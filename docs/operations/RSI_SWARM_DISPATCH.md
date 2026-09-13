@@ -251,6 +251,86 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Signer-response handoff checkpoint — 2026-09-14
+
+Packaging passed: **15 fast groups in 3,372ms** and **8 staged-manifest tests
+in 62.51s** (two pytest configuration warnings). Runtime membership remains
+1,400 with two changed source hashes and matching pins. The current 1,650-file /
+269-quarantined registry and all existing guards are unchanged.
+
+Base: main `96b70c085711da16e57d582b03ffa063b8227025`, containing PR1723 and
+one separate eSingularity frontend change. The latter stays outside this scope.
+WSP 00 awakening/strict software gate passed. Local WSP 15 planning is
+4 + 4 + 4 + 4 = **16/P1**; this app continuation supplies no runtime allocation.
+
+Retrieval was initially noisy: lexical path matching favored peripheral test
+fixtures. An exact outcome-signing query recovered its current source and test
+file. Direct imports/call sites supplied the publisher, root protocol/state,
+conversation/control anchors, secret-grant wrapper and startup owners. Required
+module contracts are present; optional design/memory artifacts and requirements
+are absent. Hit arrays were deduplicated and ordered by the actual signing path.
+Freshness remains UNKNOWN/gap with zero semantic-owner attempts; workspace
+evidence matches the base. No unchanged model/runtime probe was repeated.
+
+**Implemented prerequisite:** `validate_verified_outcome_signing_response(...)`
+now lives in the existing outcome-signing module, extracted from the publisher.
+The publisher delegates to it. It preserves original key, epoch, fingerprint,
+receipt signature and outcome-domain audit verification, requires exact `True`
+for all five acceptance/attestation flags and both verifier results, and rejects
+a present nonempty rejection code. It does not deserialize a durable record,
+check current read authority or grant replay. No new module or scheduler exists.
+
+**Verification:** four new root-backed cases compose the existing Ed25519 backend
+with real disposable primary/witness/installation stores. A successful control
+signs once; interruptions before/after root commit leave sequence 1/2 consumed;
+reconstructed stores and a fresh client seal reject another ordinary signing use.
+At the signer clock +61 seconds, the original request fails signing freshness;
+changing issuance still cannot reuse the consumed root grant. The counter covers
+all receipt-domain signatures, including altered issuance. These are injected
+interruptions and object reconstruction, not OS-process death or production UID
+proof. The real Linux-root socket case remains skipped locally.
+
+Thirteen validator counterexamples failed before repair (one positive control
+passed, five cases deselected, 1.81s): integer/string boolean claims, contradictory
+rejection and truthy verifier returns. The focused repaired suite initially passed
+19 cases in 3.11s; separate receipt/audit verifier cases then expanded it to 21.
+The connected run caught an import still used by publication retry: 19 failed /
+188 passed / one skipped in 32.12s. Restoring that import retained the retry
+contract. Final eight-suite result: **207 passed / one skipped in 31.12s**.
+Exact commands, hashes and failure evidence: `response_handoff_continuation_20260914`.
+
+**Selected remaining design — specified, not runtime implemented:** extend the
+existing root outcome owner for commitment/readback and reuse the current atomic
+JSON store for bounded response bytes. Do not repurpose conversation or control
+receipt authority, and do not add a generic outbox. Keep the following layers
+ordered within R11-A; none is an executable work order.
+
+| Layer | Existing owner and required contract | Acceptance boundary |
+|---|---|---|
+| Immutable response record — next local layer | `foundup_memex_verified_outcome_signing.py`: bind the exact canonical SigningRequest/SigningResponse, complete outcome-grant context, root reservation, original issuance, key/epoch and full response digest. Reuse the shared response validator. | Exact bounded schema; reject unknown/coerced fields, changed response/audit/signing input, foreign scope and digest substitution. No credentials, private keys, caller-selected paths or executable capabilities in serialized data. |
+| Durable pending bytes | `RootVerifiedOutcomeAuthorityState` with `AtomicJsonAuthorityRuntimeStore` and existing confined operation locks. Bind storage locations and durability to current root-owner configuration before writes. | Persist validated immutable bytes before terminal response commitment; pending bytes are unreadable to publication/learning. Preserve conflicting winners. Missing replicas or rollback cannot silently create authority. |
+| Terminal commitment | Existing root service/client/protocol. A versioned contract must bind the full response digest, not only the signature digest. | Keep current v1 reserve/commit semantics intact. Unknown recovery fields/operations still reject on v1. Commit only exact pending bytes; lost acknowledgments cannot replace the response or reopen a grant. |
+| Authenticated readback | Existing root owner, current principal/peer resolver and independently authorized work/grant boundaries. Bind current requester and immutable historical response separately. | Revalidate current owner, caller, scope, expiry/revocation and key policy. A consumed secret-access grant or serialized client seal is not read authority. Readback must not invoke ordinary outcome signing or manufacture a fresh grant. Cross-generation recovery requires explicit current independent authority. |
+| Publisher handoff | Existing publisher/runtime store and the shared response validator. | Reuse original request, response, issuance and event identity; ordinary signing's 60-second freshness rule is not a recovery API. Verify durable root commitment plus current read authority before publication. No acceptance or memory activation is implied. |
+
+The required order is: validated response → durable pending bytes → exact terminal
+commitment → authenticated readback → existing publication contract. If the
+process dies before any response is durable, the reservation remains consumed
+and owner-controlled recovery is required. If only bytes survive, they remain
+pending; if only a commitment survives, do not reconstruct a signature from its
+digest. A successful ordinary exception cleanup is not proof of abrupt process
+death cleanup. The outer secret-grant/protected-use lifecycle remains a separate
+composition prerequisite; `ResolvePerSignSignerBackend` consumes its grant before
+the signing callback, and root protected use completes before returning a result.
+
+Bound the complete new wire record within the existing 64 KiB transport ceiling;
+reject oversize input before persistence. Specify store capacity/retention,
+operation deadline, owner recovery and version compatibility before activation.
+Verify real process kill/restart, competing writers, partial replica loss,
+fresh expiry/revocation and absent/forged read authority in the admitted target
+environment. R11-B–F, legacy event recovery and measured later benefit stay open.
+All 26 packets and six R11 substeps remain non-dispatchable.
+
 ### Root-commit acknowledgment checkpoint — 2026-09-14
 
 Packaging passed: **15 fast groups in 4,658ms** and **8 staged-manifest tests

@@ -37,6 +37,14 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [signer-response handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14)
+puts response validation in the existing outcome-signing owner and keeps the
+publisher using it. Malformed boolean claims, contradictory rejection and
+non-boolean verifier results now reject. The connected selection passes 207
+tests with one Linux-root skip. Root-backed interruption tests and an ordered
+handoff contract define the remaining R11-A work: bounded immutable response
+records, root commitment, separately authorized readback, then publisher recovery.
+
 The [root-commit acknowledgment checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#root-commit-acknowledgment-checkpoint--2026-09-14)
 recovers an exact committed receipt after a lost transport reply. The existing
 client retries identical bytes once; every request still revalidates current

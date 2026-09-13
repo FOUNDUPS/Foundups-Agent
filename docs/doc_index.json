@@ -11408,7 +11408,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "641386eb060223f168bcfef6369af3756f11236d50e5abe49972bfebbead2ea7",
+      "hash_sha256": "27647e7890ab8b3e1a4650481bdf2f1eb4a9978da1a9c1302a369a2d9cd8c8ef",
       "links": {
         "automation": [
           "doc_dae"
@@ -11424,7 +11424,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 82356,
+      "size_bytes": 89488,
       "status": "active",
       "wsp_refs": []
     },
@@ -11564,7 +11564,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "c5aa0fd309d51cac671cd09122f71c717bd632bc46f30f5c192bd81bcf72dc6a",
+      "hash_sha256": "f021365cb7bfee1e2eaf0375446470f44593f2232b363598921df0907519b0df",
       "links": {
         "automation": [
           "doc_dae"
@@ -11581,7 +11581,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
-      "size_bytes": 57324,
+      "size_bytes": 58113,
       "status": "active",
       "wsp_refs": [
         "WSP 22",

@@ -1,5 +1,25 @@
 # Tests - OpenClaw Bridge
 
+## Signer response handoff and validation
+
+`test_reddog_ed25519_verified_outcome_signing.py` now owns the composed
+outcome-backend/root-store interruption contract and shared publisher-response
+validation cases. Four new root-backed cases use real disposable SQLite stores,
+fresh client reconstruction and a receipt-domain signing counter. Sixteen new
+validation cases use real Ed25519 receipt/audit signatures; only the explicit
+verifier-result negative cases inject a verifier double. No production UID or
+actual process-death claim follows from these fixtures.
+
+With the qualified/disposable environment below, run:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_signer_backend.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/response-handoff-20260914/integration-fixed --tb=short -q
+```
+
+Result: **207 passed / one Linux-root skip in 31.12s**. The existing original
+test and its assertions remain unchanged. Durable record schema, authorized
+readback and OS-process recovery acceptance are still specified in the runbook.
+
 ## Root commit acknowledgment recovery
 
 Extend `test_foundup_verified_outcome_root_authority_service.py` for this contract.

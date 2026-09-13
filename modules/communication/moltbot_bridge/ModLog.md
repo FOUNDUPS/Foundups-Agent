@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Share outcome response validation and define durable handoff
+
+- Moved the publisher's receipt/audit verification into the existing outcome-signing module and kept the publisher wired to it. Exact boolean assertions/results and noncontradictory rejection are now required. Thirteen malformed-response counterexamples reproduced the prior acceptance gap.
+- Extended the existing outcome-signing suite with real root-store composition, interruption/reconstruction, issuance-retry and typed-validation cases. Final connected result: 207 passed / one Linux-root skip. Restored the publisher's fingerprint import after connected retry tests exposed its remaining use; no assertion was weakened.
+- Recorded the ordered R11-A immutable-record, pending-byte, commitment, readback and publication contracts. Full-response durability/readback remain unimplemented; root and secret-access grants never reopen. Protected FoundUps and live runtimes are unchanged. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Recover exact root commit acknowledgments
 
 - Existing root service acknowledges only its exact durable terminal marker after fresh authority validation; the existing client retries identical COMMIT bytes once on ConnectionError/TimeoutError. Burned reservations, rejection, cancellation and protocol boundaries remain intact. No new schema, method or state owner.
