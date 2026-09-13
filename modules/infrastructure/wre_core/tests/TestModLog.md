@@ -1,5 +1,14 @@
 # TestModLog - wre_core/tests
 
+## 2026-09-14: Recorder, retention and admission composition
+
+- Extended the two existing ratchet/held-out test files after reading their fixtures and this history. Recorder matrix: **84 failed / 16 passed** before, then 100 passed. Retention matrix: **31 failed / 27 passed** before. Six metadata-redaction cases and six acceptance/retention-secret cases subsequently reproduced additional losses. Final two-file selection: **171 passed in 1.05s**.
+- Cases cover invalid/Boolean/non-finite measurements, exact work/slice/verifier links, contradictory acceptance, complete evidence identity, input/callback isolation, required acknowledgments, secret non-persistence/redaction, strict regression counts and changed verifier evidence. Successful and failed real recorder results feed the real retention gate in synthetic fixtures.
+- Existing verifier/publication selection: **34 passed in 0.78s**. Queue wrappers/handlers: **39 passed in 2.43s** after aligning one shared fixture with the real recorder's verification digest. Final memory-admission/handler selection: **34 passed in 2.22s**. Total current distinct selected cases: 278.
+- Packaging: **15 RedDog fast groups passed in 3,137ms**; **8 staged-manifest tests passed in 65.74s**. Runtime membership remains 1,400; the manifest's four changed hashes match the three runtime sources and the already-included shared test fixture file.
+- Extended the existing bridge admission test to compose recorder → queue retention/gate → memory admission → injected sink. Invalid cost, failed outcomes and post-recording verifier changes produce no sink write. Source authorities and sink are test fixtures; no authenticated production or retained-benefit claim.
+- All runs used isolated O:-resident TEMP/TMP/basetemp and database paths, disabled automatic plugins, the explicit asyncio plugin and the qualified Python interpreter. No new test file or registry inventory change. WSP 22/48/50/60/95/97.
+
 ## 2026-09-14: Auto Researcher failure/cancellation lifecycle
 
 - Reused `test_wre_auto_researcher.py`. Four regressions failed before the repair: diff `RuntimeError`, diff `KeyboardInterrupt`, final runner-restore failure, and invalid baseline reaching the proposal sentinel. A follow-up broken-output case failed because a status message preceded cleanup. Final result: **31 passed in 0.65s**, including the prior 26 cases; restoration precedes status output.

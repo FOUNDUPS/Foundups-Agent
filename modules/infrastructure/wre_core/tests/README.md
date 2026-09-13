@@ -142,6 +142,11 @@ promotion, or production RSI.
   cache, and production entries.
 - `test_skill_manifest_guard.py`: Skillz/executor hashes and signatures.
 - `test_pattern_memory.py`: outcome and non-production candidate storage.
+- `test_reddog_verified_outcome_ratchet.py`: measurement/lineage rejection,
+  secret non-persistence, evidence identity, callback isolation and acknowledgments.
+- `test_reddog_held_out_recursive_improvement_regression_gate.py`: same-work
+  retention, verifier digest, strict counts and real-recorder composition. Its
+  fixtures remain synthetic; they are not independent production evidence.
 - `test_qwen_inference_wiring.py`: isolated proposal/result-shape wiring.
 - `test_foundup_route_wsp62_exemptions.py`: bounded inherited debt.
 - `test_fmas_health_triage.py`: exact-head producer lineage and dispositions.

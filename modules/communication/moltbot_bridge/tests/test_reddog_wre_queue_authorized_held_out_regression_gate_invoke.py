@@ -63,6 +63,8 @@ def _queue_ratchet_result(*, accepted: bool = True, decision: str | None = None)
                 "slice_name": SLICE_NAME,
                 "outcome_status": "accepted",
                 "verifier_receipt_id": VERIFIER_RECEIPT_ID,
+                # The real ratchet binds the full original verifier result.
+                "verification_digest": gate._digest(_gate_request()["verification_result"]),
                 "publish_receipt_id": "verified_draft_pr_1234",
                 "pattern_memory_eligible": accepted,
                 "pattern_memory_write_performed": False,
@@ -78,6 +80,9 @@ def _queue_ratchet_result_with_runtime_binding() -> dict:
     receipt = result["ratchet_result"]["receipt"]
     receipt["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
     receipt["model_runtime_binding_digest"] = _digest("5")
+    receipt["verification_digest"] = gate._digest(
+        _gate_request_with_runtime_binding()["verification_result"]
+    )
     return result
 
 

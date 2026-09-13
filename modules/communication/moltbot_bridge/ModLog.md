@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Final RSI memory-admission acknowledgment
+
+- The existing queue memory-admission adapter now passes a deep copy to its injected sink and requires a nonempty string record acknowledgment. Missing acknowledgments use the existing `SINK_WRITE_FAILED` rejection; callback mutation cannot change the local receipt's evidence. No live queue, provider, service or production PatternMemory was invoked.
+- Extended existing admission tests to cover four bad acknowledgments, callback mutation and four complete synthetic recorder/retention/admission paths. Updated one shared held-out fixture to carry the exact verification digest already emitted by the real recorder. All 34 admission/handler and 39 neighboring queue tests pass; WRE's related selections add 205 passing cases.
+- The source callback remains a trust boundary: an exception or invalid acknowledgment is not proof of no remote effect or exactly-once storage. Canonical RSI evidence and WRE's current interface retain that limitation. WSP 22/48/50/60/95/97.
+
 ## 2026-09-13: R01 production Skillz exact-byte integrity
 
 - Regenerated both production Skillz manifests against unchanged committed content and pinned only those two Skillz files to LF checkout bytes. Strict guard behavior and unsigned inventory status are preserved.

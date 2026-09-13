@@ -251,6 +251,60 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Outcome retention checkpoint — 2026-09-14
+
+Source: `e03f68badd7664e20c7f6dd47304f69b009d16cb`. This continuation followed
+the existing recorder, held-out retention gate, queue wrappers and final
+memory-admission adapter as one connected block. Three existing runtime files
+and four existing test files were extended; no new module or test file.
+
+The recorder now rejects malformed/non-finite/Boolean measurements, non-integer
+token counts, foreign or missing receipt lineage, contradictory acceptance
+evidence and empty storage acknowledgments. Invalid inputs cannot claim memory
+eligibility. Its v2 identity seed covers cost, latency, complete publication and
+Holo evidence; callback success/failure does not rename the same evidence.
+Copies isolate caller/store/sink objects. The JSONL store refuses non-standard
+numeric JSON, and secret-marker rejections suppress affected receipt labels.
+
+The retention gate requires an accepted, memory-eligible outcome with explicit
+no-write state, the same work/slice/verifier, and the recorder's digest of the
+exact verifier result. Invalid regression counts cannot become zero failures.
+Its v2 identity seed binds the complete supplied evidence. The final existing
+admission adapter also requires a nonempty string acknowledgment and protects
+its receipt inputs from sink mutation. A recorded failure remains auditable;
+it cannot qualify as a successful learning outcome.
+
+Validation: 171 recorder/gate tests, 39 queue integration tests, 34 upstream
+verifier/publication tests and 34 memory-admission/handler tests pass (278
+distinct selected cases). The composed fixture exercises the real recorder,
+queue retention wrapper/gate and admission adapter with synthetic receipts and
+an injected sink. Valid evidence reaches that sink; invalid cost, a failed
+outcome and changed verifier evidence do not. The dated JSON continuation
+retains the initial failures and the fixture/API corrections separately.
+
+Packaging checks pass: all 15 RedDog fast groups (3,137ms) and all eight staged
+manifest tests (65.74s). Runtime membership stays at 1,400 files; the three
+runtime sources and already-included shared test fixture account for all four
+changed hashes. The compatibility digest and both pins agree.
+
+These are deterministic local contract checks. They do not authenticate the
+synthetic authorities, execute a model, admit a live worker, write production
+PatternMemory or demonstrate retained improvement. Stored ratchet records are
+pre-callback snapshots; final callback status is returned separately. IDs are
+not replay locks, and a callback may write before failing. Atomic retention,
+exactly-once effects, crash recovery, concurrent ownership and a subsequent
+invocation consuming authenticated memory remain R11/R17/R15 work. Historical
+v1 receipts are retained as history, not rewritten with v2 identifiers.
+
+Retrieval: the local Holo bundle found the existing ratchet, architecture and
+PatternMemory surfaces, then both target tests. Freshness remained UNKNOWN with
+an index gap and zero semantic-owner attempts. A neighboring conversation-scope
+hit and duplicate arrays were excluded; current module contracts and test
+histories supplied the missing execution context. Optional memory/design docs
+were absent. The queue/persistence owners already exist; no replacement was
+introduced. Local WSP 15 selection: 3+5+4+4=16/P1. Signed runtime-owner
+clarification remains pending, and no unchanged service probe was repeated.
+
 ### Stop-rule handoff checkpoint — 2026-09-14
 
 Source: `3fc74285cb19b681de5219b8288e5307a0ea533a`, after PR1714 merged with
@@ -377,6 +431,14 @@ Use R06/R07/R08 to prove one documentation artifact before authorizing broader i
 The missing dispatch evidence belongs in R06/R07, not a new orchestration subsystem. Until the binding and scope are admitted, keep `dispatchable=false` in the planning backlog. An unconfigured local shell is not a reason to weaken production gates.
 
 ## Economical model and effort policy
+
+**012 working-session preference, 2026-09-14:** continue through several
+connected, reviewable layers before handing back. Validate each layer, then
+carry it through its consumer, required checks and canonical documentation.
+A local test pass or merged PR is a checkpoint, not an automatic session end.
+Use concise progress updates during sustained work. Do not enlarge a single
+change without evidence, repeat unchanged failed probes, or bypass a missing
+authority to keep the session busy.
 
 These are proposed operating defaults to benchmark, not runtime settings changed by this document. An admitted provider/model contract takes precedence.
 

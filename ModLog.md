@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Connected RSI outcome-retention integrity
+
+- Continued in a clean owned branch from main `e03f68badd7664e20c7f6dd47304f69b009d16cb`. WSP 00 bootstrap/strict gate passed. Applied 012's preference for sustained sessions across several tested layers, recorded in the canonical dispatch runbook.
+- Hardened the existing outcome recorder, held-out gate and final memory-admission adapter together. Invalid measurements, foreign/inconsistent receipts, malformed counts and missing acknowledgments cannot become accepted learning evidence. Complete retained evidence affects identity; callback mutation is isolated and secret labels are redacted on rejection.
+- The connected selections pass 278 distinct tests: 171 recorder/gate, 39 queue, 34 verifier/publication and 34 admission/handler. Four composed synthetic cases exercise the actual path to an injected sink. Initial failures, fixture correction and the new test's corrected receipt-field assertion are retained in test histories and dated evidence.
+- Packaging: all 15 RedDog fast groups pass (3,137ms), and all 8 staged-manifest tests pass (65.74s). Runtime membership remains 1,400; only four included file hashes and the two compatibility pins change. Structural review preserves all original packet fields, prior observations and the frozen audit; two existing document-index rows update hash/size only.
+- No new module/test file, provider call, active FoundUp experiment or production-memory write. Authentication, transactional/idempotent retention, callback-after-write recovery, concurrency and subsequent benefit remain open. All 26 planning packet contracts remain non-dispatchable.
+- Retrieval used governed local bundles, UNKNOWN freshness/index-gap and zero semantic-owner attempts. Existing code/docs/test histories came first; peripheral/duplicate hits were discarded. Local WSP 15 score 3+5+4+4=16/P1. Deterministic tests resolved this connected dependency without a new model route. WSP 00/15/22/48/50/60/84/95/97.
+
 ## 2026-09-14: Preserve stop rules in the compact worker handoff
 
 - Continued from merged PR1714/main `3fc74285cb19b681de5219b8288e5307a0ea533a`, with ten successful checks and equal accepted/main trees. The shared product branch remains untouched; runtime-owner clarification is pending.

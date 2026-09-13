@@ -713,6 +713,13 @@
         "observed_on": "2026-09-14",
         "scope": "Explicit stop-list rendering only",
         "acceptance_satisfied": false
+      },
+      "latest_retention_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "outcome_retention_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local recorder, retention and final memory-admission contract integrity; synthetic composed fixture",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -765,6 +772,13 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "One authenticated admission; wrong scope/unverified outcomes blocked; crash/replay recovery; later invocation consumes accepted memory"
+      },
+      "latest_retention_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "outcome_retention_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local recorder, retention and final memory-admission contract integrity; synthetic composed fixture",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -1001,6 +1015,13 @@
         "section": "stop_rule_handoff_continuation_20260914",
         "observed_on": "2026-09-14",
         "scope": "Explicit stop-list rendering only",
+        "acceptance_satisfied": false
+      },
+      "latest_retention_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "outcome_retention_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local recorder, retention and final memory-admission contract integrity; synthetic composed fixture",
         "acceptance_satisfied": false
       }
     },

@@ -14,6 +14,38 @@ external-service, or production-promotion authority. 012 remains sovereign.
 Callers must preserve the narrower authority of the work item and runtime
 binding.
 
+## Outcome recording and retention
+
+`ratchet_verified_outcome(...)` requires finite nonnegative numeric cost/latency
+values, with an integer `total_tokens` (Boolean/string coercion is rejected).
+Verifier and accepted-publication receipts must match the requested work/slice;
+publication must name the same verifier receipt. Accepted outcomes require an
+explicit true acceptance receipt and no contradictory failure receipt.
+Invalid evidence is ineligible for memory; secret-marker payloads are not
+stored, and affected receipt labels are redacted.
+
+Recorder identity seed v2 includes all retained receipt groups, including cost,
+latency, full publication and Holo evidence. Store/sink acknowledgments must be
+nonempty strings. Deep copies isolate callback arguments and the local store;
+callback failure does not change the evidence identity. The JSONL store refuses
+non-finite JSON. Its stored record is a pre-callback snapshot; the returned
+receipt carries final acknowledgment status. This is not an atomic transaction,
+replay guard, crash-recovery proof or authenticated storage receipt.
+
+`evaluate_held_out_recursive_improvement_regression_gate(...)` requires an
+accepted, eligible, not-yet-written ratchet outcome, matching work/slice/verifier
+and exact `verification_digest`. Test counts must be positive integers and the
+failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
+the full input evidence. Old minimal hand-written fixtures must supply the
+fields already produced by the real recorder; missing fields fail closed.
+
+The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
+also isolates sink input and rejects empty/non-string acknowledgments through
+its existing `SINK_WRITE_FAILED` result. These contracts describe local
+consistency and acknowledged callbacks, not authentication of a caller's
+receipt map or proof that an external sink committed exactly once. Keep earlier
+receipt versions as historical evidence; do not rewrite them in place.
+
 ## ROC research evaluator and dry-run producer
 
 `src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
