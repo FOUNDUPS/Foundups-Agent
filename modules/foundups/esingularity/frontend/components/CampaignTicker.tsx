@@ -5,7 +5,7 @@ import { currentFieldStatus } from '../content/current-field-status';
 
 const actions = [
   { label: 'VOTE NO', text: currentFieldStatus.tickerJa, href: currentFieldStatus.href },
-  { label: 'JHR', text: 'UPDATE 9/10｜仙台200MW・印西の地区計画・福井の選択肢', href: '/reports/jhr' },
+  { label: 'JHR', text: 'UPDATE 9/14｜なぜ福井に「AI交番」が必要なのか｜日本語＋English', href: '/reports/jhr#jhr-002' },
   { label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' },
   { label: 'VISIT', text: '写真で現地を見る', href: 'https://pics.yumori.info' },
   { label: 'LISTEN', text: '九頭竜の音楽を聴く', href: 'https://music.yumori.me' },
@@ -55,8 +55,12 @@ export default function CampaignTicker({ movement = false }: { movement?: boolea
     update();
     return () => observer.disconnect();
   }, []);
+  const tickerStyle = {
+    '--ticker-duration': '300s',
+    ...(movement ? {} : { position: 'relative', top: 'auto', marginTop: '112px' }),
+  } as CSSProperties;
   return (
-    <aside ref={tickerRef} data-reading={reading} style={{ '--ticker-duration': '300s' } as CSSProperties} className={movement ? 'campaign-ticker campaign-ticker-inline' : 'campaign-ticker'} aria-label="九頭竜を守るための行動メニュー">
+    <aside ref={tickerRef} data-reading={reading} style={tickerStyle} className={movement ? 'campaign-ticker campaign-ticker-inline' : 'campaign-ticker'} aria-label="九頭竜を守るための行動メニュー">
       <button className="campaign-ticker-control" type="button" aria-pressed={reading} onClick={() => setReading(!reading)}>{reading ? '流す' : 'すべて読む・停止'}</button>
       <div className="campaign-ticker-window">
       <div ref={trackRef} className="campaign-ticker-track">
