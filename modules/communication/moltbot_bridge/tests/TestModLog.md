@@ -1,3 +1,10 @@
+## 2026-09-14: Immutable signed-publication retry
+
+- Packaging: 15 fast groups passed in 4,425ms; 8 staged-manifest tests passed in 66.65s (two pytest configuration warnings). Refreshed the existing registry's one `process` capability row; its prior quarantine and 1,650/269 membership remain unchanged. Qualified dependency settings and the required LF package-pin bytes corrected initial fast-run rejections without changing guards.
+- Extended the existing runtime-authority suite/fixtures, including two separate-interpreter retry cases for staged/active evidence. Before implementation: three failures / five passes / 21 deselected; the failures requested another signing use after restart or conflicted at an advanced clock.
+- Connected runtime-authority, queue-binding, authenticity, adversarial, Ed25519 and admission-handler selection: **91 passed in 13.08s**. Twelve new parametrized cases and the existing forged-record case require preserved durable bytes, exact publisher identity/key, valid original signature/issuance, hidden staging, and unchanged use-time expiry/revocation. No new test file or weakened assertion.
+- Separate read-only queue probe confirms identical saved inputs produce changed `verified_at` at NOW+1. That remaining R11-A step, pre-publication signing failure, competing initial writers, production isolation, activation and later benefit are not claimed complete. Evidence: `publication_retry_continuation_20260914`. WSP 00/22/50/60/71/84/97.
+
 ## 2026-09-14: Existing authority composition baseline
 
 - Reused `test_foundup_memex_verified_outcome_runtime_authority.py`, `test_reddog_signer_root_protected_use_composition.py` and `test_reddog_signer_system_service_manifest_selection_loader.py`: **46 passed / one skipped in 26.90s** on the PR1718 source tree. The skipped case requires Linux ownership semantics. Command and environment are in `tests/README.md`; no test source changed.

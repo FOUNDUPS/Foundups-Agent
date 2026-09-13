@@ -1,5 +1,21 @@
 # Tests - OpenClaw Bridge
 
+## Immutable publication retry
+
+The existing runtime-authority fixture now covers separate-interpreter retries
+for staged and active evidence, no second signing use, exact stored bytes,
+publisher identity/key drift, rehashed invalid signatures/issuance/extra fields,
+and expiry/revocation after retry. Reuse the connected selection:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
+```
+
+Use the qualified interpreter and disposable environment below. The current
+selection passed 91 tests in 13.08s. Restart tests use digest signer/verifier
+doubles and an actual child interpreter; they do not prove production signer
+isolation, queue timestamp stability or cross-store memory acceptance.
+
 ## Authority-to-memory composition baseline
 
 Reuse these existing suites before implementing the R11 connection plan:

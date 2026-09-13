@@ -1,5 +1,13 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## Verified-outcome publication retries
+
+The existing signed publisher reuses exact durable evidence after restart or
+clock advancement. It verifies the original signature, evidence and publisher
+identity, preserving bytes and issuance time. A retry acknowledgment neither
+activates staged evidence nor renews expiry/revocation authority. Queue-derived
+event timestamp stability remains open; see [INTERFACE.md](INTERFACE.md).
+
 ## Verified-outcome staging
 
 The existing `reddog_verified_pattern_memory_sink.py` stages records in an

@@ -7040,7 +7040,9 @@
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "operational",
       "shard_id": "modules-communication-moltbot-bridge-operational",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "operational",
       "collectable": false,
       "timeout_s": 900,

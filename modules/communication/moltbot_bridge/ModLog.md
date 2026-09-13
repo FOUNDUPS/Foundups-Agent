@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Preserve signed publication on retry
+
+- Extended the existing publisher/store to validate and acknowledge the original STAGED/ACTIVE envelope without another signing use, durable rewrite, timestamp refresh or activation. Invalid/changed evidence, publisher identity, key/epoch and signatures reject; initial signing/attestation and fresh runtime use checks remain in their existing owners.
+- Three failures reproduced before the repair; the connected selection passes 91 tests in 13.08s, including two actual child-process retries with unchanged bytes. Fixtures use digest signer/verifier doubles; no production root, signer service or memory was activated.
+- Updated the canonical R11 roadmap/evidence. R11-A remains partial because queue bootstrap still changes `verified_at`; that immutable event binding is next. No new module, schema, record-ID algorithm or packet permission. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Authority/memory connection audit
 
 - Verified existing queue-to-publisher and authority-to-Memex connections; recorded the staging-only sink and missing production callers for existing protected-use/WSP 71 factory components. Source was read at PR1718/main `5c29a0af`; no runtime implementation changed.
