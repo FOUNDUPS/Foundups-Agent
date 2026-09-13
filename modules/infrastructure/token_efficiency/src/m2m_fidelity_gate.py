@@ -314,14 +314,20 @@ class M2MFidelityGate:
 
         # Check fail conditions
         fail_conditions = fail_conditions or []
+        decompiled_stops_match = (
+            not fail_conditions
+            or f"Abort if any condition holds: {fail_conditions!r}." in roundtrip_prose
+        )
         fail_conditions_match = (
             m2m.fail_conditions == fail_conditions
             and parsed.fail_conditions == fail_conditions
+            and decompiled_stops_match
         )
         if not fail_conditions_match:
             errors.append(
                 f"fail_conditions mismatch: expected {fail_conditions}, "
-                f"compiled {m2m.fail_conditions}, parsed {parsed.fail_conditions}"
+                f"compiled {m2m.fail_conditions}, parsed {parsed.fail_conditions}; "
+                f"decompiled stop instruction preserved={decompiled_stops_match}"
             )
 
         # Check lane

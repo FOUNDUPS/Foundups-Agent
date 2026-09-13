@@ -10822,7 +10822,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "94f9d117f7cfc86b3c621e92ad84c21b6063ec1ae9cb7c31bb293f374796664f",
+      "hash_sha256": "1e7778bd8e8b587755aba209481d9a6390cb90c0005cdf9705f34bcd3024fd9e",
       "links": {
         "automation": [
           "doc_dae",
@@ -10835,7 +10835,7 @@
       },
       "module_hint": "wsp_framework",
       "path": "docs/contracts/REDDOG_WSP99_RTK_TOKEN_EFFICIENCY_CONTRACT_PHASE1.md",
-      "size_bytes": 24024,
+      "size_bytes": 24152,
       "status": "active",
       "wsp_refs": [
         "WSP 97",
@@ -11408,7 +11408,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "2db4c8afa5eaa4d96534cb514257e45c0d25dce32417a9d0f241b8d1ae003319",
+      "hash_sha256": "737b56dfce66ae28ca17b441880cb7dc7400cb6d78574dddbbac82a604db95b5",
       "links": {
         "automation": [
           "doc_dae"
@@ -11424,7 +11424,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 43845,
+      "size_bytes": 45899,
       "status": "active",
       "wsp_refs": []
     },

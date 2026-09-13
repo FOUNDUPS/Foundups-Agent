@@ -187,6 +187,35 @@ class TestM2MFidelityBasics:
         )
         assert result.passed
         assert result.fail_conditions_match
+        assert "Abort if any condition holds: ['test_fail', 'lint_error']." in result.roundtrip_prose
+
+    @pytest.mark.parametrize("replacement", [
+        "",
+        "Continue if any condition holds: ['missing approval', '失敗した検証'].",
+        "Abort if any condition holds: ['lint error'].",
+    ])
+    def test_changed_decompiled_stop_instruction_is_rejected(self, monkeypatch, replacement):
+        """Parsed fields alone cannot certify the instructions sent onward."""
+        gate = M2MFidelityGate()
+        decompile = gate.compiler.decompile
+        expected = "Abort if any condition holds: ['missing approval', '失敗した検証']."
+        monkeypatch.setattr(
+            gate.compiler,
+            "decompile",
+            lambda packet: decompile(packet).replace(expected, replacement),
+        )
+
+        result = gate.assert_fidelity(
+            original_prose="Review the registry module",
+            lane="QA",
+            wsp_refs=[50, 97],
+            mode="plan",
+            fail_conditions=["missing approval", "失敗した検証"],
+        )
+
+        assert not result.passed
+        assert not result.fail_conditions_match
+        assert any("fail_conditions mismatch" in error for error in result.errors)
 
     @pytest.mark.parametrize("condition", [
         "halt on safety, auth or scope failure",

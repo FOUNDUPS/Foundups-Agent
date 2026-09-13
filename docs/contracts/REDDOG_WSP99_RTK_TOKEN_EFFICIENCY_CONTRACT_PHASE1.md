@@ -145,7 +145,9 @@ RedDogComputeDecision:
 default `IMPLEMENT` to hide action loss and inspected the pre-serialization
 scope. It is not the current acceptance algorithm. The existing compiler now
 emits explicit `A:<action>`; the existing gate compares compiled, parsed and
-decompiled actions, parsed scope and parsed stop conditions. Missing or changed
+decompiled actions, parsed scope and parsed stop conditions. The 2026-09-14
+continuation also compares the original stop list with the explicit abort
+instruction in the decompiled handoff. Missing or changed
 fields fail. Legacy actionless packets remain readable but cannot prove action
 preservation. See the [current P2 interface](../../modules/infrastructure/token_efficiency/INTERFACE.md#public-api-p2-compact-fidelity-gate)
 and its regression tests. Full prose fidelity, authenticated context delivery

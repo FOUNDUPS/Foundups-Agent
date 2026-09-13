@@ -248,6 +248,9 @@ class M2MCompiler:
         if m2m.outputs:
             parts.append(f"producing: {', '.join(m2m.outputs)}")
 
+        if m2m.fail_conditions:
+            parts.append(f"Abort if any condition holds: {m2m.fail_conditions!r}")
+
         return ". ".join(parts) + "."
 
     def parse_compact(self, compact: str) -> M2MPrompt:

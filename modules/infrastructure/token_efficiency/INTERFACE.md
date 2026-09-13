@@ -131,6 +131,16 @@ failures. Signatures and original positional dataclass arguments remain valid.
 These checks do not turn the compiler's heuristic extraction into a complete
 prose or objective-preservation oracle.
 
+The 2026-09-14 continuation also requires the original declared stop list in
+the decompiled instruction `Abort if any condition holds: <Python list repr>.`
+`fail_conditions_match` covers compiled, parsed and rendered stops; dropping
+or changing that instruction returns `passed=False` and a mismatch error.
+The public wrapper raises `FidelityError` as before. Legacy actionless packets
+render existing stops, while stop-free packets keep their previous output.
+No signature or compact-wire change is involved. The gate validates this
+specific rendering; it does not decide whether arbitrary surrounding prose
+contradicts it or establishes authority.
+
 ## Public API (P3: Telemetry Service)
 
 ### Classes

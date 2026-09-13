@@ -37,6 +37,12 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The compact compiler now carries explicit stop rules into its readable handoff,
+and the existing fidelity gate rejects omitted, weakened or replaced stop
+instructions. Five reproduced failures now pass in the 162-case selection.
+The [handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#stop-rule-handoff-checkpoint--2026-09-14)
+records this R10/R15 preparation; arbitrary prose preservation remains open.
+
 The existing Auto Researcher now rejects an invalid baseline before proposing
 changes and restores its scratch baseline on Python failure/cancellation exits.
 Five reproduced failure cases now pass in the expanded 31-case selection,
