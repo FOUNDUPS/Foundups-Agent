@@ -1276,5 +1276,185 @@
     "completion_gate_advanced": false,
     "dispatchable": false,
     "retained_improvement_proven": false
+  },
+  "research_evaluator_input_continuation": {
+    "repair_base_commit": "fd6fea63bfc259c29e5a22a8b64e8d01d9cba595",
+    "observed_source": {
+      "source_commit": "6f02410b915b29fd7b245fcbc51a8f4b9d5204a5",
+      "evaluator_file_sha256": "89373d699988200305782e9c262c18c076a20885372263e43ef0856fc0ee3418",
+      "kind": "local_simulation_counterexample",
+      "observations": [
+        {
+          "case": "baseline",
+          "source": "# -*- coding: utf-8 -*-\n\"\"\"\nWRE ROC Auto-Researcher Target File (WSP 48)\n\nThis file contains the variables that are optimized by the autonomous\nresearch agent to maximize ROC and maintain sustainable ROI.\n\"\"\"\n\n# Allocation fractions per agent type (must sum to exactly 1.0)\nAGENT_ALLOCATION = {\n    \"basic_search\": 0.30,\n    \"openclaw_lite\": 0.25,\n    \"openclaw\": 0.25,\n    \"gotjunk_browse\": 0.10,\n    \"gotjunk\": 0.05,\n    \"cabr_validator\": 0.05,\n}\n\n# Premium price multipliers applied to infra costs (must be in range [1.0, 5.0])\nAGENT_PREMIUM_MULTIPLIERS = {\n    \"basic_search\": 1.5,\n    \"openclaw_lite\": 1.8,\n    \"openclaw\": 2.0,\n    \"gotjunk_browse\": 1.2,\n    \"gotjunk\": 2.2,\n    \"cabr_validator\": 2.5,\n}\n",
+          "source_sha256": "c25157a7f2ef3e851a102c58f1152bf8f3918ccdb93663ca1d6ef695448dc1df",
+          "result": {
+            "roc_ratio": 1.0426793723929701,
+            "is_roi_sustainable": true,
+            "is_compute_positive": true,
+            "fitness": 1.0426793723929701,
+            "monthly_margin_usd": 228864.316,
+            "total_revenue_usd": 255864.316,
+            "compute_cost_usd": 5156.73,
+            "compute_margin_usd": 5376.816000000001
+          }
+        },
+        {
+          "case": "negative_fraction",
+          "source": "AGENT_ALLOCATION = {'basic_search': -0.5, 'openclaw': 1.5}\nAGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0, 'openclaw': 5.0}\n",
+          "source_sha256": "a398c81e14b20e807c60448f8aecf4d6738cf3f899843e22f87c0738cf675505",
+          "result": {
+            "roc_ratio": 4.116279069767442,
+            "is_roi_sustainable": true,
+            "is_compute_positive": true,
+            "fitness": 4.116279069767442,
+            "monthly_margin_usd": 234107.5,
+            "total_revenue_usd": 261107.5,
+            "compute_cost_usd": 2580.0,
+            "compute_margin_usd": 10620.0
+          }
+        },
+        {
+          "case": "boolean_fraction",
+          "source": "AGENT_ALLOCATION = {'basic_search': True}\nAGENT_PREMIUM_MULTIPLIERS = {'basic_search': 2.0}\n",
+          "source_sha256": "d348408cd964c923d8220ee1e661f4775d38757fb66f8a98db68c0566d646d71",
+          "result": {
+            "roc_ratio": 1.0,
+            "is_roi_sustainable": true,
+            "is_compute_positive": true,
+            "fitness": 1.0,
+            "monthly_margin_usd": 223604.5,
+            "total_revenue_usd": 250604.5,
+            "compute_cost_usd": 117.00000000000001,
+            "compute_margin_usd": 117.00000000000001
+          }
+        },
+        {
+          "case": "unknown_agent",
+          "source": "AGENT_ALLOCATION = {'unregistered_agent': 1.0}\nAGENT_PREMIUM_MULTIPLIERS = {'unregistered_agent': 5.0}\n",
+          "source_sha256": "cb8b92a9feadf73c5e33459b657eed7e63117956fdda197956b749eee517d9fe",
+          "result": {
+            "roc_ratio": 0.0,
+            "is_roi_sustainable": true,
+            "is_compute_positive": false,
+            "fitness": 0.0,
+            "monthly_margin_usd": 223487.5,
+            "total_revenue_usd": 250487.5,
+            "compute_cost_usd": 0.0,
+            "compute_margin_usd": 0.0
+          }
+        }
+      ],
+      "no_model_calls": true,
+      "no_target_execution": true,
+      "no_external_effects": true,
+      "independent_verification": false
+    },
+    "after": [
+      {
+        "case": "baseline",
+        "result": {
+          "roc_ratio": 1.0426793723929701,
+          "is_roi_sustainable": true,
+          "is_compute_positive": true,
+          "fitness": 1.0426793723929701,
+          "monthly_margin_usd": 228864.316,
+          "total_revenue_usd": 255864.316,
+          "compute_cost_usd": 5156.73,
+          "compute_margin_usd": 5376.816000000001
+        }
+      },
+      {
+        "case": "negative_fraction",
+        "result": {
+          "roc_ratio": 0.0,
+          "is_roi_sustainable": false,
+          "is_compute_positive": false,
+          "fitness": -100.0,
+          "error": "Allocation fractions must be in range [0.0, 1.0]"
+        }
+      },
+      {
+        "case": "boolean_fraction",
+        "result": {
+          "roc_ratio": 0.0,
+          "is_roi_sustainable": false,
+          "is_compute_positive": false,
+          "fitness": -100.0,
+          "error": "Missing AGENT_ALLOCATION or AGENT_PREMIUM_MULTIPLIERS"
+        }
+      },
+      {
+        "case": "unknown_agent",
+        "result": {
+          "roc_ratio": 0.0,
+          "is_roi_sustainable": false,
+          "is_compute_positive": false,
+          "fitness": -100.0,
+          "error": "Unknown agent types: unregistered_agent"
+        }
+      }
+    ],
+    "workspace_file_sha256": {
+      "modules/infrastructure/wre_core/src/wre_research_evaluator.py": "dfa3d9adff23b28fc72f2236a3bc224e874abefa09c146e87d8df782b67b355a",
+      "modules/infrastructure/wre_core/src/wre_research_program.md": "695275a000c7a1b6d6438a779fd10f4a31d33efdee13fc3ca60ab729c85fe3b8",
+      "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py": "ce6f03fe217e7edf23d4f320ac311a00e42a58abc080207ac33de381969b025b"
+    },
+    "local_priority": {
+      "complexity": 2,
+      "importance": 5,
+      "deferability": 4,
+      "impact": 4,
+      "mps_total": 15,
+      "priority": "P1",
+      "packet": "R10",
+      "reason": "Existing oracle rewards an impossible allocation; repair before admitting its proposals."
+    },
+    "validation": {
+      "initial_numeric_guards": {
+        "before_failed": 10,
+        "before_passed": 14,
+        "before_seconds": 0.7,
+        "after_passed": 24,
+        "after_seconds": 0.79
+      },
+      "allocation_sum_guards": {
+        "before_failed": 2,
+        "before_passed": 24,
+        "before_seconds": 0.6,
+        "after_passed": 26,
+        "after_seconds": 0.59
+      },
+      "baseline_metrics_unchanged": true,
+      "dry_run_invalid_proposal": "failed_validation; baseline retained; no planned commit; source and scratch target restored",
+      "model_engine_factory": "injected None before construction in existing fixture",
+      "tests_file": "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py",
+      "no_new_test_files": true,
+      "source_execution": "AST literals only; target never imported"
+    },
+    "retrieval": {
+      "mode": "lexical",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "source": "6f02410b915b29fd7b245fcbc51a8f4b9d5204a5",
+      "ordering": "Existing evaluator, producer, program and test fixture after WRE current contracts.",
+      "noise": "One unrelated agent-market hit omitted.",
+      "duplication": "Duplicate result arrays deduplicated.",
+      "missing_required": [],
+      "missing_optional": "Optional Tier-0 design/runbook and Tier-2 memory/incident artifacts absent; current README/INTERFACE, module history and test docs were available.",
+      "staleness": "Local source context is not semantic authority; evaluator bytes unchanged between queried PR head and repair-base merge."
+    },
+    "model_calls": 0,
+    "protected_foundup_mutations": false,
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "remaining_limits": [
+      "Fixed simulation is not real economic outcome evidence.",
+      "Generic signed worker/evaluator wiring remains open.",
+      "Current proposal program can constrain the target more narrowly than the known-agent numeric loader.",
+      "Live AutoResearcher commits remain prohibited."
+    ]
   }
 }

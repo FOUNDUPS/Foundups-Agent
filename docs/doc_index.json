@@ -11408,7 +11408,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "57822088005bb33b0441aaf0af0e8eeaf1fb72ede4caf11e6f113544aa229c8b",
+      "hash_sha256": "2c4c0c0d67c8efbef2d3f9b89ba3c445005e4c455e507b5317927b0d7b520137",
       "links": {
         "automation": [
           "doc_dae"
@@ -11424,7 +11424,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 41139,
+      "size_bytes": 42065,
       "status": "active",
       "wsp_refs": []
     },
