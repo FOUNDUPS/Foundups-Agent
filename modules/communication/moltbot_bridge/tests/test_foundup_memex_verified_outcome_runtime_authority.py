@@ -246,6 +246,189 @@ def _publisher(
     )
 
 
+def _publication_attempt(tmp_path: Path) -> tuple:
+    store = _store(tmp_path)
+    record, verifier = _record(), _verifier_receipt()
+    request = dict(
+        record_id=reddog_verified_pattern_memory_record_id(record), record=record,
+        verification_receipt=verifier, held_out_receipt=_held_out_receipt(verifier),
+    )
+
+    class SingleUseSigner(_Signer):
+        def __init__(self) -> None:
+            self.requests = []
+
+        def sign(self, request: SigningRequest) -> SigningResponse:
+            self.requests.append(request)
+            assert len(self.requests) == 1, "publication requested another signing use"
+            return super().sign(request)
+
+    signer = SingleUseSigner()
+    publisher = replace(_publisher(store, now_epoch=NOW + 1), signer=signer)
+    return store, publisher, signer, request
+
+
+@pytest.mark.parametrize("conflicts", [1, 2])
+def test_publication_commit_retries_preserve_signature_and_other_updates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, conflicts: int,
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    raw = store._store
+    commit, attempts = raw.commit, []
+
+    def competing_update(snapshot: dict, *, expected_revision: str | None) -> str:
+        attempts.append(copy.deepcopy(snapshot))
+        if len(attempts) <= conflicts:
+            other = raw.load()
+            other["concurrent_updates"] = len(attempts)
+            commit(other, expected_revision=other.get("revision"))
+        return commit(snapshot, expected_revision=expected_revision)
+
+    monkeypatch.setattr(raw, "commit", competing_update)
+    assert publisher.publish(**request) == request["record_id"]
+    envelope = store.load_publication(request["record_id"])
+    assert len(signer.requests) == 1 and len(attempts) == conflicts + 1
+    assert raw.load()["concurrent_updates"] == conflicts
+    assert all(
+        attempt["foundup_memex_verified_outcome_authority"]["evidence"][request["record_id"]]["envelope"] == envelope
+        for attempt in attempts
+    )
+    receipt = envelope["signed_receipts"][0]
+    assert receipt["issued_at"] == NOW + 1
+    assert receipt["signature"] == _signature(PUBLIC_KEY, signer.requests[0].signing_input)
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("error_type", [RuntimeError, OSError])
+def test_publication_commit_recovers_lost_acknowledgment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error_type: type[Exception],
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit, durable = store._store.commit, []
+
+    def commit_then_fail(snapshot: dict, *, expected_revision: str | None) -> str:
+        commit(snapshot, expected_revision=expected_revision)
+        durable.append((tmp_path / "authority.json").read_bytes())
+        raise error_type("publication_ack_lost")
+
+    monkeypatch.setattr(store._store, "commit", commit_then_fail)
+    assert publisher.publish(**request) == request["record_id"]
+    assert len(signer.requests) == len(durable) == 1
+    assert (tmp_path / "authority.json").read_bytes() == durable[0]
+    assert store.load_publication(request["record_id"]) is not None
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("activate_winner", [False, True], ids=["staged", "active"])
+def test_publication_commit_reconciles_valid_competing_first_publisher(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, activate_winner: bool,
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit, winner_bytes = store._store.commit, []
+
+    def commit_after_winner(snapshot: dict, *, expected_revision: str | None) -> str:
+        winner = _publisher(_store(tmp_path), now_epoch=NOW)
+        assert winner.publish(**request) == request["record_id"]
+        if activate_winner:
+            winner.activate(request["record_id"])
+        winner_bytes.append((tmp_path / "authority.json").read_bytes())
+        return commit(snapshot, expected_revision=expected_revision)
+
+    monkeypatch.setattr(store._store, "commit", commit_after_winner)
+    assert publisher.publish(**request) == request["record_id"]
+    assert len(signer.requests) == len(winner_bytes) == 1
+    assert (tmp_path / "authority.json").read_bytes() == winner_bytes[0]
+    assert store.load_publication(request["record_id"])["signed_receipts"][0]["issued_at"] == NOW
+    assert (store.load_envelope(request["record_id"]) is not None) == activate_winner
+
+
+@pytest.mark.parametrize("change", ["record", "principal", "signature", "key_epoch"])
+def test_publication_commit_rejects_invalid_competing_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str,
+) -> None:
+    source, _record_value, _verifier, _held_out, reference = _publish(tmp_path / "source")
+    envelope = source.load_envelope(reference.record_id)
+    if change == "record":
+        envelope["record"]["tampered"] = True
+    elif change == "principal":
+        envelope["issuer_principal_id"] = "another-principal"
+    elif change == "signature":
+        envelope["signed_receipts"][0]["signature"] = "invalid"
+    else:
+        envelope["key_epoch"] = "another-epoch"
+    envelope.pop("envelope_digest")
+    envelope["envelope_digest"] = _digest(envelope)
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit, winner_bytes = store._store.commit, []
+
+    def commit_after_invalid_winner(snapshot: dict, *, expected_revision: str | None) -> str:
+        _store(tmp_path).publish(envelope)
+        winner_bytes.append((tmp_path / "authority.json").read_bytes())
+        return commit(snapshot, expected_revision=expected_revision)
+
+    monkeypatch.setattr(store._store, "commit", commit_after_invalid_winner)
+    with pytest.raises((RuntimeError, ValueError)):
+        publisher.publish(**request)
+    assert len(signer.requests) == len(winner_bytes) == 1
+    assert (tmp_path / "authority.json").read_bytes() == winner_bytes[0]
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("failure", ["io", "runtime", "conflict"])
+def test_publication_commit_failure_without_evidence_stays_bounded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str,
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    attempts = []
+
+    def fail_commit(snapshot: dict, *, expected_revision: str | None) -> str:
+        attempts.append(snapshot)
+        if failure == "io":
+            raise OSError("publication_io_failure")
+        raise RuntimeError("revision_conflict" if failure == "conflict" else "publication_runtime_failure")
+
+    monkeypatch.setattr(store._store, "commit", fail_commit)
+    with pytest.raises((RuntimeError, OSError)):
+        publisher.publish(**request)
+    assert len(signer.requests) == 1
+    assert len(attempts) == (3 if failure == "conflict" else 1)
+    assert store.load_publication(request["record_id"]) is None
+    assert not (tmp_path / "authority.json").exists()
+
+
+@pytest.mark.parametrize("signal", [KeyboardInterrupt, SystemExit])
+def test_publication_commit_does_not_swallow_cancellation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, signal: type[BaseException],
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit = store._store.commit
+
+    def commit_then_cancel(snapshot: dict, *, expected_revision: str | None) -> str:
+        commit(snapshot, expected_revision=expected_revision)
+        raise signal()
+
+    monkeypatch.setattr(store._store, "commit", commit_then_cancel)
+    with pytest.raises(signal):
+        publisher.publish(**request)
+    assert len(signer.requests) == 1
+    assert store.load_publication(request["record_id"]) is not None
+    assert store.load_envelope(request["record_id"]) is None
+
+
+def test_publication_commit_recovery_does_not_bypass_signer_rejection(tmp_path: Path) -> None:
+    store, publisher, _signer, request = _publication_attempt(tmp_path)
+
+    class RejectingSigner:
+        def sign(self, _request: SigningRequest) -> SigningResponse:
+            _publisher(_store(tmp_path)).publish(**request)
+            raise ValueError("signer_rejected")
+
+    with pytest.raises(ValueError, match="signer_rejected"):
+        replace(publisher, signer=RejectingSigner()).publish(**request)
+    assert store.load_publication(request["record_id"]) is not None
+    assert store.load_envelope(request["record_id"]) is None
+
+
 @pytest.mark.parametrize("activate", [False, True], ids=["staged", "active"])
 def test_publication_retry_after_process_restart_preserves_exact_evidence(
     tmp_path: Path, activate: bool

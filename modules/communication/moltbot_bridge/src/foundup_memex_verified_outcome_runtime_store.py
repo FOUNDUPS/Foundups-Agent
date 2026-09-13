@@ -32,21 +32,28 @@ class AuthorityRuntimeVerifiedOutcomeStore:
 
         payload = _validated_envelope(envelope)
         record_id = str(payload["record_id"])
-        current = self._store.load()
-        state = _state_from(current)
-        evidence = dict(state["evidence"])
-        entry = {"status": "STAGED", "envelope": payload}
-        existing = evidence.get(record_id)
-        if existing is not None:
-            if not isinstance(existing, Mapping) or existing.get("envelope") != payload:
-                raise ValueError("verified_outcome_evidence_conflict")
-            return record_id
-        evidence[record_id] = entry
-        state["evidence"] = evidence
-        updated = dict(current)
-        updated[_STATE_KEY] = state
-        self._store.commit(updated, expected_revision=current.get("revision"))
-        return record_id
+        # Retain identical signed bytes while reconciling unrelated store updates.
+        for _attempt in range(3):
+            current = self._store.load()
+            state = _state_from(current)
+            evidence = dict(state["evidence"])
+            existing = evidence.get(record_id)
+            if existing is not None:
+                if not isinstance(existing, Mapping) or existing.get("envelope") != payload:
+                    raise ValueError("verified_outcome_evidence_conflict")
+                return record_id
+            evidence[record_id] = {"status": "STAGED", "envelope": payload}
+            state["evidence"] = evidence
+            updated = dict(current)
+            updated[_STATE_KEY] = state
+            try:
+                self._store.commit(updated, expected_revision=current.get("revision"))
+            except RuntimeError as exc:
+                if str(exc) != "revision_conflict":
+                    raise
+            else:
+                return record_id
+        raise RuntimeError("revision_conflict")
 
     def activate(self, record_id: str) -> str:
         """Activate one exact staged envelope after durable outcome admission."""

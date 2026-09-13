@@ -37,18 +37,25 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [publication-commit checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-commit-checkpoint--2026-09-14)
+retains signed bytes through bounded authority-store revision retries and
+validates durable evidence after a lost acknowledgment or competing publication.
+The connected selection passes 118 tests. R11-A remains partial for process
+death before durable evidence, exhausted retries and owner-controlled legacy
+event recovery; authenticated memory activation and later benefit remain open.
+
 The [event-timestamp checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#event-timestamp-checkpoint--2026-09-14)
 records a stage's time once in its existing chain receipt and reuses that time
 for admission. Later snapshots and retries preserve the same metadata; missing
 or invalid event evidence rejects. The connected selection passes 214 tests
-with four platform skips. R11-A remains partial: first-signing failure before
-durable publication and competing initial publishers are next recovery gaps.
+with four platform skips at that checkpoint. The publication-commit follow-up
+above addresses recoverable revision conflicts and competing publications.
 
 The [publication-retry checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-retry-checkpoint--2026-09-14)
 preserves an existing signed envelope across advancing clocks and a separate
-process restart. The connected selection passes 91 tests. This is partial
-R11-A: queue reconstruction still changes `verified_at`; preserving that admitted
-event timestamp is next. Authority/memory activation and later benefit remain open.
+process restart. Its recorded connected selection passed 91 tests. Queue event
+time was still unstable at that checkpoint; the event-timestamp follow-up above
+addresses it. Authority/memory activation and later benefit remain open.
 
 The [authority-to-memory connection checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14)
 traces the existing queue, signer, publisher, stores and Memex reader. A disposable

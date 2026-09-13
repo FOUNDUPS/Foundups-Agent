@@ -811,11 +811,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_RECORDED_EVENT_AND_PERSISTED_PUBLICATION_RETRY_VERIFIED",
-              "evidence": "event_timestamp_continuation_20260914",
-              "previous_evidence": "publication_retry_continuation_20260914",
-              "next": "pre-publication signing failure, lost acknowledgment and competing initial publisher recovery",
-              "remaining": "legacy event recovery, cross-store acceptance, independent startup and sink activation; no runtime admission"
+              "status": "PARTIAL_IN_PROCESS_PUBLICATION_COMMIT_RECOVERY_VERIFIED",
+              "evidence": "publication_commit_continuation_20260914",
+              "previous_evidence": "event_timestamp_continuation_20260914",
+              "next": "Map and test a durable verified-outcome signer-response handoff before publication using existing outcome-root and response-anchor owners; preserve distinct operation/scope/current-authority checks and do not reset burned reservations",
+              "remaining": "process death or exhausted retries without durable evidence; legacy event recovery, cross-store acceptance, independent startup and sink activation; no runtime admission"
             }
           },
           {
@@ -908,6 +908,12 @@
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "section": "event_timestamp_continuation_20260914",
         "base_commit": "9c949e8debf4540c504de57133e980b7eb2dcab4",
+        "acceptance_satisfied": false
+      },
+      "latest_publication_commit_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "publication_commit_continuation_20260914",
+        "base_commit": "9d69a111a096aa4279eaa6f318ebb0bd63808cac",
         "acceptance_satisfied": false
       }
     },
