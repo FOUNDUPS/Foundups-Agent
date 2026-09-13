@@ -251,6 +251,78 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Publication-retry checkpoint — 2026-09-14
+
+Packaging: **15 fast groups passed in 4,425ms** and **8 staged-manifest tests
+passed in 66.65s** (two pytest configuration warnings). The 1,400-file runtime
+membership is unchanged; only the publisher/store hashes and their two pins
+changed. The existing test registry gains `process` capability on one already
+quarantined runtime-authority test row; membership/quarantine stay 1,650/269.
+The first fast invocations rejected a missing worktree dependency setting and
+CRLF bytes in the edited package pin. Supplying the existing vetted dependency
+path and restoring that file's required LF bytes resolved them; no guard changed.
+
+Base: PR1719/main `94d58e73df016e20867f0f17b88af715a85b5110`.
+WSP 00 awakening and its strict software gate passed. Local WSP 15 planning:
+3 + 4 + 4 + 4 = **15/P1**; this is local authoring under 012's instruction,
+not a signed allocation or permission to dispatch the planning packet.
+
+The source-bound Holo helper rejected semantic retrieval with
+`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness, index gap and
+zero owner attempts. Its lexical fallback bound the clean implementation
+checkout and found the existing queue binding/store and tests. Deduplicate its
+repeated hit arrays; put the exact publisher and runtime-authority fixture ahead
+of peripheral root-runtime hits. Required README/INTERFACE and evolution/test
+docs are present; optional memory/design artifacts and requirements.txt are
+absent. Exact symbol/caller reads supplied the missing publisher context;
+NAVIGATION confirms the existing PatternMemory owner. No query reindex or
+CURRENT-semantic claim. Deterministic local debugging was selected because this
+defect needs exact signed-byte, process-restart and runtime-contract evidence;
+no new model call, worker admission or autonomous dispatch was inferred.
+
+The existing signed publisher now first checks the existing authority store for
+an exact publication. It reconstructs and verifies the stored signed payload
+against the requested evidence and publisher identity using the original
+`issued_at`. A matching retry returns the record ID without another signing use,
+store write, timestamp refresh or activation. Changed evidence, principal,
+provider, RedDog identity, key/epoch, invalid signature, extra signed fields and
+invalid/future issuance reject. Initial publication still uses the existing
+signer and attestation checks; the record is snapshotted before callbacks.
+
+`AuthorityRuntimeVerifiedOutcomeStore.load_publication()` is a publication-owner
+read of STAGED or ACTIVE evidence. It raises on invalid durable state and is not
+the consumable outcome source. Existing `load_envelope()` and
+`load_verified_outcome()` still hide staging; runtime authority still performs
+fresh key, revocation and expiry checks. A publication acknowledgment does not
+grant memory-write authority or renew an expired outcome.
+
+**Verification:** three new cases failed before repair (staged/active child-process
+retry requested another signing use; later-clock retry conflicted). The expanded
+existing runtime-authority, queue-binding, authenticity, adversarial, Ed25519
+signing and admission-handler selection passed **91 tests in 13.08s**. The two
+restart cases launch a separate Python interpreter, reopen the same disposable
+atomic JSON store and require unchanged bytes. Their signer/verifier remain
+digest-based doubles. This is real local process reconstruction, not production
+root/UID isolation or composed crash recovery. Rehashed invalid evidence and
+changed publisher identities reject; later retries do not extend expiry or
+cancel revocation. No existing test assertion was weakened.
+
+**R11-A remains partial.** A separate read-only derivation probe confirms that
+the same queue/chain inputs at NOW and NOW+1 differ only in `verified_at`.
+`derive_verified_outcome_admission()` still uses the bootstrap clock; its held-out
+receipt has no event timestamp, and the chain store currently keeps only a
+snapshot-wide `updated_at`. Define/reuse an immutable admitted event timestamp
+through those existing owners; do not simply substitute a mutable snapshot time
+or alter canonical record hashing. That is the next bounded implementation.
+First-signing failure before durable publication, competing initial publications,
+cross-store acceptance, startup authority, sink activation and later improvement
+remain separate proofs. This repair does not close R11-A, R11 or G4.
+
+The baseline section `publication_retry_continuation_20260914` retains the exact
+source/test hashes, commands, failures, queue observation and limits. All 26
+packets and six R11 substeps remain non-dispatchable. Protected YUMORI/eSingularity
+work, queue activation, root/signer deployment and live memory are unchanged.
+
 ### Authority-to-memory connection checkpoint — 2026-09-14
 
 Source: merged PR1718/main `5c29a0af1eabc49ee97939e7eca800fb36d22407`.

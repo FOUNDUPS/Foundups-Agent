@@ -226,6 +226,15 @@ skip**. See the [connection map and R11-A–F sequence](../operations/RSI_SWARM_
 R11-A (immutable publication/retry) is the next local implementation target;
 production composition still requires authentic independent authority inputs.
 
+**Publication retry follow-up:** The existing publisher/store now acknowledge
+the original signed envelope without re-signing or renewing it. Three reproduced
+failures pass; the connected selection passes 91 tests, including two real local
+child-process retries with unchanged durable bytes and fresh expiry/revocation
+rejection. See the [publication checkpoint](../operations/RSI_SWARM_DISPATCH.md#publication-retry-checkpoint--2026-09-14).
+R11-A remains partial: the queue derivation still changes `verified_at` on
+reconstruction. Preserve the admitted event timestamp next; activation and
+retained benefit are not established by this local publication acknowledgment.
+
 ### R12 — Independent production promoter
 
 **Normative references:** WSP 48 / 71 / 95 / 97. **Evidence level:** `GENERIC_OWNER_MISSING`.

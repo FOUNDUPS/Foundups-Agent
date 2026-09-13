@@ -5,6 +5,8 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
@@ -209,19 +211,7 @@ def _publish(
     record = record or _record()
     verifier = _verifier_receipt()
     held_out = _held_out_receipt(verifier)
-    publisher = SignedVerifiedOutcomeEvidencePublisher(
-        store=store,
-        signer=_Signer(),
-        signature_verifier=_DigestSignatureVerifier(),
-        issuer_principal_id=PRINCIPAL_ID,
-        issuer_principal_provider=PRINCIPAL_PROVIDER,
-        reddog_id=REDDOG_ID,
-        signer_public_key=PUBLIC_KEY,
-        key_epoch=KEY_EPOCH,
-        authority_tier=AUTHORITY_TIER,
-        consensus_receipt_digest=CONSENSUS_DIGEST,
-        trusted_now_epoch=lambda: NOW,
-    )
+    publisher = _publisher(store)
     record_id = reddog_verified_pattern_memory_record_id(record)
     assert (
         publisher.publish(
@@ -236,6 +226,122 @@ def _publish(
     if activate:
         assert publisher.activate(record_id) == record_id
     return store, record, verifier, held_out, _reference(record)
+
+
+def _publisher(
+    store: AuthorityRuntimeVerifiedOutcomeStore, *, now_epoch: int = NOW
+) -> SignedVerifiedOutcomeEvidencePublisher:
+    return SignedVerifiedOutcomeEvidencePublisher(
+        store=store,
+        signer=_Signer(),
+        signature_verifier=_DigestSignatureVerifier(),
+        issuer_principal_id=PRINCIPAL_ID,
+        issuer_principal_provider=PRINCIPAL_PROVIDER,
+        reddog_id=REDDOG_ID,
+        signer_public_key=PUBLIC_KEY,
+        key_epoch=KEY_EPOCH,
+        authority_tier=AUTHORITY_TIER,
+        consensus_receipt_digest=CONSENSUS_DIGEST,
+        trusted_now_epoch=lambda: now_epoch,
+    )
+
+
+@pytest.mark.parametrize("activate", [False, True], ids=["staged", "active"])
+def test_publication_retry_after_process_restart_preserves_exact_evidence(
+    tmp_path: Path, activate: bool
+) -> None:
+    store, record, verifier, held_out, reference = _publish(tmp_path, activate=activate)
+    original_bytes = (tmp_path / "authority.json").read_bytes()
+    # A separate interpreter opens the existing store with a later clock. A retry
+    # acknowledges durable evidence; it must not request another signing use.
+    result = subprocess.run(
+        [
+            sys.executable, "-B", "-c",
+            "from pathlib import Path\n"
+            "import sys\n"
+            "from dataclasses import replace\n"
+            "from modules.communication.moltbot_bridge.tests.test_foundup_memex_verified_outcome_runtime_authority import _store, _publisher, _record, _verifier_receipt, _held_out_receipt, NOW\n"
+            "class NoSigningOnRetry:\n"
+            "    def sign(self, request):\n"
+            "        raise AssertionError('retry requested a new signing use')\n"
+            "store = _store(Path(sys.argv[1]))\n"
+            "record_id = sys.argv[2]\n"
+            "record = _record()\n"
+            "verifier = _verifier_receipt()\n"
+            "held_out = _held_out_receipt(verifier)\n"
+            "publisher = replace(_publisher(store, now_epoch=NOW + 1), signer=NoSigningOnRetry())\n"
+            "assert publisher.publish(record_id=record_id, record=record, verification_receipt=verifier, held_out_receipt=held_out) == record_id\n",
+            str(tmp_path), reference.record_id,
+        ],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=30, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / "authority.json").read_bytes() == original_bytes
+    assert (store.load_envelope(reference.record_id) is not None) is activate
+    if not activate:
+        with pytest.raises(ValueError, match="durable_source_missing"):
+            _authority(store).issue(reference)
+
+
+def test_later_publication_retry_does_not_renew_or_unrevoke_evidence(tmp_path: Path) -> None:
+    store, record, verifier, held_out, reference = _publish(tmp_path)
+    original_bytes = (tmp_path / "authority.json").read_bytes()
+    assert _publisher(store, now_epoch=NOW + 601).publish(
+        record_id=reference.record_id, record=record,
+        verification_receipt=verifier, held_out_receipt=held_out,
+    ) == reference.record_id
+    assert (tmp_path / "authority.json").read_bytes() == original_bytes
+    with pytest.raises(ValueError, match="expired"):
+        _authority(store, now_epoch=NOW + 601).issue(reference)
+    with pytest.raises(ValueError, match="signer_revoked"):
+        _authority(store, revocation_oracle=_RevocationOracle(True)).issue(reference)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("issuer_principal_id", "another-principal"),
+    ("issuer_principal_provider", "another-provider"),
+    ("reddog_id", "another-reddog"),
+    ("signer_public_key", "another-key"),
+    ("key_epoch", "another-epoch"),
+])
+def test_publication_retry_rejects_changed_publisher_identity(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    store, record, verifier, held_out, reference = _publish(tmp_path)
+    original_bytes = (tmp_path / "authority.json").read_bytes()
+    publisher = replace(_publisher(store, now_epoch=NOW + 1), **{field: value})
+    with pytest.raises(ValueError, match="verified_outcome_evidence_conflict"):
+        publisher.publish(
+            record_id=reference.record_id, record=record,
+            verification_receipt=verifier, held_out_receipt=held_out,
+        )
+    assert (tmp_path / "authority.json").read_bytes() == original_bytes
+
+
+@pytest.mark.parametrize("field,value", [
+    ("signature", "invalid-signature"),
+    ("issued_at", True),
+    ("issued_at", NOW + 2),
+    ("unexpected", True),
+])
+def test_publication_retry_rejects_rehashed_invalid_signed_evidence(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    source, record, verifier, held_out, reference = _publish(tmp_path / "source")
+    envelope = dict(source.load_envelope(reference.record_id))
+    envelope["signed_receipts"][0][field] = value
+    envelope.pop("envelope_digest")
+    envelope["envelope_digest"] = _digest(envelope)
+    store = _store(tmp_path / "invalid")
+    store.publish(envelope)
+    original_bytes = (tmp_path / "invalid" / "authority.json").read_bytes()
+    with pytest.raises(ValueError, match="verified_outcome_evidence_conflict"):
+        _publisher(store, now_epoch=NOW + 1).publish(
+            record_id=reference.record_id, record=record,
+            verification_receipt=verifier, held_out_receipt=held_out,
+        )
+    assert (tmp_path / "invalid" / "authority.json").read_bytes() == original_bytes
+    assert store.load_envelope(reference.record_id) is None
 
 
 def test_staged_evidence_is_not_consumable_before_activation(tmp_path: Path) -> None:
@@ -464,6 +570,11 @@ def test_attacker_rehashed_record_and_envelope_cannot_reuse_signature(
 
     with pytest.raises(ValueError, match="signed_digest_mismatch"):
         _authority(store).issue(_reference(forged_record))
+    with pytest.raises(ValueError, match="verified_outcome_evidence_conflict"):
+        _publisher(store, now_epoch=NOW + 1).publish(
+            record_id=forged_id, record=forged_record,
+            verification_receipt=verifier, held_out_receipt=held_out,
+        )
 
 
 def test_signer_policy_binds_exact_canonical_payload() -> None:

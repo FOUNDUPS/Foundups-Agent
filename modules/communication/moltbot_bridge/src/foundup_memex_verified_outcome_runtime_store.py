@@ -75,6 +75,18 @@ class AuthorityRuntimeVerifiedOutcomeStore:
         self._store.commit(updated, expected_revision=current.get("revision"))
         return candidate
 
+    def load_publication(self, record_id: str) -> Mapping[str, Any] | None:
+        """Read staged or active evidence for exact publication retry only.
+
+        This is not the consumable outcome source. Read/assembly authority must
+        continue to use load_envelope/load_verified_outcome, which hide staging.
+        Invalid durable state raises instead of being treated as a new publication.
+        """
+
+        state = _state_from(self._store.load())
+        entry = state["evidence"].get(record_id)
+        return copy.deepcopy(entry["envelope"]) if entry is not None else None
+
     def load_envelope(self, record_id: str) -> Mapping[str, Any] | None:
         if not str(record_id or "").strip():
             return None

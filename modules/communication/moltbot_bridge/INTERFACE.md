@@ -223,7 +223,17 @@ An absent outcome policy leaves unrelated signer operations available. The root 
 Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
 Resident production admission remains blocked until the root service is deployed
 and independent verifier runtimes issue both grant signatures. Staged authority
-envelopes remain non-consumable until exact activation. PatternMemory admission
+envelopes remain non-consumable until exact activation.
+`AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` reads STAGED
+or ACTIVE evidence for the existing publisher's retry check, returns `None` when
+absent, and raises on invalid durable state. It is not the consumable source.
+`SignedVerifiedOutcomeEvidencePublisher.publish()` acknowledges a byte-equivalent
+existing envelope after checking exact requested evidence, publisher identity,
+original issuance and signature. It does not re-sign, rewrite, renew or activate
+on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
+runtime authority still checks current key, revocation and expiry. Queue-derived
+`verified_at` remains dependent on bootstrap time pending the R11-A event binding.
+PatternMemory admission
 uses an invisible staging table in the existing database. Conflicting existing
 rows and legacy hash-shaped compatibility markers reject. Staging snapshots
 the input, reconciles a competing record-key insert without replacing the

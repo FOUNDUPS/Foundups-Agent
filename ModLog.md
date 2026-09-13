@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 immutable publication retry
+
+- Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership remains 1,400 with two changed source hashes and refreshed pins; the test registry adds one process capability without changing 1,650/269 membership/quarantine. Initial fast guards correctly rejected missing dependency configuration and CRLF pin bytes; both local invocation/materialization issues were corrected.
+- WSP 00 software gate passed; source-bound Holo rejected a stale authority HEAD. The documented lexical fallback plus exact module/test reads supplied local context. Extended the existing WRE-facing publisher and authority store on PR1719/main `94d58e73`; local planning 15/P1 is not signed dispatch authority.
+- Three reproduced retry failures now pass. The connected selection passed 91 tests in 13.08s, including separate-interpreter staged/active retries, unchanged durable bytes, invalid evidence/identity rejection and fresh expiry/revocation enforcement.
+- Root roadmap, R02 map, runbook, backlog and baseline evidence retain the partial boundary: preserve queue-derived `verified_at` next; pre-publication failure, cross-store activation and later benefit remain open. Protected FoundUps and live runtime activation are unchanged. WSP 00/15/22/48/50/60/71/84/95/97.
+
 ## 2026-09-14: R11 authority-to-memory composition checkpoint
 
 - Recovered PR1718/main `5c29a0af1eabc49ee97939e7eca800fb36d22407`, ran WSP 00 awakening and its strict software gate, and applied WSP 97 retrieval/micro/macro review. Canonical-main Holo was degraded; exact owned source and existing fixtures supplied the working context.

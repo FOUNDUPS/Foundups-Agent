@@ -2236,5 +2236,145 @@
       "No current runtime/provider binding was inferred or fabricated",
       "A reloaded store handle and skipped Linux test are not process-isolation or restart proof"
     ]
+  },
+  "publication_retry_continuation_20260914": {
+    "base_commit": "94d58e73df016e20867f0f17b88af715a85b5110",
+    "scope": "Partial R11-A: acknowledgment of an already durable signed publication; no queue timestamp or activation change",
+    "wsp00": {
+      "gate_passed": true,
+      "last_validation": "2026-09-14T04:03:32.123097",
+      "interpretation": "software gate"
+    },
+    "wsp15_local_planning": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1",
+      "runtime_allocation_receipt": false
+    },
+    "execution_plane": "local isolated source authoring under existing 012 instruction; no runtime packet dispatch",
+    "retrieval": {
+      "semantic_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "lexical_ok": true,
+      "bundle_authority": {
+        "evidence_authority": "workspace_head",
+        "repo_head_sha": "94d58e73df016e20867f0f17b88af715a85b5110",
+        "repo_root_digest": "sha256:40d60ad71436d43150e37a6d118fa2066a806f876c8f4c85e97c0cb2de85dcb2",
+        "workspace_overlay_present": false
+      },
+      "evaluation": {
+        "noise": "discard peripheral root runtime hits",
+        "ordering": "explicit publisher and runtime-authority fixture before adjacent bindings",
+        "duplication": "deduplicate code/code_hits paths",
+        "missing": "publisher directly retrieved; Tier-0 complete; optional memory/design docs and requirements.txt absent",
+        "staleness": "UNKNOWN/gap preserved; exact local source plus connected contracts used; no semantic acceptance or query reindex"
+      }
+    },
+    "changes": [
+      "Reload exact STAGED/ACTIVE publication using existing authority-store adapter",
+      "Reconstruct original signed payload and envelope against requested evidence, identity, fingerprint and epoch; verify original signature",
+      "Acknowledge without re-signing, rewriting, refreshing issued_at or activating; snapshot input before callbacks",
+      "Keep initial signer attestation and use-time key/revocation/expiry checks unchanged"
+    ],
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py": "7c926d9a6764ed4cf2ed51b111fe377fe850f0c0a1e4ac72a0247d7c89053b42",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py": "e4565237283769e0baf590982da35fbbcbbc227a332bc9be8be3be58905703c6",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py": "ba645dccdcc8445aa4df05898e4e2f54ef72037da1a599e9544fc68d623bb80f",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_authority.py": "b6883487860d73f2d6da1d92f0cfe21e2739927d7ac9a5298632835fd480cf00",
+      "modules/communication/moltbot_bridge/src/reddog_resident_queue_chain_results_store.py": "1fad69378c3ba3b3f7bcb264a6f655010ce4371e9bd1de29fab1cf186ac5fabe",
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "eb034c8e72564f6103c9be76656e12c176a4ac481c70b39e4860987eb11c7788",
+      "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py": "7ff3aced800e5a585359f01d2672455566a0f8311d4df09327533f5631008910",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py": "f60508de26646094140625539bba471df7d204fdeeaa0e9d3f2ec19877b98500",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py": "946cd9593f522c97e52a4ff4f7c0bdcd4008421a945e2257b8f12832997b096b",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py": "24befad255f4f0d9119d26af0ff4cf207e62849682202ff2ed504493dc3357d4",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py": "9894930967d7a6b0c51eca2b4dd7246b887d9bebdd66b054d37d242ce485cd21",
+      "modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py": "ae55fdec51ba9eff852e04be080134de2705947abc26279f5a2f75c93cfecc63",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py": "5724a209b027337e967df59aff8be21f73ab7fb75f3ebf8c2725f7b6d4591a17"
+    },
+    "test_evidence": {
+      "interpreter": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+      "environment": [
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUTF8=1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+        "TEMP/TMP and database/basetemp paths in disposable audit directory"
+      ],
+      "before": {
+        "failed": 3,
+        "passed": 5,
+        "deselected": 21,
+        "elapsed_seconds": 7.23,
+        "log_sha256": "a78764db775c59954d19ab291bd3d2c7e047c2057c01a808eb5c2666de72a51f",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py -k publication_retry --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --tb=short -q"
+      },
+      "after": {
+        "passed": 91,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_seconds": 13.08,
+        "log_sha256": "1227f1729253097d35e633b31ba45dab3510c64df273c8204eba9fc49c61516b",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --tb=short -q"
+      },
+      "restart": "two actual separate Python interpreter processes reopening disposable AtomicJsonAuthorityRuntimeStore; digest-based signer/verifier doubles; no second signing use and unchanged durable bytes",
+      "preserved_negative_cases": [
+        "changed publisher identity/key/epoch",
+        "rehashed invalid signature, issuance and extra signed fields",
+        "forged evidence cannot reuse prior signature",
+        "staging hidden from consumer",
+        "use-time expiry and revocation after acknowledgment"
+      ]
+    },
+    "queue_timestamp_observation": {
+      "same_persisted_chain_and_queue": true,
+      "only_changed_metadata": [
+        "verified_at"
+      ],
+      "derivation_is_stable": false,
+      "scope": "Derived admission metadata only; no queue execution, signing or database writes",
+      "remaining_work": "Retain the admitted event timestamp across queue/bootstrap reconstruction before closing R11-A."
+    },
+    "limits": [
+      "R11-A/R11/G4 not complete",
+      "Queue-derived verified_at remains dependent on bootstrap clock",
+      "No production signer/root-UID isolation or activation proof",
+      "First signing before durable publication, competing initial publishers and cross-store recovery remain open",
+      "Acknowledgment is not a fresh grant, memory write, publication renewal or accepted learning benefit"
+    ],
+    "next_authorable_step": "Preserve the admitted queue event timestamp through existing chain/admission owners; do not substitute mutable snapshot updated_at or change canonical record hashing",
+    "packaging": {
+      "fast": {
+        "groups_passed": 15,
+        "duration_ms": 4425,
+        "log_sha256": "94b5bbfa4299533f833ae3c7d4b008cf696f09a3282786686586fb074a08978a",
+        "environment": [
+          "REDDOG_TEST_SITE_PACKAGES=O:/Foundups-Agent/.venv/Lib/site-packages",
+          "REDDOG_TEST_PYTHON=O:/Foundups-Agent/.venv/Scripts/python.exe",
+          "TEMP/TMP in disposable O: audit directory"
+        ]
+      },
+      "manifest": {
+        "passed": 8,
+        "warnings": 2,
+        "elapsed_seconds": 66.65,
+        "runtime_membership": 1400,
+        "changed_runtime_files": 2,
+        "digest": "9340ef72b406d41b7b4f89b101dffff9f008fcb4e4e782f4914b26ab9dac85a7"
+      },
+      "registry": {
+        "total_files": 1650,
+        "quarantined_files": 269,
+        "change": "Existing runtime-authority test row gains process capability; its prior quarantine remains"
+      },
+      "initial_failures": [
+        "Fast tier rejected missing qualified dependency-root setting",
+        "Fast tier rejected CRLF in edited package pin; restored required LF bytes"
+      ],
+      "guard_changes": false
+    }
   }
 }

@@ -37,6 +37,12 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [publication-retry checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-retry-checkpoint--2026-09-14)
+preserves an existing signed envelope across advancing clocks and a separate
+process restart. The connected selection passes 91 tests. This is partial
+R11-A: queue reconstruction still changes `verified_at`; preserving that admitted
+event timestamp is next. Authority/memory activation and later benefit remain open.
+
 The [authority-to-memory connection checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14)
 traces the existing queue, signer, publisher, stores and Memex reader. A disposable
 composition probe exposes early evidence visibility after failed memory activation

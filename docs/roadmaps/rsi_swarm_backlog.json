@@ -809,7 +809,13 @@
               "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py"
             ],
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
-            "dispatchable": false
+            "dispatchable": false,
+            "local_progress": {
+              "status": "PARTIAL_PERSISTED_PUBLICATION_RETRY_VERIFIED",
+              "evidence": "publication_retry_continuation_20260914",
+              "next": "immutable queue/admission event timestamp",
+              "remaining": "pre-publication signing failure and competing initial publisher recovery; no activation admission"
+            }
           },
           {
             "id": "R11-B",
@@ -890,6 +896,12 @@
           }
         ],
         "authority": "Substeps refine R11 only; no new scheduler, independent global packet, model binding, budget or executable authorization."
+      },
+      "latest_publication_retry_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "publication_retry_continuation_20260914",
+        "base_commit": "94d58e73df016e20867f0f17b88af715a85b5110",
+        "acceptance_satisfied": false
       }
     },
     {
