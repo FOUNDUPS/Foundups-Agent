@@ -4,7 +4,8 @@
 
 - Confirmed that `frontend/content/yumori-presentation.ts` was intentionally superseded and removed; kept `frontend/content/yumori-vision.ts` as the single current ten-slide truth boundary.
 - Updated the stale presentation contracts and documentation for per-slide Next `Image` rendering, current floor/COG DC language, and the deliberate exclusion of unaudited revenue, profit and investor-return projections.
-- No runtime page, public copy, QR asset, routing or deployment behavior changed. WSP 22/50; bounded repository reads used, with manual GitHub inspection because no governed HoloIndex checkout is attached to this workspace.
+- Deferred the presentation's URL, slide and reduced-motion state initialization through a cancellable zero-delay browser task to satisfy the current React lint contract without changing public copy, timing constants or navigation semantics.
+- No public page copy, QR asset, routing or deployment behavior changed. WSP 22/50; bounded repository reads used, with manual GitHub inspection because no governed HoloIndex checkout is attached to this workspace.
 
 ## 2026-09-13 — Shared YUMORI.me branding in both website skills
 
