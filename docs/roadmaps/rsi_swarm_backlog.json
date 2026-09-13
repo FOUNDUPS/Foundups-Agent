@@ -59,7 +59,7 @@
       "wave": 0,
       "priority": "P0",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
-      "status": "locally_validated_pending_integration",
+      "status": "validated_in_revision",
       "dependencies": [],
       "owner_role": "existing RedDog lane",
       "reuse_scope_candidates": [

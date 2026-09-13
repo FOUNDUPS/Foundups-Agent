@@ -9431,7 +9431,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "a95ec1ad23015cce92d70e98626555a8c9ee5292d79da2d5056943354189c63a",
+      "hash_sha256": "92c0e3f69111ec19263d3495392c92259ae319a30ae9f207f35ef93091b0b639",
       "links": {
         "automation": [
           "doc_dae"
@@ -9444,7 +9444,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
-      "size_bytes": 18718,
+      "size_bytes": 19435,
       "status": "active",
       "wsp_refs": [
         "WSP 00"

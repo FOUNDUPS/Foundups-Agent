@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-11. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-13. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -18,7 +18,7 @@ Read only the entry table and selected packet before retrieving its module conte
 |---|---|
 | Evidence behind the completion verdict | [Dated audit](docs/audits/rsi/2026-09-09/README.md) |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
-| Next work | Wave 0 below; R01 integrity, R02 authority reconciliation, R03 retrieval entry context |
+| Next work | Wave 0 below; verify R01 repair is present in the selected source, then R02 authority reconciliation and R03 retrieval entry context |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -115,7 +115,7 @@ The WSP bootstrap is required by the repository but is not a substitute for G0�
 **Outcome:** a receiving worker can identify the exact source, owner, runtime, documents, and baseline without asking 012 to reconstruct status.
 
 - **R00 — Holo operational recovery. OBSERVED COMPLETE at this SHA.** The existing controller and three semantic queries passed. Retain the receipts; do not enqueue a duplicate repair for the completed task.
-- **R01 — Production skill integrity. P0, locally validated; integration pending.** Reconciled both registered production manifests to unchanged committed Skillz bytes and pinned those two files to LF checkout materialization. Both strict manifest checks pass; the documented WRE tier passes 235 tests with four explained Windows link/reparse skips. The manifests remain unsigned integrity inventories, not execution permission. Acceptance evidence and source boundaries are in the [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md#r01-production-skill-integrity-repair-2026-09-13). Reconcile the resulting commit and deployment before claiming live admission.
+- **R01 — Production skill integrity. P0, validated in this revision.** Reconciled both registered production manifests to unchanged committed Skillz bytes and pinned those two files to LF checkout materialization. Both strict manifest checks pass; the documented WRE tier passes 235 tests with four explained Windows link/reparse skips. The manifests remain unsigned integrity inventories, not execution permission. Acceptance evidence and source boundaries are in the [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md#r01-production-skill-integrity-repair-2026-09-13). Reconcile the resulting commit and deployment before claiming live admission.
 - **R02 — Canonical completion and WSP enforcement map. P1, partially delivered (documentation authority only).** Reconcile stale ledger entries, WSP 46 fallback language, the WSP 00 mirror wording, and current WRE truth. For every RSI requirement, name its normative source, implementation owner, test, and runtime receipt or missing status. Treat research-only requirements separately. Edit `CLAUDE.md` rather than its generated AGENTS projection when a learned operating rule needs to persist. Acceptance: a fresh verifier can determine current slice ownership and each G0–G5 gap without relying on an old completion claim.
 - **R03 — Reliable retrieval entry context. P0.** Reuse `authority_worktree.py`, the one-shot owner bridge, `holo_query_bundle`, incident repair, and the exact-main controller. Define how a feature worker selects current-main reference retrieval versus its own committed snapshot, and how local overlay evidence is labeled. Acceptance: clean-main, divergent-feature, dirty-overlay, stale-authority, main-advances-mid-run, and no-MCP cases have truthful results; queries never reindex; repair is idempotent and preserves other owners. The successful recovery is the first fixture/example, not proof of arbitrary branch support.
 
