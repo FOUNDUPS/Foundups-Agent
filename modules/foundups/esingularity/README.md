@@ -47,6 +47,12 @@ The current public journey is deliberately simple. The existing hero is followed
 
 The financial models, engineering research, and source audits support the public claims but are not the main public experience.
 
+## Grants, subsidies, and PPP support
+
+Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `YUMORI — eSingularity Phase 1 Functional Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
+
+A program's existence is not project funding. Keep the progression explicit: verified program → eligibility inquiry → eligible → application → selected → awarded. Only an awarded amount may be represented as committed subsidy revenue. The current highest-priority inquiry concerns the MOE/RCESPA regional-coexistence data-center decarbonization program and whether a currently closed municipal onsen can qualify after Fukui City accepts a lawful PPP/lease/use structure and an eligible operator/SPC satisfies the program conditions.
+
 ## Campaign ticker updates
 
 Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it on both eSingularity.ai and YUMORI.me. Date and time-limit each invitation in Japan time.
@@ -78,7 +84,7 @@ modules/foundups/esingularity/
 │   └── tests/              # Publish/no-publish gate tests
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
-├── docs/                   # Migration and architecture records
+├── docs/                   # Migration, architecture, grant and evidence records
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata
@@ -116,6 +122,7 @@ With no research retriever connected, JHR fails closed and returns `NO_REPORT` r
 - The deck is additive: it does not replace the existing hero, ticker, campaign actions, or deeper public sections.
 - Contact candidates remain in the ignored RedDog manual-alpha store until a governed Contact Memory runtime exists.
 - JHR public publication remains fail-closed until retrieval, verification, drafting, image provenance, and publication adapters are verified together.
+- Grant maximums, open calls and eligibility inquiries are not awards. Public funding claims remain fail-closed until the grant registry and source-of-truth ledger admit them.
 
 ## WSP alignment
 
