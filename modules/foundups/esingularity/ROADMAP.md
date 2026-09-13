@@ -30,6 +30,8 @@ These are continuing acceptance gates, not completed features that may later be 
 
 ## Phase 3 — Campaign operations
 
+- [x] Add the FoundUp-owned [website operations skill](skills/website-update/SKILL.md), with history-backed shared-ticker checks and registry/agent discovery.
+
 - [x] Add the reusable [ticker-update skill](../../../.agents/skills/esingularity-ticker/SKILL.md) with one dated field-status source and publication verification.
 
 - [x] Provide Japanese, English, and Portuguese states for the ten-slide presentation.

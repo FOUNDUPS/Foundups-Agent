@@ -8,6 +8,8 @@ description: Update the eSingularity campaign ticker and the monk's public field
 Canonical repository: `FOUNDUPS/Foundups-Agent`.
 Module: `modules/foundups/esingularity`.
 
+For wider website edits or redesigns, apply `modules/foundups/esingularity/skills/website-update/SKILL.md`; it requires preserving both ticker consumers.
+
 ## Locate and update
 
 Read repository instructions and the module README, INTERFACE and recent ModLog in bounded chunks. Search for an existing update before editing.

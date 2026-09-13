@@ -1,5 +1,12 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — Website operations skill from change-history audit
+
+- Reviewed module history and exact project-page diff: PR #1684 removed the ticker mount; #1690 restored it; #1691 added the shared movement consumer. The component existing on disk was insufficient to protect either rendered page.
+- Added `skills/website-update/SKILL.md` as the FoundUp-owned WSP 97 website workflow, with thin Claude/Codex entrypoints, README/roadmap links, ticker-skill cross-reference and registry evidence discovery for Red Dog.
+- Reused the existing shared-status and hostname tests; preserved Red Dog signed execution boundaries and the declarative-only FoundUp build contract. No runtime executor, credentials, website content or deployment changed.
+- Validation: skill frontmatter, identical agent projections and repository-relative discovery links checked; existing shared-status contracts executed.
+
 ## 2026-09-13 — One ticker across both public sites
 
 - Mounted the existing shared CampaignTicker on YUMORI.me as well as eSingularity.ai. Both read current-field-status.ts; today’s invitation and future updates have one source.
