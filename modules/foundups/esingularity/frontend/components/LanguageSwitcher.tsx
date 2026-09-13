@@ -14,7 +14,7 @@ const languages: Array<{ id: Language; label: string }> = [
 ];
 
 const copy: Record<string, [string, string]> = {
-  [currentFieldStatus.tickerJa]: ['September 25 vote: VOTE NO on the demolition-preparation budget. The request for a fixed review period or postponed vote has been withdrawn. Read the City records and support brief, then take action through YUMORI.me.', 'Votação de 25 de setembro: VOTE NO ao orçamento de preparação da demolição. O pedido de prazo fixo de análise ou adiamento da votação foi retirado. Leia os registros da cidade e o documento de apoio e participe pelo YUMORI.me.'],
+  [currentFieldStatus.tickerJa]: ['September 25 vote: VOTE NO on the demolition-preparation budget. Read the YUMORI.me Preparatory Committee message to the mayor and City Council, then make your voice heard.', 'Votação de 25 de setembro: VOTE NÃO ao orçamento de preparação da demolição. Leia a mensagem do Comitê Preparatório YUMORI.me ao prefeito e ao Conselho Municipal e faça sua voz ser ouvida.'],
   "JHR・最新レポート": ["JHR · Latest report", "JHR · Relatório atual"],
   "コンピュートで、": ["Can compute…", "A computação pode…"],
   "温泉を救えるか。": ["Save an onsen?", "Salvar um onsen?"],
@@ -159,7 +159,9 @@ const copy: Record<string, [string, string]> = {
   '九頭竜の音楽を聴く': ['Listen to the music of Kuzuryu', 'Ouvir a música de Kuzuryu'],
   '再生計画を読む': ['Read the renewal plan', 'Ler o plano de renovação'],
   'YUMORI.infoでプロジェクトを見る': ['Explore the project on YUMORI.info', 'Explorar o projeto no YUMORI.info'],
-  'Monkとつながる': ['Connect with the Monk', 'Conectar-se com o Monk'],
+  '設立準備委員会から福井市議会へのメッセージを読む': ['Read the Preparatory Committee message to Fukui City Council', 'Leia a mensagem do Comitê Preparatório ao Conselho Municipal de Fukui'],
+  '設立準備委員会から福井市長へのメッセージを読む': ['Read the Preparatory Committee message to the Mayor of Fukui', 'Leia a mensagem do Comitê Preparatório ao prefeito de Fukui'],
+  '福井市議会・福井市へ連絡する': ['Contact Fukui City Council and Fukui City', 'Entre em contato com o Conselho Municipal e a Prefeitura de Fukui'],
   '温泉を守る準備委員会に名前を加える': ['Add your name to the Save Onsen Preparatory Committee', 'Adicione seu nome ao Comitê Preparatório Save Onsen'],
   '福井市役所へ声を届ける': ['Contact Fukui City Hall', 'Entrar em contato com a Prefeitura de Fukui'],
   '九頭竜を守れ。温泉を守れ。': ['Save Kuzuryu. Save the onsen.', 'Salve Kuzuryu. Salve o onsen.'],

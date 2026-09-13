@@ -67,6 +67,8 @@ Repository state is canonical for project status and source-of-truth labels. Dri
 
 Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it on both eSingularity.ai and YUMORI.me. Date and time-limit each invitation in Japan time.
 
+The public civic-action record lives at `https://YUMORI.me/vote-no`. It publishes privacy-bounded transcripts of the committee's sent council and mayor messages, clearly labels superseded historical requests, and links visitors to official Fukui contact channels.
+
 ## Japan Hyperscaler Report (JHR)
 
 JHR is the eSingularity research/publication lane for tracking Japan's hyperscale data-center expansion, policy, grid constraints, land-use effects, community response, and implications for Fukui and distributed COG DC infrastructure.
