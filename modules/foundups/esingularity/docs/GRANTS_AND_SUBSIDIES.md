@@ -8,6 +8,45 @@ This file is the repository-side canonical registry for external grant/subsidy/P
 
 Never describe a program as project funding merely because the program exists. Track each item as: `VERIFIED PROGRAM`, `ELIGIBILITY INQUIRY`, `ELIGIBLE`, `APPLICATION`, `SELECTED`, `AWARDED`, or `CLOSED`. Only `AWARDED` may be booked as committed subsidy revenue.
 
+## Authority map: repository ↔ Google Drive
+
+Use this section to prevent drift between codebase truth and Drive working documents.
+
+### Canonical repository authority
+
+- **Grant / subsidy / PPP-support status:** this file, `modules/foundups/esingularity/docs/GRANTS_AND_SUBSIDIES.md`.
+- **Public-claim admission:** `modules/foundups/esingularity/frontend/audit/SOURCE_OF_TRUTH.md`.
+- **Module direction / discoverability:** `README.md`, `ROADMAP.md`, `ModLog.md`.
+
+### Drive working/derived documents
+
+1. **PPP/PFI Private Proposal Master Draft**  
+   Drive ID: `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc`  
+   Purpose: formal PPP/PFI mechanics, legal/submission framing, City-facing proposal structure.  
+   Rule: may consume grant-status facts from this repo registry; must not independently promote program status.
+
+2. **City / Prefecture / Council Support Brief**  
+   Drive ID: `1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE`  
+   Purpose: policy alignment, economics, public-asset reuse evidence, decision-maker support material.  
+   Rule: may cite only the current status labels recorded here for grants/PPP support.
+
+3. **Project Prospectus / Case for Support**  
+   Drive ID: `1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM`  
+   Purpose: integrated explanatory/project narrative.  
+   Rule: explanatory only; not the authority for live grant eligibility or award status.
+
+4. **Phase 1 Functional Financial Model & Grant Audit**  
+   Drive ID: `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`  
+   Tab: `Grants & Subsidies`  
+   Purpose: scenario analysis, caps/rates, timing, model integration, audit notes.  
+   Rule: analysis layer only. Maximum caps, model placeholders, or candidate programs are not committed funding unless this repo registry reaches `AWARDED`.
+
+### Cross-reference rule
+
+The three core Drive documents above now begin with an `AUTHORITY INDEX / 権威インデックス` that points readers back to this repository registry. Future agents starting in the repo should use the Drive IDs above to inspect supporting working documents when more detail is needed; future agents starting in Drive should return here before asserting current program status.
+
+If repo and Drive disagree, **do not choose the more favorable number**. Re-verify the primary government source, update this registry first, then reconcile Drive.
+
 ## Current highest-priority program
 
 ### F-01 — 地域共生を目指したデータセンター脱炭素化設備導入支援事業
