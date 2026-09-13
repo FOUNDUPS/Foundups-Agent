@@ -14,6 +14,31 @@ external-service, or production-promotion authority. 012 remains sovereign.
 Callers must preserve the narrower authority of the work item and runtime
 binding.
 
+## ROC research evaluator and dry-run producer
+
+`src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
+`load_target_config(path)` and `evaluate_target(path)`. The loader uses AST literal
+evaluation; it does not import or execute the target. Metric dictionaries accept
+finite integers/floats with string keys, excluding booleans. Unusable numeric
+maps return empty dictionaries through the existing loader contract.
+
+Before simulation, `evaluate_target` rejects missing/invalid maps, agent names
+outside `AGENT_INFRASTRUCTURE_COSTS`, allocation fractions outside `[0, 1]`,
+totals not equal to one within absolute `1e-9` (zero relative tolerance), and
+multipliers outside `[1, 5]`. These input guards return an `error`, finite
+negative `fitness`, and false compute/ROI flags. Valid known-agent subsets,
+zero allocations and the existing default multiplier of one remain supported.
+The producer's program may require a narrower, fully populated target. Invalid
+syntax or non-literal expressions can still raise through the loader; callers
+must retain the existing exception-handling boundary.
+
+`WREAutoResearcher.run()` consumes those errors through its existing
+`failed_validation`/restore path. The negative-allocation regression proves it
+keeps baseline metrics and does not record a planned commit for the invalid
+proposal. Non-dry-run execution remains `SPECIFIED_NOT_IMPLEMENTED`.
+This evaluator scores the fixed simulation; it does not authenticate runtime
+authority, establish real economic outcomes or serve as a generic code judge.
+
 ## WREMasterOrchestrator
 
 ```python

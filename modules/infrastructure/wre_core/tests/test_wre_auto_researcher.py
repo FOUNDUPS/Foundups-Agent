@@ -8,6 +8,7 @@ dry-run safety, path write protection, and fail-closed SPECIFIED_NOT_IMPLEMENTED
 """
 
 import ast
+import math
 import os
 import sys
 import shutil
@@ -26,8 +27,13 @@ from modules.infrastructure.wre_core.src.wre_auto_researcher import WREAutoResea
 
 
 @pytest.fixture
-def temp_research_env(tmp_path):
+def temp_research_env(tmp_path, monkeypatch):
     """Fixture to create temporary target and program files."""
+    # Disable model construction before initialization, not after it has occurred.
+    monkeypatch.setattr(
+        "modules.infrastructure.wre_core.src.wre_auto_researcher.get_qwen_engine",
+        lambda: None,
+    )
     target_src = Path(REPO_ROOT) / "modules" / "infrastructure" / "wre_core" / "src" / "wre_research_target.py"
     program_src = Path(REPO_ROOT) / "modules" / "infrastructure" / "wre_core" / "src" / "wre_research_program.md"
 
@@ -85,6 +91,86 @@ def test_evaluator_valid_target(temp_research_env):
     assert "fitness" in metrics
     assert "error" not in metrics
     assert metrics["roc_ratio"] > 0.0
+
+
+@pytest.mark.parametrize("allocation,multipliers", [
+    ("{'basic_search': -0.5, 'openclaw': 1.5}", "{'basic_search': 1.0, 'openclaw': 5.0}"),
+    ("{'basic_search': 1.025}", "{'basic_search': 2.0}"),
+    ("{'basic_search': 0.52, 'openclaw': 0.52}", "{'basic_search': 2.0}"),
+    ("{'basic_search': 0.48, 'openclaw': 0.48}", "{'basic_search': 2.0}"),
+    ("{'basic_search': True}", "{'basic_search': 2.0}"),
+    ("{'basic_search': '1.0'}", "{'basic_search': 2.0}"),
+    ("{'basic_search': 1e309}", "{'basic_search': 2.0}"),
+    ("{'basic_search': -1e309}", "{'basic_search': 2.0}"),
+    ("{'basic_search': " + "1" + "0" * 350 + "}", "{'basic_search': 2.0}"),
+    ("{'unregistered_agent': 1.0}", "{'unregistered_agent': 2.0}"),
+    ("{'basic_search': 1.0}", "{'basic_search': True}"),
+    ("{'basic_search': 1.0}", "{'basic_search': '2.0'}"),
+    ("{'basic_search': 1.0}", "{'basic_search': 1e309}"),
+    ("{'basic_search': 1.0}", "{'basic_search': -1.0}"),
+    ("{'basic_search': 1.0}", "{'basic_search': 5.1}"),
+    ("{'basic_search': 1.0}", "{'unregistered_agent': 2.0}"),
+])
+def test_evaluator_rejects_invalid_input_before_simulation(
+    tmp_path, monkeypatch, allocation, multipliers
+):
+    target = tmp_path / "invalid_target.py"
+    target.write_text(
+        f"AGENT_ALLOCATION = {allocation}\nAGENT_PREMIUM_MULTIPLIERS = {multipliers}\n",
+        encoding="utf-8",
+    )
+
+    def unexpected_simulation(*args, **kwargs):
+        pytest.fail("Invalid candidate reached the simulator")
+
+    monkeypatch.setattr(
+        "modules.infrastructure.wre_core.src.wre_research_evaluator.ResearchSustainabilityCalculator",
+        unexpected_simulation,
+    )
+    metrics = evaluate_target(target)
+    assert "error" in metrics
+    assert math.isfinite(metrics["fitness"]) and metrics["fitness"] < 0
+    assert metrics["is_compute_positive"] is False
+    assert metrics["is_roi_sustainable"] is False
+
+
+@pytest.mark.parametrize("multiplier,expected_roc", [(1, 0.0), (5.0, 4.0)])
+def test_evaluator_keeps_valid_numeric_boundaries(tmp_path, multiplier, expected_roc):
+    target = tmp_path / "valid_target.py"
+    target.write_text(
+        "AGENT_ALLOCATION = {'basic_search': 1, 'openclaw': 0.0}\n"
+        f"AGENT_PREMIUM_MULTIPLIERS = {{'basic_search': {multiplier!r}}}\n",
+        encoding="utf-8",
+    )
+    metrics = evaluate_target(target)
+    assert "error" not in metrics
+    assert metrics["roc_ratio"] == pytest.approx(expected_roc)
+    assert math.isfinite(metrics["fitness"])
+
+
+def test_auto_researcher_rejects_impossible_allocation(temp_research_env, tmp_path, monkeypatch):
+    target_path, program_path = temp_research_env
+    original_code = target_path.read_text(encoding="utf-8")
+    runner = DryRunGitRunner()
+    researcher = WREAutoResearcher(
+        target_path, program_path, max_iterations=1,
+        runner=runner, results_dir=tmp_path / "invalid_candidate_run",
+    )
+    # This candidate previously scored 4.116 versus the valid baseline's 1.043.
+    monkeypatch.setattr(
+        researcher, "_propose_change",
+        lambda *args: (
+            "AGENT_ALLOCATION = {'basic_search': -0.5, 'openclaw': 1.5}\n"
+            "AGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0, 'openclaw': 5.0}\n"
+        ),
+    )
+    result = researcher.run()
+    assert result["history"][0]["status"] == "failed_validation"
+    assert result["optimized"] == result["baseline"]
+    assert result["improvement"] == 0.0
+    assert not any(op["operation"] == "commit" for op in runner.planned_operations)
+    assert target_path.read_text(encoding="utf-8") == original_code
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
 
 
 def test_evaluator_does_not_execute_target_code(tmp_path):

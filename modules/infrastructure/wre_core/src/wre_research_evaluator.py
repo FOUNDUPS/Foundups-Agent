@@ -9,6 +9,7 @@ agent mixtures and premium multipliers defined in wre_research_target.py.
 import sys
 import json
 import ast
+import math
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -111,9 +112,15 @@ def _coerce_metric_map(value: object) -> dict[str, float]:
     for key, item in value.items():
         if not isinstance(key, str):
             return {}
-        if not isinstance(item, (int, float)):
+        if isinstance(item, bool) or not isinstance(item, (int, float)):
             return {}
-        result[key] = float(item)
+        try:
+            number = float(item)
+        except (OverflowError, ValueError):
+            return {}
+        if not math.isfinite(number):
+            return {}
+        result[key] = number
     return result
 
 
@@ -136,9 +143,25 @@ def evaluate_target(target_path: Path) -> dict:
             "error": "Missing AGENT_ALLOCATION or AGENT_PREMIUM_MULTIPLIERS",
         }
 
+    # Reject impossible mixtures before the simulator can reward negative costs.
+    unknown_agents = (set(allocation) | set(multipliers)) - set(AGENT_INFRASTRUCTURE_COSTS)
+    invalid_fractions = any(value < 0.0 or value > 1.0 for value in allocation.values())
+    if unknown_agents or invalid_fractions:
+        return {
+            "roc_ratio": 0.0,
+            "is_roi_sustainable": False,
+            "is_compute_positive": False,
+            "fitness": -100.0,
+            "error": (
+                f"Unknown agent types: {', '.join(sorted(unknown_agents))}"
+                if unknown_agents
+                else "Allocation fractions must be in range [0.0, 1.0]"
+            ),
+        }
+
     # Sum of allocation check
     sum_alloc = sum(allocation.values())
-    if abs(sum_alloc - 1.0) > 0.05:
+    if not math.isclose(sum_alloc, 1.0, rel_tol=0.0, abs_tol=1e-9):
         # Penalize invalid configuration
         return {
             "roc_ratio": 0.0,

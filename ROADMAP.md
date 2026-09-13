@@ -37,6 +37,12 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-13
 
+The existing Auto Researcher evaluator now rejects impossible numeric proposals
+before simulation. A negative allocation previously outscored the baseline;
+all 26 focused tests now pass, including rejection through its dry-run loop.
+The valid simulation baseline is unchanged. This advances R10 input integrity,
+not independent evaluator admission or real retained benefit.
+
 The latest R10 field-preservation repair adds explicit action transport to the
 existing compact compiler and checks parsed action/scope in the existing gate.
 All 158 focused tests pass after reproducing action loss; old packets remain

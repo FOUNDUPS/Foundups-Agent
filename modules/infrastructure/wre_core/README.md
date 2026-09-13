@@ -31,6 +31,15 @@ It does not yet own a complete authenticated production promoter, automatic
 artifact activation/rollback, a hundred-agent scheduler, or a proven
 production RSI canary.
 
+The existing ROC Auto Researcher remains a dry-run proposal/evaluation loop.
+Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionaries
+without executing target code. It now rejects negative/out-of-range allocations,
+non-finite values, booleans and unknown catalog agents before simulation;
+allocation totals must equal one within `1e-9`. An invalid negative allocation
+previously outscored the baseline. The [26 focused tests](tests/test_wre_auto_researcher.py)
+now include that rejection through the dry-run loop. These simulated results
+are not independently verified RSI benefit or live economic evidence.
+
 ## Execution-truth pipeline
 
 ```text

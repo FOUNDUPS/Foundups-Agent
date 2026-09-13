@@ -222,6 +222,18 @@ its own required passages, relax the judge or turn a local helper's PASS into
 promotion. Keep the original text as the fallback. Do not create another
 compression engine to bypass this result.
 
+The next existing R10 owner, `wre_research_evaluator.py`, also accepted invalid
+numeric input. A synthetic negative allocation scored `4.116279` against the
+valid baseline's `1.042679`, allowing a false simulated improvement. The
+repaired evaluator rejects non-finite/boolean metrics, unregistered agent
+types, fractions outside `[0, 1]` and totals outside `1.0 ± 1e-9` before
+simulation. Its multiplier bounds remain `[1, 5]`. All 26 existing/extended
+Auto Researcher tests pass, including the real dry-run validation/restore path
+with an injected invalid proposal and model construction disabled. The valid
+baseline is unchanged. This closes a numeric-input defect in the existing
+simulation oracle; a separately bound evaluator, task-specific schema and
+measured real outcome are still required. [Current callable contract](../../modules/infrastructure/wre_core/INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
+
 For the next registry workflow ticket, use the existing production Skillz
 verbatim, its generator contract and the selected packet's exact current
 references. The full system audit is navigation, not mandatory per-call

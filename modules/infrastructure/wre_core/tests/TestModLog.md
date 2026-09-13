@@ -1,5 +1,12 @@
 # TestModLog - wre_core/tests
 
+## 2026-09-13: Auto Researcher input guards and dry-run rejection
+
+- Reused `test_wre_auto_researcher.py`: 16 invalid-map cases, two valid boundary cases, one injected invalid-proposal dry-run case and the original seven tests. Initial numeric guards exposed 10 failures; the additional unit-sum guard exposed two more. Final result: **26 passed in 0.59s**.
+- Covers negative/oversized/boolean/string/non-finite/overflowing allocation values, unknown catalog names, invalid premiums, unit totals, zero fractions, numeric endpoints, AST no-target-execution and fail-closed live mode. Invalid inputs are checked before simulator construction. The dry-run case keeps baseline metrics, restores source/scratch and records no planned commit.
+- The existing fixture now disables `get_qwen_engine()` before constructor invocation; assigning `llm=None` afterward could already initialize a model. Used explicit async plugin, importlib mode, no cache provider, disabled autoload and isolated TMP/TEMP/database/basetemp paths. No new test file or registry change. Injected proposals and simulated scores are not independent RSI acceptance. WSP 22/48/50/97.
+
+
 ## 2026-09-13: R02 existing contract verification
 
 - Five existing files (execution truth, runtime admission, telemetry truth, loader hygiene and PatternMemory): **18 passed, 96 deselected in 3.61s**. Expression: `skill_load_failure or missing_registered_location or local_inference or outcome_quality or legacy_promote_variation or token or application_is_proposal_only or prototype or manifest_failure`.

@@ -1,4 +1,11 @@
 # WRE Core - ModLog
+
+## 2026-09-13: ROC evaluator numeric-input integrity
+
+- The existing fixed simulation accepted a negative allocation and scored it above the baseline. Added finite non-boolean numeric checks, catalog-name validation, `[0,1]` fraction bounds and a unit-total tolerance of `1e-9`; multiplier bounds and valid baseline behavior are preserved.
+- Expanded the existing Auto Researcher tests to 26 passing cases, including rejection before calculator construction and the existing dry-run rollback path. Invalid proposals cannot enter accepted/planned-commit history. Disabled Qwen construction in the fixture before initialization; no model call, live commit or target execution.
+- Aligned README/INTERFACE, producer instructions and test history. Root RSI evidence retains before/after observations and limitations: this local simulation is not an independently bound general outcome oracle. WSP 22/48/50/97.
+
 ## Chronological Change Log
 
 ## 2026-09-13: Registry procedure baseline for system RSI

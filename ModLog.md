@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: Auto Researcher rejects invalid simulated improvements
+
+- Continued after PR #1712 merged as `fd6fea63bfc259c29e5a22a8b64e8d01d9cba595` with all ten checks successful and its accepted tree equal to main. Reused the existing WRE evaluator/producer and existing test file; no new module or model route.
+- Reproduced a negative allocation scoring 4.116279 versus valid baseline 1.042679 in the fixed simulation. Boolean fractions and unregistered agent names also passed. The evaluator now rejects non-finite/boolean numbers, unknown catalog names, invalid fractions and non-unit totals before simulation, retaining the existing multiplier bounds.
+- Initial numeric cases: 10 failed / 14 passed before, 24 passed after. Two additional sum cases failed the former 5% tolerance; the final 26-case selection passes with absolute tolerance 1e-9. The actual dry-run loop rejects the injected invalid proposal, keeps baseline metrics and records no planned commit. Tests disable Qwen construction before initialization and isolate temporary/database state.
+- Baseline metrics were reproduced unchanged. Runtime source is outside the existing RedDog backend dependency manifest; its inventory and pins remain unchanged. Updated current WRE interfaces, program, test history and canonical RSI evidence/runbook. All 26 planning packets remain non-dispatchable; no production RSI or real economic benefit claim.
+- WSP 97 retrieval used the existing local bundle with UNKNOWN freshness and zero owner attempts. Existing contracts and tests were available; unrelated/duplicate hits were excluded. Deterministic source/data checks resolve this defect without a provider call. WSP 15 score 2+5+4+4=15/P1 for this local R10 dependency. WSP 00/15/22/48/50/84/87/97.
+
+
 ## 2026-09-13: RSI compact action and scope preservation
 
 - Continued from main `7b7a1946171d6105e0e495835dc724683c719ad5`. WSP 00 bootstrap/strict gate passed. The signed artifact-provider bootstrap already exists; missing configured admission remains an R06/R07 dependency. No provider call or active service change.
