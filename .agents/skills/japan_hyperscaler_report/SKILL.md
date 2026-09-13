@@ -6,6 +6,9 @@ Series: **Japan Hyperscaler Report (JHR)**
 Owner FoundUp: `esingularity_001`
 Canonical module: `modules/foundups/esingularity/jhr`
 Primary public surface: `eSingularity.ai`
+Canonical movement links: `https://yumori.me/` and `https://yumori.info/`
+
+For public series names, website report links and movement calls to action, read **Shared branding and language — both sites** in `modules/foundups/esingularity/skills/website-update/SKILL.md`. That section owns the Japanese katakana JHR title and YUMORI.me branding; explanatory context must not replace either brand. This reference does not change the research or publication gate below.
 
 ## Objective
 
@@ -77,7 +80,7 @@ Never transform a lead into a fact. Never describe publication as completed with
 9. Primary sources
 10. SEO tags / hashtags
 
-Japanese is the primary public language. English may be generated as a secondary version when useful.
+Japanese is always the primary public language. Every public JHR report or material update must include a complete English secondary version after the Japanese content. Public JHR surfaces must link back to `YUMORI.me` and `YUMORI.info`.
 
 ## Image policy
 

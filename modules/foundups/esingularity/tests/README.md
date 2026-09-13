@@ -17,3 +17,24 @@ Run from the repository root:
 ```powershell
 python -m pytest modules/foundups/esingularity/tests -q
 ```
+
+## Shared-host domain routing
+
+The regression boundary protects two independent concerns:
+
+| Test surface | Contract protected |
+| --- | --- |
+| `test_domain_routing.mjs` | YUMORI.me/www root internally selects `/yumori`; eSingularity.ai is excluded and keeps the filesystem homepage |
+| `test_yumori_national_landing.py` | The YUMORI page remains the join-first WHY/WHAT/HOW movement funnel with five committee actions and the 1,000-person target |
+
+Passing only one side is insufficient: correct routing to the wrong page is still a production failure, and correct page content without hostname routing is not deployed behavior.
+
+`test_domain_routing.mjs` imports the actual `frontend/next.config.ts` with Node's built-in type stripping. It checks the before-files ordering, exact YUMORI.me/www host restriction, root-only internal destination, exclusion of eSingularity.ai/YUMORI.info/other hosts, and absence of broad path or query overrides. No npm dependency is needed for these configuration tests.
+
+```powershell
+node --experimental-strip-types --test modules/foundups/esingularity/tests/test_domain_routing.mjs
+```
+
+Use Node >=22.13.0, matching the frontend engine contract. The existing Validate eSingularity workflow runs this command after Node setup and retains the Python tests, catalog validation, lint and build.
+
+These are configuration contracts, not proof of HTTP routing or publication. Before production acceptance, test fresh direct and client-side navigation against the actual Sites runtime: YUMORI.me `/` must show the movement while preserving the visible host; eSingularity.ai `/` must retain the project page; YUMORI.info must retain its redirect. Check query parameters, canonical metadata, JHR, signup, assets and browser cache behavior. See `../INTERFACE.md` for the domain and publication boundary.

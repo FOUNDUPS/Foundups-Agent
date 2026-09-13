@@ -1,5 +1,107 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — Shared YUMORI.me branding in both website skills
+
+- Recorded 012's branding direction in the existing FoundUp-owned website skill: preserve YUMORI.me, the branded JOIN action, Japanese-first `me GUARDIAN!` identity line, katakana JHR title, Japanese default and complete English coverage. Supporting context must retain the brand, and responsive layouts must avoid clipped or duplicated labels.
+- Added a thin YUMORI.me skill entrypoint alongside eSingularity's; both read one canonical workflow. Linked ticker and JHR skills to that same branding section and updated README, INTERFACE and ROADMAP discovery. Synchronized only the three affected Claude/Codex projection pairs, preserving the separate existing JHR skill.
+- WSP 00/22/50/97: V2 awakening and strict zen-state check passed. HoloIndex owner retrieval returned `HOLOINDEX_AUTHORITY_ROOT_DIRTY`; no owner-worktree mutation or reindex was performed. Used bounded read-only repository/history evidence and isolated this documentation change from ongoing work, based on main `85f188ffc37a3f70c1630d91d6837e6a79ac941f`.
+- Validation: all seven affected frontmatter-based skills passed skill validation; all three Claude/Codex pairs match exactly. Documentation-only: no frontend, form, DNS, hosting or publication change, and no claim of live branding or translation compliance.
+
+## 2026-09-13 — VOTE NO alignment, canonical QR and government-reader brief
+
+- Removed the withdrawn fixed review-period offer from public JHR, its source report, the legacy translation entry and economic SVG. Shared ticker now carries VOTE NO, retiring the expired morning invitation without inventing a new appearance. Preserved both distinct homepages and both ticker consumers.
+- Copied the supplied QR unchanged into canonical `frontend/public/`, verified its destination and the QR in the Google Doc PDF. Edited support brief 03 directly: City-record context/value proposition first, ordinary body styles, conditional technical/financial claims, current FIN smart chip, and VOTE NO throughout. A dated local PDF lives under ignored `outputs/2026-09-13/`.
+- Audited the stale root checkout, legacy Sites folder, older worktrees, current main and latest Sites source. Added a local `O:\Foundups-Agent\eSingularity.ai` junction to this module and a legacy-folder notice. See `docs/VOTE_NO_ALIGNMENT_20260913.md`. No unrelated branch work was moved or removed. WSP 22/50/97; failed Holo authority query recorded, no reindex attempted.
+- Eight existing content checks and 18 hostname tests passed. Focused ESLint has zero errors and one existing image warning; build passed. Local browser verified both consumers, English campaign translation and expanded mobile reading controls.
+- Sites version 48 from `3f30e1ad73b393d2af08514a27dea36d8e6d3bc6` deployed successfully as `appgdep_6aa638bb4db4819181b134f0c8eeb507`. Source matched the current published base before the patch. Shell requests to custom domains returned HTTP 403; browser verification is recorded separately and is not inferred from the deployment receipt.
+- Browser verification subsequently confirmed VOTE NO on eSingularity.ai and the fresh YUMORI movement URL; a plain-root navigation reused an older participation-form redirect. The form still has older framing, and the current FIN workbook is owner-only. Both are explicitly recorded in the audit; no form, DNS or sharing permission was changed.
+
+## 2026-09-13 — YUMORI mobile layout and readable shared ticker
+
+- Addressed the supplied phone screenshot: added a YUMORI header slot for language controls, constrained the wordmark and responsive grid, and added the existing compute-field concept image with an explicit concept caption. Corrected the movement page project link to the absolute eSingularity homepage. Preserved WHY / WHAT / HOW and all five JOIN actions.
+- Shared ticker now calculates duration from content width at 18 px/s on phones, 24 px/s on tablets and 38 px/s on wider screens. Added a touch-accessible stop/read-all control, wrapped reading mode and reduced-motion support. Both pages retain one shared ticker and announcement source; eSingularity homepage source is unchanged.
+- Enhanced the FoundUp website skill with phone and 11-inch iPad orientation checks, actual overflow/overlap and image inspection, measured ticker speed and touch reading checks. WSP 00/22/50/97: V2 awakening passed; HoloIndex returned MISSING_GENERATION_BINDING, so bounded repository evidence was used. Compared current monorepo 5a9c110 and Sites edc41325: edited source bases match except whitespace.
+- Visual preview could not start: the supervised runtime reported an existing Vinext server, while status reported stopped. No browser or actual Safari/iPad validation is claimed. Eight dependency-free YUMORI/JHR/ticker contract functions and all 18 domain-routing checks passed; focused ESLint had zero errors and two image-element warnings; skill validation and production build passed.
+- Published Sites version 47 from `bfeaa68f5a96f093defffd072140cac7e7636e72`; deployment `appgdep_6aa6306c1ee48191a5f9c6c2301a52ca` succeeded. Custom-domain rendering and phone/iPad visual behavior remain unverified in this runtime.
+- Existing September 13 invitation ends at noon JST and has no automatic expiry; this layout patch does not renew or change the confirmed appearance.
+
+## 2026-09-13 — Site-specific purposes and focused redesign brief
+
+- Enhanced the existing website skill with each site's purpose, visitor goal and edit boundary. Resolve “apply the website skill” from the named site or active task; do not turn one-site work into a two-site redesign.
+- Recorded 012's three-to-four-primary-tab target for eSingularity.ai, with final grouping left to the active redesign. Preserve the YUMORI.me movement funnel, JHR/participation access and the single shared ticker.
+- Updated INTERFACE and ROADMAP to distinguish this specified design direction from implemented navigation. Documentation-only: no frontend or production change in this slice. WSP 22/50/97; reviewed current main and the existing FoundUp-owned skill.
+
+## 2026-09-13 — Website operations skill from change-history audit
+
+- Reviewed module history and exact project-page diff: PR #1684 removed the ticker mount; #1690 restored it; #1691 added the shared movement consumer. The component existing on disk was insufficient to protect either rendered page.
+- Added `skills/website-update/SKILL.md` as the FoundUp-owned WSP 97 website workflow, with thin Claude/Codex entrypoints, README/roadmap links, ticker-skill cross-reference and registry evidence discovery for Red Dog.
+- Reused the existing shared-status and hostname tests; preserved Red Dog signed execution boundaries and the declarative-only FoundUp build contract. No runtime executor, credentials, website content or deployment changed.
+- Validation: skill frontmatter, identical agent projections and repository-relative discovery links checked; existing shared-status contracts executed.
+
+## 2026-09-13 — One ticker across both public sites
+
+- Mounted the existing shared CampaignTicker on YUMORI.me as well as eSingularity.ai. Both read current-field-status.ts; today’s invitation and future updates have one source.
+- Added a movement-page presentation option: normal document flow (no header overlap), with project-fragment actions pointing back to eSingularity.ai.
+- Updated ticker skill, README, INTERFACE and existing field-status regression to require both homepage mounts. WSP 22/50/97; source inspection confirmed the missing movement-page consumer.
+
+- Validation: three JHR/shared-status contracts and skill validation passed; focused ESLint passed with one existing image warning; production build passed.
+- Published Sites version 46 from `edc41325f5dd13f7d25a5c8db60fe633c9b6500f`; deployment `appgdep_6aa5f6b9f6ec8191acccf4e8e9595b6d`. Custom-domain HTTP checking remains unavailable in this runtime as documented in the preceding slice.
+
+## 2026-09-13 — Onsen entrance invitation and reusable ticker skill
+
+- Replaced the September 10 City Hall status with 012-confirmed September 13, 09:30–noon JST at the Sukatto Land Kuzuryu front entrance: oppose demolition, join the monk, and collect a free YUMORI T-shirt. Updated Japanese/English detail and linked YUMORI.info.
+- Added the discoverable `esingularity-ticker` skill in canonical Claude and Codex projection locations, linked from this README. Restored the existing ticker beneath the project-page header after confirming it was no longer mounted. Preserved both homepage bodies and all other ticker actions.
+- Removed stale event-specific literals from the existing field-status contract while retaining single-source rendering and timezone checks.
+- WSP 00/22/50/97: V2 initially lacked torch; the documented tracker fallback opened the gate without a detector witness. After installing the missing runtime dependency, V2 completed and the tracker passed. HoloIndex returned `MISSING_GENERATION_BINDING`; bounded repository search supplied exact source and consumer evidence. Retrieval noise was unrelated broadcast tickers; module-scoped search removed it. Manual content editing was appropriate for this small confirmed announcement.
+
+- Validation: three JHR/status contracts, the existing ticker/homepage integration test, 18 routing checks, skill validation and focused ESLint passed. Production build passed after caching the unchanged Google Fonts through the environment proxy. Full module CI retains three unrelated presentation failures (obsolete sprite assertion and two missing legacy presentation-file references).
+- Published the two-file frontend patch against the latest Sites source as version 45, source `1b12ab50807099632e17509c255740643801653c`, deployment `appgdep_6aa5f124a73c81919cb4a4890e9e5771` succeeded. Both homepage bodies and hostname routing were preserved; the live movement source differs from monorepo only by an existing blank line. Fresh custom-domain HTTP verification was blocked by this runtime (403; public web open also unavailable), so deployment success is confirmed by Sites, not claimed as a fresh custom-domain content check.
+
+## 2026-09-12 — Make the two-homepage architecture durable
+
+**WSP Protocol**: WSP 00, WSP 22, WSP 50, WSP 57, WSP 83, WSP 97
+**Phase**: Documentation and regression hardening
+
+- Made the one-project/two-public-experience architecture prominent in README, INTERFACE, ROADMAP, and test documentation: eSingularity.ai owns the project/vision homepage; YUMORI.me owns the movement/join homepage.
+- Added explicit merge and deployment gates so parallel work on either landing cannot overwrite or absorb the other, while retaining the single monorepo frontend and Sites project.
+- Refreshed the existing YUMORI content tests to match the restored join-first page and paired them with the existing hostname-routing tests.
+- Fresh focused validation: 18 Node routing checks and eight Python YUMORI/JHR contract functions passed. The environment lacks `pytest`; the broader direct runner still reaches the pre-existing missing legacy `frontend/content/yumori-presentation.ts` reference outside this documentation slice.
+- Made no frontend, DNS, hosting, or YUMORI.info forwarding change. This slice is designed to coexist with independent eSingularity.ai redesign work.
+- HoloIndex retrieval was attempted first but returned `MISSING_GENERATION_BINDING`; repository-local WSP and module evidence was used as the documented fallback.
+
+## 2026-09-12 — Restore the join-first YUMORI committee landing
+
+- Restored the exact three-panel national movement funnel from PR #1653 at `frontend/app/yumori/page.tsx`: WHY / WHAT / HOW, five JOIN YUMORI actions, the Japan Hyperscaler Report link, and the initial 1,000-person committee target.
+- Preserved the hostname-restricted rewrite, eSingularity.ai homepage, direct `/yumori` route, signup destination, assets, language infrastructure, and the single shared Sites project. No DNS or YUMORI.info change was made.
+- Focused ESLint completed with zero errors (one retained `no-img-element` warning), and the Sites production build completed successfully.
+- Published Sites source `21a8d0161c2bc2fc8b9ca3c8f510225aae3ae3a3` as version 44; deployment `appgdep_6aa569bcb5688191b13efe46e738346e` succeeded.
+- Fresh cache-busted HTTP and Cloud Browser checks confirmed YUMORI.me and www show the restored movement page while keeping their hostnames and query strings; eSingularity.ai remains the project/vision homepage. YUMORI.info's existing HTTP redirect still points to `https://eSingularity.ai`; its DNS/forwarding was not modified.
+
+
+## 2026-09-12 — Separate YUMORI.me entry on the shared Sites app
+
+- Selected one existing hosting project with hostname routing instead of a second deployment or copied campaign page.
+- Added a host-restricted `beforeFiles` rewrite in `frontend/next.config.ts`: only YUMORI.me/www `/` maps internally to the existing `/yumori` route. eSingularity.ai's project page and the existing YUMORI.info redirect remain untouched.
+- Left page content, assets, JHR, signup destination, Sites project ID, D1 binding and DNS unchanged. The inspected service worker already uses network-only navigation; no speculative cache fix was added.
+- Updated this module's INTERFACE hosting/domain contract and test documentation so subsequent sessions recover the separation from repository truth.
+- Added dependency-free Node configuration checks and connected them to the existing validation workflow. Fresh local run: 18 passed. The reconciled production frontend also completed the Sites production build. Full lint still reports four pre-existing presentation/accessibility errors plus five image warnings outside this routing slice. The Python module suite reports 20 passed and five stale contract failures against the newer production homepage/presentation/JHR structure; none exercises or fails the hostname rewrite.
+- Reconciled the Foundups branch with the newer Sites production source (`14efff19f8d7bc0eefcf2ee7a2cb41a12cf9f0bb`) before applying the routing patch, preventing a rollback of the current homepage, Fukui map, JHR, language, performance and public FAQ work.
+- Published the exact routing source (`b8bd40eb82475bccba0507a17167cfc2c8b21cc3`) as Sites version 43; deployment `appgdep_6aa556c60e588191aafe94caef929fe6` completed successfully on the existing public eSingularity project.
+- DNS was not changed. Sites already reported eSingularity.ai, www.eSingularity.ai, YUMORI.me and www.YUMORI.me active with active SSL; public YUMORI.me apex A and www CNAME records matched the platform-supplied targets. YUMORI.info was not modified.
+- Fresh cache-busted production checks returned the YUMORI page at YUMORI.me and www while retaining each hostname and query string, retained the project homepage at eSingularity.ai, and retained YUMORI.info's redirect to eSingularity.ai. Direct `/yumori`, JHR, signup destination, representative assets and mobile-user-agent responses remained healthy.
+
+## 2026-09-11 — Real-building full-screen YUMORI vision deck
+
+- Replaced the presentation renderer with the revised ten-slide vision based on 012's photographs of the actual former Sukatto Land Kuzuryu building rather than a generic greenfield resort.
+- Kept eSingularity.ai as the canonical vision surface and YUMORI.me as the movement/join surface; the final deck action routes to YUMORI instead of duplicating a second independently maintained deck.
+- Added full-screen 16:9 presentation mode, touch swipe, previous/next, direct slide selectors, optional nine-second progression, reduced-motion handling, keyboard Left/Right/Escape, and `?vision=1&slide=N#yumori-deck` deep links.
+- Packed the ten approved concept slides into one optimized vertical sprite at `frontend/public/vision/vision-sprite.jpg`; structured Japanese-first text/evidence remains in `frontend/content/yumori-vision.ts` for accessibility, search, translation and RedDog grounding.
+- Preserved whole-slide rendering with no text cropping and kept bathers inside screened/private onsen areas rather than public event circulation.
+- Added the revised program: 24-hour onsen concept, B1 gym/rest/recovery, D-K-inspired night activation, COG DC heat-reuse candidates, 60 FoundUps with maximum three humans per team, local problem-to-FoundUp agriculture, and Fukui distributed-compute prototype.
+- Kept Slide 02 accounting categories separate: reported ~¥1.58B demolition estimate, verified 129,649 FY2018 users, modeled ~¥5.37B five-year revenue and modeled ~¥1.94B cumulative five-year FCFE. These are not forecasts or guarantees and are not added together as one return measure.
+- Added `docs/YUMORI_VISION_DECK_20260911.md` and updated `INTERFACE.md` so future agents can recover the visual, domain, evidence, financial and D-K truth boundaries without relying on chat history.
+- Updated existing contract coverage for the sprite, full-screen/deep-link controls, current ten-slide spine and retained public-source boundaries.
+
 ## 2026-09-06 — Japanese-first YUMORI cinematic presentation
 
 - Added a mobile-first ten-slide presentation immediately below the existing hero, without replacing the page shell or campaign sections.

@@ -1,0 +1,80 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "verifier",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "QA",
+  "S": {
+    "owner": "modules/platform_integration/elevenlabs_calls",
+    "read": [
+      "modules/platform_integration/elevenlabs_calls/docs/SETUP.md",
+      "modules/platform_integration/elevenlabs_calls/tests/README.md",
+      "modules/platform_integration/elevenlabs_calls/src/service.py",
+      "modules/platform_integration/elevenlabs_calls/src/journal.py"
+    ],
+    "write": []
+  },
+  "M": "qa",
+  "T": "JP-CALL-03",
+  "R": [
+    0,
+    5,
+    6,
+    21,
+    22,
+    34,
+    84,
+    97,
+    99
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "single_carrier_adapter": true,
+    "delivery_requires_external_confirmation": true,
+    "automatic_redial": false,
+    "effect_boundary": "Only concrete authorized controlled calls; stop on uncertain submission, wrong recipient or missing authority."
+  },
+  "O": [
+    "redacted live acceptance report",
+    "private evidence references for recipient and mailbox confirmation",
+    "work_orders/results/JP-CALL-03.json (redacted; coordinator integrates)"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Credential disclosure risk",
+    "Attempt to claim unobserved live success"
+  ],
+  "X": {
+    "status": "blocked_provider_and_test_targets",
+    "created_utc": "2026-09-11T00:00:00Z",
+    "timestamp_precision": "date; midnight is a date marker, not execution time",
+    "baseline_commit": "196976aea3516426552238e70be54e015c397999",
+    "depends_on": [
+      "JP-CALL-02"
+    ],
+    "objective": "Prove that the current prepared-request prototype leaves a complete Japanese message.",
+    "steps": [
+      "Bind an explicitly supplied controlled human recipient and controlled mailbox, exact Japanese text, caller identity and test-call authority. Do not dial sample numbers.",
+      "Preview and execute one human-answer scenario and one mailbox scenario using distinct request IDs in one persistent journal.",
+      "Obtain recipient confirmation and mailbox playback confirmation; record completeness, start after greeting/beep, caller ID, duration, latency and actual charges.",
+      "Repeat an already submitted request ID against the same journal and check provider history for absence of an extra call. Never create a replacement ID automatically after ambiguity."
+    ],
+    "acceptance": [
+      "Human recipient confirms the complete intended message.",
+      "Mailbox playback confirms the complete message after the greeting/beep.",
+      "Provider history and journal reconcile; submitted/ended alone do not count as delivery."
+    ],
+    "token_budget": {
+      "analysis": 2500,
+      "planning": 1500,
+      "implementation": 2500,
+      "documentation": 2000
+    },
+    "coherence": {
+      "required_threshold": 0.618,
+      "measured": null
+    },
+    "rollback": "Revert only owned changes; preserve journal and evidence. Reconcile any external effects; never automatically redial."
+  }
+}

@@ -624,6 +624,7 @@
       "token_status": "TOKEN_DEFERRED",
       "token_symbol": null,
       "evidence_docs": [
+        "modules/foundups/esingularity/skills/website-update/SKILL.md",
         "modules/foundups/esingularity/docs/MONOREPO_MIGRATION_2026-08-30.md",
         "modules/foundups/esingularity/frontend/audit/AUDIT.md",
         "modules/foundups/esingularity/frontend/audit/SOURCE_OF_TRUTH.md"

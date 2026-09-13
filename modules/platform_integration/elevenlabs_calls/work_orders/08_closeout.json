@@ -1,0 +1,90 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "coordinator",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "ORCH",
+  "S": {
+    "owner": "modules/platform_integration/elevenlabs_calls",
+    "read": [
+      "modules/platform_integration/elevenlabs_calls/README.md",
+      "modules/platform_integration/elevenlabs_calls/ROADMAP.md",
+      "modules/platform_integration/elevenlabs_calls/ModLog.md",
+      "modules/platform_integration/elevenlabs_calls/tests/TestModLog.md",
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "write": [
+      "modules/platform_integration/elevenlabs_calls/README.md",
+      "modules/platform_integration/elevenlabs_calls/ROADMAP.md",
+      "modules/platform_integration/elevenlabs_calls/ModLog.md",
+      "modules/platform_integration/elevenlabs_calls/tests",
+      "modules/platform_integration/elevenlabs_calls/docs",
+      "modules/platform_integration/elevenlabs_calls/work_orders"
+    ]
+  },
+  "M": "exec",
+  "T": "JP-CALL-08",
+  "R": [
+    0,
+    5,
+    6,
+    21,
+    22,
+    34,
+    84,
+    97,
+    99
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "single_carrier_adapter": true,
+    "delivery_requires_external_confirmation": true,
+    "automatic_redial": false,
+    "effect_boundary": "Documentation and review; do not manufacture signed runtime authority or merge/deploy by implication."
+  },
+  "O": [
+    "integrated handoff and roadmap",
+    "new WSP 97 receipt",
+    "updated PR description",
+    "work_orders/results/JP-CALL-08.json (redacted; coordinator integrates)"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Credential disclosure risk",
+    "Attempt to claim unobserved live success"
+  ],
+  "X": {
+    "status": "waiting_dependencies",
+    "created_utc": "2026-09-11T00:00:00Z",
+    "timestamp_precision": "date; midnight is a date marker, not execution time",
+    "baseline_commit": "196976aea3516426552238e70be54e015c397999",
+    "depends_on": [
+      "JP-CALL-06"
+    ],
+    "objective": "Publish a truthful reproducible prototype handoff and reconcile all agent evidence.",
+    "steps": [
+      "Review dependency results on the integrated candidate commit; reject completion claims based solely on submission status or mocks.",
+      "Reconcile module documentation, test inventory and WSP 97 execution evidence; preserve the historical receipt and add a new receipt for the accepted integrated revision.",
+      "Write a one-command operator entry point, credential setup, exact call workflow, status interpretation and restart/unknown-submission recovery instructions.",
+      "Update the draft PR with verified outcomes, outstanding limitations and links to redacted receipts. Sound POC is optional for prototype closure and must retain its own status.",
+      "Keep merge and deployment state truthful and follow existing authority; this assignment does not independently authorize promotion."
+    ],
+    "acceptance": [
+      "A fresh operator can follow the documented host setup and call workflow without hidden prerequisites.",
+      "All required jobs 01–06 have accepted evidence bound to the integrated revision.",
+      "Roadmap checks reflect actual live acceptance; optional sound experiments remain separate."
+    ],
+    "token_budget": {
+      "analysis": 2500,
+      "planning": 1500,
+      "implementation": 2500,
+      "documentation": 2000
+    },
+    "coherence": {
+      "required_threshold": 0.618,
+      "measured": null
+    },
+    "rollback": "Revert only owned changes; preserve journal and evidence. Reconcile any external effects; never automatically redial."
+  }
+}

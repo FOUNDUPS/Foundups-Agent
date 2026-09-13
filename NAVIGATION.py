@@ -26,6 +26,11 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    # Japanese message-call prototype and agent build assignments
+    "make a phone call in Japanese": "modules/platform_integration/elevenlabs_calls/README.md",
+    "Japanese call roadmap": "modules/platform_integration/elevenlabs_calls/ROADMAP.md",
+    "Japanese call M2M Prometheus work orders": "modules/platform_integration/elevenlabs_calls/work_orders/README.md",
+
     # GotJunk Classification Logic
     "handle item classification": "modules/foundups/gotjunk/frontend/App.tsx:handleClassify()",
     "prevent duplicate item creation": "modules/foundups/gotjunk/frontend/App.tsx:handleClassify() - race condition guards",

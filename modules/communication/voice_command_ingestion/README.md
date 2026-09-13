@@ -6,6 +6,13 @@ WSP: WSP 3, WSP 11, WSP 22, WSP 49, WSP 84
 
 ## Overview
 
+Japanese input is available through `FasterWhisperSTT(language="ja")` and
+`get_voice_ingestion(language="ja")`; the existing default remains English.
+Use `language=None` for Whisper detection and a multilingual model (not `.en`).
+The [Japanese message-call prototype](../../platform_integration/elevenlabs_calls/README.md)
+reuses this STT through the CLI speech adapter; telephone speech is hosted by
+ElevenLabs. Batch-transcriber language behavior is unchanged.
+
 voice_command_ingestion converts live audio into text events using faster-whisper,
 detects the "0102" trigger token, and emits command events for WRE skill routing.
 

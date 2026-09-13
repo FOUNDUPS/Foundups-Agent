@@ -1,5 +1,38 @@
 # eSingularity TestModLog
 
+## 2026-09-13 — Shared ticker consumers
+
+- Extended the existing field-status contract to require exactly one shared ticker on each homepage and correct project-link resolution from the movement page.
+
+## 2026-09-13 — Reusable field-status contract
+
+- Replaced hard-coded September 10/City Hall event assertions with required status fields, ISO timestamp/JST validation and the shared href renderer check.
+- Three existing JHR/field-status tests passed via direct invocation (pytest unavailable); 18 hostname-routing tests passed. The ticker skill passed quick validation. After restoring the homepage mount, the existing ticker integration test and focused frontend ESLint also passed.
+
+## 2026-09-12 — Distinct-homepage regression contract
+
+- Refreshed the existing YUMORI landing tests in place after the join-first PR #1653 page was restored; no duplicate test file was created.
+- The content contract now requires the ordered WHY / WHAT / HOW movement funnel, five JOIN actions, the 1,000-person preparatory-committee target, JHR access, and community-compute framing.
+- Removed stale assertions for the later long-form YUMORI iteration and stopped requiring live-field detail to be duplicated inside the movement page; the campaign ticker remains its canonical renderer.
+- Paired this content suite with `test_domain_routing.mjs`: future acceptance requires both the correct page and the correct hostname selection.
+- Fresh local evidence: 18 Node routing checks and eight dependency-free Python contract functions passed. Full `pytest` execution was unavailable in this environment; the broader direct runner still encounters the previously documented missing legacy `frontend/content/yumori-presentation.ts` reference.
+
+## 2026-09-12 — Shared-host domain routing configuration
+
+- Retrieved this inventory, tests README, and the existing `test_yumori_national_landing.py` before authoring tests. The Python suite covers movement content; the new dependency-free Node suite covers the distinct executable routing configuration without replacing that suite.
+- Added `test_domain_routing.mjs`: before-files ordering, exact YUMORI.me and www host matches, eSingularity.ai/YUMORI.info/unknown-host exclusions, root-only internal rewrite, unchanged report/API/asset paths, and no query override or new redirect.
+- Wired the Node command into the existing Validate eSingularity workflow after Node setup; retained all existing validation steps.
+- Fresh local evidence: 18 configuration checks passed using Node v24.19.0 with `--experimental-strip-types`, against the reconciled production source plus the hostname-routing patch.
+- This result is not a frontend build, HTTP/SPA test, DNS check or production deployment receipt. Those remain separate acceptance gates.
+
+## 2026-09-11 — Full-screen real-building vision deck coverage
+
+- Updated the existing presentation contract tests to treat `frontend/content/yumori-vision.ts` as the current real-building ten-slide semantic/evidence source.
+- Added regression coverage for the optimized `public/vision/vision-sprite.jpg`, responsive sprite positioning, full-screen/deep-link behavior, keyboard Left/Right/Escape controls, touch swiping and reduced-motion handling.
+- Added exact current slide-spine checks for option value, D-K, 24-hour onsen/wellness, AI rice field, COG DC heat reuse, 60 FoundUps plus B1 gym/rest/recovery, local problem-to-FoundUp, distributed Fukui prototype and closing choice.
+- Added financial truth-boundary checks for reported demolition estimate vs. modeled five-year revenue and cumulative FCFE.
+- Retained public-source checks on the landing page for Fukui AI/agriculture/satellite/manufacturing sources and the official D-K destination.
+
 ## 2026-09-06 — YUMORI presentation contract coverage
 
 - Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.
