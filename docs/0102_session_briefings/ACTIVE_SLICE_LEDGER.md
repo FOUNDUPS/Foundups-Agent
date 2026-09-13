@@ -5,7 +5,7 @@
 ## RSI handoff — 2026-09-13
 
 - **Merged groundwork:** [roadmap PR #1656](https://github.com/FOUNDUPS/Foundups-Agent/pull/1656), merge `18297fc3f1449350b89079db64a3612b004687a1`; [R01 integrity PR #1702](https://github.com/FOUNDUPS/Foundups-Agent/pull/1702), merge `35ed430c61e4e35c1b779f03c13e40368c82b65f`. Their CI selections passed. R01's local tier passed 235 tests with four platform skips; installed runtime admission remains separate.
-- **Current documentation slice:** [R02 enforcement map](../roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) covers R00–R25 and reconciles selected WSP/runtime contradictions. It remains partial: individual April-row dispositions and separately bound review are outstanding. This handoff does not assert that its own revision has merged.
+- **Current documentation slice:** [R02 enforcement map](../roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) covers R00–R25 and reconciles selected WSP/runtime contradictions. The [September dispositions](../roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md#historical-ledger-dispositions--2026-09-13) now cover all 11 pending April rows/tracks plus four relevant closed rows. R02 remains partial: unresolved owner evidence, SoftProto per-contract archival decisions and separately bound review are outstanding. This handoff does not assert that its own revision has merged.
 - **Next preparation:** R03 current-source Holo entry and authority qualification, followed by the admitted R06–R15 canary path according to dependencies. Reconcile source and ownership again before dispatch.
 - **Concurrent ownership:** YUMORI/eSingularity/RedDog product work and the separate WSP 00 state-semantics review retain their owners. No owner is reassigned by this document.
 

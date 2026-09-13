@@ -168,7 +168,8 @@
         "two obsolete system roadmaps archived",
         "R00-R25 requirement, owner, test and operational-gap map",
         "WSP 46/CORE current-runtime clarification with knowledge mirrors",
-        "dated ledger handoff and briefing navigation correction"
+        "dated ledger handoff and briefing navigation correction",
+        "15 evidence-backed historical ledger dispositions: all 11 pending rows/tracks and four RSI groundwork rows"
       ],
       "delivery_evidence": {
         "date": "2026-09-13",
@@ -180,10 +181,18 @@
           "deselected": 96
         },
         "remaining": [
-          "individual historical ledger dispositions",
-          "separately bound review of requirement coverage and the R06-R15 path"
+          "unresolved owner receipts",
+          "SoftProto per-contract replacement decisions",
+          "separately bound requirement/path review"
         ],
-        "runtime_completion_claim": false
+        "runtime_completion_claim": false,
+        "ledger_reconciliation": {
+          "source_commit": "cc9c79361ef8e9075d0b09759027ad88a2adfd90",
+          "dispositions": 15,
+          "pending_rows_covered": 11,
+          "map_anchor": "historical-ledger-dispositions--2026-09-13",
+          "runtime_completion_claim": false
+        }
       }
     },
     {
