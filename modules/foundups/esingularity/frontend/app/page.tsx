@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Brand from '../components/Brand';
+import CampaignTicker from '../components/CampaignTicker';
 import YumoriPresentation from '../components/YumoriPresentation';
 import FukuiComparisonMap from '../components/FukuiComparisonMap';
 
@@ -36,6 +37,7 @@ export default function Home() {
           </div>
         </details>
       </header>
+      <CampaignTicker />
 
       <main id="top">
         <section className="hero project-hero" id="hero" aria-labelledby="hero-title">

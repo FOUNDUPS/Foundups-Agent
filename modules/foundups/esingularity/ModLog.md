@@ -3,7 +3,7 @@
 ## 2026-09-13 — Onsen entrance invitation and reusable ticker skill
 
 - Replaced the September 10 City Hall status with 012-confirmed September 13, 09:30–noon JST at the Sukatto Land Kuzuryu front entrance: oppose demolition, join the monk, and collect a free YUMORI T-shirt. Updated Japanese/English detail and linked YUMORI.info.
-- Added the discoverable `esingularity-ticker` skill in canonical Claude and Codex projection locations, linked from this README. Preserved both homepages and all other ticker actions.
+- Added the discoverable `esingularity-ticker` skill in canonical Claude and Codex projection locations, linked from this README. Restored the existing ticker beneath the project-page header after confirming it was no longer mounted. Preserved both homepage bodies and all other ticker actions.
 - Removed stale event-specific literals from the existing field-status contract while retaining single-source rendering and timezone checks.
 - WSP 00/22/50/97: V2 initially lacked torch; the documented tracker fallback opened the gate without a detector witness. After installing the missing runtime dependency, V2 completed and the tracker passed. HoloIndex returned `MISSING_GENERATION_BINDING`; bounded repository search supplied exact source and consumer evidence. Retrieval noise was unrelated broadcast tickers; module-scoped search removed it. Manual content editing was appropriate for this small confirmed announcement.
 
