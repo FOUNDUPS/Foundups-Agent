@@ -1,5 +1,12 @@
 # TestModLog - wre_core/tests
 
+## 2026-09-13: R01 exact-byte repair verification
+
+- Documented 14-file WRE execution-truth tier: **235 passed, 4 platform-limited link/reparse skips in 35.45s**, with isolated TMP/TEMP, AgentDB, PatternMemory, lyrics database, cache and basetemp; importlib mode and explicit async plugin.
+- Both registered production inventories pass the existing strict manifest guard, with `signature_verified=false`. A separate Git checkout-index materialization under `core.autocrlf=true` preserves original committed Skillz bytes and passes the same guard.
+- No new test implementation, weakened assertion, runtime behavior, signature, activation or full RSI claim. This repairs the separately reproduced R01 failure above; the historical audit remains unchanged. WSP 22, 50, 97.
+
+
 ## 2026-09-13: Registry inventory and separate Skillz preflight
 
 - `test_wre_test_registry.py`: 28 passed in an isolated temporary/database environment. Plugin autoload was disabled; two configuration warnings were emitted because the async plugin was not loaded for this synchronous selection.
