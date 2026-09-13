@@ -1,5 +1,14 @@
 # HoloIndex - Brain Surgeon Level Code Intelligence System
 
+## R03 entry checkpoint — 2026-09-13
+
+Use the existing [source-bound owner bridge and local fallback](CLI_REFERENCE.md#source-bound-owner-queries).
+The script checkout determines source; Git's primary checkout may be on another
+branch. At reviewed source `773a29e70`, local module context retrieval works
+without the semantic owner. The matched older reference currently fails owner
+startup, so no new CURRENT semantic receipt is claimed. Existing entry/root
+contracts: 81 tests passed. R03 operational qualification remains partial.
+
 ## Current operational truth (2026-08-29)
 
 Live authority is a fresh governed owner receipt, not prose. Exact main

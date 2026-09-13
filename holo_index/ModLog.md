@@ -1,5 +1,14 @@
 # HoloIndex Package ModLog
 
+## [2026-09-13] R03 source selection and existing fallback documentation
+
+- Corrected bootstrap/canonical-agent retrieval instructions to bind the helper's actual source, distinguish primary checkout from current main, and reuse the existing local bundle when semantic retrieval is unavailable. Extended this module's atlas/interface rather than adding a service or module.
+- WSP 00 activation and strict tracker gate passed in the isolated checkout (`self=0102`, role architect, origin external principal); WSP 97 review reused owner/selector/repair contracts. The separate WSP 00 state-semantics PR #1636 remains unchanged.
+- Existing entry/root selection: 81 passed in 4.37s. Live primary entry: HEAD mismatch; matched reference: owner startup exit after two attempts; clean local bundle: success, UNKNOWN freshness, zero owner attempts. An initial unsupported `bundle_module_hint` request rejected before startup and was corrected to the existing `module_hint` field; it was not classified as an infrastructure outage.
+- Retrieval assessment: current module contracts were available through the local bundle; semantic availability and stale historical completion claims remained separate. Exact field/source checks filled missing context, and direct symbol reads avoided duplicate implementation. This documentation/contract comparison used deterministic tools; no Qwen/Gemma generation or measured learning is claimed.
+- R03 remains partial. No index/route/authority mutation, model generation, runtime source change, production memory write or new execution permission. WSP 00, 22, 50, 81, 87, 97.
+- The live local fallback also passed after documentation edits and correctly changed its evidence label to `workspace_overlay`. Targeted CLAUDE-to-AGENTS renderer parity passes. The broader projection check reports pre-existing `stale:.agents/skills/file_set`: tracked `japan_hyperscaler_report/SKILL.md` has no canonical counterpart in the generator's expected set. Skill sources/projections are unchanged from the base and belong to the concurrent lane; this is not reported as a global projection pass or repaired by deleting its skill.
+
 ## [2026-08-29] Pre-owner exact-main live acceptance
 
 - PR #1591 merged as exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`.

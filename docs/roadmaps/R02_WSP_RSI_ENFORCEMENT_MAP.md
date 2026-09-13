@@ -80,6 +80,8 @@ Normative source key: [WSP catalog](../../WSP_framework/src/WSP_MASTER_INDEX.md)
 
 **Required next evidence:** Qualify clean main, divergent feature, dirty overlay, stale authority, concurrent main advance and no-MCP entry paths. Reconcile old WSP 00 raw-query/reindex examples with the governed maintenance boundary.
 
+Later R03 checkpoint (2026-09-13, source `773a29e70`): the [existing entry procedure](../../holo_index/CLI_REFERENCE.md#source-bound-owner-queries) reconciles bootstrap commands and documents the six-case matrix. All 81 existing entry/root tests pass and local bundle retrieval succeeds. The matched reference now fails owner startup; no new current-main semantic acceptance is claimed. These later observations do not change the pinned R02 source inventory or close R03.
+
 ### R04 — Holo runtime builder and independent producer
 
 **Normative references:** WSP 12 / 71 / 95 / 97. **Evidence level:** `CONTRACT_AND_GAP`.

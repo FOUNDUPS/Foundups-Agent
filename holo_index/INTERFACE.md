@@ -20,6 +20,21 @@ This policy prevents stale audit prose from becoming the default answer to a
 current-state question. It does not prove that a document is true, change the
 ranker automatically, authorize reindexing, or constitute retrieval RSI.
 
+## Owner entry and local-context evidence
+
+The existing one-shot owner adapter selects workspace source from its script
+checkout. A primary checkout is not inherently current main. Configured
+authority selection requires a clean same-repository, same-HEAD worktree;
+the owner also validates the published generation and runtime bindings.
+See [source-bound owner queries](CLI_REFERENCE.md#source-bound-owner-queries)
+for supported JSON requests and the qualification matrix.
+
+`retrieval_mode="lexical"`/`bundle_only=true` uses the existing local bundle
+path without semantic owner/store access. Its `bundle_authority` separates
+`workspace_head` from `workspace_overlay`; UNKNOWN freshness and index-gap
+labels remain visible. Bundle success does not satisfy semantic admission.
+These are existing contracts, not new API fields or a new MCP service.
+
 ## Package import boundary
 
 Importing `holo_index.cli.commands.bundle_json` is a bounded, closed-environment

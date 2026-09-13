@@ -129,24 +129,29 @@ RIGHT: Simplest layer → Test → Feedback → Course correct → Next layer �
 
 ### Step 2: HoloIndex Search
 ```powershell
-$main = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
+$taskQueryRoot = git rev-parse --show-toplevel
 $env:PYTHONDONTWRITEBYTECODE = "1"
-'{"query":"[task]","limit":5}' | python -B "$main/scripts/reddog_holoindex_owner_query_once.py"
+'{"query":"[task]","limit":5,"include_bundle":true}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
 ```
-- Derive the canonical main checkout from Git's common directory so the same
-  command works from main and linked worker worktrees. Accept its
-  generation-bound evidence only when `ok=true`, `freshness=CURRENT`, and
-  `index_gap_detected=false`.
-- Do not run raw `holo_index.py --search` from a shared or dirty checkout. Its
-  root-bound freshness proof correctly rejects a different authority root.
-- A query path is read-only. On failure, preserve the exact error and route the
-  existing governed WRE/CI maintenance path; never reindex inside the query.
-- Keep `-B` and `PYTHONDONTWRITEBYTECODE=1` on the query host. This prevents a
-  writable qualified interpreter base from gaining untracked bytecode before
-  the owner boundary can enforce its own runtime closure.
-- Find existing implementations FIRST
-- Examples: "test orchestration" -> autonomous_refactoring.py
-- NEVER vibecode - always search first
+- The helper's own checkout selects the workspace source. Git's common
+  directory locates a primary checkout, not necessarily current main or this
+  feature. Verify the source before reusing another checkout's query result.
+- Accept semantic evidence only when `ok=true`, `freshness=CURRENT`,
+  `index_gap_detected=false`, and source/generation match the intended query.
+  A separately selected clean reference proves only its recorded SHA.
+- Do not run raw `holo_index.py --search` from a shared or dirty checkout.
+  Preserve failures and use the existing governed WRE/CI maintenance owner;
+  never reindex inside the query or reset an authority to make it pass.
+- No-MCP/semantic-unavailable fallback already exists: set
+  `retrieval_mode="lexical"`, `include_bundle=true`, and the real `module_hint`.
+  Inspect `bundle_authority` and keep UNKNOWN freshness/index-gap labels.
+  Local `workspace_head`/`workspace_overlay` context is not semantic acceptance.
+- Keep `-B` and `PYTHONDONTWRITEBYTECODE=1` on the query host to prevent
+  untracked bytecode in a writable qualified interpreter base.
+- [Source-selection procedure and accepted request fields](holo_index/CLI_REFERENCE.md#source-bound-owner-queries).
+- Find existing implementations FIRST. Older raw-command examples below are
+  historical; use this current entry procedure for new work.
+- NEVER vibecode - retrieve, verify exact paths, and extend existing owners.
 
 ### Step 2.1: Mandatory Start-of-Work Loop (WRE Memory Rule)
 **Canonical spec**: `WSP_framework/src/WSP_CORE.md` → **“WSP Memory System (0102)”**

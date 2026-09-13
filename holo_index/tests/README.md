@@ -1,5 +1,14 @@
 # HoloIndex Tests
 
+## R03 source and entry qualification
+
+The three existing suites named in the [entry matrix](../CLI_REFERENCE.md#qualification-matrix-and-evidence-scope)
+cover source selection, root binding, dirty-context labels, source-change
+rejection and no-owner local bundles. Their 81-test result is a contract
+selection; semantic service readiness and current-main runtime receipts must
+be established separately. Fixtures must not refresh a live index to make an
+entry test pass.
+
 ## Current-truth document retrieval
 
 `test_document_truth.py` proves low-cardinality current, implementation,
