@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 recorded-event continuity
+
+- Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership stays at 1,400 with two changed source hashes and matching pins; the current 1,650/269 test registry is unchanged.
+- Resumed PR1720/main `9c949e8d`, passed WSP 00's software gate and used the governed source-bound lexical fallback under WSP 97. Local planning 15/P1 does not authorize runtime dispatch.
+- Extended existing chain receipts and admission derivation so advancing clocks/reloads preserve recorded event time. Missing, invalid or mismatched timestamp evidence rejects; historical data is not backfilled from current time. Connected selection: 214 passed / four platform skips after preserving rejection precedence and reconciling existing fixture/import issues.
+- Root roadmap, R02 map, runbook, backlog and baseline evidence retain R11-A's remaining pre-publication and competing-writer recovery. Production authority, activation, legacy event recovery and retained benefit remain open. Protected FoundUps and live runtimes are unchanged. WSP 00/15/22/48/50/60/71/84/95/97.
+
 ## 2026-09-14: R11 immutable publication retry
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership remains 1,400 with two changed source hashes and refreshed pins; the test registry adds one process capability without changing 1,650/269 membership/quarantine. Initial fast guards correctly rejected missing dependency configuration and CRLF pin bytes; both local invocation/materialization issues were corrected.

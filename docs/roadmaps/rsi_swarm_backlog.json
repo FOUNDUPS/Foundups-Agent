@@ -811,10 +811,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_PERSISTED_PUBLICATION_RETRY_VERIFIED",
-              "evidence": "publication_retry_continuation_20260914",
-              "next": "immutable queue/admission event timestamp",
-              "remaining": "pre-publication signing failure and competing initial publisher recovery; no activation admission"
+              "status": "PARTIAL_RECORDED_EVENT_AND_PERSISTED_PUBLICATION_RETRY_VERIFIED",
+              "evidence": "event_timestamp_continuation_20260914",
+              "previous_evidence": "publication_retry_continuation_20260914",
+              "next": "pre-publication signing failure, lost acknowledgment and competing initial publisher recovery",
+              "remaining": "legacy event recovery, cross-store acceptance, independent startup and sink activation; no runtime admission"
             }
           },
           {
@@ -901,6 +902,12 @@
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "section": "publication_retry_continuation_20260914",
         "base_commit": "94d58e73df016e20867f0f17b88af715a85b5110",
+        "acceptance_satisfied": false
+      },
+      "latest_event_timestamp_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "event_timestamp_continuation_20260914",
+        "base_commit": "9c949e8debf4540c504de57133e980b7eb2dcab4",
         "acceptance_satisfied": false
       }
     },

@@ -2376,5 +2376,174 @@
       ],
       "guard_changes": false
     }
+  },
+  "event_timestamp_continuation_20260914": {
+    "base_commit": "9c949e8debf4540c504de57133e980b7eb2dcab4",
+    "scope": "Partial R11-A: retain the accepted stage recording time through queue/admission reconstruction; no activation change",
+    "wsp00": {
+      "gate_passed": true,
+      "last_validation": "2026-09-14T05:00:39.364840",
+      "interpretation": "software gate",
+      "log_sha256": "c1a9bb52f8f30c605a946902fed64216a02d79e32884280ea85a35c67a240c2c"
+    },
+    "wsp15_local_planning": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1",
+      "runtime_allocation_receipt": false
+    },
+    "execution_plane": "local isolated source authoring under existing 012 instruction; app continuation is not runtime packet admission",
+    "retrieval": {
+      "query": "verified outcome admission event timestamp chain results store receipts tests",
+      "query_receipt_sha256": "1663aa1a48f1e28f4b211035d36da9ad1d8b1e799607971f79d62f46f2c8654d",
+      "mode": "governed source-bound lexical fallback; unchanged semantic failure not retried",
+      "prior_semantic_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+      "prior_semantic_authority_commit": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "lexical_ok": true,
+      "bundle_authority": {
+        "evidence_authority": "workspace_head",
+        "repo_head_sha": "9c949e8debf4540c504de57133e980b7eb2dcab4",
+        "repo_root_digest": "sha256:40d60ad71436d43150e37a6d118fa2066a806f876c8f4c85e97c0cb2de85dcb2",
+        "workspace_overlay_present": false
+      },
+      "evaluation": {
+        "noise": "Discard peripheral authority-admission/adversarial hits",
+        "ordering": "Prioritize chain store/test, then direct admission binder and canary receipt consumers",
+        "duplication": "Deduplicate code/code_hits paths",
+        "missing": "Tier-0 README/INTERFACE present; direct source/caller reads recovered binder; optional memory/design documents and requirements.txt absent",
+        "staleness": "UNKNOWN/gap retained; exact local source and connected contracts, not CURRENT semantic proof; no reindex"
+      },
+      "routing": "Deterministic contract fixtures and source review before model work; no new worker/model allocation"
+    },
+    "changes": [
+      "Append optional recorded_at to the existing transition receipt; omit when absent in historical objects",
+      "After normal planner eligibility checks, require an aware recording timestamp and persist it in the existing atomic stage commit",
+      "Keep existing transition IDs/schema and earlier receipts unchanged; canonical snapshot revision covers the timestamp",
+      "Derive verified_at from exactly one canonical held-out-stage receipt with matching queue/slice and recomputed transition ID",
+      "Reject absent, malformed, timezone-naive, future, duplicate or mismatched event evidence without clock/updated_at fallback or backfill"
+    ],
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py": "3abff0ba91e938c086875dc8cfda5eac10e7c4866f8f4d4201b85356d74474fc",
+      "modules/communication/moltbot_bridge/src/reddog_resident_queue_chain_results_store.py": "2249b2eec05bfca4b560804e985f1b0ad0db673d25e0117029dc2032c9b64794",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py": "7c926d9a6764ed4cf2ed51b111fe377fe850f0c0a1e4ac72a0247d7c89053b42",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py": "e4565237283769e0baf590982da35fbbcbbc227a332bc9be8be3be58905703c6",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_validation.py": "c349d3977c6f05267fdc36bb9430eb22a1ad9735f2d3d75c99b096d56670bc8f",
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "eb034c8e72564f6103c9be76656e12c176a4ac481c70b39e4860987eb11c7788",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py": "c6b41afc7e793d045dcd57df38ca6864438384a8d11da365dfa01e7b2573d862",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py": "2a3d14571974b36d131eea7130ee6ec8593b3bb335f5125ca5428aab1eca1da1",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_orchestration_plan.py": "c0d1a90b846e5a572a424a3bc0f0af51ba003872535060c530851846223b91f7",
+      "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py": "9b7da26db67e4ff84f223e82411469924e4a5d905f21b800b0d3fcf40c72f032",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py": "f60508de26646094140625539bba471df7d204fdeeaa0e9d3f2ec19877b98500",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py": "f42c1f17a8753165a92d09218111f54e93caef5b300907f16c5572543382d4d0",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "5c596b8233bb0b04b080979156237662b1493eaf0545311079ec4e0a8acd31d7",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_next_stage_dispatch.py": "a295b295472f6ed784e4a989bc7536ae47c587eff187f81f50b5ec94a7eae048"
+    },
+    "source_hash_basis": "Git-normalized LF bytes",
+    "test_evidence": {
+      "interpreter": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+      "environment": [
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUTF8=1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+        "TEMP/TMP, FOUNDUPS_DB_PATH, WRE_PATTERN_MEMORY_DB, ANTIFAFM_LYRICS_DB and basetemp in disposable audit directory"
+      ],
+      "before": {
+        "failed": 18,
+        "deselected": 18,
+        "elapsed_seconds": 2.24,
+        "log_sha256": "7e97a2c5eccc952a22f4f18e1bd9a1a181f2763aa2672f17511549ddbb17457f",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py -k \"timestamp or event_time or record_current or atomic_json_store_writes_schema or multi_stage_recording\" --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --tb=short -q",
+        "interpretation": "18 failed assertions in the new selection, not 18 distinct production bugs; some invalid-clock assertions originally overspecified the rejection reason"
+      },
+      "intermediate_findings": [
+        {
+          "finding": "Older chain-store fixture lacked progressive-stage binding and failed before timestamp assertions; reuse current planner fixture and preserve the old fixture as an explicit rejection case",
+          "log_sha256": "a098cad41fc60a3c8145a1d10a066e114f616c72d86b52f58754e9ed708abf7d"
+        },
+        {
+          "finding": "Existing spawn/CAS test used a temporary pytest import name; reuse its callable via canonical module import",
+          "passed": 34,
+          "skipped": 1,
+          "failed": 1,
+          "log_sha256": "a2c11395494dbce04c13c47c9c77905497c412910567b2581d63a6c69c9d8744"
+        },
+        {
+          "finding": "Early timestamp validation changed an existing bootstrap rejection reason; moved validation after planner acceptance and preserved the original assertion",
+          "passed": 213,
+          "skipped": 4,
+          "failed": 1,
+          "log_sha256": "37a69cc946f39825a37c07bfa13f1cc980ef0c90aead6aa5d1ab98c90ab7a03f"
+        }
+      ],
+      "after": {
+        "passed": 214,
+        "failed": 0,
+        "skipped": 4,
+        "elapsed_seconds": 99.49,
+        "log_sha256": "25d039776e48983d646a3b7d4b9e11935abeae4bf0d8894167cbb08fcefe4dcd",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_orchestration_plan.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_next_stage_dispatch.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/event-timestamp-20260914/connected-final --tb=short -q"
+      },
+      "restart_scope": "Admission regression reopens the same disposable atomic JSON store object; separate OS process proof applies to the existing spawn/CAS and publication fixtures, not to this new admission reload assertion",
+      "skipped_capabilities": [
+        "3 symlink-creation capability checks unavailable on this Windows host",
+        "1 AF_UNIX capability check unavailable in this Python build"
+      ],
+      "preserved_checks": [
+        "Earlier receipts unchanged across later stage writes",
+        "Duplicate stage rejected without timestamp refresh or overwrite",
+        "Missing legacy timestamp, canonical snapshot tampering, mismatched queue/slice/transition ID and duplicate receipt reject",
+        "Existing planner/bootstrap rejection reporting",
+        "Existing publication retry, freshness, revocation, canary and dispatch contracts"
+      ],
+      "state_scope": "Disposable stores and synthetic/injected authorities; no protected live FoundUp, production signer, queue activation or memory experiment"
+    },
+    "limits": [
+      "R11-A/R11/G4 remain partial; no packet/substep dispatch or completion gate advanced",
+      "Timestamp is recorded-event integrity evidence, not an independent signed-clock attestation",
+      "Historical timestamp-less snapshots remain readable but need owner-controlled evidence recovery before new admission; no automatic backfill",
+      "First signing before durable publication, competing initial publishers and cross-store recovery remain open",
+      "No production startup admission, real sink activation, write-authority grant or measured later learning benefit"
+    ],
+    "next_authorable_step": "Inspect existing publisher/signer/store handling of accepted signing before durable publication, lost acknowledgments and competing first publishers; reuse recovery owners before adding any mechanism",
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "packaging": {
+      "fast": {
+        "groups_passed": 15,
+        "duration_ms": 2988,
+        "log_sha256": "dcdb9509b26144744bd974a6cc6479f3207b7592838ece61fb7c74e9aa06951a",
+        "command": "node tests/run_reddog_test_tier.js fast",
+        "working_directory": "extensions/reddog",
+        "environment": [
+          "REDDOG_TEST_SITE_PACKAGES=O:/Foundups-Agent/.venv/Lib/site-packages",
+          "REDDOG_TEST_PYTHON=O:/Foundups-Agent/.venv/Scripts/python.exe",
+          "TEMP/TMP in disposable O: audit directory"
+        ]
+      },
+      "manifest": {
+        "passed": 8,
+        "warnings": 2,
+        "elapsed_seconds": 61.83,
+        "runtime_membership": 1400,
+        "changed_runtime_files": 2,
+        "digest": "6e974611e9b2ef5a5dd0a1e1e2921e87c7bf974c2ee12f4f0cfc47701d31b93b",
+        "log_sha256": "2aec698e4e5024c6a9dc8790ebe5139f9d0ee69422bb751d0db4a10e4dc93ead",
+        "command": "python -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/event-timestamp-20260914/manifest --tb=short -q"
+      },
+      "registry": {
+        "current": true,
+        "total_files": 1650,
+        "quarantined_files": 269,
+        "changed": false
+      },
+      "guard_changes": false
+    }
   }
 }

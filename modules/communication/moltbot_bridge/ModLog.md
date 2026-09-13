@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Retain the admitted event timestamp
+
+- Added optional `recorded_at` to the existing chain receipt; new accepted stage writes persist a timezone-aware recording clock in the same atomic snapshot. Existing transition IDs, historical receipt shape and earlier receipts are preserved. Admission reuses a unique matching held-out receipt's time after canonical/scope/ID validation; bootstrap/snapshot time never replaces missing history.
+- Reused the existing planner fixture for stale store tests, retained the legacy rejection, and corrected spawn's canonical callable import. Final connected selection: 214 passed / four platform skips. Original bootstrap rejection reporting is preserved; no authority guard was weakened.
+- Updated the authoritative roadmap and evidence. R11-A remains partial for pre-publication signing/competing-writer recovery; legacy event recovery, independent activation and later benefit remain open. No new module, scheduler, live runtime or protected FoundUp change. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Preserve signed publication on retry
 
 - Extended the existing publisher/store to validate and acknowledge the original STAGED/ACTIVE envelope without another signing use, durable rewrite, timestamp refresh or activation. Invalid/changed evidence, publisher identity, key/epoch and signatures reject; initial signing/attestation and fresh runtime use checks remain in their existing owners.

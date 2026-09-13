@@ -5,8 +5,10 @@
 The existing signed publisher reuses exact durable evidence after restart or
 clock advancement. It verifies the original signature, evidence and publisher
 identity, preserving bytes and issuance time. A retry acknowledgment neither
-activates staged evidence nor renews expiry/revocation authority. Queue-derived
-event timestamp stability remains open; see [INTERFACE.md](INTERFACE.md).
+activates staged evidence nor renews expiry/revocation authority. Queue admission
+now reuses the recorded time from its canonical held-out-stage receipt, so a
+later bootstrap/snapshot clock does not change the outcome. Legacy receipts
+without that time reject new admission; see [INTERFACE.md](INTERFACE.md).
 
 ## Verified-outcome staging
 

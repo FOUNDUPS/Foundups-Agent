@@ -231,8 +231,16 @@ absent, and raises on invalid durable state. It is not the consumable source.
 existing envelope after checking exact requested evidence, publisher identity,
 original issuance and signature. It does not re-sign, rewrite, renew or activate
 on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
-runtime authority still checks current key, revocation and expiry. Queue-derived
-`verified_at` remains dependent on bootstrap time pending the R11-A event binding.
+runtime authority still checks current key, revocation and expiry.
+`ResidentQueueChainResultReceipt.recorded_at` is optional for historical objects;
+new accepted `record_resident_queue_stage_result()` writes require a timezone-aware
+`now_iso` and persist it once. Earlier receipts and transition IDs are preserved;
+the canonical snapshot revision covers the field. Admission derivation requires
+one held-out-stage receipt with a matching queue/slice/transition ID and valid
+nonfuture timestamp in a canonical snapshot. It reuses that time as `verified_at`.
+Snapshot `updated_at` and the current bootstrap clock cannot backfill missing
+historical event time. Old histories remain readable; timestamp-less admission
+requires owner-controlled recovery. This integrity check is not signed authority.
 PatternMemory admission
 uses an invisible staging table in the existing database. Conflicting existing
 rows and legacy hash-shaped compatibility markers reject. Staging snapshots
