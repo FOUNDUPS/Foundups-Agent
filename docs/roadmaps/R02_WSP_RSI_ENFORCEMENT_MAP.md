@@ -205,6 +205,13 @@ winner bytes and before/after-commit retry. See the
 This is preparatory R11/R17 evidence; activation/revocation atomicity and real
 crash/sustained-concurrency proof remain open.
 
+**Active-record identity follow-up:** The existing sink's active-row retry now
+uses canonical JSON equality, preserving boolean/numeric/signed-zero identity.
+Three previously acknowledged mismatches now reject; valid fixture-seeded
+active retries retain their IDs. The 55-case sink/admission selection passes.
+See the [identity checkpoint](../operations/RSI_SWARM_DISPATCH.md#active-record-identity-checkpoint--2026-09-14).
+This is local R11 evidence; fixture insertion is not authenticated activation.
+
 **Required next evidence:** Compose authenticated scope, atomic/idempotent retention and failure recovery, then demonstrate the next invocation reads the accepted version. Storage alone is not verified learning.
 
 ### R12 — Independent production promoter

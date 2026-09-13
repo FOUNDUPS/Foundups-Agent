@@ -4,7 +4,9 @@
 
 `test_reddog_verified_pattern_memory_sink.py` covers controlled competing
 SQLite inserts, immutable input snapshots, before/after-commit retry, existing
-row conflicts and staging/recall separation. Use its existing admission and
+row conflicts and staging/recall separation. Active-row cases reject canonical
+boolean/numeric/signed-zero mismatches while a matching fixture-seeded row
+retains its ID and readback. Use its existing admission and
 handler tests to check the next boundary:
 
 ```powershell

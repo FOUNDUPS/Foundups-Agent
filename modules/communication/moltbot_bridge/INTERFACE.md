@@ -228,7 +228,11 @@ uses an invisible staging table in the existing database. Conflicting existing
 rows and legacy hash-shaped compatibility markers reject. Staging snapshots
 the input, reconciles a competing record-key insert without replacing the
 winner, and checks exact stored payload/agent before commit. Same-record retry
-returns the same ID; staging remains outside recall. This does not make
+returns the same ID; staging remains outside recall. Active-row retries compare
+the stored payload's canonical JSON with the requested canonical JSON. Values
+such as `true`/`1`, `12`/`12.0` and `0.0`/`-0.0` conflict even when Python
+equality accepts them; existing record IDs and digest serialization are unchanged.
+This does not make
 activation and authority revalidation one atomic transaction. The real sink is deliberately
 not activation-ready until it can independently revalidate a durable authority
 source; direct sink activation is forbidden. Authority-envelope consumption reloads

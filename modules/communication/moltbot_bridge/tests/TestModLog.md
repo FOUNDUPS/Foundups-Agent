@@ -1,3 +1,10 @@
+## 2026-09-14: Active-row canonical identity
+
+- Packaging: **15 fast groups passed in 3,104ms**, **8 staged-manifest tests passed in 68.97s** (two pytest configuration warnings). Corrected the initial temporary-drive invocation and refreshed the manifest/pins before the final fast pass. The 1,400-file runtime membership is unchanged; only the sink hash changes.
+- Reused the existing sink conflict and idempotence tests. Added boolean/integer, integer/float and signed-zero conflicts plus a valid fixture-seeded active retry. No new test file or live activation.
+- Before repair: **3 failed / 18 passed in 1.62s**, each mismatch failed to raise the existing conflict error. After repair: **55 passed in 4.15s** across the sink, queue admission and resident admission-handler selection in `tests/README.md`. Conflicting rows retain their exact bytes, add no staging row and fail readback; matching active retries preserve identity/readback.
+- Qualified Python, `-B`, explicit asyncio plugin, disabled automatic plugins/cache, and disposable O:-resident TEMP/TMP/database/basetemp paths. Registry: **current / 1,650 / 269 quarantined**. Evidence: `docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json` → `active_record_identity_continuation_20260914`. WSP 22/48/50/60/95/97.
+
 ## 2026-09-14: Staging interleaving, snapshot and commit retry
 
 - Packaging: **15 RedDog fast groups passed in 3,052ms**; **8 staged-manifest tests passed in 65.51s**. Exactly one runtime source hash changed; manifest membership remains 1,400.

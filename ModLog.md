@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Short RSI checkpoint — active-record identity
+
+- Packaging: 15 fast groups passed in 3,104ms; 8 staged-manifest tests passed in 68.97s. Runtime membership remains 1,400 with one changed source hash and two refreshed pins. Earlier fast invocations correctly rejected the wrong temporary drive and pending manifest refresh; no guard changed.
+
+- Recovered merged PR1717/main `dae4b76aeae06d4dd25e6d8a80ef1b65b32b6c19`, reran WSP 00 awakening and its strict software gate, and continued in the owned checkout. Canonical-main Holo returned degraded lexical context; exact source/docs/tests were explicitly retrieved before editing.
+- Reused the existing WRE memory sink and tests: 3 failures exposed canonical record-identity mismatches accepted by Python equality. The repaired comparison and adjacent admission selection pass 55 tests in 4.15s; registry remains current at 1,650 / 269 quarantined. Local WSP 15 planning: 13/P1, not signed runtime admission.
+- Updated the canonical runbook and completion map. 012's latest preference supersedes the earlier longer-session policy: finish and save one bounded checkpoint before continuing. Connection invalidation remains an unconfirmed app/transport incident; no causal link to RSI or short-checkpoint cure is claimed.
+- Record-ID format, serialization, memory schema and activation restrictions are unchanged. Protected product paths and shared checkout were preserved. Authenticated activation, workflow-wide recovery and measured retained benefit remain open. WSP 00/11/15/22/48/50/60/84/95/97.
+
 ## 2026-09-14: WSP 00/97 staging replay continuation
 
 - Packaging passed: 15 RedDog fast groups (3,052ms), 8 staged-manifest tests (65.51s); one runtime hash changed within the same 1,400-file manifest. Structural review preserves all original packet fields, prior raw observations, document-index membership and protected paths.
@@ -58897,4 +58906,3 @@ if cooldown_sets:
 - Added `stop_git_push_dae()` to `modules/infrastructure/git_push_dae/scripts/launch.py`.
 - Added `stop_social_media_dae()` to `modules/platform_integration/social_media_orchestrator/scripts/launch.py`.
 - Registered both runtimes with real `stop_callable` hooks in `main.py`.
-
