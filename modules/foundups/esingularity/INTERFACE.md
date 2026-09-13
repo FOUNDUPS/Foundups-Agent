@@ -14,6 +14,12 @@ This is one FoundUp and one deployed frontend with two deliberately different pu
 
 Agents resolving merges or synchronizing a Sites checkout must preserve **both** page files and verify both hostnames. Similar subject matter, shared components, or one shared deployment never authorizes collapsing the pages. `yumori.info` is a separate external forwarding rule and is not an alternate YUMORI content source.
 
+## Website task scope and navigation goal
+
+Apply the website operations skill to the named site or the site established by the active task. eSingularity.ai explains the Fukui project and directs participation to YUMORI; YUMORI.me builds the movement and preparatory committee. A page-specific change preserves the other homepage; shared ticker edits intentionally reach both. Audit shared dependencies without expanding the redesign scope.
+
+The current eSingularity redesign brief calls for three to four primary content tabs, with supporting detail grouped beneath a clear visitor journey. Preserve JHR access, participation actions, language controls and the shared ticker. Labels/grouping remain part of the active redesign; this is a specified target, not an implemented navigation change. It does not change YUMORI.me's WHY / WHAT / HOW funnel.
+
 ## Filesystem routes
 
 | Route | Purpose |

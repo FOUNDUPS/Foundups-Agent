@@ -1,5 +1,11 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — Site-specific purposes and focused redesign brief
+
+- Enhanced the existing website skill with each site's purpose, visitor goal and edit boundary. Resolve “apply the website skill” from the named site or active task; do not turn one-site work into a two-site redesign.
+- Recorded 012's three-to-four-primary-tab target for eSingularity.ai, with final grouping left to the active redesign. Preserve the YUMORI.me movement funnel, JHR/participation access and the single shared ticker.
+- Updated INTERFACE and ROADMAP to distinguish this specified design direction from implemented navigation. Documentation-only: no frontend or production change in this slice. WSP 22/50/97; reviewed current main and the existing FoundUp-owned skill.
+
 ## 2026-09-13 — Website operations skill from change-history audit
 
 - Reviewed module history and exact project-page diff: PR #1684 removed the ticker mount; #1690 restored it; #1691 added the shared movement consumer. The component existing on disk was insufficient to protect either rendered page.
