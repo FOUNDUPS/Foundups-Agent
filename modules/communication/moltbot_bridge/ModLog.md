@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Recover exact root commit acknowledgments
+
+- Existing root service acknowledges only its exact durable terminal marker after fresh authority validation; the existing client retries identical COMMIT bytes once on ConnectionError/TimeoutError. Burned reservations, rejection, cancellation and protocol boundaries remain intact. No new schema, method or state owner.
+- Extended the existing root-service tests; 17 focused cases and 115 connected cases pass, with one Linux-root skip. Corrected the existing process-pool canonical import without changing its single-winner assertion. Each RPC retains its per-call timeout; no combined deadline or production isolation proof is claimed.
+- R11-A still needs full outcome-response durability and authenticated restart readback through existing owners. Root digest storage and conversation response replay are distinct contracts. Roadmap, runbook and baseline preserve that boundary; no protected FoundUp or live runtime changed. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Reconcile signed publication commit failures
 
 - Existing authority-store publication now retries only revision conflicts, up to three commits with identical signed bytes and fresh unrelated state. Existing publisher reloads and validates durable evidence after a publication error, preserving the winner without another signing use, rewrite or activation. Missing/invalid evidence, signer rejection and cancellation stay closed or propagate.

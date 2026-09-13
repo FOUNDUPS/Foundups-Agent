@@ -253,6 +253,15 @@ R11-A still needs a durable response handoff for process death before publicatio
 and owner recovery after exhaustion. Existing outcome-root and conversation
 replay contracts are the next retrieval targets; their authorities are distinct.
 
+**Root-commit acknowledgment follow-up:** The existing service acknowledges the
+exact committed marker after fresh authority validation. Its client retries the
+same encoded COMMIT once only after ConnectionError/TimeoutError; burned grants
+never reopen. The connected selection passes 115 tests with one Linux-root skip;
+see the [root checkpoint](../operations/RSI_SWARM_DISPATCH.md#root-commit-acknowledgment-checkpoint--2026-09-14).
+This recovers an in-process lost acknowledgment. Full outcome-response durability,
+authenticated restart readback and the process-local reservation seal remain the
+next R11-A boundary. Conversation replay has distinct authority and is not a grant.
+
 ### R12 — Independent production promoter
 
 **Normative references:** WSP 48 / 71 / 95 / 97. **Evidence level:** `GENERIC_OWNER_MISSING`.

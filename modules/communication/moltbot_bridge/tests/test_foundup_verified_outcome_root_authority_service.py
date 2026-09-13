@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import os
 import shutil
 import stat
@@ -10,6 +11,7 @@ import tempfile
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -280,6 +282,194 @@ def test_root_service_reserve_commit_and_replay_reject(
     assert _reserve(authority, grant) is None
 
 
+def test_root_commit_recovery_acknowledges_only_exact_committed_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    _commit(authority, reservation, _sha("signature"))
+    binding = authorization_binding(grant["authorization_id"])
+    committed = state.load(binding)
+    _commit(authority, reservation, _sha("signature"))
+    assert state.load(binding) == committed
+    assert committed.sequence == 2
+    assert _reserve(authority, grant) is None
+
+
+@pytest.mark.parametrize("failure_type", [ConnectionResetError, TimeoutError])
+@pytest.mark.parametrize("after_commit", [False, True], ids=["before", "after"])
+def test_root_commit_recovery_retries_identical_transport_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    failure_type: type[Exception], after_commit: bool,
+) -> None:
+    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    roundtrip, attempts = client_module._root_socket_roundtrip, []
+
+    def interrupted_roundtrip(path, payload, uid, timeout):
+        attempts.append(hashlib.sha256(payload).hexdigest())
+        if len(attempts) == 1:
+            if after_commit:
+                roundtrip(path, payload, uid, timeout)
+            raise failure_type("test_commit_transport_interrupted")
+        return roundtrip(path, payload, uid, timeout)
+
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", interrupted_roundtrip)
+    _commit(authority, reservation, _sha("signature"))
+    assert len(attempts) == 2 and attempts[0] == attempts[1]
+    committed = state.load(authorization_binding(grant["authorization_id"]))
+    assert committed is not None and committed.sequence == 2
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", roundtrip)
+    assert _reserve(authority, grant) is None
+
+
+def test_root_commit_recovery_concurrent_acknowledgments_share_one_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    barrier = threading.Barrier(4)
+
+    def complete(_index: int) -> None:
+        barrier.wait(timeout=10)
+        _commit(authority, reservation, _sha("signature"))
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        assert list(pool.map(complete, range(4))) == [None] * 4
+    marker = state.load(authorization_binding(grant["authorization_id"]))
+    assert marker is not None and marker.sequence == 2
+    assert _reserve(authority, grant) is None
+
+
+@pytest.mark.parametrize("change", ["signature_digest", "reservation"])
+def test_root_commit_recovery_rejects_changed_terminal_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str,
+) -> None:
+    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    _commit(authority, reservation, _sha("signature"))
+    binding = authorization_binding(grant["authorization_id"])
+    before = state.load(binding)
+    changed = replace(reservation, reservation_id=_sha("another-reservation")) if change == "reservation" else reservation
+    digest = _sha("another-signature") if change == "signature_digest" else _sha("signature")
+    with pytest.raises(ValueError, match="commit_rejected"):
+        _commit(authority, changed, digest)
+    assert state.load(binding) == before
+    assert _reserve(authority, grant) is None
+
+
+@pytest.mark.parametrize("invalidation", ["revocation", "expiry"])
+def test_root_commit_recovery_revalidates_after_lost_reply(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, invalidation: str,
+) -> None:
+    descriptor, grant, state, _primary, _witness, _installation, current, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    attempts = []
+
+    def changing_authority_roundtrip(_path, payload, _uid, _timeout):
+        attempts.append(hashlib.sha256(payload).hexdigest())
+        now = int(grant["expires_at"]) if invalidation == "expiry" and len(attempts) > 1 else NOW
+        reply = handle_root_authority_request(
+            payload, peer=_peer(), state=state,
+            snapshot_supplier=lambda: current["snapshot"], now_epoch=now,
+        )
+        if len(attempts) == 1:
+            if invalidation == "revocation":
+                revoked = copy.deepcopy(descriptor)
+                revoked["authority_generation_sequence"] = 2
+                revoked["revoked_authorization_ids"] = [grant["authorization_id"]]
+                revoked["descriptor_id"] = descriptor_id_for(revoked)
+                current["snapshot"] = _snapshot(revoked, _sha("owner-config-2"), state)
+            raise ConnectionResetError("test_commit_reply_lost")
+        return reply
+
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", changing_authority_roundtrip)
+    with pytest.raises(ValueError, match="commit_rejected"):
+        _commit(authority, reservation, _sha("signature"))
+    assert len(attempts) == 2 and attempts[0] == attempts[1]
+    committed = state.load(authorization_binding(grant["authorization_id"]))
+    assert committed is not None and committed.sequence == 2
+
+
+@pytest.mark.parametrize("failure", ["server_uid", "response_size", "malformed", "rejected"])
+def test_root_commit_recovery_does_not_retry_authority_or_protocol_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str,
+) -> None:
+    _descriptor_value, grant, state, _primary, _witness, _installation, current, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    attempts = []
+
+    def rejected_roundtrip(_path, payload, _uid, _timeout):
+        attempts.append(hashlib.sha256(payload).hexdigest())
+        if failure == "server_uid":
+            raise OSError("root_authority_server_uid_mismatch")
+        if failure == "response_size":
+            raise OSError("root_authority_response_size_invalid")
+        if failure == "malformed":
+            return b"{}"
+        return handle_root_authority_request(
+            payload, peer=_peer(uid=1002), state=state,
+            snapshot_supplier=lambda: current["snapshot"], now_epoch=NOW,
+        )
+
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", rejected_roundtrip)
+    with pytest.raises((OSError, ValueError)):
+        _commit(authority, reservation, _sha("signature"))
+    assert len(attempts) == 1
+    burned = state.load(authorization_binding(grant["authorization_id"]))
+    assert burned is not None and burned.sequence == 1
+
+
+def test_root_commit_recovery_preserves_cancellation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    attempts = []
+
+    def cancelled_roundtrip(_path, payload, _uid, _timeout):
+        attempts.append(hashlib.sha256(payload).hexdigest())
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", cancelled_roundtrip)
+    with pytest.raises(KeyboardInterrupt):
+        _commit(authority, reservation, _sha("signature"))
+    assert len(attempts) == 1
+    assert state.load(authorization_binding(grant["authorization_id"])).sequence == 1
+
+
+@pytest.mark.parametrize("after_commit", [False, True], ids=["before", "after"])
+def test_root_commit_recovery_transport_retry_is_bounded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, after_commit: bool,
+) -> None:
+    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    reservation = _reserve(authority, grant)
+    assert reservation is not None
+    roundtrip, attempts = client_module._root_socket_roundtrip, []
+
+    def failed_roundtrip(path, payload, uid, timeout):
+        attempts.append(hashlib.sha256(payload).hexdigest())
+        if after_commit:
+            roundtrip(path, payload, uid, timeout)
+        raise TimeoutError("test_commit_reply_unavailable")
+
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", failed_roundtrip)
+    with pytest.raises(TimeoutError):
+        _commit(authority, reservation, _sha("signature"))
+    assert len(attempts) == 2 and attempts[0] == attempts[1]
+    marker = state.load(authorization_binding(grant["authorization_id"]))
+    assert marker is not None and marker.sequence == (2 if after_commit else 1)
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", roundtrip)
+    assert _reserve(authority, grant) is None
+
+
 @pytest.mark.skipif(
     os.name != "posix" or not hasattr(os, "geteuid") or os.geteuid() != 0,
     reason="real root-owned Unix service requires Linux root",
@@ -385,6 +575,11 @@ def test_concurrent_root_service_reservation_has_one_winner(
 def test_cross_process_root_state_reservation_has_one_winner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Spawned interpreters must import the canonical module under importlib mode.
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority_service import (
+        _advance_root_state_process as advance_in_child,
+    )
+
     descriptor, grant, _state_value, primary, witness, installation, *_rest = (
         _runtime(tmp_path, monkeypatch)
     )
@@ -404,7 +599,7 @@ def test_cross_process_root_state_reservation_has_one_winner(
         authorization_binding(grant["authorization_id"]),
     )
     with ProcessPoolExecutor(max_workers=4) as pool:
-        results = tuple(pool.map(_advance_root_state_process, (values,) * 8))
+        results = tuple(pool.map(advance_in_child, (values,) * 8))
     assert sum(results) == 1
 
 

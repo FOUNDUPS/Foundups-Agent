@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 root commit acknowledgment recovery
+
+- Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership stays at 1,400 with two source hashes and matching pins; the current 1,650/269 registry and guards are unchanged.
+- Resumed PR1722/main `15fafb8d`, passed the WSP 00 software gate and applied WSP 97 retrieval/test discipline to the existing root service/client. Local planning 16/P1 supplies no runtime allocation.
+- Exact committed receipts can be acknowledged after current authority checks; one transient transport retry retains identical encoded bytes. No reserve reset, second signing use or protocol expansion. Connected verification: 115 passed / one Linux-root skip; existing Windows test import repaired without weakening its ownership assertion.
+- Root roadmap, R02 map, runbook, backlog and immutable baseline history record this R11-A prerequisite and the remaining full-response durability/restart boundary. No new module, scheduler, deployed signer or protected FoundUp experiment. R11-B–F and retained benefit remain open. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: R11 publication commit recovery
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. The 1,400-file runtime list has two updated source hashes and matching pins; the current 1,650/269 test registry is unchanged.

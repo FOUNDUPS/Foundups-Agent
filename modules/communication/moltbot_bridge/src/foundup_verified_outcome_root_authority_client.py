@@ -187,7 +187,13 @@ def commit_service_authority(
         request_id="sha256:" + ("0" * 64),
     )
     request = replace(request, request_id=request_id_for(asdict(request)))
-    response = response_from_bytes(state.exchange.exchange(request.to_bytes()))
+    payload = request.to_bytes()
+    try:
+        reply = state.exchange.exchange(payload)
+    except (ConnectionError, TimeoutError):
+        # One transport retry retains the proof, request ID and per-call timeout.
+        reply = state.exchange.exchange(payload)
+    response = response_from_bytes(reply)
     if not _response_matches(
         response,
         request,

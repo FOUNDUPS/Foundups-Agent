@@ -1,3 +1,11 @@
+## 2026-09-14: Root commit acknowledgment recovery
+
+- Packaging: 15 fast groups passed in 4,658ms; 8 staged-manifest tests passed in 62.11s (two pytest configuration warnings). Runtime membership, registry/quarantine and guards are unchanged.
+- Added 17 cases to the existing root-service suite. The first 16 yielded 9 failed / 7 passed / 22 deselected in 8.02s before repair; failures include the proposed retry/revalidation contract. Focused result: 17 passed / 22 deselected in 8.18s.
+- First connected result: 114 passed / 1 failed / 1 skipped, exposing the existing Windows spawn/importlib callable failure. Canonical import fixes that harness without changing the eight-attempt, one-winner assertion. Final six-suite result: 115 passed / 1 skipped in 36.42s.
+- Real disposable SQLite stores and signed fixtures cover exact terminal replay, concurrent acknowledgments, identical payload retry, fresh revocation/expiry, altered receipts, protocol failures, cancellation and two-attempt exhaustion. The real Linux-root socket test remains skipped locally; no production service or protected FoundUp was exercised.
+- Full signer-response handoff and restart recovery remain open. Evidence: `outcome_response_continuation_20260914`. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Publication commit recovery
 
 - Packaging: 15 fast groups passed in 2,882ms; 8 staged-manifest tests passed in 62.62s (two pytest configuration warnings). Runtime membership, registry, quarantine and guards are unchanged.

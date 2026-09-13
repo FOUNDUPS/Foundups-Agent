@@ -205,7 +205,16 @@ domain-separated Ed25519 proof from the exact current E0 signer key, while fresh
 kernel UID/GID credentials are checked against the current root config. The
 root service burns a reservation before signing, then re-reads current root
 configuration and rechecks revocation, generation, grant, reservation, signer
-proof, and signature digest before commit. Runtime startup cannot initialize or
+proof, and signature digest before commit. After those same checks, an exact
+already-committed reservation/digest is acknowledged without advancing or resetting
+the terminal marker. `commit_service_authority(...)` retries identical encoded
+request bytes once for ConnectionError/TimeoutError only. Plain OSError ownership
+or size failures, malformed replies, explicit rejection and cancellation do not
+retry. Each exchange retains its configured timeout (default 5 seconds, maximum
+30); there is no combined deadline across the two attempts. No protocol/schema or
+method signature changes. The response contains no full outcome signature payload,
+and the opaque reservation seal remains process-local; acknowledgment recovery
+does not supply durable outcome-response recovery. Runtime startup cannot initialize or
 reset replay state. The separate installer rejects after its third-domain
 commit, including after both replay stores are deleted. A failed or crashed
 reservation never reopens. Every current snapshot must match the exact roots,
