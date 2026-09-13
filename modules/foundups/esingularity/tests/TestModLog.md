@@ -1,5 +1,10 @@
 # eSingularity TestModLog
 
+## 2026-09-13 — Reusable field-status contract
+
+- Replaced hard-coded September 10/City Hall event assertions with required status fields, ISO timestamp/JST validation and the shared href renderer check.
+- Three existing JHR/field-status tests passed via direct invocation (pytest unavailable); 18 hostname-routing tests passed. The ticker skill passed quick validation.
+
 ## 2026-09-12 — Distinct-homepage regression contract
 
 - Refreshed the existing YUMORI landing tests in place after the join-first PR #1653 page was restored; no duplicate test file was created.

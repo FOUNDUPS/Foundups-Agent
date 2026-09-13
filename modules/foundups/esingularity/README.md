@@ -43,6 +43,10 @@ The current public journey is deliberately simple. The existing hero is followed
 
 The financial models, engineering research, and source audits support the public claims but are not the main public experience.
 
+## Campaign ticker updates
+
+Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it. Date and time-limit each invitation in Japan time.
+
 ## Japan Hyperscaler Report (JHR)
 
 JHR is the eSingularity research/publication lane for tracking Japan's hyperscale data-center expansion, policy, grid constraints, land-use effects, community response, and implications for Fukui and distributed COG DC infrastructure.
