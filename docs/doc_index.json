@@ -9431,7 +9431,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "89a9461e9576a4ef046ccbdc8aec33de3f4db6dfabbc4267c2191f854b740bfc",
+      "hash_sha256": "315878d205ca528d7da107acef36e8c63920c4f907abd1ff63796db80f0b65e8",
       "links": {
         "automation": [
           "doc_dae"
@@ -9444,7 +9444,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
-      "size_bytes": 11055,
+      "size_bytes": 14151,
       "status": "active",
       "wsp_refs": [
         "WSP 00"
@@ -9452,7 +9452,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "9725716911b5beaf41d774fb40371800033e62cb09f616416bed88e036e53727",
+      "hash_sha256": "388b7be7b06f461493aa72a71ebf1370d9178e079792e8a5765971e3b8b8b2b2",
       "links": {
         "automation": [
           "doc_dae"
@@ -9465,7 +9465,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/MODULE_MAP.md",
-      "size_bytes": 22874,
+      "size_bytes": 22647,
       "status": "active",
       "wsp_refs": [
         "WSP 3"

@@ -34,6 +34,12 @@ The baseline below remains `fb58e5279673ef9de30735ccfedc8001c3bb79d6`. Documenta
 
 R00 recovery is historical success at its recorded source/generation. R02 documentation authority integration is delivered by this revision; enforcement mapping, the stale ledger's individual entries, WSP 46 reconciliation, and other owners' work remain open. Do not mark all of R02 or G0 complete merely because this roadmap is now discoverable.
 
+## Current delivery checkpoint — 2026-09-13
+
+The roadmap change is being reconciled against main `034d04b427896cb7c944efb5aa1f4d6d3e2413b5`. Later phone/YUMORI work is preserved and remains outside the original audit. The current generated inventory is 1,650 tracked Python test files / 269 quarantined; 28 registry-contract tests pass. One omitted, already-tracked Japanese-copy test was added to that inventory. These counts do not replace the dated module census or imply that all tests were executed.
+
+R01's production-skill integrity failure was reproduced and remains the next core admission blocker. R02's documentation/navigation portion is delivered in this branch; its broader enforcement work is still open. A matching clean Holo reference returned CURRENT/no-gap at published source `78b79c36c2d776e030cd0ee8aa23359a67f952ec`; this is not proof of current-main freshness or exact runtime closure. [Integration evidence and merge status boundary](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
 ## Operating model: governed tickets with optional bounded teams
 
 Use a hybrid: a qualified production line owns tickets, admission, independent audit and reward accounting; selected tickets can recruit a bounded self-organizing team. Agents may propose subtasks and coordinate within admitted scope, capacity and budget. They cannot expand authority or certify their own work. One qualified worker is the economical default; the [hybrid architecture](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) defines team admission, typed consensus and PoC-to-MVP evidence.

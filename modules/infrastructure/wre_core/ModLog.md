@@ -1,6 +1,12 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-09-13] - Canonical registry reconciliation for roadmap delivery
+
+- Used the existing registry generator to include the already-tracked eSingularity Japanese-copy regression file omitted from main's inventory.
+- Registry inventory: 1,650 total / 269 quarantined. Existing registry contract: 28 passed; the separate production-Skillz integrity preflight still fails for `reddog_operations/SKILLz.md` and is not hidden by this repair.
+- No classifier, test source, runtime admission or product behavior changed. WSP 22, 50, 97.
+
 ### [2026-08-29] - BOUNDED GIT BINARY STDIN HARDENING
 
 - Extended `run_bounded_stdout` with an <=8 MiB binary stdin channel for

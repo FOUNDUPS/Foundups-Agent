@@ -1,5 +1,15 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-13] RSI roadmap main reconciliation and registry repair
+
+WSPs: 15, 22, 34, 50, 97. Resumed the existing roadmap change against main `034d04b427896cb7c944efb5aa1f4d6d3e2413b5` in an isolated integration worktree.
+
+- Preserved main's phone/YUMORI additions and both independent root log entries. No product source was changed by this integration.
+- Regenerated the canonical test registry: main already contains `test_japanese_surface_copy.py`, but its registry omitted that file. The corrected inventory is 1,650 tracked tests / 269 quarantined; 28 registry contract tests pass. This is inventory evidence, not 1,650 passing tests.
+- Reproduced the R01 production-skill manifest mismatch independently of the registry repair; R01 remains open for a separate bounded repair.
+- Holo retrieval succeeded from a clean reference matching published source `78b79c36c2d776e030cd0ee8aa23359a67f952ec`. Previous checkpoints remain historical; R03 is not complete for arbitrary roots.
+- Merge and operational truth are tracked in the [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md). Production RSI remains incomplete.
+
 ## [2026-09-11] Active FoundUp participation gate and R25 / 3V mapping
 
 WSPs: 15, 22, 26, 29, 48, 50, 97. Documentation only; 012 clarification.
