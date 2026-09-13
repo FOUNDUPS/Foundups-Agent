@@ -3,7 +3,7 @@ import CampaignTicker from '../../components/CampaignTicker';
 
 const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform';
 const JHR_URL = '/reports/jhr';
-const ESINGULARITY_URL = '/';
+const ESINGULARITY_URL = 'https://esingularity.ai/';
 const INZAI_IMAGE = 'https://www.re-port.net/picture_l/report/0000074457_09.png';
 
 export const metadata: Metadata = {
@@ -24,14 +24,15 @@ const body = { fontSize:'clamp(1rem,1.7vw,1.25rem)', lineHeight:1.85, maxWidth:8
 function Join({ dark=false }: { dark?: boolean }) {
   return <a href={FORM_URL} target="_blank" rel="noreferrer" style={dark ? darkJoin : join}>JOIN YUMORI / 湯守になる ↗</a>;
 }
-
 export default function YumoriPage() {
-  return <main style={{ background:'#0b0d0c', color:'#f4f1e8', minHeight:'100vh', fontFamily:'system-ui,sans-serif' }}>
+  return <main className="yumori-page" style={{ background:'#0b0d0c', color:'#f4f1e8', minHeight:'100vh', fontFamily:'system-ui,sans-serif' }}>
+    <header className="yumori-header"><a href="https://yumori.me/">YUMORI.me / 湯守</a><div id="home-language-controls" /></header>
     <CampaignTicker movement />
-    <section style={{ ...panel, minHeight:'82vh', display:'grid', alignContent:'end' }}>
+    <section className="yumori-hero" style={panel}>
       <p style={{ letterSpacing:'.18em', fontWeight:850 }}>YUMORI.me / 湯守</p>
-      <h1 style={{ fontSize:'clamp(4.5rem,14vw,11rem)', lineHeight:.8, letterSpacing:'-.075em', margin:'20px 0 32px' }}>YUMORI<span style={{opacity:.5}}>.me</span></h1>
+      <h1 className="yumori-wordmark">YUMORI<span style={{opacity:.5}}>.me</span></h1>
       <p style={{ fontSize:'clamp(1.6rem,4vw,3.5rem)', lineHeight:1.15, fontWeight:800, maxWidth:1000 }}>I am a guardian.<br/>日本の地域を守り、地域のAIをつくる。</p>
+      <figure className="yumori-hero-image"><img src="/yumori-compute-field.png" width="1672" height="941" alt="田園と地域の小規模AI計算基盤を組み合わせた再生構想" fetchPriority="high" /><figcaption>地域の未来を、地域でつくる。<span>再生構想のイメージ・実在の完成施設ではありません</span></figcaption></figure>
       <p style={body}>湯守は、本来、湯と場所を守る人。YUMORI.meは、その考えを地域へ広げます。AIインフラは必要です。しかし、土地・電力・知識・文化の未来を、地域の外だけで決めさせない。知る。守る。そして別の形をつくる。</p>
       <div style={{marginTop:30}}><Join /></div>
       <p style={{marginTop:18, opacity:.65}}>準備委員会の最初の目標：1,000人。1,000人に達した段階で、全国運動を支える正式な組織化を検討します。</p>
@@ -40,7 +41,7 @@ export default function YumoriPage() {
     <section style={{...panel, background:'#e9e3d6', color:'#111511'}}>
       <p style={{fontWeight:850,letterSpacing:'.15em'}}>01 / WHY — KNOW WHAT IS COMING</p>
       <h2 style={title}>ハイパースケールは、<br/>建物一棟の話ではない。</h2>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:32,alignItems:'start'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,280px),1fr))',gap:32,alignItems:'start'}}>
         <div><p style={body}>千葉・印西では巨大データセンターの集積が、電力、土地、景観、騒音、都市計画、地域との共存の問題になっています。米国ではさらに先の巨大集積をすでに経験しています。日本は、その結果を見てから動く必要はありません。</p>
           <p style={body}>YUMORIはデータセンターそのものに反対する運動ではありません。地域が、巨大投資の後ではなく<strong>前に</strong>選択できるようにする運動です。</p>
           <p><a href={JHR_URL} style={link}>JAPAN HYPERSCALER REPORTを読む →</a></p><Join dark /></div>

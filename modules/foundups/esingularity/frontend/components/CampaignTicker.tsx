@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { currentFieldStatus } from '../content/current-field-status';
 
 const actions = [
@@ -33,11 +34,35 @@ function ActionSet({ duplicate = false, movement = false }: { duplicate?: boolea
 }
 
 export default function CampaignTicker({ movement = false }: { movement?: boolean }) {
+  const [reading, setReading] = useState(false);
+  const tickerRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const ticker = tickerRef.current;
+    const track = trackRef.current;
+    if (!ticker || !track) return;
+    const update = () => {
+      if (ticker.dataset.reading === 'true') return;
+      const width = ticker.getBoundingClientRect().width;
+      const pixelsPerSecond = width <= 600 ? 18 : width <= 1200 ? 24 : 38;
+      const distance = track.scrollWidth / 2;
+      ticker.style.setProperty('--ticker-duration', `${Math.max(48, distance / pixelsPerSecond)}s`);
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(ticker);
+    observer.observe(track);
+    document.fonts.ready.then(update);
+    update();
+    return () => observer.disconnect();
+  }, []);
   return (
-    <aside className={movement ? 'campaign-ticker campaign-ticker-inline' : 'campaign-ticker'} aria-label="九頭竜を守るための行動メニュー">
-      <div className="campaign-ticker-track">
+    <aside ref={tickerRef} data-reading={reading} style={{ '--ticker-duration': '300s' } as CSSProperties} className={movement ? 'campaign-ticker campaign-ticker-inline' : 'campaign-ticker'} aria-label="九頭竜を守るための行動メニュー">
+      <button className="campaign-ticker-control" type="button" aria-pressed={reading} onClick={() => setReading(!reading)}>{reading ? '流す' : 'すべて読む・停止'}</button>
+      <div className="campaign-ticker-window">
+      <div ref={trackRef} className="campaign-ticker-track">
         <ActionSet movement={movement} />
         <ActionSet duplicate movement={movement} />
+      </div>
       </div>
     </aside>
   );
