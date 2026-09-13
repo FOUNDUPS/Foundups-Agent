@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-09-13 - AutoPost lens continuation linked
+
+- Extended the existing Lick contract with deliberate enrollment, renewal,
+  scoped sharing, peer requirements, recovery and membership boundaries.
+- Linked the existing external AutoPost owners and PR 12; no duplicated camera,
+  identity store, public host or semantic router. Its minimal code slice prevents
+  stale provisional capture references and has 81 passing tests plus TypeScript
+  and build checks; real-phone and deployment acceptance remain open.
+- This Foundups-Agent change is documentation only. No biometric, authority,
+  routing, billing or production-host behavior is activated.
+
+
 ## 2026-09-13 - Continuous Lick audit and evaluated design
 
 - Audited the Gemini proposal and 012's continuous/mutual Lick use case against

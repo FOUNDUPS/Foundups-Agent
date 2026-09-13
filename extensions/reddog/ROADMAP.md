@@ -1,5 +1,27 @@
 # RedDog Roadmap
 
+## AutoPost lens continuation
+
+Extend the existing external [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md)
+and local-vision work order; do not duplicate their camera, CaptureSkills,
+identity store or connector responsibilities. [AutoPost PR 12](https://github.com/FOUNDUPS/autopost/pull/12)
+adds provisional-reference freshness and maps the follow-on work below. It is
+unmerged and undeployed; its passing synthetic tests are not phone/liveness proof.
+
+- [x] Map enrollment, renewal, recipient-scoped sharing, peer requirements,
+  recovery and model-membership boundaries in the existing canonical Lick design.
+- [ ] Merge/activate the separately reviewed provisional-freshness slice and
+  prove consent, expiry, guest fallback and renewal on a real phone with an
+  available public RedDog host.
+- [ ] Close AutoPost's existing local-vision phone gate before expanding models:
+  observable output, capture-ID correlation, correction reuse and measured latency.
+- [ ] Build possession-bound enrollment and server-verified step-up through the
+  existing identity owner; then reviewed short-lived peer-proof delegation.
+- [ ] Verify the existing Liberty ingress contract and approved publishing
+  receipts before automatic dispatch. A model's scene label grants no authority.
+- [ ] Audit existing entitlement/model-routing owners for optional smarter
+  RedDog memberships. No billing stack or assurance upgrade is implied.
+
 ## Continuous Lick design and evaluation
 
 Evaluated 2026-09-13 (Asia/Tokyo); runtime expansion is

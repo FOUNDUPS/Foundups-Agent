@@ -201,6 +201,43 @@ challenge and presentation-attack testing. MVP is gated on independent error,
 spoof, demographic, privacy, deletion, and recovery evidence plus a separate
 possession/signing factor for protected actions.
 
+### Enrollment, renewal, and the AutoPost lens
+
+012's product direction distinguishes deliberate **Create my Lick** enrollment,
+explicit **Verify me** step-up, and automatic freshness checks during an enabled
+encounter. Enrollment binds a credential to a profile through the existing
+identity owner; a display name alone establishes no identity. Biometric
+reference enrollment/replacement needs its own consent, evaluated methods,
+protected local custody, deletion and recovery controls. Generate cryptographic
+keys independently of noisy biometric measurements. Never share raw face,
+voice or cardiac templates as the peer handshake.
+
+AutoPost is RedDog's outward-facing, phone-first lens. It owns the existing
+capture/perception/CaptureSkill composition, not a second twin, identity service,
+public host or routing engine. Its [existing roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md)
+and [continuation PR 12](https://github.com/FOUNDUPS/autopost/pull/12) own phone
+acceptance, enrollment, recipient-scoped proofs, Liberty routing, publishing
+and optional model-membership capabilities. Membership may enable an evaluated
+model or service; it never increases verification assurance or action authority.
+
+The first AutoPost code slice in PR 12 only prevents stale provisional capture
+references: conservative local expiry, background/offline invalidation,
+late-response cancellation and capture-time revalidation. It remains unmerged,
+undeployed and non-biometric. Video references identify the completion encounter,
+not continuous verification across the recording. Track/participant recognition,
+passkey enrollment, server-side authentication, peer proofs and received-media
+verification remain follow-on gates. Physical-phone model completion and
+approved provider delivery require actual device evidence.
+
+A future peer policy may allow unverified communication, require account
+authentication, or require separately evaluated live-human evidence. Each must
+name the evidence accepted and show missing/expired evidence without silent
+downgrade. Passkey user verification may use a PIN or a biometric; do not infer
+that a particular face was checked. Lost-device recovery must revoke affected
+sessions and credential/delegation bindings, and require fresh evidence before
+restoring continuity. AutoPost controls its own protected surfaces, not arbitrary
+phone applications. Preserve the independent WSP action-authority boundary.
+
 ## Open-source research lineage
 
 `WSP_knowledge/docs/Papers/Patent_Series/04_rESP_Patent_Updated.md` contains
