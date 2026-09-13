@@ -11,6 +11,10 @@ Project eSingularity is a Japanese-first community campaign and public-informati
 **Lifecycle**: Internal Proto
 **Deployment**: OpenAI Sites
 
+## Website operations skill
+
+For “apply the website skill”, use [esingularity-website](skills/website-update/SKILL.md). This FoundUp-owned WSP 97 workflow covers bounded history/research, both distinct homepages, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the FoundUp registry expose it to existing agent and Red Dog discovery.
+
 ## Public architecture — one project, two focused sites
 
 The module deliberately publishes two different public experiences from one canonical frontend and one existing Sites project. Shared hosting does **not** mean a shared homepage.
