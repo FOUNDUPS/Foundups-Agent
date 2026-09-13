@@ -125,12 +125,12 @@ recorded failure; preserve that evidence boundary when diagnosing other exits.
 
 | Case | Existing behavior and test | Remaining operational limit |
 |---|---|---|
-| Clean source and matching authority | `test_configured_clean_same_head_authority_is_selected`; `test_query_runs_against_selected_authority_root` | Contract fixtures pass; current-main positive semantic/runtime receipt is still required. |
+| Clean source and matching authority | `test_configured_clean_same_head_authority_is_selected`; `test_query_runs_against_selected_authority_root` | Contract fixtures pass; exact-main `bcc87782` has the positive operational checkpoint below. Requalify later source states. |
 | Divergent feature / stale authority | `test_different_head_authority_is_rejected`; `test_head_mismatch_failure_preserves_verified_authority_binding` | Rejection is correct; reference retrieval must not be relabeled as feature evidence. |
 | Dirty workspace | `test_dirty_workspace_can_use_clean_same_head_authority`; `test_semantic_owner_rejection_preserves_safe_workspace_bundle` | Committed semantic evidence excludes edits; bundle labels expose the overlay. |
 | Source changes during query | `test_authority_change_before_owner_rejects_without_query`; `test_authority_change_after_query_discards_result` | Injected state-change tests pass; no live concurrent-main qualification is claimed. |
 | No MCP / unavailable semantic owner | `test_lexical_bundle_never_starts_or_preflights_owner`; `test_bundle_only_overrides_semantic_without_owner` | Actual local bundle succeeded at the reviewed source; it is not semantic freshness. |
-| Owner exits during startup | Existing bounded bootstrap retry/cleanup tests | Earlier ambient-interpreter failure is diagnosed in the later checkpoint below; matched-reference retrieval is restored, while exact-current-main qualification remains open. |
+| Owner exits during startup | Existing bounded bootstrap retry/cleanup tests | Earlier ambient-interpreter failure is diagnosed below; both the matched reference and later exact-main `bcc87782` now have positive retrieval evidence. |
 
 Test owners: [authority worktree](tests/test_holoindex_authority_worktree.py),
 [one-shot entry](../scripts/tests/test_reddog_holoindex_owner_query_once.py),
@@ -145,10 +145,10 @@ the reviewed task source returned a clean local bundle with zero owner
 attempts. After these documentation edits, the same local query succeeded with
 `workspace_overlay`, preserving UNKNOWN freshness and zero owner attempts.
 Earlier CURRENT receipts retain only their original dated scope.
-R03 is partial: entry contracts and guidance are validated. The later checkpoint
-restores matched-reference retrieval; exact-current-main positive qualification
-and broader operational matrix proof remain open. R04 runtime closure and R05
-retrieval quality remain separate gates.
+R03 is partial: entry contracts, guidance, matched-reference retrieval and the
+later exact-main `bcc87782` checkpoint are validated. Broader operational matrix
+proof and requalification as sources advance remain open. R04 runtime closure
+and R05 retrieval quality remain separate gates.
 
 ### Interpreter correction checkpoint — 2026-09-13
 
@@ -175,6 +175,28 @@ current source, preserving concurrent work, before R03 closes. R04 exact
 runtime closure, R05 retrieval quality and R06–R15 admitted RSI remain open.
 The corrected invocation is reusable operational knowledge, not automatic
 PatternMemory promotion or measured retained RSI.
+
+### Exact-main maintenance checkpoint — 2026-09-13
+
+The existing post-merge controller completed at then-current main
+`bcc877829653997d7df638b7069258a061d04ee1`, using its admitted task
+`holoindex_postmerge_refresh:bcc877829653997d7df638b7069258a061d04ee1`.
+OpenClaw/WRE performed the existing maintenance transaction; the controller
+started the resident and supervisor and confirmed reverse-order shutdown of
+both. No Holo runtime source change or manual in-query rebuild was needed.
+
+- Generation: `sha256:681b03ead03d6945151779d92a81081922357ed167109a63647b08705e512501`.
+- Freshness receipt: `sha256:98145ad229a7c838d7eeca7b10c0ef907cc98ef0481c2be32cb7dbe44a142e8b`.
+- Fresh subsequent owner query: CURRENT, no index gap, one owner attempt,
+  matching workspace/authority HEADs, successful module bundle, no reindex.
+- `runtime_environment_exact_closure_verified=false`; R04 remains open.
+
+This replaces the older-reference limitation for the named source only. New
+main commits need new evidence. The broader R03 operational matrix and R05
+retrieval-quality promotion are not complete. Search still returned peripheral
+runtime/legacy material ahead of exact worker admission context; direct module
+contracts/tests supplied that context. Freshness is not a relevance score or
+an independently evaluated RSI improvement.
 
 ## Menu Snapshot (0102 Ops)
 ```

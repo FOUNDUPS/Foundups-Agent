@@ -27,14 +27,20 @@ def _base(_distro: str) -> str:
     return r"E:\Agents\WSL\Ubuntu-24.04"
 
 
-def test_probe_accepts_exact_named_distro_and_components(capsys) -> None:
+@pytest.mark.parametrize("openclaw_version", [
+    "OpenClaw 2026.7.1",
+    "OpenClaw 2026.7.1 (abcdef0)",
+    "OpenClaw 2026.7.1-2",
+    "OpenClaw 2026.7.1-2 (abcdef0)",
+])
+def test_probe_accepts_exact_named_distro_and_components(capsys, openclaw_version) -> None:
     calls: list[tuple[str, ...]] = []
 
     def runner(command, _timeout):
         assert _timeout == 10.0
         calls.append(tuple(command))
         version = (
-            "OpenClaw 2026.7.1"
+            openclaw_version
             if any(str(part).endswith("/openclaw") for part in command)
             else "Hermes Agent v0.19.1 (2026.7.30)"
         )
@@ -48,6 +54,7 @@ def test_probe_accepts_exact_named_distro_and_components(capsys) -> None:
     assert receipt.authority_class == "advisory_unverified_runtime_report"
     assert receipt.base_path == ENV["FOUNDUPS_AGENT_WSL_EXPECTED_BASE"]
     assert {item.component_id for item in receipt.components} == {"openclaw", "hermes"}
+    assert receipt.components[0].version == openclaw_version
     assert all("--exec" in command and "--version" in command for command in calls)
     assert "preflight=PASS" in capsys.readouterr().out
 
@@ -162,10 +169,16 @@ def test_probe_is_disabled_by_default() -> None:
     assert receipt.state == "DISABLED"
 
 
-def test_secret_shaped_suffix_cannot_enter_version_evidence(capsys) -> None:
+@pytest.mark.parametrize("version", [
+    "OpenClaw 2026.7.1 SECRET_SHAPED_VALUE",
+    "OpenClaw 2026.7.1-2 SECRET_SHAPED_VALUE",
+    "OpenClaw 2026.7.1-SECRET_SHAPED_VALUE",
+    "OpenClaw 2026.7.1-2 (SECRET_SHAPED_VALUE)",
+])
+def test_secret_shaped_suffix_cannot_enter_version_evidence(capsys, version) -> None:
     receipt = run_wsl_agent_runtime_advisory(
         environment=ENV,
-        runner=lambda *_args: (0, "OpenClaw 2026.7.1 SECRET_SHAPED_VALUE"),
+        runner=lambda *_args: (0, version),
         base_path_resolver=_base,
     )
     assert receipt.state == "NOT_READY"

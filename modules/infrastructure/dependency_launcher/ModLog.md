@@ -7,6 +7,21 @@
 
 ## Change Log
 
+### 2026-09-13: Recognize installed OpenClaw numeric release suffix
+
+- RSI readiness inspection found the existing WSL advisory rejected installed
+  `OpenClaw 2026.7.1-2 (0790d9f)` while the existing Gateway command transport
+  successfully returned that version. Extended only the existing version regex
+  to accept numeric release suffixes; preserved full-match output filtering.
+- Extended existing positive and content-rejection tests: two new suffix cases
+  failed before the repair; 68 focused WSL/Gateway tests passed afterward.
+  A fresh version-only WSL probe reports both OpenClaw and Hermes available.
+- PASS remains unverified availability, not service health or model/dispatch
+  authority. No install, provider inference, service reconfiguration or new
+  module. WSP 22, 50, 84, 97; R07 readiness groundwork.
+
+---
+
 ### 2026-08-05: Runtime compatibility test clock consistency
 
 - Removed a calendar-bound fixture failure by composing publication evidence at

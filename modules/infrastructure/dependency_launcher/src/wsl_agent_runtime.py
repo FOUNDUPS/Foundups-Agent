@@ -18,7 +18,7 @@ COMPONENT_EXECUTABLES = {
     "hermes": "/usr/local/bin/hermes",
 }
 COMPONENT_VERSION_PATTERNS = {
-    "openclaw": re.compile(r"OpenClaw [0-9]{4}\.[0-9]{1,2}\.[0-9]{1,2}(?: \([0-9a-f]{7,40}\))?"),
+    "openclaw": re.compile(r"OpenClaw [0-9]{4}\.[0-9]{1,2}\.[0-9]{1,2}(?:-[0-9]+)?(?: \([0-9a-f]{7,40}\))?"),
     "hermes": re.compile(r"Hermes Agent v[0-9]+\.[0-9]+\.[0-9]+ \([0-9]{4}\.[0-9]{1,2}\.[0-9]{1,2}\)"),
 }
 _DISTRO_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
