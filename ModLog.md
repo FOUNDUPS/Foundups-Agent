@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: RSI baseline observations and rejected context compression
+
+- Continued after PR #1709 merged as `24ecdf1c38ca80aee13c74b39313e9b104e5c14b`; all ten checks passed and its accepted tree matched main. Preserved the earlier Holo CURRENT receipt's exact `bcc877829` source boundary.
+- Existing registry-audit check passed once: 1,650 registered / 269 quarantined, 18.589 seconds, three input hashes unchanged. This is preparatory R15 evidence, not a measured improvement.
+- Existing M2M compiler lost eight predeclared runbook passages; the YAML shim rejected that candidate. A synthetic valid-YAML counterexample passed while losing worker/verifier independence. Kept original context and corrected prototype documentation's unsupported fidelity claims; reference-compiler runtime behavior is unchanged.
+- Holo found the separate existing compact-prompt fidelity gate. Its stop-condition check compared only the pre-serialization object and falsely passed lossy comma/bracket cases. Repaired the comparison against parsed values; two regression cases failed before the fix, 53 fidelity/compatibility tests passed afterward, and six existing reference-shim tests passed. Reused the existing backend inventory generator and compatibility pins; no new module, grammar or runtime route.
+- Ran 36 selected Science Hub tests from external pinned source `bdf0e15f019f83d76fa9cf94b131716bde559350` with an injected detector and disposable SQLite state; all passed in 1.01 seconds, tracked source unchanged. No install, live detector, FAM/publication suite, model call, promotion or reward effect.
+- Linked one dated evidence artifact through the existing system roadmap, dispatch runbook and R10/R15/R20/R23. All 26 packet statuses, dependencies, priorities and non-dispatchable authority remain unchanged. WSP 22, 48, 50, 84, 97, 99.
+
 ## 2026-09-13: RSI worker readiness and WSL advisory correction
 
 - Continued R03/R06–R08 through existing components. The model query remains

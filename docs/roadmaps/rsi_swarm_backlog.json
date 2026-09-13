@@ -678,6 +678,11 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Correct observable outcomes and actual costs evaluated against frozen baseline; effect-less success and wrong answers rejected"
+      },
+      "preparatory_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "observed_on": "2026-09-13",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -941,7 +946,12 @@
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Complete observed-to-retained cycle; actual subsequent benefit; unchanged independent oracle; one forced regression and rollback"
       },
-      "research_harness_boundary": "WRE Auto Researcher is a reuse candidate only where its literal ROC-target contract fits; keep the registry-workflow oracle separate and fixed"
+      "research_harness_boundary": "WRE Auto Researcher is a reuse candidate only where its literal ROC-target contract fits; keep the registry-workflow oracle separate and fixed",
+      "preparatory_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "observed_on": "2026-09-13",
+        "acceptance_satisfied": false
+      }
     },
     {
       "packet_id": "R16",
@@ -1209,8 +1219,13 @@
       "external_repository_candidate": {
         "repository": "FOUNDUPS/science-swarm-hub",
         "commit": "bdf0e15f019f83d76fa9cf94b131716bde559350",
-        "inspection": "source_only_no_tests_or_installation",
+        "inspection": "source_review_and_36_selected_fixture_tests_passed_no_installation_or_live_integration",
         "monorepo_entry": "modules/foundups/pqn_swarm_hub/README.md"
+      },
+      "preparatory_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "observed_on": "2026-09-13",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -1369,6 +1384,11 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Three successive cycles plus bounded soak/fault cases; rejected candidate and rollback; retained measured benefit; all G0-G5 pass for declared scope"
+      },
+      "preparatory_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "observed_on": "2026-09-13",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -1532,7 +1552,7 @@
     "external_repository_evidence": {
       "repository": "FOUNDUPS/science-swarm-hub",
       "commit": "bdf0e15f019f83d76fa9cf94b131716bde559350",
-      "inspection": "source_only_no_tests_or_installation",
+      "inspection": "source_review_and_36_selected_fixture_tests_passed_no_installation_or_live_integration",
       "monorepo_entry": "modules/foundups/pqn_swarm_hub/README.md"
     }
   }

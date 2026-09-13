@@ -1,5 +1,12 @@
 # AI Intelligence Overseer - ModLog
 
+## 2026-09-13 - RSI context preservation evidence
+
+- Ran the existing deterministic M2M compiler and compile shim in a disposable replica of source bcc877829. The runbook shrank 186 to 14 lines but lost all eight declared boundary passages and failed YAML parsing.
+- A seven-line synthetic reference passed the YAML gate after losing its worker/verifier independence sentence. Rejected both candidates; original sources and executable Skillz remain unchanged. No model call, promotion or verified learning.
+- Corrected README, INTERFACE and the prototype compile-gate Skillz to describe implemented structural/YAML checks, actual result fields, side effects and unimplemented fidelity checks. This is a documentation correction, not a runtime fidelity repair.
+- Evidence and next acceptance requirements: docs/operations/RSI_SWARM_DISPATCH.md, linked from the root roadmap. WSP 22, 48, 50, 84, 97, 99.
+
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
 **Version**: 0.10.5

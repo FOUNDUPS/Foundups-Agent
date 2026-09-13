@@ -1,0 +1,184 @@
+{
+  "record_type": "rsi_preparatory_observations",
+  "observed_on": "2026-09-13",
+  "authority": "observations only; not signed admission, independent verification, promotion or RSI completion",
+  "integration_base_commit": "24ecdf1c38ca80aee13c74b39313e9b104e5c14b",
+  "registry_baseline": {
+    "source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+    "experiment": "registry_audit_baseline_observation",
+    "sample_count": 1,
+    "exit_code": 0,
+    "wall_seconds": 18.589,
+    "summary": "test_registry=current total=1650 quarantined=269",
+    "inputs_unchanged": true,
+    "input_sha256": {
+      "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md": "64855a943eea31224ff47c9f3a1bcd0d4365f0aaf8d56f8998430bbe728e2094",
+      "modules/infrastructure/wre_core/scripts/generate_test_registry.py": "d239bbced29067f9aa541acf9ccdc5e2866bd770742f8b43f11ffe781ea70132",
+      "WSP_knowledge/WSP_Test_Registry.json": "f321dffc0b8d5064e93620bbc9c77383fc49a34cd2a71133a16c305bcb95a992"
+    },
+    "model_call_performed": false,
+    "registry_write_requested": false,
+    "rsi_improvement_proven": false
+  },
+  "m2m_reference_candidate": {
+    "source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+    "source_path": "docs/operations/RSI_SWARM_DISPATCH.md",
+    "source_sha256": "88e484880dbe69baf79c09d048b9ace68f2235b781fd4952e8561e79bd9eb234",
+    "candidate_sha256": "7c983642590e030155dd1e2c546b53388348192492d36ee603bc19747f64e561",
+    "compile_result": {
+      "success": true,
+      "source_path": "docs/operations/RSI_SWARM_DISPATCH.md",
+      "staged_path": ".m2m\\staged\\docs\\operations\\RSI_SWARM_DISPATCH_M2M.yaml",
+      "original_lines": 186,
+      "m2m_lines": 14,
+      "reduction_percent": 92.5,
+      "compilation_method": "deterministic"
+    },
+    "wall_seconds": 0.0141,
+    "original_bytes": 28223,
+    "candidate_bytes": 641,
+    "yaml_parse_passed": false,
+    "required_fragment_count": 8,
+    "retained_verbatim_fragments": 0,
+    "missing_verbatim_fragments": [
+      "Each ticket fixes its acceptance criteria, scope, price/reward policy, budget and independent reviewer before assignment.",
+      "Treat actual reward delivery as unproven until the settlement owner returns confirmation.",
+      "Never populate trusted keys, acceptance flags or receipts from this planning document.",
+      "A dry-run or a persuasive response is not the acceptance signal.",
+      "Until the binding and scope are admitted, keep `dispatchable=false` in the planning backlog.",
+      "Preserve YUMORI.me/eSingularity and concurrent reserved lanes.",
+      "V1 opinions do not self-certify V2 correctness, V3 valuation or promotion; initial tests remain synthetic.",
+      "Registry meaning, required test selection, quarantine rules and held-out correctness stay unchanged; measure actual cost/latency and rollback a bad candidate."
+    ],
+    "executable_skill_rejected": true,
+    "original_source_unchanged": true,
+    "model_call_performed": false,
+    "promoted": false,
+    "candidate_accepted": false,
+    "rsi_improvement_proven": false,
+    "actual_model_token_usage": null
+  },
+  "m2m_gate_counterexample": {
+    "source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+    "real_runbook_gate_status": "FAIL",
+    "real_runbook_staged_retained": false,
+    "synthetic_fixture": "# Reference context\n\n## Worker boundary\n\nThe worker must not approve its own output.\n\n- Mode: candidate_only\n",
+    "synthetic_fixture_sha256": "302e6f2e6272b3ef51f2df3ad32fbf892b9f306933634fef1e8c5604edd40981",
+    "synthetic_gate_status": "OK",
+    "synthetic_gate_result": {
+      "success": true,
+      "source_path": "docs/authority_boundary_fixture.md",
+      "staged_path": ".m2m\\staged\\docs\\authority_boundary_fixture_M2M.yaml",
+      "original_lines": 7,
+      "m2m_lines": 5,
+      "reduction_percent": 28.6,
+      "compilation_method": "deterministic",
+      "gate_status": "PASS",
+      "gate_error": null
+    },
+    "required_boundary_retained": false,
+    "synthetic_candidate": "# M2M v1.0 | authority_boundary_fixture.md | 20260913 | src:docs/authority_boundary_fixture.md\n\nREFERENCE_CONTEXT:\nWORKER_BOUNDARY:\n  MODE: candidate_only",
+    "model_call_performed": false,
+    "promoted": false,
+    "candidate_accepted": false,
+    "interpretation": "The real runbook fails YAML parsing; the synthetic counterexample passes parsing while losing its explicit independence constraint. Neither is accepted for RSI context."
+  },
+  "science_hub_baseline": {
+    "repository": "https://github.com/FOUNDUPS/science-swarm-hub",
+    "source_commit": "bdf0e15f019f83d76fa9cf94b131716bde559350",
+    "selected_test_files": [
+      "tests/test_contracts.py",
+      "tests/test_detector_bridge.py",
+      "tests/test_persistence.py"
+    ],
+    "sample_count": 1,
+    "exit_code": 0,
+    "wall_seconds": 1.714,
+    "test_summary": "36 passed in 1.01s",
+    "tracked_source_bytes_unchanged": true,
+    "selected_test_sha256": {
+      "tests/test_contracts.py": "55c0b5fc370fdc30015c2afddbbe6420cf34a13e8e83f638cd0247f2445ec54c",
+      "tests/test_detector_bridge.py": "6d23f2dd27102e8b90102a09b8f2469c0809b8bff106d656f788771c8d0f51d9",
+      "tests/test_persistence.py": "299935e281d4560db46239b0185a0b6347dac39681e624cb6a1b67152bb73627"
+    },
+    "detector_runner": "existing fake_detector_runner fixture emitting CSV/JSONL",
+    "sqlite_state": "disposable test-owned paths",
+    "package_install_performed": false,
+    "model_call_performed": false,
+    "live_detector_executed": false,
+    "live_fam_or_publication_tests_selected": false,
+    "rsi_improvement_proven": false,
+    "standalone_package_release_verified": false
+  },
+  "completion_gate_advanced": false,
+  "dispatchable": false,
+  "retained_improvement_proven": false,
+  "compact_prompt_gate_counterexample": {
+    "source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+    "operation": "existing compact-prompt fidelity gate counterexample",
+    "requested_fail_conditions": [
+      "halt on safety, auth or scope failure"
+    ],
+    "parsed_fail_conditions": [
+      "halt on safety",
+      "auth or scope failure"
+    ],
+    "reported_passed": true,
+    "reported_fail_conditions_match": true,
+    "original_conditions_equal_parsed": false,
+    "model_call_performed": false,
+    "promoted": false,
+    "candidate_accepted": false
+  },
+  "compact_prompt_gate_repair": {
+    "runtime_path": "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py",
+    "changed_behavior": "Compare requested fail conditions to both compiled and parsed compact values; reject lossy parsing",
+    "runtime_sha256": "4dcb85cc2bd44252acc787455c5cb43684f4028cec35cfe0b41f432948f7d742",
+    "regression_cases_before_fix": {
+      "failed": 2,
+      "deselected": 36
+    },
+    "compact_fidelity_and_compatibility_after_fix": {
+      "passed": 53,
+      "seconds": 0.23
+    },
+    "overseer_shim_tests": {
+      "passed": 6,
+      "seconds": 3.9,
+      "combined_run_other_tests_skipped": 53,
+      "skip_cause": "AI Overseer collection hook skips non-allowlisted test filenames; compact files were rerun separately and all passed"
+    },
+    "compiler_grammar_changed": false,
+    "general_prose_fidelity_proven": false,
+    "live_context_or_model_binding_proven": false
+  },
+  "retrieval_evaluation": {
+    "query": "M2M fidelity required source fragments preservation compile gate YAML validation",
+    "source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+    "authority_source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+    "freshness": "CURRENT",
+    "index_gap_detected": false,
+    "owner_attempts": 1,
+    "generation": "sha256:681b03ead03d6945151779d92a81081922357ed167109a63647b08705e512501",
+    "runtime_environment_exact_closure_verified": false,
+    "missing_required": [],
+    "missing_optional": [
+      "Tier-0: SPEC.md",
+      "Tier-0: PRD.md",
+      "Tier-0: PROMPTS.md",
+      "Tier-0: prompts/",
+      "Tier-0: RUNBOOK.md",
+      "Tier-2: memory/README.md",
+      "Tier-2: HOLOINDEX.md",
+      "Tier-2: ADR.md",
+      "Tier-2: adr/",
+      "Tier-2: INCIDENTS.md",
+      "Tier-2: SEV.md"
+    ],
+    "noise": "Top hits include the compact prompt gate and its tests plus the distinct reference-YAML Skillz; distinguish these formats before selecting an owner.",
+    "ordering": "Compact fidelity test and gate precede the queried reference compile Skillz; this revealed a reusable adjacent owner.",
+    "duplication": "Two distinct M2M formats already exist; no third compiler or evaluator was created.",
+    "staleness": "CURRENT applies only to bcc877829; later integration source requires its own qualification. Relevant compiler/gate source matched before this repair.",
+    "must_include": "Directly inspected sentinel, shim, compact compiler/gate/tests and available module contracts; token_efficiency has no ROADMAP, ModLog or tests README/TestModLog in this source."
+  }
+}

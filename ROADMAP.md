@@ -45,6 +45,17 @@ The later R03 continuation qualified then-current main `bcc877829653997d7df638b7
 
 ## Operating model: governed tickets with optional bounded teams
 
+Preparatory observations are now recorded in the [registry/context and Science
+Hub checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+The existing registry audit passed once at its pinned source. A deterministic
+M2M reference candidate was rejected for lost instructions; YAML parsing alone
+does not establish fidelity. The existing compact-prompt fidelity gate now
+rejects stop conditions changed during parsing; 53 focused tests pass.
+Science Hub's 36 selected standalone tests passed
+with an injected detector and disposable persistence. These qualify baseline
+work and negative cases for R10/R15/R20/R23; no completion gate advances and no
+retained improvement is claimed.
+
 Use a hybrid: a qualified production line owns tickets, admission, independent audit and reward accounting; selected tickets can recruit a bounded self-organizing team. Agents may propose subtasks and coordinate within admitted scope, capacity and budget. They cannot expand authority or certify their own work. One qualified worker is the economical default; the [hybrid architecture](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) defines team admission, typed consensus and PoC-to-MVP evidence.
 
 The work path is **ticket → worker or bounded team → evidence synthesis → independent audit → governed acceptance/activation → reward eligibility → confirmed settlement**. The feedback path is **012 ↔ own RedDog → deep 0102/WSP 97 proposal → optional relevant opted-in 012s actively engaged with that same FoundUp → V1 feedback → revised proposal/ticket → independently verified outcome**. Agreement and feedback inform decisions; neither substitutes for authorization or verification. [R25](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) owns the feedback integration plan.

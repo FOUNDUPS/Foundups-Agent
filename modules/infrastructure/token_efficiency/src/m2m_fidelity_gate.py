@@ -314,9 +314,15 @@ class M2MFidelityGate:
 
         # Check fail conditions
         fail_conditions = fail_conditions or []
-        fail_conditions_match = m2m.fail_conditions == fail_conditions
+        fail_conditions_match = (
+            m2m.fail_conditions == fail_conditions
+            and parsed.fail_conditions == fail_conditions
+        )
         if not fail_conditions_match:
-            errors.append(f"fail_conditions mismatch: {fail_conditions} vs {m2m.fail_conditions}")
+            errors.append(
+                f"fail_conditions mismatch: expected {fail_conditions}, "
+                f"compiled {m2m.fail_conditions}, parsed {parsed.fail_conditions}"
+            )
 
         # Check lane
         if parsed.lane.value != lane.upper():

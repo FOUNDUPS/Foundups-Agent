@@ -2616,7 +2616,7 @@
     "modules/infrastructure/token_efficiency/src/__init__.py": "6d2360e51edff6022349b7f81ac1328fa601180e7be076da0b88377f1aa02c80",
     "modules/infrastructure/token_efficiency/src/bypass_classifier.py": "5b8040829450fb9f2e97c545d81afd651591841f7ddbd953d0e17c69243117a4",
     "modules/infrastructure/token_efficiency/src/compute_governor.py": "91555699784faef1d686aae1cf44b76a84e29fafe8037e8c86968b35d2f5e43d",
-    "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py": "6ef5bdf2cf186de281a99aee5d2ab43f64f95e4b479de14bc78a13ddccc8f8a9",
+    "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py": "e3dd9ac4dabb74feddeb3473946ab4fc01935c324a93e07928980c79b27daef6",
     "modules/infrastructure/token_efficiency/src/rtk_evaluation_dryrun.py": "3b511050e7a83f83ca4803c21b888c025d2dcc91905c1958e84a10829d773016",
     "modules/infrastructure/token_efficiency/src/rtk_openclaw_hermes_adapter_dryrun.py": "3b0ca8448f412dea089bdb6c6c0be0527b50e1a43777e83e19fd7872eb3adc1b",
     "modules/infrastructure/token_efficiency/src/telemetry_service.py": "775a1283ddf40e10b922d20a78ace10b320dd7651584ffb871cdc5a9d8d0c402",
