@@ -779,6 +779,13 @@
         "observed_on": "2026-09-14",
         "scope": "Local recorder, retention and final memory-admission contract integrity; synthetic composed fixture",
         "acceptance_satisfied": false
+      },
+      "latest_staging_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "staging_replay_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local staging replay/snapshot and commit-exception recovery; no authority activation",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -1023,6 +1030,13 @@
         "observed_on": "2026-09-14",
         "scope": "Local recorder, retention and final memory-admission contract integrity; synthetic composed fixture",
         "acceptance_satisfied": false
+      },
+      "latest_staging_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "staging_replay_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local staging replay/snapshot and commit-exception recovery; no authority activation",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -1127,6 +1141,13 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Per-item or serialized transaction ownership; synchronized bounded cache; conflict/crash/replay cases; tenant isolation"
+      },
+      "latest_staging_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "staging_replay_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local staging replay/snapshot and commit-exception recovery; no authority activation",
+        "acceptance_satisfied": false
       }
     },
     {

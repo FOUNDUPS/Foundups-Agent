@@ -225,7 +225,11 @@ Resident production admission remains blocked until the root service is deployed
 and independent verifier runtimes issue both grant signatures. Staged authority
 envelopes remain non-consumable until exact activation. PatternMemory admission
 uses an invisible staging table in the existing database. Conflicting existing
-rows and legacy hash-shaped compatibility markers reject. The real sink is deliberately
+rows and legacy hash-shaped compatibility markers reject. Staging snapshots
+the input, reconciles a competing record-key insert without replacing the
+winner, and checks exact stored payload/agent before commit. Same-record retry
+returns the same ID; staging remains outside recall. This does not make
+activation and authority revalidation one atomic transaction. The real sink is deliberately
 not activation-ready until it can independently revalidate a durable authority
 source; direct sink activation is forbidden. Authority-envelope consumption reloads
 the durable envelope, resolves the key from the current committed authority profile,

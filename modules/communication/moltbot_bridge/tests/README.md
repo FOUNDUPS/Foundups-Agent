@@ -1,5 +1,19 @@
 # Tests - OpenClaw Bridge
 
+## Verified-outcome staging and replay
+
+`test_reddog_verified_pattern_memory_sink.py` covers controlled competing
+SQLite inserts, immutable input snapshots, before/after-commit retry, existing
+row conflicts and staging/recall separation. Use its existing admission and
+handler tests to check the next boundary:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py -q
+```
+
+These tests use explicit disposable databases and injected callbacks. They do
+not activate production memory or prove power-loss/sustained concurrency behavior.
+
 ## Exact-main post-merge lifecycle
 
 `test_reddog_holoindex_owner_query_root_binding.py` proves all post-completion,

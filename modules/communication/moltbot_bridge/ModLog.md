@@ -1,5 +1,10 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Staging snapshot and competing replay
+
+- Extended the existing sink and test suite after WSP 00/97 retrieval. Deep snapshots bind record ID and stored payload; record-key conflict handling preserves the winning row and checks exact payload/agent before commit. Identical competing retries succeed; conflicting winners use the existing rejection.
+- Four failures / 13 passes before; 51 sink/admission/handler cases pass after, including two commit-boundary recovery cases. Staging remains outside recall and the real sink remains activation-ineligible. Schema, authority and direct-activation policy are unchanged. WSP 22/48/50/60/95/97.
+
 ## 2026-09-14: Final RSI memory-admission acknowledgment
 
 - The existing queue memory-admission adapter now passes a deep copy to its injected sink and requires a nonempty string record acknowledgment. Missing acknowledgments use the existing `SINK_WRITE_FAILED` rejection; callback mutation cannot change the local receipt's evidence. No live queue, provider, service or production PatternMemory was invoked.

@@ -251,6 +251,54 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Staging replay checkpoint — 2026-09-14
+
+Packaging validation: all 15 RedDog fast groups pass (3,052ms), and all eight
+staged-manifest tests pass (65.51s). Runtime membership remains 1,400; only the
+sink source hash and the two compatibility pins change.
+
+Source: merged PR1716/main `0120878c7febc68b794c749a10e80c305fd0c89f`.
+WSP 00 awakening and its strict software gate passed again. The local execution
+plane remains preparatory maintenance; no distributed worker/model authority
+is inferred from a planning score or successful local tests.
+
+Holo retrieval found the existing sink, its tests and adjacent root/Memex
+authority modules. The lexical bundle is UNKNOWN/index-gap with zero semantic
+owner attempts; current source and module contracts supply the working context.
+Duplicate hit arrays and the peripheral false-positive-memory hit were excluded.
+Tier-0 README/INTERFACE and test histories exist; optional memory/design docs
+and a module requirements file are absent. NAVIGATION confirms PatternMemory.
+
+The micro pass reproduced a lookup/insert interleaving and shallow-copy drift.
+One existing sink test file now has six additional cases: three controlled
+second-connection insertions, a nested-input mutation and two commit-boundary
+failures. Before: four failed / 13 passed. After: all 17 sink cases and 34
+adjacent admission/handler cases pass (51 in 3.19s). The canonical registry is
+current at 1,650 files / 269 quarantined; no test was newly quarantined.
+
+The existing sink now snapshots the payload and uses SQLite's record-key
+conflict handling, then checks the stored payload and agent before commit.
+An identical winner yields the same ID; a different winner retains its bytes,
+agent and timestamp and produces the existing conflict error. Failure before
+commit leaves no staging row, and retry after a completed commit retains one
+row. The tests use disposable SQLite state and explicitly injected failures.
+
+The macro pass keeps the existing staging table, PatternMemory, admission
+adapter and authority boundaries. A new memory backend or scheduler is
+unnecessary. Whole-workflow locking would need the independent activation
+owner; this repair covers staging-row replay only. It does not prove process
+crash/power-loss recovery, sustained concurrency, atomic activation/revocation,
+authenticated recall or retained benefit. The real sink remains
+`activation_ready=False`; no live authority, provider or protected FoundUp ran.
+
+WSP 15 local planning score: 2+4+4+4=14/P1. This is recorded preparation for
+R11/R15/R17, not a signed allocation or packet admission. Deterministic local
+counterexamples justify the small existing-code repair without a model call.
+The canonical WSP 15 section 4 also corrects the prior outcome checkpoint's
+score-16 label to **P0**. Its earlier P1 label is preserved in the raw dated
+observation with an explicit correction in this continuation; packet scores,
+dependencies and execution authority are unchanged.
+
 ### Outcome retention checkpoint — 2026-09-14
 
 Source: `e03f68badd7664e20c7f6dd47304f69b009d16cb`. This continuation followed
@@ -320,7 +368,7 @@ an index gap and zero semantic-owner attempts. A neighboring conversation-scope
 hit and duplicate arrays were excluded; current module contracts and test
 histories supplied the missing execution context. Optional memory/design docs
 were absent. The queue/persistence owners already exist; no replacement was
-introduced. Local WSP 15 selection: 3+5+4+4=16/P1. Signed runtime-owner
+introduced. Local WSP 15 selection: 3+5+4+4=16/P0 (the earlier P1 label was incorrect). Signed runtime-owner
 clarification remains pending, and no unchanged service probe was repeated.
 
 ### Stop-rule handoff checkpoint — 2026-09-14

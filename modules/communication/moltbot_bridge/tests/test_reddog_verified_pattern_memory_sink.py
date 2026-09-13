@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import ast
+import copy
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src import reddog_verified_pattern_memory_sink as sink_module
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
     REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY,
     PatternMemorySinkConfigurationError,
@@ -158,6 +161,126 @@ def test_sink_staging_is_idempotent_for_same_verified_outcome_record(
     second = sink.stage_verified_outcome(record)
 
     assert second == first
+
+
+@pytest.mark.parametrize("competing", ["same", "different-payload", "different-agent"])
+def test_staging_reconciles_a_writer_between_lookup_and_insert(tmp_path, monkeypatch, competing):
+    """Force a real second SQLite connection to win the insertion window."""
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=_repo(tmp_path), db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    record = _record()
+    winner = _record(work_order_id="other-work") if competing == "different-payload" else record
+    winner_agent = "other-agent" if competing == "different-agent" else "reddog"
+    winner_json = json.dumps(winner, sort_keys=True, separators=(",", ":"))
+    real_memory = sink_module.PatternMemory
+    inserted = []
+
+    def memory_with_competing_writer(*, db_path):
+        memory = real_memory(db_path=db_path)
+        connection = memory.conn
+
+        class Connection:
+            def execute(self, statement, parameters=()):
+                if statement.startswith("INSERT INTO reddog_verified_outcome_staging") and not inserted:
+                    with sqlite3.connect(str(db_path)) as other:
+                        other.execute(
+                            "INSERT INTO reddog_verified_outcome_staging "
+                            "(record_id, payload, agent, staged_at) VALUES (?, ?, ?, ?)",
+                            (parameters[0], winner_json, winner_agent, "fixture-writer"),
+                        )
+                    inserted.append(parameters[0])
+                return connection.execute(statement, parameters)
+
+            def __getattr__(self, name):
+                return getattr(connection, name)
+
+        memory.conn = Connection()
+        return memory
+
+    monkeypatch.setattr(sink_module, "PatternMemory", memory_with_competing_writer)
+    if competing == "same":
+        assert sink.stage_verified_outcome(record) == reddog_verified_pattern_memory_record_id(record)
+    else:
+        with pytest.raises(ValueError, match="verified_outcome_staged_record_conflict"):
+            sink.stage_verified_outcome(record)
+    assert inserted == [reddog_verified_pattern_memory_record_id(record)]
+    with sqlite3.connect(str(sink.db_path)) as connection:
+        assert connection.execute(
+            "SELECT record_id, payload, agent, staged_at FROM reddog_verified_outcome_staging",
+        ).fetchall() == [(inserted[0], winner_json, winner_agent, "fixture-writer")]
+        assert connection.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0] == 0
+
+
+def test_staging_keeps_identity_and_payload_on_one_snapshot(tmp_path, monkeypatch):
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=_repo(tmp_path), db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    record = _record(evidence={"step": "original"})
+    snapshot = copy.deepcopy(record)
+    real_memory = sink_module.PatternMemory
+
+    def memory_after_caller_mutation(*, db_path):
+        record["evidence"]["step"] = "changed by caller"
+        return real_memory(db_path=db_path)
+
+    monkeypatch.setattr(sink_module, "PatternMemory", memory_after_caller_mutation)
+    record_id = sink.stage_verified_outcome(record)
+    with sqlite3.connect(str(sink.db_path)) as connection:
+        stored = json.loads(connection.execute(
+            "SELECT payload FROM reddog_verified_outcome_staging WHERE record_id = ?", (record_id,),
+        ).fetchone()[0])
+    assert stored == snapshot
+    assert record_id == reddog_verified_pattern_memory_record_id(stored)
+    assert record["evidence"]["step"] == "changed by caller"
+
+
+@pytest.mark.parametrize("commit_completed", [False, True])
+def test_staging_retry_recovers_before_or_after_commit_failure(tmp_path, monkeypatch, commit_completed):
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=_repo(tmp_path), db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    real_memory = sink_module.PatternMemory
+
+    def memory_with_commit_failure(*, db_path):
+        memory = real_memory(db_path=db_path)
+        connection = memory.conn
+
+        class Connection:
+            inserted = False
+
+            def execute(self, statement, parameters=()):
+                result = connection.execute(statement, parameters)
+                if statement.startswith("INSERT INTO reddog_verified_outcome_staging"):
+                    self.inserted = True
+                return result
+
+            def commit(self):
+                if self.inserted:
+                    if commit_completed:
+                        connection.commit()
+                    raise RuntimeError("simulated staging commit interruption")
+                connection.commit()
+
+            def __getattr__(self, name):
+                return getattr(connection, name)
+
+        memory.conn = Connection()
+        return memory
+
+    with monkeypatch.context() as patch:
+        patch.setattr(sink_module, "PatternMemory", memory_with_commit_failure)
+        with pytest.raises(RuntimeError, match="simulated staging commit interruption"):
+            sink.stage_verified_outcome(_record())
+    with sqlite3.connect(str(sink.db_path)) as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM reddog_verified_outcome_staging",
+        ).fetchone()[0] == int(commit_completed)
+    assert sink.stage_verified_outcome(_record()) == reddog_verified_pattern_memory_record_id(_record())
+    with sqlite3.connect(str(sink.db_path)) as connection:
+        assert connection.execute("SELECT COUNT(*) FROM reddog_verified_outcome_staging").fetchone()[0] == 1
+        assert connection.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0] == 0
+    assert sink.load_verified_outcome(reddog_verified_pattern_memory_record_id(_record())) is None
 
 
 def test_staged_outcome_is_invisible_until_activation(tmp_path: Path) -> None:

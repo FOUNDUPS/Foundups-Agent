@@ -1,5 +1,14 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## Verified-outcome staging
+
+The existing `reddog_verified_pattern_memory_sink.py` stages records in an
+explicit outside-repository database. It snapshots input and reconciles
+record-key conflicts against exact stored payload/agent; retries preserve the
+winning row and its timestamp. Staging is outside normal recall, and the real
+sink still rejects direct activation without independent durable authority.
+See [INTERFACE.md](INTERFACE.md) and the existing sink tests for this boundary.
+
 ## HoloIndex runtime truth
 
 The exact-main controller requires clean `refs/remotes/origin/main`, sealed repair/completion

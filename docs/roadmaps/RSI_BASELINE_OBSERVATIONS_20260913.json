@@ -1875,5 +1875,121 @@
       "classifier_modified": false,
       "new_quarantine": false
     }
+  },
+  "staging_replay_continuation_20260914": {
+    "observed_on": "2026-09-14",
+    "source_commit": "0120878c7febc68b794c749a10e80c305fd0c89f",
+    "scope": "Existing verified-outcome staging sink: competing record-key insert, input snapshot and commit-boundary retry",
+    "base_git_blob_sha256": {
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "1fe0be2ab9ebf2efe272989561745255eef32706e4fe47efee2d966ef8578bfc",
+      "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "81d48f2c5e2d1928517379216ed37e65fdc9b71bbc6ac3faab6931f9bae8afd6"
+    },
+    "candidate_workspace_sha256": {
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "1d215174891bb2d19f22129ed14375c60f6300c70fa3840c86ecdea18817d47f",
+      "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "da63ea80936b86eaf32a850d079a4d847297775490e17e02acf561622c31b7f3"
+    },
+    "wsp00_gate": {
+      "is_zen_compliant": true,
+      "validated_at": "2026-09-14T01:53:43.276898",
+      "tracked_awakening_write_enabled": false
+    },
+    "execution_plane": "local preparatory maintenance; not admitted distributed WRE execution",
+    "before": {
+      "failed": 4,
+      "passed": 13,
+      "seconds": 1.39
+    },
+    "after": {
+      "passed": 51,
+      "seconds": 3.19,
+      "sink_cases": 17,
+      "admission_and_handler_cases": 34
+    },
+    "new_cases": [
+      "A real second SQLite connection wins the insert window with identical payload and agent",
+      "A competing row with different payload is preserved and rejected through the existing conflict error",
+      "A competing row with different agent is preserved and rejected through the existing conflict error",
+      "Nested caller mutation between identity calculation and database opening cannot alter the saved snapshot",
+      "Injected commit failure before the write commits leaves no staging row; a later retry succeeds",
+      "Injected acknowledgment failure after commit retains one staging row; retry keeps the same ID"
+    ],
+    "counterexample_distinction": "The identical competing insert lost an otherwise valid retry to IntegrityError; conflicting inserts already rejected but used the raw integrity error. The fourth failure was a stored-payload/identity mismatch. Both commit-boundary tests already passed before repair.",
+    "retrieval": {
+      "bundle_ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "query": "verified pattern memory staging replay concurrency activation authority",
+      "workspace_query_head": "2530f2aa2068ef8af01079b988b2291630728400",
+      "query_tree_matches_selected_merge_base": true,
+      "noise": "Duplicate hit arrays and the peripheral PatternMemory false-positive hit excluded",
+      "ordering": "Existing sink/test first, then current module contracts and adjacent authority contracts",
+      "missing_artifacts": "Tier-0 README/INTERFACE present; optional design/memory artifacts and module requirements.txt absent; test returned as a code hit and read directly",
+      "staleness_risk": "Lexical workspace context only; no CURRENT semantic-owner authority at the selected source",
+      "duplication": "One existing runtime file and one existing test file; reused PatternMemory, staging table and adjacent admission adapters"
+    },
+    "wsp15_local_selection": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1",
+      "authority": "local preparation only; not signed allocation or packet admission"
+    },
+    "protocol_corrections": [
+      {
+        "prior_section": "outcome_retention_continuation_20260914.wsp15_local_selection.priority",
+        "recorded_priority": "P1",
+        "score": 16,
+        "correct_priority": "P0",
+        "authority": "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md section 4",
+        "authority_sha256": "706239210fa0404f0f72d3b3c0f06fa3c371262d7d498546d63810d14d09b8d9",
+        "disposition": "Correct current runbook, append ModLog correction, retain earlier raw observation; no packet score/authority change"
+      }
+    ],
+    "registry_validation": {
+      "status": "current",
+      "total_tests": 1650,
+      "quarantined_tests": 269,
+      "registry_modified": false,
+      "classifier_modified": false,
+      "new_quarantine": false
+    },
+    "backend_manifest": {
+      "runtime_file_count": 1400,
+      "membership_unchanged": true,
+      "changed_runtime_hash_paths": [
+        "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py"
+      ],
+      "digest": "d14a4b422615003e3fa7401883e0ea2aadeb1e6e74402707546c45730fc97bb5"
+    },
+    "verification_command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --tb=short -q",
+    "environment": "Qualified interpreter; automatic plugins disabled; isolated O:-resident database, TEMP/TMP and fresh explicit basetemp paths",
+    "boundaries": {
+      "model_call_performed": false,
+      "new_module_or_test_file": false,
+      "live_memory_write": false,
+      "controlled_two_connection_interleaving_proved": true,
+      "existing_winner_bytes_agent_timestamp_preserved": true,
+      "local_commit_exception_retry_proved": true,
+      "staging_recall_isolation_preserved": true,
+      "sustained_or_multi_process_concurrency_proved": false,
+      "process_crash_or_power_loss_recovery_proved": false,
+      "activation_revocation_atomicity_proved": false,
+      "independent_authenticated_recall_proved": false,
+      "worker_admission": false,
+      "production_activation": false,
+      "retained_benefit": false,
+      "packet_acceptance_satisfied": false,
+      "protected_foundup_or_connection_service_changed": false
+    },
+    "next_dependency": "R11/R17 still require independent authority/activation composition and recovery/ownership proof across the whole workflow; R15 requires later measured benefit. Reuse the existing components and keep staged data outside recall until admitted.",
+    "packaging_validation": {
+      "fast_groups_passed": 15,
+      "fast_duration_ms": 3052,
+      "manifest_tests_passed": 8,
+      "manifest_seconds": 65.51
+    }
   }
 }
