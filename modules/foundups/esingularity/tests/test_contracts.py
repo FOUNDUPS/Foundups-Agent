@@ -102,7 +102,7 @@ def test_current_vision_propositions_and_progressive_disclosure_are_present() ->
     assert "slide.link.href" in component
 
 
-def test_fullscreen_deck_uses_per_slide_images_and_accessible_controls() -> None:
+def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> None:
     component = read("components/YumoriPresentation.tsx")
     vision = read("content/yumori-vision.ts")
     image_paths = re.findall(r"image: '(/[^']+)'", vision)
@@ -140,7 +140,7 @@ def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
     assert "長谷川章氏の参加は未承認" in page
 
 
-def test_economic_claims_stay_inside_the_current_public_truth_boundary() -> None:
+def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
     page = read("app/page.tsx")
     vision = read("content/yumori-vision.ts")
     combined = page + vision
