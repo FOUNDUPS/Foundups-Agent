@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-09-13 - Current-main backend inventory reconciliation
+
+- Regenerated the existing 1,400-file inventory for the two phone/voice files already changed on main `034d04b427896cb7c944efb5aa1f4d6d3e2413b5`. The closure membership is unchanged; only two content hashes change.
+- Updated the extension digest pin and existing generator-test expectation to `e28795db78d22b26a3254a7cf8e60f047133ac4e1dfca0b949b9547902080e57`. No backend source, authority rule, dependency cap or release version changed.
+- This repairs the backend preflight failure exposed by roadmap PR CI. RedDog fast tier: 15 groups pass. Package remains 67 files and within the existing byte cap; this does not publish a VSIX or activate a runtime. WSP 22, 50, 97.
+
 ## 2026-09-05 - Identity / merged builder reconciliation (0.4.141)
 
 - Corrected foreground identity above the merged `0.4.140` builder release;

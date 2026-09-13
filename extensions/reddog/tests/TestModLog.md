@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-13 - Backend inventory versus current main
+
+- Remote roadmap CI failed `test_backend_compatibility_contract.js` because two already-merged phone/voice files differed from their stale inventory hashes. Local preflight reproduced exactly those two paths.
+- Regeneration changes only those hashes in the unchanged 1,400-file closure. The pinned canonical digest and existing generator-test expectation now match the generated inventory; no assertion or boundary was removed.
+- RedDog fast tier: all 15 groups pass with the documented Windows interpreter/dependency-root overrides and isolated temporary/database paths. The initial local attempt lacked a worktree-local dependency directory and stopped before its first test; using the supported existing dependency-root override resolves that setup issue.
+- Hostile backend-preflight runner and its imported checks pass. Generator selection: seven tests passed before staging; the eighth correctly rejected the old staged inventory, then passed after the regenerated inventory and digest pins were staged. No test implementation changed between those runs; two async-plugin configuration warnings were emitted.
+
 ## 2026-09-05 - Identity / merged builder reconciliation (0.4.141 candidate)
 
 - Applied the RedDog/0102 identity contract above the already merged `0.4.140`
