@@ -156,6 +156,13 @@ execution surfaces, so Windows PATH alone cannot establish worker absence.
 The existing WSL advisory's numeric-release parsing defect is corrected in
 this revision; version-only availability remains non-authoritative.
 
+Earlier [upstream live proofs](../audits/openclaw_hermes/REDDOG_UPSTREAM_WORKER_LIVE_PROOF_20260821.md)
+already exercised confined Hermes/OpenClaw GotJunk audit canaries. Preserve
+that groundwork: those diagnostic invocations ran beneath model-capability
+admission, so they do not supply a current signed work order, materializer or
+independent verifier. The current missing API/bindings do not justify rebuilding
+the existing adapters.
+
 | Existing step | Current evidence and required connection |
 |---|---|
 | Architect model query | `MODEL_RUNTIME_BINDING_UNCONFIGURED`, `configured=false`, `accepted=false` in this shell. The [query](../../modules/communication/moltbot_bridge/src/reddog_model_runtime_binding_query.py) validates `reddog_backend_architect` only; READY here is insufficient for artifact execution. |

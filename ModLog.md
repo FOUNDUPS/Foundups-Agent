@@ -19,6 +19,9 @@
   at the same generation. R04 exact closure remains false; this is a named-source
   prerequisite proof, not completed RSI. Protected project work remains untouched.
   WSP 22, 50, 84, 97.
+- PR CI detected the parser's stale backend inventory hash. Regenerated the
+  existing 1,400-file manifest and its pins; membership is unchanged and exactly
+  one runtime hash changes. No compatibility check was weakened.
 
 ## 2026-09-13: Existing research components and early-stage RSI workloads
 

@@ -2427,7 +2427,7 @@
     "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py": "1e15a1029db535d749c56d2bba6df15a6a0ea2b01eec4494fe959f76c7f57063",
     "modules/infrastructure/dependency_launcher/src/runtime_compatibility_preflight.py": "bbed37f5cf8e2515673bef008891604dc7fdd1ca72e09eaa72083510929fe940",
     "modules/infrastructure/dependency_launcher/src/runtime_compatibility_receipt.py": "caf2465d5a21e2112574cd150e418b9b626605c693166aaa9affa8c2b94f1372",
-    "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py": "c1492a1b9a2a7c0b7a81cf010002a245f7461a88ecb2ee31b7a5bfa1c7fcad36",
+    "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py": "5a1d4bc19e8f36eb122d4fa16c3330358d5eed7ad084587fad1fda22f8436e12",
     "modules/infrastructure/foundups_mcp_bridge/__init__.py": "14ec5bb1bf00656f81004d554fccf20f736249747ab537a25657afe83e66a888",
     "modules/infrastructure/foundups_mcp_bridge/src/__init__.py": "2ad55a9f5ee7c8c4aa3533be8a5c25f82eb3155e14729c355e283bf4ebdfe493",
     "modules/infrastructure/foundups_mcp_bridge/src/bridge_server.py": "b599862def1fd7955b70ff8cf7f904605c78db65253bab04e63bc6074d2325d5",

@@ -1,5 +1,15 @@
 # RedDog ModLog
 
+## 2026-09-13 - Pin WSL advisory release-suffix correction
+
+- Regenerated the existing backend manifest after the WSL OpenClaw version
+  parser repair. The 1,400-file closure membership is unchanged; only the
+  `dependency_launcher/src/wsl_agent_runtime.py` content hash changes.
+- Updated the manifest pin and existing generator-test expectation to
+  `100c0148e7c5e2f4ceb16c4018449e60f5cdee19e14f3c6c20eb61b9ce544392`.
+  This resolves the backend preflight mismatch found by PR CI; it changes no
+  extension behavior, authority policy or release version. WSP 22, 50, 97.
+
 ## 2026-09-13 - Current-main backend inventory reconciliation
 
 - Regenerated the existing 1,400-file inventory for the two phone/voice files already changed on main `034d04b427896cb7c944efb5aa1f4d6d3e2413b5`. The closure membership is unchanged; only two content hashes change.
