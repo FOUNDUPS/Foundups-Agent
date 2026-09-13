@@ -1,5 +1,12 @@
 # eSingularity TestModLog
 
+## 2026-09-13 — Current vision source regression repair
+
+- Rebased the three stale presentation contracts on the sole current source, `frontend/content/yumori-vision.ts`; the intentionally removed `yumori-presentation.ts` is no longer read.
+- Replaced obsolete sprite/CSS assertions with per-slide Next `Image`, source asset, accessibility, keyboard, swipe, autoplay and JHR-entry checks.
+- The repaired contract suite passed 26/26 in CI. The same run exposed the component's synchronous effect-state lint error; URL, slide and reduced-motion initialization now runs in a cancellable zero-delay browser task.
+- Replaced removed modeled revenue/FCFE expectations with a fail-closed public boundary: reported demolition estimate and verified attendance remain visible, while unaudited projections remain absent.
+
 ## 2026-09-13 — Shared ticker consumers
 
 - Extended the existing field-status contract to require exactly one shared ticker on each homepage and correct project-link resolution from the movement page.

@@ -8,8 +8,8 @@ The test suite verifies the monorepo and public-presentation contracts:
 - explicit token deferral rather than an invented token;
 - existing public routes remain present in source;
 - exactly one presentation notification is added to the existing ticker;
-- the Japanese canonical source has ten slides with complete derived language states;
-- floor allocation, COG DC ownership, economics labels, timed controls, assets, and outreach provenance remain truth-bound;
+- `frontend/content/yumori-vision.ts` is the sole current ten-slide source, with Japanese-first and complete derived language states;
+- per-slide image assets, floor allocation, COG DC ownership, public economic boundaries, timed controls, and outreach provenance remain truth-bound;
 - the `/future` source remains valid UTF-8 and free of the superseded speculative capacity schedule.
 
 Run from the repository root:
