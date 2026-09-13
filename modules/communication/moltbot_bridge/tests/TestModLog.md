@@ -1,3 +1,11 @@
+## 2026-09-14: Outcome response handoff and shared validation
+
+- Packaging: 15 fast groups passed in 3,372ms; 8 staged-manifest tests passed in 62.51s (two pytest configuration warnings). Runtime membership, test registry/quarantine and guards are unchanged.
+- Added 20 cases to the existing outcome-signing test file: four real-root-store handoff/clock cases and sixteen shared validation cases. Preserved the original test, helpers and assertions. Reconstruction fixtures do not claim an actual killed process, live service or production UID proof.
+- Before validator repair: 13 failed / one passed / five deselected in 1.81s. Malformed truthy flags, contradictory rejection and non-boolean verifier results passed the old predicate. Focused repair initially passed 19 cases in 3.11s; separate receipt/audit verifier negatives expanded the file to 21 cases.
+- Connected selection initially failed 19 cases because moving validation removed a fingerprint import still used by publication retry. Restored that import without changing test assertions. Final eight-suite result: 207 passed / one Linux-root skip in 31.12s. Failure logs and source bindings are retained in `response_handoff_continuation_20260914`.
+- Root and secret-access grants stay consumed; normal signing freshness is not a recovery API. The next schema/persistence/readback layers and required process/ownership proofs remain open. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Root commit acknowledgment recovery
 
 - Packaging: 15 fast groups passed in 4,658ms; 8 staged-manifest tests passed in 62.11s (two pytest configuration warnings). Runtime membership, registry/quarantine and guards are unchanged.

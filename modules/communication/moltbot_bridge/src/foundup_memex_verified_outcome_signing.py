@@ -9,12 +9,15 @@ from typing import Any, Mapping, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
+    public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
     VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
+    canonical_signer_audit_attestation_input,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PREFIX_RECEIPT,
+    SignatureVerifier,
     canonical_signing_input,
 )
 
@@ -113,6 +116,47 @@ def validate_verified_outcome_signing_request(
     return payload
 
 
+def validate_verified_outcome_signing_response(
+    response: Any,
+    signing_input: str,
+    *,
+    signer_public_key: str,
+    key_epoch: str,
+    requester_principal_id: str,
+    signature_verifier: SignatureVerifier,
+) -> bool:
+    """Verify the original response; this grants no replay or recovery authority."""
+    audit_input = canonical_signer_audit_attestation_input(
+        signing_input=signing_input,
+        signature=str(response.signature),
+        audit_mac=str(response.audit_mac),
+        signer_public_key=signer_public_key,
+        key_epoch=key_epoch,
+        requester_principal_id=requester_principal_id,
+        domain_prefix=VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
+    )
+    return bool(
+        response.accepted is True
+        and getattr(response, "rejection_code", "") == ""
+        and response.signer_public_key == signer_public_key
+        and response.key_fingerprint == public_key_fingerprint(signer_public_key)
+        and response.key_epoch == key_epoch
+        and response.boundary_attested is True
+        and response.requester_identity_attested is True
+        and response.signer_loads_no_untrusted_code is True
+        and response.no_secret_material_returned is True
+        and response.signature
+        and response.audit_mac
+        and response.audit_attestation_signature
+        and signature_verifier.verify(
+            signer_public_key, signing_input, response.signature
+        ) is True
+        and signature_verifier.verify(
+            signer_public_key, audit_input, response.audit_attestation_signature
+        ) is True
+    )
+
+
 def _parse_payload(signing_input: str) -> Mapping[str, Any] | None:
     if not isinstance(signing_input, str) or not signing_input.startswith(
         VERIFIED_OUTCOME_SIGNING_PREFIX
@@ -147,4 +191,5 @@ __all__ = [
     "VerifiedOutcomeSigningAuthority",
     "VerifiedOutcomeSignerPolicy",
     "validate_verified_outcome_signing_request",
+    "validate_verified_outcome_signing_response",
 ]

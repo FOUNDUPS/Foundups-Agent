@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 response validation and durable handoff contract
+
+- Packaging: 15 fast groups and 8 staged-manifest tests passed. The 1,400-file runtime list has two changed source hashes and matching pins; the current 1,650/269 test registry and guards are unchanged.
+- Reconciled owned work from main `96b70c08`, passed the WSP 00 software gate and used WSP 97 retrieval/fixture reuse. Existing outcome signing now owns shared response validation; the publisher calls it and rejects malformed boolean claims or contradictory rejection. Local planning 16/P1 is not runtime allocation.
+- Twenty new cases extend an existing test file; final connected result is 207 passed / one Linux-root skip. Preserved both original acceptance-gap evidence and the corrected import failure from integration testing.
+- Canonical roadmap, R02 map, runbook and backlog now specify immutable response records → pending durability → full-response commitment → separately authorized readback → publisher recovery. Those runtime layers and retained benefit remain open. Shared checkout, protected FoundUps and live services were untouched. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: R11 root commit acknowledgment recovery
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership stays at 1,400 with two source hashes and matching pins; the current 1,650/269 registry and guards are unchanged.

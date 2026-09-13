@@ -18,12 +18,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_run
     build_outcome_evidence_envelope,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
-    VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
     VERIFIED_OUTCOME_SIGNER_ROLE,
     VERIFIED_OUTCOME_SIGNING_OPERATION,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
-    canonical_signer_audit_attestation_input,
+    validate_verified_outcome_signing_response,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     IsolatedSignerClient,
@@ -292,36 +289,13 @@ def _validate_signer_response(
     response: Any,
     signing_input: str,
 ) -> None:
-    audit_input = canonical_signer_audit_attestation_input(
-        signing_input=signing_input,
-        signature=str(response.signature),
-        audit_mac=str(response.audit_mac),
+    valid = validate_verified_outcome_signing_response(
+        response,
+        signing_input,
         signer_public_key=publisher.signer_public_key,
         key_epoch=publisher.key_epoch,
         requester_principal_id=publisher.issuer_principal_id,
-        domain_prefix=VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
-    )
-    valid = bool(
-        response.accepted
-        and response.signer_public_key == publisher.signer_public_key
-        and response.key_fingerprint
-        == public_key_fingerprint(publisher.signer_public_key)
-        and response.key_epoch == publisher.key_epoch
-        and response.boundary_attested
-        and response.requester_identity_attested
-        and response.signer_loads_no_untrusted_code
-        and response.no_secret_material_returned
-        and response.signature
-        and response.audit_mac
-        and response.audit_attestation_signature
-        and publisher.signature_verifier.verify(
-            publisher.signer_public_key, signing_input, response.signature
-        )
-        and publisher.signature_verifier.verify(
-            publisher.signer_public_key,
-            audit_input,
-            response.audit_attestation_signature,
-        )
+        signature_verifier=publisher.signature_verifier,
     )
     if not valid:
         raise ValueError("verified_outcome_publish_signer_rejected")

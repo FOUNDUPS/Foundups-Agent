@@ -241,6 +241,17 @@ existing envelope after checking exact requested evidence, publisher identity,
 original issuance and signature. It does not re-sign, rewrite, renew or activate
 on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
 runtime authority still checks current key, revocation and expiry.
+`validate_verified_outcome_signing_response(response, signing_input, *,
+signer_public_key, key_epoch, requester_principal_id, signature_verifier)` is the
+shared predicate in `foundup_memex_verified_outcome_signing.py`; the publisher's
+existing validation wrapper calls it. Acceptance, boundary/requester attestations,
+untrusted-code exclusion and secret exclusion require exact `True`, as do both
+signature-verifier results. A present rejection code must be empty. Original
+receipt and outcome-domain audit signatures, key, fingerprint and epoch remain
+bound. The predicate performs no persistence, issuance renewal, state transition, current
+read-authorization check or record deserialization. Malformed attributes or
+dependency exceptions can still raise; consumers must fail closed. Its result
+cannot authorize durable response replay or construct a process-local capability.
 `AuthorityRuntimeVerifiedOutcomeStore.publish()` bounds revision-conflict retries
 to three commit attempts, preserving the signed envelope and unrelated current
 state. Other errors are not retried. On publication OSError/RuntimeError/ValueError,

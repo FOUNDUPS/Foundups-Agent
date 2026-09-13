@@ -1,5 +1,14 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## Verified-outcome response validation
+
+The publisher uses `validate_verified_outcome_signing_response(...)` in the
+existing outcome-signing module for receipt and audit verification. Acceptance
+and attestation flags, plus verifier results, must be actual `True`; a nonempty
+rejection code rejects. This reusable validation grants no replay authority.
+Durable response storage and authenticated readback remain the next R11-A layers
+in the [system runbook](../../../docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14).
+
 ## Verified-outcome root commit recovery
 
 The existing root service acknowledges an exact already-committed receipt after

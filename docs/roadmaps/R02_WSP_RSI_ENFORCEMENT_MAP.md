@@ -262,6 +262,16 @@ This recovers an in-process lost acknowledgment. Full outcome-response durabilit
 authenticated restart readback and the process-local reservation seal remain the
 next R11-A boundary. Conversation replay has distinct authority and is not a grant.
 
+**Signer-response handoff follow-up:** The publisher now uses response validation
+from the existing outcome-signing owner; malformed boolean claims, contradictory
+rejection and non-boolean cryptographic verifier results reject. The connected
+selection passes 207 tests with one Linux-root skip. Root-backed interruption and
+clock tests preserve consumed grants. The [handoff contract](../operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14)
+orders immutable response records, pending durability, terminal commitment,
+separately authorized readback and publisher recovery. The next local layer is
+the bounded record/binding contract; persistence and readback remain unimplemented.
+Object reconstruction is not production process-death recovery or retained RSI.
+
 ### R12 — Independent production promoter
 
 **Normative references:** WSP 48 / 71 / 95 / 97. **Evidence level:** `GENERIC_OWNER_MISSING`.
