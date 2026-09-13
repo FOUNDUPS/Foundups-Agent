@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Active-row retry preserves canonical identity
+
+- Extended the existing sink comparison and two existing tests after WSP 00/97 retrieval. Python dictionary equality allowed boolean/integer, integer/float and signed-zero mismatches under a different canonical record ID. Compare with the existing canonical serializer; record IDs and schema remain unchanged.
+- Before: 3 failed / 18 passed in 1.62s. After: 55 sink/admission/handler cases passed in 4.15s. Conflicting fixture rows remain unchanged; matching active/staged retries still succeed. Canonical registry remains current at 1,650 / 269 quarantined.
+- Local R11 preparation only: activation remains blocked, fixture insertion is not production authority, and no retained-benefit claim is made. WSP 11/22/48/50/60/84/95/97.
+
 ## 2026-09-14: Staging snapshot and competing replay
 
 - Extended the existing sink and test suite after WSP 00/97 retrieval. Deep snapshots bind record ID and stored payload; record-key conflict handling preserves the winning row and checks exact payload/agent before commit. Identical competing retries succeed; conflicting winners use the existing rejection.

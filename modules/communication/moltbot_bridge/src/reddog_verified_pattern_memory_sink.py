@@ -141,6 +141,7 @@ class RedDogVerifiedPatternMemorySink:
 
         payload = _validated_record(record)
         execution_id = _record_id(payload)
+        canonical = _canonical_json(payload)
         memory = PatternMemory(db_path=self.db_path)
         try:
             _ensure_staging_table(memory)
@@ -153,11 +154,10 @@ class RedDogVerifiedPatternMemorySink:
                 if (
                     active["agent"] != self.agent
                     or active["success"] != 1
-                    or _stored_payload(active) != payload
+                    or _canonical_json(_stored_payload(active)) != canonical
                 ):
                     raise ValueError("verified_outcome_existing_record_conflict")
                 return execution_id
-            canonical = _canonical_json(payload)
             # Reconcile a competing insert against the winner without replacing it.
             memory.conn.execute(
                 "INSERT INTO reddog_verified_outcome_staging "

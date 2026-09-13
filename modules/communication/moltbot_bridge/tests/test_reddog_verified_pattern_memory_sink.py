@@ -146,8 +146,9 @@ def test_sink_readback_rejects_noncanonical_record_id(tmp_path: Path) -> None:
     assert sink.load_verified_outcome(record_id) is None
 
 
+@pytest.mark.parametrize("already_active", [False, True])
 def test_sink_staging_is_idempotent_for_same_verified_outcome_record(
-    tmp_path: Path,
+    tmp_path: Path, already_active: bool,
 ) -> None:
     repo = _repo(tmp_path)
     sink = build_reddog_verified_pattern_memory_sink(
@@ -157,10 +158,16 @@ def test_sink_staging_is_idempotent_for_same_verified_outcome_record(
     assert sink is not None
 
     record = _record()
+    if already_active:
+        # Fixture only: the production sink cannot activate records.
+        _seed_active(sink.db_path, reddog_verified_pattern_memory_record_id(record), record)
     first = sink.stage_verified_outcome(record)
     second = sink.stage_verified_outcome(record)
 
     assert second == first
+    assert first == reddog_verified_pattern_memory_record_id(record)
+    if already_active:
+        assert sink.load_verified_outcome(first) == record
 
 
 @pytest.mark.parametrize("competing", ["same", "different-payload", "different-agent"])
@@ -303,8 +310,18 @@ def test_staged_outcome_is_invisible_until_activation(tmp_path: Path) -> None:
     assert not callable(getattr(sink, "activate_verified_outcome", None))
 
 
+@pytest.mark.parametrize(
+    "stored_overrides",
+    [
+        {"work_order_id": "attacker"},
+        {"pattern_memory_admission_allowed": 1},
+        {"regression_test_count": 12.0},
+        {"admission_metadata": {"margin": -0.0}},
+    ],
+    ids=["changed-work", "boolean-integer", "integer-float", "signed-zero"],
+)
 def test_preseeded_conflicting_record_cannot_satisfy_idempotent_store(
-    tmp_path: Path,
+    tmp_path: Path, stored_overrides: dict[str, object],
 ) -> None:
     repo = _repo(tmp_path)
     sink = build_reddog_verified_pattern_memory_sink(
@@ -312,12 +329,20 @@ def test_preseeded_conflicting_record_cannot_satisfy_idempotent_store(
         db_path=tmp_path / "runtime" / "pattern_memory.db",
     )
     assert sink is not None
-    record = _record()
+    record = _record(admission_metadata={"margin": 0.0})
     record_id = reddog_verified_pattern_memory_record_id(record)
-    _seed_active(sink.db_path, record_id, _record(work_order_id="attacker"))
+    stored = {**record, **stored_overrides}
+    assert reddog_verified_pattern_memory_record_id(stored) != record_id
+    _seed_active(sink.db_path, record_id, stored)
 
     with pytest.raises(ValueError, match="verified_outcome_existing_record_conflict"):
         sink.stage_verified_outcome(record)
+    with sqlite3.connect(str(sink.db_path)) as connection:
+        assert connection.execute(
+            "SELECT output_result FROM skill_outcomes WHERE execution_id = ?", (record_id,),
+        ).fetchone()[0] == json.dumps(stored, sort_keys=True, separators=(",", ":"))
+        assert connection.execute("SELECT COUNT(*) FROM reddog_verified_outcome_staging").fetchone()[0] == 0
+    assert sink.load_verified_outcome(record_id) is None
 
 
 def test_sink_rejects_direct_store_without_activation_capability(tmp_path: Path) -> None:

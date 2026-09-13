@@ -251,6 +251,60 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Active-record identity checkpoint — 2026-09-14
+
+Packaging: **15 fast groups passed in 3,104ms** and **8 staged-manifest tests
+passed in 68.97s**. The 1,400-member runtime closure changes only the sink hash;
+both existing compatibility pins were refreshed. Earlier fast invocations
+rejected an incorrect temporary-drive setting and the not-yet-refreshed
+manifest; the final qualified invocation passes. No test or guard was weakened.
+
+Resumed from merged PR1717/main
+`dae4b76aeae06d4dd25e6d8a80ef1b65b32b6c19`; the previous staging repair is
+complete at that source. WSP 00 awakening and its strict software gate passed.
+This is one local R11 maintenance checkpoint, not a distributed worker run.
+
+The canonical-main Holo query returned a lexical workspace bundle at
+`0c81418fe94a7786cfd55f01e138ddc5d510583d`: `UNKNOWN`, index gap, zero semantic
+owner attempts. Its five code hits were peripheral and it returned no tests.
+The bundle's README/INTERFACE and history paths were useful navigation only.
+Deduplicate hit arrays, discard unrelated false-positive/vision/market hits,
+and explicitly include the sink, its existing tests, admission producer and
+handler in the owned source above. Read those exact files and module contracts;
+NAVIGATION confirms PatternMemory. Optional memory/design artifacts and the
+module requirements file are absent. This repairs local context assembly, not
+Holo freshness; no reindex or CURRENT claim is made.
+
+Micro finding: the active-row retry branch used Python dictionary equality,
+which equates `true` with `1`, `12` with `12.0`, and `0.0` with `-0.0`.
+Those JSON values have different canonical digests. All three preseeded-row
+counterexamples were acknowledged despite failing subsequent record-ID
+readback: **3 failed / 18 passed in 1.62s** before repair. Reuse the existing
+canonical serializer for this comparison, keeping the digest algorithm and
+record-ID format unchanged. The existing conflict test now covers those values;
+the idempotence test also covers a valid fixture-seeded active row. Conflicting
+rows retain their bytes and create no staging row. **55 sink/admission/handler
+tests pass in 4.15s**; registry remains current at 1,650 / 269 quarantined.
+
+Macro decision: preserve PatternMemory, its existing tables and the admission
+contracts. Numeric normalization would change receipt identities, and a new
+store would duplicate the existing boundary; neither is needed. Deterministic
+SQLite fixtures are sufficient for this narrow defect, so no Qwen/Gemma or
+provider call is needed. Local WSP 15 planning score: 2 + 4 + 3 + 4 = **13/P1**,
+under section 4; this is not a signed allocation or runtime admission receipt.
+
+The real sink remains `activation_ready=False`. Fixture-seeded active rows
+are test inputs, not authenticated activation. No production memory, protected
+FoundUp, worker binding, or service was changed. R11 still requires an
+independently bound durable authority, activation/revocation ordering and
+recovery, then an invocation consuming accepted memory. Resume by retrieving
+the existing root-authority/startup-factory and admission contracts named in
+the module INTERFACE and R02 map; do not synthesize authority to unblock them.
+R15 still needs measured retained benefit. This checkpoint advances no G0–G5
+gate. Machine-readable evidence is in the existing
+[baseline observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
+under `active_record_identity_continuation_20260914`.
+
 ### Staging replay checkpoint — 2026-09-14
 
 Packaging validation: all 15 RedDog fast groups pass (3,052ms), and all eight
@@ -498,13 +552,16 @@ The missing dispatch evidence belongs in R06/R07, not a new orchestration subsys
 
 ## Economical model and effort policy
 
-**012 working-session preference, 2026-09-14:** continue through several
-connected, reviewable layers before handing back. Validate each layer, then
-carry it through its consumer, required checks and canonical documentation.
-A local test pass or merged PR is a checkpoint, not an automatic session end.
-Use concise progress updates during sustained work. Do not enlarge a single
-change without evidence, repeat unchanged failed probes, or bypass a missing
-authority to keep the session busy.
+**012 working-session preference, revised 2026-09-14:** use short, bounded
+checkpoints following the reported Codex connection interruption. This
+supersedes the earlier preference for several layers per session. Complete
+one evidenced change, its consumer checks and documentation; save the exact
+source, results, outstanding gates and next action before continuing. Recover
+from that checkpoint after an interruption and verify Git/PR state before
+repeating work. Continue the RSI journey across checkpoints. Keep concise
+progress updates, and never enlarge scope, retry unchanged failures, or bypass
+authority merely to extend a run. Short checkpoints reduce recovery work;
+they are not a demonstrated fix for the unconfirmed connection failure.
 
 These are proposed operating defaults to benchmark, not runtime settings changed by this document. An admitted provider/model contract takes precedence.
 

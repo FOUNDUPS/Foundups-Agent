@@ -37,6 +37,14 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The existing sink now compares an active row using canonical JSON before
+acknowledging a retry. Three type/value mismatches that Python treated as equal
+are rejected; valid retries keep their existing record IDs. The
+[active-record checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#active-record-identity-checkpoint--2026-09-14)
+records 55 passing sink/admission cases and the revised short-checkpoint
+continuity policy. This is R11 preparation; authenticated activation and
+retained improvement remain open.
+
 The next R11 preparation repairs retries in the existing staging sink. A
 competing identical insert returns the same record ID, a conflicting winner is
 preserved and rejected, and a deep snapshot keeps identity and payload aligned.

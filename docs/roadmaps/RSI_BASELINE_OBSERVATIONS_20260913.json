@@ -1991,5 +1991,121 @@
       "manifest_tests_passed": 8,
       "manifest_seconds": 65.51
     }
+  },
+  "active_record_identity_continuation_20260914": {
+    "date": "2026-09-14",
+    "base_commit": "dae4b76aeae06d4dd25e6d8a80ef1b65b32b6c19",
+    "predecessor": {
+      "pr": 1717,
+      "verified_state": "MERGED",
+      "merge_commit": "dae4b76aeae06d4dd25e6d8a80ef1b65b32b6c19"
+    },
+    "status": "LOCAL_PREPARATION_VERIFIED",
+    "execution_plane": "Local maintenance of the existing WRE memory boundary; no distributed runtime admission",
+    "wsp00": {
+      "awakening_exit_code": 0,
+      "strict_gate_passed": true,
+      "last_validation": "2026-09-14T02:22:34.582364"
+    },
+    "wsp15_local_selection": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability_urgency": 3,
+      "impact": 4,
+      "total": 13,
+      "priority": "P1",
+      "authority": "Local planning only; not a signed allocation or packet admission"
+    },
+    "retrieval": {
+      "query": "verified pattern memory record identity canonical staging replay tests",
+      "entry": "canonical-main scripts/reddog_holoindex_owner_query_once.py; lexical module bundle",
+      "bundle_ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "workspace_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "noise": "Five peripheral code hits and zero test hits; excluded false-positive memory, market and vision hits",
+      "ordering": "Explicitly included exact owned sink, existing sink tests, admission producer/handler and module contracts; NAVIGATION confirms PatternMemory",
+      "missing_artifacts": "Required README/INTERFACE present; optional memory/design artifacts and module requirements.txt absent; tests retrieved directly",
+      "staleness": "Canonical-main workspace bundle is not selected-source authority; exact owned source/docs/tests read before edits",
+      "duplication": "Deduplicated hit arrays; extended existing sink and two tests, no new module/store/test file",
+      "no_reindex": true
+    },
+    "counterexamples": [
+      "boolean true versus integer 1",
+      "integer 12 versus float 12.0",
+      "positive versus negative zero in nested metadata"
+    ],
+    "before": {
+      "failed": 3,
+      "passed": 18,
+      "seconds": 1.62,
+      "failure": "Active-row retry acknowledged a different canonical identity instead of raising the existing conflict"
+    },
+    "after": {
+      "passed": 55,
+      "seconds": 4.15,
+      "scope": "21 sink cases plus 34 queue-admission/resident-handler cases"
+    },
+    "repair": "Compare active payload and request with the existing canonical serializer; preserve mismatched row and create no staging row",
+    "compatibility": [
+      "Canonical serializer/digest/record-ID functions unchanged",
+      "Matching staged and fixture-seeded active retries preserve ID; active fixture readback succeeds",
+      "Real sink activation_ready remains false"
+    ],
+    "registry": {
+      "current": true,
+      "total": 1650,
+      "quarantined": 269,
+      "registry_changed": false
+    },
+    "packaging": {
+      "fast_groups_passed": 15,
+      "fast_duration_ms": 3104,
+      "manifest_tests_passed": 8,
+      "manifest_seconds": 68.97,
+      "runtime_count": 1400,
+      "runtime_membership_changed": false,
+      "changed_runtime_paths": [
+        "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py"
+      ],
+      "manifest_digest": "83c54885ff43e0d7b6a0d21e96b268beaadaec99ec4514c044207b7eca01f6b8",
+      "initial_failures": [
+        "TEMP/TMP outside permitted artifact volume; corrected invocation",
+        "Manifest not yet refreshed for changed source; regenerated manifest and refreshed existing pins"
+      ],
+      "pytest_configuration_warnings": 2
+    },
+    "documentation_index_correction": {
+      "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+      "inherited_index_hash": "eaeca30bd2787571e9bcf2dd5d0e1d7e81324ffb1e29877cf59c9065ebd61ba2",
+      "inherited_git_blob_hash": "32bae9d6b8b675e69cd8364d463e247492aa09f086ee7011135124ca0c34bf77",
+      "disposition": "Inherited index metadata did not match the committed blob; refreshed the two changed document rows against LF-normalized Git content. Membership and all other row fields remain unchanged."
+    },
+    "completion_gates_advanced": [],
+    "runtime_admission_proven": false,
+    "authenticated_activation_proven": false,
+    "retained_benefit_proven": false,
+    "limits": [
+      "Disposable fixture-seeded active rows only; not authenticated activation",
+      "No whole-workflow atomicity, process-crash or sustained-concurrency proof",
+      "No live provider, service, protected FoundUp or shared-checkout mutation"
+    ],
+    "next_action": "Retrieve the existing independent durable root-authority/startup-factory and memory-admission contracts from R02 and the module INTERFACE; reconcile owner and signed runtime scope before activation composition. R15 still requires later measured benefit.",
+    "checkpoint_policy": "Latest 012 steering supersedes multi-layer sessions: save one bounded verified checkpoint with source, results, outstanding gates and next action; recover repository truth before repeating work. Connection cause remains unconfirmed.",
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "eb034c8e72564f6103c9be76656e12c176a4ac481c70b39e4860987eb11c7788",
+      "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "70f034331d1abbc2ceccf1ba5bc1ea191c8c37b21d403e38f00fbfcfbef87083"
+    },
+    "local_log_sha256": {
+      "before.txt": "03e865885b99bb797f8c71ffbdc73114942c138e87043c0b633cc638c87d2c4a",
+      "after.txt": "c3752db537fdbdc0bced8e3e45e21d322f5b5b8f9dfe25f3c81e03047c9e3ec5",
+      "registry.txt": "af28182d893f69c07c80096e78f45ae3c700aad53be2b2a25a19224bac571bad",
+      "fast.txt": "d669c1b7c6ee0a31482ad69cdf43d654a1dc1f4498bfd503f0d61323d14db2d9",
+      "fast-corrected-environment.txt": "d5d7516a2cfc2932f2fd8c01a10d0148eb30af238c141fa28eaa2fabcb282380",
+      "fast-final.txt": "48a1f0d3cf14c896c9b0554e2fb2935d3b55b9b3a872c94b653a94a79af91c9e",
+      "manifest.txt": "cad314ff3b367de65c635d4983e9b8f305b4ef67d4364b954e63783d173fe63f"
+    }
   }
 }

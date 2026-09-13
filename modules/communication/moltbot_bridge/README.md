@@ -7,6 +7,8 @@ explicit outside-repository database. It snapshots input and reconciles
 record-key conflicts against exact stored payload/agent; retries preserve the
 winning row and its timestamp. Staging is outside normal recall, and the real
 sink still rejects direct activation without independent durable authority.
+Active-row retries compare canonical JSON, so Python's boolean/numeric equality
+cannot acknowledge a row with a different record identity.
 See [INTERFACE.md](INTERFACE.md) and the existing sink tests for this boundary.
 
 ## HoloIndex runtime truth
