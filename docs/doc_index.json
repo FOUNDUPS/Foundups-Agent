@@ -11564,7 +11564,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "0e4c24859bbd825ef273128fec28d4bdc5446cf8181b9f7bf6785616fec50e04",
+      "hash_sha256": "d63f14895a17fd2cd796067ddeae11a488f4231ee84b51f4047cc994d3598dec",
       "links": {
         "automation": [
           "doc_dae"
@@ -11581,7 +11581,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
-      "size_bytes": 50472,
+      "size_bytes": 51124,
       "status": "active",
       "wsp_refs": [
         "WSP 22",

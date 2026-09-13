@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: Restore matched-reference Holo retrieval with existing runtime
+
+- WSP 00 bootstrap/strict gate passed; WSP 97 traced the startup failure through the existing supervisor and dependency guard. Bounded, non-authoritative diagnostics identified missing NumPy under the ambient Python 3.12.2 base; raw output was not retained.
+- Reused the primary checkout's existing vetted 3.12.10 venv with the reference checkout's helper. An uninstrumented default-budget query returned CURRENT/no-gap in one attempt at matched source `78b79c36`; current task source `89bdd7a5` correctly rejected that older authority before startup and returned local bundle context.
+- Corrected canonical CLAUDE/WSP 00 retrieval recipes, regenerated only AGENTS, synchronized the WSP 00 mirror and recorded the source/budget boundaries in the existing Holo atlas and R03 plan. No runtime code, installation, route/index change or active FoundUp experiment.
+- Existing runtime-selection tests: 2 passed / 16 deselected in 0.39s. Structural documentation verification is recorded in the PR. R03 current-main qualification, R04/R05 and full RSI remain open. WSP 22, 50, 81, 84, 87, 97.
+
 ## 2026-09-13: R02 historical ledger dispositions
 
 - Applied WSP 00 bootstrap/strict gate and WSP 97 source/owner checks at main `cc9c79361`. Reused the existing R02 map and evidence inventory to disposition all 11 pending April rows/tracks and four relevant closed groundwork rows.
