@@ -1,3 +1,9 @@
+## 2026-09-14: Existing authority composition baseline
+
+- Reused `test_foundup_memex_verified_outcome_runtime_authority.py`, `test_reddog_signer_root_protected_use_composition.py` and `test_reddog_signer_system_service_manifest_selection_loader.py`: **46 passed / one skipped in 26.90s** on the PR1718 source tree. The skipped case requires Linux ownership semantics. Command and environment are in `tests/README.md`; no test source changed.
+- Separate disposable probe reused `_publish(..., activate=False)`, the actual signed publisher/authority store and `_activate_published`, with existing digest signer/verifier doubles and `_CanonicalPatternMemorySink(activation_fail=True)`. Admission rejects/no memory write, but the envelope is readable and the fixture runtime authority can issue; zero memory records/one staged record remain. Re-publishing the same inputs at NOW+1 rejects with `verified_outcome_evidence_conflict`.
+- This qualifies existing local contracts and identifies integration gaps. It does not prove production signatures, admitted runtime supply, Linux process isolation, atomic authority/memory activation or retained benefit. Evidence: baseline observations → `authority_activation_continuation_20260914`. WSP 22/48/50/60/71/95/97.
+
 ## 2026-09-14: Active-row canonical identity
 
 - Packaging: **15 fast groups passed in 3,104ms**, **8 staged-manifest tests passed in 68.97s** (two pytest configuration warnings). Corrected the initial temporary-drive invocation and refreshed the manifest/pins before the final fast pass. The 1,400-file runtime membership is unchanged; only the sink hash changes.

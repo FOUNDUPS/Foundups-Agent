@@ -214,6 +214,18 @@ This is local R11 evidence; fixture insertion is not authenticated activation.
 
 **Required next evidence:** Compose authenticated scope, atomic/idempotent retention and failure recovery, then demonstrate the next invocation reads the accepted version. Storage alone is not verified learning.
 
+**2026-09-14 composition audit:** The queue-to-publisher and authority-to-Memex
+connections already exist. The queue constructs a staging-only PatternMemory
+sink; the independent activation dependency/method and whole-workflow acceptance
+remain absent. Static caller search also leaves the existing protected-use loader
+and WSP 71 ephemeral factory without production callers. A disposable real-adapter
+probe with signer/verifier doubles shows ACTIVE evidence after failed memory
+activation and a conflicting publication on a one-second-later retry. The real
+sink remains closed. Existing selected suites: **46 passed / one Linux ownership
+skip**. See the [connection map and R11-A–F sequence](../operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14).
+R11-A (immutable publication/retry) is the next local implementation target;
+production composition still requires authentic independent authority inputs.
+
 ### R12 — Independent production promoter
 
 **Normative references:** WSP 48 / 71 / 95 / 97. **Evidence level:** `GENERIC_OWNER_MISSING`.
