@@ -1,5 +1,7 @@
 # R25 — Consented 012 / RedDog feedback into governed tickets
 
+Current validation scope (012 correction, 2026-09-13): this work first qualifies feedback behavior using synthetic participants, activity/consent records and a dedicated test FoundUp. The [system roadmap](../../ROADMAP.md#rsi-validation-scope-internal-workflows-and-dedicated-fixtures) excludes active FoundUps from RSI experiments; consent or engagement alone does not override that exclusion. The live-delivery behavior below remains future, separately scoped product adoption.
+
 Date: 2026-09-11. Status: `SPECIFIED_NOT_IMPLEMENTED`. Parent: [system roadmap](../../ROADMAP.md). Registry: [planning backlog](rsi_swarm_backlog.json). Architecture decision: [hybrid tickets, teams and feedback](../architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md). This packet is not a work order, a message-send instruction or a delegation of voting authority.
 
 ## Outcome

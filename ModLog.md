@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: Keep RSI validation on internal workflows
+
+- Applied 012's correction: active FoundUps are excluded from RSI experiments. Removed eSingularity from R22's proposed scope; R20/R22 now specify dedicated synthetic lifecycle/consumer fixtures. Product adoption is downstream, not an R15 dependency.
+- Preserved the existing registry-audit procedure as the first canary and assessed existing auto-post/PQN research surfaces as later isolated candidates. The dispatch runbook names reuse paths, fixed checks, live-state hazards and admission prerequisites. No new module, experiment, project test or runtime change was made.
+- Applied the boundary to all 26 non-executable packets and linked it from the enforcement map, hybrid architecture and R25 feedback packet. Source audit evidence and historical observations are retained.
+- WSP 00 activation/strict gate passed; existing Holo local bundle returned usable context with UNKNOWN semantic freshness. The roadmap/runbook supplied current sequencing; exact source reads found the R22 project coupling and live-test/default-output hazards. This targeted review reused the full audit; no module suite or provider was launched. WSP 22, 50, 84, 97.
+
 ## 2026-09-13: R03 reuse of source-bound Holo entry and local fallback
 
 - Ran WSP 00 activation/strict gate in an isolated checkout and applied WSP 97 to existing owner/authority/bundle/repair surfaces. Added no module or runtime behavior; source selection was already implemented.
