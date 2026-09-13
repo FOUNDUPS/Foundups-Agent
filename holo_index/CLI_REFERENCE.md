@@ -83,6 +83,14 @@ before maintenance; query callers do not reindex, activate a route, edit an
 authority, or retry indefinitely. An index refresh must not be used to guess
 away a service-startup failure.
 
+For the observed startup exit, [the existing readiness loop](../modules/infrastructure/foundups_mcp_bridge/src/holo_query_owner_startup.py)
+reports that the owned process exited; it does not identify the child cause.
+The [existing supervisor](../modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_supervisor.py)
+discards child stdout/stderr. The next recovery investigation must obtain a
+bounded, secret-safe diagnostic through that owner boundary before selecting
+a repair. No missing dependency, broken index or runtime defect is established
+by this generic error alone.
+
 ### Qualification matrix and evidence scope
 
 | Case | Existing behavior and test | Remaining operational limit |

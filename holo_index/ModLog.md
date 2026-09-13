@@ -8,6 +8,7 @@
 - Retrieval assessment: current module contracts were available through the local bundle; semantic availability and stale historical completion claims remained separate. Exact field/source checks filled missing context, and direct symbol reads avoided duplicate implementation. This documentation/contract comparison used deterministic tools; no Qwen/Gemma generation or measured learning is claimed.
 - R03 remains partial. No index/route/authority mutation, model generation, runtime source change, production memory write or new execution permission. WSP 00, 22, 50, 81, 87, 97.
 - The live local fallback also passed after documentation edits and correctly changed its evidence label to `workspace_overlay`. Targeted CLAUDE-to-AGENTS renderer parity passes. The broader projection check reports pre-existing `stale:.agents/skills/file_set`: tracked `japan_hyperscaler_report/SKILL.md` has no canonical counterpart in the generator's expected set. Skill sources/projections are unchanged from the base and belong to the concurrent lane; this is not reported as a global projection pass or repaired by deleting its skill.
+- Startup follow-up: `holo_query_owner_startup.await_owner_startup()` emits the observed label when the owned child exits, while `HoloQueryServiceSupervisor._spawn()` discards stdout/stderr. The cause is not established by that label. Reuse those owners for a bounded, secret-safe diagnostic before choosing repair; no new diagnostic module or speculative reindex was added.
 
 ## [2026-08-29] Pre-owner exact-main live acceptance
 
