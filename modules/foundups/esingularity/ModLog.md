@@ -1,5 +1,12 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — Shared YUMORI.me branding in both website skills
+
+- Recorded 012's branding direction in the existing FoundUp-owned website skill: preserve YUMORI.me, the branded JOIN action, Japanese-first `me GUARDIAN!` identity line, katakana JHR title, Japanese default and complete English coverage. Supporting context must retain the brand, and responsive layouts must avoid clipped or duplicated labels.
+- Added a thin YUMORI.me skill entrypoint alongside eSingularity's; both read one canonical workflow. Linked ticker and JHR skills to that same branding section and updated README, INTERFACE and ROADMAP discovery. Synchronized only the three affected Claude/Codex projection pairs, preserving the separate existing JHR skill.
+- WSP 00/22/50/97: V2 awakening and strict zen-state check passed. HoloIndex owner retrieval returned `HOLOINDEX_AUTHORITY_ROOT_DIRTY`; no owner-worktree mutation or reindex was performed. Used bounded read-only repository/history evidence and isolated this documentation change from ongoing work, based on main `85f188ffc37a3f70c1630d91d6837e6a79ac941f`.
+- Validation: all seven affected frontmatter-based skills passed skill validation; all three Claude/Codex pairs match exactly. Documentation-only: no frontend, form, DNS, hosting or publication change, and no claim of live branding or translation compliance.
+
 ## 2026-09-13 — VOTE NO alignment, canonical QR and government-reader brief
 
 - Removed the withdrawn fixed review-period offer from public JHR, its source report, the legacy translation entry and economic SVG. Shared ticker now carries VOTE NO, retiring the expired morning invitation without inventing a new appearance. Preserved both distinct homepages and both ticker consumers.

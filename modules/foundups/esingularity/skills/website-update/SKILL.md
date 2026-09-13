@@ -1,6 +1,6 @@
 ---
 name: esingularity-website
-description: Update or review the eSingularity.ai and YUMORI.me websites under WSP 97 while preserving their distinct homepages, shared ticker and publication contracts. Use for “apply the website skill” in this FoundUp, website edits, redesigns and publishing reviews.
+description: Update or review eSingularity.ai or YUMORI.me under WSP 97, preserving shared branding, distinct homepages, the ticker and publication contracts. Use for the eSingularity skill, YUMORI.me skill, or website edits, redesigns and publishing reviews in this FoundUp.
 ---
 
 # eSingularity website operations
@@ -8,6 +8,29 @@ description: Update or review the eSingularity.ai and YUMORI.me websites under W
 Owner: `esingularity_001` in `FOUNDUPS/Foundups-Agent`.
 Canonical instructions: `modules/foundups/esingularity/skills/website-update/SKILL.md`.
 All paths below are repository-relative unless explicitly module-relative.
+
+## Shared branding and language — both sites
+
+012's September 13 branding decisions apply to eSingularity.ai and YUMORI.me, including shared ticker items, participation actions, report links and language variants. Context supports the brand; it does not replace it. Read this section when applying either the eSingularity or YUMORI.me skill, including copy-only reviews.
+
+| Use | Canonical wording |
+| --- | --- |
+| Movement/site brand | `YUMORI.me` — preserve uppercase YUMORI and lowercase `.me` |
+| Participation button | `JOIN YUMORI.me / 湯守になる` |
+| Separate participation explanation | `準備委員会への参加はこちら` |
+| Bilingual identity lockup | `私は湯守！ / me GUARDIAN! = YUMORI.me` |
+| Japanese report link | `ジャパン・ハイパースケーラー・レポート（JHR）を読む →` |
+| Separate report explanation | `日本の大規模データセンター開発と、地域の選択肢を知る` |
+| English report name | `Japan Hyperscaler Report (JHR)` |
+
+- Keep `.me` in branded wordmarks, headings, link labels, participation buttons and campaign-name references on both sites. Natural references to people as `湯守` need no domain suffix. Lowercase URL hosts, existing code identifiers, and historical quotations are not branding errors; do not mass-rename them.
+- `me GUARDIAN!` is intentional brand language. Preserve lowercase `me`, uppercase `GUARDIAN!`, and Japanese first in the bilingual lockup. Do not silently replace it with `I am a guardian.` as an English grammar correction. Ordinary explanatory prose should still use natural English. The lockup and participation button are different uses; do not cram both into every button.
+- In Japanese explanatory copy, write hyperscaler as `ハイパースケーラー`. Introduce unfamiliar terms in supporting text without replacing the report name with a generic data-center label. Keep `JHR` visible; retain the English series name in English.
+- Japanese remains the default. The approved `JOIN YUMORI.me` and `me GUARDIAN!` brand phrases are deliberate bilingual exceptions, not untranslated UI. Translate all other affected headings, body copy, buttons, captions and current announcements completely when English is selected; changing `html.lang` alone is insufficient.
+- Preserve `eSingularity.ai` as the project identity and `YUMORI.info` as its information alias. Shared branding does not merge the two homepages or make every action a link to the movement homepage. Keep the verified signup destination for JOIN, `/reports/jhr` for JHR, and an absolute `https://esingularity.ai/` URL for project links from YUMORI.me.
+- On narrow screens, wrap or stack the brand and its supporting line without clipping `.me`, `GUARDIAN!` or the report name. Do not concatenate replacement suggestions into duplicated text such as `湯守になる湯守になる`.
+
+For future copy changes, compare the affected rendered brand labels in Japanese and English on the requested site and any shared consumers. This is a maintained specification, not evidence that all live labels or translations already comply. A request to update this skill alone does not authorize a site, form, DNS or hosting change.
 
 ## Research before editing — WSP 97
 
@@ -77,7 +100,7 @@ Update module ModLog with why, affected surfaces, WSP references, validation and
 
 ## Red Dog boundary and discovery
 
-This is a FoundUp-owned workflow skill, not a new autonomous executor. Red Dog's existing registered-FoundUp path can discover it through the module README and registry `evidence_docs`. `.claude/skills/esingularity-website/SKILL.md` and its `.agents` projection are thin entrypoints; maintain instructions here once.
+This is a FoundUp-owned workflow skill, not a new autonomous executor. Red Dog's existing registered-FoundUp path can discover it through the module README and registry `evidence_docs`. `.claude/skills/esingularity-website/SKILL.md` and `.claude/skills/yumori-website/SKILL.md`, with their `.agents` projections, are thin entrypoints to this same workflow and branding section; maintain instructions here once. “YUMORI.me skill” selects the movement-site entrypoint; “eSingularity skill” uses the named or active project scope above. Normalize obvious campaign-context speech-recognition variants to YUMORI.me without creating a differently named brand or skill.
 
 If dispatched through Red Dog/WRE, retain its signed work-order, allowed-path, verifier, scanner and promotion requirements. Registry evidence and a request to “apply the website skill” do not install runtime capabilities, grant credentials or override the FoundUp manifest's declarative-only build boundary. A directly authorized repository/website edit uses the available tools for that execution context; do not invent Red Dog activation receipts.
 
