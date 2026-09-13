@@ -251,6 +251,72 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Event-timestamp checkpoint — 2026-09-14
+
+Packaging passed: **15 fast groups in 2,988ms** and **8 staged-manifest tests
+in 61.83s** (two pytest configuration warnings). The runtime list stays at
+1,400 files with two changed source hashes and matching pins. The test registry
+is current at 1,650 files / 269 quarantined, with no registry or guard change.
+
+Base: PR1720/main `9c949e8debf4540c504de57133e980b7eb2dcab4`.
+WSP 00 awakening/strict software gate passed. Local WSP 15 planning is
+3 + 4 + 4 + 4 = **15/P1** under the existing 012 authoring instruction;
+this app continuation supplies no signed allocation, work order or runtime grant.
+
+The governed source-bound lexical query returned the existing chain store/test,
+with UNKNOWN freshness, an index gap and zero semantic-owner attempts. Its clean
+workspace binding matches the base above. Prior semantic authority remains at
+`5326080d`; no unchanged semantic failure was retried. Tier-0 documents are
+complete; optional memory/design documents and requirements.txt remain absent.
+Deduplicate repeated hit arrays, prioritize the chain store and exact admission
+binder, and discard peripheral authority-admission/adversarial hits. Direct
+symbol/caller reads recovered the missing binder and confirmed the existing
+canary receipt consumer. This is local retrieval evidence, not CURRENT semantics.
+Deterministic fixtures/contract checks were selected before any model work.
+
+The existing `ResidentQueueChainResultReceipt` now carries optional
+`recorded_at`. Newly accepted stage writes require a timezone-aware recording
+clock and save it with the stage in the existing atomic commit. Prior receipts
+and their timestamps remain unchanged as later stages advance. Historical
+receipt objects omit the field when absent; the transition-ID algorithm and
+chain schema version stay unchanged. The existing canonical snapshot revision
+covers the timestamp. This is integrity binding, not a signed clock attestation.
+
+The admission binder requires a canonical chain snapshot and exactly one
+held-out-stage receipt with matching queue/slice and recomputable transition ID.
+It reuses that receipt's time as `verified_at`, rejecting missing, malformed,
+timezone-naive, future, duplicated or mismatched evidence. It does not substitute
+the current bootstrap clock or snapshot-wide `updated_at`. Legacy histories
+without this event time remain readable but cannot derive a new admission;
+owner-controlled evidence recovery is required, not automatic timestamp backfill.
+
+**Verification:** the new pre-repair selection had 18 failed assertions. The
+first attempt also exposed an older store fixture without progressive-stage
+binding; reusing the existing planner's governed fixture let the timestamp
+assertions run. The old fixture remains as an explicit rejection case. An
+existing spawn test now imports its callable by canonical package name so
+pytest's temporary import name is not pickled into the child. A broader run
+then exposed rejection-message precedence; validating timestamps only after
+the existing planner accepts the stage preserved the original assertion.
+
+The final connected chain-store, admission, planner, serial bootstrap, publication,
+canary and dispatcher selection passed **214 tests / four skipped in 99.49s**.
+The skipped capabilities are symlink creation and AF_UNIX availability on this
+host. Tests cover unchanged old receipt bytes during stage advancement, duplicate
+stage rejection, atomic store reload, canonical snapshot tampering, invalid event
+bindings, spawn/CAS behavior and existing publication freshness/revocation gates.
+They use disposable state and synthetic/injected authorities. No production
+signer, active FoundUp, queue activation or live memory experiment ran.
+
+R11-A remains partial. Next, inspect the existing publisher/signer/store boundary
+for signing accepted before publication becomes durable, lost acknowledgments
+and competing first publications. Do not add a second outbox or scheduler before
+checking current recovery owners. Cross-store acceptance (R11-B), admitted startup,
+memory activation, legacy event recovery and measured later benefit remain open.
+All 26 planning packets and six R11 substeps remain non-dispatchable. Exact
+commands, source hashes, failures and limits are in baseline section
+`event_timestamp_continuation_20260914`.
+
 ### Publication-retry checkpoint — 2026-09-14
 
 Packaging: **15 fast groups passed in 4,425ms** and **8 staged-manifest tests

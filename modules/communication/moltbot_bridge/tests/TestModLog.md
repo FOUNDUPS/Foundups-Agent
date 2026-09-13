@@ -1,3 +1,11 @@
+## 2026-09-14: Immutable recorded event timestamp
+
+- Packaging: 15 fast groups passed in 2,988ms; 8 staged-manifest tests passed in 61.83s with two pytest configuration warnings. No runtime membership, registry, quarantine or guard changes.
+- Extended existing queue-binding and chain-store tests. Initial pre-repair run: 18 failed / 17 deselected, including an outdated fixture's progressive-stage rejection before timestamp assertions. Reused the existing planner fixture and preserved the legacy rejection case; corrected pre-repair run: 18 failed / 18 deselected in 2.24s.
+- Initial focused implementation run: 34 passed / one skipped / one spawn-import failure. Corrected the existing process-pool callable's canonical import. Connected run then found one rejection-precedence failure (213 passed / four skipped); moving recording-clock validation after successful planning preserved the original bootstrap assertion.
+- Final eight-suite selection: **214 passed / four skipped in 99.49s**. Existing receipt/time preservation, atomic reload, ambiguous/missing/invalid event rejection, duplicate stage rejection, real spawn/CAS, planner/dispatcher/bootstrap/canary and publication freshness contracts pass. Platform skips involve symlinks/AF_UNIX; no production activation proof or live FoundUp effect.
+- Evidence: `event_timestamp_continuation_20260914`; R11-A still needs pre-publication signing/competing-writer recovery and legacy event recovery. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Immutable signed-publication retry
 
 - Packaging: 15 fast groups passed in 4,425ms; 8 staged-manifest tests passed in 66.65s (two pytest configuration warnings). Refreshed the existing registry's one `process` capability row; its prior quarantine and 1,650/269 membership remain unchanged. Qualified dependency settings and the required LF package-pin bytes corrected initial fast-run rejections without changing guards.

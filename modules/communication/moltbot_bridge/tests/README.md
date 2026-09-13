@@ -1,5 +1,24 @@
 # Tests - OpenClaw Bridge
 
+## Recorded admission event time
+
+Extend the existing queue-binding and chain-store suites for recording/replay
+changes. They cover stable receipt timestamps, later atomic snapshot reloads,
+duplicate stages, invalid clocks, mismatched/ambiguous receipts and canonical
+snapshot tampering. The store suite reuses the planner's governed fixture while
+retaining rejection of its old fixture without progressive-stage binding.
+Its process-pool callable uses the canonical module import for spawn portability.
+
+The connected command, with the qualified/disposable environment below, is:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_orchestration_plan.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_next_stage_dispatch.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
+```
+
+Current result: 214 passed / four skipped in 99.49s. Symlink/AF_UNIX host
+limitations remain; synthetic/injected authority fixtures do not prove production
+activation, signed clock provenance or cross-store crash recovery.
+
 ## Immutable publication retry
 
 The existing runtime-authority fixture now covers separate-interpreter retries

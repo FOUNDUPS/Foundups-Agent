@@ -231,9 +231,18 @@ the original signed envelope without re-signing or renewing it. Three reproduced
 failures pass; the connected selection passes 91 tests, including two real local
 child-process retries with unchanged durable bytes and fresh expiry/revocation
 rejection. See the [publication checkpoint](../operations/RSI_SWARM_DISPATCH.md#publication-retry-checkpoint--2026-09-14).
-R11-A remains partial: the queue derivation still changes `verified_at` on
-reconstruction. Preserve the admitted event timestamp next; activation and
-retained benefit are not established by this local publication acknowledgment.
+At the publication-only checkpoint, queue reconstruction still changed
+`verified_at`; the event-time follow-up below addresses that gap. Publication
+acknowledgment alone establishes neither activation nor retained benefit.
+
+**Event timestamp follow-up:** The existing chain receipt records the accepted
+stage time once; canonical admission derivation reuses the unique matching
+held-out receipt's timestamp. Later snapshot time does not change metadata.
+Missing/invalid/ambiguous/foreign event evidence rejects, including historical
+receipts without a timestamp. The connected selection passes 214 tests with
+four platform skips; see the [event checkpoint](../operations/RSI_SWARM_DISPATCH.md#event-timestamp-checkpoint--2026-09-14).
+R11-A remains partial for failure before durable publication, competing initial
+writers and owner-controlled legacy evidence recovery. No activation gate closes.
 
 ### R12 — Independent production promoter
 

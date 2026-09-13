@@ -37,6 +37,13 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [event-timestamp checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#event-timestamp-checkpoint--2026-09-14)
+records a stage's time once in its existing chain receipt and reuses that time
+for admission. Later snapshots and retries preserve the same metadata; missing
+or invalid event evidence rejects. The connected selection passes 214 tests
+with four platform skips. R11-A remains partial: first-signing failure before
+durable publication and competing initial publishers are next recovery gaps.
+
 The [publication-retry checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-retry-checkpoint--2026-09-14)
 preserves an existing signed envelope across advancing clocks and a separate
 process restart. The connected selection passes 91 tests. This is partial
