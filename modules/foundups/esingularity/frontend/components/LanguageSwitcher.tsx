@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
+import { currentFieldStatus } from '../content/current-field-status';
 
 type Language = 'ja' | 'en' | 'pt';
 
@@ -13,6 +14,7 @@ const languages: Array<{ id: Language; label: string }> = [
 ];
 
 const copy: Record<string, [string, string]> = {
+  [currentFieldStatus.tickerJa]: ['September 25 vote: VOTE NO on the demolition-preparation budget. The request for a fixed review period or postponed vote has been withdrawn. Read the City records and support brief, then take action through YUMORI.me.', 'Votação de 25 de setembro: VOTE NO ao orçamento de preparação da demolição. O pedido de prazo fixo de análise ou adiamento da votação foi retirado. Leia os registros da cidade e o documento de apoio e participe pelo YUMORI.me.'],
   "JHR・最新レポート": ["JHR · Latest report", "JHR · Relatório atual"],
   "コンピュートで、": ["Can compute…", "A computação pode…"],
   "温泉を救えるか。": ["Save an onsen?", "Salvar um onsen?"],
@@ -464,7 +466,6 @@ const copy: Record<string, [string, string]> = {
   '固定10億円ではなく、純回避費用と検証済み資金不足額の小さい方を上限にする提案。': ['The proposal is not a fixed ¥1 billion. Its ceiling would be the lower of the city’s verified avoided net cost and the verified funding gap.', 'A proposta não fixa ¥1 bilhão. O limite seria o menor valor entre o custo líquido evitado pela cidade e a lacuna de financiamento comprovada.'],
   '解体準備は進めても、': ['Demolition preparation may continue,', 'A preparação da demolição pode continuar,'],
   '代案の扉は閉じない': ['but keep the alternative open.', 'mas a alternativa deve permanecer aberta.'],
-  '求めるのは、固定60日間の停止ではありません。補正予算、附帯決議、または同等の正式措置により、解体契約の締結など後戻りが困難になる時点まで、条件を満たす再生案を受け付け、解体執行前に比較評価できる道を残すことです。': ['We are not asking for a fixed 60-day pause. We ask for a supplemental budget condition, accompanying resolution, or equivalent formal measure that keeps the door open for a qualified reuse proposal until a demolition contract or another hard-to-reverse commitment, allowing comparison before demolition is executed.', 'Não pedimos uma pausa fixa de 60 dias. Pedimos uma condição no orçamento suplementar, uma resolução anexa ou medida formal equivalente que mantenha aberta a possibilidade de uma proposta qualificada de reutilização até a contratação da demolição ou outro compromisso difícil de reverter, permitindo a comparação antes da execução.'],
   '期限前に、安全性、実行主体、借地合意、資金計画、市の財政効果を証明できた場合、解体案と同じ条件で正式に審査する。': ['If safety, an operating entity, land agreements, financing, and fiscal benefit to the city are proven before the deadline, the reuse plan receives formal review on equal terms with demolition.', 'Se segurança, entidade operadora, acordos fundiários, financiamento e benefício fiscal para a cidade forem comprovados antes do prazo, o plano de reutilização será analisado formalmente em igualdade com a demolição.'],
   '期限': ['Deadline', 'Prazo'],
   '解体契約締結など、公費上の後戻りが困難になる前': ['Before a demolition contract or another fiscally irreversible commitment', 'Antes de um contrato de demolição ou outro compromisso fiscal irreversível'],
@@ -675,7 +676,10 @@ export default function LanguageSwitcher() {
   const [language, setLanguage] = useState<Language>('ja');
   const pathname = usePathname();
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
-  useEffect(() => { setHeaderSlot(document.getElementById('home-language-controls')); }, [pathname]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setHeaderSlot(document.getElementById('home-language-controls')));
+    return () => cancelAnimationFrame(frame);
+  }, [pathname]);
   const languageRef = useRef<Language>('ja');
 
   useEffect(() => {

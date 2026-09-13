@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — VOTE NO alignment, canonical QR and government-reader brief
+
+- Removed the withdrawn fixed review-period offer from public JHR, its source report, the legacy translation entry and economic SVG. Shared ticker now carries VOTE NO, retiring the expired morning invitation without inventing a new appearance. Preserved both distinct homepages and both ticker consumers.
+- Copied the supplied QR unchanged into canonical `frontend/public/`, verified its destination and the QR in the Google Doc PDF. Edited support brief 03 directly: City-record context/value proposition first, ordinary body styles, conditional technical/financial claims, current FIN smart chip, and VOTE NO throughout. A dated local PDF lives under ignored `outputs/2026-09-13/`.
+- Audited the stale root checkout, legacy Sites folder, older worktrees, current main and latest Sites source. Added a local `O:\Foundups-Agent\eSingularity.ai` junction to this module and a legacy-folder notice. See `docs/VOTE_NO_ALIGNMENT_20260913.md`. No unrelated branch work was moved or removed. WSP 22/50/97; failed Holo authority query recorded, no reindex attempted.
+- Eight existing content checks and 18 hostname tests passed. Focused ESLint has zero errors and one existing image warning; build passed. Local browser verified both consumers, English campaign translation and expanded mobile reading controls.
+- Sites version 48 from `3f30e1ad73b393d2af08514a27dea36d8e6d3bc6` deployed successfully as `appgdep_6aa638bb4db4819181b134f0c8eeb507`. Source matched the current published base before the patch. Shell requests to custom domains returned HTTP 403; browser verification is recorded separately and is not inferred from the deployment receipt.
+- Browser verification subsequently confirmed VOTE NO on eSingularity.ai and the fresh YUMORI movement URL; a plain-root navigation reused an older participation-form redirect. The form still has older framing, and the current FIN workbook is owner-only. Both are explicitly recorded in the audit; no form, DNS or sharing permission was changed.
+
 ## 2026-09-13 — YUMORI mobile layout and readable shared ticker
 
 - Addressed the supplied phone screenshot: added a YUMORI header slot for language controls, constrained the wordmark and responsive grid, and added the existing compute-field concept image with an explicit concept caption. Corrected the movement page project link to the absolute eSingularity homepage. Preserved WHY / WHAT / HOW and all five JOIN actions.

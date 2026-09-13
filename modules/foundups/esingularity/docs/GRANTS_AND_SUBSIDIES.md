@@ -43,7 +43,7 @@ Use this section to prevent drift between codebase truth and Drive working docum
 
 ### Cross-reference rule
 
-The three core Drive documents above now begin with an `AUTHORITY INDEX / 権威インデックス` that points readers back to this repository registry. Future agents starting in the repo should use the Drive IDs above to inspect supporting working documents when more detail is needed; future agents starting in Drive should return here before asserting current program status.
+The core Drive documents link back to this repository registry. In support brief 03, the registry link belongs in the funding section as ordinary reference text: its opening is reserved for the council request, City records, and public value. Do not prepend an internal authority banner or format body paragraphs as Title/Heading. Future agents starting in the repo should use the Drive IDs above to inspect supporting working documents when more detail is needed; future agents starting in Drive should return here before asserting current program status.
 
 If repo and Drive disagree, **do not choose the more favorable number**. Re-verify the primary government source, update this registry first, then reconcile Drive.
 

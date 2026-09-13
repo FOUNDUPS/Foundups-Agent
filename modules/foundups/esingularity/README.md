@@ -17,6 +17,8 @@ For “apply the website skill”, use [esingularity-website](skills/website-upd
 
 ## Public architecture — one project, two focused sites
 
+YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. Its current council request is **VOTE NO** on demolition preparation; the fixed review-period proposal has been withdrawn. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) for local checkout locations, QR provenance, and the supporting Google Doc.
+
 The module deliberately publishes two different public experiences from one canonical frontend and one existing Sites project. Shared hosting does **not** mean a shared homepage.
 
 | Public entry | Focus | Homepage owner |
