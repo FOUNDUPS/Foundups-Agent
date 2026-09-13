@@ -1,3 +1,12 @@
+## 2026-09-14: Staging interleaving, snapshot and commit retry
+
+- Packaging: **15 RedDog fast groups passed in 3,052ms**; **8 staged-manifest tests passed in 65.51s**. Exactly one runtime source hash changed; manifest membership remains 1,400.
+
+- Reused `test_reddog_verified_pattern_memory_sink.py` and its 11 existing tests; added six cases in that file. A second SQLite connection wins a controlled insert window (identical payload, different payload, different agent), caller mutation occurs between identity calculation and persistence, and commits fail before or after the durable write. These are local fault injections, not production authority or power-loss tests.
+- Before repair: **4 failed / 13 passed in 1.39s**. The identical race raised a unique-key error; conflicting races raised a raw integrity error instead of the existing domain conflict; nested input drift changed stored bytes under the original ID. Before/after-commit recovery already passed and remains covered.
+- After repair and adjacent admission/handler selection: **51 passed in 3.19s**. Existing winner bytes, agent and timestamp remain intact; failed uncommitted writes leave no staging row; committed retries retain exactly one staging row; active recall stays empty. The canonical registry remains **current / 1,650 / 269 quarantined**, with no registry/classifier change.
+- Command: the three-file selection in `tests/README.md`, using the qualified Python interpreter, `-B`, explicit asyncio plugin, disabled automatic plugins/cache, and isolated O:-resident TEMP/TMP/database/basetemp paths. Evidence: `docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json` → `staging_replay_continuation_20260914`. WSP 22/48/50/60/95/97.
+
 ## 2026-09-14: RSI retention fixture and final admission guards
 
 - Reused the existing held-out invocation and memory-admission test files. The shared held-out fixture now carries the real recorder's complete verifier-result digest, including the runtime-bound variant. Four legacy-fixture failures / 35 passes became **39 passes in 2.43s** across the adjacent queue selection.

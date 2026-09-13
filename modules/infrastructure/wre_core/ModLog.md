@@ -1,5 +1,9 @@
 # WRE Core - ModLog
 
+## 2026-09-14: WSP 15 priority-label correction
+
+- The outcome-retention entry below recorded 3+5+4+4=16 as P1. Canonical WSP 15 section 4 maps 16-20 to **P0**. The live dispatch checkpoint is corrected; the raw dated observation is preserved with an appended correction. This changes no packet score, authority, completion status or runtime allocation.
+
 ## 2026-09-14: Outcome-to-retention integrity
 
 - Reused the existing ratchet, held-out gate and bridge memory-admission adapter at main `e03f68badd7664e20c7f6dd47304f69b009d16cb`. Numeric/lineage/acceptance guards now reject malformed inputs; rejected evidence cannot claim memory eligibility. Strict regression counts and exact verifier-result binding prevent false retention.

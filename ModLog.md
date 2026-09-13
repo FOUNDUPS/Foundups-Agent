@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: WSP 00/97 staging replay continuation
+
+- Packaging passed: 15 RedDog fast groups (3,052ms), 8 staged-manifest tests (65.51s); one runtime hash changed within the same 1,400-file manifest. Structural review preserves all original packet fields, prior raw observations, document-index membership and protected paths.
+
+- Re-ran WSP 00 awakening and the strict software gate, recovered curated historical continuity, and verified PR1716/main `0120878c7febc68b794c749a10e80c305fd0c89f`. Worked in a clean owned branch; shared product state remained separate.
+- WSP 97 retrieval/micro/macro review reused the existing staging sink and test file. Four failures exposed a competing-insert error and nested-input identity drift; the repair snapshots input and uses the existing SQLite key without replacing the winner. New before/after-commit cases preserve retry and recall isolation. Fresh focused/dependency selection: 51 passed in 3.19s; canonical registry current at 1,650/269.
+- Current local planning score is 14/P1. Canonical WSP 15 section 4 classifies 16 as P0: the previous outcome checkpoint's P1 label was wrong. Corrected the live runbook and appended a correction to dated evidence; earlier raw observations and all packet permissions remain intact.
+- No new module, test file, memory backend, worker dispatch or production activation. Controlled database interleavings and injected commit exceptions do not prove process-crash recovery, authenticated activation, sustained concurrency or retained benefit. WSP 00/15/22/48/50/60/84/95/97.
+
 ## 2026-09-14: Connected RSI outcome-retention integrity
 
 - Continued in a clean owned branch from main `e03f68badd7664e20c7f6dd47304f69b009d16cb`. WSP 00 bootstrap/strict gate passed. Applied 012's preference for sustained sessions across several tested layers, recorded in the canonical dispatch runbook.

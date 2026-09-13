@@ -37,6 +37,13 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The next R11 preparation repairs retries in the existing staging sink. A
+competing identical insert returns the same record ID, a conflicting winner is
+preserved and rejected, and a deep snapshot keeps identity and payload aligned.
+The new [staging checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#staging-replay-checkpoint--2026-09-14)
+records four reproduced failures and 51 fresh sink/admission passes. This is
+local staging evidence; authenticated activation and later benefit remain open.
+
 The existing outcome recorder, retention gate and final memory-admission adapter
 now reject inconsistent evidence and missing storage acknowledgments. The
 connected selections pass 315 tests, including a real recorder-to-gate-to-adapter

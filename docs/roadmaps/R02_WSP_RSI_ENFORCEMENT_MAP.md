@@ -197,6 +197,14 @@ staging, conflicting records and recall isolation. Preserve this boundary and
 compose the existing authority/activation path instead of creating another
 memory store. The full authenticated cycle still needs the evidence below.
 
+**Staging replay follow-up:** Four local counterexamples now pass after the
+existing sink snapshots input and reconciles competing insertions through the
+same SQLite record key. The 51-case sink/admission selection includes preserved
+winner bytes and before/after-commit retry. See the
+[staging checkpoint](../operations/RSI_SWARM_DISPATCH.md#staging-replay-checkpoint--2026-09-14).
+This is preparatory R11/R17 evidence; activation/revocation atomicity and real
+crash/sustained-concurrency proof remain open.
+
 **Required next evidence:** Compose authenticated scope, atomic/idempotent retention and failure recovery, then demonstrate the next invocation reads the accepted version. Storage alone is not verified learning.
 
 ### R12 — Independent production promoter
