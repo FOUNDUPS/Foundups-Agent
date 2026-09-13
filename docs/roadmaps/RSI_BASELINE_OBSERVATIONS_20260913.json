@@ -1666,16 +1666,18 @@
       "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py": "94df02b06c7e23e2423ac659bc4106e6ef25dcda3d29c6151e4f39ce3290dad7",
       "modules/infrastructure/wre_core/tests/test_reddog_held_out_recursive_improvement_regression_gate.py": "1095d5453838dd54a6131147515dfbba279211b6674115e320afec817106f12b",
       "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_held_out_regression_gate_invoke.py": "305e4dfea4054edac0b64e687b488bc1636f24b7bd4835111de258538b9a731d",
-      "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "9526c5a4d6f615b92e8e2ceaae28cdaf9cc7c567e3c805bb6d56c6a7521c9321"
+      "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "9526c5a4d6f615b92e8e2ceaae28cdaf9cc7c567e3c805bb6d56c6a7521c9321",
+      "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "8785c03c5cb1b23a9ff6e7338087372d6a5f26c5314e0fbee5346d07f63b028a"
     },
     "candidate_workspace_sha256": {
       "modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py": "9e8822e1b50eda4e117081f8cbf0fd64d0748b512dc4c0e7ee46bc1d43f8661d",
       "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py": "a74b05882733ad4e42b6f7760db483eabc5aaaa356c530bdcbe6f6db467e35a4",
       "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "e1ab1d757b71b452d7c1e46d8775362a8efcccdd532fc61d9beaf3ca7440095e",
-      "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py": "23b5bb6415f7ad7144c1ee4801ebb5e9b1a4cc1fd974d807474993ad46cf6c02",
+      "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py": "d870661fad26752488f89ff9d770bada00d78e37eb478e6dcd5a7cd3f57dff43",
       "modules/infrastructure/wre_core/tests/test_reddog_held_out_recursive_improvement_regression_gate.py": "f623d3366334d147590ddc210d58a263c757833874abed15f495dc3ad5f50397",
       "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_held_out_regression_gate_invoke.py": "cd0feb9dcd06097ee877799dfd9a553516d7189e1ee28362db18d045d87729fc",
-      "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "026a4d5d3a8f4999fed00ff0a2d00eded388783c89fbc70cecdfb46549bc1a09"
+      "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "026a4d5d3a8f4999fed00ff0a2d00eded388783c89fbc70cecdfb46549bc1a09",
+      "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "1febd5086b81675ce1f656dc2d16fd10ce9816cf982dc35574db02e68ada7792"
     },
     "counterexample_phases": [
       {
@@ -1715,6 +1717,12 @@
         "passed": 4,
         "deselected": 12,
         "seconds": 1.72
+      },
+      {
+        "stage": "existing real-sink/canary tests before shared producer-fixture alignment",
+        "failed": 26,
+        "passed": 11,
+        "seconds": 24.94
       }
     ],
     "test_authoring_correction": "One new sink-mutation assertion used a nonexistent candidate_digest receipt field; inspected the existing receipt contract and corrected it to compare record_digest against an unmutated control. Intermediate run: 1 failed, 33 passed.",
@@ -1735,7 +1743,12 @@
         "passed": 34,
         "seconds": 2.22
       },
-      "distinct_selected_tests_passed": 278
+      "distinct_selected_tests_passed": 315,
+      "existing_real_sink_and_canary_boundary_tests": {
+        "passed": 37,
+        "seconds": 33.73,
+        "scope": "Disposable SQLite and Git repositories; live canary proof remains blocked"
+      }
     },
     "composed_fixture": {
       "components": [
@@ -1772,7 +1785,7 @@
       "ordering": "Existing PatternMemory owner found and checked in NAVIGATION; exact recorder/gate test query followed by current source and module documents",
       "missing_artifacts": "Optional design/memory documents absent; current module interface, roadmap and test/history files read directly",
       "staleness_risk": "Lexical bundle is local context only, not CURRENT semantic-owner evidence for this source revision",
-      "duplication": "Extended three existing runtime files and four existing test files; no replacement module, scheduler, memory backend or MCP wrapper"
+      "duplication": "Extended three existing runtime files, four test files and one existing shared canary fixture; reused real-sink staging and the current registry classifier unchanged"
     },
     "wsp15_local_selection": {
       "complexity": 3,
@@ -1810,7 +1823,8 @@
       "production_activation": false,
       "retained_benefit": false,
       "packet_acceptance_satisfied": false,
-      "protected_foundup_or_connection_code_changed": false
+      "protected_foundup_or_connection_code_changed": false,
+      "real_sink_tested_in_disposable_database": true
     },
     "persistence_limits": [
       "The ratchet journal stores a pre-callback snapshot; final write acknowledgment is returned separately",
@@ -1818,12 +1832,48 @@
       "Local evidence digests and scope checks do not authenticate plain receipt maps or qualify Holo/runtime authority",
       "The optional direct recorder sink route is still a local injected contract, not proof of independent production memory admission"
     ],
-    "next_dependency": "R11 still needs existing authenticated owner composition, durable replay/crash recovery and a later invocation consuming accepted memory. Signed worker/model runtime-owner clarification remains pending; no unchanged service/provider probe repeated.",
+    "next_dependency": "R11 should reuse existing idempotent staging and compose the existing independent authority/activation owner, durable recovery and later authenticated recall. Signed worker/model runtime-owner clarification remains pending; no unchanged service/provider probe repeated.",
     "packaging_validation": {
       "fast_groups_passed": 15,
       "fast_duration_ms": 3137,
       "manifest_tests_passed": 8,
       "manifest_seconds": 65.74
+    },
+    "initial_candidate_workspace_sha256": {
+      "modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py": "9e8822e1b50eda4e117081f8cbf0fd64d0748b512dc4c0e7ee46bc1d43f8661d",
+      "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py": "a74b05882733ad4e42b6f7760db483eabc5aaaa356c530bdcbe6f6db467e35a4",
+      "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "e1ab1d757b71b452d7c1e46d8775362a8efcccdd532fc61d9beaf3ca7440095e",
+      "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py": "23b5bb6415f7ad7144c1ee4801ebb5e9b1a4cc1fd974d807474993ad46cf6c02",
+      "modules/infrastructure/wre_core/tests/test_reddog_held_out_recursive_improvement_regression_gate.py": "f623d3366334d147590ddc210d58a263c757833874abed15f495dc3ad5f50397",
+      "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_held_out_regression_gate_invoke.py": "cd0feb9dcd06097ee877799dfd9a553516d7189e1ee28362db18d045d87729fc",
+      "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "026a4d5d3a8f4999fed00ff0a2d00eded388783c89fbc70cecdfb46549bc1a09"
+    },
+    "existing_retention_surface": {
+      "source": "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py",
+      "already_implemented": [
+        "idempotent same-record staging",
+        "conflicting-record rejection",
+        "staging outside normal recall",
+        "canonical record readback"
+      ],
+      "activation_ready": false,
+      "direct_activation": "Requires an independent durable authority capability; current real sink rejects direct store",
+      "next_work": "Compose existing owner/activation contracts and prove recovery and later authenticated recall; do not create another memory backend"
+    },
+    "registry_validation": {
+      "initial_ci_head": "608e6b1ab323faebb968dd6360a7330109b1fbea",
+      "initial_ci_job_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/34769198390/job/103755559346",
+      "initial_result": "stale",
+      "initial_total": 1650,
+      "initial_quarantined": 270,
+      "cause": "New ratchet test decorator invoked a local digest helper at import, triggering the existing module_scope_local_function_invocation quarantine rule",
+      "correction": "Equivalent literal digest in the parameter list; no import-time local helper call",
+      "result": "current",
+      "total": 1650,
+      "quarantined": 269,
+      "registry_modified": false,
+      "classifier_modified": false,
+      "new_quarantine": false
     }
   }
 }

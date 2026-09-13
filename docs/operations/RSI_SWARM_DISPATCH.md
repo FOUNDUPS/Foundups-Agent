@@ -255,8 +255,9 @@ R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
 Source: `e03f68badd7664e20c7f6dd47304f69b009d16cb`. This continuation followed
 the existing recorder, held-out retention gate, queue wrappers and final
-memory-admission adapter as one connected block. Three existing runtime files
-and four existing test files were extended; no new module or test file.
+memory-admission adapter as one connected block. Three existing runtime files,
+four existing test files and one existing shared canary fixture were extended;
+no new module or test file.
 
 The recorder now rejects malformed/non-finite/Boolean measurements, non-integer
 token counts, foreign or missing receipt lineage, contradictory acceptance
@@ -282,10 +283,27 @@ an injected sink. Valid evidence reaches that sink; invalid cost, a failed
 outcome and changed verifier evidence do not. The dated JSON continuation
 retains the initial failures and the fixture/API corrections separately.
 
+Downstream review also ran the existing real-sink and canary-integration tests
+in disposable repositories/databases. An older shared canary fixture omitted
+the newly required ratchet outcome/no-write state and verifier digest: 26
+failures/11 passes became 37 passes after that fixture matched the producer
+contract. Total distinct selected tests: 315. The existing sink already stages
+identical records idempotently and keeps them out of normal recall. Its
+`activation_ready` is deliberately false and direct activation is rejected
+until an independent durable authority source is wired. Reuse this staging
+implementation for R11; the canary tests assert blocked proof, not live success.
+
+The initial PR CI stopped at registry freshness: a new test decorator called a
+local digest helper at import time, triggering the existing quarantine rule.
+Replacing that pure test parameter with its literal digest preserves coverage;
+the registry is current at 1,650 files/269 quarantined with no registry or
+classification-rule change. No new test was excluded to make CI pass.
+
 Packaging checks pass: all 15 RedDog fast groups (3,137ms) and all eight staged
 manifest tests (65.74s). Runtime membership stays at 1,400 files; the three
 runtime sources and already-included shared test fixture account for all four
-changed hashes. The compatibility digest and both pins agree.
+changed hashes. The compatibility digest and both pins agree. The later test
+parameter and canary-fixture corrections are outside that runtime manifest.
 
 These are deterministic local contract checks. They do not authenticate the
 synthetic authorities, execute a model, admit a live worker, write production

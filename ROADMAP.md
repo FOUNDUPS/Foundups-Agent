@@ -39,8 +39,9 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 The existing outcome recorder, retention gate and final memory-admission adapter
 now reject inconsistent evidence and missing storage acknowledgments. The
-connected selections pass 278 tests, including a real recorder-to-gate-to-adapter
-fixture with an injected sink. The [retention checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#outcome-retention-checkpoint--2026-09-14)
+connected selections pass 315 tests, including a real recorder-to-gate-to-adapter
+fixture with an injected sink and existing disposable sink/canary boundary tests.
+The [retention checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#outcome-retention-checkpoint--2026-09-14)
 records the R10/R11/R15 preparation. Authentication, atomic/idempotent retention
 and measured benefit on a later invocation remain open.
 

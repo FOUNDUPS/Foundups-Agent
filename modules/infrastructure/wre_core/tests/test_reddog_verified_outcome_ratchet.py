@@ -347,7 +347,7 @@ def test_jsonl_store_never_appends_nonstandard_numeric_json(tmp_path):
     ("latency_receipt", "wall_time_ms", 1001),
     ("latency_receipt", "queue_time_ms", 11),
     ("publish_result", "note", "changed publication evidence"),
-    ("holoindex_evidence", "holoindex_freshness_receipt_digest", _digest("5")),
+    ("holoindex_evidence", "holoindex_freshness_receipt_digest", "sha256:" + "5" * 64),
 ])
 def test_outcome_identity_binds_all_retained_evidence(section, key, replacement):
     req = valid_request()
