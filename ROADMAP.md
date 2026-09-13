@@ -37,6 +37,16 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-13
 
+After PR #1710 merged, governed Holo maintenance completed at
+`5326080d583625aebbc230242117fb7fcf0044a6` and stopped both owned runtimes.
+The existing six-case public retrieval benchmark passed its unchanged 0.95
+policy: Recall@8/MRR `1.0`, nDCG@8 `0.9939998`, p95 `4031ms`.
+All six receipts report CURRENT/no-gap at that source; exact runtime closure
+remains false. This advances the recorded R03/R05 evidence, not full packet
+acceptance, sealed independent evaluation or promotion. The [complete dated
+receipts](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) retain those
+boundaries; later commits require their own source qualification.
+
 Roadmap PR #1656 merged as `18297fc3f1449350b89079db64a3612b004687a1`; R01 PR #1702 merged as `35ed430c61e4e35c1b779f03c13e40368c82b65f`. Both passed their CI selections. The current R02 review uses that latter source. Later phone/YUMORI work is preserved and remains outside the original audit. The current generated inventory is 1,650 tracked Python test files / 269 quarantined; 28 registry-contract tests pass. One omitted, already-tracked Japanese-copy test was added to that inventory. These counts do not replace the dated module census or imply that all tests were executed.
 
 R01's narrow integrity repair is locally validated in this revision: both production manifests match unchanged committed Skillz content, and the documented WRE tier passes 235 tests with four platform-limited skips. Git materialization with `core.autocrlf=true` preserves those exact bytes. The repair is merged; live runtime admission remains separate. R02's map and selected documentation corrections are present in this revision; its remaining reconciliation and independent review stay open. A matching clean Holo reference returned CURRENT/no-gap at published source `78b79c36c2d776e030cd0ee8aa23359a67f952ec`; this is not proof of current-main freshness or exact runtime closure. [Integration evidence and merge status boundary](docs/audits/rsi/2026-09-09/INTEGRATION.md).

@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: Post-merge Holo public-quality evidence
+
+- PR #1710 merged as `5326080d583625aebbc230242117fb7fcf0044a6`, all ten checks successful and accepted tree equal to main. Continued through the existing exact-main maintenance controller; completed and stopped both runtimes it started.
+- Fixed six-case public benchmark passed at that source: Recall@8/MRR 1.0, nDCG@8 0.9939998, p95 4031ms, six CURRENT/no-gap receipts. Retained the full benchmark and deterministic verification receipts in the existing dated RSI evidence artifact.
+- Preserved exact-closure=false, public-corpus/non-independent status, no-promotion truth, unchanged packet contracts and the source boundary for future commits. No corpus or threshold tuning, provider generation, protected product mutation or RSI-completion claim. WSP 22, 50, 87, 97.
+
 ## 2026-09-13: RSI baseline observations and rejected context compression
 
 - Continued after PR #1709 merged as `24ecdf1c38ca80aee13c74b39313e9b104e5c14b`; all ten checks passed and its accepted tree matched main. Preserved the earlier Holo CURRENT receipt's exact `bcc877829` source boundary.

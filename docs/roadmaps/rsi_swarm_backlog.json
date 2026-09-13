@@ -314,6 +314,14 @@
           "procedure": "holo_index/CLI_REFERENCE.md#exact-main-maintenance-checkpoint--2026-09-13",
           "scope": "named-source operational proof only; later main commits require requalification"
         }
+      },
+      "latest_public_retrieval_observation": {
+        "source_commit": "5326080d583625aebbc230242117fb7fcf0044a6",
+        "evidence_path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "public_quality_gate_passed": true,
+        "runtime_exact_closure_verified": false,
+        "independent_promotion_evidence": false,
+        "packet_acceptance_satisfied": false
       }
     },
     {
@@ -417,6 +425,14 @@
         "priority": "P1",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Public and independently owned held-out corpus meets frozen thresholds; required collections indexed; historical noise measured"
+      },
+      "latest_public_retrieval_observation": {
+        "source_commit": "5326080d583625aebbc230242117fb7fcf0044a6",
+        "evidence_path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "public_quality_gate_passed": true,
+        "runtime_exact_closure_verified": false,
+        "independent_promotion_evidence": false,
+        "packet_acceptance_satisfied": false
       }
     },
     {
