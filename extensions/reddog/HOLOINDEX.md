@@ -19,6 +19,8 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 
 ## Documentation
 
+- `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` - recurring, consented encounter assessment; implemented unsigned request-continuity PoC; proposed continuous human presence, pseudonymous mutual verification, live-media binding, and affect/authority separation
+- `../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md` - Gemini/012 closed-loop evaluation against code; deepfake threat model, WSP 44 scoring limits, evidence and staged acceptance gates
 - `ARCHITECTURE.md` - canonical RedDog/0102 identity boundary: 012 <-> RedDog surface/proxy <-> 0102 digital twin/orchestrator; attention firewall and recursive co-development invariants
 - `docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` - bounded guest admission for AutoPost, foundups.com and eSingularity.ai; implementation evidence, 3V Verification linkage and live activation gaps
 - `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
