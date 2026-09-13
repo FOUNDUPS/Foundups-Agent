@@ -68,7 +68,7 @@ The Foundups shell owns discovery and routing. The eSingularity module owns camp
 
 ## Shared campaign ticker
 
-Both homepages render `CampaignTicker.tsx` from the single `content/current-field-status.ts` object. The project page uses `<CampaignTicker />`; the movement page uses `<CampaignTicker movement />`, placing it in normal flow and resolving project-only fragment links to eSingularity.ai. Updating the canonical status and publishing the shared frontend updates both sites. Do not maintain separate ticker copy.
+Both homepages render `CampaignTicker.tsx` from the single `content/current-field-status.ts` object. The project page uses `<CampaignTicker />`; the movement page uses `<CampaignTicker movement />`, placing it in normal flow and resolving project-only fragment links to eSingularity.ai. Updating the canonical status and publishing the shared frontend updates both sites. Do not maintain separate ticker copy. The YUMORI language controls occupy a dedicated header slot above the ticker. Scrolling duration is calculated from rendered content width, targeting 18 px/s up to 600px, 24 px/s up to 1200px and 38 px/s above that; a 48-second minimum loop duration may slow short content further. The read-all control stops and wraps the primary set, hiding its duplicate; reduced motion disables animation.
 
 ## Shared external actions
 

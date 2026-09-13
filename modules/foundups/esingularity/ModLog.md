@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — YUMORI mobile layout and readable shared ticker
+
+- Addressed the supplied phone screenshot: added a YUMORI header slot for language controls, constrained the wordmark and responsive grid, and added the existing compute-field concept image with an explicit concept caption. Corrected the movement page project link to the absolute eSingularity homepage. Preserved WHY / WHAT / HOW and all five JOIN actions.
+- Shared ticker now calculates duration from content width at 18 px/s on phones, 24 px/s on tablets and 38 px/s on wider screens. Added a touch-accessible stop/read-all control, wrapped reading mode and reduced-motion support. Both pages retain one shared ticker and announcement source; eSingularity homepage source is unchanged.
+- Enhanced the FoundUp website skill with phone and 11-inch iPad orientation checks, actual overflow/overlap and image inspection, measured ticker speed and touch reading checks. WSP 00/22/50/97: V2 awakening passed; HoloIndex returned MISSING_GENERATION_BINDING, so bounded repository evidence was used. Compared current monorepo 5a9c110 and Sites edc41325: edited source bases match except whitespace.
+- Visual preview could not start: the supervised runtime reported an existing Vinext server, while status reported stopped. No browser or actual Safari/iPad validation is claimed. Eight dependency-free YUMORI/JHR/ticker contract functions and all 18 domain-routing checks passed; focused ESLint had zero errors and two image-element warnings; skill validation and production build passed.
+- Published Sites version 47 from `bfeaa68f5a96f093defffd072140cac7e7636e72`; deployment `appgdep_6aa6306c1ee48191a5f9c6c2301a52ca` succeeded. Custom-domain rendering and phone/iPad visual behavior remain unverified in this runtime.
+- Existing September 13 invitation ends at noon JST and has no automatic expiry; this layout patch does not renew or change the confirmed appearance.
+
 ## 2026-09-13 — Site-specific purposes and focused redesign brief
 
 - Enhanced the existing website skill with each site's purpose, visitor goal and edit boundary. Resolve “apply the website skill” from the named site or active task; do not turn one-site work into a two-site redesign.
