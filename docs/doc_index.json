@@ -4,7 +4,7 @@
   "documents": [
     {
       "doc_type": "other",
-      "hash_sha256": "c1e722e421dd7687fe6650b973f383f229cf62e03e39f55900d82c7c1b4ede79",
+      "hash_sha256": "ed22000c555d90bf46cc64c1e8b3c2667d936caf2c3c37a9b16ad9c773e495af",
       "links": {
         "automation": [
           "doc_dae"
@@ -26,7 +26,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
-      "size_bytes": 18193,
+      "size_bytes": 18420,
       "status": "active",
       "wsp_refs": [
         "WSP 27",
@@ -11539,7 +11539,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "4e79866c22426cea23b3d57bde3723c468ce261e31fd75970c6a8f84a7b9722e",
+      "hash_sha256": "74d8ecfbc3f74b6e5121d7a7d14b423e507c56403dd16601d8e69769ae607233",
       "links": {
         "automation": [
           "doc_dae"
@@ -11551,7 +11551,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_EVIDENCE.json",
-      "size_bytes": 18066,
+      "size_bytes": 35708,
       "status": "active",
       "wsp_refs": [
         "WSP 22",
@@ -11564,7 +11564,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "f3bd6b2ce85ca40953361bc24868e55f485fa08cb37b83694b5baf8fab315c21",
+      "hash_sha256": "0e4c24859bbd825ef273128fec28d4bdc5446cf8181b9f7bf6785616fec50e04",
       "links": {
         "automation": [
           "doc_dae"
@@ -11581,7 +11581,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
-      "size_bytes": 37053,
+      "size_bytes": 50472,
       "status": "active",
       "wsp_refs": [
         "WSP 22",

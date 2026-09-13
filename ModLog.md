@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: R02 historical ledger dispositions
+
+- Applied WSP 00 bootstrap/strict gate and WSP 97 source/owner checks at main `cc9c79361`. Reused the existing R02 map and evidence inventory to disposition all 11 pending April rows/tracks and four relevant closed groundwork rows.
+- Distinguished landed Genesis intake validation from the original missing DAG/field-drift requirements; retained the existing diagnostic, report, A/B and Holo owners. No new module, runtime change, worker dispatch or active FoundUp experiment.
+- Kept unresolved provenance, test, financial-review, extraction and SoftProto owner evidence explicit. Preserved the April snapshot and original 70-source audit inventory. R02 remains partial pending these follow-ups and separately bound review.
+- Validation: 15 dispositions (all 11 pending rows/tracks), 24 pinned source hashes, 10 ancestor commits and 22 new local links checked; original 70-source inventory and April snapshot preserved; 26 packets remain non-executable. Seven documentation files changed. Referenced module tests were not executed in this documentation slice. WSP 15, 22, 50, 84, 97.
+
 ## 2026-09-13: Keep RSI validation on internal workflows
 
 - Applied 012's correction: active FoundUps are excluded from RSI experiments. Removed eSingularity from R22's proposed scope; R20/R22 now specify dedicated synthetic lifecycle/consumer fixtures. Product adoption is downstream, not an R15 dependency.

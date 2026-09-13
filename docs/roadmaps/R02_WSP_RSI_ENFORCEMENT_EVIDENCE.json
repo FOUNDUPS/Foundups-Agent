@@ -390,5 +390,350 @@
       "base_git_blob_sha256": "137333f12d49a62f6dd5c95720a3bbcad09d8118e9ab9b4fa02583c867ce452e",
       "unchanged_from_original_audit_source": true
     }
-  ]
+  ],
+  "ledger_reconciliation": {
+    "recorded_on": "2026-09-13",
+    "source_commit": "cc9c79361ef8e9075d0b09759027ad88a2adfd90",
+    "execution_authority": "none",
+    "coverage": {
+      "open_rows": 9,
+      "deferred_rows": 1,
+      "archive_tracks": 1,
+      "selected_closed_rows": 4
+    },
+    "runtime_tests_run": false,
+    "independent_verification": false,
+    "sources": [
+      {
+        "path": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+        "git_blob_sha256": "db5232beefc9eefd530aed480d9a1870a2cad8078bcc9d930532928b0becfbca"
+      },
+      {
+        "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+        "git_blob_sha256": "c1e722e421dd7687fe6650b973f383f229cf62e03e39f55900d82c7c1b4ede79"
+      },
+      {
+        "path": "docs/0102_session_briefings/DE4_GOTJUNK_ENTRY_URL_ACTIVATION.md",
+        "git_blob_sha256": "da0743b486ee83595987263a6ed303871f57691e781c0f4b4e3037d21449ae89"
+      },
+      {
+        "path": "docs/0102_session_briefings/DI1_DECISION_GATE.md",
+        "git_blob_sha256": "3d3a61966ae7998ea44de47b547cf49c47ad5db8b9ad9dce4cdf358b94b2e138"
+      },
+      {
+        "path": "holo_index/CLI_REFERENCE.md",
+        "git_blob_sha256": "2fece9ffce2d3dbb8e506acaa7ad75b0d640b5a9a55a95b36f3d2b801ed0df2a"
+      },
+      {
+        "path": "main.py",
+        "git_blob_sha256": "a6af3c4862fb36609d39f5b685279855a3057a04c2c798a19fa8b68d5d4234a2"
+      },
+      {
+        "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/envelope.py",
+        "git_blob_sha256": "f7291ab939d8464e47509b4989c2558cc06df9329a274b6ee525b8a7e1969ad1"
+      },
+      {
+        "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py",
+        "git_blob_sha256": "7a234e5c90278a29facd9af447aa35d050d4a7951a097b2bf1fca92294e3f921"
+      },
+      {
+        "path": "modules/ai_intelligence/ai_overseer/src/preflight_resolution.py",
+        "git_blob_sha256": "8364ba5a398a2edcbe577d16f6bb01c79b232fd98a6407571c1026e5077a2cc7"
+      },
+      {
+        "path": "modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py",
+        "git_blob_sha256": "ae5db93afb1cba9138e1e79e0ad74ad70970f6fa137822be70d8a378d9567b74"
+      },
+      {
+        "path": "modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py",
+        "git_blob_sha256": "30b9d08a6edeb7ed3931f98107364b31b9454bb5ba985d4af5b6f78606ce28c3"
+      },
+      {
+        "path": "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
+        "git_blob_sha256": "d8b27c6930c08263d67fb04eb8d14529914e5ebe90a93e9d116f4cca7d8fa0de"
+      },
+      {
+        "path": "modules/communication/moltbot_bridge/src/openclaw_skill_evolution.py",
+        "git_blob_sha256": "f59aebfac5d9c7ff7a862d7a97c9ea1374cd6d59e7e3ea6fecc714ceed9d2c98"
+      },
+      {
+        "path": "modules/communication/moltbot_bridge/tests/test_openclaw_skill_evolution.py",
+        "git_blob_sha256": "6524bef15a2adfdcc8288ec10d13f51ee689e9e78a99f7ff7f52fb1f8bbe753d"
+      },
+      {
+        "path": "modules/foundups/agent_market/src/orchestrator.py",
+        "git_blob_sha256": "9f254e302733fc96974d154ef4775a6e841296e76bd5aacab60961f79b762f10"
+      },
+      {
+        "path": "modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md",
+        "git_blob_sha256": "697b4f8f9e20b7a64632317841cc52928d0e7aa5ccea26762d6ff55f046308c1"
+      },
+      {
+        "path": "modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md",
+        "git_blob_sha256": "23a164bbf05f0e81e6fe7b21a53d19dee8efc59f6f36e386358f4e10738bc261"
+      },
+      {
+        "path": "modules/infrastructure/wre_core/src/pattern_ab_evidence.py",
+        "git_blob_sha256": "bf03c370ac7e7563c0184937de90ab7c1c1dc3bff525d3083415805e4db7d850"
+      },
+      {
+        "path": "modules/platform_integration/stream_resolver/ModLog.md",
+        "git_blob_sha256": "ad0c243d43079a1eff5a45c2899ab0b0b067faeb29580422f895084d9cd5e7c6"
+      },
+      {
+        "path": "modules/platform_integration/stream_resolver/tests/README.md",
+        "git_blob_sha256": "4a6f9081ea7ed95daf5670a8255dae1f584ef31ad34ea970fc8847b0e955deeb"
+      },
+      {
+        "path": "scripts/reddog_holoindex_owner_query_once.py",
+        "git_blob_sha256": "137333f12d49a62f6dd5c95720a3bbcad09d8118e9ab9b4fa02583c867ce452e"
+      },
+      {
+        "path": "tests/test_main_ironclaw_preflight.py",
+        "git_blob_sha256": "1dc5a1a5bb76583b27960b0db4fda2de619fc9de3a0fb69cf239f751e6e5431f"
+      },
+      {
+        "path": "tests/test_main_runtime_bootstrap.py",
+        "git_blob_sha256": "e4b09728f262c39dced7569995cb70eabbd2221c8a0e2ed7762004e4e10c976f"
+      },
+      {
+        "path": "tools/pr_scope_guard/pr_scope_guard.py",
+        "git_blob_sha256": "386824fee408c78b9417ae41e13ea236294a22da038844f33e91d78fa0d6ee44"
+      }
+    ],
+    "commits": [
+      {
+        "commit": "fde9d64a439c8b952845b536b358c81176224fe0",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "59b2ed3df115e4ae2194f80149eb9ac3e6f3716e",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "f450b5bbcd4580cba63cec3eb237832bdc98702b",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "864e89b2823e9583169e75301ae5581f0cce2852",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "8018a1f62aa462a72822ae2e6e5b5f30cac584e8",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "6f651a8c6c8521593bd72b92d0f00d520701ef63",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "3ae3117678bc7c413b1a8b0fb1e642a1d85668e7",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "44842435837e1dc14b0d566047a5b86719b6de8e",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "dcc9ddfdd6dc906e80ca4ddf72fb485308f382ad",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      },
+      {
+        "commit": "9a89fedebebe7749a293f8ccd5b7a51cd592bb0e",
+        "is_ancestor_of_source": true,
+        "meaning": "inclusion_only_not_feature_completion"
+      }
+    ],
+    "dispositions": [
+      {
+        "historical_row": "bh1_branch_hygiene_forensics",
+        "status": "unresolved",
+        "owner_responsibility": "Git/PR provenance owner; existing PR scope guard",
+        "replacement_packet": "R02",
+        "finding": "The commit-to-PR API now associates fde9d64a4 with merged PR #384. That PR has a rolodex title; association and ancestry do not settle the original mixed-scope/provenance question. Preserve forensic follow-up; do not repeat the obsolete no-associated-PR claim.",
+        "source_paths": [
+          "tools/pr_scope_guard/pr_scope_guard.py"
+        ]
+      },
+      {
+        "historical_row": "dj2_b_ironclaw_skip_intentionality_assertion",
+        "status": "still_open",
+        "owner_responsibility": "main.py preflight / AI Overseer owner",
+        "replacement_packet": "R02",
+        "finding": "run_ironclaw_runtime_preflight skips every non-ironclaw backend when ALWAYS is false. The requested unknown-backend classification is absent from that branch. Reuse the existing dispatcher and known-backend test; qualify the unknown case without probing a live runtime.",
+        "source_paths": [
+          "main.py",
+          "tests/test_main_ironclaw_preflight.py"
+        ]
+      },
+      {
+        "historical_row": "dj2_d_brain_artifact_missing_dir_event",
+        "status": "still_open",
+        "owner_responsibility": "main.py preflight / AI Overseer owner",
+        "replacement_packet": "R02",
+        "finding": "The missing-directory branch returns True after PASS (missing), so the later false-return startup-blocker diagnostic cannot cover it. Preserve return behavior; specify the low-severity non-automation event before any owner implementation.",
+        "source_paths": [
+          "main.py",
+          "modules/ai_intelligence/ai_overseer/src/preflight_resolution.py"
+        ]
+      },
+      {
+        "historical_row": "dj2_e_git_merge_sentinel_import_failure_event",
+        "status": "still_open",
+        "owner_responsibility": "main.py / WRE sentinel owner",
+        "replacement_packet": "R02",
+        "finding": "The ImportError branch logs WARN and returns True. It does not invoke the existing failure dispatcher or the later startup-blocker diagnostic. Scope any follow-up to that branch and a synthetic import-failure test.",
+        "source_paths": [
+          "main.py",
+          "modules/ai_intelligence/ai_overseer/src/preflight_resolution.py"
+        ]
+      },
+      {
+        "historical_row": "dj2_f_openclaw_security_fail_dispatch",
+        "status": "still_open",
+        "owner_responsibility": "main.py security / RedDog diagnostic owner",
+        "replacement_packet": "R02",
+        "finding": "Commit f450b5bbcd (#1247) adds startup-blocker diagnostics for false preflight returns. However passed=False with enforcement disabled still returns True, and the original severity/payload contract is not proved by that diagnostic. Narrow the old ticket to the uncovered failure branch and payload; reuse the landed owner.",
+        "source_paths": [
+          "main.py",
+          "tests/test_main_runtime_bootstrap.py",
+          "modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py"
+        ]
+      },
+      {
+        "historical_row": "yt_cleanup2_stream_resolver_api_contract_rebase",
+        "status": "unresolved",
+        "owner_responsibility": "stream_resolver test owner",
+        "replacement_packet": "R19",
+        "finding": "The April count of 12 failures is not current test evidence. Current test documentation and history exist, but no exact failing selection was reproduced in this documentation slice. Preserve the owner handoff; require an isolated selection before closing or re-implementing it.",
+        "source_paths": [
+          "modules/platform_integration/stream_resolver/tests/README.md",
+          "modules/platform_integration/stream_resolver/ModLog.md"
+        ]
+      },
+      {
+        "historical_row": "legal_ii1_bonding_curve_review_packet",
+        "status": "unresolved",
+        "owner_responsibility": "Financial/legal review owner, assignment unverified",
+        "replacement_packet": "R21",
+        "finding": "The April planning row is not a completed review or current owner assignment. Retain a separate review handoff; no legal conclusion, financial execution or RSI test is authorized by this disposition.",
+        "source_paths": [
+          "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md"
+        ]
+      },
+      {
+        "historical_row": "fam_ideation2_envelope_schema_validator",
+        "status": "still_open",
+        "owner_responsibility": "AI Overseer foundup_genesis owner",
+        "replacement_packet": "R20",
+        "finding": "Schema and structured acceptance validation landed in 864e89b28 (#428), with later input-hardening commits. The existing envelope has truth_state_map, not the original task_graph/backpropagation DAG. WSP 27 section 8.1.10 still requires cycle, missing-precondition and orphan-postcondition validation. Extend/reconcile the existing contract; do not create another envelope.",
+        "source_paths": [
+          "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+          "modules/ai_intelligence/ai_overseer/src/foundup_genesis/envelope.py",
+          "modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py",
+          "modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py"
+        ]
+      },
+      {
+        "historical_row": "fam_ideation3_ai_overseer_truth_sentinel",
+        "status": "still_open",
+        "owner_responsibility": "AI Overseer / existing OpenClaw intake gate owner",
+        "replacement_packet": "R20",
+        "finding": "The intake validator rejects implementation markers without evidence; this is not a repository-bound field-status drift check. No occurrence of the original sentinel field/event names was found in tracked modules Python source. FAM LaunchOrchestrator exposes launch_foundup, not accept_envelope. Preserve IDEATION3-before-IDEATION4 and reconcile the existing WSP 109 gate before implementation.",
+        "source_paths": [
+          "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+          "modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py",
+          "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
+          "modules/foundups/agent_market/src/orchestrator.py"
+        ]
+      },
+      {
+        "historical_row": "de4_hermes_extraction_next_sandbox",
+        "status": "unresolved",
+        "owner_responsibility": "Existing DE/Hermes extraction owner",
+        "replacement_packet": "R20",
+        "finding": "DI1 deferred externalization; the separate DE4 entry-URL briefing records a later URL activation. URL activation does not prove repository publication or a fresh extraction gate. This product-specific track is outside the internal RSI experiment scope; preserve both records and obtain owner evidence separately.",
+        "source_paths": [
+          "docs/0102_session_briefings/DI1_DECISION_GATE.md",
+          "docs/0102_session_briefings/DE4_GOTJUNK_ENTRY_URL_ACTIVATION.md"
+        ]
+      },
+      {
+        "historical_row": "softproto",
+        "status": "unresolved",
+        "owner_responsibility": "Existing UI/PMCTRL/WRE contract owners",
+        "replacement_packet": "R02",
+        "finding": "The rollout document still proposes a UI architecture branch while the April ledger requests reconciliation. Overlap alone is insufficient to archive each contract. Preserve the five prompts and eight contracts/plans; require a per-contract replacement and owner disposition. Do not revive this as an RSI implementation wave.",
+        "source_paths": [
+          "modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md",
+          "modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md"
+        ]
+      },
+      {
+        "historical_row": "skill_evolution_loop_phase1_report_surface",
+        "status": "merged_bounded_scope",
+        "owner_responsibility": "OpenClaw skill-evolution report owner",
+        "replacement_packet": "R10-R15",
+        "finding": "3ae311767 is included. The report surface exists; reporting and supervisor integration do not prove an independent evaluator, production activation or retained benefit.",
+        "source_paths": [
+          "modules/communication/moltbot_bridge/src/openclaw_skill_evolution.py",
+          "modules/communication/moltbot_bridge/tests/test_openclaw_skill_evolution.py"
+        ]
+      },
+      {
+        "historical_row": "skill_evolution_loop_phase2_mutation_surface",
+        "status": "merged_bounded_scope",
+        "owner_responsibility": "OpenClaw report / WRE promotion owners",
+        "replacement_packet": "R12-R15",
+        "finding": "448424358 is included. A/B status and readiness queries exist, but the current legacy promote_variation method raises PermissionError pending an independent signed promoter. Nomination/readiness is not promotion. Reuse these surfaces in R12-R15.",
+        "source_paths": [
+          "modules/communication/moltbot_bridge/src/openclaw_skill_evolution.py",
+          "modules/infrastructure/wre_core/src/pattern_ab_evidence.py"
+        ]
+      },
+      {
+        "historical_row": "fam_ideation1_foundup_outcome_backpropagation_contract_phase1",
+        "status": "merged_bounded_scope",
+        "owner_responsibility": "WSP 27 / FAM lifecycle contract owner",
+        "replacement_packet": "R20",
+        "finding": "dcc9ddfdd is included and WSP 27 retains the outcome/backpropagation contract and ordered future slices. This closes the documented specification only; the IDEATION2/3 rows above retain their implementation gaps.",
+        "source_paths": [
+          "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md"
+        ]
+      },
+      {
+        "historical_row": "fx1_holoindex_truth_restoration",
+        "status": "merged_bounded_scope",
+        "owner_responsibility": "Holo query / authority owner",
+        "replacement_packet": "R03-R05",
+        "finding": "9a89fedeb is included. The current source-bound entry supports local bundle fallback with explicit UNKNOWN freshness. Historical truth-restoration work is not a current semantic-generation or runtime-closure receipt; continue through the existing R03-R05 owners.",
+        "source_paths": [
+          "holo_index/CLI_REFERENCE.md",
+          "scripts/reddog_holoindex_owner_query_once.py"
+        ]
+      }
+    ],
+    "github_observation": {
+      "commit_prefix": "fde9d64a4",
+      "associated_pr": 384,
+      "state": "MERGED",
+      "merge_commit": "59b2ed3df115e4ae2194f80149eb9ac3e6f3716e",
+      "title": "docs(rolodex): regenerate artifacts after CF4 file-specific binding",
+      "provenance_resolved": false
+    },
+    "remaining": [
+      "unresolved owner receipts",
+      "SoftProto per-contract replacement decisions",
+      "separately bound requirement/path review"
+    ]
+  }
 }
