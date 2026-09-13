@@ -10,6 +10,8 @@ Module: `modules/foundups/esingularity`.
 
 For wider website edits or redesigns, apply `modules/foundups/esingularity/skills/website-update/SKILL.md`; it requires preserving both ticker consumers.
 
+For every ticker copy update, read that workflow's **Shared branding and language — both sites** section. Keep YUMORI.me and JHR brand labels intact, put context alongside them, and preserve Japanese-first and complete English copy across both consumers. Do not maintain separate branding rules in this ticker skill.
+
 ## Locate and update
 
 Read repository instructions and the module README, INTERFACE and recent ModLog in bounded chunks. Search for an existing update before editing.

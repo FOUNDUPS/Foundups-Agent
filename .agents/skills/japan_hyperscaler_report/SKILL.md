@@ -8,6 +8,8 @@ Canonical module: `modules/foundups/esingularity/jhr`
 Primary public surface: `eSingularity.ai`
 Canonical movement links: `https://yumori.me/` and `https://yumori.info/`
 
+For public series names, website report links and movement calls to action, read **Shared branding and language — both sites** in `modules/foundups/esingularity/skills/website-update/SKILL.md`. That section owns the Japanese katakana JHR title and YUMORI.me branding; explanatory context must not replace either brand. This reference does not change the research or publication gate below.
+
 ## Objective
 
 Research Japan's hyperscale data-center expansion and publish only when a verified development materially changes the picture for Japan, Chiba/Inzai, Fukui, or the distributed COG DC thesis.
