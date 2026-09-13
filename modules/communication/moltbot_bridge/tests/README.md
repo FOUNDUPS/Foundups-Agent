@@ -1,5 +1,25 @@
 # Tests - OpenClaw Bridge
 
+## Authority-to-memory composition baseline
+
+Reuse these existing suites before implementing the R11 connection plan:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
+```
+
+Use the qualified interpreter, `PYTHONDONTWRITEBYTECODE=1`, `PYTHONUTF8=1`,
+`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, and explicit disposable O:-resident
+TEMP/TMP/database/basetemp paths. On Windows the Linux ownership case skips;
+the 2026-09-14 selection passed 46 tests with that one skip. Reopening a store
+inside one process is not a real process-restart test.
+
+The composed failure probe and required R11-A–F acceptance cases are recorded
+in the [connection checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14)
+and `tests/TestModLog.md`. Its signer/verifier are test doubles; the live sink
+remains closed. Extend the existing runtime-authority, queue-binding and
+admission-handler tests when implementing the corresponding substep.
+
 ## Verified-outcome staging and replay
 
 `test_reddog_verified_pattern_memory_sink.py` covers controlled competing

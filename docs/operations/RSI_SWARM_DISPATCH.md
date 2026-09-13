@@ -251,6 +251,98 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Authority-to-memory connection checkpoint — 2026-09-14
+
+Source: merged PR1718/main `5c29a0af1eabc49ee97939e7eca800fb36d22407`.
+WSP 00 awakening and its strict software gate passed. This checkpoint is a
+local composition audit and R11 plan refinement; runtime code and production
+configuration are unchanged. Local WSP 15 planning: 2 + 4 + 4 + 4 = **14/P1**,
+not a signed allocation or runtime admission.
+
+The canonical-main Holo bundle again returned `UNKNOWN`, index gap and zero
+semantic owner attempts at workspace `0c81418f`, with peripheral simulator,
+market and general bridge test hits. Its required module documents exist;
+optional memory/design artifacts and requirements.txt remain absent. Deduplicate
+hit arrays, discard unrelated hits, and explicitly retrieve the exact owners
+and existing fixtures below at the selected source. This is degraded retrieval,
+not CURRENT authority. Static caller searches and deterministic fixture runs
+resolve this bounded question without a model/provider call or new subsystem.
+
+| Existing connection | Verified source and boundary |
+|---|---|
+| Queue to admission and publisher | [Queue binding](../../modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py) is called by [serial-loop bootstrap](../../modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py). It derives admission metadata and constructs the existing signed publisher from supplied dependencies. This connection already exists. |
+| Queue to PatternMemory | [Runtime binding](../../modules/communication/moltbot_bridge/src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py) constructs the existing sink with a database path. The [sink](../../modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py) remains staging-only, has no activation method, and does not receive an independent authority dependency. An environment flag cannot supply that missing contract. |
+| Publisher to durable evidence | [Publisher](../../modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py) signs and stages an envelope in the [existing authority store](../../modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py). The store separates STAGED/ACTIVE evidence and durable receipt consumption. It is not a second PatternMemory implementation. |
+| Signer startup and protected use | [Startup selection](../../modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py) supplies root-backed outcome signing. A separate [protected-use loader](../../modules/communication/moltbot_bridge/src/reddog_signer_system_service_root_protected_use_loader.py) and [WSP 71 ephemeral factory](../../modules/communication/moltbot_bridge/src/reddog_signer_wsp71_ephemeral_backend_factory.py) already exist; static Python search under modules/scripts finds their definitions and tests, without a production caller. Do not recreate them. |
+| Evidence to Memex | [Runtime authority](../../modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_authority.py) revalidates active durable evidence and issues an opaque read/assembly capability. [Operational Memex supply](../../modules/communication/moltbot_bridge/src/reddog_operational_memex_snapshot_supplier.py) already accepts this authority and consumes capabilities through the existing assembler. That capability is not permission to mutate PatternMemory. |
+
+**Fresh evidence:** the existing runtime-authority, protected-use-composition
+and startup-selection suites passed **46 tests, with one Linux ownership check
+skipped, in 26.90s**. The tests use disposable state and injected dependencies;
+this is not production signer/startup admission or a multi-process deployment
+proof. In particular, a fresh store handle in a replay test is not itself a
+separate operating-system process.
+
+**Composition counterexamples:** reuse the runtime-authority test's `_publish`
+fixture with `activate=False`, the real signed publisher/authority-store code,
+and the existing admission-handler test's failing `_CanonicalPatternMemorySink`.
+The signer and verifier here are digest-based test doubles. Calling the actual
+handler `_activate_published()` rejects memory admission and reports no memory
+write, but the authority envelope has already become ACTIVE. The fixture runtime
+authority can issue a capability while memory still has zero records and one
+staged record. Retrying the same publication with a trusted clock one second
+later raises `verified_outcome_evidence_conflict`: newly signed bytes differ
+under the same evidence key. These observations identify latent composition
+gaps; the real staging-only sink still prevents this production path.
+
+The [baseline evidence](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
+`authority_activation_continuation_20260914`, retains the exact source hashes,
+fixture observation, command and limitations. Do not relax conflict checks,
+replace signed evidence, reverse callbacks blindly, or switch activation on
+to make a canary pass. Signer protected-use ordering covers signing/revocation;
+it does not prove atomic acceptance across the authority store and PatternMemory.
+
+**R11 implementation sequence:** these are substeps of the existing packet,
+not new independently dispatchable tickets. The machine-readable plan is in
+R11's `authority_activation_plan` in the existing backlog.
+
+1. **R11-A — immutable publication and retry.** Start with the existing queue
+   binding, publisher, authority store and their tests. Define and retain the
+   exact admitted event/publication across restart and clock advancement. The
+   derived `verified_at` field and signing `issued_at` field must not accidentally
+   create a new outcome or conflicting signature on a retry. Preserve fresh
+   use-time expiry/revocation checks; reject changed scope, evidence and keys.
+2. **R11-B — acceptance and visibility.** Bind evidence and memory acceptance
+   to one recoverable decision under the existing authority/WRE owners. A failed
+   memory operation must not expose an accepted outcome to the Memex reader.
+   Fix the composed counterexample with the real adapters and explicit fault
+   boundaries before enabling activation; existing signer locks alone are insufficient.
+3. **R11-C — admitted startup composition.** Reuse current owner selection,
+   protected-use loader, grant/revocation and WSP 71 factories. Require authentic
+   current owner/runtime bindings and independent verifier inputs, preserving
+   their distinct operations and principals. Missing dependencies remain a
+   rejection; a local fixture or installed executable is not admission evidence.
+4. **R11-D — existing sink activation.** Extend the existing sink and its queue
+   factory only after A–C have a verified contract. Supply independent authority
+   at the write boundary, revalidate exact staged bytes/agent/scope, and use the
+   existing PatternMemory transaction. Return success only after the accepted
+   record and its durable decision agree. Preserve the default closed path.
+5. **R11-E — recovery and ownership.** Exercise real process restart, competing
+   writers, expiry/revocation, cancellation and lost acknowledgments across the
+   composed stores. Require one accepted effect, preserved conflicts/failures
+   and safe recovery. Reuse current tests and Linux harnesses; do not count a
+   skipped ownership test or a second object as process-isolation proof.
+6. **R11-F — later use and benefit.** Reuse existing Memex supply/PatternMemory
+   consumers with an admitted accepted version and the fixed R15 system-workflow
+   oracle. Distinguish one-use assembly receipts from durable learning. Demonstrate
+   the next invocation consumes the accepted improvement, retains rejected
+   variants, and improves measured outcome/cost. Storage or a successful read
+   alone cannot close R11/G4 or R15.
+
+Next authorable step is **R11-A** in an isolated source snapshot. Independent
+authority/runtime supply remains a separate prerequisite for C/D and live proof.
+All 26 packets remain non-dispatchable, and no completion gate advances here.
+
 ### Active-record identity checkpoint — 2026-09-14
 
 Packaging: **15 fast groups passed in 3,104ms** and **8 staged-manifest tests

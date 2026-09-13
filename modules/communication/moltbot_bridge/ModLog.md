@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Authority/memory connection audit
+
+- Verified existing queue-to-publisher and authority-to-Memex connections; recorded the staging-only sink and missing production callers for existing protected-use/WSP 71 factory components. Source was read at PR1718/main `5c29a0af`; no runtime implementation changed.
+- Existing authority/startup/protected-use selection: 46 passed / one Linux ownership skip. Reusing existing publisher/store and test doubles, a failed memory callback leaves the envelope ACTIVE, and a retry one second later conflicts. The actual sink remains activation-ineligible; these are latent composition findings, not live production effects.
+- Canonical R11-A–F implementation sequence and evidence: `docs/operations/RSI_SWARM_DISPATCH.md`, `docs/roadmaps/rsi_swarm_backlog.json`, and baseline observations. Next is immutable publication/retry; preserve current authorization and conflict checks. WSP 22/48/50/60/71/95/97.
+
 ## 2026-09-14: Active-row retry preserves canonical identity
 
 - Extended the existing sink comparison and two existing tests after WSP 00/97 retrieval. Python dictionary equality allowed boolean/integer, integer/float and signed-zero mismatches under a different canonical record ID. Compare with the existing canonical serializer; record IDs and schema remain unchanged.

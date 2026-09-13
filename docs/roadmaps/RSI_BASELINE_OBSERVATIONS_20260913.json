@@ -2107,5 +2107,134 @@
       "fast-final.txt": "48a1f0d3cf14c896c9b0554e2fb2935d3b55b9b3a872c94b653a94a79af91c9e",
       "manifest.txt": "cad314ff3b367de65c635d4983e9b8f305b4ef67d4364b954e63783d173fe63f"
     }
+  },
+  "authority_activation_continuation_20260914": {
+    "date": "2026-09-14",
+    "base_commit": "5c29a0af1eabc49ee97939e7eca800fb36d22407",
+    "predecessor_pr": 1718,
+    "execution_plane": "Local read-only composition audit and documentation; no runtime source/configuration changes",
+    "wsp00": {
+      "awakening_exit_code": 0,
+      "strict_gate_passed": true,
+      "last_validation": "2026-09-14T03:15:15.663106"
+    },
+    "wsp15_local_planning": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1",
+      "authority": "Local planning, not signed allocation or runtime admission"
+    },
+    "retrieval": {
+      "query": "reddog_verified_outcome_authority_admission protected use activation tests",
+      "bundle_ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "workspace_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "noise": "Peripheral simulator/market/general bridge test hits excluded",
+      "ordering": "Explicit exact-source owner/caller and closest existing fixture retrieval after document bundle; NAVIGATION confirms existing memory",
+      "missing": "Required README/INTERFACE available; optional memory/design artifacts and module requirements.txt absent",
+      "staleness": "Lexical canonical-main bundle is not selected-source semantic authority; owned source read directly",
+      "duplication": "Deduplicated hit arrays; reused existing components and fixtures; no new module, store or test file",
+      "no_reindex": true
+    },
+    "existing_connections": [
+      "Serial-loop bootstrap derives admission and resolves signed publisher using existing queue binding",
+      "Runtime binding supplies a database-only staging sink; real activation remains false and no activation method exists",
+      "Signed publisher uses the existing authority store",
+      "Existing runtime authority is consumed by operational Memex supply and assembly"
+    ],
+    "static_caller_inventory": {
+      "scope": [
+        "modules",
+        "scripts"
+      ],
+      "method": "Exact-symbol Python source search",
+      "symbols": {
+        "load_system_service_root_protected_use_authority": [
+          "modules/communication/moltbot_bridge/src/reddog_signer_system_service_root_protected_use_loader.py",
+          "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_identity.py"
+        ],
+        "Wsp71EphemeralSignerBackendFactory": [
+          "modules/communication/moltbot_bridge/src/reddog_signer_wsp71_ephemeral_backend_factory.py",
+          "modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py"
+        ]
+      },
+      "boundary": "No production caller found in this static inventory; not a claim about every dynamic/external caller or installed runtime"
+    },
+    "tests": {
+      "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=<disposable> --tb=short -q",
+      "environment": "Qualified repository interpreter on Windows; bytecode/automatic plugins/cache disabled; explicit outside-repo TEMP/TMP/database/basetemp paths",
+      "passed": 46,
+      "skipped": 1,
+      "seconds": 26.9,
+      "skip": "test_world_writable_owner_ancestor_fails_closed requires Linux ownership semantics",
+      "source_changed": false,
+      "log_sha256": "6e0428ff275150c4908e36debcd5346cc2501bc202d16be03daa569b2f3db9ee"
+    },
+    "composition_observation": {
+      "base_commit": "5c29a0af1eabc49ee97939e7eca800fb36d22407",
+      "execution": "Disposable fixture integration; existing publisher and AtomicJson authority store; digest-based signer/verifier doubles and injected failing memory sink; no production signing or activation",
+      "before_envelope_readable": false,
+      "handler_decision": "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT",
+      "reported_pattern_memory_write": false,
+      "after_envelope_readable": true,
+      "memory_records": 0,
+      "memory_staged_records": 1,
+      "fixture_runtime_authority_can_issue": true,
+      "same_record_retry_one_second_later_error": "verified_outcome_evidence_conflict",
+      "production_sink_activation_enabled": false
+    },
+    "composition_observation_sha256": "cc20712a3cdbaa572ac6f9a3a321d81fcd415b66762f78b3d84e74f242dad763",
+    "reproduction": [
+      "Reuse existing runtime-authority fixture _publish(scratch, activate=False)",
+      "Reconstruct the existing publisher with the same fixture dependencies and NOW clock",
+      "Call actual admission handler _activate_published with existing _CanonicalPatternMemorySink(activation_fail=True)",
+      "Observe rejection/no memory write but active durable envelope and fixture capability issuance",
+      "Re-publish unchanged record/receipts with NOW+1; observe verified_outcome_evidence_conflict"
+    ],
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py": "09c8d15e03cb9136e3f86af638ebe6c0de80f90358deada9e1107e15aeb8a0fc",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py": "ba645dccdcc8445aa4df05898e4e2f54ef72037da1a599e9544fc68d623bb80f",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_authority.py": "b6883487860d73f2d6da1d92f0cfe21e2739927d7ac9a5298632835fd480cf00",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py": "96829d1370f2a3188c8f71be2de206fb76b9a522240afdc58bafb22e5c7c1da8",
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_dependency.py": "2c0eb28b0e0914b048d4390ad3e16c992424400891e0f81ebd3812ef1e0dfac9",
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_service_entrypoint.py": "1234dbf8bd9ddf7d97336bfed84e403f6bd99cfa55837f6e59878dac2e99e17a",
+      "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py": "0e12d52aab8763da841c915d83f17b160057b9be8bf44163835bd559f393cb27",
+      "modules/communication/moltbot_bridge/src/reddog_operational_memex_snapshot_supplier.py": "35ba4a2b7550821e7fc46d1f1dd84579bd0a09ed140d027f909be9f02c447342",
+      "modules/communication/moltbot_bridge/src/reddog_resident_queue_pattern_memory_admission_handler.py": "c1d93e7368575bf92584746ad8399ad0b89bf964a84124cfd655f0243a4af39a",
+      "modules/communication/moltbot_bridge/src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py": "3160c81ea10e00c33f68383cd9936a6342bc1e9a963f8cc940378b1863cfcd5f",
+      "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "d8063dc3d07c0c423871cd3d76d9d4d9c8118a083012dfe4b3eeaef72080b930",
+      "modules/communication/moltbot_bridge/src/reddog_signer_system_service_root_protected_use_loader.py": "444e2f32e1300b2625f70521eddbb481616203af75993b2174786168c36e9903",
+      "modules/communication/moltbot_bridge/src/reddog_signer_wsp71_ephemeral_backend_factory.py": "72087853e2d4eafa4f418673f6cfb47bed63371593a48111ce5ffbc13fd8d150",
+      "modules/communication/moltbot_bridge/src/reddog_verified_outcome_authority_admission.py": "77e8ae2856649bb36716fe474d5f478fe822becb9e6e2b1440e0291cc7a12faf",
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "eb034c8e72564f6103c9be76656e12c176a4ac481c70b39e4860987eb11c7788",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py": "946cd9593f522c97e52a4ff4f7c0bdcd4008421a945e2257b8f12832997b096b",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py": "7d58208aff210cfc7e442fbf9ba466a7aa51091118c77dacc7ba492c844032d6",
+      "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_protected_use_linux.py": "a25c7ebcf278d559d58fccbb88c91240ebb153f9212ebf6bb2e0c22159a79235",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py": "5724a209b027337e967df59aff8be21f73ab7fb75f3ebf8c2725f7b6d4591a17",
+      "modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py": "024096af2cadcbd4d5e6ca421dc6f98f9c68f2b501d10ecf6c50c0fd56b161af",
+      "modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py": "71d0132f5eb1e6895139de481f70d228198d555f6f3d5d9f1d03de43282dbe07",
+      "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "70f034331d1abbc2ceccf1ba5bc1ea191c8c37b21d403e38f00fbfcfbef87083",
+      "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md": "64855a943eea31224ff47c9f3a1bcd0d4365f0aaf8d56f8998430bbe728e2094",
+      "modules/infrastructure/wre_core/src/pattern_memory.py": "79a3ddd8fb987569e879e50a9bfd0068e576b7521f6936c9c774da01849aea33"
+    },
+    "next_substep": "R11-A",
+    "plan_location": "docs/roadmaps/rsi_swarm_backlog.json: R11.authority_activation_plan",
+    "completion_gates_advanced": [],
+    "production_activation_enabled": false,
+    "authenticated_runtime_admission_proven": false,
+    "retained_benefit_proven": false,
+    "limits": [
+      "Probe uses digest-based signer/verifier doubles and an injected failing memory sink; not live authentication or a production effect",
+      "Root protected-use signing/revocation ordering is not cross-store authority/memory atomicity",
+      "Memex read/assembly capability does not authorize PatternMemory mutation",
+      "No current runtime/provider binding was inferred or fabricated",
+      "A reloaded store handle and skipped Linux test are not process-isolation or restart proof"
+    ]
   }
 }

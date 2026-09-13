@@ -786,6 +786,110 @@
         "observed_on": "2026-09-14",
         "scope": "Local staging replay/snapshot and commit-exception recovery; no authority activation",
         "acceptance_satisfied": false
+      },
+      "authority_activation_plan": {
+        "source_commit": "5c29a0af1eabc49ee97939e7eca800fb36d22407",
+        "status": "PLANNING_ONLY_NOT_RUNTIME_ADMITTED",
+        "next_local_substep": "R11-A",
+        "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#authority_activation_continuation_20260914",
+        "runbook": "docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14",
+        "invariant": "No accepted, consumable learning outcome until independently authorized evidence and memory acceptance agree durably; retries preserve the admitted event without bypassing fresh authority checks.",
+        "substeps": [
+          {
+            "id": "R11-A",
+            "title": "Immutable publication and retry",
+            "owner": "Existing queue binding/publisher/authority-store owners",
+            "reuse": [
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py",
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py",
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py"
+            ],
+            "tests": [
+              "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py",
+              "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py"
+            ],
+            "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
+            "dispatchable": false
+          },
+          {
+            "id": "R11-B",
+            "title": "Recoverable acceptance and visibility",
+            "owner": "Existing authority/WRE retention owners",
+            "reuse": [
+              "modules/communication/moltbot_bridge/src/reddog_resident_queue_pattern_memory_admission_handler.py",
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py",
+              "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py"
+            ],
+            "tests": [
+              "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py",
+              "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py",
+              "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py"
+            ],
+            "acceptance": "A failed memory operation cannot expose accepted evidence to the existing Memex authority/reader. Demonstrate recoverable durable agreement across both stores with real adapters and injected failures. Signer protected-use ordering is not proof of cross-store atomicity.",
+            "dispatchable": false
+          },
+          {
+            "id": "R11-C",
+            "title": "Admitted independent startup composition",
+            "owner": "Existing root/signer runtime and independent verifier owners",
+            "reuse": [
+              "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py",
+              "modules/communication/moltbot_bridge/src/reddog_signer_system_service_root_protected_use_loader.py",
+              "modules/communication/moltbot_bridge/src/reddog_signer_wsp71_ephemeral_backend_factory.py"
+            ],
+            "acceptance": "Compose current authentic owner/runtime selection, protected-use capability, grants/revocation and WSP71 resolution using existing factories and distinct roles. Missing or stale dependencies reject. No generated trust roots or synthetic admission receipts.",
+            "dispatchable": false
+          },
+          {
+            "id": "R11-D",
+            "title": "Activation on the existing sink",
+            "owner": "Existing memory/retention and queue-binding owners",
+            "requires": [
+              "R11-A",
+              "R11-B",
+              "R11-C"
+            ],
+            "reuse": [
+              "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py",
+              "modules/communication/moltbot_bridge/src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py"
+            ],
+            "acceptance": "Supply independent write authority; validate exact staged bytes, agent, scope and current permission at the write boundary. Use existing PatternMemory transactions and the agreed durable acceptance decision. Preserve default closed behavior and reject marker-only activation. Memex assembly capability does not grant memory mutation.",
+            "dispatchable": false
+          },
+          {
+            "id": "R11-E",
+            "title": "Recovery and concurrent ownership",
+            "owner": "Independent verification owner with existing runtime owners",
+            "requires": [
+              "R11-D"
+            ],
+            "reuse": [
+              "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py",
+              "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py",
+              "modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py",
+              "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_protected_use_linux.py"
+            ],
+            "acceptance": "Real process restart, competing writers, expiry/revocation, cancellation and lost acknowledgments preserve one accepted effect and conflicting/failing evidence. Complete Linux ownership/process checks in the admitted environment; object reloads and skips do not satisfy them.",
+            "dispatchable": false
+          },
+          {
+            "id": "R11-F",
+            "title": "Later invocation and retained benefit",
+            "owner": "Existing memory consumer and independent R15 experiment owners",
+            "requires": [
+              "R11-E"
+            ],
+            "reuse": [
+              "modules/communication/moltbot_bridge/src/reddog_operational_memex_snapshot_supplier.py",
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_authority.py",
+              "modules/infrastructure/wre_core/src/pattern_memory.py",
+              "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md"
+            ],
+            "acceptance": "An admitted later system-workflow invocation consumes the accepted version under the fixed R15 oracle. Distinguish one-use assembly from durable learning, preserve rejected variants, and measure outcome/cost benefit. Read or storage success alone is insufficient.",
+            "dispatchable": false
+          }
+        ],
+        "authority": "Substeps refine R11 only; no new scheduler, independent global packet, model binding, budget or executable authorization."
       }
     },
     {

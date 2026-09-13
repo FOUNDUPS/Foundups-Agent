@@ -37,6 +37,13 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [authority-to-memory connection checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14)
+traces the existing queue, signer, publisher, stores and Memex reader. A disposable
+composition probe exposes early evidence visibility after failed memory activation
+and a publication conflict when the retry clock advances. The existing selection
+passes 46 tests with one Linux-only skip. R11 now has six ordered substeps;
+immutable publication/retry is next. Runtime code and activation remain unchanged.
+
 The existing sink now compares an active row using canonical JSON before
 acknowledging a retry. Three type/value mismatches that Python treated as equal
 are rejected; valid retries keep their existing record IDs. The

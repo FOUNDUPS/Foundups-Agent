@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 authority-to-memory composition checkpoint
+
+- Recovered PR1718/main `5c29a0af1eabc49ee97939e7eca800fb36d22407`, ran WSP 00 awakening and its strict software gate, and applied WSP 97 retrieval/micro/macro review. Canonical-main Holo was degraded; exact owned source and existing fixtures supplied the working context.
+- Traced existing queue admission, signed publication, root/protected-use dependencies, staging sink and Memex consumers. Reused three existing suites: 46 passed / one Linux ownership skip in 26.90s. A disposable composition probe with digest signer/verifier doubles demonstrates early ACTIVE evidence after a memory failure and conflicting publication on a later retry.
+- Refined the existing R11 packet into ordered publication/retry, visibility, startup, sink, recovery and later-benefit substeps. R11-A is next; runtime activation remains closed. Local planning 14/P1 is not signed admission. No runtime code, new module, live service or protected FoundUp changed; no gate advanced. WSP 00/15/22/48/50/60/71/84/95/97.
+
 ## 2026-09-14: Short RSI checkpoint — active-record identity
 
 - Packaging: 15 fast groups passed in 3,104ms; 8 staged-manifest tests passed in 68.97s. Runtime membership remains 1,400 with one changed source hash and two refreshed pins. Earlier fast invocations correctly rejected the wrong temporary drive and pending manifest refresh; no guard changed.
