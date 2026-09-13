@@ -706,6 +706,13 @@
         "observed_on": "2026-09-14",
         "scope": "Local dry-run scratch recovery and invalid-baseline gate only",
         "acceptance_satisfied": false
+      },
+      "latest_handoff_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "stop_rule_handoff_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Explicit stop-list rendering only",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -987,6 +994,13 @@
         "section": "research_lifecycle_continuation_20260914",
         "observed_on": "2026-09-14",
         "scope": "Local dry-run scratch recovery and invalid-baseline gate only",
+        "acceptance_satisfied": false
+      },
+      "latest_handoff_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "stop_rule_handoff_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Explicit stop-list rendering only",
         "acceptance_satisfied": false
       }
     },

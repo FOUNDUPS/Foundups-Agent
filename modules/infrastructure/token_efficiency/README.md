@@ -100,6 +100,13 @@ The expanded fidelity/compatibility selection passes 158 tests, including all
 14 verbs in all seven modes and wire-corruption rejection. Legacy actionless
 packets retain their old reader behavior; they do not prove action fidelity.
 
+The 2026-09-14 continuation also preserves explicit stop conditions in the
+decompiled handoff. The gate now rejects a missing stop instruction, an `Abort`
+changed to `Continue`, or a substituted list, even when parsed fields match.
+Five reproduced failures became passes in the 162-case selection. Legacy
+actionless packets render their stops; packets without stops keep their old
+rendering. The compact grammar is unchanged and its lossy-list cases still fail.
+
 This gate owns compact prompt packets. It is not the AI Overseer reference-YAML
 compiler's acceptance gate. Its existing CTX.HOLO check round-trips the supplied
 context object separately; it does not prove that context traversed the compact

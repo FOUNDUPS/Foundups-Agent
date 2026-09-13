@@ -159,6 +159,15 @@ class TestDecompileBackwardCompat:
         prose = compiler.decompile(m2m)
         assert "Execute task" in prose
         assert "abc123" in prose
+        assert prose == "Execute task abc123. in scope: test/. following WSP 50."
+
+    def test_decompile_legacy_stop_conditions(self):
+        """Existing actionless packets must also render their explicit stops."""
+        prose = decompile_m2m(
+            "L:A S:registry M:plan T:abc123 R:[50] F:['missing approval']"
+        )
+        assert "Plan implementation for abc123" in prose
+        assert "Abort if any condition holds: ['missing approval']." in prose
 
     def test_decompile_plan(self):
         """decompile() for plan mode produces expected prose."""

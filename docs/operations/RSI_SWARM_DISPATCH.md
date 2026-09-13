@@ -251,6 +251,39 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Stop-rule handoff checkpoint — 2026-09-14
+
+Source: `3fc74285cb19b681de5219b8288e5307a0ea533a`, after PR1714 merged with
+all ten checks successful and its accepted tree equal to main. The existing
+compact compiler retained explicit `F` stop conditions while omitting them
+from decompiled instructions; the existing gate still reported success.
+
+The compiler now emits `Abort if any condition holds: <condition list>.`
+The gate compares that instruction with the original declared stop list, as
+well as comparing compiled and parsed fields. The existing tests reject
+removed instructions, an `Abort` changed to `Continue`, and a replacement
+list; they also cover legacy actionless packets. Before: five failures /
+157 passes. After: 162 passes in 0.48s, with two configuration warnings from
+disabled automatic pytest plugins. No model call was needed.
+
+This is local field-preservation evidence for R10/R15. Commas/brackets that
+the existing compact parser cannot preserve still fail closed. Arbitrary
+prose, objective and authenticated context delivery remain open. Keep the
+original prompt and governed work contract; this change supplies no worker
+admission, independent verification, promotion or retained-benefit evidence.
+The dated continuation in `RSI_BASELINE_OBSERVATIONS_20260913.json` preserves
+earlier observations. All 26 planning packets remain non-dispatchable.
+
+Retrieval evaluation: the governed local bundle located the existing compiler
+gate and then its test file, with UNKNOWN freshness, an index gap and zero
+semantic-owner attempts. Duplicate hit arrays were discarded; NAVIGATION
+confirmed the compiler. README/interface and both existing M2M tests were
+read first. Missing test history is now filled with an inventory of the
+seven existing test files; no test module, compiler or scheduler was created.
+Local WSP 15 selection: 2+4+4+4=14/P1, deterministic local execution, focused
+tests followed by packaged dependency checks. The signed runtime-owner
+clarification remains pending; no unchanged runtime probe was repeated.
+
 ## First bounded dispatch
 
 ### Research lifecycle checkpoint — 2026-09-14

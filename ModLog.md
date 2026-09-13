@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Preserve stop rules in the compact worker handoff
+
+- Continued from merged PR1714/main `3fc74285cb19b681de5219b8288e5307a0ea533a`, with ten successful checks and equal accepted/main trees. The shared product branch remains untouched; runtime-owner clarification is pending.
+- Reproduced a further R10 preparation gap: explicit stop conditions survived compact parsing but disappeared from the decompiled instructions while the gate reported success. The existing compiler now renders an abort instruction and the existing gate verifies its declared list. No new module, grammar or model call.
+- Extended the existing two M2M test files: five failures / 157 passes before, 162 passes in 0.48s afterward. Dropped, weakened and replaced instructions fail; legacy and stop-free rendering stay covered. Added the missing standard module/test histories with an inventory of seven existing test files for reuse.
+- All 15 RedDog fast groups and eight staged manifest tests pass. The first fast-tier attempt needed the existing external dependency-root setting because this worktree has no local `.venv`; the configured retry passed. The backend inventory keeps the same 1,400 paths, with exactly the compiler/gate hashes and their two digest pins refreshed.
+- Current roadmap/runbook, interface, historical contract correction and dated evidence preserve the boundary: field fidelity only, no arbitrary-prose preservation, independent verification, production activation or retained improvement. All 26 packet contracts remain non-dispatchable.
+- WSP 97 retrieval found the existing gate/test through local Holo bundles, UNKNOWN freshness/index-gap/zero owner attempts; duplicate arrays were omitted and NAVIGATION verified the compiler. Deterministic execution was sufficient. Local WSP 15 score 2+4+4+4=14/P1; WSP 00/15/22/50/84/87/97/99.
+
 ## 2026-09-14: Auto Researcher failure and cancellation recovery
 
 - Resumed merged main `595d9007125a7bc261efcfb8d2ed67b55e7d0bba` in a clean owned branch; WSP 00 bootstrap/strict gate passed. Verified canonical artifact-mode/runtime-root environment names remain unset in this shell. No live provider/model/service probe or protected project change.

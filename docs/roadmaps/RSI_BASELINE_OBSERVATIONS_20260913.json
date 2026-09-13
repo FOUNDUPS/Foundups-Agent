@@ -1574,5 +1574,85 @@
     "completion_gate_advanced": false,
     "dispatchable": false,
     "retained_improvement_proven": false
+  },
+  "stop_rule_handoff_continuation_20260914": {
+    "observed_on": "2026-09-14",
+    "source_commit": "3fc74285cb19b681de5219b8288e5307a0ea533a",
+    "scope": "Explicit stop-list preservation in the existing compact decompiled handoff",
+    "base_git_blob_sha256": {
+      "prompt/swarm/m2m_compiler.py": "ff788daeb96f528e5050b3fe274055be97dd483ee1f544767b3687a23c5d1e0f",
+      "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py": "88aa110d1dd085c160a1c44b750e587aa61790b0564cb1557d93a946b68f6c81"
+    },
+    "candidate_workspace_sha256": {
+      "prompt/swarm/m2m_compiler.py": "b6720184fbcfac03c8331910eb8705a2a61abfe01305f2710aeb442eded1c2d5",
+      "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py": "3730bd0021631f255311a26e276432ebf874bdd54e8302528fd93ea91f97946e"
+    },
+    "before": {
+      "failed": 5,
+      "passed": 157,
+      "seconds": 0.43
+    },
+    "after": {
+      "passed": 162,
+      "seconds": 0.48,
+      "warnings": 2
+    },
+    "warning_scope": "asyncio configuration options while automatic plugins are disabled; selected tests synchronous",
+    "cases": [
+      "stop instructions rendered",
+      "missing instruction rejected",
+      "Abort changed to Continue rejected",
+      "substituted list rejected",
+      "legacy actionless stops rendered",
+      "legacy stop-free rendering unchanged"
+    ],
+    "retrieval": {
+      "bundle_ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "noise": "duplicate hit arrays discarded",
+      "ordering": "source query then test-symbol query and direct current reads",
+      "missing_artifacts": "module/test histories absent; standard history and existing seven-file test inventory added",
+      "duplication": "existing compiler, gate and two test files extended"
+    },
+    "wsp15_local_selection": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1",
+      "authority": "local preparatory selection; not signed runtime allocation"
+    },
+    "backend_manifest": {
+      "runtime_file_count": 1400,
+      "membership_unchanged": true,
+      "changed_runtime_hash_paths": [
+        "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py",
+        "prompt/swarm/m2m_compiler.py"
+      ],
+      "digest": "205db8ef67f311763ce4001aa37cb1d139d5bd5f2460c80daf46c09f13e0b3e9"
+    },
+    "boundaries": {
+      "model_call_performed": false,
+      "new_runtime_module": false,
+      "compact_grammar_changed": false,
+      "arbitrary_prose_preservation_proved": false,
+      "authenticated_context_delivery_proved": false,
+      "independent_verification": false,
+      "worker_admission": false,
+      "production_activation": false,
+      "retained_benefit": false,
+      "packet_acceptance_satisfied": false
+    },
+    "next_dependency": "Keep source prompt and governed contract; signed runtime-owner clarification pending. No unchanged provider/service probe repeated.",
+    "packaging_validation": {
+      "fast_groups_passed": 15,
+      "fast_duration_ms": 4632,
+      "manifest_tests_passed": 8,
+      "manifest_seconds": 61.71,
+      "initial_fast_attempt": "dependency-root setting absent for worktree; corrected using existing REDDOG_TEST_SITE_PACKAGES and REDDOG_TEST_PYTHON inputs"
+    }
   }
 }
