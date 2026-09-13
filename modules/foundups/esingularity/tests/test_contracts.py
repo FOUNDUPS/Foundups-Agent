@@ -102,54 +102,59 @@ def test_current_vision_propositions_and_progressive_disclosure_are_present() ->
     assert "slide.link.href" in component
 
 
-def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> None:
+def test_fullscreen_deck_uses_per_slide_images_and_accessible_controls() -> None:
     component = read("components/YumoriPresentation.tsx")
-    css = read("components/YumoriPresentation.module.css")
-    assert (FRONTEND_ROOT / "public" / "vision" / "vision-sprite.jpg").is_file()
-    assert "SPRITE_URL = '/vision/vision-sprite.jpg'" in component
-    assert "backgroundPosition" in component
-    assert "background-size:100% 1000%" in css
-    assert "role=\"img\"" in component
-    assert "aria-label={slide.alt}" in component
+    vision = read("content/yumori-vision.ts")
+    image_paths = re.findall(r"image: '(/[^']+)'", vision)
+    assert len(image_paths) == 10
+    for image_path in image_paths:
+        assert (FRONTEND_ROOT / "public" / image_path.removeprefix("/")).is_file()
+    assert "import Image from 'next/image';" in component
+    assert "src={slide.image}" in component
+    assert "alt={slide.alt}" in component
     assert "ArrowLeft" in component and "ArrowRight" in component and "Escape" in component
     assert "prefers-reduced-motion: reduce" in component
-    assert "Math.abs(distance) > 55" in component
+    assert "SWIPE_DISTANCE = 55" in component
+    assert "Math.abs(distanceX) > SWIPE_DISTANCE" in component
     assert "AUTOPLAY_MS = 9000" in component
     assert "https://yumori.me" in component
-    assert 'href="/reports/jhr"' in component
+    assert 'href="/reports/jhr"' in read("app/page.tsx")
 
 
 def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
     page = read("app/page.tsx")
-    content = read("content/yumori-presentation.ts")
     vision = read("content/yumori-vision.ts")
-    combined = page + content + vision
+    combined = page + vision
     for required in (
-        "COMMUNITY-OWNED GREEN DATA CENTER",
-        "私たちのCOG DCコンピュート",
-        "THIRD FLOOR · EMERGING",
-        "TOP FLOOR · ADVANCED",
-        "SEPARATE INFRASTRUCTURE",
-        "IDEA → PROJECT → FOUNDUP → VALIDATED FOUNDUP → INDEPENDENT AI-NATIVE BUSINESS",
-        "地下をジム・休憩・回復",
+        "COG DCを温泉棟とは別配置",
+        "私たちのCOG DC",
+        "3階 · 挑戦・育成スペース",
+        "最上階 · 実証・発展スペース",
+        "別棟 · COG DC",
+        "地下はジム、休憩、回復スペース",
+        "1チーム最大3人は構想上の運営原則",
     ):
         assert required in combined
     for obsolete in ("2ND FLOOR · LEARN", "4TH FLOOR · LAUNCH"):
-        assert obsolete not in page
+        assert obsolete not in combined
     assert "長谷川章氏の参加は未承認" in page
 
 
-def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
-    content = read("content/yumori-presentation.ts")
+def test_economic_claims_stay_inside_the_current_public_truth_boundary() -> None:
+    page = read("app/page.tsx")
     vision = read("content/yumori-vision.ts")
-    assert 129_649 * 1_000 == 129_649_000
-    assert 129_649 * 5_546 == 719_033_354
-    for label in ("VERIFIED", "REPORTED", "MODELLED"):
-        assert label in vision
-    assert "5年売上 約53.7億円" in vision
-    assert "5年累計FCFE 約19.4億円" in vision
-    assert "予測・保証ではありません" in vision
-    assert "予算・契約額ではありません" in content
+    combined = page + vision
+    for required in (
+        "約15.8億円",
+        "確定契約額ではありません",
+        "129,649人",
+        "再利用の事業性、資金調達、工事費は検証中です",
+        "監査を通過していない売上、利益、投資回収などの数値は、このサイトの根拠として公開しません",
+    ):
+        assert required in combined
+    for unpublished_projection in ("5年売上 約53.7億円", "5年累計FCFE 約19.4億円"):
+        assert unpublished_projection not in combined
+
 
 
 def test_existing_public_assets_and_local_sources_remain_present() -> None:
