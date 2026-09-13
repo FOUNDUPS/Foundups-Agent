@@ -1,5 +1,18 @@
 # Tests - OpenClaw Bridge
 
+## Publication commit recovery
+
+The existing runtime-authority file adds 16 cases for bounded revision retries,
+unrelated state preservation, lost commit acknowledgments, competing staged/active
+publications, invalid winners, absent durable evidence, cancellation and signer
+rejection. The six-suite command under **Immutable publication retry** passed
+**118 tests in 15.96s**; the focused runtime-authority file passed 49 in 13.81s.
+Fault injection uses real disposable atomic JSON stores and digest signer/verifier
+doubles. Each candidate signs once; competing fixtures perform a separate publish.
+Controlled interleavings are not production competing-process or power-loss proof.
+Existing child-interpreter retry checks remain separate from recovery before any
+envelope is durable, which is still open.
+
 ## Recorded admission event time
 
 Extend the existing queue-binding and chain-store suites for recording/replay
@@ -15,7 +28,7 @@ The connected command, with the qualified/disposable environment below, is:
 python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_orchestration_plan.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_next_stage_dispatch.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
 ```
 
-Current result: 214 passed / four skipped in 99.49s. Symlink/AF_UNIX host
+PR1721 checkpoint result: 214 passed / four skipped in 99.49s. Symlink/AF_UNIX host
 limitations remain; synthetic/injected authority fixtures do not prove production
 activation, signed clock provenance or cross-store crash recovery.
 
@@ -30,8 +43,9 @@ and expiry/revocation after retry. Reuse the connected selection:
 python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
 ```
 
-Use the qualified interpreter and disposable environment below. The current
-selection passed 91 tests in 13.08s. Restart tests use digest signer/verifier
+Use the qualified interpreter and disposable environment below. The original
+publication-retry checkpoint passed 91 tests in 13.08s; the expanded selection is
+reported above. Restart tests use digest signer/verifier
 doubles and an actual child interpreter; they do not prove production signer
 isolation, queue timestamp stability or cross-store memory acceptance.
 

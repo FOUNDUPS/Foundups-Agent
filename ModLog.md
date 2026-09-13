@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 publication commit recovery
+
+- Packaging: 15 fast groups / 8 staged-manifest tests passed. The 1,400-file runtime list has two updated source hashes and matching pins; the current 1,650/269 test registry is unchanged.
+- Resumed merged PR1721/main `9d69a111`, passed the WSP 00 software gate, retrieved existing publisher/signing/store owners and applied WSP 97's test/contract discipline. Local planning 15/P1 is not runtime allocation.
+- Extended the current store/publisher for bounded revision-conflict retry and validated durable-winner acknowledgment. Connected selection: 118 passed. Roadmap, R02 map, runbook, backlog and baseline preserve exact evidence and the remaining process-death/authority boundaries.
+- No new module, scheduler, deployed signer or protected FoundUp experiment. R11-A remains partial; next is existing-owner durable outcome-response recovery before publication. WSP 00/15/22/48/50/60/71/84/97.
+
 ## 2026-09-14: R11 recorded-event continuity
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership stays at 1,400 with two changed source hashes and matching pins; the current 1,650/269 test registry is unchanged.

@@ -2,6 +2,12 @@
 
 ## Verified-outcome publication retries
 
+Publication retains its signed envelope through at most three authority-store
+revision attempts. A lost acknowledgment or competing write is reconciled by
+validating the durable winner; missing or conflicting evidence rejects. The
+publisher does not retry signing or change staging visibility. Process death
+before durable evidence still requires owner-controlled recovery.
+
 The existing signed publisher reuses exact durable evidence after restart or
 clock advancement. It verifies the original signature, evidence and publisher
 identity, preserving bytes and issuance time. A retry acknowledgment neither

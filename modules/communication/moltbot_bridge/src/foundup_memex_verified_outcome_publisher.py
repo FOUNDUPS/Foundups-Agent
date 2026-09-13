@@ -119,7 +119,19 @@ class SignedVerifiedOutcomeEvidencePublisher:
             signer_key_fingerprint=response.key_fingerprint,
             key_epoch=self.key_epoch,
         )
-        return self.store.publish(envelope)
+        try:
+            return self.store.publish(envelope)
+        except (OSError, RuntimeError, ValueError):
+            # A lost acknowledgment or competing writer needs durable evidence,
+            # not another signing use. Signer failures remain outside this scope.
+            existing = self.store.load_publication(record_id)
+            if existing is None:
+                raise
+            _validate_publication_retry(
+                self, existing, record_id, record, verifier, held_out,
+                evidence_digest, now_epoch,
+            )
+            return record_id
 
     def activate(self, record_id: str) -> str:
         activated_id = self.store.activate(record_id)

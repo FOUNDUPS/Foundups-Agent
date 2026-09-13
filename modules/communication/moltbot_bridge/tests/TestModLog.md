@@ -1,3 +1,10 @@
+## 2026-09-14: Publication commit recovery
+
+- Packaging: 15 fast groups passed in 2,882ms; 8 staged-manifest tests passed in 62.62s (two pytest configuration warnings). Runtime membership, registry, quarantine and guards are unchanged.
+- Extended the existing runtime-authority file with 16 cases using its existing publisher/record/signature fixtures and real disposable atomic stores. Before repair: 7 failed / 9 passed / 33 deselected in 4.31s (six reproduced recovery failures plus the proposed three-attempt bound).
+- Focused file: 49 passed in 13.81s. Connected publication, queue-binding, authenticity, adversarial, Ed25519 and admission-handler selection: 118 passed in 15.96s, no skips. Exact signed payload preservation, unrelated updates, durable winner bytes, absent/invalid evidence rejection, cancellation and signer rejection are checked.
+- Controlled interleavings do not prove production competing-process ownership or process death before publication; existing separate-interpreter retries remain covered. No new file, weakened assertion, runtime grant or active FoundUp experiment. Evidence: `publication_commit_continuation_20260914`. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Immutable recorded event timestamp
 
 - Packaging: 15 fast groups passed in 2,988ms; 8 staged-manifest tests passed in 61.83s with two pytest configuration warnings. No runtime membership, registry, quarantine or guard changes.

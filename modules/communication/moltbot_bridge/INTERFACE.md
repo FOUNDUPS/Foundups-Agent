@@ -232,6 +232,14 @@ existing envelope after checking exact requested evidence, publisher identity,
 original issuance and signature. It does not re-sign, rewrite, renew or activate
 on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
 runtime authority still checks current key, revocation and expiry.
+`AuthorityRuntimeVerifiedOutcomeStore.publish()` bounds revision-conflict retries
+to three commit attempts, preserving the signed envelope and unrelated current
+state. Other errors are not retried. On publication OSError/RuntimeError/ValueError,
+the signed publisher may acknowledge only a reloaded, fully validated durable
+publication, including an equivalent winner with its original issuance/signature.
+Missing or invalid evidence still rejects. Signing failures and cancellation are
+not publication recovery; no burned signer reservation is reset. This does not
+recover process death before an envelope is durable or activate memory.
 `ResidentQueueChainResultReceipt.recorded_at` is optional for historical objects;
 new accepted `record_resident_queue_stage_result()` writes require a timezone-aware
 `now_iso` and persist it once. Earlier receipts and transition IDs are preserved;

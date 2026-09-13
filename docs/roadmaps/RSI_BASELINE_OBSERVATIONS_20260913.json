@@ -2545,5 +2545,175 @@
       },
       "guard_changes": false
     }
+  },
+  "publication_commit_continuation_20260914": {
+    "base_commit": "9d69a111a096aa4279eaa6f318ebb0bd63808cac",
+    "scope": "Partial R11-A: in-process reconciliation of publication commit conflicts and lost acknowledgments after accepted signing",
+    "wsp00": {
+      "gate_passed": true,
+      "last_validation": "2026-09-14T06:07:15.649473",
+      "interpretation": "software gate",
+      "log_sha256": "e1056abdb650350295d6a2d9f6e1c6dfc64d30a7a82d08a6775942ff4445a18a"
+    },
+    "wsp15_local_planning": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1",
+      "runtime_allocation_receipt": false
+    },
+    "execution_plane": "local isolated source authoring under existing 012 instruction; autonomous app follow-up supplies no WRE allocation or promotion authority",
+    "ownership": {
+      "owned_worktree_reconciled": true,
+      "open_owned_pr_at_start": false,
+      "source_owner_overlap_found": false,
+      "separate_packaging_overlap_pr": 1680,
+      "boundary": "Only current owned branch; preserve shared checkout, other PR head and protected product/service lanes"
+    },
+    "retrieval": {
+      "query": "verified outcome publisher signing commit failure concurrent first publication recovery",
+      "query_receipt_sha256": "8e948fe4bb1d407099901bfc1263dd2b12895e3fcea4fad8111874026262ff4b",
+      "mode": "governed lexical fallback; unchanged semantic failure not retried",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "lexical_ok": true,
+      "prior_semantic_authority_commit": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "bundle_authority": {
+        "evidence_authority": "workspace_head",
+        "repo_head_sha": "9d69a111a096aa4279eaa6f318ebb0bd63808cac",
+        "repo_root_digest": "sha256:40d60ad71436d43150e37a6d118fa2066a806f876c8f4c85e97c0cb2de85dcb2",
+        "workspace_overlay_present": false
+      },
+      "evaluation": {
+        "noise": "Peripheral authenticity hit deferred to connected verification",
+        "ordering": "Publisher, exact store/CAS contract and runtime-authority fixture before adjacent root and conversation-signing owners",
+        "duplication": "Deduplicated code/code_hits arrays",
+        "missing": "Tier-0 complete; direct reads recovered omitted runtime store and nearest test; optional memory/design artifacts and requirements.txt absent",
+        "staleness": "UNKNOWN/index gap retained; exact local source only, not semantic-generation acceptance; no query reindex"
+      },
+      "routing": "Deterministic fault injection and existing contract fixtures before model work; no new worker/model allocation"
+    },
+    "decision": {
+      "smallest_change": "Existing store owns bounded CAS retry; existing publisher owns validation of a durable competing publication",
+      "alternatives_checked": [
+        "Blindly retrying publish from the caller would request another signing use when no envelope is yet durable",
+        "A new generic outbox would duplicate recovery concerns before existing root and response-anchor contracts are evaluated",
+        "Conversation signing already stores/replays full responses under its own policy; it cannot be treated as verified-outcome authority"
+      ],
+      "authority_boundary": "Root outcome reserve is burned before signing; commit binds a signature digest. No reset, new grant, conversation-domain substitution or runtime activation is introduced"
+    },
+    "changes": [
+      "Retry only revision_conflict, at most three existing authority-store commits, preserving identical signed bytes and rebuilding from current unrelated state",
+      "After a publication OSError/RuntimeError/ValueError, reload durable evidence and reuse the existing identity/evidence/issuance/signature validator",
+      "A valid competing staged/active winner retains its bytes and visibility; missing/invalid evidence rejects without another signing use",
+      "Signer rejection and KeyboardInterrupt/SystemExit are outside publication recovery"
+    ],
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py": "200d8d0f7fef85f8a99661bc4dd7a29abd06ffa1c54be07184220eb4dd658c5d",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py": "a5557d50b5b2747a98d4d6044111e9a0af96ad34681195ddb256b7f5d60b5f98",
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py": "3abff0ba91e938c086875dc8cfda5eac10e7c4866f8f4d4201b85356d74474fc",
+      "modules/communication/moltbot_bridge/src/reddog_ed25519_verified_outcome_signing.py": "ebf460e4003916775a03ec0bbf0fe2a5faf8e3b5a3052fa2c0fda4b7e65b8eca",
+      "modules/communication/moltbot_bridge/src/reddog_ed25519_signer_backend.py": "a6c21afa3a7c88b35639657bdb9d8d8a0cd5444d1ccb1019ff9842a64f2c6e0c",
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_service.py": "916fb2119e12ec2a93f30753ca500b968336d75ada3aeade86dfc1b9b88389c6",
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_client.py": "f9153069b1a715d959102e48c6952ae83150e857c8c638d2e3b3a25401bf217d",
+      "modules/communication/moltbot_bridge/src/reddog_ed25519_conversation_scope_backend.py": "cdd04bf07c9a175a00d7d5eec107689f77d69ff1356c35a584b46ba66c937582",
+      "modules/communication/moltbot_bridge/src/reddog_authority_runtime_store.py": "784feb49e8748f565cffa69dd4965f9e0a5c93f13b3be7d3fffd30c6be75bbfc",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py": "7c20b4f9c03f289a37643e46650b0019318feb02d5724583b7b74a5a531b420d",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py": "c6b41afc7e793d045dcd57df38ca6864438384a8d11da365dfa01e7b2573d862",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py": "24befad255f4f0d9119d26af0ff4cf207e62849682202ff2ed504493dc3357d4",
+      "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py": "9894930967d7a6b0c51eca2b4dd7246b887d9bebdd66b054d37d242ce485cd21",
+      "modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py": "ae55fdec51ba9eff852e04be080134de2705947abc26279f5a2f75c93cfecc63",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py": "5724a209b027337e967df59aff8be21f73ab7fb75f3ebf8c2725f7b6d4591a17"
+    },
+    "source_hash_basis": "Git-normalized LF bytes",
+    "test_evidence": {
+      "interpreter": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+      "environment": [
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUTF8=1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+        "TEMP/TMP, FOUNDUPS_DB_PATH, WRE_PATTERN_MEMORY_DB, ANTIFAFM_LYRICS_DB and basetemp in disposable O: audit directory"
+      ],
+      "added_cases": 16,
+      "before": {
+        "failed": 7,
+        "passed": 9,
+        "deselected": 33,
+        "elapsed_seconds": 4.31,
+        "log_sha256": "1a2a8b9548e9a7129793c00a7014efefa328b0a1bc40f903f29cde7786048d0e",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py -k publication_commit --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/publication-commit-20260914/before --tb=short -q",
+        "interpretation": "Six reproduced recoverable failures plus one assertion for the proposed three-attempt retry bound"
+      },
+      "focused": {
+        "passed": 49,
+        "failed": 0,
+        "elapsed_seconds": 13.81,
+        "log_sha256": "021be9db7449b400729da4c1db8a1848ccdf55d97a42619817583623f5c2313d",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/publication-commit-20260914/focused --tb=short -q"
+      },
+      "after": {
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_seconds": 15.96,
+        "log_sha256": "8466dcb4e233e80027d8b54518f4b490b22f8235f2b9d9d218bcc23baf789386",
+        "command": "python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/publication-commit-20260914/connected --tb=short -q"
+      },
+      "new_case_scope": [
+        "One/two controlled unrelated revisions retain all state and the original signed envelope",
+        "Lost acknowledgment after a real durable atomic commit preserves bytes",
+        "Competing staged/active publication retains the validated winner and its earlier issuance",
+        "Rehashed altered record, principal, signature and epoch reject without overwriting the winner",
+        "Missing durable evidence rejects; repeated conflict stops after three attempts",
+        "Cancellation propagates even after commit; signing rejection is not converted into an acknowledgment"
+      ],
+      "restart_scope": "Existing separate-interpreter publication retry cases pass; new interleavings are deterministic calls across real atomic-store instances, not competing OS processes or process death before publication",
+      "signature_scope": "Each candidate attempt signs once; a competing injected fixture performs its own separate signing/publication. Not proof of one global production signer use",
+      "state_scope": "Disposable files and synthetic/injected authorities; no production signer, root grants, memory activation or protected FoundUp experiment"
+    },
+    "limits": [
+      "R11-A/R11/G4 remain partial and all planning dispatch flags remain false",
+      "No durable envelope after process death or retry exhaustion remains an owner-controlled recovery gap",
+      "Root authority retains burned reservations; no grant renewal or response-replay authority is inferred",
+      "Independent startup, cross-store acceptance, real sink activation, legacy event recovery and measured later benefit remain open"
+    ],
+    "next_authorable_step": "Map and test a durable verified-outcome signer-response handoff before publication using existing outcome-root and response-anchor owners; preserve distinct operation/scope/current-authority checks and do not reset burned reservations",
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "packaging": {
+      "fast": {
+        "groups_passed": 15,
+        "duration_ms": 2882,
+        "log_sha256": "618d38477a9be4e601c2a8aa4745fa2b284ee1e5d44b109412120893c2a73304",
+        "command": "node tests/run_reddog_test_tier.js fast",
+        "working_directory": "extensions/reddog",
+        "environment": [
+          "REDDOG_TEST_SITE_PACKAGES=O:/Foundups-Agent/.venv/Lib/site-packages",
+          "REDDOG_TEST_PYTHON=O:/Foundups-Agent/.venv/Scripts/python.exe",
+          "TEMP/TMP in disposable O: audit directory"
+        ]
+      },
+      "manifest": {
+        "passed": 8,
+        "warnings": 2,
+        "elapsed_seconds": 62.62,
+        "runtime_membership": 1400,
+        "changed_runtime_files": 2,
+        "digest": "9b91a483049492d7033e93493344221d0834b994d8042296524e6e6fca3dadb0",
+        "log_sha256": "52889172a3d8b090e92b2949ff0f4a73ec0fe4f7fd5472a51e6cc5af972c954c",
+        "command": "python -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/publication-commit-20260914/manifest --tb=short -q"
+      },
+      "registry": {
+        "current": true,
+        "total_files": 1650,
+        "quarantined_files": 269,
+        "changed": false
+      },
+      "guard_changes": false
+    }
   }
 }

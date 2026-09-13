@@ -241,8 +241,17 @@ held-out receipt's timestamp. Later snapshot time does not change metadata.
 Missing/invalid/ambiguous/foreign event evidence rejects, including historical
 receipts without a timestamp. The connected selection passes 214 tests with
 four platform skips; see the [event checkpoint](../operations/RSI_SWARM_DISPATCH.md#event-timestamp-checkpoint--2026-09-14).
-R11-A remains partial for failure before durable publication, competing initial
-writers and owner-controlled legacy evidence recovery. No activation gate closes.
+The next follow-up addresses recoverable publication conflicts; owner-controlled
+legacy event recovery and production acceptance remain open.
+
+**Publication commit follow-up:** The existing store retries revision conflicts
+with the same signed bytes, bounded to three attempts. The publisher validates a
+durable winner after a lost acknowledgment or competing write; unrelated state,
+original signature/issuance and staging visibility are preserved. The connected
+selection passes 118 tests; see the [commit checkpoint](../operations/RSI_SWARM_DISPATCH.md#publication-commit-checkpoint--2026-09-14).
+R11-A still needs a durable response handoff for process death before publication
+and owner recovery after exhaustion. Existing outcome-root and conversation
+replay contracts are the next retrieval targets; their authorities are distinct.
 
 ### R12 — Independent production promoter
 

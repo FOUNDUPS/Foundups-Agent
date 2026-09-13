@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Reconcile signed publication commit failures
+
+- Existing authority-store publication now retries only revision conflicts, up to three commits with identical signed bytes and fresh unrelated state. Existing publisher reloads and validates durable evidence after a publication error, preserving the winner without another signing use, rewrite or activation. Missing/invalid evidence, signer rejection and cancellation stay closed or propagate.
+- Reproduced six recovery failures plus the planned retry-bound assertion; focused 49 / connected 118 tests pass. Real disposable stores, injected authorities and controlled interleavings do not establish production crash recovery or global single-signing behavior.
+- Next R11-A action is the durable outcome-response handoff before publication, starting from existing root outcome and conversation replay owners. Burned reservations, independent authority, legacy event recovery, R11-B–F and retained benefit remain open. WSP 00/15/22/48/50/60/71/84/97.
+
 ## 2026-09-14: Retain the admitted event timestamp
 
 - Added optional `recorded_at` to the existing chain receipt; new accepted stage writes persist a timezone-aware recording clock in the same atomic snapshot. Existing transition IDs, historical receipt shape and earlier receipts are preserved. Admission reuses a unique matching held-out receipt's time after canonical/scope/ID validation; bootstrap/snapshot time never replaces missing history.

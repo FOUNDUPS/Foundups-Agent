@@ -251,6 +251,59 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Publication-commit checkpoint — 2026-09-14
+
+Packaging passed: **15 fast groups in 2,882ms** and **8 staged-manifest tests
+in 62.62s** (two pytest configuration warnings). Runtime membership stays at
+1,400 with two changed source hashes and matching pins. The test registry is
+current and unchanged at 1,650 files / 269 quarantined; no guard was weakened.
+
+Base: PR1721/main `9d69a111a096aa4279eaa6f318ebb0bd63808cac`.
+WSP 00 awakening/strict software gate passed. Local WSP 15 planning is
+3 + 4 + 4 + 4 = **15/P1** under the existing 012 authoring instruction.
+This app continuation is not a signed allocation, work order or runtime grant.
+
+Governed lexical retrieval found the existing publisher and signing owners;
+deduplicated hit arrays and direct reads supplied the omitted store and nearest
+runtime-authority tests. Tier-0 contracts are present; optional memory/design
+artifacts and requirements.txt are absent. Peripheral authenticity hits were
+deferred until the connected verification pass. Workspace evidence matches the
+base above; freshness remains UNKNOWN/gap with zero semantic-owner attempts.
+The unchanged semantic authority at `5326080d` was not queried again or moved.
+Deterministic source/fixture work was selected before any model dispatch.
+
+The existing authority-store adapter now attempts at most three commits for
+`revision_conflict`, retaining the same signed envelope and rebuilding each
+candidate snapshot from current state. Unrelated updates survive. Other errors
+do not trigger write retries. The existing publisher handles a publication error
+only after signing succeeded: it reloads the durable publication and reuses its
+original evidence/identity/issuance/signature validator. A matching winner can be
+acknowledged without replacement, activation or another signing use. Missing,
+invalid or conflicting durable evidence still rejects; signer rejection and
+KeyboardInterrupt/SystemExit remain outside recovery.
+
+**Verification:** 16 new cases extend the existing runtime-authority test file.
+Before repair: **7 failed / 9 passed / 33 deselected in 4.31s**. Six failures
+reproduced recoverable commit behavior; one checked the proposed three-attempt
+bound. Focused result: **49 passed in 13.81s**. Connected publication, queue
+binding, authenticity, adversarial, Ed25519 and admission-handler result:
+**118 passed in 15.96s**. Controlled interleavings use real disposable atomic JSON
+stores and injected signer/verifier doubles; each candidate signs once. Competing
+fixtures produce their own publication and do not prove one global signer use.
+Existing separate-interpreter publication retry tests also pass. Process death
+before durable publication and production root/UID isolation remain unverified.
+
+R11-A remains partial. The root outcome service deliberately burns reservations
+and stores a signature digest, while conversation signing already has a distinct
+response-replay/anchor contract. Next, map a durable outcome-response handoff onto
+those existing owners before considering a new mechanism. Preserve operation,
+scope, current-key/revocation and independent grant boundaries; do not reinterpret
+conversation recovery as an outcome grant or reset burned reservations. Process
+death or exhausted retries with no durable envelope still require owner recovery.
+R11-B–F, legacy event recovery and measured retained benefit stay open.
+All 26 packets and six R11 substeps remain non-dispatchable. Exact source hashes,
+commands and limits are in `publication_commit_continuation_20260914`.
+
 ### Event-timestamp checkpoint — 2026-09-14
 
 Packaging passed: **15 fast groups in 2,988ms** and **8 staged-manifest tests
