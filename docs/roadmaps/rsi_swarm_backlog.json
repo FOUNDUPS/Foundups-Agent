@@ -115,7 +115,7 @@
       "wave": 0,
       "priority": "P1",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
-      "status": "partially_delivered_documentation_authority_only",
+      "status": "partially_delivered_enforcement_map_and_selected_drift_corrections",
       "dependencies": [],
       "owner_role": "0102 governance/documentation",
       "reuse_scope_candidates": [
@@ -162,8 +162,26 @@
         "root roadmap authority",
         "WSP navigation",
         "dated audit attachment",
-        "two obsolete system roadmaps archived"
-      ]
+        "two obsolete system roadmaps archived",
+        "R00-R25 requirement, owner, test and operational-gap map",
+        "WSP 46/CORE current-runtime clarification with knowledge mirrors",
+        "dated ledger handoff and briefing navigation correction"
+      ],
+      "delivery_evidence": {
+        "date": "2026-09-13",
+        "review_base_commit": "35ed430c61e4e35c1b779f03c13e40368c82b65f",
+        "map": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+        "source_inventory": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_EVIDENCE.json",
+        "focused_existing_tests": {
+          "passed": 18,
+          "deselected": 96
+        },
+        "remaining": [
+          "individual historical ledger dispositions",
+          "separately bound review of requirement coverage and the R06-R15 path"
+        ],
+        "runtime_completion_claim": false
+      }
     },
     {
       "packet_id": "R03",

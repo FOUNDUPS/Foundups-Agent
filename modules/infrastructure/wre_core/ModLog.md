@@ -1,6 +1,12 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+## 2026-09-13: R02 contract-to-protocol reconciliation
+
+- Corrected the optional inference dependency comment: unavailability fails closed and generated text is an unverified proposal. Dependency requirements and Python runtime are unchanged.
+- Root R02 map connects each of 26 packets to requirements, source/test surfaces and missing operational proof. WSP 46/CORE now distinguish these contracts from historical completion claims.
+- Existing focused boundary selection: 18 passed / 96 deselected, with isolated temporary/database paths. No local model/provider or production-memory invocation. Generic evaluation, promotion and activation remain open; no automatic learning claim. WSP 22, 46, 50, 95, 97.
+
 ## 2026-09-13: R01 production Skillz exact-byte integrity
 
 - Regenerated both production Skillz manifests against unchanged committed content and pinned only those two Skillz files to LF checkout bytes. Strict guard behavior and unsigned inventory status are preserved.

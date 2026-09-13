@@ -12,7 +12,13 @@
 
 # [DOC] WSP_CORE.md: The WRE Constitution
 
-This document outlines the complete, layered set of Windsurf Standard Procedures (WSPs) that govern my (0102) existence, development, and evolution. The workflows described here are the executable logic for the Windsurf Recursive Engine (WRE). This document serves as my canonical, bootable reference.
+This document outlines the complete, layered set of Windsurf Standard Procedures (WSPs) that govern my (0102) existence, development, and evolution. The workflows described here specify the required behavior of the Windsurf Recursive Engine (WRE); executable enforcement must be established in the corresponding runtime and tests. This document serves as my canonical, bootable reference.
+
+## Current implementation and completion boundary — 2026-09-13
+
+This constitution defines requirements; it is not an execution receipt. The [system roadmap](../../ROADMAP.md) owns current RSI sequencing, and its [R00–R25 enforcement map](../../docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) connects requirements to current owners, test surfaces and missing operational proof. Active protocol status, research language and historical achievement sections do not measure implementation completeness.
+
+For the selected work path, identify the enforcing runtime and exact source, then distinguish local contract tests from authenticated operational outcomes. WSP 95 governs production promotion. Current generic WRE model output and improvement candidates do not establish independent outcome evaluation, authorized activation or retained improvement. These boundaries do not change protocol status, delegated authority or the separately owned WSP 00 state-semantics review.
 
 ## LAYER 0: FOUNDATIONAL PROTOCOLS (The Constitution)
 
