@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { currentFieldStatus } from '../content/current-field-status';
 
 const actions = [
-  { label: 'LIVE', text: currentFieldStatus.tickerJa, href: currentFieldStatus.href },
+  { label: 'VOTE NO', text: currentFieldStatus.tickerJa, href: currentFieldStatus.href },
   { label: 'JHR', text: 'UPDATE 9/10｜仙台200MW・印西の地区計画・福井の選択肢', href: '/reports/jhr' },
   { label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' },
   { label: 'VISIT', text: '写真で現地を見る', href: 'https://pics.yumori.info' },

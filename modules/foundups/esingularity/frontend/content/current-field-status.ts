@@ -1,10 +1,10 @@
-// Canonical public field-status source. Update this one object when the monk's location changes.
+// Canonical campaign status for both homepages. Do not renew an expired appearance without confirmation.
 export const currentFieldStatus = {
-  updatedAt: '2026-09-13T09:30:00+09:00',
-  updatedLabelJa: '9/13 9:30〜正午',
-  locationJa: 'すかっとランド九頭竜の正面入口前',
-  tickerJa: '9/13 9:30〜正午｜僧はすかっとランド九頭竜の正面入口前で解体反対の抗議中。ぜひ合流を！YUMORIの皆さん、無料のYUMORI Tシャツを受け取りに来てください。詳しくはYUMORI.infoへ。',
-  detailJa: '9月13日9:30〜正午、この僧はすかっとランド九頭竜の正面入口前で、温泉の解体に反対する抗議をしています。ぜひ会いに来て、一緒に声を届けてください。YUMORIの皆さんにはYUMORI Tシャツを無料でお渡しします。活動の詳細はYUMORI.infoへ。',
-  detailEn: 'September 13, 9:30 a.m.–noon (Japan time): the monk is protesting the demolition at the front entrance of Sukatto Land Kuzuryu. Come join him! YUMORI members, stop by and pick up your free YUMORI T-shirt. Learn more at YUMORI.info.',
-  href: 'https://yumori.info/',
+  updatedAt: '2026-09-13T14:30:00+09:00',
+  updatedLabelJa: '9/13更新｜9/25の採決へ',
+  locationJa: '旧すかっとランド九頭竜の保存活動',
+  tickerJa: '9/25の採決へ｜解体準備予算に反対を（VOTE NO）。期限付き検証・採決延期の要請は撤回。市の記録と支援資料を読み、YUMORI.meから声を届けてください。',
+  detailJa: '9月13日9:30〜正午の現地参加案内は終了しました。現在の要請は、9月25日の採決で旧すかっとランド九頭竜の解体準備予算に反対すること（VOTE NO）です。期限付き検証や採決延期を求めるものではありません。',
+  detailEn: 'The September 13, 9:30 a.m.–noon Japan-time invitation has expired. The current request is VOTE NO on the budget containing demolition preparation for Sukatto Land Kuzuryu at the September 25 vote. The request for a fixed review period or postponed vote has been withdrawn.',
+  href: 'https://yumori.me/',
 } as const;
