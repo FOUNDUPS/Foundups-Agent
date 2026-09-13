@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-13. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-14. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -35,7 +35,15 @@ The baseline below remains `fb58e5279673ef9de30735ccfedc8001c3bb79d6`. Documenta
 
 R00 recovery is historical success at its recorded source/generation. R02 now includes a requirement/owner/test/gap map for R00–R25 and selected WSP 46/CORE and briefing corrections. The [ledger reconciliation](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md#historical-ledger-dispositions--2026-09-13) now covers all 11 pending April rows/tracks and four relevant closed rows; unresolved owner evidence, per-contract archival decisions and separately bound review remain open. Do not mark all of R02 or G0 complete merely because the documentation is discoverable.
 
-## Current delivery checkpoint — 2026-09-13
+## Current delivery checkpoint — 2026-09-14
+
+The existing Auto Researcher now rejects an invalid baseline before proposing
+changes and restores its scratch baseline on Python failure/cancellation exits.
+Five reproduced failure cases now pass in the expanded 31-case selection,
+including runner-restore and cleanup-output failures. This is preparatory local recovery evidence for
+R10/R13/R15, not production activation or durable process-crash recovery. The
+[lifecycle checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#research-lifecycle-checkpoint--2026-09-14)
+retains the exact scope and unchanged worker-admission gap.
 
 The existing Auto Researcher evaluator now rejects impossible numeric proposals
 before simulation. A negative allocation previously outscored the baseline;

@@ -297,6 +297,91 @@ def test_results_tsv_path_isolation(temp_research_env, tmp_path):
     assert not source_results.exists()
 
 
+@pytest.mark.parametrize("error_type", [RuntimeError, KeyboardInterrupt])
+def test_dry_run_restores_after_diff_interruption(temp_research_env, tmp_path, monkeypatch, error_type):
+    target_path, program_path = temp_research_env
+    original_code = target_path.read_text(encoding="utf-8")
+    runner = DryRunGitRunner()
+    researcher = WREAutoResearcher(
+        target_path, program_path, max_iterations=1,
+        runner=runner, results_dir=tmp_path / "interrupted_run",
+    )
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: original_code + "\n# candidate\n")
+
+    def interrupted_diff(*args):
+        raise error_type("interrupted diff")
+
+    monkeypatch.setattr(runner, "diff", interrupted_diff)
+    with pytest.raises(error_type, match="interrupted diff"):
+        researcher.run()
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
+    assert target_path.read_text(encoding="utf-8") == original_code
+    assert not any(op["operation"] == "commit" for op in runner.planned_operations)
+
+
+@pytest.mark.parametrize("cleanup_fault", ["runner", "output"])
+def test_dry_run_restores_local_copy_when_cleanup_dependencies_fail(
+    temp_research_env, tmp_path, monkeypatch, cleanup_fault
+):
+    target_path, program_path = temp_research_env
+    original_code = target_path.read_text(encoding="utf-8")
+    runner = DryRunGitRunner()
+    researcher = WREAutoResearcher(
+        target_path, program_path, max_iterations=1,
+        runner=runner, results_dir=tmp_path / "failed_restore_run",
+    )
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: original_code + "\n# candidate\n")
+
+    def interrupted_diff(*args):
+        raise RuntimeError("interrupted diff")
+
+    def failed_restore(*args):
+        raise RuntimeError("runner restore failed")
+
+    monkeypatch.setattr(runner, "diff", interrupted_diff)
+    if cleanup_fault == "runner":
+        monkeypatch.setattr(runner, "restore", failed_restore)
+        error_type, message = RuntimeError, "runner restore failed"
+    else:
+        import builtins
+        original_print = builtins.print
+
+        def failed_cleanup_output(*args, **kwargs):
+            if args and str(args[0]).startswith("\n[SAFETY]"):
+                raise BrokenPipeError("cleanup output failed")
+            return original_print(*args, **kwargs)
+
+        monkeypatch.setattr(builtins, "print", failed_cleanup_output)
+        error_type, message = BrokenPipeError, "cleanup output failed"
+    with pytest.raises(error_type, match=message) as caught:
+        researcher.run()
+    assert "interrupted diff" in str(caught.value.__context__)
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
+    assert target_path.read_text(encoding="utf-8") == original_code
+
+
+def test_invalid_baseline_stops_before_proposal(temp_research_env, tmp_path, monkeypatch):
+    target_path, program_path = temp_research_env
+    invalid_source = (
+        "AGENT_ALLOCATION = {'basic_search': -0.5, 'openclaw': 1.5}\n"
+        "AGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0, 'openclaw': 5.0}\n"
+    )
+    target_path.write_text(invalid_source, encoding="utf-8")
+    researcher = WREAutoResearcher(
+        target_path, program_path, max_iterations=1,
+        results_dir=tmp_path / "invalid_baseline_run",
+    )
+
+    def unexpected_proposal(*args):
+        pytest.fail("Invalid baseline reached proposal generation")
+
+    monkeypatch.setattr(researcher, "_propose_change", unexpected_proposal)
+    with pytest.raises(ValueError, match="Baseline validation failed"):
+        researcher.run()
+    assert researcher.working_target_path.read_text(encoding="utf-8") == invalid_source
+    assert not any(op["operation"] == "commit" for op in researcher.runner.planned_operations)
+
+
 def test_commit_mode_fail_closed(temp_research_env, tmp_path):
     """Verify commit/live mode is fail-closed, raising SPECIFIED_NOT_IMPLEMENTED."""
     target_path, program_path = temp_research_env

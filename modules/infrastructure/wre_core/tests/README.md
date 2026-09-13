@@ -29,9 +29,10 @@ After setting the isolated paths above, run the existing
 `tests/test_wre_auto_researcher.py` with plugin autoload disabled, the explicit
 `pytest_asyncio.plugin`, importlib mode, no cache provider and a unique external
 `--basetemp`. The fixture disables Qwen construction before researcher
-initialization. The 26-case selection covers literal-only evaluation, numeric
+initialization. The 31-case selection covers literal-only evaluation, numeric
 and catalog guards before simulation, valid boundary values, invalid-candidate
-rejection through the dry-run loop and the existing source/commit boundaries.
+rejection through the dry-run loop, invalid-baseline rejection, exception and
+keyboard-cancellation cleanup, runner-restore/output failure, and existing source/commit boundaries.
 It does not dispatch a model or prove production RSI.
 
 ## Bounded Git I/O tier

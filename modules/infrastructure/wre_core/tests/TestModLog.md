@@ -1,5 +1,12 @@
 # TestModLog - wre_core/tests
 
+## 2026-09-14: Auto Researcher failure/cancellation lifecycle
+
+- Reused `test_wre_auto_researcher.py`. Four regressions failed before the repair: diff `RuntimeError`, diff `KeyboardInterrupt`, final runner-restore failure, and invalid baseline reaching the proposal sentinel. A follow-up broken-output case failed because a status message preceded cleanup. Final result: **31 passed in 0.65s**, including the prior 26 cases; restoration precedes status output.
+- Assertions verify original/scratch restoration, no planned commit for interrupted first proposals, propagated cleanup errors with the earlier exception context, and rejection before proposing against invalid baseline metrics. Tests use injected failures, the existing pre-construction model-disable fixture and isolated TEMP/TMP/database/basetemp paths.
+- These tests do not prove OS process-kill recovery, storage durability, independently bound worker verification or production RSI. No new test file, dependency or registry update. WSP 22/48/50/97.
+
+
 ## 2026-09-13: Auto Researcher input guards and dry-run rejection
 
 - Reused `test_wre_auto_researcher.py`: 16 invalid-map cases, two valid boundary cases, one injected invalid-proposal dry-run case and the original seven tests. Initial numeric guards exposed 10 failures; the additional unit-sum guard exposed two more. Final result: **26 passed in 0.59s**.
