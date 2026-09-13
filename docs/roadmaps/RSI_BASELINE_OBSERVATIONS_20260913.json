@@ -180,5 +180,794 @@
     "duplication": "Two distinct M2M formats already exist; no third compiler or evaluator was created.",
     "staleness": "CURRENT applies only to bcc877829; later integration source requires its own qualification. Relevant compiler/gate source matched before this repair.",
     "must_include": "Directly inspected sentinel, shim, compact compiler/gate/tests and available module contracts; token_efficiency has no ROADMAP, ModLog or tests README/TestModLog in this source."
-  }
+  },
+  "holo_postmerge_after_1710": {
+    "accepted": true,
+    "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+    "generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+    "no_holoindex_reindex_performed_by_controller": true,
+    "rejection_reasons": [],
+    "schema_version": "reddog_holoindex_postmerge_runtime.v1",
+    "started_runtime_ids": [
+      "openclaw",
+      "openclaw_supervisor"
+    ],
+    "status": "COMPLETED",
+    "stopped_runtime_ids": [
+      "openclaw_supervisor",
+      "openclaw"
+    ],
+    "target_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+    "task_id": "holoindex_postmerge_refresh:5326080d583625aebbc230242117fb7fcf0044a6"
+  },
+  "holo_public_benchmark_after_1710": {
+    "source_commit": "5326080d583625aebbc230242117fb7fcf0044a6",
+    "wall_seconds": 97.102,
+    "result": {
+      "success": true,
+      "error": "",
+      "benchmark_run": {
+        "schema_version": "holoindex_retrieval_benchmark_run.v1",
+        "corpus_digest": "sha256:202666d47351efb275e035eae4c0e4633cf398b2909d52d28e575964aa074b5c",
+        "corpus_source_digest": "sha256:2a3f519d62c6e907275870e2bbef09abdac6c977513174349d89c1161e3f424d",
+        "split": "heldout",
+        "split_digest": "sha256:e2bcb09b858eac4f794defa9fe8a5a86c2bbb6190f20a78c5ac0c903a903bd9d",
+        "candidate_binding": {
+          "candidate_id": "sha256:4c95c0a901e6671b0c9f4d18b2bb85ac439a5ecd2ffa0286a984ecd13c4df786",
+          "generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+          "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+          "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+          "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+          "config_digest": "sha256:593e136902c889579eea0b5b87e11e6b2d7410c0f988a16b3dc2f143850843ed",
+          "ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+          "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167"
+        },
+        "k": 8,
+        "metrics": {
+          "recall_at_k": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_k": 0.9939998,
+          "mean_latency_ms": 3702.667,
+          "p95_latency_ms": 4031.0
+        },
+        "evaluations": [
+          {
+            "case_id": "heldout-m2m-compiler",
+            "query_digest": "sha256:c48c030b65f88303a842875e900a888ccf857fca461100b96197d1d7985f8eaa",
+            "query_receipt": {
+              "schema_version": "holoindex_query_receipt.v1",
+              "source": "holoindex_retrieval_autoresearch",
+              "source_class": "holoindex",
+              "ok": true,
+              "query": "m2m compression sentinel",
+              "freshness": "CURRENT",
+              "hits": [
+                {
+                  "path": "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/ai_intelligence/ai_overseer/tests/test_m2m_compression_sentinel.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/reports/holo_system_check.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": ".claude/skills/m2m/SKILL.md",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/ai_intelligence/ai_overseer/memory/m2m_compression_cache.json",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "prompt/swarm/m2m_compiler.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/ai_intelligence/ai_overseer/skillz/m2m_compile_gate/SKILLz.md",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "WSP_framework/docs/SENTINEL_AUGMENTATION_METHODOLOGY.md",
+                  "title": "Sentinel Augmentation Methodology for WSP Framework",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                }
+              ],
+              "error": "",
+              "freshness_generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+              "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+              "freshness_receipt_path": "",
+              "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "index_gap_detected": false,
+              "stale_reasons": [],
+              "no_holoindex_reindex_performed": true,
+              "retrieval_runtime_ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+              "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167",
+              "runtime_environment_exact_closure_verified": false,
+              "semantic_evidence_digest": "sha256:817cf08477eb8a149e71d128b64ed197109047acb050801ce9f8f003b752877c",
+              "semantic_evidence_count": 56,
+              "observed_latency_ms": 3547.0,
+              "owner_attempts": 1,
+              "owner_retry_performed": false,
+              "owner_retry_reason": "",
+              "owner_acquisition_cycle": 0,
+              "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_overlay_present": false,
+              "semantic_evidence_authority": "committed_head_only",
+              "no_authority_worktree_mutation_performed": true,
+              "receipt_id": "sha256:0e3a59b7203674a7e4cd61216932b92137b81c8695f5509a3c5462d2ccb3a6f2"
+            },
+            "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+            "ranked_paths": [
+              "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py",
+              "modules/ai_intelligence/ai_overseer/tests/test_m2m_compression_sentinel.py",
+              "holo_index/reports/holo_system_check.py",
+              ".claude/skills/m2m/SKILL.md",
+              "modules/ai_intelligence/ai_overseer/memory/m2m_compression_cache.json",
+              "prompt/swarm/m2m_compiler.py",
+              "modules/ai_intelligence/ai_overseer/skillz/m2m_compile_gate/SKILLz.md",
+              "WSP_framework/docs/SENTINEL_AUGMENTATION_METHODOLOGY.md"
+            ],
+            "latency_ms": 3547.0,
+            "recall_at_k": 1.0,
+            "reciprocal_rank": 1.0,
+            "ndcg_at_k": 0.96399881
+          },
+          {
+            "case_id": "heldout-stage-promotion",
+            "query_digest": "sha256:32c197d9d8fe73e04b445fc9ed014c38806755898942ee6b59638af0c4235081",
+            "query_receipt": {
+              "schema_version": "holoindex_query_receipt.v1",
+              "source": "holoindex_retrieval_autoresearch",
+              "source_class": "holoindex",
+              "ok": true,
+              "query": "compile_to_staged promote_staged rollback",
+              "freshness": "CURRENT",
+              "hits": [
+                {
+                  "path": "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/wre_core/skillz/skills_registry.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/wre_core/skillz/skills_registry_v2.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/ai_intelligence/ai_overseer/skillz/m2m_stage_promote_safe/SKILLz.md",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/foundups/agent/tests/test_context_bundle_builder.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/wre_core/src/security_trigger.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "scripts/tests/test_generate_reddog_backend_manifest.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/foundups/agent/tests/test_foundup_scaffold_writer_live.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                }
+              ],
+              "error": "",
+              "freshness_generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+              "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+              "freshness_receipt_path": "",
+              "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "index_gap_detected": false,
+              "stale_reasons": [],
+              "no_holoindex_reindex_performed": true,
+              "retrieval_runtime_ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+              "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167",
+              "runtime_environment_exact_closure_verified": false,
+              "semantic_evidence_digest": "sha256:efc631349c5c4884373bc7ce95cea73c804f554d16954ffbbd8679f7d9ad83de",
+              "semantic_evidence_count": 56,
+              "observed_latency_ms": 3655.0,
+              "owner_attempts": 1,
+              "owner_retry_performed": false,
+              "owner_retry_reason": "",
+              "owner_acquisition_cycle": 0,
+              "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_overlay_present": false,
+              "semantic_evidence_authority": "committed_head_only",
+              "no_authority_worktree_mutation_performed": true,
+              "receipt_id": "sha256:ac0dd4103dfa54518e59fcc5332d2764ab69c7e50cba4e445f2d14d4c1cb5945"
+            },
+            "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+            "ranked_paths": [
+              "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py",
+              "modules/infrastructure/wre_core/skillz/skills_registry.py",
+              "modules/infrastructure/wre_core/skillz/skills_registry_v2.py",
+              "modules/ai_intelligence/ai_overseer/skillz/m2m_stage_promote_safe/SKILLz.md",
+              "modules/foundups/agent/tests/test_context_bundle_builder.py",
+              "modules/infrastructure/wre_core/src/security_trigger.py",
+              "scripts/tests/test_generate_reddog_backend_manifest.py",
+              "modules/foundups/agent/tests/test_foundup_scaffold_writer_live.py"
+            ],
+            "latency_ms": 3655.0,
+            "recall_at_k": 1.0,
+            "reciprocal_rank": 1.0,
+            "ndcg_at_k": 1.0
+          },
+          {
+            "case_id": "heldout-wsp99",
+            "query_digest": "sha256:1c2d0b09572998ffb481644583e5ebe144c75d3a518a7bb82aff2548be4a8ebc",
+            "query_receipt": {
+              "schema_version": "holoindex_query_receipt.v1",
+              "source": "holoindex_retrieval_autoresearch",
+              "source_class": "holoindex",
+              "ok": true,
+              "query": "WSP 99 M2M prompting protocol",
+              "freshness": "CURRENT",
+              "hits": [
+                {
+                  "path": "WSP_framework/src/WSP_99_M2M_Prompting.md",
+                  "title": "WSP 99: Machine-to-Machine (M2M) Prompting Protocol",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+                  "title": "WSP 97: System Execution Prompting Protocol",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "WSP_framework/src/WSP_21_Enhanced_Prompt_Engineering_Protocol.md",
+                  "title": "WSP 21: Enhanced Prompt Engineering Protocol",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "WSP_knowledge/docs/Papers/Empirical_Evidence/Multi_Agent_Awakening_Analysis.md",
+                  "title": "Multi-Agent Awakening Protocol Analysis",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/wsp_orchestrator/src/wsp_orchestrator.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/dae_components/dae_prompting/src/dae_envelope_system.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/cli/src/wsp_explainer_menu.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/qwen_advisor/wsp_master.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                }
+              ],
+              "error": "",
+              "freshness_generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+              "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+              "freshness_receipt_path": "",
+              "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "index_gap_detected": false,
+              "stale_reasons": [],
+              "no_holoindex_reindex_performed": true,
+              "retrieval_runtime_ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+              "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167",
+              "runtime_environment_exact_closure_verified": false,
+              "semantic_evidence_digest": "sha256:3dff84de78ae9f99c679916c4f16872ea2b724c430e4fd15a6dc3331df358ddd",
+              "semantic_evidence_count": 56,
+              "observed_latency_ms": 3500.0,
+              "owner_attempts": 1,
+              "owner_retry_performed": false,
+              "owner_retry_reason": "",
+              "owner_acquisition_cycle": 0,
+              "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_overlay_present": false,
+              "semantic_evidence_authority": "committed_head_only",
+              "no_authority_worktree_mutation_performed": true,
+              "receipt_id": "sha256:9a544858112f1466264b19cbda6d44dcd2bffd7eb2e8b764c2addf4c94621cf1"
+            },
+            "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+            "ranked_paths": [
+              "WSP_framework/src/WSP_99_M2M_Prompting.md",
+              "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+              "WSP_framework/src/WSP_21_Enhanced_Prompt_Engineering_Protocol.md",
+              "WSP_knowledge/docs/Papers/Empirical_Evidence/Multi_Agent_Awakening_Analysis.md",
+              "modules/infrastructure/wsp_orchestrator/src/wsp_orchestrator.py",
+              "modules/infrastructure/dae_components/dae_prompting/src/dae_envelope_system.py",
+              "modules/infrastructure/cli/src/wsp_explainer_menu.py",
+              "holo_index/qwen_advisor/wsp_master.py"
+            ],
+            "latency_ms": 3500.0,
+            "recall_at_k": 1.0,
+            "reciprocal_rank": 1.0,
+            "ndcg_at_k": 1.0
+          },
+          {
+            "case_id": "heldout-query-receipt",
+            "query_digest": "sha256:da2f907b896136c05ae3ffdf6ac6f1dfc5c22694748c613729c1440a8f77a966",
+            "query_receipt": {
+              "schema_version": "holoindex_query_receipt.v1",
+              "source": "holoindex_retrieval_autoresearch",
+              "source_class": "holoindex",
+              "ok": true,
+              "query": "generation bound HoloIndex query receipt",
+              "freshness": "CURRENT",
+              "hits": [
+                {
+                  "path": "holo_index/query_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C3A.md",
+                  "title": "HoloIndex Query Runtime Builder Runtime Composition Assumption Audit - Phase 2C3a",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/tests/test_holoindex_query_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/qwen_advisor/holodae_coordinator.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md",
+                  "title": "HoloIndex Query Runtime Builder Child Assumption Audit - Phase 2C3c",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/INTERFACE.md",
+                  "title": "HoloIndex Public Interface",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md",
+                  "title": "HoloIndex Query Runtime Builder Packaging Wheel Assumption Audit - Phase 2C1",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                }
+              ],
+              "error": "",
+              "freshness_generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+              "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+              "freshness_receipt_path": "",
+              "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "index_gap_detected": false,
+              "stale_reasons": [],
+              "no_holoindex_reindex_performed": true,
+              "retrieval_runtime_ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+              "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167",
+              "runtime_environment_exact_closure_verified": false,
+              "semantic_evidence_digest": "sha256:f5fc5bcabd4fe291597d822b36d1292f245677f693c15c05c4d861f86fbbadde",
+              "semantic_evidence_count": 56,
+              "observed_latency_ms": 3750.0,
+              "owner_attempts": 1,
+              "owner_retry_performed": false,
+              "owner_retry_reason": "",
+              "owner_acquisition_cycle": 0,
+              "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_overlay_present": false,
+              "semantic_evidence_authority": "committed_head_only",
+              "no_authority_worktree_mutation_performed": true,
+              "receipt_id": "sha256:b91b000ec6d9805066b474d28a671f3f91644c6caf71efcb8736afbcea5dff1a"
+            },
+            "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+            "ranked_paths": [
+              "holo_index/query_receipt.py",
+              "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C3A.md",
+              "holo_index/tests/test_holoindex_query_receipt.py",
+              "holo_index/qwen_advisor/holodae_coordinator.py",
+              "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py",
+              "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md",
+              "holo_index/INTERFACE.md",
+              "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md"
+            ],
+            "latency_ms": 3750.0,
+            "recall_at_k": 1.0,
+            "reciprocal_rank": 1.0,
+            "ndcg_at_k": 1.0
+          },
+          {
+            "case_id": "heldout-query-owner",
+            "query_digest": "sha256:d55acbc36b8a7d27002100a0a6232b6e69744b7ad2a879329be57273177d9127",
+            "query_receipt": {
+              "schema_version": "holoindex_query_receipt.v1",
+              "source": "holoindex_retrieval_autoresearch",
+              "source_class": "holoindex",
+              "ok": true,
+              "query": "read only generation pinned HoloIndex query owner service",
+              "freshness": "CURRENT",
+              "hits": [
+                {
+                  "path": "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/tests/test_holoindex_readonly_query_guard.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/communication/moltbot_bridge/src/reddog_holoindex_query_adapter.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "scripts/reddog_holoindex_owner_query_once.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/query_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/wre_core/recursive_improvement/src/memory_preflight.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/tests/test_holoindex_query_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/tests/test_holoindex_query_admission.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                }
+              ],
+              "error": "",
+              "freshness_generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+              "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+              "freshness_receipt_path": "",
+              "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "index_gap_detected": false,
+              "stale_reasons": [],
+              "no_holoindex_reindex_performed": true,
+              "retrieval_runtime_ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+              "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167",
+              "runtime_environment_exact_closure_verified": false,
+              "semantic_evidence_digest": "sha256:1241b946b04a3d99340be5b640b2c861276cb6ab92f104643225f80d3e368f29",
+              "semantic_evidence_count": 56,
+              "observed_latency_ms": 4031.0,
+              "owner_attempts": 1,
+              "owner_retry_performed": false,
+              "owner_retry_reason": "",
+              "owner_acquisition_cycle": 0,
+              "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_overlay_present": false,
+              "semantic_evidence_authority": "committed_head_only",
+              "no_authority_worktree_mutation_performed": true,
+              "receipt_id": "sha256:e3ebe5cbd5e2bec0c9250d0946a8c7fe6f5d4f0145f763ed173024939502bf40"
+            },
+            "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+            "ranked_paths": [
+              "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service.py",
+              "holo_index/tests/test_holoindex_readonly_query_guard.py",
+              "modules/communication/moltbot_bridge/src/reddog_holoindex_query_adapter.py",
+              "scripts/reddog_holoindex_owner_query_once.py",
+              "holo_index/query_receipt.py",
+              "modules/infrastructure/wre_core/recursive_improvement/src/memory_preflight.py",
+              "holo_index/tests/test_holoindex_query_receipt.py",
+              "holo_index/tests/test_holoindex_query_admission.py"
+            ],
+            "latency_ms": 4031.0,
+            "recall_at_k": 1.0,
+            "reciprocal_rank": 1.0,
+            "ndcg_at_k": 1.0
+          },
+          {
+            "case_id": "heldout-freshness",
+            "query_digest": "sha256:2a3e8e230c808a623431a5a6d38455a846223abc4e4ed5adf26846aa7ca0db9f",
+            "query_receipt": {
+              "schema_version": "holoindex_query_receipt.v1",
+              "source": "holoindex_retrieval_autoresearch",
+              "source_class": "holoindex",
+              "ok": true,
+              "query": "HoloIndex freshness generation receipt",
+              "freshness": "CURRENT",
+              "hits": [
+                {
+                  "path": "holo_index/freshness_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/tests/test_holoindex_freshness_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md",
+                  "title": "HoloIndex Query Runtime Builder Packaging Wheel Assumption Audit - Phase 2C1",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "holo_index/tests/test_holoindex_query_receipt.py",
+                  "title": "",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/holoindex_search_quality/HIA4A_INDEX_REFRESH_REPORT.md",
+                  "title": "HIA4A: HoloIndex Index Refresh Audit",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/holoindex_ascii_guardian/ASCII_WARNING_AUDIT.md",
+                  "title": "HoloIndex WSP-GUARDIAN ASCII Warning Audit",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                },
+                {
+                  "path": "docs/audits/holoindex_external_foundup/CURRENT_STATE_AUDIT.md",
+                  "title": "HoloIndex External FoundUp: Current State Audit",
+                  "score": "",
+                  "digest": "",
+                  "evidence_ref": "",
+                  "source_class": "holoindex"
+                }
+              ],
+              "error": "",
+              "freshness_generation_id": "sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062",
+              "freshness_receipt_digest": "sha256:0015eec76c5aef7fdb377e582b4ba9caf157977c849ec68062533e1f6d0c6e5b",
+              "freshness_receipt_path": "",
+              "repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "index_gap_detected": false,
+              "stale_reasons": [],
+              "no_holoindex_reindex_performed": true,
+              "retrieval_runtime_ranker_digest": "sha256:7b219d7f919244e512b4846a0bff2918a528a274354f337c6c7f903b691065ee",
+              "runtime_environment_digest": "sha256:d796432ae318e11d22922b34c370b31adcf2a8092b80d502aa5910f1a8f62167",
+              "runtime_environment_exact_closure_verified": false,
+              "semantic_evidence_digest": "sha256:9ea2ef8994844d4e604acdba54a1d316c7d29b99acb19a9943afc152995dd0bc",
+              "semantic_evidence_count": 56,
+              "observed_latency_ms": 3733.0,
+              "owner_attempts": 1,
+              "owner_retry_performed": false,
+              "owner_retry_reason": "",
+              "owner_acquisition_cycle": 0,
+              "repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+              "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+              "workspace_overlay_present": false,
+              "semantic_evidence_authority": "committed_head_only",
+              "no_authority_worktree_mutation_performed": true,
+              "receipt_id": "sha256:f16d3984952a6bab8291206e66e72935e448c859600326ea16965a469b9e6c65"
+            },
+            "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+            "ranked_paths": [
+              "holo_index/freshness_receipt.py",
+              "holo_index/tests/test_holoindex_freshness_receipt.py",
+              "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md",
+              "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py",
+              "holo_index/tests/test_holoindex_query_receipt.py",
+              "docs/audits/holoindex_search_quality/HIA4A_INDEX_REFRESH_REPORT.md",
+              "docs/audits/holoindex_ascii_guardian/ASCII_WARNING_AUDIT.md",
+              "docs/audits/holoindex_external_foundup/CURRENT_STATE_AUDIT.md"
+            ],
+            "latency_ms": 3733.0,
+            "recall_at_k": 1.0,
+            "reciprocal_rank": 1.0,
+            "ndcg_at_k": 1.0
+          }
+        ],
+        "no_holoindex_reindex_performed": true,
+        "no_generation_promotion_performed": true,
+        "receipt_id": "sha256:f4be8c3cee2ff28f35f44c083022092c6e9a807b978d032b9c4fa048f84ed46f"
+      },
+      "verification": {
+        "schema_version": "holoindex_retrieval_benchmark_verification.v1",
+        "benchmark_run_receipt_id": "sha256:f4be8c3cee2ff28f35f44c083022092c6e9a807b978d032b9c4fa048f84ed46f",
+        "verifier_digest": "sha256:baa65fb00020daf5ac86f1c6408c1d6b6e616209abeac4f63b252179115b1684",
+        "candidate_binding_digest": "sha256:504e0112b91cae65d597ac564b2de5e9ebe64cfaf59d4aa38c42e165d182c908",
+        "accepted": true,
+        "rejection_reasons": [],
+        "integrity_evidence_only": true,
+        "not_promotion_authority": true,
+        "receipt_id": "sha256:f1c5ef4913b3399481a36bcff73c4633289457a8c5421f52d8b8bb645f9bf4b2"
+      },
+      "quality_threshold": 0.95,
+      "quality_gate_passed": true,
+      "public_regression_corpus_not_independent_heldout": true,
+      "no_holoindex_reindex_performed": true,
+      "no_generation_promotion_performed": true,
+      "no_repository_artifact_written": true
+    }
+  },
+  "holo_evidence_boundary": "Six public-regression queries CURRENT/no-gap at source 5326080d5; metrics and receipt-integrity verification pass, exact runtime closure is false, no independent sealed evaluation or promotion, later commits require fresh qualification."
 }

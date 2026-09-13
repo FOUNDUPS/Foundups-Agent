@@ -178,6 +178,17 @@ PatternMemory promotion or measured retained RSI.
 
 ### Exact-main maintenance checkpoint — 2026-09-13
 
+Latest named-source observation: after PR #1710, the existing controller
+completed `5326080d583625aebbc230242117fb7fcf0044a6`, stopped both owned
+runtimes and published generation
+`sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062`.
+The fixed six-case public benchmark returned CURRENT/no-gap throughout and
+passed the unchanged policy: Recall@8/MRR `1.0`, nDCG@8 `0.9939998`,
+p95 `4031ms`. Exact runtime closure remains false. The [complete run and
+verification receipts](../docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+are dated evidence, not independent promotion authority or proof for future
+commits. The earlier checkpoint below retains its own source boundary.
+
 The existing post-merge controller completed at then-current main
 `bcc877829653997d7df638b7069258a061d04ee1`, using its admitted task
 `holoindex_postmerge_refresh:bcc877829653997d7df638b7069258a061d04ee1`.

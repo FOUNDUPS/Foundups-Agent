@@ -170,6 +170,19 @@ rejected; no source was replaced and no PatternMemory success was recorded.
 The production registry `SKILLz.md` was copied unchanged and correctly rejected
 by the existing boot/Skillz exclusion.
 
+After the repair merged in PR #1710, the existing OpenClaw/WRE maintenance
+controller completed source `5326080d583625aebbc230242117fb7fcf0044a6` and
+stopped both owned runtimes. The fixed six-case public retrieval benchmark
+then passed: Recall@8 `1.0`, MRR `1.0`, nDCG@8 `0.9939998`, mean latency
+`3702.667ms`, p95 `4031ms`; whole invocation `97.102s`, including startup and
+cleanup. All query receipts are CURRENT/no-gap at the same generation.
+The complete run and deterministic verification receipts are retained in the
+dated evidence file above. Exact runtime closure is false in every receipt;
+this public regression corpus is not an independently sealed evaluator.
+No ranker, query set, threshold, generation-promotion rule or runtime binding
+was changed to obtain the pass. These observations do not establish a causal
+RSI improvement relative to the historical benchmark or qualify a later SHA.
+
 The [existing M2M owner](../../modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py),
 [compile shim](../../modules/ai_intelligence/ai_overseer/src/ai_overseer.py) and
 separate [compact-prompt fidelity gate](../../modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py)

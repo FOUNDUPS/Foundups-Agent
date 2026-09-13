@@ -1,5 +1,17 @@
 # HoloIndex Package ModLog
 
+## [2026-09-13] Current-source maintenance and public quality benchmark
+
+- Existing OpenClaw/WRE maintenance completed main `5326080d5` after PR #1710;
+  both owned runtimes stopped. No index operation was added to the query path.
+- Existing fixed public benchmark: six CURRENT/no-gap receipts, Recall@8/MRR
+  1.0, nDCG@8 0.9939998, p95 4031ms; deterministic verification accepted.
+  Corpus, ranker and 0.95 policy unchanged. Exact runtime closure remains false
+  in all receipts; no independent sealed evaluation or promotion performed.
+- Retained the full run in the existing dated RSI evidence artifact and linked
+  the source boundary from the roadmap/CLI atlas. This is R03/R05 evidence,
+  not completed RSI or a claim about subsequent main commits. WSP 22, 50, 87, 97.
+
 ## [2026-09-13] R03 interpreter selection recovery
 
 - Diagnosed ambient Python/base mismatch excluding the existing vetted dependency path; the owned child reported missing NumPy. Reused the existing repository venv with the matched reference helper, without source or index mutation.
