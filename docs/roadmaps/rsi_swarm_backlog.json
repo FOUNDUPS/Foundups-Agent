@@ -699,6 +699,13 @@
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "observed_on": "2026-09-13",
         "acceptance_satisfied": false
+      },
+      "latest_lifecycle_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "research_lifecycle_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local dry-run scratch recovery and invalid-baseline gate only",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -855,6 +862,13 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Exact-byte activation; forced regression rollback; interrupted activation recovery; restored version receives subsequent work"
+      },
+      "latest_lifecycle_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "research_lifecycle_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local dry-run scratch recovery and invalid-baseline gate only",
+        "acceptance_satisfied": false
       }
     },
     {
@@ -966,6 +980,13 @@
       "preparatory_evidence": {
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "observed_on": "2026-09-13",
+        "acceptance_satisfied": false
+      },
+      "latest_lifecycle_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "research_lifecycle_continuation_20260914",
+        "observed_on": "2026-09-14",
+        "scope": "Local dry-run scratch recovery and invalid-baseline gate only",
         "acceptance_satisfied": false
       }
     },

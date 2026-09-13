@@ -253,6 +253,33 @@ R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
 ## First bounded dispatch
 
+### Research lifecycle checkpoint — 2026-09-14
+
+At main `595d9007125a7bc261efcfb8d2ed67b55e7d0bba`, four new existing-suite
+cases exposed local lifecycle gaps in `WREAutoResearcher`: a diff failure or
+keyboard cancellation left the candidate in its scratch file; a runner failure
+prevented local restore; and an invalid baseline still reached proposal
+generation. The existing producer now guarantees a final restore attempt on
+Python exits and rejects baseline validation errors before proposing. Local
+restore is attempted even when the injected runner fails; errors propagate.
+A further broken-output case exposed a status message preceding cleanup;
+restoration now runs first. The expanded selection passes 31 tests. Models are disabled before fixture
+initialization, with disposable files and isolated database paths.
+
+This advances a local R10/R13/R15 dependency. It does not prove durable recovery
+after process termination or storage failure, independent verification,
+activation or retained benefit. The existing [dated baseline evidence](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+contains an explicitly dated `research_lifecycle_continuation_20260914` entry;
+its earlier observations remain unchanged.
+
+The verified runtime environment names `REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT`
+and `REDDOG_ARTIFACT_GENERATOR_MODE` remain unset in this shell. That preserves
+the R06/R07 admission dependency, not a machine-wide availability verdict.
+The local Holo bundle initially returned unrelated dry-run examples; narrowing
+to `wre_auto_researcher` located the existing producer and tests. Both bundles
+retained UNKNOWN freshness and zero semantic-owner attempts. Current module
+contracts/history/test docs were available; no new module or reindex was needed.
+
 ### Worker readiness checkpoint — 2026-09-13
 
 Source inspected: `bcc877829653997d7df638b7069258a061d04ee1`.

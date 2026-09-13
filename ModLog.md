@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Auto Researcher failure and cancellation recovery
+
+- Resumed merged main `595d9007125a7bc261efcfb8d2ed67b55e7d0bba` in a clean owned branch; WSP 00 bootstrap/strict gate passed. Verified canonical artifact-mode/runtime-root environment names remain unset in this shell. No live provider/model/service probe or protected project change.
+- Four new cases in the existing Auto Researcher suite failed: diff exception/cancellation left candidate scratch bytes, final restoration was skipped, and an invalid baseline reached proposal generation. The existing producer now restores scratch in a finalizer, attempts local restoration even on runner failure, and rejects invalid baselines before proposals. Exceptions and storage failures remain visible.
+- The expanded selection passes 31 tests in 0.65s. Initial failure cases produced 4 failures / 26 passes; a subsequent broken-output case produced 1 failure / 30 passes until restoration was moved before its status message. Model construction is disabled by the existing fixture; temporary files and database paths are isolated. No new module, test file, scheduler, production activation or durable process-crash recovery claim.
+- Updated canonical roadmap/runbook, module/test contracts and the existing evidence record with a dated continuation; R10/R13/R15 gain preparatory evidence pointers only. All 26 packet acceptance, dependency, priority and dispatch-authority fields remain unchanged. The producer is outside the RedDog backend manifest; no inventory/pin regeneration is required.
+- Retrieval initially returned unrelated dry-run examples. Refining to `wre_auto_researcher` found the existing owner and test file; local bundle remains UNKNOWN/no semantic qualification, with zero owner attempts. Current contracts/history/tests were available; optional missing artifacts were recorded without placeholders. Deterministic reproduction was sufficient; no Qwen/Gemma model call. Local WSP 15 score 2+4+4+4=14/P1. WSP 00/15/22/48/50/84/87/97.
+
+
 ## 2026-09-13: Auto Researcher rejects invalid simulated improvements
 
 - Continued after PR #1712 merged as `fd6fea63bfc259c29e5a22a8b64e8d01d9cba595` with all ten checks successful and its accepted tree equal to main. Reused the existing WRE evaluator/producer and existing test file; no new module or model route.

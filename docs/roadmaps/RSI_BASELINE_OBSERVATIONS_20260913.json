@@ -1456,5 +1456,123 @@
       "Current proposal program can constrain the target more narrowly than the known-agent numeric loader.",
       "Live AutoResearcher commits remain prohibited."
     ]
+  },
+  "last_continued_on": "2026-09-14",
+  "research_lifecycle_continuation_20260914": {
+    "observed_on": "2026-09-14",
+    "source_commit": "595d9007125a7bc261efcfb8d2ed67b55e7d0bba",
+    "source_file": "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+    "base_git_blob_sha256": "0085063c1426fd9653323abe604be218d8c278a16ebd1eb5f18c98cf2f3388a3",
+    "repair_workspace_sha256": "7dc3eccdc7bd5956db2b273d37fe460bbc32daa34ca042872d235ed132ee92c1",
+    "execution_plane": "local deterministic producer repair, no distributed worker execution",
+    "local_priority": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "mps_total": 14,
+      "priority": "P1",
+      "supports_packets": [
+        "R10",
+        "R13",
+        "R15"
+      ],
+      "reason": "Repair proven scratch-recovery failures before this existing producer can participate in an admitted canary."
+    },
+    "failure_evidence": [
+      {
+        "case": "test_dry_run_restores_after_diff_interruption[RuntimeError]",
+        "observed": "Candidate suffix remained in scratch after interrupted diff."
+      },
+      {
+        "case": "test_dry_run_restores_after_diff_interruption[KeyboardInterrupt]",
+        "observed": "Candidate suffix remained in scratch after keyboard cancellation."
+      },
+      {
+        "case": "test_dry_run_restores_local_copy_when_runner_restore_fails",
+        "observed": "No final restore was invoked after diff failure; runner failure could also skip the local write in the existing rollback implementation.",
+        "current_case": "test_dry_run_restores_local_copy_when_cleanup_dependencies_fail[runner]"
+      },
+      {
+        "case": "test_invalid_baseline_stops_before_proposal",
+        "observed": "An invalid baseline reached the proposal-generation sentinel."
+      },
+      {
+        "case": "test_dry_run_restores_local_copy_when_cleanup_dependencies_fail[output]",
+        "observed": "Broken cleanup output skipped restoration while the status message preceded it."
+      }
+    ],
+    "validation": {
+      "file": "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py",
+      "before": {
+        "failed": 4,
+        "passed": 26,
+        "seconds": 1.15
+      },
+      "after": {
+        "failed": 0,
+        "passed": 31,
+        "seconds": 0.65
+      },
+      "new_test_files": 0,
+      "qwen_engine_factory": "Disabled by existing fixture before initialization",
+      "state": "Disposable target/program/scratch with isolated TMP/TEMP, database paths and basetemp",
+      "actual_target_execution": false,
+      "actual_model_calls": 0,
+      "initial_guard_after": {
+        "passed": 30,
+        "seconds": 0.65
+      },
+      "cleanup_output_followup": {
+        "before_failed": 1,
+        "before_passed": 30,
+        "before_seconds": 0.67,
+        "fix": "Restore before printing the cleanup status message."
+      }
+    },
+    "repair": "Existing run method guarantees final scratch-restore attempt; existing rollback attempts local write even on runner error; invalid baseline errors are logged and raised before proposing.",
+    "retrieval_evaluation": {
+      "first_hits": [
+        "modules/infrastructure/wre_core/tests/test_hxa12_gotjunk_second_proof_dryrun.py",
+        "modules/infrastructure/wre_core/tests/test_hxa4_real_hermes_object_dryrun.py",
+        "modules/infrastructure/wre_core/tests/test_openclaw_voteballots_dryrun_proof.py",
+        "modules/infrastructure/wre_core/config/WRE_RUNBOOK.md"
+      ],
+      "refined_query": "wre_auto_researcher",
+      "refined_hits": [
+        "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+        "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py"
+      ],
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "noise": "Broad dry-run terms returned unrelated examples; exact symbol query removed that noise.",
+      "ordering": "Current WRE contracts/history/test docs followed by exact producer/test source.",
+      "missing_required": [],
+      "missing_optional": "Optional design/runbook and memory/incident artifacts remain absent. No placeholder creation.",
+      "duplication": "Identical result arrays deduplicated for reading.",
+      "staleness": "Local checkout evidence only; no semantic-generation qualification or index maintenance."
+    },
+    "admission_recheck": {
+      "scope": "This shell only; no machine-wide runtime inventory",
+      "verified_environment_names": {
+        "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": false,
+        "REDDOG_ARTIFACT_GENERATOR_MODE": false
+      },
+      "source_owners": [
+        "modules/communication/moltbot_bridge/src/reddog_resident_model_runtime_bindings.py",
+        "modules/communication/moltbot_bridge/src/reddog_resident_queue_binding_profile.py"
+      ],
+      "runtime_model_admission_changed": false
+    },
+    "remaining_limits": [
+      "A failed file write or forced process termination can prevent restoration; no durable recovery claim.",
+      "Exceptions propagate; a cleanup error prevents a successful result and preserves Python exception chaining.",
+      "Local scratch cleanup is not signed production activation or rollback.",
+      "Independent worker/model/verifier admission and measured retained benefit remain open."
+    ],
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false
   }
 }

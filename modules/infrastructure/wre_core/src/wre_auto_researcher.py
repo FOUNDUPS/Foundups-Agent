@@ -196,11 +196,23 @@ class WREAutoResearcher:
             f.write(row)
 
     def run(self) -> Dict:
-        """Run the optimization loop."""
+        """Run the dry-run loop and restore its scratch baseline on every exit."""
+        try:
+            return self._run_loop()
+        finally:
+            if self.dry_run:
+                self._rollback(self.original_code)
+                print("\n[SAFETY] Scratch restored to original baseline.")
+
+    def _run_loop(self) -> Dict:
+        """Evaluate proposals only after a valid baseline has been established."""
         print(f"[AUTO-RESEARCHER] Starting research loop (max_iterations={self.max_iterations}, dry_run={self.dry_run})")
 
         # Baseline evaluation on working copy
         baseline_metrics = evaluate_target(self.working_target_path)
+        if "error" in baseline_metrics:
+            self._log_to_tsv(0, "failed_baseline", baseline_metrics, baseline_metrics["error"])
+            raise ValueError(f"Baseline validation failed: {baseline_metrics['error']}")
         print(f"[BASELINE] Fitness: {baseline_metrics.get('fitness'):.4f} (ROC: {baseline_metrics.get('roc_ratio'):.4f})")
         self._log_to_tsv(0, "baseline", baseline_metrics, "Initial baseline parameters")
 
@@ -268,11 +280,6 @@ class WREAutoResearcher:
                 self._log_to_tsv(iteration, "crashed", {}, str(eval_err))
                 history.append({"iteration": iteration, "status": "crashed", "error": str(eval_err)})
 
-        # End of loop: handle final dry-run safety restore
-        if self.dry_run:
-            print("\n[SAFETY] Dry run active. Restoring sandboxed copy to original baseline.")
-            self._rollback(self.original_code)
-
         summary = {
             "baseline": baseline_metrics,
             "optimized": best_metrics,
@@ -295,9 +302,12 @@ class WREAutoResearcher:
 
     def _rollback(self, fallback_code: str):
         """Rollback modifications using injected Git runner and restore file state."""
-        self.runner.restore(self.working_target_path, fallback_code)
-        # Ensure local working target file matches fallback code
-        self.working_target_path.write_text(fallback_code, encoding="utf-8")
+        try:
+            self.runner.restore(self.working_target_path, fallback_code)
+        finally:
+            # A runner/receipt failure must not skip local scratch restoration.
+            # Write failures still propagate; cleanup is never silently certified.
+            self.working_target_path.write_text(fallback_code, encoding="utf-8")
 
     def _commit(self, iteration: int, metrics: Dict):
         """Commit progress via Git runner if not running in dry-run mode."""

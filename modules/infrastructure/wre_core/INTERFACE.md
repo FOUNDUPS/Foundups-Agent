@@ -36,6 +36,19 @@ must retain the existing exception-handling boundary.
 `failed_validation`/restore path. The negative-allocation regression proves it
 keeps baseline metrics and does not record a planned commit for the invalid
 proposal. Non-dry-run execution remains `SPECIFIED_NOT_IMPLEMENTED`.
+
+The 2026-09-14 lifecycle correction wraps `run()` in final scratch restoration
+for normal returns and Python exception exits, including `KeyboardInterrupt`.
+When the baseline evaluator returns an `error`, it logs `failed_baseline` at
+iteration zero and raises `ValueError` before proposal generation. Parse errors
+also propagate before proposals. `_rollback()` attempts the local file restore
+even if the injected runner fails; runner and file-write failures still surface
+to the caller, with Python exception chaining preserving earlier errors.
+Restoration runs before its status message, so broken output cannot skip it.
+No successful result is returned when cleanup or status output raises. This is local scratch
+recovery, not durable recovery after process termination, storage failure or
+authenticated production activation.
+
 This evaluator scores the fixed simulation; it does not authenticate runtime
 authority, establish real economic outcomes or serve as a generic code judge.
 

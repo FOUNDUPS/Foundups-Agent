@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-14: Auto Researcher scratch lifecycle repair
+
+- Moved final dry-run restoration into `run()`'s finalizer so proposal/diff failures and Python cancellation cannot bypass the restore attempt. `_rollback()` still attempts the local write when its injected runner fails; errors propagate and are not labeled success.
+- An evaluator error on the baseline logs `failed_baseline` at iteration zero and raises before proposing. This prevents improvement comparisons against an invalid baseline; AST parsing failures also exit before proposals.
+- Extended the existing suite: four initial failures reproduced; final 31 tests pass, including a later broken-output failure. Restoration now precedes the status message. No model, target-code execution, live commit or new module. This is local scratch recovery, not persistence across forced termination, storage failure or signed activation. Canonical RSI evidence/runbook and module interfaces retain those limits. WSP 22/48/50/97.
+
+
 ## 2026-09-13: ROC evaluator numeric-input integrity
 
 - The existing fixed simulation accepted a negative allocation and scored it above the baseline. Added finite non-boolean numeric checks, catalog-name validation, `[0,1]` fraction bounds and a unit-total tolerance of `1e-9`; multiplier bounds and valid baseline behavior are preserved.

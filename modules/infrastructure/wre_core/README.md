@@ -36,8 +36,11 @@ Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionarie
 without executing target code. It now rejects negative/out-of-range allocations,
 non-finite values, booleans and unknown catalog agents before simulation;
 allocation totals must equal one within `1e-9`. An invalid negative allocation
-previously outscored the baseline. The [26 focused tests](tests/test_wre_auto_researcher.py)
-now include that rejection through the dry-run loop. These simulated results
+previously outscored the baseline. The [31 focused tests](tests/test_wre_auto_researcher.py)
+include invalid-input rejection, cancellation/failure cleanup and the invalid
+baseline gate. The producer restores its scratch baseline on Python exception
+exits and surfaces cleanup errors; process termination and storage failure are
+not a proven durable-recovery boundary. These simulated results
 are not independently verified RSI benefit or live economic evidence.
 
 ## Execution-truth pipeline
