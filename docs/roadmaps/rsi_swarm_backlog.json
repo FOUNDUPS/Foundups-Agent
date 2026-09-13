@@ -59,7 +59,7 @@
       "wave": 0,
       "priority": "P0",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
-      "status": "existing_owner_coordination",
+      "status": "validated_in_revision",
       "dependencies": [],
       "owner_role": "existing RedDog lane",
       "reuse_scope_candidates": [
@@ -98,6 +98,15 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Intended committed content and manifest agree; both production bundles pass; focused integrity failure resolved"
+      },
+      "delivery_evidence": {
+        "date": "2026-09-13",
+        "repair_base_commit": "988e62886f5d9bd70638e9b2b862afe372430096",
+        "record": "docs/audits/rsi/2026-09-09/INTEGRATION.md#r01-production-skill-integrity-repair-2026-09-13",
+        "strict_production_manifest_checks": "2 passed; signatures remain unverified",
+        "wre_execution_truth": "235 passed, 4 platform-limited skips in 35.45s",
+        "windows_git_materialization": "both unchanged committed Skillz files remain LF with core.autocrlf=true",
+        "runtime_dispatch_or_activation": "not performed"
       }
     },
     {

@@ -1,6 +1,13 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+## 2026-09-13: R01 production Skillz exact-byte integrity
+
+- Regenerated both production Skillz manifests against unchanged committed content and pinned only those two Skillz files to LF checkout bytes. Strict guard behavior and unsigned inventory status are preserved.
+- Both manifest checks and Windows Git materialization pass. The isolated documented WRE execution-truth tier passes 235 tests with four platform-limited skips. No runtime activation, provider call, signature authentication or complete RSI claim.
+- Updated R01 planning evidence; remaining enforcement, retrieval-entry and independent RSI composition gates stay open. WSP 22, 50, 84, 97.
+
+
 ### [2026-09-13] - Canonical registry reconciliation for roadmap delivery
 
 - Used the existing registry generator to include the already-tracked eSingularity Japanese-copy regression file omitted from main's inventory.

@@ -6,6 +6,13 @@
 - The RedDog fast tier now passes all 15 groups. No phone, YUMORI, WRE runtime or model behavior was edited. R01's separate production-skill repair remains independently tracked.
 - Remote CodeQL failures at results upload are unresolved in the preceding run; fresh CI and merge must be observed. WSP 22, 50, 97.
 
+## 2026-09-13: R01 production Skillz exact-byte integrity
+
+- Regenerated both production Skillz manifests against unchanged committed content and pinned only those two Skillz files to LF checkout bytes. Strict guard behavior and unsigned inventory status are preserved.
+- Both manifest checks and Windows Git materialization pass. The isolated documented WRE execution-truth tier passes 235 tests with four platform-limited skips. No runtime activation, provider call, signature authentication or complete RSI claim.
+- Updated R01 planning evidence; remaining enforcement, retrieval-entry and independent RSI composition gates stay open. WSP 22, 50, 84, 97.
+
+
 ## [2026-09-13] RSI roadmap main reconciliation and registry repair
 
 WSPs: 15, 22, 34, 50, 97. Resumed the existing roadmap change against main `034d04b427896cb7c944efb5aa1f4d6d3e2413b5` in an isolated integration worktree.
