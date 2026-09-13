@@ -2715,5 +2715,179 @@
       },
       "guard_changes": false
     }
+  },
+  "outcome_response_continuation_20260914": {
+    "base_commit": "15fafb8d828d93e229796fff722cb5e806988aeb",
+    "scope": "Partial R11-A prerequisite: exact root COMMIT acknowledgment and one in-process transient transport retry; no durable full-response recovery",
+    "wsp00": {
+      "gate_passed": true,
+      "last_validation": "2026-09-14T07:05:12.336126",
+      "interpretation": "software gate",
+      "log_sha256": "5437946374d5303a02d2504155abf7693a22d28c7548e5c090cc46e79fd0b71f"
+    },
+    "wsp15_local_planning": {
+      "complexity": 4,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 16,
+      "priority": "P1",
+      "runtime_allocation_receipt": false
+    },
+    "execution_plane": "Local isolated source authoring under existing 012 instruction; app continuation provides no signed WRE work order, model allocation or independent promotion authority",
+    "ownership": {
+      "owned_worktree_reconciled": true,
+      "open_owned_pr_at_start": false,
+      "source_owner_overlap_found": false,
+      "separate_packaging_overlap_pr": 1680,
+      "boundary": "Owned branch only; shared checkout, other PRs and protected product/service lanes preserved"
+    },
+    "retrieval": {
+      "query": "verified outcome signer durable response replay anchor handoff recovery tests",
+      "query_receipt_sha256": "2eded7d82983f309890b8f1770e12f320de7198256b9f898c3989dc22116f665",
+      "refined_query": "reddog_signer_conversation_scope_anchor",
+      "refined_receipt_sha256": "7b0dbb480ed507fc50ce75fbb5c69e22d673e1164f0b9a729ee7faaf3827b448",
+      "mode": "governed lexical fallback; unchanged semantic failure not retried",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "lexical_ok": true,
+      "prior_semantic_authority_commit": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "bundle_authority": {
+        "evidence_authority": "workspace_head",
+        "repo_head_sha": "15fafb8d828d93e229796fff722cb5e806988aeb",
+        "repo_root_digest": "sha256:40d60ad71436d43150e37a6d118fa2066a806f876c8f4c85e97c0cb2de85dcb2",
+        "workspace_overlay_present": false
+      },
+      "evaluation": {
+        "noise": "First query favored peripheral authenticity and fixture hits; exact anchor refinement recovered the existing full-response owner",
+        "ordering": "Root service/client/state and nearest test contracts, then distinct conversation anchor/backend; import/call-site verification supplied omitted owners",
+        "duplication": "Deduplicated code/code_hits arrays; extended existing owners and test file",
+        "missing": "Tier-0 contracts present; optional design/memory artifacts and requirements.txt absent; direct reads recovered critical omitted owners",
+        "staleness": "UNKNOWN/index gap retained; local exact-source evidence only, no generation acceptance or reindex"
+      },
+      "routing": "Deterministic fixture work first; authority/API boundary inspection requires local engineering. No admitted model runtime, new worker call or fabricated runtime binding"
+    },
+    "decision": {
+      "smallest_change": "Reuse root state advance/load and the precedent of finish_protected_use exact terminal acknowledgments; retry only the same root COMMIT message",
+      "existing_full_response_owner": "reddog_signer_conversation_scope_anchor.py persists a full conversation response under different operation/principal/session policy",
+      "remaining_contract_gap": "Root protocol v1 carries only reservation and signature digest; outcome signing returns the full response after commit; client reservation seal is process-local",
+      "authority_boundary": "No reserve reset, new grant, root state/schema extension, conversation-domain substitution, second outcome-signing request or runtime activation"
+    },
+    "changes": [
+      "Service acknowledges only an exact already-committed marker after unchanged fresh snapshot, peer, grant and signer-proof validation",
+      "Client retries once only on ConnectionError or TimeoutError, reusing exact encoded payload, proof and request ID; second failure propagates",
+      "Ownership/size OSError, malformed response, explicit rejection and cancellation do not retry",
+      "Existing cross-process reservation test uses its canonical module import under spawn/importlib; eight attempts still produce exactly one winner"
+    ],
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_service.py": "8b2c57e8e19e86704946c87d75f9cd5f1ff9c92739149f0e0858ee74dd6c8679",
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_client.py": "25eff116faf81a35c9fb5643147bbed4b868b108bbc9fac333d2aa01466fef61",
+      "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py": "50564b99bad49746713ba1c71519ebdd27098a09c36b7a6a7df88291563eb769"
+    },
+    "source_hash_basis": "UTF-8 Git/LF-normalized source bytes",
+    "test_evidence": {
+      "environment": {
+        "python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "bytecode_disabled": true,
+        "PYTHONUTF8": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "TEMP_TMP": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\temp",
+        "FOUNDUPS_DB_PATH": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\agent.db",
+        "WRE_PATTERN_MEMORY_DB": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\patterns.db",
+        "ANTIFAFM_LYRICS_DB": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\lyrics.db"
+      },
+      "before": {
+        "passed": 7,
+        "failed": 9,
+        "deselected": 22,
+        "elapsed_seconds": 8.02,
+        "cases": 16,
+        "log_path": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\before.txt",
+        "log_sha256": "f65420000e91a92bd860b9cf8e9a217e496b676a315e4bce20aad8bd25e8088b",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py -k root_commit_recovery --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\before --tb=short -q"
+      },
+      "before_interpretation": "Includes new planned retry-bound and fresh-revalidation assertions; not nine separate production defects. Concurrent acknowledgment case added with repair",
+      "focused": {
+        "passed": 17,
+        "deselected": 22,
+        "elapsed_seconds": 8.18,
+        "log_path": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\focused.txt",
+        "log_sha256": "8b47b66224d13a0f3fe89496acfdd0062f485c2100e6bed465d92d9ad43d076b",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py -k root_commit_recovery --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\focused --tb=short -q"
+      },
+      "first_connected": {
+        "passed": 114,
+        "failed": 1,
+        "skipped": 1,
+        "elapsed_seconds": 35.48,
+        "log_path": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\connected.txt",
+        "log_sha256": "7ab0ab4cc97f653e6aada3d0bf85d7aaf4af976044dbad055b084a681da11662",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_runtime_binding.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\connected --tb=short -q"
+      },
+      "first_connected_failure": "Existing ProcessPool test child could not import tests.test_foundup_verified_outcome_root_authority_service under Windows spawn/importlib; fixed canonical callable import without changing assertions",
+      "connected": {
+        "passed": 115,
+        "skipped": 1,
+        "elapsed_seconds": 36.42,
+        "log_path": "O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\connected-after.txt",
+        "log_sha256": "721f8a8a390b1bbc3318e55f15ee09fa27d89330bef14b82c12427e2c5c45741",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_runtime_binding.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:\\Foundups-Agent-audits\\20260909-rsi\\outcome-response-20260914\\connected-after --tb=short -q"
+      },
+      "new_case_scope": [
+        "Exact terminal replay with unchanged marker and burned reserve",
+        "Identical request before/after commit for ConnectionResetError and TimeoutError",
+        "Four concurrent exact acknowledgments retain one sequence-2 state",
+        "Changed reservation/signature digest reject",
+        "Fresh expiry and revocation reject after lost commit reply",
+        "Ownership/size failure, malformed response and explicit rejection do not retry",
+        "Cancellation propagates",
+        "Transport failure before/after commit stops at two attempts and never reopens reserve"
+      ],
+      "fixture_scope": "Real disposable primary/witness/installation SQLite stores and Ed25519 fixtures with injected socket transport and peer identity; existing child-process reservation ownership test passes",
+      "skip_scope": "Real Linux-root Unix service test requires Linux root; not exercised on this Windows host"
+    },
+    "limits": [
+      "R11-A/R11/G4 remain partial; all planning dispatch flags remain false",
+      "No durable full-outcome-response storage or authenticated restart readback; process-local reservation seal cannot be reconstructed from a serialized mapping",
+      "Each of at most two exchanges retains its configured timeout (default 5s, maximum 30s); no combined overall deadline or admitted runtime budget is claimed",
+      "Root reservations stay burned after any failure; digest acknowledgment does not recover signature bytes or authorize another signing use",
+      "Production root/UID/socket ownership, independent startup, cross-store acceptance, actual sink activation, legacy event recovery and measured later benefit remain open"
+    ],
+    "next_authorable_step": "Define and test authenticated durable full-outcome-response handoff/readback through the existing signer/root/storage owners, binding restart state and pending/committed visibility while preserving current key, grant, revocation and one-use boundaries; conversation replay is not outcome authority",
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "packaging": {
+      "registry": {
+        "current": true,
+        "total_files": 1650,
+        "quarantined_files": 269,
+        "changed": false
+      },
+      "guard_changes": false,
+      "fast": {
+        "groups_passed": 15,
+        "duration_ms": 4658,
+        "log_sha256": "17a02618ca855cbbdf521fc44fd19cbaf8b5c1dd699ee0695fb616b4179f16e9",
+        "command": "node tests/run_reddog_test_tier.js fast",
+        "working_directory": "extensions/reddog",
+        "environment": [
+          "REDDOG_TEST_SITE_PACKAGES=O:/Foundups-Agent/.venv/Lib/site-packages",
+          "REDDOG_TEST_PYTHON=O:/Foundups-Agent/.venv/Scripts/python.exe",
+          "TEMP/TMP in disposable O: audit directory"
+        ]
+      },
+      "manifest": {
+        "passed": 8,
+        "warnings": 2,
+        "elapsed_seconds": 62.11,
+        "runtime_membership": 1400,
+        "changed_runtime_files": 2,
+        "digest": "60454b9495d586b0b6ed2835fb0a4593508730183f96598449079e4f0e88ad0b",
+        "log_sha256": "b67a493f8adcba431fe4bcaec96421e8c7e14af4713d3ae3ca9e8bdf0cd62761",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/outcome-response-20260914/manifest --tb=short -q"
+      }
+    }
   }
 }

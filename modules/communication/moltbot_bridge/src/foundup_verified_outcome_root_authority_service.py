@@ -270,11 +270,13 @@ def _commit(
             {**payload, "signature_digest": request.signature_digest}
         ),
     )
-    state.advance(
-        authorization_binding(request.authorization_id),
-        expected=expected,
-        next_value=committed,
-    )
+    binding = authorization_binding(request.authorization_id)
+    try:
+        state.advance(binding, expected=expected, next_value=committed)
+    except RuntimeError:
+        # Acknowledge only the exact durable terminal state; never reopen reserve.
+        if state.load(binding) != committed:
+            raise
     return _accept(request, snapshot, request.reservation_id, STATE_COMMITTED)
 
 

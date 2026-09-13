@@ -251,6 +251,63 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Root-commit acknowledgment checkpoint — 2026-09-14
+
+Packaging passed: **15 fast groups in 4,658ms** and **8 staged-manifest tests
+in 62.11s** (two pytest configuration warnings). Runtime membership remains
+1,400 with two updated source hashes and matching pins. The registry is current
+and unchanged at 1,650 files / 269 quarantined; no guard changed.
+
+Base: PR1722/main `15fafb8d828d93e229796fff722cb5e806988aeb`.
+WSP 00 awakening/strict software gate passed. Local WSP 15 planning is
+4 + 4 + 4 + 4 = **16/P1** under the existing 012 authoring instruction.
+This isolated source continuation supplies no signed allocation or runtime grant.
+
+WSP 97 retrieval evaluation: the first lexical query was noisy; an exact-owner
+refinement found the existing conversation response anchor. Deduplicated hits,
+direct imports and module contracts identified the outcome root service/client
+and their current test file. Tier-0 contracts are present; optional design/memory
+artifacts and requirements.txt are absent. Workspace evidence matches the base;
+semantic freshness remains UNKNOWN/gap, with zero owner attempts. No reindex,
+new model dispatch or repeated missing-runtime probe was attempted.
+
+The existing root service acknowledges only the exact durable terminal marker,
+including the reservation binding and signature digest. The state owner's
+existing terminal acknowledgment behavior provided the precedent. A repeated
+COMMIT still passes fresh snapshot, generation, peer, grant and signer-proof
+validation; changed reservation/digest, expiry or revocation rejects. RESERVE
+remains burned. The existing client retries once only for ConnectionError or
+TimeoutError, with identical encoded request bytes, proof and request ID.
+Plain OSError ownership/size failures, malformed replies, explicit rejection and
+cancellation do not retry. Each exchange retains its configured per-call timeout;
+two attempts can consume two timeouts. No shared operation deadline is claimed.
+
+**Verification:** 17 cases extend the existing root-service test file. The first
+16 cases produced **9 failed / 7 passed / 22 deselected in 8.02s** before repair;
+these include assertions for the proposed retry bound and fresh revalidation,
+not nine distinct production defects. The focused result was **17 passed /
+22 deselected in 8.18s**. The connected run first exposed the existing Windows
+spawn/importlib callable failure (**114 passed / 1 failed / 1 skipped**).
+Using the canonical import preserves its eight-attempt, single-reservation-winner
+assertion. The final six-suite selection passes **115 tests / 1 skipped in
+36.42s**. Disposable SQLite primary/witness/installation stores and Ed25519
+fixtures cover exact replay, four concurrent acknowledgments, before/after-commit
+reply loss, changed receipts, fresh revocation/expiry, protocol rejection,
+cancellation and the two-attempt limit. The real Linux-root socket test is
+skipped here; these results do not establish production peer or process isolation.
+
+**Next R11-A step:** preserve and recover the full signed outcome response across
+process death before publication. The root protocol stores a digest, not those
+response bytes, and the client reservation seal is process-local. The conversation
+anchor already stores full responses under a different operation/principal/session
+policy; it cannot authorize outcome recovery. Extend the existing signer/root
+and durable-store owners only after defining authenticated readback, current
+key/revocation checks, pending versus committed visibility, and restart binding.
+Do not reset a burned reservation, re-sign on retry, or substitute conversation
+authority. R11-B–F, owner-controlled legacy event recovery and later measured
+benefit remain open. All 26 packets and six substeps remain non-dispatchable.
+Commands, hashes and limits: `outcome_response_continuation_20260914`.
+
 ### Publication-commit checkpoint — 2026-09-14
 
 Packaging passed: **15 fast groups in 2,882ms** and **8 staged-manifest tests

@@ -1,5 +1,25 @@
 # Tests - OpenClaw Bridge
 
+## Root commit acknowledgment recovery
+
+Extend `test_foundup_verified_outcome_root_authority_service.py` for this contract.
+Its 17 added cases cover exact terminal acknowledgment, identical request retry,
+four concurrent acknowledgments, changed reservation/digest rejection, fresh
+revocation/expiry after a lost reply, protocol errors, cancellation and exhaustion.
+The existing process-pool test uses a canonical callable import for Windows spawn;
+its eight attempts must still produce exactly one reservation winner.
+
+With the qualified/disposable environment below, the connected command is:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_runtime_binding.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/outcome-response-20260914/connected-after --tb=short -q
+```
+
+Result: **115 passed / 1 Linux-root skip in 36.42s**. Real disposable SQLite
+stores and Ed25519 fixtures run behind an injected socket transport/peer boundary.
+This does not prove production isolation or recovery of a full signer response
+after process death. The focused 17-case selection passed in 8.18s.
+
 ## Publication commit recovery
 
 The existing runtime-authority file adds 16 cases for bounded revision retries,

@@ -37,6 +37,13 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [root-commit acknowledgment checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#root-commit-acknowledgment-checkpoint--2026-09-14)
+recovers an exact committed receipt after a lost transport reply. The existing
+client retries identical bytes once; every request still revalidates current
+authority, and a burned reservation never reopens. The connected selection
+passes 115 tests with one Linux-root skip. This is a prerequisite within R11-A;
+durable recovery of the full signer response before publication remains next.
+
 The [publication-commit checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-commit-checkpoint--2026-09-14)
 retains signed bytes through bounded authority-store revision retries and
 validates durable evidence after a lost acknowledgment or competing publication.

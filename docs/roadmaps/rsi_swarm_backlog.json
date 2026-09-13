@@ -811,11 +811,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_IN_PROCESS_PUBLICATION_COMMIT_RECOVERY_VERIFIED",
-              "evidence": "publication_commit_continuation_20260914",
-              "previous_evidence": "event_timestamp_continuation_20260914",
-              "next": "Map and test a durable verified-outcome signer-response handoff before publication using existing outcome-root and response-anchor owners; preserve distinct operation/scope/current-authority checks and do not reset burned reservations",
-              "remaining": "process death or exhausted retries without durable evidence; legacy event recovery, cross-store acceptance, independent startup and sink activation; no runtime admission"
+              "status": "PARTIAL_IN_PROCESS_ROOT_COMMIT_ACKNOWLEDGMENT_VERIFIED",
+              "evidence": "outcome_response_continuation_20260914",
+              "previous_evidence": "publication_commit_continuation_20260914",
+              "next": "Define and test authenticated durable full-outcome-response handoff/readback through the existing signer/root/storage owners, binding restart state and pending/committed visibility while preserving current key, grant, revocation and one-use boundaries; conversation replay is not outcome authority",
+              "remaining": "Full-response durability and restart binding; legacy event recovery, cross-store acceptance, independent startup, sink activation and later benefit; no runtime admission"
             }
           },
           {
@@ -914,6 +914,12 @@
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "section": "publication_commit_continuation_20260914",
         "base_commit": "9d69a111a096aa4279eaa6f318ebb0bd63808cac",
+        "acceptance_satisfied": false
+      },
+      "latest_outcome_response_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "outcome_response_continuation_20260914",
+        "base_commit": "15fafb8d828d93e229796fff722cb5e806988aeb",
         "acceptance_satisfied": false
       }
     },

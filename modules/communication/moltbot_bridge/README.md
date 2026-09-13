@@ -1,5 +1,14 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## Verified-outcome root commit recovery
+
+The existing root service acknowledges an exact already-committed receipt after
+fresh authority checks. Its client retries identical COMMIT bytes once after a
+connection error or timeout. A changed receipt, authority rejection or malformed
+reply still fails; reservations never reopen. Each attempt uses its own configured
+timeout. This does not persist the full signer response for process restart;
+that R11-A handoff remains open. See [INTERFACE.md](INTERFACE.md).
+
 ## Verified-outcome publication retries
 
 Publication retains its signed envelope through at most three authority-store
