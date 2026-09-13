@@ -1,6 +1,8 @@
 """Public-content contracts for JHR and the YUMORI live field status."""
 
 from pathlib import Path
+from datetime import datetime
+import re
 
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +35,12 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     status = read(FRONTEND_ROOT / "content" / "current-field-status.ts")
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
 
-    assert "2026-09-10T09:15:00+09:00" in status
-    assert "福井市役所前" in status
-    assert "YUMORI Tシャツ" in status
-    assert "準備委員会" in status
+    timestamp = re.search(r"updatedAt: '([^']+)'", status)
+    assert timestamp is not None
+    assert datetime.fromisoformat(timestamp.group(1)).utcoffset().total_seconds() == 9 * 3600
+    for field in ("updatedLabelJa", "locationJa", "tickerJa", "detailJa", "detailEn", "href"):
+        assert re.search(rf"{field}: '[^']+'", status)
+    assert "currentFieldStatus.href" in ticker
     assert "currentFieldStatus.tickerJa" in ticker
     assert "label: 'JHR'" in ticker
     assert "href: '/reports/jhr'" in ticker

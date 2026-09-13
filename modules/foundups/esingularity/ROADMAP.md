@@ -30,6 +30,8 @@ These are continuing acceptance gates, not completed features that may later be 
 
 ## Phase 3 — Campaign operations
 
+- [x] Add the reusable [ticker-update skill](../../../.agents/skills/esingularity-ticker/SKILL.md) with one dated field-status source and publication verification.
+
 - [x] Provide Japanese, English, and Portuguese states for the ten-slide presentation.
 - [ ] Complete route-based Japanese, English, and Portuguese localization for every legacy page surface.
 - [ ] Add confirmed community events through structured event data.
