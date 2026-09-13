@@ -1,3 +1,11 @@
+## 2026-09-14: RSI retention fixture and final admission guards
+
+- Reused the existing held-out invocation and memory-admission test files. The shared held-out fixture now carries the real recorder's complete verifier-result digest, including the runtime-bound variant. Four legacy-fixture failures / 35 passes became **39 passes in 2.43s** across the adjacent queue selection.
+- Expanded final admission coverage: four missing/invalid acknowledgments and callback mutation initially gave **5 failures / 4 passes / 12 deselected**. The repaired mutation case exposed an incorrect new test assertion on a nonexistent receipt field; it now checks the actual `record_digest` contract. Final admission/handler selection: **34 passed in 2.22s**.
+- Four composed cases use the real recorder, queue retention wrapper/gate and admission adapter with synthetic evidence and an injected sink. Valid evidence reaches the sink; invalid cost, failed outcomes and changed verification do not. No production service, model or memory call. No new test file. WSP 22/48/50/60/95/97.
+- Packaging: **15 RedDog fast groups passed in 3,137ms** and **8 staged-manifest tests passed in 65.74s**. Existing runtime membership is unchanged at 1,400 files; compatibility digest and both pins agree.
+- Broader downstream review found an incomplete existing `reddog_resident_live_canary_test_support.py` ratchet fixture: **26 failures / 11 passes in 24.94s**. It now supplies the accepted outcome, explicit no-prior-write state and digest of its exact verifier result. Existing real-sink/canary selection: **37 passed in 33.73s**. The sink already stages idempotently; activation remains blocked and staged records remain outside recall. Canary tests continue to assert missing-authority blockage. Total connected selection: 315 cases, all using disposable state.
+
 ## 2026-08-29: Pre-owner exact-HEAD repair admission
 
 - Added the positive exact-task path for independently reproduced,

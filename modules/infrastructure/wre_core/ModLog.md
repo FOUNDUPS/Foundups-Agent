@@ -1,5 +1,13 @@
 # WRE Core - ModLog
 
+## 2026-09-14: Outcome-to-retention integrity
+
+- Reused the existing ratchet, held-out gate and bridge memory-admission adapter at main `e03f68badd7664e20c7f6dd47304f69b009d16cb`. Numeric/lineage/acceptance guards now reject malformed inputs; rejected evidence cannot claim memory eligibility. Strict regression counts and exact verifier-result binding prevent false retention.
+- Evidence identities cover the retained payload; recorder callback failures retain the same identity. Deep copies isolate caller, local store and callback inputs. Missing acknowledgments fail through existing error codes. JSONL rejects non-standard numeric JSON, and secret-marker receipt labels are redacted on rejection.
+- Current selections: 171 recorder/gate, 39 queue, 34 verifier/publication and 34 memory-admission/handler tests pass. The composed fixture reaches an injected sink only for accepted evidence. No new runtime/test module, model, real authority, production-memory write or active FoundUp test.
+- Existing real-sink/canary tests add 37 passes after aligning their shared ratchet fixture (315 total). The sink's idempotent staging already exists; activation remains blocked. CI exposed an import-time helper call in a new test decorator; using the equivalent literal restores the unchanged 1,650-file/269-quarantine registry and keeps all new cases collectable.
+- Durable roadmap evidence records pre-fix failures and fixture corrections. Authentication, atomic/idempotent retention, callback-after-write recovery, concurrency and later benefit remain open; the pre-callback journal and final returned status are distinct. Local WSP 15 score 3+5+4+4=16/P1; WSP 00/15/22/48/50/60/84/95/97.
+
 ## 2026-09-14: Auto Researcher scratch lifecycle repair
 
 - Moved final dry-run restoration into `run()`'s finalizer so proposal/diff failures and Python cancellation cannot bypass the restore attempt. `_rollback()` still attempts the local write when its injected runner fails; errors propagate and are not labeled success.

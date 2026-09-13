@@ -180,6 +180,23 @@ Later runtime-selection checkpoint (2026-09-13, documentation source `89bdd7a5`)
 
 **Observed boundary:** The ratchet can forward independently accepted records to an injected sink; PatternMemory stores outcomes/candidates. These are separate trust boundaries.
 
+**2026-09-14 local checkpoint:** The existing recorder, retention gate and final
+memory-admission adapter now enforce matching work/verifier evidence, valid
+measurements, explicit retention eligibility and nonempty write acknowledgments.
+The composed synthetic fixture reaches the injected sink only for its accepted
+case; 315 selected core, dependency and disposable sink/canary tests pass. These are structural contract
+checks on supplied receipts, not proof of their independent authenticity. See
+[outcome retention evidence](../operations/RSI_SWARM_DISPATCH.md#outcome-retention-checkpoint--2026-09-14).
+
+**Existing retention implementation to reuse:**
+[reddog_verified_pattern_memory_sink.py](../../modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py)
+already provides idempotent staging outside normal recall. Its current
+`activation_ready` remains false; direct activation rejects without an
+independent durable authority source. Existing sink tests cover same-record
+staging, conflicting records and recall isolation. Preserve this boundary and
+compose the existing authority/activation path instead of creating another
+memory store. The full authenticated cycle still needs the evidence below.
+
 **Required next evidence:** Compose authenticated scope, atomic/idempotent retention and failure recovery, then demonstrate the next invocation reads the accepted version. Storage alone is not verified learning.
 
 ### R12 — Independent production promoter

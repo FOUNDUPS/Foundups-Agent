@@ -368,7 +368,9 @@ def _held_out_stage(head: str) -> dict[str, object]:
                 "work_order_id": WORK_ORDER_ID,
                 "slice_name": SLICE_NAME,
                 "verifier_receipt_id": "wre_slice_verify_canary",
+                "outcome_status": "accepted",
                 "pattern_memory_eligible": True,
+                "pattern_memory_write_performed": False,
             },
         },
     }
@@ -407,6 +409,12 @@ def _held_out_stage(head: str) -> dict[str, object]:
             "holoindex_freshness_receipt_digest": "sha256:" + "4" * 64,
         },
     }
+    ratchet["ratchet_result"]["receipt"]["verification_digest"] = (
+        "sha256:" + hashlib.sha256(json.dumps(
+            request["verification_result"], sort_keys=True, separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")).hexdigest()
+    )
     return invoke_reddog_wre_queue_authorized_held_out_regression_gate(
         explicit_queue_authorized_held_out_regression_gate_requested=True,
         queue_verified_outcome_ratchet_result=ratchet,

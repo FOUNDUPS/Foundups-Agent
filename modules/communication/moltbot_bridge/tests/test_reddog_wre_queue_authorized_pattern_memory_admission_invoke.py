@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import ast
+import copy
 import json
 from pathlib import Path
+
+import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_held_out_regression_gate_invoke import (
     QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT,
     QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_REJECT,
+    invoke_reddog_wre_queue_authorized_held_out_regression_gate,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
     QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT,
@@ -18,6 +22,14 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_patter
 )
 from modules.infrastructure.wre_core.src import (
     reddog_held_out_recursive_improvement_regression_gate as gate,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verified_outcome_ratchet_invoke import (
+    QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT,
+    QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_REJECT,
+)
+from modules.infrastructure.wre_core.tests.test_reddog_held_out_recursive_improvement_regression_gate import (
+    record_gate_fixture,
+    valid_request as retention_request,
 )
 
 
@@ -143,6 +155,68 @@ def test_admits_verified_held_out_outcome_to_injected_sink() -> None:
     assert len(sink.records) == 1
     assert sink.records[0]["record_type"] == "reddog_verified_recursive_improvement_outcome"
     assert sink.records[0]["work_order_id"] == WORK_ORDER_ID
+
+
+@pytest.mark.parametrize("ack", [None, "", "   ", False])
+def test_sink_without_record_acknowledgment_is_not_admitted(ack):
+    class InvalidAckSink:
+        def store_verified_outcome(self, record):
+            return ack
+
+    result = _invoke(sink=InvalidAckSink())
+    assert result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+    assert QueueAuthorizedPatternMemoryAdmissionInvokeReason.SINK_WRITE_FAILED in result.rejection_reasons
+    assert result.pattern_memory_write_performed is False
+
+
+def test_sink_cannot_mutate_admission_receipt_or_request():
+    request = _admission_request()
+    original = copy.deepcopy(request)
+    expected_digest = _invoke(request=copy.deepcopy(request)).receipt.record_digest
+
+    class MutatingSink:
+        def store_verified_outcome(self, record):
+            record["work_order_id"] = "foreign-work"
+            record["candidate_digest"] = _digest("9")
+            return "pattern-record-1"
+
+    result = _invoke(request=request, sink=MutatingSink())
+    assert result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT
+    assert result.receipt.work_order_id == WORK_ORDER_ID
+    assert result.receipt.record_digest == expected_digest
+    assert request == original
+
+
+@pytest.mark.parametrize("case", ["accepted", "invalid-cost", "failed-outcome", "changed-verifier"])
+def test_recording_through_retention_to_memory_sink(case):
+    request = retention_request()
+    recorded = record_gate_fixture(
+        request, invalid_cost=case == "invalid-cost", failed_outcome=case == "failed-outcome",
+    )
+    if case == "changed-verifier":
+        request["verification_result"]["receipt"]["head_sha"] = "b" * 40
+        request["held_out_regression"]["candidate_head_sha"] = "b" * 40
+    queue_retention = invoke_reddog_wre_queue_authorized_held_out_regression_gate(
+        explicit_queue_authorized_held_out_regression_gate_requested=True,
+        queue_verified_outcome_ratchet_result={
+            "decision": (QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT
+                         if recorded.accepted else QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_REJECT),
+            "ratchet_result": recorded.to_dict(),
+        },
+        held_out_gate_request=request,
+    )
+    sink = FakePatternMemorySink()
+    result = _invoke(
+        queue_gate=queue_retention.to_dict(),
+        request={"work_order_id": request["work_order_id"]}, sink=sink,
+    )
+    accepted = case == "accepted"
+    assert result.pattern_memory_write_performed is accepted
+    assert len(sink.records) == int(accepted)
+    assert (result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT) is accepted
+    if accepted:
+        assert sink.records[0]["ratchet_id"] == recorded.receipt.ratchet_id
+        assert sink.records[0]["gate_id"] == queue_retention.gate_result.receipt.gate_id
 
 
 def test_admission_record_carries_model_runtime_binding_from_gate() -> None:

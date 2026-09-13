@@ -37,6 +37,14 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The existing outcome recorder, retention gate and final memory-admission adapter
+now reject inconsistent evidence and missing storage acknowledgments. The
+connected selections pass 315 tests, including a real recorder-to-gate-to-adapter
+fixture with an injected sink and existing disposable sink/canary boundary tests.
+The [retention checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#outcome-retention-checkpoint--2026-09-14)
+records the R10/R11/R15 preparation. Authentication, atomic/idempotent retention
+and measured benefit on a later invocation remain open.
+
 The compact compiler now carries explicit stop rules into its readable handoff,
 and the existing fidelity gate rejects omitted, weakened or replaced stop
 instructions. Five reproduced failures now pass in the 162-case selection.

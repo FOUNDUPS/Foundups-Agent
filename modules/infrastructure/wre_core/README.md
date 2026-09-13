@@ -45,6 +45,15 @@ are not independently verified RSI benefit or live economic evidence.
 
 ## Execution-truth pipeline
 
+The 2026-09-14 retention continuation hardens the existing outcome recorder,
+held-out gate and final injected-sink adapter as one path. Invalid measurements,
+foreign or contradictory receipts, malformed regression counts and missing
+write acknowledgments are rejected. Stored/callback inputs are isolated, and
+receipt identities bind their retained evidence. The connected selections pass
+278 tests with synthetic evidence and disposable state; authentication,
+transactional retention, replay recovery and later measured benefit remain open.
+See [current callable boundaries](INTERFACE.md#outcome-recording-and-retention).
+
 ```text
 registry entry
   -> exact production frontmatter match
