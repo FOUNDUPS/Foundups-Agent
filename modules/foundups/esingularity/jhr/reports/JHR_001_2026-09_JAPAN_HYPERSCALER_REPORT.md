@@ -115,7 +115,7 @@ YUMORI.me / eSingularityが主張するのは、データセンター反対で�
 
 ## 8. YUMORI.meとの関係
 
-YUMORI.meは、旧すかっとランド九頭竜を、解体前に60日間だけでも正式に再利用可能性を調べることを求めている。
+2026-09-13 方針更新：eSingularity.aiの市民活動・保存運動を担うYUMORI.me設立準備委員会の現在の要請は、9月25日の採決で旧すかっとランド九頭竜の解体準備事業を含む予算案に反対すること（VOTE NO）である。期限付きの検証期間や採決延期は求めていない。反対票は、再利用案の採用や市の出資・保証を承認するものではない。根拠は[福井市の補正予算案（印刷頁8）](https://www.city.fukui.lg.jp/sisei/zaisei/yosan/yosan_d/fil/R8-9hosei.pdf#page=10)と[支援資料03](https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit)を参照。
 
 この建物を地域向けCOG DC、温泉、教育、起業、文化の複合拠点として成立させられるかは未検証である。だからこそ、壊す前に電力、通信、構造、資金、需要、温泉運営を調べる。
 

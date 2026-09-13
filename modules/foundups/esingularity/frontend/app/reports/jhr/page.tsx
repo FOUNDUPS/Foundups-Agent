@@ -222,8 +222,9 @@ export default function JapanHyperscalerReportPage() {
       </section>
 
       <section style={{ marginTop: 36 }}>
-        <h2>8. YUMORI.me — 壊す前に調べる</h2>
-        <p>YUMORI.meは、旧すかっとランド九頭竜を解体する前に、60日間だけでも正式に再利用可能性を調べることを求めています。COG DC、温泉、教育、起業、文化の複合拠点として成立するかは未検証です。だからこそ、電力、通信、構造、資金、需要、温泉運営を先に調べる。</p>
+        <h2>8. YUMORI.me — 解体準備予算に反対を（VOTE NO）</h2>
+        <p>YUMORI.meは、eSingularity.aiの市民活動・保存運動を担う設立準備委員会です。現在の要請は、9月25日の採決で旧すかっとランド九頭竜の解体準備事業を含む予算案に反対することです。期限付きの検証期間や採決延期は求めていません。COG DC、温泉、教育、起業、文化の複合拠点としての成立は未検証であり、反対票は再利用案の採用、資金調達や市の出資を承認するものではありません。</p>
+        <p>要請の対象と根拠：<a href="https://www.city.fukui.lg.jp/sisei/zaisei/yosan/yosan_d/fil/R8-9hosei.pdf#page=10">福井市の補正予算案（印刷頁8）</a> ／ <a href="https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit">市・県・市議会向け支援資料 03</a>。安全確保に必要な調査・保全と、解体を前提とする判断を分けるよう求めます。</p>
         <p>
           <a href={YUMORI_ME} target="_blank" rel="noreferrer" style={button}>YUMORI.me / 参加・現場</a>
           <a href={YUMORI_INFO} target="_blank" rel="noreferrer" style={button}>YUMORI.info / 計画・資料</a>
@@ -238,9 +239,9 @@ export default function JapanHyperscalerReportPage() {
         <p><strong>Bottom line:</strong> Japan is moving from attracting individual facilities toward planning large data-center clusters as national industrial infrastructure. METI has named nine prefectures as first-stage promising areas for its Data Center Concentration category, with criteria that contemplate gigawatt-scale expansion, roughly 30 hectares or more of industrial land, power, communications, water, resilience and community coexistence.</p>
 
         <h3>September 12 addendum — latest news and land-area comparison</h3>
-        <p>On September 11, fantasista announced a basic agreement to begin financing and cooperation discussions with a U.S. investment manager's fund for the Sendai 200 MW total receiving-capacity project. This is not completed financing or development permission. <a href="https://prtimes.jp/main/html/rd/p/000000062.000093934.html">Operator announcement</a>.</p>
+        <p>On September 11, fantasista announced a basic agreement to begin financing and cooperation discussions with a U.S. investment manager&apos;s fund for the Sendai 200 MW total receiving-capacity project. This is not completed financing or development permission. <a href="https://prtimes.jp/main/html/rd/p/000000062.000093934.html">Operator announcement</a>.</p>
         <p>These developments support discussing scale, location and community benefit in Fukui early; they do not establish a project near the onsen.</p>
-        <p>Published site areas: DPDC Inzai Park approximately 270,000 m² (27 ha), versus approximately 71,787 m² (7.18 ha) for Sendai. Inzai's area is about 3.76 times larger. Equivalent squares have sides of about 520 m and 268 m, calculated as the square root of each area. These are area comparisons, not actual plot shapes. <a href="https://www.daiwahouse.com/about/release/house/20220329190642.html">Daiwa House source</a>; <a href="https://prtimes.jp/main/html/rd/p/000000061.000093934.html">Sendai source</a>.</p>
+        <p>Published site areas: DPDC Inzai Park approximately 270,000 m² (27 ha), versus approximately 71,787 m² (7.18 ha) for Sendai. Inzai&apos;s area is about 3.76 times larger. Equivalent squares have sides of about 520 m and 268 m, calculated as the square root of each area. These are area comparisons, not actual plot shapes. <a href="https://www.daiwahouse.com/about/release/house/20220329190642.html">Daiwa House source</a>; <a href="https://prtimes.jp/main/html/rd/p/000000061.000093934.html">Sendai source</a>.</p>
         <p>Site area differs from total floor area, and MW alone does not determine land requirements. The homepage outline follows the area selected for comparison. The supplied map has no scale bar; its outline is not yet calibrated to 27 ha, and cannot yet establish whether the marked area is larger or smaller than Inzai. A known map distance is needed before an equal-area overlay can be finalized.</p>
 
         <h3>Sendai — 200 MW proposal</h3>
@@ -261,6 +262,7 @@ export default function JapanHyperscalerReportPage() {
         <p><span style={tag}>ANALYSIS</span>This does not mean a hyperscale campus is confirmed for Fukui. It means Fukui is already inside a national policy environment connecting clean power, industrial location and digital infrastructure. The YUMORI position is not anti-data-center: large greenfield campuses consuming tens of hectares should not become the only model.</p>
 
         <h3>Community-scale alternative</h3>
+        <p>Campaign update, September 13: YUMORI.me is the preparatory committee carrying the civic and preservation work of eSingularity.ai. The current request is VOTE NO on the budget containing demolition preparation for Sukatto Land Kuzuryu at the September 25 vote. A fixed review period and postponement are no longer requested. A NO vote does not approve the reuse proposal or commit public investment, guarantees, or project funding.</p>
         <p>Before major land conversion, Fukui can test whether existing public buildings, factories, hotels, warehouses and hot-spring facilities can support modular 1→5→10→20 MW compute where structure, power, fiber, cooling and heat reuse make sense. Distributed compute will not replace every hyperscale facility. The point is to create a third option before communities face a binary accept-or-reject decision.</p>
 
         <p>

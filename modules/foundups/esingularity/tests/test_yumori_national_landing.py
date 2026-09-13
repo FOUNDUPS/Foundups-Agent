@@ -2,6 +2,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "frontend" / "app" / "yumori" / "page.tsx"
+QR = ROOT / "frontend" / "public" / "YUMORIme-qr-code.png"
+PUBLIC_ASSET_README = ROOT / "frontend" / "public" / "README.md"
 
 
 def source() -> str:
@@ -48,3 +50,12 @@ def test_yumori_truth_boundary_uses_candidate_language() -> None:
     assert "成立する場所では" in text
     assert "技術検証する" in text
     assert "構想です" in text
+
+
+def test_yumori_official_qr_asset_is_canonical_png() -> None:
+    assert QR.is_file()
+    assert QR.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    contract = PUBLIC_ASSET_README.read_text(encoding="utf-8")
+    assert "YUMORIme-qr-code.png" in contract
+    assert "https://YUMORI.me" in contract
+    assert "official YUMORI.me QR-code asset" in contract
