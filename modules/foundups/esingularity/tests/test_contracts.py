@@ -57,7 +57,7 @@ def test_sites_configuration_and_primary_routes_are_present() -> None:
 
 
 
-def test_ticker_prioritizes_current_civic_actions_and_keeps_one_deck_notification() -> None:
+def test_existing_ticker_receives_one_deck_notification() -> None:
     page = read("app/page.tsx")
     ticker = read("components/CampaignTicker.tsx")
     status = read("content/current-field-status.ts")
@@ -110,7 +110,7 @@ def test_current_vision_propositions_and_progressive_disclosure_are_present() ->
 
 
 
-def test_fullscreen_deck_uses_real_images_and_accessible_controls() -> None:
+def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> None:
     component = read("components/YumoriPresentation.tsx")
     css = read("components/YumoriPresentation.module.css")
     vision = read("content/yumori-vision.ts")
@@ -145,7 +145,7 @@ def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
     assert "長谷川章氏の参加は未承認" in page
 
 
-def test_removed_presentation_is_not_a_second_source_of_truth_and_current_claims_are_labeled() -> None:
+def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
     vision = read("content/yumori-vision.ts")
     assert not (FRONTEND_ROOT / "content" / "yumori-presentation.ts").exists()
     assert "報告資料：将来の解体見込み 約15.8億円。確定契約額ではありません。" in vision
