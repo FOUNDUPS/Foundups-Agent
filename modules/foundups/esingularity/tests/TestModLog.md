@@ -1,5 +1,9 @@
 # eSingularity TestModLog
 
+## 2026-09-13 — Shared ticker consumers
+
+- Extended the existing field-status contract to require exactly one shared ticker on each homepage and correct project-link resolution from the movement page.
+
 ## 2026-09-13 — Reusable field-status contract
 
 - Replaced hard-coded September 10/City Hall event assertions with required status fields, ISO timestamp/JST validation and the shared href renderer check.

@@ -15,28 +15,29 @@ const actions = [
   { label: 'ACT', text: '福井市役所へ声を届ける', href: '#city-action' },
 ] as const;
 
-function ActionSet({ duplicate = false }: { duplicate?: boolean }) {
+function ActionSet({ duplicate = false, movement = false }: { duplicate?: boolean; movement?: boolean }) {
   return (
     <div className="campaign-ticker-set" aria-hidden={duplicate || undefined}>
       {actions.map((action) => {
-        const external = action.href.startsWith('http');
+        const href = movement && action.href.startsWith('#') ? `https://esingularity.ai/${action.href}` : action.href;
+        const external = href.startsWith('http');
         return (
-          <a key={action.label} href={action.href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined} tabIndex={duplicate ? -1 : undefined}>
+          <a key={action.label} href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined} tabIndex={duplicate ? -1 : undefined}>
             <strong>{action.label}</strong><span>{action.text}</span>
           </a>
         );
       })}
-      <a href="#act-now" tabIndex={duplicate ? -1 : undefined}><strong>SAVE THE DRAGON</strong><span>九頭竜を守れ。温泉を守れ。</span></a>
+      <a href={movement ? 'https://esingularity.ai/#act-now' : '#act-now'} tabIndex={duplicate ? -1 : undefined}><strong>SAVE THE DRAGON</strong><span>九頭竜を守れ。温泉を守れ。</span></a>
     </div>
   );
 }
 
-export default function CampaignTicker() {
+export default function CampaignTicker({ movement = false }: { movement?: boolean }) {
   return (
-    <aside className="campaign-ticker" aria-label="九頭竜を守るための行動メニュー">
+    <aside className={movement ? 'campaign-ticker campaign-ticker-inline' : 'campaign-ticker'} aria-label="九頭竜を守るための行動メニュー">
       <div className="campaign-ticker-track">
-        <ActionSet />
-        <ActionSet duplicate />
+        <ActionSet movement={movement} />
+        <ActionSet duplicate movement={movement} />
       </div>
     </aside>
   );

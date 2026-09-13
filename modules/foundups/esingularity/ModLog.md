@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — One ticker across both public sites
+
+- Mounted the existing shared CampaignTicker on YUMORI.me as well as eSingularity.ai. Both read current-field-status.ts; today’s invitation and future updates have one source.
+- Added a movement-page presentation option: normal document flow (no header overlap), with project-fragment actions pointing back to eSingularity.ai.
+- Updated ticker skill, README, INTERFACE and existing field-status regression to require both homepage mounts. WSP 22/50/97; source inspection confirmed the missing movement-page consumer.
+
+- Validation: three JHR/shared-status contracts and skill validation passed; focused ESLint passed with one existing image warning; production build passed.
+- Published Sites version 46 from `edc41325f5dd13f7d25a5c8db60fe633c9b6500f`; deployment `appgdep_6aa5f6b9f6ec8191acccf4e8e9595b6d`. Custom-domain HTTP checking remains unavailable in this runtime as documented in the preceding slice.
+
 ## 2026-09-13 — Onsen entrance invitation and reusable ticker skill
 
 - Replaced the September 10 City Hall status with 012-confirmed September 13, 09:30–noon JST at the Sukatto Land Kuzuryu front entrance: oppose demolition, join the monk, and collect a free YUMORI T-shirt. Updated Japanese/English detail and linked YUMORI.info.
