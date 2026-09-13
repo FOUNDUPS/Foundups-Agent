@@ -30,6 +30,9 @@ These are continuing acceptance gates, not completed features that may later be 
 
 ## Phase 3 — Campaign operations
 
+- [ ] Focus eSingularity.ai navigation on three to four primary tabs; determine labels/grouping in the active redesign, preserve JHR and participation access, and verify desktop/mobile consistency. Keep YUMORI.me's movement funnel intact.
+- [x] Make the website skill resolve the target site, purpose, visitor goal and edit boundary before each change.
+
 - [x] Add the FoundUp-owned [website operations skill](skills/website-update/SKILL.md), with history-backed shared-ticker checks and registry/agent discovery.
 
 - [x] Add the reusable [ticker-update skill](../../../.agents/skills/esingularity-ticker/SKILL.md) with one dated field-status source and publication verification.

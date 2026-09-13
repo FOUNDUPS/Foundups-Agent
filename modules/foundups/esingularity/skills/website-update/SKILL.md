@@ -17,6 +17,24 @@ Resolve the FoundUp through `modules/foundups/foundup_registry.json`. Inspect re
 
 Apply the WSP 97 loop: research → inspect the exact change → inspect adjacent consumers and hosting → challenge the proposed change → choose the simplest valid patch → execute → validate → document. Specifically ask: could this preserve a component file while removing its rendered consumer, replace the other homepage, break a cross-site link, or overwrite newer published work?
 
+## Select the site and its goal before editing
+
+| Target | Purpose | Visitor goal | Edit boundary |
+| --- | --- | --- | --- |
+| eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI | `frontend/app/page.tsx` and its necessary dependencies |
+| YUMORI.me / www | Build the wider YUMORI movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
+| Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and `current-field-status.ts`; verify both consumers |
+
+“Apply the website skill” applies the workflow to the site named in the request or established by the active task. It does not mean redesign both sites. State the target, requested outcome and bounded edit scope briefly before editing. If the target truly cannot be resolved from the request and visible context, ask one short question before a page-specific mutation.
+
+An eSingularity redesign must leave YUMORI.me's content, order and join funnel intact. A YUMORI edit must preserve the project page. Shared CSS, language handling, navigation helpers and hosting can affect both: inspect their consumers, scope page-specific styling and regression-check the other site. Checking the other page does not authorize redesigning it. A shared ticker update intentionally reaches both.
+
+### Current eSingularity redesign direction — specified, not yet implemented by this skill change
+
+012 requests a more focused project experience with **three to four primary navigation tabs**, replacing the overloaded top-level menu. This direction applies to eSingularity.ai only. Group the existing project material around a clear visitor journey; keep supporting detail reachable without making every topic a primary tab. Preserve JHR discoverability, participation actions and the shared ticker. Do not count language controls or a participation button as extra content tabs.
+
+Choose the actual labels and grouping from the current redesign brief and source; do not invent approved labels or delete evidence simply to meet the tab count. Keep desktop and mobile navigation consistent. Record the final grouping and validation when implemented. The three-to-four-tab target is a design requirement, not a claim that the live navigation has already changed.
+
 ## Invariants for every website change
 
 | Surface | Owner / check |
