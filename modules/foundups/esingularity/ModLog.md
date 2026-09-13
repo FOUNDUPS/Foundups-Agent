@@ -7,6 +7,9 @@
 - Removed stale event-specific literals from the existing field-status contract while retaining single-source rendering and timezone checks.
 - WSP 00/22/50/97: V2 initially lacked torch; the documented tracker fallback opened the gate without a detector witness. After installing the missing runtime dependency, V2 completed and the tracker passed. HoloIndex returned `MISSING_GENERATION_BINDING`; bounded repository search supplied exact source and consumer evidence. Retrieval noise was unrelated broadcast tickers; module-scoped search removed it. Manual content editing was appropriate for this small confirmed announcement.
 
+- Validation: three JHR/status contracts, the existing ticker/homepage integration test, 18 routing checks, skill validation and focused ESLint passed. Production build passed after caching the unchanged Google Fonts through the environment proxy. Full module CI retains three unrelated presentation failures (obsolete sprite assertion and two missing legacy presentation-file references).
+- Published the two-file frontend patch against the latest Sites source as version 45, source `1b12ab50807099632e17509c255740643801653c`, deployment `appgdep_6aa5f124a73c81919cb4a4890e9e5771` succeeded. Both homepage bodies and hostname routing were preserved; the live movement source differs from monorepo only by an existing blank line. Fresh custom-domain HTTP verification was blocked by this runtime (403; public web open also unavailable), so deployment success is confirmed by Sites, not claimed as a fresh custom-domain content check.
+
 ## 2026-09-12 — Make the two-homepage architecture durable
 
 **WSP Protocol**: WSP 00, WSP 22, WSP 50, WSP 57, WSP 83, WSP 97
