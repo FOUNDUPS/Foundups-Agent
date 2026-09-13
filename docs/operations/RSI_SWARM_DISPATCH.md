@@ -146,10 +146,61 @@ it does not claim that all components are already integrated or RSI-complete.
 
 ## First bounded dispatch
 
+### Worker readiness checkpoint — 2026-09-13
+
+Source inspected: `bcc877829653997d7df638b7069258a061d04ee1`.
+The local Windows CLI reports OpenClaw `2026.5.2`; the existing canonical
+WSL command transport reports OpenClaw `2026.7.1-2`, and the WSL advisory finds
+Hermes `0.20.4`. Windows PATH has no Hermes command. These are different
+execution surfaces, so Windows PATH alone cannot establish worker absence.
+The existing WSL advisory's numeric-release parsing defect is corrected in
+this revision; version-only availability remains non-authoritative.
+
+Earlier [upstream live proofs](../audits/openclaw_hermes/REDDOG_UPSTREAM_WORKER_LIVE_PROOF_20260821.md)
+already exercised confined Hermes/OpenClaw GotJunk audit canaries. Preserve
+that groundwork: those diagnostic invocations ran beneath model-capability
+admission, so they do not supply a current signed work order, materializer or
+independent verifier. The current missing API/bindings do not justify rebuilding
+the existing adapters.
+
+| Existing step | Current evidence and required connection |
+|---|---|
+| Architect model query | `MODEL_RUNTIME_BINDING_UNCONFIGURED`, `configured=false`, `accepted=false` in this shell. The [query](../../modules/communication/moltbot_bridge/src/reddog_model_runtime_binding_query.py) validates `reddog_backend_architect` only; READY here is insufficient for artifact execution. |
+| Artifact model/provider binding | [Generation runtime](../../modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py) requires a separately verified `reddog_artifact_generation` surface and matching one-use authority. [Existing provider bootstrap](../../modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py) composes OpenClaw/Hermes/Fusion; it does not invent available providers. No resident runtime root or artifact-generator mode is configured in this shell. |
+| Hermes service | Existing transport's unauthenticated `GET /v1/capabilities` on loopback returned status `0` (no usable HTTP response). Installed CLI `0.20.4` is not proof of the required running API. Qualify the existing API service/profile/auth/tool-surface/lifecycle contract before a leaf; do not replace it with the legacy executor. |
+| Work-order intake | [Existing invocation](../../modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py) is explicitly `invoke_reddog_work_order_dryrun`: policy evaluation and receipt emission, with no execution. Its acceptance must not be reported as worker execution. |
+| Durable publication | [Existing publisher](../../modules/communication/moltbot_bridge/src/reddog_openclaw_hermes_0102_worker_dispatch_runtime.py) authenticates, stages, commits publication and activates AgentDB tasks; it does not execute the worker. Use the existing claim/runner path afterward. |
+| Independent effect evidence | Artifact generation returns checked content; its module does not write the worktree. Bind subsequent materialization, verifier and final result separately. Do not call provider text, queue acceptance or a dry-run receipt a completed artifact. |
+
+Local validation: 148 existing job/admission/artifact/Hermes/model-query tests
+passed with synthetic authorities/transports and isolated database/temp state.
+The first attempt had 20 temporary-directory setup errors; the corrected full
+run passed. The WSL parser repair first reproduced two failing release-suffix
+cases, then passed 68 focused WSL/Gateway tests and a real version-only probe.
+No live model call or worker artifact is claimed by those tests. Required module
+documents were available; lexical Holo retrieval had historical/noisy peripheral
+hits and UNKNOWN/index-gap evidence. Direct exact-source reads supplied missing
+runtime/test context; no semantic CURRENT claim follows from that retrieval.
+
+Holo's existing exact-main controller subsequently completed at the named
+`bcc87782` source, and a fresh owner query returned CURRENT/no-gap with matching
+workspace/authority HEADs. See the [maintenance checkpoint](../../holo_index/CLI_REFERENCE.md#exact-main-maintenance-checkpoint--2026-09-13).
+The receipt does not apply automatically to later main commits or this edited
+worktree, and exact runtime closure remains false.
+
+Next executable proof still requires current Holo evidence, distinct verified
+architect/artifact bindings, an admitted provider profile, exact signed work
+scope/budget/expiry, one durable claim, bounded artifact materialization and a
+separate verifier. Reuse the existing owners above; preserve `dispatchable=false`
+until their real admission succeeds. Holo maintenance has its own owner and
+does not supply these model or worker authorities.
+
+### Dispatch through the existing owners
+
 Use R06/R07/R08 to prove one documentation artifact before authorizing broader implementation:
 
 1. Verify merged R01 integrity in the selected source and obtain current clean worktree claims. Apply the system-first / selected-early-stage validation scope above; preserve all active project/service lanes and the separate WSP state-semantics work.
-2. Ask the existing runtime's binding query for its selected model/provider. The acceptance signal is `MODEL_RUNTIME_BINDING_READY`, with current verified evidence and the correct surface. Reuse the signed-evidence supply and authenticated operations bootstrap. Never populate trusted keys, acceptance flags or receipts from this planning document.
+2. Ask the existing runtime's binding query for its selected architect model/provider. `MODEL_RUNTIME_BINDING_READY` validates that architect surface only. Separately admit the `reddog_artifact_generation` binding and provider through the existing generation bootstrap before worker execution. Reuse the signed-evidence supply and authenticated operations bootstrap. Never populate trusted keys, acceptance flags or receipts from this planning document.
 3. Compile one packet using the existing [work-order intake](../../modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py), [signed worker dispatch](../../modules/communication/moltbot_bridge/src/reddog_openclaw_hermes_0102_worker_dispatch_runtime.py) and model binding. Bind one base SHA, permitted source reads, output artifact, expiry, budgets, tool profile, owner and separate verifier.
 4. Candidate task: read the canonical roadmap entry and R06–R09, then return a short dependency/acceptance checklist as a bounded artifact. No repository write, Git operation, service activation, nested delegation or deployment is needed for this first canary. Finalize the exact artifact name and byte limit in the admitted contract.
 5. Dispatch through the existing operations/queue adapter. Do not run an unconstrained `openclaw agent` prompt against the shared checkout, start OpenClaw inside OpenClaw, or revive the legacy blocked Hermes executor.

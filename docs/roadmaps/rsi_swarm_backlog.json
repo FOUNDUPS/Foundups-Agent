@@ -252,9 +252,9 @@
         "procedure": "holo_index/CLI_REFERENCE.md#source-bound-owner-queries",
         "existing_contract_tests_passed": 81,
         "local_bundle": "observed_success_UNKNOWN_freshness_zero_owner_attempts",
-        "current_semantic_acceptance": false,
+        "current_semantic_acceptance": true,
         "remaining": [
-          "prove exact-current-main semantic and runtime bindings",
+          "requalify receiving source as main advances; R04 exact runtime closure remains separate",
           "complete operational matrix including concurrent main advance"
         ],
         "runtime_source_changes": false,
@@ -284,6 +284,35 @@
           "runtime_source_changes": false,
           "new_packages_installed": false,
           "procedure": "holo_index/CLI_REFERENCE.md#interpreter-correction-checkpoint--2026-09-13"
+        },
+        "semantic_acceptance_source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+        "exact_main_maintenance_checkpoint": {
+          "date": "2026-09-13",
+          "source_commit": "bcc877829653997d7df638b7069258a061d04ee1",
+          "controller_status": "COMPLETED",
+          "task_id": "holoindex_postmerge_refresh:bcc877829653997d7df638b7069258a061d04ee1",
+          "generation_id": "sha256:681b03ead03d6945151779d92a81081922357ed167109a63647b08705e512501",
+          "freshness_receipt_digest": "sha256:98145ad229a7c838d7eeca7b10c0ef907cc98ef0481c2be32cb7dbe44a142e8b",
+          "started_runtime_ids": [
+            "openclaw",
+            "openclaw_supervisor"
+          ],
+          "stopped_runtime_ids": [
+            "openclaw_supervisor",
+            "openclaw"
+          ],
+          "owner_query": {
+            "ok": true,
+            "freshness": "CURRENT",
+            "index_gap_detected": false,
+            "owner_attempts": 1,
+            "no_reindex": true,
+            "workspace_repo_head_sha": "bcc877829653997d7df638b7069258a061d04ee1",
+            "authority_repo_head_sha": "bcc877829653997d7df638b7069258a061d04ee1",
+            "runtime_environment_exact_closure_verified": false
+          },
+          "procedure": "holo_index/CLI_REFERENCE.md#exact-main-maintenance-checkpoint--2026-09-13",
+          "scope": "named-source operational proof only; later main commits require requalification"
         }
       }
     },

@@ -1,5 +1,28 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: RSI worker readiness and WSL advisory correction
+
+- Continued R03/R06–R08 through existing components. The model query remains
+  unconfigured in this shell; traced distinct architect/artifact model surfaces,
+  dry-run work-order intake, signed queue publication and artifact generation.
+- Existing boundary suites pass 148 tests after correcting the external test
+  scratch-directory setup. These use synthetic authorities/transports and do
+  not establish a live worker invocation.
+- Real WSL inspection found OpenClaw `2026.7.1-2` and Hermes `0.20.4`; the
+  availability advisory falsely rejected the numeric OpenClaw suffix. Fixed
+  that existing parser, retained content filtering, passed 68 focused tests,
+  and reproduced advisory PASS on the installed executables. Hermes loopback
+  capabilities returned status 0; runtime/model admission remains unproven.
+- Holo exact-main maintenance completed through its existing OpenClaw/WRE
+  controller at `bcc877829653997d7df638b7069258a061d04ee1`, with both owned
+  runtimes stopped. A fresh owner query returned CURRENT/no-gap on attempt one
+  at the same generation. R04 exact closure remains false; this is a named-source
+  prerequisite proof, not completed RSI. Protected project work remains untouched.
+  WSP 22, 50, 84, 97.
+- PR CI detected the parser's stale backend inventory hash. Regenerated the
+  existing 1,400-file manifest and its pins; membership is unchanged and exactly
+  one runtime hash changes. No compatibility check was weakened.
+
 ## 2026-09-13: Existing research components and early-stage RSI workloads
 
 - Applied 012's clarification: system RSI comes first, while selected early-stage FoundUps/other repositories are eligible test workloads. Replaced the blanket active-FoundUp exclusion; YUMORI/eSingularity and concurrent reserved lanes stay protected. Existing packet IDs, dependencies, numerical priorities and admission gates remain unchanged.

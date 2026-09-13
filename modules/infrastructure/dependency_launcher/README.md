@@ -70,6 +70,15 @@ Environment variables:
 - Falls back to DOM-only mode if not available
 - Must have UI-TARS model loaded (manual step)
 
+## WSL agent availability advisory
+
+The existing opt-in `probe_wsl_agent_runtime()` reads exact OpenClaw/Hermes
+version commands in the configured WSL distribution. OpenClaw numeric release
+suffixes such as `2026.7.1-2` are supported alongside the optional hexadecimal
+build ID. A successful probe is `advisory_unverified_runtime_report`: it does
+not prove API health, model binding, confinement or permission to dispatch.
+Windows PATH discovery is separate from this WSL runtime.
+
 ## Runtime Compatibility Advisory
 
 `main.py` runs a read-only advisory after the DAE broker starts. It consumes a
