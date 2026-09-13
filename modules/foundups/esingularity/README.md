@@ -49,9 +49,15 @@ The financial models, engineering research, and source audits support the public
 
 ## Grants, subsidies, and PPP support
 
-Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `YUMORI — eSingularity Phase 1 Functional Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
+Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `FIN — YUMORI Phase 1 Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
 
 A program's existence is not project funding. Keep the progression explicit: verified program → eligibility inquiry → eligible → application → selected → awarded. Only an awarded amount may be represented as committed subsidy revenue. The current highest-priority inquiry concerns the MOE/RCESPA regional-coexistence data-center decarbonization program and whether a currently closed municipal onsen can qualify after Fukui City accepts a lawful PPP/lease/use structure and an eligible operator/SPC satisfies the program conditions.
+
+## Google Drive document authority
+
+Use [docs/DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md) before creating, renaming, deleting, or searching for YUMORI Drive material. It maps the numbered 01–06 spine plus `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, finance, press, landowner and legal lanes to their stable Drive IDs and roles.
+
+Repository state is canonical for project status and source-of-truth labels. Drive is the working drafting/evidence layer. If repo, Drive and a primary government source disagree, re-verify the primary source first, update the repo authority, then reconcile Drive. Do not create another Drive file merely because an existing file is hard to find.
 
 ## Campaign ticker updates
 
@@ -84,7 +90,7 @@ modules/foundups/esingularity/
 │   └── tests/              # Publish/no-publish gate tests
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
-├── docs/                   # Migration, architecture, grant and evidence records
+├── docs/                   # Migration, architecture, Drive index, grant and evidence records
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata
@@ -123,6 +129,7 @@ With no research retriever connected, JHR fails closed and returns `NO_REPORT` r
 - Contact candidates remain in the ignored RedDog manual-alpha store until a governed Contact Memory runtime exists.
 - JHR public publication remains fail-closed until retrieval, verification, drafting, image provenance, and publication adapters are verified together.
 - Grant maximums, open calls and eligibility inquiries are not awards. Public funding claims remain fail-closed until the grant registry and source-of-truth ledger admit them.
+- Drive artifacts do not outrank repository authority merely because they are newer or longer; durable status changes must be reconciled into the repo.
 
 ## WSP alignment
 
