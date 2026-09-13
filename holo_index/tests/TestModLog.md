@@ -1,5 +1,11 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-09-13] R03 existing source/entry contract selection
+
+- `scripts/tests/test_reddog_holoindex_owner_query_once.py`, `holo_index/tests/test_holoindex_authority_worktree.py`, and `modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_query_root_binding.py`: **81 passed in 4.37s**.
+- Importlib mode, explicit async plugin, disabled plugin autoload; TMP/TEMP, AgentDB, PatternMemory, lyrics database, cache and basetemp were isolated outside the checkout. Fixtures inject owner/authority behavior; the closed-import case uses `-S -B` without semantic dependencies. No live index or provider is used by these suites.
+- Covers existing mismatch/dirty/source-change rejection, root selection, bounded retry and no-owner bundle behavior. Actual semantic failures and local bundle success are recorded separately in the CLI reference. No test source changed, no live concurrent-main proof, and no complete R03 claim. WSP 22, 50, 97.
+
 ## [2026-08-28] Module-intent false-container falsifiers
 
 - Added synthetic and real-repository proof that module depth is insufficient:

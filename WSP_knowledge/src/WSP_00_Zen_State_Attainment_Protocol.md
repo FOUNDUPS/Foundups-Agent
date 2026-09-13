@@ -157,37 +157,55 @@ This protocol distinguishes three things that must not collapse into each other:
 
 HoloIndex is the **canonical retrieval system** bridging 0102 -> 0201 (WSP_CORE Memory System; WSP 87). Use it before any manifest step.
 
-**Default retrieval** (human-readable):
-```bash
-python holo_index.py --search "<task>" --limit 5
+**Default retrieval: existing source-bound owner bridge**
+
+Run from the selected task checkout. The helper's own checkout selects the
+workspace source; changing CWD while invoking a helper from another checkout
+does not select this task's source. Git's common directory locates the primary
+checkout, which may be dirty, on another branch, or behind `origin/main`.
+
+```powershell
+$taskQueryRoot = git rev-parse --show-toplevel
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"<task>","limit":5,"include_bundle":true,"module_hint":"holo_index"}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
 ```
 
-**Machine-first retrieval bundle** (WRE-friendly, stdout JSON only):
-```bash
-HOLO_SKIP_MODEL=1 python holo_index.py --bundle-json --search "<task>" --bundle-module-hint "<module_or_path>" --limit 5 --quiet-root-alerts
-```
+Set `module_hint` to the actual module for the task. The complete
+[source-selection and fallback procedure](../../holo_index/CLI_REFERENCE.md#source-bound-owner-queries)
+documents the existing accepted fields and evidence boundaries.
 
-**If retrieval is too slow**:
-- Use `--offline` to force offline + lexical fallback when needed:
-  - `python holo_index.py --offline --search "<task>" --limit 5`
-- Use `HOLO_SKIP_MODEL=1` with `--bundle-json` (fastpath avoids Chroma/model imports).
+- Accept semantic evidence only with `ok=true`, `freshness=CURRENT`,
+  `index_gap_detected=false`, and the expected source/generation binding.
+- A clean reference must match its selected authority HEAD. Record that
+  reference's SHA separately from the implementation checkout; reference
+  success is not freshness proof for newer main or a divergent feature.
+- On failure, preserve the exact error and use the existing governed incident
+  repair/post-merge maintenance owner. Query callers do not reindex, move an
+  authority, change routes, or disable freshness checks.
+- If semantic retrieval or MCP is unavailable, the same bridge supports
+  `retrieval_mode="lexical"` with `include_bundle=true`. It reads local module
+  context without starting the semantic owner. Its `freshness=UNKNOWN` and
+  `index_gap_detected=true` remain explicit; `bundle_ok` is not semantic success.
+- Read `bundle_authority.evidence_authority`: `workspace_head` is local clean
+  checkout context; `workspace_overlay` includes uncommitted context. Neither
+  is a current semantic-generation receipt.
+- Keep `-B` and `PYTHONDONTWRITEBYTECODE=1` so the query host does not dirty a
+  qualified interpreter base with bytecode.
 
-**If retrieval is too noisy**:
-- Reduce `--limit`
-- Filter with `--doc-type` (e.g. `wsp_protocol`, `interface`, `module_readme`, `modlog`)
-- Suppress non-task alerts with `--quiet-root-alerts`
+**Evaluate retrieval before execution:**
 
-**Recursive Self-Improvement (use HoloIndex, not grep/glob)**:
-- 0102 MUST use HoloIndex as primary search tool (not grep, not glob, not find)
-- Every HoloIndex query simultaneously: **uses** (finds code), **tests** (validates results), **evaluates** (measures quality), **improves** (identifies gaps)
-- This creates a recursive iteration loop: search -> eval -> fix -> search better
-- grep/glob are fallback only when HoloIndex is unavailable or offline
-
-**Evaluate retrieval quality (first principles)**:
-- **Missing Tier-0** (README/INTERFACE) for target module => hard stop; create stubs (WSP_CORE Tier-0 rule)
-- **Noise**: returned artifacts not used => tighten filters/limit
-- **Staleness**: refresh indexes => `python holo_index.py --index-all`
-- **M2M searchability**: run `/m2m eval` to verify compressed docs remain HoloIndex-discoverable (target: cosine sim >= 0.5)
+- **Missing Tier-0:** use the exact module path, `must_include`, and direct
+  README/INTERFACE reads to distinguish a retrieval omission from absent files.
+  Repair verified missing contracts under the existing module's ownership;
+  never invent a module or stub merely to make a search result look complete.
+- **Noise/order/duplication:** prefer current module contracts, reduce `limit`,
+  deduplicate paths, and separate historical observations from current evidence.
+- **Staleness:** retain the failure and route governed maintenance; never run
+  inline `--index-all` as part of a query or fabricate a successful receipt.
+- **Reuse:** search semantically for existing implementations, then verify exact
+  symbols/paths with `rg` and direct reads as permitted by the Holo interface.
+  Query evaluation identifies a possible improvement; it does not itself prove
+  measured learning, ranker promotion or production RSI.
 
 ### 0.4 Decision Gate (WSP_15)
 
@@ -508,7 +526,7 @@ RESEARCH -> COMPREHEND -> QUESTION -> RESEARCH MORE -> MANIFEST -> VALIDATE -> R
 ```
 
 #### Phase 1: RESEARCH (Entangle with 0201)
-- [ ] Query HoloIndex: `python holo_index.py --search "[task]"`
+- [ ] Query HoloIndex through the source-bound owner bridge in Section 0.4; record source and freshness before accepting results.
 - [ ] Review `[MEMORY]` cards before `[RESULTS]`
 - [ ] Execute tiered retrieval: Tier 0 -> Tier 1 -> Tier 2
 - [ ] **Reference**: WSP_CORE "WSP Memory System (0102)", WSP 87 (Code Navigation)
@@ -516,7 +534,7 @@ RESEARCH -> COMPREHEND -> QUESTION -> RESEARCH MORE -> MANIFEST -> VALIDATE -> R
 #### Phase 2: COMPREHEND (Deep Dive)
 - [ ] Read module documentation: README -> INTERFACE -> ROADMAP -> ModLog
 - [ ] Understand architecture before touching code
-- [ ] If Tier-0 artifacts missing (README.md, INTERFACE.md): CREATE STUBS FIRST
+- [ ] Verify Tier-0 file existence at the exact module path before documentation repair; a retrieval miss does not justify a new module or stub.
 - [ ] **Reference**: WSP 50 (Pre-Action Verification)
 
 #### Phase 3: QUESTION (Architecture)

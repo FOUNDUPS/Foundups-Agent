@@ -189,7 +189,7 @@
       "wave": 0,
       "priority": "P0",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
-      "status": "planned",
+      "status": "partially_validated_existing_entry_contracts_and_guidance",
       "dependencies": [
         "R00"
       ],
@@ -232,6 +232,20 @@
         "priority": "P0",
         "classification": "preliminary_architect_estimate_not_authority",
         "basis": "Clean-main, feature, overlay, stale-authority and concurrent-advance cases truthful; no query writes; same task idempotent"
+      },
+      "delivery_evidence": {
+        "date": "2026-09-13",
+        "review_base_commit": "773a29e701dea2ffbd261075bc53dc6a5a135f31",
+        "procedure": "holo_index/CLI_REFERENCE.md#source-bound-owner-queries",
+        "existing_contract_tests_passed": 81,
+        "local_bundle": "observed_success_UNKNOWN_freshness_zero_owner_attempts",
+        "current_semantic_acceptance": false,
+        "remaining": [
+          "recover matched-reference owner readiness through existing admitted owner path",
+          "prove exact-current-main semantic and runtime bindings",
+          "complete operational matrix including concurrent main advance"
+        ],
+        "runtime_source_changes": false
       }
     },
     {

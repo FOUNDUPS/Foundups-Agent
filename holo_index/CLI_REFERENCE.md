@@ -7,6 +7,118 @@ Contract note:
 - Canonical interface contracts live in `holo_index/INTERFACE.md`.
 - Canonical machine schema lives in `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json`.
 
+## Source-bound owner queries
+
+Reviewed against source `773a29e701dea2ffbd261075bc53dc6a5a135f31` on 2026-09-13
+for [RSI packet R03](../ROADMAP.md#wave-0--recover-and-establish-current-truth).
+This procedure uses the existing owner bridge, authority selector and local
+bundle command. It adds no service, module, query schema or runtime behavior.
+The menu below remains a capability atlas; its search/refresh flags are not
+permission to bypass this query/maintenance boundary.
+
+### Select the source before querying
+
+1. Identify the task checkout, committed HEAD and dirty state. The one-shot
+   script binds its workspace to its own location, not the shell's CWD.
+2. Use that checkout's helper for its source. A configured authority must be a
+   distinct clean worktree in the same repository at the same HEAD. Invoking
+   the authority as its own configured workspace is rejected.
+3. A primary checkout found via `git --git-common-dir` is not necessarily
+   current main. For reference retrieval, explicitly choose a known clean
+   control checkout matching the published authority, record its SHA, and
+   verify current implementation files separately. Do not move/reset another
+   lane or authority to force the match.
+4. Leave owner-controlled route and runtime configuration to the existing
+   admission path. Its source, replica and runtime checks remain required.
+
+```powershell
+$taskQueryRoot = git rev-parse --show-toplevel
+git -C $taskQueryRoot rev-parse HEAD
+git -C $taskQueryRoot status --short
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"HoloIndex query authority entry","limit":5,"include_bundle":true,"module_hint":"holo_index"}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
+```
+
+Inspect JSON even if the process exits zero. Semantic acceptance requires
+`ok=true`, `freshness=CURRENT`, `index_gap_detected=false`, the expected
+`workspace_repo_head_sha`/`authority_repo_head_sha`, and valid owner generation
+and receipt bindings. A successful query against an older reference does not
+certify a newer commit. `semantic_evidence_authority` describes scope only; it
+does not turn a failed result into acceptance.
+
+### Existing local fallback without MCP or semantic owner
+
+```powershell
+$taskQueryRoot = git rev-parse --show-toplevel
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"HoloIndex query authority entry","limit":5,"retrieval_mode":"lexical","include_bundle":true,"module_hint":"holo_index","must_include":["holo_index/README.md","holo_index/INTERFACE.md"]}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
+```
+
+Replace the hint and must-include paths with the existing task module. The
+accepted request fields are exactly `query`, `limit`, `retrieval_mode`,
+`include_bundle`, `module_hint`, `must_include`, and `bundle_only`.
+`bundle_module_hint` is not a JSON field; unknown fields reject before owner
+startup. `bundle_only=true` also selects the existing local-bundle path.
+
+Local success reports `source=holoindex_bundle`, `bundle_ok=true`, zero owner
+attempts, `freshness=UNKNOWN`, and `index_gap_detected=true`. Inspect
+`bundle_authority.evidence_authority`: clean local context is `workspace_head`;
+uncommitted context is `workspace_overlay`. Preserve this distinction in the
+ticket. A semantic failure may still include a usable local bundle; never
+replace the failed semantic `ok` flag with its `bundle_ok` flag.
+
+Missing README/INTERFACE hits require exact-path checks before creating files.
+The local path supports investigation; work requiring admitted semantic or
+runtime evidence must still wait for that evidence. MCP is a transport choice,
+not a replacement for the existing owner, source and generation checks.
+
+### Failures and maintenance ownership
+
+Preserve the error, selected source, binding metadata and retry counts without
+credentials. The existing [incident repair runtime](../modules/communication/moltbot_bridge/src/reddog_holoindex_incident_repair_runtime.py)
+routes authenticated incidents to WRE; the [post-merge controller](../modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py)
+owns bounded exact-main maintenance. A raw CLI error is not by itself an
+authenticated repair order. Reconcile the active owner and required admission
+before maintenance; query callers do not reindex, activate a route, edit an
+authority, or retry indefinitely. An index refresh must not be used to guess
+away a service-startup failure.
+
+For the observed startup exit, [the existing readiness loop](../modules/infrastructure/foundups_mcp_bridge/src/holo_query_owner_startup.py)
+reports that the owned process exited; it does not identify the child cause.
+The [existing supervisor](../modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_supervisor.py)
+discards child stdout/stderr. The next recovery investigation must obtain a
+bounded, secret-safe diagnostic through that owner boundary before selecting
+a repair. No missing dependency, broken index or runtime defect is established
+by this generic error alone.
+
+### Qualification matrix and evidence scope
+
+| Case | Existing behavior and test | Remaining operational limit |
+|---|---|---|
+| Clean source and matching authority | `test_configured_clean_same_head_authority_is_selected`; `test_query_runs_against_selected_authority_root` | Contract fixtures pass; current-main positive semantic/runtime receipt is still required. |
+| Divergent feature / stale authority | `test_different_head_authority_is_rejected`; `test_head_mismatch_failure_preserves_verified_authority_binding` | Rejection is correct; reference retrieval must not be relabeled as feature evidence. |
+| Dirty workspace | `test_dirty_workspace_can_use_clean_same_head_authority`; `test_semantic_owner_rejection_preserves_safe_workspace_bundle` | Committed semantic evidence excludes edits; bundle labels expose the overlay. |
+| Source changes during query | `test_authority_change_before_owner_rejects_without_query`; `test_authority_change_after_query_discards_result` | Injected state-change tests pass; no live concurrent-main qualification is claimed. |
+| No MCP / unavailable semantic owner | `test_lexical_bundle_never_starts_or_preflights_owner`; `test_bundle_only_overrides_semantic_without_owner` | Actual local bundle succeeded at the reviewed source; it is not semantic freshness. |
+| Owner exits during startup | Existing bounded bootstrap retry/cleanup tests | The matched reference returned `HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP` after two attempts this session; live readiness remains open. |
+
+Test owners: [authority worktree](tests/test_holoindex_authority_worktree.py),
+[one-shot entry](../scripts/tests/test_reddog_holoindex_owner_query_once.py),
+and [repair/control root binding](../modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_query_root_binding.py).
+The three existing suites passed **81 tests in 4.37s** using isolated temporary
+and database paths, disabled plugin autoload and an explicit async plugin.
+No test implementation or assertion changed.
+
+Session observations: the canonical-primary helper at `0c81418f` rejected
+HEAD mismatch; a clean matched reference at `78b79c36` failed owner startup;
+the reviewed task source returned a clean local bundle with zero owner
+attempts. After these documentation edits, the same local query succeeded with
+`workspace_overlay`, preserving UNKNOWN freshness and zero owner attempts.
+Earlier CURRENT receipts retain only their original dated scope.
+R03 is partial: entry contracts and guidance are validated, but owner recovery,
+exact-current-main positive qualification and broader operational matrix proof
+remain open. R04 runtime closure and R05 retrieval quality remain separate gates.
+
 ## Menu Snapshot (0102 Ops)
 ```
 ============================================================

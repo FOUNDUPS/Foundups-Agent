@@ -1,5 +1,12 @@
 # HoloIndex Development Roadmap
 
+## [2026-09-13] R03 existing entry-path qualification
+
+- [Source-selection procedure and matrix](CLI_REFERENCE.md#source-bound-owner-queries): existing owner, selector and local bundle paths; no new runtime implementation.
+- Three existing entry/root suites: 81 passed. Actual current-source local bundle succeeds with UNKNOWN semantic freshness, explicit source and zero owner attempts.
+- Canonical-primary semantic entry rejects HEAD mismatch; the matched reference fails owner startup after its bounded retries. Next: reconcile live owner readiness through existing maintenance admission, then prove exact-current-main and remaining operational cases. Reference history is not current acceptance.
+- R04 exact runtime closure, R05 quality and the wider retrieval RSI loop remain open.
+
 ## [2026-08-29] Current-truth retrieval and RSI gate
 
 **Current status:** governed retrieval is operational at exact main

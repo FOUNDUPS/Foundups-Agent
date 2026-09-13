@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: R03 reuse of source-bound Holo entry and local fallback
+
+- Ran WSP 00 activation/strict gate in an isolated checkout and applied WSP 97 to existing owner/authority/bundle/repair surfaces. Added no module or runtime behavior; source selection was already implemented.
+- Reconciled WSP 00 retrieval/checklist commands and its exact knowledge mirror, edited canonical CLAUDE instructions and regenerated only AGENTS through the existing renderer. Added the source/evidence procedure to the existing Holo atlas/interface and linked roadmap/backlog status.
+- Existing entry/root contracts: 81 passed in 4.37s. Actual local bundle succeeds; semantic primary entry rejects HEAD mismatch and the matched reference fails bounded owner startup. R03 remains partial pending operational recovery and current-source qualification; R04/R05 remain separate.
+- Preserved WSP 00 identity/state semantics, protocol status, budgets, frozen audits and concurrent YUMORI/eSingularity/RedDog changes. No index/authority/route mutation, provider generation or production-memory write. WSP 00, 22, 50, 81, 87, 97.
+
 ## 2026-09-13: R02 enforcement map and current documentation boundaries
 
 - Added the R00–R25 requirement/owner/test/gap map and 70-file pinned source inventory. Confirmed roadmap #1656 and R01 #1702 merged; current-source baseline is `35ed430c6`.
