@@ -29,7 +29,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -37,7 +38,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -76,7 +77,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -84,7 +86,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -135,7 +137,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -143,7 +146,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -210,7 +213,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -218,7 +222,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -274,7 +278,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -282,7 +287,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -325,7 +330,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -333,7 +339,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -378,7 +384,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -386,7 +393,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -428,7 +435,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -436,7 +444,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -478,7 +486,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -486,7 +495,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -528,7 +537,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -536,7 +546,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -578,7 +588,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -586,7 +597,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -629,7 +640,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -637,7 +649,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -681,7 +693,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -689,7 +702,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -731,7 +744,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -739,7 +753,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -782,7 +796,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -790,7 +805,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -832,7 +847,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -840,7 +856,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -884,7 +900,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -892,7 +909,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -934,7 +951,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -942,7 +960,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -986,7 +1004,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -994,7 +1013,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -1037,7 +1056,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1045,7 +1065,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -1072,13 +1092,13 @@
         "R15",
         "R16"
       ],
-      "owner_role": "selected FoundUp owner",
+      "owner_role": "dedicated synthetic FoundUp fixture owner",
       "reuse_scope_candidates": [
         "modules/foundups/agent",
         "modules/foundups/agent_market",
         "modules/ai_intelligence/ai_overseer/src/foundup_genesis"
       ],
-      "acceptance": "Intake to admitted work to artifact to proof to independent verification to lifecycle state; no financial side effects",
+      "acceptance": "Intake to admitted work to artifact to proof to independent verification to lifecycle state; no financial side effects; dedicated synthetic fixture and disposable state only, no active FoundUp",
       "dispatchable": false,
       "execution_authority": "none; planning only",
       "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
@@ -1089,7 +1109,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1097,7 +1118,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -1110,7 +1131,7 @@
         "total": 14,
         "priority": "P1",
         "classification": "preliminary_architect_estimate_not_authority",
-        "basis": "Intake to admitted work to artifact to proof to independent verification to lifecycle state; no financial side effects"
+        "basis": "Intake to admitted work to artifact to proof to independent verification to lifecycle state; no financial side effects; dedicated synthetic fixture and disposable state only, no active FoundUp"
       }
     },
     {
@@ -1139,7 +1160,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1147,7 +1169,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -1165,21 +1187,20 @@
     },
     {
       "packet_id": "R22",
-      "title": "Expose authoritative work outcomes through the active product lane",
+      "title": "Demonstrate authoritative work outcomes in an isolated RedDog test consumer",
       "wave": 5,
       "priority": "P1",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
-      "status": "reserved_existing_lane",
+      "status": "deferred_optional_test_consumer",
       "dependencies": [
         "R20"
       ],
-      "owner_role": "existing eSingularity/RedDog owner",
+      "owner_role": "RedDog system interface owner / isolated test consumer",
       "reuse_scope_candidates": [
         "extensions/reddog",
-        "modules/foundups/esingularity",
         "modules/ai_intelligence/digital_twin"
       ],
-      "acceptance": "Existing owner reconciled; UI states derive from receipts; no fabricated completion; no duplicate campaign/client implementation",
+      "acceptance": "Existing query/client contract reused; synthetic principal/test consumer states derive from receipts; no fabricated completion, active FoundUp integration or campaign changes",
       "dispatchable": false,
       "execution_authority": "none; planning only",
       "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
@@ -1190,7 +1211,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1198,7 +1220,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -1211,7 +1233,7 @@
         "total": 13,
         "priority": "P1",
         "classification": "preliminary_architect_estimate_not_authority",
-        "basis": "Existing owner reconciled; UI states derive from receipts; no fabricated completion; no duplicate campaign/client implementation"
+        "basis": "Existing query/client contract reused; synthetic principal/test consumer states derive from receipts; no fabricated completion, active FoundUp integration or campaign changes"
       }
     },
     {
@@ -1243,7 +1265,8 @@
         "Compile into existing admitted work/job contract",
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
-        "Define negative cases, exact verification command, stop and recovery conditions"
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1251,7 +1274,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
@@ -1302,7 +1325,8 @@
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
         "Define negative cases, exact verification command, stop and recovery conditions",
-        "Fix reward type, funding, recipient, terms and settlement owner; no production payment authorized by planning data"
+        "Fix reward type, funding, recipient, terms and settlement owner; no production payment authorized by planning data",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1310,7 +1334,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md; existing FAM and WRE test suites; exact commands fixed per admitted slice",
@@ -1361,7 +1385,8 @@
         "Define negative cases, exact verification command, stop and recovery conditions",
         "Bind participant consent/disclosure, proposal version, recipient and attention budgets; coordinate existing conversation owner; no outreach authorization inferred from this JSON",
         "Define qualifying active-engagement events, authoritative activity source, freshness/expiry and pause semantics; recheck before delivery",
-        "Bind typed V1 feedback separately from V2 verification and V3 valuation; no automatic CABR increment or reward from replies"
+        "Bind typed V1 feedback separately from V2 verification and V3 valuation; no automatic CABR increment or reward from replies",
+        "Apply the internal-only validation scope; active FoundUps and live project/service state are excluded"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
@@ -1373,7 +1398,7 @@
       ],
       "forbidden_in_this_audit": [
         "source changes",
-        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "RSI experiments on active FoundUps or live project/service state; preserve concurrent owned work",
         "automatic dispatch from this JSON"
       ],
       "verification_plan_location": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md; existing conversation/Memex/WRE tests; exact commands fixed per admitted slice",
@@ -1402,5 +1427,21 @@
   "production_line_packet": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
   "hybrid_refined_on": "2026-09-11",
   "hybrid_architecture": "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
-  "feedback_packet": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
+  "feedback_packet": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+  "validation_scope": {
+    "authority": "012 scope correction 2026-09-13; planning constraint, not execution permission",
+    "allowed": "isolated internal workflows and dedicated synthetic FoundUp/consumer/participant fixtures",
+    "excluded": [
+      "all active FoundUps, including YUMORI.me and eSingularity",
+      "active project/service accounts, data, traffic, deployments, browser sessions and memories"
+    ],
+    "first_R15_target": "existing test-registry-audit work procedure",
+    "additional_candidates": [
+      "isolated auto-post preparation/routing/deduplication",
+      "isolated PQN research workflow preparation and reproducible artifact assembly"
+    ],
+    "candidate_assessment": "docs/operations/RSI_SWARM_DISPATCH.md#internal-rsi-validation-candidates",
+    "product_adoption_is_R15_prerequisite": false,
+    "active_FoundUp_experiment_requires": "separate explicit 012 scope change"
+  }
 }

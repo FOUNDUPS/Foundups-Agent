@@ -1,5 +1,7 @@
 # RedDog hybrid: governed tickets, bounded teams and 012 feedback
 
+Current validation scope (012 correction, 2026-09-13): qualify this architecture with internal workflows and synthetic agent/participant/FoundUp fixtures under the [system roadmap](../../ROADMAP.md#rsi-validation-scope-internal-workflows-and-dedicated-fixtures). Active FoundUps are excluded from RSI experiments. Product continuity and adoption goals below are downstream capabilities, not prerequisites for the first internal RSI proof.
+
 Date: 2026-09-11. Status: `SPECIFIED_NOT_IMPLEMENTED` for the integrated model. This decision extends the [dual-loop architecture](REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md); the [system roadmap](../../ROADMAP.md) owns sequencing. Implementation packets: [R24 production line](../roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25 feedback loop](../roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md). No runtime, outreach, governance vote or reward is activated by this document.
 
 ## Decision

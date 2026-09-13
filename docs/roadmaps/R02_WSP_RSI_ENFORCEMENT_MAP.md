@@ -6,6 +6,8 @@ This is a derived evidence map for the [system roadmap](../../ROADMAP.md), cover
 
 **Verdict:** R01's local integrity repair is present. R02's requirement map and selected documentation contradictions are reconciled in this revision. The complete generic evaluator → promoter → activation/rollback → measured retained improvement chain remains unproved. R02 stays partial until historical ledger dispositions and independent review of the required path are complete.
 
+Current planning constraint (012 correction, 2026-09-13): the [system roadmap's validation scope](../../ROADMAP.md#rsi-validation-scope-internal-workflows-and-dedicated-fixtures) excludes active FoundUps from RSI experiments. R15 uses an internal workflow; R20/R22 use dedicated synthetic lifecycle/consumer fixtures. Later product adoption is separate. This constraint supersedes any live-product interpretation of the dated packet descriptions below without changing their source inventory.
+
 ## Evidence levels and use
 
 - `HISTORICAL_OPERATION`: a real observation exists only for its recorded source/generation.
@@ -298,7 +300,7 @@ Later R03 checkpoint (2026-09-13, source `773a29e70`): the [existing entry proce
 
 **Required next evidence:** Reconcile canonical authenticated backend/query ownership and typed evidence. Prove supported valuation and confirmed settlement separately from a convenient displayed status.
 
-### R22 — Active RedDog/product lane
+### R22 — RedDog interface / isolated test consumer
 
 **Normative references:** WSP 73 / 91 / 97 / 104. **Evidence level:** `CONTRACT_AND_GAP`.
 
@@ -308,7 +310,7 @@ Later R03 checkpoint (2026-09-13, source `773a29e70`): the [existing entry proce
 
 **Observed boundary:** Authoritative work-state query contracts are available for consumer integration. The existing product lane owns delivery and must be reconciled before edits.
 
-**Required next evidence:** Show principal-scoped queued/running/blocked/verified/activated outcomes from authenticated owners in the selected live product. No concurrent YUMORI or RedDog product change is made here.
+**Required next evidence:** Show principal-scoped queued/running/blocked/verified/activated outcomes from authenticated owners in a dedicated synthetic test consumer. Active FoundUps and live product state are excluded; eventual adoption is separately scoped.
 
 ### R23 — Production RSI operations owner
 
