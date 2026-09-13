@@ -16,6 +16,7 @@ parent_wsp: 21  # Extends WSP 21 Enhanced Prompt Engineering
 # S: <scope>          # File/module scope
 # M: exec|plan|qa     # Mode
 # T: <task_hash>      # Task identifier
+# A: <action>         # Explicit verb in new compiler output; absent on legacy packets
 # R: [wsp_list]       # Required WSP compliance
 # I: {k:v invariants} # Constraints
 # O: [deliverables]   # Required outputs
@@ -23,6 +24,9 @@ parent_wsp: 21  # Extends WSP 21 Enhanced Prompt Engineering
 #
 # Example:
 # L:A S:modules/sim/ M:exec T:sse_001 R:[50,22] I:{atomic:true} O:[ModLog.md] F:[test_fail]
+# New compiler example: L:QA S:registry M:plan T:abc123 A:REVIEW R:[50,97]
+# Legacy packets remain readable. Readers that ignore A cannot certify action
+# preservation. ACTION is the compiler's YAML field; it does not replace OBJ.
 # =============================================================================
 
 # =============================================================================

@@ -35,17 +35,63 @@ from m2m_fidelity_gate import (
 class TestM2MFidelityBasics:
     """Contract Section 7a: Basic fidelity tests."""
 
-    def test_action_preserved(self):
+    @pytest.mark.parametrize("action", [
+        "ANALYZE", "CREATE", "DELETE", "ENHANCE", "FIX", "IMPLEMENT",
+        "MIGRATE", "REFACTOR", "TEST", "VALIDATE", "VERIFY", "REVIEW",
+        "DEPLOY", "ROLLBACK",
+    ])
+    @pytest.mark.parametrize("mode", [
+        "plan", "exec", "qa", "audit", "review", "verify", "implement",
+    ])
+    def test_action_preserved(self, action, mode):
         """Action verb must survive roundtrip."""
         gate = M2MFidelityGate()
         result = gate.assert_fidelity(
-            original_prose="ANALYZE the auth module",
+            original_prose=f"{action} the registry module",
             lane="A",
             wsp_refs=[50, 71],
-            mode="plan",  # Use plan mode to avoid CTX.HOLO requirement
+            mode=mode,
+            ctx_holo=CTXHolo(
+                query="registry",
+                mode=HoloMode.NONE,
+                status=HoloStatus.NOT_APPLICABLE,
+                not_applicable_reason="Isolated serialization test",
+            ),
         )
         assert result.passed
-        assert result.original_action == "ANALYZE"
+        assert result.original_action == action
+        assert result.roundtrip_action == action
+
+    @pytest.mark.parametrize("field,replacement,expected_scope", [
+        ("action", "", "modules/registry/audit.py"),
+        ("action", "A:ROLLBACK", "modules/registry/audit.py"),
+        ("scope", "", ""),
+        ("scope", "S:modules/registry", "modules/registry"),
+        ("scope", "S:modules/unrelated.py", "modules/unrelated.py"),
+    ])
+    def test_changed_wire_action_or_scope_is_rejected(
+        self, monkeypatch, field, replacement, expected_scope
+    ):
+        """Judge the actual parsed packet, including dropped or retargeted fields."""
+        gate = M2MFidelityGate()
+        parse_compact = gate.compiler.parse_compact
+        original = "A:REVIEW" if field == "action" else "S:modules/registry/audit.py"
+        monkeypatch.setattr(
+            gate.compiler,
+            "parse_compact",
+            lambda compact: parse_compact(compact.replace(original, replacement)),
+        )
+
+        result = gate.assert_fidelity(
+            original_prose="Review modules/registry/audit.py",
+            lane="QA",
+            wsp_refs=[50, 97],
+            mode="plan",
+        )
+
+        assert not result.passed
+        assert any(f"{field} mismatch" in error for error in result.errors)
+        assert result.roundtrip_scope == expected_scope
 
     def test_scope_preserved(self):
         """Scope must survive roundtrip if present."""
@@ -496,6 +542,22 @@ class TestAssertFidelityFunction:
                 wsp_refs=[50],
                 mode="exec",
                 ctx_holo=None,  # Missing for exec mode
+            )
+
+    def test_missing_wire_action_cannot_pass_as_default_implement(self, monkeypatch):
+        """Legacy default prose cannot certify a dropped explicit action."""
+        compiler_type = type(M2MFidelityGate().compiler)
+        parse_compact = compiler_type.parse_compact
+        monkeypatch.setattr(
+            compiler_type,
+            "parse_compact",
+            lambda compiler, compact: parse_compact(
+                compiler, compact.replace("A:IMPLEMENT", "")
+            ),
+        )
+        with pytest.raises(FidelityError, match="action mismatch"):
+            assert_m2m_fidelity(
+                "Implement the registry module", lane="A", wsp_refs=[50], mode="plan"
             )
 
 

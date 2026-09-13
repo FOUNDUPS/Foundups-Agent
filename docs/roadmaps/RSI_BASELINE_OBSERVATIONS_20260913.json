@@ -969,5 +969,312 @@
       "no_repository_artifact_written": true
     }
   },
-  "holo_evidence_boundary": "Six public-regression queries CURRENT/no-gap at source 5326080d5; metrics and receipt-integrity verification pass, exact runtime closure is false, no independent sealed evaluation or promotion, later commits require fresh qualification."
+  "holo_evidence_boundary": "Six public-regression queries CURRENT/no-gap at source 5326080d5; metrics and receipt-integrity verification pass, exact runtime closure is false, no independent sealed evaluation or promotion, later commits require fresh qualification.",
+  "compact_action_scope_continuation": {
+    "base_commit": "7b7a1946171d6105e0e495835dc724683c719ad5",
+    "packet_dependencies": [
+      "R10",
+      "R15",
+      "R20"
+    ],
+    "selection": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "mps_total": 14,
+      "priority": "P1",
+      "reason": "Existing R06/R07 signed admission remains unavailable in this shell; fix reproduced R10 field-preservation false passes without affecting protected runtime lanes.",
+      "execution_plane": "local deterministic repair; no distributed execution",
+      "model_calls": 0
+    },
+    "before": {
+      "schema_version": "rsi_m2m_action_counterexamples.v1",
+      "source_commit": "7b7a1946171d6105e0e495835dc724683c719ad5",
+      "sources": {
+        "prompt/swarm/m2m_compiler.py": "35ce092461e0bfb9d6c10a4a1b8e7e1df654406a8e2806c3caf7c73e78d64524",
+        "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py": "4dcb85cc2bd44252acc787455c5cb43684f4028cec35cfe0b41f432948f7d742"
+      },
+      "observations": [
+        {
+          "prose": "ANALYZE the registry module",
+          "passed": true,
+          "original_action": "ANALYZE",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:a9009858 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for a9009858. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "CREATE the registry module",
+          "passed": true,
+          "original_action": "CREATE",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:c39332eb R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for c39332eb. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "DELETE the registry module",
+          "passed": true,
+          "original_action": "DELETE",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:73d0f2c1 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 73d0f2c1. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "DEPLOY the registry module",
+          "passed": true,
+          "original_action": "DEPLOY",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:04e93a96 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 04e93a96. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "ENHANCE the registry module",
+          "passed": true,
+          "original_action": "ENHANCE",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:b9692a89 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for b9692a89. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "FIX the registry module",
+          "passed": true,
+          "original_action": "FIX",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:03a604c6 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 03a604c6. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "IMPLEMENT the registry module",
+          "passed": true,
+          "original_action": "IMPLEMENT",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:810f2dc8 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 810f2dc8. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "MIGRATE the registry module",
+          "passed": true,
+          "original_action": "MIGRATE",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:3baeed85 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 3baeed85. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "REFACTOR the registry module",
+          "passed": true,
+          "original_action": "REFACTOR",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:6a0ca112 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 6a0ca112. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "REVIEW the registry module",
+          "passed": true,
+          "original_action": "REVIEW",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:7925282c R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 7925282c. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "ROLLBACK the registry module",
+          "passed": true,
+          "original_action": "ROLLBACK",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:2bc46580 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 2bc46580. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "TEST the registry module",
+          "passed": true,
+          "original_action": "TEST",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:2d212904 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 2d212904. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "VALIDATE the registry module",
+          "passed": true,
+          "original_action": "VALIDATE",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:9fda14a7 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for 9fda14a7. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        },
+        {
+          "prose": "VERIFY the registry module",
+          "passed": true,
+          "original_action": "VERIFY",
+          "roundtrip_action": "IMPLEMENT",
+          "compact": "L:QA S:registry M:plan T:acb3f120 R:[50, 97]",
+          "roundtrip_prose": "Plan implementation for acb3f120. in scope: registry. following WSP 50, WSP 97.",
+          "errors": []
+        }
+      ],
+      "no_model_calls": true,
+      "no_execution": true
+    },
+    "repair": {
+      "behavior": "Existing compiler carries A action; existing gate compares compiled/parsed/decompiled action and actual parsed scope. Legacy packets remain readable.",
+      "tests": {
+        "before": {
+          "failed": 99,
+          "passed": 59,
+          "seconds": 0.46
+        },
+        "after": {
+          "passed": 158,
+          "failed": 0,
+          "seconds": 0.31
+        },
+        "configuration_warnings": [
+          "asyncio_default_fixture_loop_scope",
+          "asyncio_mode"
+        ],
+        "warning_reason": "Automatic pytest plugins disabled; asyncio plugin not needed by these synchronous cases.",
+        "files": [
+          "modules/infrastructure/token_efficiency/tests/test_m2m_fidelity.py",
+          "modules/infrastructure/token_efficiency/tests/test_m2m_compiler_compat.py"
+        ],
+        "scope": [
+          "14 recognized verbs in 7 modes",
+          "dropped or replaced action",
+          "dropped, shortened or retargeted scope",
+          "standalone exception on lost IMPLEMENT",
+          "legacy reader/object compatibility"
+        ]
+      },
+      "plan_mode_recheck": [
+        {
+          "action": "ANALYZE",
+          "passed": true,
+          "roundtrip_action": "ANALYZE"
+        },
+        {
+          "action": "CREATE",
+          "passed": true,
+          "roundtrip_action": "CREATE"
+        },
+        {
+          "action": "DELETE",
+          "passed": true,
+          "roundtrip_action": "DELETE"
+        },
+        {
+          "action": "DEPLOY",
+          "passed": true,
+          "roundtrip_action": "DEPLOY"
+        },
+        {
+          "action": "ENHANCE",
+          "passed": true,
+          "roundtrip_action": "ENHANCE"
+        },
+        {
+          "action": "FIX",
+          "passed": true,
+          "roundtrip_action": "FIX"
+        },
+        {
+          "action": "IMPLEMENT",
+          "passed": true,
+          "roundtrip_action": "IMPLEMENT"
+        },
+        {
+          "action": "MIGRATE",
+          "passed": true,
+          "roundtrip_action": "MIGRATE"
+        },
+        {
+          "action": "REFACTOR",
+          "passed": true,
+          "roundtrip_action": "REFACTOR"
+        },
+        {
+          "action": "REVIEW",
+          "passed": true,
+          "roundtrip_action": "REVIEW"
+        },
+        {
+          "action": "ROLLBACK",
+          "passed": true,
+          "roundtrip_action": "ROLLBACK"
+        },
+        {
+          "action": "TEST",
+          "passed": true,
+          "roundtrip_action": "TEST"
+        },
+        {
+          "action": "VALIDATE",
+          "passed": true,
+          "roundtrip_action": "VALIDATE"
+        },
+        {
+          "action": "VERIFY",
+          "passed": true,
+          "roundtrip_action": "VERIFY"
+        }
+      ],
+      "workspace_file_sha256": {
+        "prompt/swarm/m2m_compiler.py": "e3407ef305da07462e42bcdcb4952531d820b7137d8a58077c68097cf6f1d31b",
+        "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py": "430740e0bcf26b2faa59cf5964de1b77381f510f6879170595f580554a212b47"
+      },
+      "backend_inventory": {
+        "files": 1400,
+        "membership_unchanged": true,
+        "changed_hash_paths": [
+          "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py",
+          "prompt/swarm/m2m_compiler.py"
+        ],
+        "digest": "cd21e2873a50061db2d787fe0c5a146177a9585ee5988ed2751ee1b9774e8ea2",
+        "fast_contract_groups_passed": 15,
+        "staged_manifest_tests": {
+          "passed": 8,
+          "seconds": 60.46
+        }
+      }
+    },
+    "retrieval": {
+      "semantic_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+      "workspace_head": "7b7a1946171d6105e0e495835dc724683c719ad5",
+      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "local_bundle_ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "noise": "One unrelated agent-market hit; excluded from working context.",
+      "ordering": "Current module README/INTERFACE, gate/compiler and existing tests used first.",
+      "missing_artifacts": [
+        "ROADMAP.md",
+        "ModLog.md",
+        "tests/README.md",
+        "tests/TestModLog.md",
+        "memory/README.md"
+      ],
+      "duplication": "Identical code and code_hits arrays deduplicated for reading.",
+      "staleness": "Local checkout context is not a current semantic-generation qualification."
+    },
+    "remaining_limits": [
+      "Heuristic action/scope extraction is not general objective or prose fidelity.",
+      "CTX.HOLO remains separately serialized, not delivered through compact packets or authenticated.",
+      "Static caller search found the gate export and tests, not a generic admitted worker evaluator.",
+      "No signed worker admission, independently bound verifier execution, activation or retained RSI benefit."
+    ],
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false
+  }
 }

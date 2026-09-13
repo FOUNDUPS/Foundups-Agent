@@ -190,8 +190,27 @@ are existing extension points. Holo retrieved the compact gate and its tests;
 it must not be recreated or mistaken for a reference-YAML validator. Its stop
 condition comparison now includes the parsed packet. Its CTX.HOLO check still
 round-trips a separately supplied context object, not context serialized through
-the compact packet; this does not authenticate current retrieval. The compiler's
-existing grammar and other fidelity limits remain unchanged.
+the compact packet; this does not authenticate current retrieval.
+
+The next action check at source `7b7a1946171d6105e0e495835dc724683c719ad5`
+found 13 false passes among the 14 recognized verbs in plan mode. The compiler
+discarded the action and the gate accepted default `IMPLEMENT`. The existing
+compiler now carries explicit `A:<action>` and the gate compares compiled,
+parsed and decompiled actions plus the actual parsed scope. All 158 focused
+fidelity/compatibility cases pass, covering every verb/mode combination and
+dropped/changed field rejection. Legacy actionless packets retain their old
+reader behavior; older readers that ignore `A` cannot certify action fidelity.
+This repairs field preservation, not arbitrary objectives or prose. Static
+caller search finds the gate's module export and tests; a generic admitted
+worker/evaluator integration is still required. See the extended [dated evidence](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+
+Retrieval for this continuation preserved `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`
+between task main `7b7a1946` and indexed authority `5326080d`. The existing lexical
+bundle returned current checkout context with UNKNOWN freshness/no semantic
+qualification. It located the existing gate, compiler and tests; unrelated
+agent-market noise and duplicated result arrays were omitted from the working
+context. Missing optional module history/test docs were recorded, not replaced
+with placeholder modules. No owner startup or inline reindex occurred.
 
 The reference compiler documentation now distinguishes structure and YAML
 parsing from unimplemented fidelity checks. Before this producer is
