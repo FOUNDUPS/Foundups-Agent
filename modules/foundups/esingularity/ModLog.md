@@ -1,5 +1,11 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — Canonical YUMORI vision contract cleanup
+
+- Confirmed that `frontend/content/yumori-presentation.ts` was intentionally superseded and removed; kept `frontend/content/yumori-vision.ts` as the single current ten-slide truth boundary.
+- Updated the stale presentation contracts and documentation for per-slide Next `Image` rendering, current floor/COG DC language, and the deliberate exclusion of unaudited revenue, profit and investor-return projections.
+- No runtime page, public copy, QR asset, routing or deployment behavior changed. WSP 22/50; bounded repository reads used, with manual GitHub inspection because no governed HoloIndex checkout is attached to this workspace.
+
 ## 2026-09-13 — Shared YUMORI.me branding in both website skills
 
 - Recorded 012's branding direction in the existing FoundUp-owned website skill: preserve YUMORI.me, the branded JOIN action, Japanese-first `me GUARDIAN!` identity line, katakana JHR title, Japanese default and complete English coverage. Supporting context must retain the brand, and responsive layouts must avoid clipped or duplicated labels.
