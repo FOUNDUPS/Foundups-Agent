@@ -2,14 +2,15 @@
 
 ## Current workspace verdict checks
 
-Reuse `test_skill_safety_guard.py`: 16 verdict/clock/severity/force cases and four
-real wardrobe-change cases extend existing fixtures. Two required-scanner cases
-share a parameterized fixture; FOUNDUP gate checks inject the current failure.
-No live scanner is invoked. Before: 12 failed/eight passed/40 deselected. Connected:
-191 passed/four existing link skips; the scanner file contributes 59 passes/one skip.
-Use explicit external temp/database paths and the existing isolation instructions.
-Exact commands and initial packaging/registry failures are retained in
-`workspace_scan_cache_continuation_20260915`; caching is disabled, not newly qualified.
+Reuse `test_skill_safety_guard.py`: six nested-call fixtures cover pass/fail and
+all three result paths; fourteen policy cases cover changes and unchanged controls.
+The callback schedules interleaving at diagnostic publication; it is not a real
+DAE thread/process soak. Scanner results remain injected. Before: 18 failed /
+61 passed / one skip. Connected: 211 passed / four existing link skips, including
+79 passes / one skip in this file. Prior TTL/manifest cases remain covered.
+Two duplicate cache-control/enforcement fixture pairs are parameterized; the file
+is 658 lines. Use the existing external temp/database isolation instructions.
+Commands, failures and limits: `workspace_verdict_handoff_continuation_20260915`.
 
 ## Scanner report ownership
 

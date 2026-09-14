@@ -1,5 +1,10 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI per-call verdict handoff
+
+- Closed stale diagnostic-verdict reads and observed scan-policy drift in the existing OpenClaw guard. Local: 211 passes/four skips,8 manifest tests and 15 fast groups; one runtime hash and both pins, no new module/skill/test file. Exact source, failures and limits: `workspace_verdict_handoff_continuation_20260915`.
+- Prior PR1748 merge/main CI/CodeQL verified. WSP15/97 re-observation selects AutoResearcher report completeness 15/P1; canonical roadmap/backlog updated. No startup worker or runtime/promotion admission enabled. WSP00/15/22/50/62/84/95/97.
+
 ## 2026-09-15: Reconcile launch plan and remove stale workspace verdict reuse
 
 - PR #1747 merged as `cf8ad130cae2345a4080e4690eccd709dc5c6970` after verifying documentation-only tree parity, nine successful jobs and actual PR/required-check policy. CodeQL aggregate remains recorded NEUTRAL; no success claim or admin bypass. Main CI passed; separate main CodeQL still running at observation.

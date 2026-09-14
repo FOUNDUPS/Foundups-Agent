@@ -1,5 +1,10 @@
 # WRE Core - ModLog
 
+## 2026-09-15: OpenClaw local verdict handoff
+
+- Reused WRE's local-result pattern in the existing OpenClaw policy; 211 connected tests/four existing link skips, 8 manifest tests and 15 fast groups pass. No WRE runtime source or admission changed.
+- Prior TTL PR1748/main workflows verified closed. Fresh WSP15/97 selects existing AutoResearcher report completeness 15/P1 before planned launch display. Atomic policy/dispatch contracts and retained RSI remain open. Evidence: `workspace_verdict_handoff_continuation_20260915`; WSP00/15/22/50/62/84/95/97.
+
 ## 2026-09-15: Reconcile workspace scanner admission
 
 - Existing OpenClaw permission policy now always invokes its manifest/scanner path; unbound TTL verdict reuse is removed. The WRE per-skill cache stays unchanged. 191 connected tests/four existing link skips, eight manifest tests and 15 fast groups pass; no new module or runtime admission.

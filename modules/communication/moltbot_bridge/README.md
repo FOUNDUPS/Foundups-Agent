@@ -951,7 +951,7 @@ records (`action_cli_<route>_<action>`), enabling recall of:
 
 ## Skill Safety Gate (Cisco Skill Scanner)
 
-`src.skill_safety_guard.run_skill_scan()` supplies OpenClaw's cached preflight
+`src.skill_safety_guard.run_skill_scan()` supplies OpenClaw's current preflight
 for mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
 a wardrobe uses recursive `scan-all`. The caller selects the report directory.
 Each invocation owns a temporary subdirectory for its report and scanner TMP/TEMP.
@@ -966,7 +966,7 @@ scanner or workspace/publication error fails closed. Raw scanner streams are
 omitted and its environment excludes credentials. `SkillScanResult` is supply-chain
 evidence only; it grants no execution, effect, evaluation or promotion authority.
 
-Each guard call scans current inputs; `force`, TTL and ALWAYS remain compatible inputs, not permission to reuse a verdict.
+Each call returns its own verdict; REQUIRED/ENFORCED/MAX_SEVERITY drift observed during scanning rejects. Diagnostic fields show latest state; `force`, TTL and ALWAYS remain compatible.
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
 - `OPENCLAW_SKILL_SCAN_ENFORCED=1` (default): block risky scans above threshold
 - `OPENCLAW_SKILL_SCAN_MAX_SEVERITY=medium` (default)
