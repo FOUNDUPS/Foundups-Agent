@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Full-response process races and fresh RSI selection
+
+- Closed the selected 15/P1 process-race layer with two spawned-writer cases in the existing service suite. Conflicting records preserve one winner; identical retries preserve exact bytes, mirrored digest and consumed authority. Full service plus three existing guards: 138 passed / one Linux-only skip. Runtime source and pins are unchanged.
+- Reused the old store factory instead of duplicating setup; 64 other definitions remain unchanged and the test file stays at 1,497 lines. Registry 1,650/269 is current. Previous PR #1737 merge CI/CodeQL are verified successful.
+- Fresh WSP 15/WSP 97 ranking selects existing R11-B acceptance/visibility 16/P0 for current-source composition regression. The preceding queue omitted this independently authorable substep; higher runtime items and response-read policy remain separate dependencies. All packets stay non-dispatchable; no active product or AutoPost work.
+- Evidence: `process_race_continuation_20260914` in the existing RSI baseline; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Bounded writer-process recovery and RSI re-selection
 
 - Extended the existing root service tests with four real spawned-writer cases; exact retries preserve stored bytes and consumed authorization after payload, primary-mirror and reply exits. Full service/guard selection: 136 passed / one Linux-only skip. Runtime source and manifest pins are unchanged.

@@ -166,48 +166,12 @@ def _peer(
     return KernelPeerIdentity(attestation, 1234, uid, gid, "kernel_so_peercred")
 
 
-def _advance_root_state_process(values: tuple[str, ...]) -> bool:
-    (
-        primary_path,
-        primary_root,
-        primary_id,
-        primary_receipt,
-        witness_path,
-        witness_root,
-        witness_id,
-        witness_receipt,
-        installation_path,
-        installation_root,
-        installation_id,
-        installation_receipt,
-        binding,
-    ) = values
-    stores = tuple(
-        SqliteMonotonicAuthorityStore(
-            path,
-            allowed_root=root,
-            repo_root=REPO_ROOT,
-            store_id=store_id,
-            durability_receipt_id=receipt,
-        )
-        for path, root, store_id, receipt in (
-            (primary_path, primary_root, primary_id, primary_receipt),
-            (witness_path, witness_root, witness_id, witness_receipt),
-            (
-                installation_path,
-                installation_root,
-                installation_id,
-                installation_receipt,
-            ),
-        )
-    )
-    state = RootVerifiedOutcomeAuthorityState(
-        *stores, repo_root=REPO_ROOT, require_root_ownership=False
-    )
+def _advance_root_state_process(values: tuple[str, dict, str]) -> bool:
+    path, descriptor, binding = values
+    state, *_stores_value = _state(Path(path), descriptor)
     try:
         state.advance(
-            binding,
-            expected=None,
+            binding, expected=None,
             next_value=ProposalReplayHighWater(1, "c" * 64),
         )
     except Exception:
@@ -586,29 +550,11 @@ def test_concurrent_root_service_reservation_has_one_winner(
 def test_cross_process_root_state_reservation_has_one_winner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Spawned interpreters must import the canonical module under importlib mode.
     from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority_service import (
         _advance_root_state_process as advance_in_child,
     )
-
-    descriptor, grant, _state_value, primary, witness, installation, *_rest = (
-        _runtime(tmp_path, monkeypatch)
-    )
-    values = (
-        str(primary.path),
-        str(primary.rollback_domain_root),
-        primary.store_id,
-        primary.durability_receipt_id,
-        str(witness.path),
-        str(witness.rollback_domain_root),
-        witness.store_id,
-        witness.durability_receipt_id,
-        str(installation.path),
-        str(installation.rollback_domain_root),
-        installation.store_id,
-        installation.durability_receipt_id,
-        authorization_binding(grant["authorization_id"]),
-    )
+    descriptor, grant, *_rest = _runtime(tmp_path, monkeypatch)
+    values = (str(tmp_path), descriptor, authorization_binding(grant["authorization_id"]))
     with ProcessPoolExecutor(max_workers=4) as pool:
         results = tuple(pool.map(advance_in_child, (values,) * 8))
     assert sum(results) == 1
@@ -1494,4 +1440,58 @@ def test_root_record_recovers_after_writer_process_exit(record_commit_inputs, tm
         assert reply.accepted and reply.record_digest == v.digest
         assert _read_root_record(v) == v.raw and v.path.read_bytes() == original
     assert v.state._primary.load(binding) == v.state._witness.load(binding) == ProposalReplayHighWater(2, v.digest[7:])
+    assert _reserve(v.authority, v.grant) is None and v.counts["outcome_signatures"] == 1
+
+
+def _race_root_record_writer(path, descriptor, snapshot, raw, barrier, output):
+    state, *_stores_value = _state(Path(path), descriptor)
+    barrier.wait(timeout=20)
+    reply = handle_root_authority_request(raw, peer=_peer(), state=state,
+        snapshot_supplier=lambda: snapshot, now_epoch=NOW)
+    response = protocol.record_commit_response_from_bytes(reply)
+    output.put((os.getpid(), response.accepted, response.record_digest))
+
+
+@pytest.mark.parametrize("same_record", [False, True], ids=["conflicting", "identical"])
+def test_root_record_process_race_preserves_one_durable_response(record_commit_inputs, tmp_path, same_record):
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority_service import _race_root_record_writer
+    from modules.communication.moltbot_bridge.tests.test_reddog_ed25519_verified_outcome_signing import _alternate_pending_response
+    v = record_commit_inputs
+    other_raw, other_digest = (v.raw, v.digest) if same_record else _alternate_pending_response(v)
+    candidates = [_record_commit_request(v), _record_commit_request(v, other_raw, other_digest)]
+    context = get_context("spawn")
+    barrier, output = context.Barrier(2), context.Queue()
+    children = [context.Process(target=_race_root_record_writer,
+        args=(str(tmp_path), v.descriptor, v.current["snapshot"], request.to_bytes(), barrier, output))
+        for request in candidates]
+    try:
+        for child in children: child.start()
+        replies = [output.get(timeout=30) for _child in children]
+        for child in children:
+            child.join(10)
+            assert child.exitcode == 0
+    finally:
+        for child in children:
+            if child.is_alive():
+                child.terminate()
+                child.join(5)
+            child.close()
+        output.close()
+        output.join_thread()
+    assert len({pid for pid, _accepted, _digest in replies}) == 2
+    assert all(pid != os.getpid() for pid, _accepted, _digest in replies)
+    assert sum(accepted for _pid, accepted, _digest in replies) == (2 if same_record else 1)
+    winners = {digest for _pid, accepted, digest in replies if accepted}
+    assert len(winners) == 1 and winners <= {v.digest, other_digest}
+    winner = winners.pop()
+    original = v.path.read_bytes()
+    v.state, *_stores_value = _state(tmp_path, v.descriptor)
+    for candidate in candidates:
+        replay = protocol.record_commit_response_from_bytes(_record_reply(v, candidate))
+        assert replay.accepted == (candidate.record_digest == winner)
+        assert v.path.read_bytes() == original
+    expected_raw = v.raw if winner == v.digest else other_raw
+    assert _read_root_record(v, expected_record_digest=winner) == expected_raw
+    binding = authorization_binding(v.grant["authorization_id"])
+    assert v.state._primary.load(binding) == v.state._witness.load(binding) == ProposalReplayHighWater(2, winner[7:])
     assert _reserve(v.authority, v.grant) is None and v.counts["outcome_signatures"] == 1
