@@ -20,7 +20,8 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#execution-admission-ownership-checkpoint--2026-09-15); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution); packet order is not an automatic assignment |
+| RSI at launch and cycle budgets | [Existing WRE launch/evaluation sequence](modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15) — staged plan, not enabled runtime |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,13 +50,19 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-15
 
-The [execution admission checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#execution-admission-ownership-checkpoint--2026-09-15)
-binds each coordinator call to its own scanner fingerprint and removes shared
-skill-name admission state. **172 connected tests pass with four existing link
-skips**; 8 manifest tests and 15 RedDog fast groups pass. Fresh WSP 15/WSP 97
-selects OpenClaw workspace cache content/policy ownership **16/P0** for reproduction.
-Independent runtime admission, complete coordinator concurrency and production RSI
-remain incomplete.
+The [launch/evaluation checkpoint](modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
+maps startup reporting onto existing WRE paths. Five ten-attempt diagnostic runs
+produce 40 candidate evaluations and five baselines; missing proposals show why
+attempts cannot be counted as verified RSI cycles. **41 existing tests pass**.
+Launch wiring, independent verification and retained benefit remain unimplemented
+or unproved. Budgets do not double merely because main.py launches again.
+Fresh WSP 15/WSP 97 retains OpenClaw cache ownership **16/P0** ahead of the newly
+grounded report-completeness follow-on **15/P1**.
+
+Execution-admission PR [#1746](https://github.com/FOUNDUPS/Foundups-Agent/pull/1746)
+merged as `af29f082e866a05bb0d05a8f32e27414f8c1939b`; main CI and CodeQL passed.
+Its 172 connected passes/four link skips remain evidence of bounded execution
+ownership, not complete coordinator concurrency or production RSI.
 
 Scan-report PR [#1745](https://github.com/FOUNDUPS/Foundups-Agent/pull/1745)
 merged as `cd532a538720b1c659f4625784032ebfb24ed012`; both main workflows passed.

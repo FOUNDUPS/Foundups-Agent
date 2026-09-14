@@ -2,18 +2,103 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-Per-execution fingerprint capture and dispatch are locally verified: 172 connected
-passes/four existing link skips. The coordinator no longer reads shared skill-name
-admission state. Its file/class shrink and its existing execution method does not grow.
-Current selection is [OpenClaw workspace cache content/policy ownership, 16/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#execution-admission-ownership-checkpoint--2026-09-15).
-Reproduce TTL reuse through the existing permission-policy and wardrobe tests.
-Independent runtime admission and whole-coordinator concurrency remain unproved.
-Scan-report PR #1745 has verified main checks.
+The launch/evaluation plan and controlled rehearsal below address 012's proposal.
+41 existing tests pass; runtime source and startup behavior are unchanged.
+PR #1746's per-execution ownership is merged with successful main workflows.
+Fresh scoring retains OpenClaw cache ownership 16/P0 and records report completeness
+15/P1. Re-observe the [canonical selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
+before execution. Independent runtime admission and production RSI remain open.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: this repair reduces the file 1,294→1,279 lines and
 class 1,164→1,149. Continue decomposition through existing storage/schema owners
 after their transaction contracts are established; no new exemption is added.
+
+## RSI launch and evaluation sequence — 2026-09-15
+
+Planning decision from 012's launch proposal, grounded at main
+`af29f082e866a05bb0d05a8f32e27414f8c1939b`. The first local layer is qualified by
+source inspection and the rehearsal below; the later launch wiring is a plan.
+
+**At launch, surface the latest qualified report quickly.** Show its source,
+freshness, evidence level, measured result, blockers and next WSP-15 selection.
+Absent/stale/partial reports mean unknown, not success. Launch-time reading must
+use the applicable read contract and must not initialize a model, launch work,
+promote memory, mutate a workspace, or block the menu for a research campaign.
+Existing security gates retain their own enforcement; this display is advisory.
+
+**Run work through the existing admitted queue after startup.** Do not add another
+scheduler or invoke the ROC researcher blindly from `main()`. One active campaign
+per admitted scope, duplicate-launch protection and resumable receipts must be
+qualified through existing queue/job owners. A queue round, an optimizer attempt
+and a complete repository RSI cycle are different units.
+
+| Existing owner | Verified source boundary | Next integration step |
+|---|---|---|
+| `main.py:run_wre_dashboard_preflight` and `src/dashboard_alerts.py` | Current startup health/sample warnings; may dispatch resolution events. Not an RSI benefit report or a wholly read-only path. | Extend the existing report/display seam after report-input qualification; do not infer learning from health/sample count. |
+| `main.py:_reddog_run_bounded_control_rounds` | Existing resident serial/claim rounds, configured default eight, idle/failure stops and receipt persistence. Count bounds alone are not time/cost bounds. | Compile an eligible campaign into current admitted jobs; retain stop, claim and receipt owners. No new ten-round default is enabled here. |
+| `src/wre_auto_researcher.py` / `src/wre_research_evaluator.py` | Isolated dry-run ROC configuration proposal/evaluation and per-run TSV; constructor attempts Qwen loading. | Complete attempt/evaluation/terminal reporting in this owner before using its results at launch. Keep its simulator judge task-specific. |
+| AI Gateway model AutoResearch | Existing [benchmark and feedback contracts](../../ai_intelligence/ai_gateway/INTERFACE.md#benchmark-evidence-and-outcome-receipts) bind task family/split, model, verifier, cost and latency. | Reuse for model selection under current provider budgets/admission. A model campaign is not a generic repository editor. |
+| WRE differential tests, independent slice verifier and PatternMemory | Existing [verification and retention contracts](INTERFACE.md#outcome-recording-and-retention). Production acceptance/activation and later benefit remain incomplete. | Bind accepted evidence to the exact artifact and prove a later invocation consumes it successfully; keep write/read/promotion authorities distinct. |
+
+### Bounded campaign and report acceptance
+
+1. Freeze the selected WSP-15/WSP-97 ticket, exact base/candidate, allowed paths,
+   oracle/test corpus, held-out split, model/configuration and input/seed identities.
+   Use a repository-system fixture first; preserve active FoundUps and external owners.
+2. Propose **at most ten attempts** for the first admitted campaign. Enforce explicit
+   total/per-attempt time, provider/token/cost and concurrency budgets as well as
+   attempt count. Their values must come from the work contract before execution.
+   Stop on no eligible work, cancellation, failed admission/validation, exhausted
+   budget or the declared no-progress condition; preserve partial/error receipts.
+3. Record requested, started, evaluated, skipped/failed, locally improved,
+   independently verified and retained counts separately. Include stop reason,
+   baseline/candidate metric vectors, regression results, actual resource usage,
+   source/oracle/environment identities and receipt/artifact locations. Unmeasured
+   cost or retained benefit is unknown, never zero or success. Persist a terminal
+   report only with truthful cleanup/rollback state; a partial log is not completion.
+4. Compare candidate and unchanged control using the same frozen workload, then
+   evaluate held-out cases through the independent owner. Repeated test passes or
+   a better training/simulation score alone cannot admit a change.
+5. After authorized retention, re-open the accepted artifact/state in a later
+   invocation and measure benefit on unseen cases versus the unchanged baseline.
+   Verify regression and rollback behavior. This retained capability, with the
+   selection/execution/validation loop, is the RSI target.
+6. Re-observe and re-score after each campaign. Consider 20, then 40 or 80 only
+   when useful eligible work, repeatable independently accepted benefit, regression
+   checks, resource headroom and current delegated policy justify a larger ceiling.
+   Launch count never changes a budget. Shrink/stop if benefit stalls; model self-
+   ratings, consensus or reward counts cannot certify the increase.
+
+### Controlled rehearsal and next action
+
+Five separate cases use ten attempts each, the existing dry-run runner/evaluator,
+model construction disabled before initialization and unique external scratch.
+Only the heuristic cases use a fixed `random.Random(97)` binding. Same seed,
+target, program and source produce the same proposal hashes and returned summary.
+
+| Case | Candidate evaluations | Local outcome |
+|---|---:|---|
+| Unchanged control | 10 | 10 rejected; zero gain |
+| Invalid-allocation control | 10 | 10 validation failures; zero gain |
+| Missing-proposal control | 0 | 10 attempts, empty history and no candidate rows; zero gain |
+| Seeded heuristic | 10 | 6 locally accepted / 4 rejected; simulated fitness 1.042679 → 1.375724 |
+| Fresh seeded replay | 10 | Same proposals, decisions and simulated metrics |
+
+Total: 50 attempt slots, 40 candidate evaluations, five baseline evaluations,
+**zero completed repository RSI cycles**. Source bytes/mtime remain unchanged and
+scratch restores in every case. Gains are same-oracle simulation results, not live
+financial results, an independent judgment or retained learning. No worker was enabled.
+Existing tests: 35 researcher, two injected dashboard export and four mocked queue
+boundary cases pass (**41 total**); registry remains 1,650/269 quarantined.
+
+Evidence and reproduction inputs: `launch_evaluation_continuation_20260915` in the
+[canonical observations](../../../docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+The diagnostic layer closes at 16/P0. Re-scoring leaves the outstanding OpenClaw
+cache-content/policy guard at **16/P0**, ahead of report completeness **15/P1**.
+Report completeness is a launch-display dependency; do not enable startup RSI to
+work around it. The existing production admission and unanswered reader-policy
+dependencies remain unchanged.
 
 ## Repository prioritization and closure
 
@@ -61,10 +146,10 @@ Continue parity-proven decomposition in later focused slices:
 - reconcile cached PatternMemory handle disposal/restart/handoff with the new
   per-instance creating-thread contract before concurrent multi-agent execution;
   same-handle multi-call transactions and R11 acceptance remain unimplemented;
-- finish report-file ownership across independent caches/processes and bind
-  the per-execution fingerprint handoff before concurrent coordinator use;
-  per-mapping refresh synchronization, policy binding and 128-entry retention
-  are closed at the current local checkpoint.
+- qualify remaining concurrent coordinator state after the merged per-call
+  report and fingerprint repairs; per-mapping refresh synchronization, severity
+  binding, 128-entry retention, private scanner reports and explicit dispatch
+  fingerprints are locally closed in PRs #1744–#1746, not full concurrency proof.
 
 ## Code-health composition
 

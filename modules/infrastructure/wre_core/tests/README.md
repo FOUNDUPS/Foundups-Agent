@@ -1,5 +1,19 @@
 # wre_core Test Suite
 
+## Launch and evaluation evidence
+
+Reuse `test_wre_auto_researcher.py` (35) and `test_dashboard_snapshot_export.py` (2).
+The four selected `tests/test_main_runtime_bootstrap.py` cases cover bounded rounds,
+idle stopping, invalid-round rejection and persistence failure. **41 pass** at
+`af29f082e866a05bb0d05a8f32e27414f8c1939b`; no test implementation changed.
+Run from an external working directory with the owned checkout on `sys.path` so
+main's import-time log stays isolated; actual menu/service launch is not invoked.
+Use the isolation gate below, disable model construction before researcher setup,
+and retain injected dashboard/queue behavior. The [roadmap rehearsal](../ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
+records five ten-attempt controls/runs separately from pytest counts. Detailed
+inputs/results live under `launch_evaluation_continuation_20260915`; simulated
+repeatability is not independent verification or retained benefit.
+
 ## Per-execution admission evidence
 
 Reuse `test_wre_execution_truth.py` and `test_wre_runtime_admission_truth.py` for

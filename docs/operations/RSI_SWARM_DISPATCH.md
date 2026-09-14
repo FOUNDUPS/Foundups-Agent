@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `execution_admission_ownership_continuation_20260915` in
+**Current selection evidence:** `launch_evaluation_continuation_20260915` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -162,19 +162,18 @@ separate levels of evidence.
 
 ### Apply the existing Auto Researcher without broadening its claims
 
-`dry_run=True` does not mean “no side effects”: its constructor creates a results
-directory/copy/TSV and attempts to obtain the Qwen engine. Its present mutable
-target is literal allocation/multiplier configuration for a sustainability
-simulator. It is not an already-connected generic code editor or a proven
-registry-workflow optimizer. Qualify paths/model loading and evaluate the
-existing contract before any experiment. If a registry procedure requires a
-different target shape, extend the appropriate existing owner only after the
-interface mismatch is demonstrated; do not make the ROC metric its judge.
+The [launch/evaluation sequence](../../modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
+now binds 012's startup proposal to existing owners. Launch should display current
+evidence; bounded campaigns belong to the admitted WRE queue. No automatic doubling.
+The 2026-09-15 rehearsal uses five ten-attempt controls/runs: 40 candidate evaluations,
+five baselines, repeatable simulated gain and no independent retained-benefit claim.
+The existing tests pass 41 cases; see `launch_evaluation_continuation_20260915`.
 
-Likewise, model AutoResearch is an existing model-selection/evaluation lane.
-Connect its evidence through the admitted model/runtime binding and the same
-ticket lifecycle. Do not merge the two Auto Research systems into a new engine
-or equate their feedback stores with automatic PatternMemory promotion.
+`dry_run=True` still creates scratch/TSV and attempts Qwen initialization. Disable
+model construction before diagnostic instantiation. ROC targets are literal
+allocation/multiplier configurations, not a generic editor or registry optimizer.
+Keep its simulator distinct from model AutoResearch and their existing judges,
+feedback stores and admission contracts. Neither grants PatternMemory promotion.
 
 ### External Science Hub evidence boundary
 

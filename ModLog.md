@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: Ground RSI launch proposal in existing WRE evidence
+
+- Qualified the launch/reporting proposal through existing main.py, WRE and model-evaluation paths. The canonical roadmap now points to staged evidence display, admitted bounded campaigns and measured budget growth; launch count does not double work. No runtime/startup change or new scheduler/module.
+- Five ten-attempt controls/runs produce 40 candidate evaluations, five baselines and repeatable simulated gain; zero repository RSI cycles claimed. 41 existing tests pass with isolated state and models disabled. PR #1746 merged and both main workflows passed.
+- Re-scored under WSP 15/97: OpenClaw cache ownership remains 16/P0; newly grounded report completeness is 15/P1 and precedes any result-display wiring. Independent admission/retention and protected/external work boundaries remain. Evidence: `launch_evaluation_continuation_20260915`; WSP 00/15/22/48/50/60/62/84/97.
+
 ## 2026-09-15: Bind scan admission to each execution
 
 - Extended the existing admission owner with a three-value verdict/fingerprint result and preserved the two-value safety API as a forwarding view. The coordinator carries the exact value to existing executor validation; shared skill-name state and late cache readback are removed. No new module, skill, context class or grant.
