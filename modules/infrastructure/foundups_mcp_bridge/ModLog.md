@@ -1,5 +1,11 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-09-14: Existing MCP dependency candidates qualified without activation
+
+- Extended section 6 of the existing `docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md`; its expired historical decision is not renewed. Traced direct tool registration and immutable Holo snapshots against the FastMCP/Chroma advisories. Live topology remains unverified; alerts stay open.
+- Reconciled open PR1526/1525: FastMCP-only resolution fails; the paired quartet resolves and passes 25 existing MCP cases in a disposable venv. Both PRs leave `MCP_RUNTIME_VERSIONS` unchanged. A combined migration must retain the exact gate and qualify a replacement runtime before activation.
+- Existing query-environment MCP/snapshot selection: 38 passed, 2 live-service cases deselected. Source, requirements and shared environments remain unchanged. System re-score proceeds to R11 mirror restoration while runtime migration remains separately gated. WSP 00, 15, 22, 50, 84, 97.
+
 ## 2026-09-13: Holo startup diagnostic and existing interpreter reuse
 
 - Observed the existing owner through the shared bounded capture primitive in an external diagnostic harness. Retained only exit codes and allowlisted error categories; both failed children exited 1 with missing NumPy. No production diagnostic API or runtime code changed.

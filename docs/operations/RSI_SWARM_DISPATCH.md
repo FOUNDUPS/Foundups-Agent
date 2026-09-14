@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `full_record_commit_continuation_20260914` in
+**Current selection evidence:** `dependency_qualification_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,45 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Dependency qualification checkpoint — 2026-09-14
+
+Source: merged PR1732/main `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`.
+Its exact CI/CodeQL runs succeeded. WSP 97 reuses the
+[existing MCP assumption audit](../../modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md#6-dependency-qualification--2026-09-14),
+PR1526/1525, launcher pin checks and existing snapshot tests. No dependency PR,
+module, skill or runtime was duplicated or promoted.
+
+The FastMCP-only upgrade fails dependency resolution. The paired quartet resolves
+and passes 25 existing MCP tests in a disposable venv. The query interpreter passes
+38 launcher/MCP/snapshot tests; these include the same 25 MCP cases. Both runs
+deselect the two fixed-port service tests. Existing code uses direct MCP tool
+registration and immutable readonly query snapshots; no affected OpenAPI/Chroma
+server setup was found in the bounded source/configuration search. This does not
+establish deployment exposure or close the three manifest alerts. Both one-line
+PRs also omit the intentionally exact `MCP_RUNTIME_VERSIONS` contract.
+
+**Local qualification is complete; runtime migration is not.** Reconcile both PRs,
+the launcher pins, admitted replacement bytes and owned live lifecycle before
+changing the shared runtime. Chroma has no first patched version in the observed
+alerts. Preserve current services and the separate AutoPost/product lanes.
+
+| Re-scored action | C/I/D/Impact | WSP 15 | WSP 97 disposition / next step |
+|---|---|---|---|
+| Independent execution/verification/promotion/activation | 5/5/4/5 | 19/P0 | Blocked on current admission and independent evidence; no dispatch. |
+| Integrated MCP migration; admitted WRE worker | 4/5/4/5 each | 18/P0 each | Existing owners/contracts; runtime/model admission not established. Qualified package resolution is not activation. |
+| R11 authenticated restoration of a missing later-sequence mirror | 4/5/4/4 | 17/P0 | **Selected local authoring.** Extend existing root authority/store owners and closest tests; preserve generic CAS monotonicity. |
+| Chroma deployment qualification/mitigation | 3/5/4/5 | 17/P0 | Runtime-owner dependency; source search cannot establish current live exposure. |
+| R11 independently authenticated readback; current semantic retrieval | 4/4/4/4; 3/5/4/4 | 16/P0 each | Readback follows recovery; semantic qualification stays with the governed owner. |
+| Protected eSingularity observation | 3/4/4/3 | 14/P1 | Separate owner; no product edits. |
+| Existing AutoResearcher process/volume durability | 4/3/3/3 | 13/P1 | Later eligible local fixtures. |
+
+The previous dependency preflight is removed from outstanding executable work.
+Mirror restoration wins after the new eligibility review, not because it was the
+previous runner-up. Its surviving witness must be authenticated before restoring
+a missing marker; do not loosen None → 1 CAS or synthesize intermediate history.
+Re-observe and rescore again after this checkpoint closes. Production RSI, R03/R04,
+R11/G4 and all planning-packet admission remain incomplete.
 
 ### Full-record commitment checkpoint — 2026-09-14
 

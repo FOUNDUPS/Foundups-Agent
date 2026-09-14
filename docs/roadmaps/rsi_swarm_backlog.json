@@ -1816,10 +1816,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "full_record_commit_continuation_20260914",
-    "base_commit": "b2ae1e159c22bd9de67cfef8eb4bb062e5a517f8",
-    "selected_action": "R03-R04-dependency-exposure-and-pin-reconciliation",
-    "status": "selected_for_next_local_preflight_after_owned_pr_closure",
+    "section": "dependency_qualification_continuation_20260914",
+    "base_commit": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+    "selected_action": "R11-authenticated-missing-mirror-restoration",
+    "status": "selected_for_next_local_authoring_after_owned_checkpoint_closure",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false
   }

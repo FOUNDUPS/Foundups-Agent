@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Wave 0 below; verify R01 repair is present in the selected source, then R02 authority reconciliation and R03 retrieval entry context |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#dependency-qualification-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,15 +49,24 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [dependency qualification checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#dependency-qualification-checkpoint--2026-09-14)
+closes the local Holo/MCP preflight at `1173d1ab`. The FastMCP-only PR cannot
+resolve with the pinned MCP version; the paired candidate resolves and passes
+25 existing MCP tests in a disposable environment. Both PRs omit the launcher's
+exact-version update. The existing query/snapshot selection passes 38 tests;
+live migration, deployment exposure and the three advisory closures remain open.
+Fresh scoring selects authenticated mirror restoration **17/P0** while integrated
+MCP migration **18/P0** requires current owner/runtime admission. All packets remain
+non-dispatchable; qualification creates no replacement runtime authority.
+
 The [full-record commitment checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14)
 connects a versioned root commit route to the existing pending writer and mirrored
 terminal state. V1 remains separate; current peer/proof/grant checks and exact-byte
 retry pass locally. Validation: 279 passed / one Linux-root skip.
 The tests exposed an inherited later-sequence whole-mirror restoration gap.
-Fresh local scoring ranked its authenticated repair **17/P0**. Subsequent verified
-dependency alerts and pin/runtime drift now put Holo/MCP exposure qualification
-first at **18/P0**, followed by mirror repair and readback (16/P0). Reconcile
-current authority and deployment contracts before any dependency change.
+At that checkpoint, scoring ranked authenticated repair **17/P0**. Subsequent
+dependency alerts put Holo/MCP preflight first at **18/P0**; that local preflight
+is recorded above. Readback remains 16/P0 and follows the recovery contract.
 Readback, ordinary signer/publisher integration and retained RSI remain incomplete.
 
 The [pending-response storage checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)

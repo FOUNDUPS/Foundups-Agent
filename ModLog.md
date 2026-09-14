@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: RSI dependency qualification and queue reconciliation
+
+- Completed the selected Holo/MCP local preflight at main `1173d1ab`. Reused the existing MCP audit, PR1526/1525 and tests. FastMCP alone cannot resolve with MCP 1.20.0; the paired candidate resolves, but both PRs omit the exact launcher-version contract.
+- 38 existing launcher/MCP/snapshot tests passed; the same 25 MCP cases also passed in a disposable paired environment. Two fixed-port service tests were deselected in each run. No shared packages, services, production pins or runtime source changed. Source evidence does not establish live advisory exposure; alerts remain open.
+- WSP 15 + WSP 97 now select authenticated mirror restoration 17/P0; the higher-score integrated migration still needs owner/runtime admission. Updated canonical roadmap/runbook/backlog and existing observation/journals, retaining all history and non-dispatchable packets. WSP 00, 15, 22, 50, 84, 97; see `dependency_qualification_continuation_20260914`.
+
 ## 2026-09-14: RSI full-response commitment and fresh recovery prioritization
 
 - R11-A local v2 root commitment now reuses existing pending bytes, mirrors, current authority checks and exact-byte retry. V1 remains separate; normal signer/readback/activation wiring is still pending.

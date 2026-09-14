@@ -62,3 +62,79 @@ automation or enforcement of WSP_97 Annex A, whose protocol status remains
 - Timestamp: 2026-08-21T00:00:00+09:00
 - Boundary: implement and test only the read-only tool, public projection,
   authenticated `/mcp` transport, and truthful documentation described above.
+
+## 6. Dependency qualification — 2026-09-14
+
+Source: main `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`. This dated
+qualification does not renew the expired August decision or admit a runtime.
+The system observation is `dependency_qualification_continuation_20260914` in
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`.
+
+### Advisory scope and repository evidence
+
+- FastMCP [GHSA-vv7q-7jx5-f767](https://github.com/PrefectHQ/fastmcp/security/advisories/GHSA-vv7q-7jx5-f767)
+  affects path construction in the OpenAPI provider before 3.2.0. The maintainer
+  labels it High; the repository's Dependabot alert 317 labels it Critical.
+  `src/mcp_server.py:build_mcp_server()` constructs FastMCP directly and registers
+  exactly `holo_query_bundle` with tool decorators. No OpenAPI adapter invocation
+  was found in the reviewed Holo/MCP source and launch configuration scope.
+  This is a source observation, not a live exposure assessment or alert dismissal.
+- ChromaDB alerts 286/322 target Python server collection creation/update with
+  caller-controlled embedding configuration. The researchers distinguish
+  [pre-authentication creation](https://www.hiddenlayer.com/research/chromatoast-served-pre-auth)
+  from [authenticated update](https://www.hiddenlayer.com/sai-security-advisory/2026-06-chromadb-5).
+  `holo_index/core/holo_index.py` opens `open_query_snapshot_client()` in readonly
+  query mode and a local `PersistentClient` for maintenance. The immutable reader
+  lives in `src/holo_query_snapshot_store.py`; it does not expose collection
+  mutation endpoints. No Python Chroma server/HTTP-client setup was found in the
+  reviewed source/configuration scope. Installed ChromaDB 1.5.5 remains affected
+  by the manifest alerts; GitHub reports no first patched version for either.
+  Deployment topology and other consumers remain unverified. Do not start a
+  vulnerable feature to test it or infer a safe upgrade version.
+
+The bounded search covered Python, PowerShell, shell, YAML and Dockerfile paths
+under `holo_index`, this module, `scripts` and `.github`. Negative symbol searches
+are not a proof against dynamic registration, external deployment or other repos.
+No exploit payload, live listener, service restart, reindex or shared package
+change was used for this qualification.
+
+### Existing upgrades and exact-version contract
+
+| Candidate | Observed head | Qualification |
+|---|---|---|
+| [PR1526](https://github.com/FOUNDUPS/Foundups-Agent/pull/1526), FastMCP only | `9b17a56c61189bcca48bd130a41d9d3dcec35229` | Resolver rejects FastMCP 3.2.0 with MCP 1.20.0; FastMCP requires MCP >=1.24.0,<2.0. |
+| [PR1525](https://github.com/FOUNDUPS/Foundups-Agent/pull/1525), MCP only | `b94bbda640fd50579301e8bd187269f4d20184cc` | Quartet resolves, but FastMCP remains 2.13.0.2 and the launcher's pinned MCP version differs. |
+| Paired disposable candidate | FastMCP 3.2.0 / MCP 1.28.1 / Pydantic 2.12.3 / Uvicorn 0.38.0 | Resolver succeeds; 25 existing MCP tests pass. This is not production or full-lifecycle acceptance. |
+
+Both open PRs change only `requirements.txt`. Neither updates
+`scripts/launch.py:MCP_RUNTIME_VERSIONS`, whose exact equality check is intentional.
+`test_runtime_version_contract_matches_requirements` binds those declarations.
+Neither one-line upgrade is a complete migration. Their August checks do not
+establish current-main compatibility; this qualification does not replace them.
+
+The separate query interpreter reports 3.2.0 / 1.27.0 / 2.12.5 / 0.40.0 for the
+same four distributions, plus ChromaDB 1.5.5. Package metadata does not establish
+which MCP service is running or satisfy the pinned startup contract.
+
+### Local validation and next action
+
+- Existing launcher, MCP surface and immutable snapshot suites: **38 passed,
+  2 deselected in 7.87s** with the query interpreter. The snapshot suite exports
+  real Chroma data in temporary storage and reads it without reopening Chroma.
+- Fresh external venv containing the paired quartet and the existing test-runner
+  versions: **25 passed, 2 deselected in 3.68s** for launcher/MCP suites. These
+  are the same 25 MCP cases, not 25 additional distinct tests. This environment
+  was installed from public PyPI wheels and was not promoted or activated.
+- Both runs exclude the two tests that start fixed-port listeners. Bearer,
+  surface, schema and mocked lifecycle checks passed; live initialize/list/call,
+  service ownership/cleanup and exact closure of the paired runtime remain open.
+- Exact base CI and CodeQL runs 34803625970 / 34803625558 succeeded. They verify
+  base `1173d1ab`, not these documentation changes or the new disposable runtime.
+
+Reconcile PR1526/1525 as one owner-coordinated migration with the launcher pins,
+then qualify a replacement runtime and its live lifecycle in an owned fixture.
+Preserve the existing environment until its replacement is admitted. Chroma
+deployment qualification/mitigation remains with the corresponding runtime owner;
+the three alerts stay open. This completes the local preflight, not R03/R04.
+The system re-score selects R11 authenticated mirror restoration (17/P0) while
+the higher-scored integrated migration lacks current runtime/owner admission.
