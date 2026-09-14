@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 bounded pending outcome storage
+
+- Final evidence: 226 passed / one Linux-only skip across eight suites; 15 fast groups / eight staged-manifest tests passed. Registry 1650/269 and runtime membership 1400 unchanged; one source hash and matching pins updated.
+- Extended the existing root state owner using the immutable response parser, mirrored state and AtomicJsonAuthorityRuntimeStore. Exact bytes remain pinned across tested write failures; the outcome grant stays reserved. No original runtime method changed. WSP 00/15/22/50/60/62/71/84/97.
+- Added 22 cases in the existing signing suite. Connected root authority selection: 116 passed / one Linux-only skip. Full fixture/guard/packaging evidence is in `pending_response_continuation_20260914`.
+- Consolidated the existing interface's full outcome contract into the established runbook and reduced its stale size metadata without widening a ceiling; README now points to current R11 contracts. Full-response commitment/readback and retained learning remain open; planning packets remain non-dispatchable.
+
 ## 2026-09-14: R11 immutable outcome response records
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. One runtime hash/pins updated; 1,400 runtime files, 1,650/269 registry and guards unchanged.

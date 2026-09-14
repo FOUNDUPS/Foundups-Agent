@@ -251,6 +251,210 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Pending-response storage checkpoint — 2026-09-14
+
+Final local verification: **226 passed / one Linux-only skip** across eight
+distinct suites. Packaging: **15 fast groups in 3,378ms** and **8 staged-manifest
+tests in 63.94s**, with two pytest configuration warnings. Runtime
+membership is unchanged at 1,400 with one changed source hash and matching pins;
+test registry remains current at 1,650 files / 269 quarantined. Guards are
+unchanged; the existing interface metadata decreases from 1527 to 1517.
+
+Base: PR1728/main `bec40ffe52cd0076013a4bb9e5f7629b683741be`.
+WSP 00 awakening/strict software gate passed. WSP 97 reused the exact root state,
+immutable-record validator and atomic writer. The refined lexical query returned
+both owners, with the POSIX writer as secondary context. Module contracts were
+present; optional design/memory/requirements artifacts remain absent. Peripheral
+initial hits were removed. Freshness remains UNKNOWN/gap with zero semantic-owner
+attempts; workspace HEAD matches the base. No unchanged blocked runtime/model
+probe was repeated. WSP 15 local planning is **4 + 4 + 4 + 4 = 16/P0**.
+This automated continuation uses 012's existing local authoring instruction;
+it is not a WRE allocation, independent verification role or runtime admission.
+
+**Implemented:** `RootVerifiedOutcomeAuthorityState.persist_pending_response`
+reuses `AtomicJsonAuthorityRuntimeStore` under the already owner-bound primary
+root at `verified-outcome-pending-responses.json`. No configurable path, owner
+schema or additional storage domain is introduced. Under the existing root lock,
+the current owner generation and exact reserved tuple must match. Full co-signed
+history, signatures and the caller's supplied current epoch are validated first.
+A separate mirrored sequence-1 selection pins the **full record digest before
+payload storage**. The outcome grant stays sequence 1 (reserved), not terminal.
+Every retained row is verified against its own mirrored selection before mutation
+and acknowledgment. Real ownership is required by the production state owner;
+the new boundary checks the pending file before load and acknowledgment.
+
+The snapshot permits at most **eight records** and **512 KiB including the complete
+pretty-printed JSON, revision and newline**; individual records retain 64 KiB.
+Capacity rejects before selecting the new record, with no eviction. Repeated exact
+bytes are acknowledged; different valid responses, conflicting persisted bytes,
+unanchored rows, wrong generation/reservation/digest, expired context and terminal
+grants reject. Interrupted writes keep the selection pinned. Lost acknowledgments
+require an exact validated readback. One missing state replica uses the existing
+repair; loss of both cannot bypass the installation witness. Cancellation remains
+visible, and no failure resets the outcome reservation or signs again.
+
+**Validation scope:** disposable real SQLite mirrors and real Ed25519 fixtures.
+The fixture captures actual signed bytes immediately before v1 finalization;
+it does not wire the new method into the live backend. Twenty-two new cases extend
+the existing signing suite to 94 cases. Connected service, descriptor, startup,
+provisioning, runtime-binding and protected-use tests pass **116 / one Linux-only
+skip in 36.89s**. Ownership decisions in two Windows cases are injected, not proof
+of Linux UID isolation. Real process kills, whole-volume failure and concurrent
+processes have not been exercised; the concurrency case uses two state instances
+and threads. Exact commands, failure history and packaging results are recorded in
+`pending_response_continuation_20260914` in the existing baseline observations.
+
+**WSP 62/97 closure:** the combined check found inherited interface metadata
+1527 versus 1620 actual lines. Its full outcome contract is preserved verbatim in
+the API reference below; the module now carries a smaller API index and a reduced
+existing exemption, not a larger ceiling. README history is consolidated into
+current R11 pointers. Runtime source stays below its 675-line ceiling with every
+function at most 50 lines and every pre-existing method/function unchanged.
+The signing test file is now in the 1000–1500-line critical window: keep subsequent
+RPC/readback cases in the existing root service/client suites and reuse current
+fixtures; review cohesion before further growth, with no new exemption or module.
+
+**Remaining:** this is a local pending-byte primitive. Caller-supplied pins/time
+are not authentication. Payload bytes are a single primary-domain copy; mirrored
+selection digests cannot recover them. A missing file can only be repaired from
+caller-retained exact bytes. Capacity bounds the current snapshot, not a new
+cross-domain retention policy. Next is a versioned full-record commitment in the
+existing root service/client with fresh owner, peer, signer proof and revocation
+checks, then separately authorized readback and signer/publisher restart recovery.
+Keep complete enclosing-wire limits and an operation deadline explicit. R11-B–F,
+production isolation/launch, independent memory activation and measured later
+benefit remain open. All 26 packets and six R11 substeps remain non-dispatchable.
+
+### Verified-outcome API reference
+
+The following contract moved verbatim from the module interface at PR1728; its
+historical validation, root v1, publication and memory conditions remain in force.
+The pending-storage addition is defined in the checkpoint immediately above.
+
+Architect proposal attestation v2 requires a typed `OperationalMemexSupplyReceipt`;
+promotion rehydrates its complete serialized form, recomputes the canonical ID,
+rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcome
+rehydration checks canonical verifier/held-out receipts. The system-service
+signer loads an exact root-owned v2 outcome-authority descriptor and an opaque
+client for a separately launched root authority service. The service owns
+disjoint primary, witness, and one-time installation monotonic stores; the
+signer owns none of them. Each
+co-signed grant binds FoundUp, snapshot,
+work order, slice, job, worker, exact head/content, runtime, PatternMemory record,
+signer key/epoch, and the current signer run packet/config/session/manifest
+generation through an immutable authority-context digest covered by both
+independent signatures. Only a root-UID-authenticated socket exchange can mint
+the opaque E0 capability; every key-provider constructor verifies that boundary
+before resolving key material. Every reserve and commit additionally carries a
+domain-separated Ed25519 proof from the exact current E0 signer key, while fresh
+kernel UID/GID credentials are checked against the current root config. The
+root service burns a reservation before signing, then re-reads current root
+configuration and rechecks revocation, generation, grant, reservation, signer
+proof, and signature digest before commit. After those same checks, an exact
+already-committed reservation/digest is acknowledged without advancing or resetting
+the terminal marker. `commit_service_authority(...)` retries identical encoded
+request bytes once for ConnectionError/TimeoutError only. Plain OSError ownership
+or size failures, malformed replies, explicit rejection and cancellation do not
+retry. Each exchange retains its configured timeout (default 5 seconds, maximum
+30); there is no combined deadline across the two attempts. No protocol/schema or
+method signature changes. The response contains no full outcome signature payload,
+and the opaque reservation seal remains process-local; acknowledgment recovery
+does not supply durable outcome-response recovery. Runtime startup cannot initialize or
+reset replay state. The separate installer rejects after its third-domain
+commit, including after both replay stores are deleted. A failed or crashed
+reservation never reopens. Every current snapshot must match the exact roots,
+paths, store IDs, and durability receipts opened at service startup; state-store
+rotation therefore rejects until a supervised restart. The production isolated
+signer applies its Linux E0 boundary before key resolution: distinct non-root
+UID/GID matching the root-owned v2 owner config, YAMA ptrace controls, no
+`CAP_SYS_PTRACE`, disabled core/dumpable state, and a cleared inherited
+environment. The legacy CLI and one-shot isolated-process composer reject every
+non-test provider before authority, resolver, or socket access. Only the stable
+service is production; it derives manifest, outcome authority, owner ID, and
+signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
+test-only dry-run is non-authoritative. The same root service optionally routes opaque `RootRevocationAnchorAuthority.load()`/`advance_snapshot()` operations with no caller-selected CAS state, holding `lease_validated_owner_e0_current_admission()` through signed policy, topology, snapshot, witness, and monotonic validation.
+An absent outcome policy leaves unrelated signer operations available. The root protected-use protocol can atomically order revocation and one callback, but production E0 activation remains blocked until the service startup factory supplies that capability with authenticated grants and WSP71 resolution.
+Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
+Resident production admission remains blocked until the root service is deployed
+and independent verifier runtimes issue both grant signatures. Staged authority
+envelopes remain non-consumable until exact activation.
+`AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` reads STAGED
+or ACTIVE evidence for the existing publisher's retry check, returns `None` when
+absent, and raises on invalid durable state. It is not the consumable source.
+`SignedVerifiedOutcomeEvidencePublisher.publish()` acknowledges a byte-equivalent
+existing envelope after checking exact requested evidence, publisher identity,
+original issuance and signature. It does not re-sign, rewrite, renew or activate
+on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
+runtime authority still checks current key, revocation and expiry.
+`validate_verified_outcome_signing_response(response, signing_input, *,
+signer_public_key, key_epoch, requester_principal_id, signature_verifier)` is the
+shared predicate in `foundup_memex_verified_outcome_signing.py`; the publisher's
+existing validation wrapper calls it. Acceptance, boundary/requester attestations,
+untrusted-code exclusion and secret exclusion require exact `True`, as do both
+signature-verifier results. A present rejection code must be empty. Original
+receipt and outcome-domain audit signatures, key, fingerprint and epoch remain
+bound. The predicate performs no persistence, issuance renewal, state transition, current
+read-authorization check or record deserialization. Malformed attributes or
+dependency exceptions can still raise; consumers must fail closed. Its result
+cannot authorize durable response replay or construct a process-local capability.
+`VerifiedOutcomeResponseBinding(descriptor_id, owner_config_id,
+authorization_id, reservation_id)` is frozen public identifier data, never a root
+reservation capability. `build_verified_outcome_response_record(request, response,
+*, descriptor, binding, signature_verifier) -> bytes` snapshots a v1 record using
+the existing root codec. `parse_verified_outcome_response_record(raw, *,
+expected_binding, expected_record_digest, signature_verifier) ->
+tuple[SigningRequest, SigningResponse]` returns the original typed pair after
+canonical/full-record digest, scope, co-signed descriptor and receipt/audit checks.
+The complete record includes its response digest, full descriptor/grant context
+and the four root identifiers. V1 requires exact string/boolean fields, omits the
+unsupported elevated-consensus proof, rejects unknown/missing fields and duplicate
+keys, and caps the full ASCII canonical JSON plus newline at 65,536 bytes.
+Historical validation uses original issuance; replay anchor identifiers receive
+shape checks without touching their store. Expected bindings/digest must come
+from an independently authenticated owner, not the parsed record. The parser
+does not supply that authentication, fresh expiry/revocation/read authority,
+durable root commitment, process-local seals, persistence or memory activation.
+No production caller is connected in this schema layer. Future enclosing wire
+messages must also respect the existing complete-message limit.
+
+`AuthorityRuntimeVerifiedOutcomeStore.publish()` bounds revision-conflict retries
+to three commit attempts, preserving the signed envelope and unrelated current
+state. Other errors are not retried. On publication OSError/RuntimeError/ValueError,
+the signed publisher may acknowledge only a reloaded, fully validated durable
+publication, including an equivalent winner with its original issuance/signature.
+Missing or invalid evidence still rejects. Signing failures and cancellation are
+not publication recovery; no burned signer reservation is reset. This does not
+recover process death before an envelope is durable or activate memory.
+`ResidentQueueChainResultReceipt.recorded_at` is optional for historical objects;
+new accepted `record_resident_queue_stage_result()` writes require a timezone-aware
+`now_iso` and persist it once. Earlier receipts and transition IDs are preserved;
+the canonical snapshot revision covers the field. Admission derivation requires
+one held-out-stage receipt with a matching queue/slice/transition ID and valid
+nonfuture timestamp in a canonical snapshot. It reuses that time as `verified_at`.
+Snapshot `updated_at` and the current bootstrap clock cannot backfill missing
+historical event time. Old histories remain readable; timestamp-less admission
+requires owner-controlled recovery. This integrity check is not signed authority.
+PatternMemory admission
+uses an invisible staging table in the existing database. Conflicting existing
+rows and legacy hash-shaped compatibility markers reject. Staging snapshots
+the input, reconciles a competing record-key insert without replacing the
+winner, and checks exact stored payload/agent before commit. Same-record retry
+returns the same ID; staging remains outside recall. Active-row retries compare
+the stored payload's canonical JSON with the requested canonical JSON. Values
+such as `true`/`1`, `12`/`12.0` and `0.0`/`-0.0` conflict even when Python
+equality accepts them; existing record IDs and digest serialization are unchanged.
+This does not make
+activation and authority revalidation one atomic transaction. The real sink is deliberately
+not activation-ready until it can independently revalidate a durable authority
+source; direct sink activation is forbidden. Authority-envelope consumption reloads
+the durable envelope, resolves the key from the current committed authority profile,
+checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worker/
+verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain
+assembler consumes that capability against the same durable replay state. Raw
+booleans, raw receipt IDs, caller-supplied records, and serializable capability
+markers are never authority. `gate_foundup_memex_learning_candidates()` emits exception-total, pre-traversal-bounded, canonical, digest-bound `STRUCTURAL_ONLY` candidates from structurally self-consistent assembly-receipt-bound Memex views plus Breadcrumb/verified-outcome evidence; this is not authenticated view provenance. Governed research fails closed until an authenticated authority exists, and caller-supplied receipt IDs never authorize it. `verify_foundup_memex_learning_candidate_reconstruction(candidate, proposal, evidence)` requires the exact proposal and evidence closure. The gate is non-runtime-admissible and performs no persistence or mutation.
+Brain writes, runtime source adapters, roadmap writes, default Memex supply, and HoloIndex mutation remain outside this interface. `ExternalSignerAuthoritativeUseLeaseIssuer` extends socket-v2/E0 with an opaque exact-effect capability bound to the root-selected signer profile, current generation, and durable replay root; substitution, replay, expiry overrun, rollback revival, and socket-v1 downgrade reject, while production remains inactive until the external signer lifecycle and live canary are provisioned.
+
 ### Immutable-response record checkpoint — 2026-09-14
 
 Packaging: **15 fast groups in 3,013ms**, **8 staged-manifest tests in 64.36s**
@@ -364,7 +568,7 @@ ordered within R11-A; none is an executable work order.
 | Layer | Existing owner and required contract | Acceptance boundary |
 |---|---|---|
 | Immutable response record — local prerequisite implemented above | `foundup_memex_verified_outcome_signing.py`: bind the exact canonical SigningRequest/SigningResponse, complete outcome-grant context, root reservation, original issuance, key/epoch and full response digest. Reuse the shared response validator. | Exact bounded schema; reject unknown/coerced fields, changed response/audit/signing input, foreign scope and digest substitution. No credentials, private keys, caller-selected paths or executable capabilities in serialized data. |
-| Durable pending bytes | `RootVerifiedOutcomeAuthorityState` with `AtomicJsonAuthorityRuntimeStore` and existing confined operation locks. Bind storage locations and durability to current root-owner configuration before writes. | Persist validated immutable bytes before terminal response commitment; pending bytes are unreadable to publication/learning. Preserve conflicting winners. Missing replicas or rollback cannot silently create authority. |
+| Durable pending bytes — local primitive implemented above | `RootVerifiedOutcomeAuthorityState` with `AtomicJsonAuthorityRuntimeStore` and existing confined operation locks. Bind storage locations and durability to current root-owner configuration before writes. | Persist validated immutable bytes before terminal response commitment; pending bytes are unreadable to publication/learning. Preserve conflicting winners. Missing replicas or rollback cannot silently create authority. |
 | Terminal commitment | Existing root service/client/protocol. A versioned contract must bind the full response digest, not only the signature digest. | Keep current v1 reserve/commit semantics intact. Unknown recovery fields/operations still reject on v1. Commit only exact pending bytes; lost acknowledgments cannot replace the response or reopen a grant. |
 | Authenticated readback | Existing root owner, current principal/peer resolver and independently authorized work/grant boundaries. Bind current requester and immutable historical response separately. | Revalidate current owner, caller, scope, expiry/revocation and key policy. A consumed secret-access grant or serialized client seal is not read authority. Readback must not invoke ordinary outcome signing or manufacture a fresh grant. Cross-generation recovery requires explicit current independent authority. |
 | Publisher handoff | Existing publisher/runtime store and the shared response validator. | Reuse original request, response, issuance and event identity; ordinary signing's 60-second freshness rule is not a recovery API. Verify durable root commitment plus current read authority before publication. No acceptance or memory activation is implied. |

@@ -3239,5 +3239,176 @@
         "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/response-record-20260914/manifest --tb=short -q"
       }
     }
+  },
+  "pending_response_continuation_20260914": {
+    "base_commit": "bec40ffe52cd0076013a4bb9e5f7629b683741be",
+    "scope": "R11-A local pending immutable-response storage in existing root state owner",
+    "wsp00": {
+      "software_gate_passed": true,
+      "last_validation": "2026-09-14T09:56:31.425197",
+      "tracked_awakening_writes": false
+    },
+    "wsp15_local_planning": {
+      "complexity": 4,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 16,
+      "priority": "P0",
+      "runtime_allocation_receipt": false,
+      "rationale": "Authority-bound persistence is the next required prerequisite for full-response recovery and later retained learning; reuse the existing state and atomic writer"
+    },
+    "execution_plane": "Existing 012-authorized local authoring; architect/worker role; autonomous_trigger origin; no WRE admission or independent verifier role",
+    "ownership": {
+      "branch": "agent/rsi-pending-outcome-storage-20260914",
+      "worktree": "O:/Foundups-Agent-worktrees/agent-rsi-baseline-context-evidence-20260913",
+      "open_prs_checked": 97,
+      "target_overlaps": [],
+      "main_checkout_mutated": false,
+      "protected_foundup_or_live_runtime_exercised": false
+    },
+    "retrieval": {
+      "mode": "documented lexical fallback",
+      "ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "semantic_owner_attempts": 0,
+      "workspace_head": "bec40ffe52cd0076013a4bb9e5f7629b683741be",
+      "receipt": "O:/Foundups-Agent-audits/20260909-rsi/rsi_pending_response_refined_query_20260914.json",
+      "receipt_sha256": "918793e3cbe368f9909182c0c09f9c6460d84fdf16f08861716dc5e4b0e066af",
+      "evaluation": {
+        "noise": "Initial peripheral hits removed",
+        "ordering": "Exact root state and atomic store first; POSIX writer secondary",
+        "missing": "Required module docs present; optional design/memory/requirements absent",
+        "staleness": "UNKNOWN/gap is not current semantic evidence; exact workspace source verified at base",
+        "duplication": "Existing parser, root state/mirrors, atomic writer and test fixtures reused; no new module"
+      }
+    },
+    "changes": {
+      "source": "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_state.py",
+      "tests": "modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py",
+      "new_test_cases": 22,
+      "signing_suite_total": 94,
+      "storage": "Fixed verified-outcome-pending-responses.json under already owner-bound primary state root",
+      "selection": "Existing primary/witness sequence-1 marker pins full record digest before payload commit",
+      "limits": {
+        "records": 8,
+        "record_bytes": 65536,
+        "complete_pretty_snapshot_bytes": 524288
+      },
+      "original_runtime_definitions_unchanged": true,
+      "outcome_grant_remains_reserved": true,
+      "new_rpc_or_owner_schema": false,
+      "wsp62": {
+        "runtime_lines": 654,
+        "runtime_line_ceiling": 675,
+        "function_line_ceiling": 50,
+        "interface_base_actual_lines": 1620,
+        "interface_inherited_metadata": 1527,
+        "interface_current_lines": 1517,
+        "existing_exemption_reduced": true,
+        "guard_unchanged": true,
+        "moved_contract_sha256": "bcb81ef485dc9ef70fa939b0fe765c1ed0c39fdef262d8bf8557489d715a300c",
+        "contract_preserved_verbatim_at": "docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference",
+        "test_growth_remediation": "Reuse existing root service/client suites for subsequent RPC/readback cases; review signing-fixture cohesion before further growth below the 1500 hard limit"
+      }
+    },
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_state.py": "60a38fbed8817ab6bc774dcd7ba280c4c47b05fc55f291be41ef8bf2f8469e3b",
+      "modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py": "45ec237029797ddb0c27e96519f4927301a3f5a1da265c0ad7abcc50ad207e25"
+    },
+    "source_hash_basis": "UTF-8 LF-normalized source; checked against staged Git blobs before commit",
+    "test_evidence": {
+      "status": "LOCAL_VALIDATED",
+      "logs": {
+        "before.txt": "14b49020f26732f5186fe426cdc0989da47a89a7f0ba6b394117ba832a30932a",
+        "focused.txt": "a85351e9e8a4d1de39f8ed3e501ce63d0c45846339bb6460a77c31c609f02cf3",
+        "expanded.txt": "559eaf81d9ce904371587db7e5c32ae05c9eb77e70ee92f1a4d18fbd80583c2c",
+        "focused-final.txt": "bfadb4c0ee8e46bc2a98456a8744ffe3ef91445a2bb4265c7598e3c48e6cae5e",
+        "connected.txt": "6d1d4d7ff553b81ed92bb23aab6b4d32bd3fe666ca682d3ba78b17866259ef4e",
+        "guard-corrected.txt": "f9a8f8f26b0cc7d35482b6168e563672b4891c7bc49e09b6f4c078299f220ca7"
+      },
+      "distinct_final_passed": 226,
+      "distinct_final_skipped": 1,
+      "final_selection": [
+        {
+          "passed": 110,
+          "skipped": 0,
+          "elapsed_seconds": 38.24,
+          "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/guard-corrected --tb=short -q",
+          "log_sha256": "f9a8f8f26b0cc7d35482b6168e563672b4891c7bc49e09b6f4c078299f220ca7"
+        },
+        {
+          "passed": 116,
+          "skipped": 1,
+          "elapsed_seconds": 36.89,
+          "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_provision_entrypoint.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_runtime_binding.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/connected --tb=short -q",
+          "log_sha256": "6d1d4d7ff553b81ed92bb23aab6b4d32bd3fe666ca682d3ba78b17866259ef4e"
+        }
+      ],
+      "environment": [
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUTF8=1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+        "TEMP/TMP=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/temp",
+        "FOUNDUPS_DB_PATH=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/agent.db",
+        "WRE_PATTERN_MEMORY_DB=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/patterns.db",
+        "ANTIFAFM_LYRICS_DB=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/lyrics.db"
+      ],
+      "failure_dispositions": [
+        "before.txt: proposed missing method, not an existing production failure",
+        "expanded.txt: two fixture UID-boundary mistakes corrected without weakening failure assertions; WSP62 guards deselected by -k",
+        "focused-final.txt: signing tests passed; inherited interface exact-size metadata failed, corrected through contract consolidation and lower metadata"
+      ]
+    },
+    "limits": [
+      "Local root-state primitive, not caller authentication, a WRE admission, full-record terminal commitment or activated publication",
+      "Payload has one primary-domain copy; mirrored digests cannot reconstruct bytes. Missing-file repair requires caller-retained exact original bytes",
+      "No retention/eviction, independent startup, authenticated readback, real process-kill or whole-volume durability proof",
+      "Two ownership decisions and transport/peer boundaries are injected fixtures; one existing Linux-only check skipped",
+      "Threads/two state objects are not multiprocess concurrency evidence",
+      "Fresh owner/peer/proof/revocation checks, complete enclosing-wire capacity and whole-operation deadline remain integration requirements"
+    ],
+    "next_authorable_step": "Extend the existing root service/client with a versioned full-record commitment contract; bind fresh current owner, peer, proof, revocation and exact pending bytes before the terminal marker, preserving v1 behavior. Then compose separately authorized readback and signer/publisher restart recovery within complete-message and operation-deadline bounds",
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "model_coordination": "Existing concrete signature/parser/storage validators and deterministic tests selected; local authoring handles the authority-bound persistence integration. No unchanged unavailable model/runtime admission probe repeated and no Qwen/Gemma execution claimed.",
+    "packaging": {
+      "registry": {
+        "current": true,
+        "total_files": 1650,
+        "quarantined_files": 269,
+        "changed": false,
+        "log_sha256": "af28182d893f69c07c80096e78f45ae3c700aad53be2b2a25a19224bac571bad"
+      },
+      "guards_unchanged": true,
+      "existing_interface_metadata_reduced_from_to": [
+        1527,
+        1517
+      ],
+      "fast": {
+        "groups_passed": 15,
+        "duration_ms": 3378,
+        "log_sha256": "62494da87f5add7169428cbe499f169ff4cf0c479fa5e96d90c7e2c1c8a01682",
+        "command": "node tests/run_reddog_test_tier.js fast",
+        "working_directory": "extensions/reddog",
+        "environment": [
+          "REDDOG_TEST_SITE_PACKAGES=O:/Foundups-Agent/.venv/Lib/site-packages",
+          "REDDOG_TEST_PYTHON=O:/Foundups-Agent/.venv/Scripts/python.exe",
+          "TEMP/TMP in disposable O: audit directory"
+        ]
+      },
+      "manifest": {
+        "passed": 8,
+        "warnings": 2,
+        "elapsed_seconds": 63.94,
+        "runtime_membership": 1400,
+        "changed_runtime_files": 1,
+        "digest": "1a52c9b0c5b9a6c6ce70a68a46a200530846b2ce5170b6a2745842f5b25b62e0",
+        "log_sha256": "74d9c3d200afc94781e3f6c857932b9ec40618c835e7514b48b9c4a7c1fb29e8",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/manifest --tb=short -q"
+      }
+    }
   }
 }

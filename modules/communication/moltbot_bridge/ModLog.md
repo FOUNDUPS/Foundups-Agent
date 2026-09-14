@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Root-owned pending response bytes
+
+- Added `persist_pending_response` to the existing root state class: current generation/exact reservation, full-record digest selection in both mirrors, fixed primary-root atomic storage, eight-record/512 KiB bounds, full retained-row validation and exact retry. No RPC, owner schema, terminal grant transition or publisher call site changed.
+- Twenty-two disposable fixture cases cover interruptions, witness/file loss, conflict, capacity, context, concurrency and injected ownership decisions. Connected root selection: 116 passed / one Linux-only skip. Real process/volume recovery and Linux isolation remain unproven.
+- WSP 62/97: preserved the full existing outcome interface contract verbatim in the canonical runbook and reduced the module summary and exemption. Existing runtime methods are unchanged; source stays under 675 lines / 50 per function. Next: existing root service/client commitment, then independently authorized readback. WSP 00/15/22/50/60/62/71/84/97.
+
 ## 2026-09-14: Bound immutable outcome response history
 
 - Added pure record build/parse and immutable public binding data in the existing outcome-signing owner. Reused root JSON/co-signature validators and shared response verification; enforced complete 64 KiB messages and strict anchor identifiers. No root RPC, owner configuration, publisher call site or persistence change.
