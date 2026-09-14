@@ -1,5 +1,21 @@
 # Tests - OpenClaw Bridge
 
+## Competing full-response writer processes
+
+Reuse `test_root_record_process_race_preserves_one_durable_response` in the existing
+root service suite. Two spawned child PIDs coordinate with a barrier and commit
+identical or conflicting signed records through the real handler/disposable stores.
+Assert exact accepted counts, one durable digest, winner-only retries, unchanged
+payload, reopened root read and consumed authorization. Child/queue cleanup is bounded.
+
+Full service suite plus three existing guards: **138 passed / one Linux-only skip
+in 76.65s**. The focused seven cases overlap this total. Commands, IDs, fingerprints
+and environment are in `process_race_continuation_20260914` in the existing RSI
+baseline. The file remains 1,497 lines by reusing the existing factory in the older
+reservation test; eight attempts/four workers are preserved. Peer ownership is
+injected on Windows; privileged service, physical-volume failure and exhaustive
+scheduling remain outside this proof. Earlier checkpoint gaps below are historical.
+
 ## Writer-process response recovery
 
 Reuse `test_root_record_recovers_after_writer_process_exit` in the existing

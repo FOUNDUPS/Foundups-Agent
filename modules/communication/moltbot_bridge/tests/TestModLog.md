@@ -1,3 +1,10 @@
+## 2026-09-14: Identical and conflicting full-response process races
+
+- Focused existing reservation/exit/new-race selection: seven passed / 129 deselected in 18.88s. Full root service suite plus three unchanged size guards: 138 passed / one Linux-only skip in 76.65s. No failing fixture run occurred in this continuation; overlapping runs are not summed.
+- Two process-race cases observe separate child PIDs and exact identical/conflicting acceptance counts. Reopened root reads and retries preserve one winner, exact payload, mirrored terminal state and consumed authority. Existing reservation setup now calls `_state`/`_stores`; eight attempts/four workers and its one-winner assertion remain.
+- 64 prior definitions remain AST-identical; two setup definitions were intentionally consolidated and two definitions added. Test file remains 1,497 lines, registry 1,650/269 unchanged. No runtime source, manifest, new file or relaxed size guard; prior broader packaging evidence is not a fresh run.
+- Next current-source composition regression targets existing R11-B acceptance/visibility. This does not enable the production sink, grant response-read access or prove retained learning. Evidence: `process_race_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Root response writer-process exit recovery
 
 - Added four cases to the existing root service suite with its existing record fixture and a canonical-imported spawn target. Observed normal exit 0 and abrupt exits 71/72/73 at payload commit, primary terminal advance and built reply, then preserved exact bytes/digest and consumed authority over two recovery retries. Child lifecycle is bounded and cleaned up.

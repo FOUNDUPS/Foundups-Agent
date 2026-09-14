@@ -815,11 +815,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_ROOT_WRITER_PROCESS_EXIT_RECOVERY_VERIFIED",
-              "evidence": "process_exit_continuation_20260914",
-              "previous_evidence": "root_record_read_continuation_20260914",
-              "next": "Re-observe competing-process full-response writer qualification15/P1. Read admission16/P0 waits for the eligible-reader policy decision; no default disclosure.",
-              "remaining": "Purpose-specific current read authority, competing full-record processes, physical volume/privileged runtime qualification, ordinary v2 publisher integration, R11-B-F and retained benefit; no runtime admission."
+              "status": "PARTIAL_ROOT_FULL_RESPONSE_PROCESS_RACES_VERIFIED",
+              "evidence": "process_race_continuation_20260914",
+              "previous_evidence": "process_exit_continuation_20260914",
+              "next": "Freshly select R11-B recoverable acceptance/visibility local composition work 16/P0; reader policy remains pending separately.",
+              "remaining": "Purpose-specific current read authority, physical-volume/privileged runtime qualification, ordinary v2 publisher integration, R11-B-F and retained benefit; no runtime admission."
             }
           },
           {
@@ -1816,12 +1816,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "process_exit_continuation_20260914",
-    "base_commit": "18981983c1935bfed55ca8703b05629d2b9634ad",
-    "selected_action": "R11-competing-process-full-response-recovery",
+    "section": "process_race_continuation_20260914",
+    "base_commit": "35eb1e863b7ab73024f6d430f9b116bfeebd49d7",
+    "selected_action": "R11-B-recoverable-acceptance-visibility",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "process_exit_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "process_race_continuation_20260914.post_sprint_reobservation"
   }
 }

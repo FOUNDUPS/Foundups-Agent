@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Verify competing full-response writer processes
+
+- Added identical/conflicting response races using the existing record fixture, root handler and disposable stores. Two distinct spawned PIDs, exact winner/retry behavior, reopened bytes, terminal mirrors and consumed authorization are verified.
+- Consolidated duplicate bare-reservation child setup into `_state`/`_stores`; its eight attempts/four workers remain. Full service plus three unchanged guards: 138 passed / one Linux-only skip in 76.65s. Test file remains 1,497 lines; 64 other definitions unchanged; no runtime/API/manifest or size-exemption change.
+- Fresh selection is existing R11-B recoverable acceptance/visibility 16/P0. Its current composed failure must be reproduced before repair; live sink activation and read permission remain separately gated. Evidence: `process_race_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Verify root response recovery across writer process exit
 
 - Reused the existing signed record and real root stores in four spawned-child cases: clean return, exit after payload persistence, primary terminal write, and built reply. Reopened exact-request retries preserve payload, mirrored terminal digest and consumed authorization.

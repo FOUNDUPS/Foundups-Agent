@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#writer-process-recovery-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#competing-process-response-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,14 +49,19 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
-The [writer-process recovery checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#writer-process-recovery-checkpoint--2026-09-14)
-validates exact response recovery after a spawned writer exits at three durable
-boundaries, with a clean-exit control. The full service suite and existing size
-guards pass **136 tests / one Linux-only skip**. Runtime implementation is unchanged.
-Read admission remains **16/P0**, pending the eligible-reader policy decision;
-competing full-response writer processes are the next eligible **15/P1** local
-validation. No default read permission, physical-volume or production RSI proof
-follows from this test layer. R11 remains partial.
+The [competing-process response checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#competing-process-response-checkpoint--2026-09-14)
+closes the selected identical/conflicting full-response writer race scope using
+existing tests and stores. The full service suite and three existing size guards
+pass **138 tests / one Linux-only skip**; runtime implementation is unchanged.
+Fresh WSP 15/WSP 97 selection promotes existing **R11-B acceptance/visibility
+16/P0** for isolated composition regression and recoverable-decision work.
+Read admission separately awaits the eligible-reader policy decision. Physical
+volume, privileged runtime and retained-benefit proof remain open; R11 is partial.
+
+Writer-exit PR [#1737](https://github.com/FOUNDUPS/Foundups-Agent/pull/1737) merged
+as `35eb1e863b7ab73024f6d430f9b116bfeebd49d7`; its main CI and CodeQL runs are
+observed successful. The following checkpoints retain their historical scope
+and priorities; they are not current assignments.
 
 Storage-read PR [#1736](https://github.com/FOUNDUPS/Foundups-Agent/pull/1736) merged
 as `18981983c1935bfed55ca8703b05629d2b9634ad`. Its exact-head checks and main

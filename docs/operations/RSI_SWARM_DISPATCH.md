@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `process_exit_continuation_20260914` in
+**Current selection evidence:** `process_race_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,57 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Competing-process response checkpoint — 2026-09-14
+
+Source: main `35eb1e863b7ab73024f6d430f9b116bfeebd49d7`, following merged
+PR [#1737](https://github.com/FOUNDUPS/Foundups-Agent/pull/1737). That merge's CI
+and CodeQL runs are both observed successful. This continuation closes the
+existing **15/P1** full-response process-race validation scope.
+
+Two spawned processes now exercise identical and conflicting signed responses
+through the existing root handler and real disposable stores. Conflicting
+responses yield one winner; identical responses are idempotent. Reopening and
+retrying preserves the winner's exact bytes, mirrored terminal digest and consumed
+authorization. Distinct child PIDs, coordinated start and clean exits are checked.
+The old bare-reservation test reuses the existing store factory while retaining
+eight attempts/four workers; 64 other definitions remain AST-identical.
+
+Validation: focused **7 passed**, then full service suite and three unchanged size
+guards **138 passed / one Linux-only skip in 76.65s**. Counts overlap. The test
+file remains 1,497 lines; registry 1,650/269 is current. No runtime source, manifest,
+wire contract, new file or size exemption changed. This Windows fixture injects
+peer/ownership decisions; it does not prove privileged Linux service behavior,
+physical-volume failure or every possible process schedule.
+
+Fresh WSP 15/WSP 97 reconciliation promotes the existing **R11-B recoverable
+acceptance/visibility** substep to **4/5/3/4 = 16/P0**, the highest eligible
+local source action. Current `_activate_published` still activates authority
+before the memory sink; its existing failure test checks sink records using a
+fake publisher. The earlier composed counterexample remains dated evidence.
+First reproduce it against current real disposable stores in the existing tests,
+then establish a recoverable decision through the existing owners. Do not merely
+reverse callbacks or enable the production sink. This work does not depend on
+granting response-read permission; live activation retains its separate gates.
+
+| Work after this local closure | C/I/D/Impact | WSP 15 | WSP 97 disposition / next action |
+|---|---|---|---|
+| Independent execution/verification/promotion/activation | 5/5/4/5 | 19/P0 | Current independent runtime admission remains blocked. |
+| Integrated FastMCP/MCP migration | 4/5/4/5 | 18/P0 | Local preflight exists; current owner/live lifecycle remains required. |
+| WRE/OpenClaw/Hermes worker | 4/5/4/5 | 18/P0 | Reuse adapters; changed signed work/model/runtime admission is required. |
+| Chroma deployment qualification | 3/5/4/5 | 17/P0 | Runtime owner/deployment dependency; no exposure inferred. |
+| R11-B acceptance and visibility | 4/5/3/4 | 16/P0 | **Selected:** reproduce composed failure in existing tests; recoverable agreement before activation. |
+| Authenticated response read | 4/4/4/4 | 16/P0 | Eligible-reader decision remains pending; no default permission. |
+| Current semantic retrieval | 3/5/4/4 | 16/P0 | Governed owner qualification remains required; lexical UNKNOWN is not semantic proof. |
+| Protected eSingularity work | 3/4/4/3 | 14/P1 | External ownership; preserve product work. |
+| Existing AutoResearcher process/volume durability | 4/3/3/3 | 13/P1 | Later eligible disposable fixtures; ordinary Python-exit restore is already covered. |
+
+The earlier ranking omitted R11-B as a separate authorable action while focusing
+on R11-A. This re-observation corrects that omission without creating a packet.
+No matching open PR currently owns the inspected root, acceptance or researcher
+source paths; all runtime packets/substeps remain non-dispatchable. Re-observe
+again after owned review/closure. Exact source, tests, ranking and limits are in
+`process_race_continuation_20260914` in the existing baseline observations.
 
 ### Writer-process recovery checkpoint — 2026-09-14
 
