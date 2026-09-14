@@ -5473,6 +5473,17 @@
       "Normal v2 signer/publisher wiring",
       "Whole-operation deadlines and physical process/volume recovery",
       "Independent runtime/memory activation and retained benefit"
-    ]
+    ],
+    "integration_validation": {
+      "source_commit": "7b79a5246409cd37c242df03a0867a46895171fa",
+      "integration_base": "cd7e899ff0a76d0f67b284afafda5bad22553465",
+      "original_test_base": "84e72cd55442a7cbe04e834642269d929b90e362",
+      "protected_base_paths_preserved": 13,
+      "selected_source_test_byte_hashes_match": 13,
+      "byte_reconciliation": "Rebase normalized line endings; restored exact previously tested selected file bytes with no Git content change.",
+      "test_registry_after_integration": "current total=1650 quarantined=269",
+      "doc_index_reconciliation": "Refreshed only existing runbook metadata after checkout newline normalization.",
+      "new_test_pass_claim": false
+    }
   }
 }
