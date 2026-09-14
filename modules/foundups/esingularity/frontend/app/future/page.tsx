@@ -20,37 +20,37 @@ export default function FuturePage() {
     <>
       <header className="site-header team-site-header">
         <Brand href="/" />
-        <nav aria-label="Primary navigation"><Link href="/">温泉を守る</Link><Link href="/#innovation-hub">AI拠点</Link><Link href="/future" aria-current="page">福井の未来</Link><Link href="/team">チーム</Link></nav>
+        <nav aria-label="主要ナビゲーション"><Link href="/">温泉を守る</Link><Link href="/#innovation-space">イノベーション・スペース</Link><Link href="/future" aria-current="page">福井の未来</Link><Link href="/team">チーム</Link></nav>
         <LineButton />
       </header>
 
       <main className="future-page">
         <section className="future-hero">
-          <p className="eyebrow light"><span /> FUKUI ECONOMIC FUTURE</p>
+          <p className="eyebrow light"><span /> 福井の経済的な未来</p>
           <h1>福井に、<br /><em>何が残る？</em></h1>
           <p>データセンターをつくることだけが目的ではありません。温泉を中心に、学び、農業、仕事、商い、文化がつながり、そこで働く人とプロジェクトが私たちのCOG DCコンピュートを使える土台を検証します。</p>
           <a className="button button-primary" href="#benefits">8つの地域価値を見る <span>↓</span></a>
         </section>
 
         <section className="future-benefits section" id="benefits" aria-labelledby="benefits-title">
-          <div className="future-heading"><p className="eyebrow"><span /> WHAT FUKUI GETS</p><h2 id="benefits-title">計算機だけではない。<br /><em>地域に残る価値</em>です。</h2><p>一つひとつは小さく始められます。大切なのは、別々の事業にせず、温泉を中心に人と仕事が循環する仕組みにすることです。</p></div>
+          <div className="future-heading"><p className="eyebrow"><span /> 福井に残す価値</p><h2 id="benefits-title">計算機だけではない。<br /><em>地域に残る価値</em>です。</h2><p>一つひとつは小さく始められます。大切なのは、別々の事業にせず、温泉を中心に人と仕事が循環する仕組みにすることです。</p></div>
           <div className="benefit-grid" role="list">{benefits.map(([icon, title, body]) => <article key={title} role="listitem"><span aria-hidden="true">{icon}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div>
         </section>
 
         <section className="money-loop section" aria-labelledby="loop-title">
-          <p className="eyebrow light"><span /> KEEP VALUE IN FUKUI</p>
+          <p className="eyebrow light"><span /> 価値を福井に残す</p>
           <h2 id="loop-title">COG DCの電力から、<br /><em>福井の仕事へ。</em></h2>
-          <div className="money-loop-flow" aria-label="COG DCから福井の地域経済へつながる流れ"><span>電力</span><b>→</b><span>私たちのCOG DCコンピュート</span><b>→</b><span>学生・FoundUps</span><b>→</b><span>農業・教育・企業</span><b>→</b><span>解決策と仕事</span></div>
+          <div className="money-loop-flow" aria-label="COG DCから福井の地域経済へつながる流れ"><span>電力</span><b>→</b><span>私たちのCOG DCコンピュート</span><b>→</b><span>学生・FoundUpプロジェクト</span><b>→</b><span>農業・教育・企業</span><b>→</b><span>解決策と仕事</span></div>
           <p>すべての仕事やデータを地域内に限定するという意味ではありません。COG DCで働く人とプロジェクトが、計算、モデル、知識、適切に管理されたデータを使い、福井の実課題に取り組める選択肢を増やします。</p>
         </section>
 
         <section className="growth section" aria-labelledby="growth-title">
-          <p className="eyebrow"><span /> START SMALL · GROW WITH DEMAND</p>
+          <p className="eyebrow"><span /> 小さく始める · 需要とともに育てる</p>
           <h2 id="growth-title">小さく始める。<br /><em>必要な分だけ育てる。</em></h2>
           <p className="growth-lead">最初から巨大施設を約束しません。まず約1 MWを検討単位として、需要、工学、経済性、熱利用を確かめます。実際の利用が成長を正当化するときだけ、次の段階を検討します。</p>
           <details className="growth-details">
             <summary>詳しく見る <span>段階的な検証</span></summary>
-            <ol><li><span>01</span><strong>需要を確認</strong><p>学生、FoundUps、研究、地域プロジェクトが何を使うかを具体化します。</p></li><li><span>02</span><strong>工学を確認</strong><p>電力、通信、冷却、安全、別棟配置、回収熱の温度と距離を調べます。</p></li><li><span>03</span><strong>経済性を確認</strong><p>設備費、運営費、利用契約、熱利用の価値を実測・見積もりで比べます。</p></li><li><span>04</span><strong>約1 MWから</strong><p>契約・許認可済み容量ではなく、最初の検証規模です。</p></li><li><span>NEXT</span><strong>利用が育った時だけ</strong><p>電力、許認可、資金、土地、需要、地域合意がそろってから拡張を判断します。</p></li></ol>
+            <ol><li><span>01</span><strong>需要を確認</strong><p>学生、FoundUpプロジェクト、研究、地域プロジェクトが何を使うかを具体化します。</p></li><li><span>02</span><strong>工学を確認</strong><p>電力、通信、冷却、安全、別棟配置、回収熱の温度と距離を調べます。</p></li><li><span>03</span><strong>経済性を確認</strong><p>設備費、運営費、利用契約、熱利用の価値を実測・見積もりで比べます。</p></li><li><span>04</span><strong>約1 MWから</strong><p>契約・許認可済み容量ではなく、最初の検証規模です。</p></li><li><span>NEXT</span><strong>利用が育った時だけ</strong><p>電力、許認可、資金、土地、需要、地域合意がそろってから拡張を判断します。</p></li></ol>
             <p className="growth-caveat">容量、時期、費用、熱利用、収益は未確定です。調査と関係者合意なしに建設を約束しません。</p>
           </details>
         </section>
@@ -62,7 +62,7 @@ export default function FuturePage() {
         </section>
       </main>
 
-      <footer><Brand href="/" /><p>ONSEN × LEARNING × OUR COG DC COMPUTE × COMMUNITY</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで参加 ↗</a></footer>
+      <footer><Brand href="/" /><p>温泉 × 学び × COG DC × 地域</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで参加 ↗</a></footer>
     </>
   );
 }
