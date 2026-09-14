@@ -49,6 +49,13 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
+Recovery [PR #1734](https://github.com/FOUNDUPS/Foundups-Agent/pull/1734) is merged
+as `7f4f49b79692a1aa6484544c4e46115fe6690027`. All ten reported checks passed at
+its exact head; all 18 changed Git blobs match the merge. Fresh post-merge
+observation removes the pending closure and retains authenticated response
+readback at **16/P0** as the highest eligible local action. The existing baseline
+records the separate merge-CI observations and unchanged admission dependencies.
+
 The [mirror-restoration checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#mirror-restoration-checkpoint--2026-09-14)
 extends the existing root/SQLite owners to recover either missing mirror after
 exact store reopening, including later-sequence v1/v2 commitments. Identity,

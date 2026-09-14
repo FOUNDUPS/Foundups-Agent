@@ -326,6 +326,22 @@ R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
 ### Mirror restoration checkpoint — 2026-09-14
 
+**Remote closure:** [PR #1734](https://github.com/FOUNDUPS/Foundups-Agent/pull/1734)
+merged at `7f4f49b79692a1aa6484544c4e46115fe6690027` on 2026-09-14 06:07:08 UTC.
+Its exact head `4f4e466f4151eb06676b60394a98a6cfb37c7d24` passed all ten reported
+checks; GitHub reported no required-check set and no independent review. All
+18 owned Git blobs match the merge, and the 13 incoming YUMORI paths are preserved.
+The current selection is now based on post-merge observation, not pending PR
+closure. WSP 15 was reapplied: the merged local repair leaves the queue; current
+dependency alerts/PRs and runtime-admission dependencies do not change the remaining
+scores. Readback remains **16/P0**, with its absent route confirmed in the existing
+root protocol/service/router. Its next bounded step is to bind a fresh read request
+to current authorization, exact record/context and terminal state using those
+owners and their existing tests. A historical signing grant supplies no read grant.
+See `merge_closure` and `post_merge_reobservation` under this checkpoint's existing
+baseline key for separate local, exact-head CI and merge-CI evidence. This closure
+adds no runtime implementation, service activation or retained-learning claim.
+
 Base: PR1733/main `84e72cd55442a7cbe04e834642269d929b90e362`; exact merge CI and
 CodeQL succeeded. Fresh ownership review found no open PR on the two selected
 source owners or their closest tests. WSP 15 selected local mirror restoration

@@ -2,6 +2,7 @@
 
 ## 2026-09-14: Recover exact later-sequence state from an existing mirror
 
+- Remote closure: PR #1734 merged as `7f4f49b79692a1aa6484544c4e46115fe6690027` after ten successful exact-head checks. The 18 owned Git blobs match the merge. Post-merge WSP 15/WSP 97 re-observation retains authenticated readback 16/P0; local test counts below are preserved evidence, not a new run.
 - Added `SqliteMonotonicAuthorityStore.restore_missing_from_witness()` in the existing store owner; exact reader/identity/context/domain and checkpoint checks surround a missing-only SQLite transaction and verified readback. Identical retries are harmless, conflicting state is preserved, and post-commit failure is not acknowledgment.
 - The existing root state's two missing-side branches call it under the existing root lock. Ordinary `advance()` and readonly reader source are unchanged. Existing principal/installation checks remain; the store operation creates no grant or API for reading signed responses.
 - Reused service/store tests for either-side loss at sequences 1/2/5, v1/v2 terminal retry, identity/context substitution, stale source, conflicts, cancellation and concurrent copies. Final connected/guard selection: 318 passed / one Linux-only skip; packaging 8 tests / 15 fast groups passed. Two runtime hashes changed; no new module, test file or exemption.
