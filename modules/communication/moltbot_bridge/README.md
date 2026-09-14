@@ -11,9 +11,11 @@ The [API index](INTERFACE.md#verified-outcome-authority-signing-and-memory) and
 [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference)
 cover signed records, strict response validation, root COMMIT acknowledgment retry,
 immutable publication, canonical event time and invisible PatternMemory staging.
-The [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14)
-records local commitment and the next repair: authenticated restoration of a missing
-later-sequence mirror. Readback, activation and retained improvement remain open.
+The [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#mirror-restoration-checkpoint--2026-09-14)
+records recovery of either missing mirror after exact store reopening, including
+later-sequence v1/v2 commitments. It reuses identity-checked witness readers under
+the existing root owner lock; ordinary CAS remains strictly one step. Independently
+authenticated readback is next. Activation and retained improvement remain open.
 
 ## HoloIndex runtime truth
 

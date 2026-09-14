@@ -408,10 +408,14 @@ class RootVerifiedOutcomeAuthorityState:
         if primary == witness:
             return primary
         if primary is None and witness is not None:
-            self._primary.advance(binding, expected=None, next_value=witness)
+            self._primary.restore_missing_from_witness(
+                binding, witness=self._witness.reader(), expected=witness,
+            )
             return witness
         if witness is None and primary is not None:
-            self._witness.advance(binding, expected=None, next_value=primary)
+            self._witness.restore_missing_from_witness(
+                binding, witness=self._primary.reader(), expected=primary,
+            )
             return primary
         if primary is not None and witness is not None:
             if primary.sequence == witness.sequence + 1:

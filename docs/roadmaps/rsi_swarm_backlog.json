@@ -815,11 +815,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_FULL_RECORD_COMMIT_VERIFIED",
-              "evidence": "full_record_commit_continuation_20260914",
-              "previous_evidence": "pending_response_continuation_20260914",
-              "next": "The current system selection is Holo/MCP dependency qualification (18/P0). R11 next remains authenticated missing-mirror restoration at sequence 2+ (17/P0), then independently authorized readback (16/P0); reconcile current ownership/authority before each action.",
-              "remaining": "Mirror restoration, current read authority, ordinary signer/publisher integration, operation deadline, real process/volume recovery; R11-B-F and retained benefit; no runtime admission"
+              "status": "PARTIAL_MIRROR_RESTORATION_VERIFIED",
+              "evidence": "mirror_restoration_continuation_20260914",
+              "previous_evidence": "full_record_commit_continuation_20260914",
+              "next": "Independently authenticated response readback (16/P0) through existing root/record/client owners; re-observe current source and admission before execution.",
+              "remaining": "Current read authority, ordinary v2 signer/publisher integration, operation deadline, physical process/volume recovery, R11-B-F and retained benefit; no runtime admission"
             }
           },
           {
@@ -1816,10 +1816,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "dependency_qualification_continuation_20260914",
-    "base_commit": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
-    "selected_action": "R11-authenticated-missing-mirror-restoration",
-    "status": "selected_for_next_local_authoring_after_owned_checkpoint_closure",
+    "section": "mirror_restoration_continuation_20260914",
+    "base_commit": "84e72cd55442a7cbe04e834642269d929b90e362",
+    "selected_action": "R11-independently-authenticated-response-readback",
+    "status": "selected_after_local_validation_pending_owned_pr_closure",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false
   }

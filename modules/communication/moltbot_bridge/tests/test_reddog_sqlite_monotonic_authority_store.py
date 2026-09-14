@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -272,3 +273,197 @@ def test_malformed_values_fail_closed(
         )
 
     assert store.load(BINDING) is None
+
+
+@pytest.fixture()
+def mirrors(roots):
+    destination = _store(roots)
+    witness_root = roots[1].with_name("mirror-witness")
+    witness_root.mkdir()
+    witness = _store((roots[0], witness_root), store_id="witness:recovery")
+    return destination, witness
+
+
+def _advance_to(store, sequence):
+    current = None
+    for number in range(1, sequence + 1):
+        wanted = _value(number, str(number))
+        store.advance(BINDING, expected=current, next_value=wanted)
+        current = wanted
+    return current
+
+
+@pytest.mark.parametrize("sequence", [1, 2, 5])
+def test_missing_checkpoint_restore_is_exact_durable_and_idempotent(mirrors, roots, sequence):
+    destination, source = mirrors
+    expected = _advance_to(source, sequence)
+    witness = source.reader()
+    assert not hasattr(witness, "restore_missing_from_witness")
+    for _ in range(2):
+        destination.restore_missing_from_witness(BINDING, witness=witness, expected=expected)
+        assert _store(roots).reader().load(BINDING) == expected
+        assert witness.load(BINDING) == expected
+    if sequence > 1:
+        with pytest.raises(ValueError, match="monotonic_authority_not_monotonic"):
+            destination.advance("sha256:" + "f" * 64, expected=None, next_value=expected)
+        assert destination.load("sha256:" + "f" * 64) is None
+
+
+@pytest.mark.parametrize("side", ["destination", "witness"])
+def test_restore_rechecks_both_store_identities_before_writing(mirrors, side):
+    destination, source = mirrors
+    expected = _advance_to(source, 3)
+    witness = source.reader()
+    changed = destination if side == "destination" else source
+    with sqlite3.connect(changed.path) as connection:
+        connection.execute("UPDATE metadata SET store_id = 'substituted'")
+    with pytest.raises(ValueError, match="monotonic_authority_identity_mismatch"):
+        destination.restore_missing_from_witness(BINDING, witness=witness, expected=expected)
+    assert destination.load(BINDING) is None
+    assert source.load(BINDING) == expected
+
+
+@pytest.mark.parametrize("bad", ["object", "writer", "same-root", "nested-root", "foreign-repo"])
+def test_restore_rejects_unqualified_or_overlapping_witness(mirrors, roots, bad):
+    destination, source = mirrors
+    expected = _advance_to(source, 3)
+    witness = source.reader()
+    error = "monotonic_authority_restore_domain_invalid"
+    if bad in {"object", "writer"}:
+        witness = object() if bad == "object" else source
+        error = "monotonic_authority_restore_witness_invalid"
+    elif bad == "same-root":
+        witness = destination.reader()
+    elif bad == "nested-root":
+        nested = destination.rollback_domain_root / "nested-witness"
+        nested.mkdir()
+        witness = _store((roots[0], nested), store_id="nested:recovery").reader()
+    else:
+        other_repo = roots[0].with_name("other-repo")
+        other_repo.mkdir()
+        witness = SqliteMonotonicAuthorityReader(
+            source.path, allowed_root=source.rollback_domain_root,
+            repo_root=other_repo, store_id=source.store_id,
+            durability_receipt_id=source.durability_receipt_id,
+        )
+    with pytest.raises(ValueError, match=error):
+        destination.restore_missing_from_witness(BINDING, witness=witness, expected=expected)
+    assert destination.load(BINDING) is None
+
+
+@pytest.mark.parametrize("mismatch", ["missing", "behind", "revision", "binding"])
+def test_restore_requires_the_exact_current_witness_checkpoint(mirrors, mismatch):
+    destination, source = mirrors
+    actual = None if mismatch == "missing" else _advance_to(source, 3)
+    expected = _value(2, "2") if mismatch == "behind" else _value(3, "3")
+    if mismatch == "revision":
+        expected = _value(3, "f")
+    binding = "sha256:" + "b" * 64 if mismatch == "binding" else BINDING
+    with pytest.raises(RuntimeError, match="monotonic_authority_restore_witness_changed"):
+        destination.restore_missing_from_witness(binding, witness=source.reader(), expected=expected)
+    assert destination.load(binding) is None
+    assert source.load(BINDING) == actual
+
+
+@pytest.mark.parametrize("current_sequence", [1, 3, 4])
+def test_restore_never_replaces_conflicting_existing_destination(mirrors, current_sequence):
+    destination, source = mirrors
+    current = _advance_to(destination, current_sequence)
+    if current_sequence == 3:
+        prior = _advance_to(source, 2)
+        expected = _value(3, "f")
+        source.advance(BINDING, expected=prior, next_value=expected)
+    else:
+        expected = _advance_to(source, 3)
+    with pytest.raises(RuntimeError, match="monotonic_authority_conflict"):
+        destination.restore_missing_from_witness(BINDING, witness=source.reader(), expected=expected)
+    assert destination.load(BINDING) == current
+    assert source.load(BINDING) == expected
+
+
+@pytest.mark.parametrize("change_on_call", [2, 3])
+def test_restore_source_change_is_not_acknowledged(mirrors, monkeypatch, change_on_call):
+    destination, source = mirrors
+    expected = _advance_to(source, 3)
+    witness = source.reader()
+    load = SqliteMonotonicAuthorityReader.load
+    calls = 0
+
+    def changing_load(self, binding):
+        nonlocal calls
+        if self.path == source.path:
+            calls += 1
+            if calls == change_on_call:
+                source.advance(BINDING, expected=expected, next_value=_value(4, "4"))
+        return load(self, binding)
+
+    # Exact reader type is retained; slots prevent attaching replacement methods.
+    monkeypatch.setattr(SqliteMonotonicAuthorityReader, "load", changing_load)
+    error = "witness_changed" if change_on_call == 2 else "restore_unverified"
+    with pytest.raises(RuntimeError, match=error):
+        destination.restore_missing_from_witness(BINDING, witness=witness, expected=expected)
+    assert destination.load(BINDING) == (None if change_on_call == 2 else expected)
+    assert source.load(BINDING) == _value(4, "4")
+
+
+def test_restore_cancellation_before_copy_preserves_missing_destination(mirrors, monkeypatch):
+    destination, source = mirrors
+    expected = _advance_to(source, 3)
+    original = SqliteMonotonicAuthorityReader.load
+    calls = 0
+
+    def cancel(self, binding):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise asyncio.CancelledError()
+        return original(self, binding)
+
+    monkeypatch.setattr(SqliteMonotonicAuthorityReader, "load", cancel)
+    with pytest.raises(asyncio.CancelledError):
+        destination.restore_missing_from_witness(BINDING, witness=source.reader(), expected=expected)
+    assert destination.load(BINDING) is None
+    assert source.load(BINDING) == expected
+
+
+def test_concurrent_exact_restorations_share_one_checkpoint(mirrors):
+    destination, source = mirrors
+    expected = _advance_to(source, 3)
+    barrier = Barrier(2)
+
+    def recover(_index):
+        barrier.wait()
+        destination.restore_missing_from_witness(BINDING, witness=source.reader(), expected=expected)
+        return destination.load(BINDING)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(recover, range(2)))
+    assert results == [expected, expected]
+    assert source.load(BINDING) == expected
+
+
+def test_competing_restore_checkpoints_preserve_one_exact_winner(mirrors, roots):
+    destination, first = mirrors
+    other_root = roots[1].with_name("other-witness")
+    other_root.mkdir()
+    second = _store((roots[0], other_root), store_id="other:recovery")
+    candidates = [(first, _advance_to(first, 3)), (second, _advance_to(second, 2))]
+    barrier = Barrier(2)
+
+    def recover(index):
+        source, expected = candidates[index]
+        barrier.wait()
+        try:
+            destination.restore_missing_from_witness(
+                BINDING, witness=source.reader(), expected=expected,
+            )
+        except RuntimeError as exc:
+            assert str(exc) == "monotonic_authority_conflict"
+            return False
+        return True
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        accepted = list(executor.map(recover, range(2)))
+    assert sum(accepted) == 1
+    assert destination.load(BINDING) == candidates[accepted.index(True)][1]
+    assert all(source.load(BINDING) == expected for source, expected in candidates)

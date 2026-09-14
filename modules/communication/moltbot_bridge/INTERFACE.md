@@ -188,7 +188,7 @@ administered principal-key resolver.
 
 ### Verified-outcome authority, signing and memory
 
-The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [full-record checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14) records the latest local layer.
+The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [mirror-restoration checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#mirror-restoration-checkpoint--2026-09-14) records the latest local layer.
 
 | Existing API / owner | Current contract |
 |---|---|
@@ -205,7 +205,7 @@ The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-
 | Learning-candidate gate / reconstruction verifier | Bounded `STRUCTURAL_ONLY` evidence, not authenticated provenance, work authority or runtime admission. |
 
 Pending payloads use the fixed primary-root file `verified-outcome-pending-responses.json`, the existing atomic store, at most eight records and a complete 512 KiB snapshot. The payload has one copy; mirrored digests cannot reconstruct lost bytes. Only retained exact bytes can repair a missing file.
-The local v2 commit route adds no authenticated readback or ordinary signer/publisher caller. Later-sequence whole-mirror restoration fails closed and is the next repair; current CAS requires None → 1. Operation deadlines, production isolation, independent activation and retained improvement remain open.
+`SqliteMonotonicAuthorityStore.restore_missing_from_witness(binding_digest, *, witness, expected)` copies an exact checkpoint from an identity-checked readonly witness in a disjoint storage root. The root owner serializes recovery; conflicting destination state rejects and ordinary CAS retains None → 1 / exact +1. See the checkpoint for post-commit uncertainty and store-reopening conditions. Authenticated readback, ordinary v2 signer/publisher wiring, process/volume qualification, operation deadlines, independent activation and retained improvement remain open.
 
 `build_grant_service_archive_from_git()` reads only exact commit-tree blobs and
 emits canonical archive schema v2. `validate_grant_service_archive_git_provenance()`
