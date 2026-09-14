@@ -8,12 +8,116 @@ WSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills), WSP 48 (Recursive Se
 
 import pytest
 import json
+import sqlite3
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 from datetime import datetime, timedelta
 from pathlib import Path
 from modules.infrastructure.wre_core.src.pattern_memory import (
     PatternMemory,
     SkillOutcome
 )
+from modules.infrastructure.wre_core.src import pattern_memory as memory_module
+
+
+@pytest.fixture
+def isolated_default_path(tmp_path, monkeypatch):
+    """Exercise the default constructor without opening the repository store."""
+    monkeypatch.setattr(memory_module, "__file__", str(tmp_path / "src" / "pattern_memory.py"))
+    # Isolate the legacy singleton on the before-fix tree as well.
+    monkeypatch.setattr(PatternMemory, "_initialized", False, raising=False)
+    monkeypatch.setattr(PatternMemory, "_shared_state", {}, raising=False)
+    return tmp_path / "data" / "pattern_memory.db"
+
+
+@pytest.fixture(params=["default", "explicit"])
+def memory_pair(request, isolated_default_path):
+    args = {} if request.param == "default" else {"db_path": isolated_default_path}
+    first, second = PatternMemory(**args), PatternMemory(**args)
+    try:
+        yield first, second
+    finally:
+        first.close()
+        second.close()
+
+
+@pytest.mark.parametrize("other_action", ["read", "commit", "rollback", "close"])
+def test_pending_write_belongs_to_one_memory_instance(memory_pair, other_action):
+    first, second = memory_pair
+    first.conn.set_authorizer(
+        lambda action, arg, *_: sqlite3.SQLITE_DENY
+        if action == sqlite3.SQLITE_TRANSACTION and arg == "COMMIT"
+        else sqlite3.SQLITE_OK
+    )
+    try:
+        with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+            first.store_variation("pending", "skill", "proposal")
+    finally:
+        first.conn.set_authorizer(None)
+    query = "SELECT variation_content FROM skill_variations WHERE variation_id = 'pending'"
+    if other_action == "read":
+        assert second.conn.execute(query).fetchone() is None
+    elif other_action == "close":
+        second.close()
+    else:
+        getattr(second.conn, other_action)()
+    with sqlite3.connect(first.db_path) as observer:
+        assert observer.execute(query).fetchone() is None
+        assert first.conn.execute(query).fetchone()[0] == "proposal"
+        first.conn.commit()
+        assert observer.execute(query).fetchone()[0] == "proposal"
+
+
+@pytest.mark.parametrize("operation", ["read", "write", "rollback", "close"])
+def test_memory_connection_rejects_foreign_thread(memory_pair, operation):
+    memory, _ = memory_pair
+    actions = {
+        "read": lambda: memory.get_counter("foreign_thread"),
+        "write": lambda: memory.increment_counter("foreign_thread"),
+        "rollback": memory.conn.rollback,
+        "close": memory.close,
+    }
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(actions[operation])
+        with pytest.raises(sqlite3.ProgrammingError, match="same thread"):
+            future.result(timeout=5)
+    assert memory.get_counter("foreign_thread") == 0
+    assert memory.increment_counter("owner_thread") == 1
+
+
+def test_default_worker_close_does_not_close_another_worker(isolated_default_path):
+    first_ready, second_ready, first_closed = Event(), Event(), Event()
+
+    def first_worker():
+        memory = PatternMemory()
+        try:
+            assert memory.increment_counter("first_worker") == 1
+            first_ready.set()
+            assert second_ready.wait(5)
+        finally:
+            memory.close()
+            first_closed.set()
+
+    def second_worker():
+        assert first_ready.wait(5)
+        memory = PatternMemory()
+        second_ready.set()
+        try:
+            assert first_closed.wait(5)
+            return memory.increment_counter("second_worker")
+        finally:
+            memory.close()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first, second = pool.submit(first_worker), pool.submit(second_worker)
+        first.result(timeout=10)
+        assert second.result(timeout=10) == 1
+    memory = PatternMemory(db_path=isolated_default_path)
+    try:
+        assert memory.get_counter("first_worker") == 1
+        assert memory.get_counter("second_worker") == 1
+    finally:
+        memory.close()
 
 
 class TestPatternMemory:

@@ -50,6 +50,14 @@ and `researcher.working_target_path` to locate artifacts. Repository-local outpu
 parents reject before directory creation. The [current isolation checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
 records overlapping-run and filename-collision coverage; it does not activate a worker.
 
+## PatternMemory connection ownership
+
+Create and close a `PatternMemory` handle inside each worker. Default instances
+now own separate SQLite connections; they share committed database records.
+SQLite rejects use on another thread. Read the [interface](INTERFACE.md#patternmemory)
+for transaction and worker-handoff limits. The existing tests reproduce foreign
+commit/rollback/close interference and verify independent owner lifetimes.
+
 ## Execution-truth pipeline
 
 The 2026-09-14 retention continuation hardens the existing outcome recorder,

@@ -1,5 +1,11 @@
 # WRE Core - ModLog
 
+## 2026-09-14: Give each PatternMemory worker its own connection
+
+- Removed default process-global connection aliases and retained SQLite creating-thread enforcement. Each instance owns its transaction and close lifecycle; schema and every other storage method remain unchanged. Existing per-operation sink/DB ownership supplied the pattern; no new module or pool.
+- Reproduced 13 failures with four explicit-path controls passing. The existing suite now passes 41 cases; 206 connected tests, 8 manifest tests and 15 fast groups pass. All 24 old test/fixture definitions and 55 assertions remain. Source/test are 1,279/569 lines; inherited class shrinks 1,164→1,149. One packaged source hash and both existing pins changed; 1,400 runtime members and registry 1,650/269 stay unchanged.
+- WSP 97 closes only default alias/thread ownership. Fresh WSP 15 selects existing admission-cache ownership at 17/P0 for reproduction; cached worker lifecycle, atomic acceptance and runtime admission remain open. Evidence: `pattern_memory_ownership_continuation_20260914`; WSP 00/15/22/48/50/60/62/84/97.
+
 ## 2026-09-14: Isolate overlapping Auto Researcher runs
 
 - Reused the existing researcher/tempfile owner: each invocation owns a unique output child, target namespace and TSV log. Initialization reports the actual results path. Repository-local output parents reject before directory creation; dry-run cleanup cannot overwrite another run's target.

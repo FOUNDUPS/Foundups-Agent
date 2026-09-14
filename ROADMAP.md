@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#patternmemory-connection-ownership-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,12 +49,15 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
-The [research run isolation checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
-repairs overlapping Auto Researcher scratch/log storage through the existing runner.
-**35 local tests pass**, with models disabled and source templates preserved.
-R11 memory transaction binding remains partial. Fresh WSP 15/WSP 97 selects the
-existing PatternMemory shared-connection ownership investigation **17/P0**; reproduce
-it in disposable databases before changes. Production RSI remains incomplete.
+The [PatternMemory ownership checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#patternmemory-connection-ownership-checkpoint--2026-09-14)
+repairs shared default-connection transactions and close lifetimes through the
+existing storage owner. **41 focused / 206 connected tests pass**, plus 8 manifest
+tests and 15 RedDog fast groups. Each handle belongs to its creating thread.
+Fresh WSP 15/WSP 97 selects existing admission-cache ownership **17/P0** for
+reproduction. Atomic R11 acceptance and production RSI remain incomplete.
+
+Auto Researcher isolation PR [#1742](https://github.com/FOUNDUPS/Foundups-Agent/pull/1742)
+merged as `cc2ef5d8023b5c88669143d25a482148482a75d7`; its main CI and CodeQL passed.
 
 Activation recovery PR [#1740](https://github.com/FOUNDUPS/Foundups-Agent/pull/1740)
 merged as `9b056d641442022022925bb2ad4b934f621298e3`; its main CI and CodeQL passed.

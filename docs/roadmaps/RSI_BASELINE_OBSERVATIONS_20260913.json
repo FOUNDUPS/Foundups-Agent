@@ -8966,5 +8966,436 @@
     "reader_policy": "Earlier 012 response-read question remains pending; no default or new read authority.",
     "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\memory-acceptance-contract-20260914",
     "dispatchable": false
+  },
+  "pattern_memory_ownership_continuation_20260914": {
+    "base_commit": "477cde2b80f2171e05343b398e4a73f7503a9735",
+    "recorded_at": "2026-09-14T13:13:15.607711+00:00",
+    "wsp00_gate": {
+      "gate_passed": true,
+      "attempted_awakening": false,
+      "awakening_success": false,
+      "is_zen_compliant": true,
+      "requires_awakening": false,
+      "last_validation": "2026-09-14T21:55:51.172569",
+      "session_id": 1789307432,
+      "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+      "action": "check"
+    },
+    "prior_closure": {
+      "pr": 1742,
+      "merge_commit": "cc2ef5d8023b5c88669143d25a482148482a75d7",
+      "main_ci": "success",
+      "codeql": "success",
+      "run_ids": [
+        34842868231,
+        34842867833
+      ]
+    },
+    "intervening_main": {
+      "pr": 1741,
+      "paths": "RedDog identity/CLI tests and its audit; no PatternMemory/source overlap"
+    },
+    "retrieval": {
+      "noise": "Broad lexical task words return historical material; exact module artifacts read incrementally.",
+      "ordering": "WSP00, WSP15/97/62, module contracts, test inventory, current source, neighboring DB and sink owners.",
+      "missing": "No required module document missing; optional memory README absent.",
+      "staleness": "Holo freshness UNKNOWN/index_gap true, semantic authority differs; current Git paths used explicitly, no semantic currency claim.",
+      "duplication": "PatternMemory explicit-path instances already own connections; DatabaseManager and RedDog sink use bounded connection lifetimes. No new database module or lock framework.",
+      "improvement": "Must-include docs, source/mixin/tests followed by exact-symbol and caller reads."
+    },
+    "ranking_before": [
+      {
+        "task": "independent-execution-verification-promotion",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Independent runtime admission absent"
+      },
+      {
+        "task": "integrated-mcp-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+      },
+      {
+        "task": "wre-openclaw-hermes-worker",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current signed job/model/runtime admission absent"
+      },
+      {
+        "task": "chroma-deployment",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current deployment owner and runtime qualification"
+      },
+      {
+        "task": "PatternMemory-transaction-ownership",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "selected_local_reproduction_and_owner_repair",
+        "evidence": [
+          "modules/infrastructure/wre_core/ROADMAP.md#execution-truth-p0-follow-ons",
+          "modules/infrastructure/wre_core/src/pattern_memory.py:PatternMemory.__init__"
+        ],
+        "next_step": "Reproduce default-instance transaction/close aliasing and foreign-thread use in disposable databases; extend existing PatternMemory constructor/lifecycle."
+      },
+      {
+        "task": "R11-B-memory-acceptance-contract",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "partial_transaction_dependency",
+        "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+      },
+      {
+        "task": "authenticated-response-read",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "012 reader-policy question remains unanswered"
+      },
+      {
+        "task": "current-semantic-retrieval",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Governed owner qualification; current fallback UNKNOWN/index gap"
+      },
+      {
+        "task": "protected-foundup-work",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "external",
+        "next_step": "YUMORI/eSingularity and separate autopost ownership"
+      },
+      {
+        "task": "auto-researcher-process-durability",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 13,
+        "priority": "P1",
+        "state": "eligible-later",
+        "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+      }
+    ],
+    "decision": {
+      "selected_action": "PatternMemory-transaction-ownership",
+      "rationale": "Independent runtime admission and current service qualification block the higher-ranked tasks. Existing WRE roadmap names unsafe shared connections. A local owner repair is eligible and reduces prerequisite risk for R11.",
+      "scope": "Separate default and explicit instances; retain SQLite creating-thread ownership; public storage schema/methods stay in existing files. Same-thread multi-step transactions and signed acceptance remain separate.",
+      "alternatives": {
+        "database_manager": "Pattern reusable; direct reuse would change database backend/path/schema and public raw connection type unnecessarily.",
+        "method_locks": "Incomplete while raw conn and A/B rollback paths are public; process singleton and close ownership remain.",
+        "thread_local_pool": "New lifecycle/pooling machinery unnecessary for a thread-confined per-work-item connection."
+      },
+      "manual_reason": "Deterministic SQLite reproduction and caller-contract review are required. Current Qwen/Gemma/WRE runtime admission is not established; no model dispatch or claimed model review.",
+      "verification_plan": [
+        "Existing PatternMemory regression suite, baseline failure before source edit",
+        "Connected WRE execution/telemetry/evolution/orchestrator and bridge sink/canary suites with disposable DBs",
+        "Canonical test registry; changed runtime manifest if this source is packaged; WSP97 receipt and exact-base WSP62 attribution"
+      ]
+    },
+    "changes": {
+      "owner": "modules/infrastructure/wre_core/src/pattern_memory.py",
+      "contract": "Default and explicit instances own independent creating-thread SQLite connections. Closing/committing/rolling back one cannot affect another instance transaction. Foreign-thread database operations reject with sqlite3.ProgrammingError.",
+      "schema_unchanged": true,
+      "implementation": "Removed process singleton state reuse and check_same_thread=False; existing SQLite APIs and caller lifetime pattern reused. Only constructor and close changed.",
+      "test_reuse": "17 parametrized cases added to existing test_pattern_memory.py; all 24 existing definitions and 55 original assertion ASTs preserved."
+    },
+    "validation": {
+      "before": "13 failed, 4 passed, 24 deselected in 1.24s; four default-instance transaction/lifecycle failures, eight unguarded foreign-thread calls, one cross-worker close failure.",
+      "focused": "41 passed in 1.72s",
+      "connected": "206 passed in 84.51s; includes focused tests, counts overlap",
+      "manifest": "8 passed in 69.80s",
+      "fast": "15 groups passed in 10081ms",
+      "registry": "current: 1650 tracked, 269 quarantined",
+      "source": {
+        "base_commit": "477cde2b80f2171e05343b398e4a73f7503a9735",
+        "changed_source_methods": [
+          "__init__",
+          "close"
+        ],
+        "all_other_source_methods_unchanged": true,
+        "original_test_definitions_preserved": 24,
+        "original_assertions_preserved": 55,
+        "source_lines": {
+          "before": 1294,
+          "after": 1279
+        },
+        "test_lines": {
+          "before": 465,
+          "after": 569
+        },
+        "class_lines": {
+          "before": 1164,
+          "after": 1149
+        },
+        "runtime_members": 1400,
+        "runtime_hashes_changed": [
+          "modules/infrastructure/wre_core/src/pattern_memory.py"
+        ],
+        "manifest_digest": "956f5248c3ad8bb1332bb904a202ea355a339f0bcb244cfd17d168be8fc2377b",
+        "new_modules_or_skills": false,
+        "new_exemptions": false
+      },
+      "environment": {
+        "python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "node": "C:/Program Files/nodejs/node.exe",
+        "bytecode": false,
+        "pytest_plugin_autoload": false,
+        "pytest_plugins": [
+          "pytest_asyncio.plugin",
+          "no:cacheprovider"
+        ],
+        "import_mode": "importlib",
+        "temp_and_databases": "unique external O: audit directory; default constructor fixture redirects module path to tmp; no model/provider dispatch"
+      },
+      "test_files": [
+        "modules/infrastructure/wre_core/tests/test_pattern_memory.py",
+        "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py",
+        "modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py",
+        "modules/infrastructure/wre_core/tests/test_qwen_inference_wiring.py",
+        "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py",
+        "modules/communication/moltbot_bridge/tests/test_openclaw_skill_evolution.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py"
+      ],
+      "command_contract": "Qualified python -B -m pytest <named files> --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=<audit>/<run>-temp --tb=short -q --junitxml=<audit>/<run>.xml. Before uses test_pattern_memory.py -k \"pending_write_belongs or rejects_foreign_thread or default_worker_close\"; focused uses its whole suite. Manifest uses scripts/tests/test_generate_reddog_backend_manifest.py. Node extensions/reddog/tests/run_reddog_test_tier.js fast with explicit qualified Python/site-packages and O: TEMP/TMP. Registry: python -B modules/infrastructure/wre_core/scripts/generate_test_registry.py --check.",
+      "limitations": [
+        "Thread-confined per-instance ownership, not task identity authentication, async-task isolation, a connection pool or arbitrary cross-thread orchestrator support.",
+        "No process/volume durability, atomic memory acceptance, independent retained learning or production RSI claim.",
+        "Same-instance multi-call transaction design, failure cleanup and cached handle restart/handoff remain follow-ons."
+      ]
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T13:13:15.607711+00:00",
+      "origin_main": "477cde2b80f2171e05343b398e4a73f7503a9735",
+      "open_pr_count": 96,
+      "other_open_heads_unchanged": true,
+      "ranked_queue": [
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "WRE-admission-cache-ownership",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "selected_for_current_source_reproduction",
+          "evidence": [
+            "modules/infrastructure/wre_core/ROADMAP.md#execution-truth-p0-follow-ons",
+            "modules/infrastructure/wre_core/src/skill_runtime_admission.py:_scan_and_cache",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_wre_skill_scan_cache"
+          ],
+          "next_step": "Retrieve existing runtime-admission tests and cache owners; reproduce overlapping scan/cache publication and inspect bounded eviction before extending the existing owner. No live race or runtime admission claim."
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Governed owner qualification; current fallback UNKNOWN/index gap"
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        }
+      ],
+      "selected_action": "WRE-admission-cache-ownership",
+      "score": 17,
+      "priority": "P0",
+      "closed_local": "PatternMemory-default-alias-and-thread-ownership",
+      "reconciliation": "41 focused / 206 connected tests close default connection aliasing and foreign-thread access. Existing admission-cache mutation lacks synchronization/total eviction; roadmap already names it. It is the highest eligible local reproduction. Higher runtime items remain ineligible; R11 transaction/authority binding remains partial.",
+      "runtime_admission": false
+    },
+    "pending_reader_policy": "No 012 response; original-signing-agent-only versus separately authorized recovery readers remains unresolved. No new question or inferred default.",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\pattern-memory-ownership-20260914",
+    "runtime_admission": false
   }
 }
