@@ -1,5 +1,13 @@
 # WRE Core Roadmap
 
+## Repository prioritization and closure
+
+Use the [canonical RSI selection loop](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
+to re-observe, score and reconcile after every completed or blocked work item.
+Extend current WRE/AgentDB/RedDog owners when runtime wiring is qualified. The
+legacy `ImprovementJob.WSP15Priority` risk hints and prototype roadmap-auditor
+outputs remain advisory; neither is a signed numeric allocation or dispatch grant.
+
 ## WRE master orchestrator decomposition
 
 Execution-truth hardening extracted registry-bound executor dispatch, local

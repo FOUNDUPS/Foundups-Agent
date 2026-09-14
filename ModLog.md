@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Recursive repository prioritization governs RSI selection
+
+- Local validation: seven WSP 15 vectors/eligibility checked, WSP 97 repository-evidence receipt compliant, all 26 packet records and historical baseline entries preserved. Existing 30-minute continuation updated and read back. Fresh local re-observation removes the implemented policy scope and selects R11-A full-record commitment (16/P0), contingent on finishing this owned PR and re-observing again. No runtime tests were rerun for this documentation-only change.
+- Integrated 012's Observe → Score → Reconcile → Select → Execute → Validate → Document → Re-observe objective into the existing system roadmap, dispatch runbook, backlog and WRE roadmap. No new protocol, module, skill or scheduler. WSP 00/15/22/50/97.
+- Canonical MPS remains C+I+D+Impact. Eligibility and consequence/authorization checks remain separate; every completed or blocked sprint requires fresh scoring and reconciliation. FOUNDUPS/autopost remains Remote-owned.
+- Fresh observation at main `dcf20781a99f975438751d6dd1d906ab1bcea340`: main CI passed, pending-response storage merged, root v1 still commits only a signature digest. Lexical retrieval remains UNKNOWN/gap; no new semantic or model admission is claimed. The baseline records ranked actions, limits and the post-sprint re-observation requirement.
+
 ## 2026-09-14: R11 bounded pending outcome storage
 
 - Final evidence: 226 passed / one Linux-only skip across eight suites; 15 fast groups / eight staged-manifest tests passed. Registry 1650/269 and runtime membership 1400 unchanged; one source hash and matching pins updated.

@@ -2,6 +2,79 @@
 
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. The hybrid planning refinement is dated 2026-09-11; earlier runtime observations retain their date. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
 
+## Recursive repository prioritization and execution
+
+012's 2026-09-14 objective makes this the continuing work-selection rule for RSI:
+
+**Observe → Score → Reconcile → Select → Execute → Validate → Document → Re-observe.**
+
+This refines the existing system plan under [WSP 15](../../WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md)
+and [WSP 97](../../WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md).
+It adds no scheduler, scoring variant, WRE grant, independent verifier or promotion authority.
+
+1. **Observe current evidence.** Reconcile exact Git base/HEAD and owned work;
+   finish or safely disposition an already-owned sprint before changing lanes.
+   Inspect current WSP 15/97, applicable skills/instructions, canonical roadmap
+   and backlog, relevant ModLogs/contracts/tests, changed source, visible
+   branches/worktrees, current CI and operational TODO/FIXME or incomplete code.
+   Use the governed Holo entry and evaluate noise, ordering, missing artifacts,
+   freshness and duplication. An inventory, archived claim or unavailable remote
+   is not verified completion. Expand into adjacent owners where evidence requires.
+2. **Score actionable work using WSP 15.** Record Complexity, Importance,
+   Deferability/urgency and Impact, each 1–5; sum C + I + D + Impact. Higher D
+   means less deferrable. Use the canonical P0–P4 ranges; review LLME only when
+   applicable to a module. Record cost/effort and verification burden as context,
+   not an invented ROI formula, extra score dimension or inverted Complexity.
+3. **Reconcile with WSP 97.** Classify each candidate as outstanding, partial,
+   complete but unclosed, duplicated, stale/superseded, blocked or externally
+   owned. Verify completion in source/tests and available receipts. Consolidate
+   into existing owners; close resolved scope without erasing its history.
+4. **Select the highest-ranked eligible action.** Dependencies, active ownership,
+   current evidence, budget and delegated authority constrain eligibility. A
+   blocked theoretical P0 cannot displace an executable action. Record a short
+   decision rationale and prerequisite; never take the old queue's next row by
+   default. A tied score requires an evidenced dependency/value judgment, not a
+   new numeric framework. Planning records remain non-dispatchable.
+5. **Execute one coherent sprint.** Use an owned branch/worktree and the smallest
+   change that closes or materially advances the selected scope. Search and reuse
+   before creating; use existing tests/fixtures and deterministic checks before
+   paid model work. Preserve concurrent work, signed execution boundaries and
+   separate verification/promotion roles. Stop or fail closed on uncertain validation.
+6. **Validate and close.** Record exact scope, command, source and result. Distinguish
+   local verification, observed remote/CI verification and infrastructure-blocked
+   checks. Update only canonical roadmap/backlog, module docs and ModLogs required
+   by WSP. Do not claim push, PR, merge, deployment or checks without observing them.
+7. **Immediately re-observe after completion or blockage.** Refresh changed Git,
+   ownership, CI and dependency evidence; reapply WSP 15 and WSP 97, remove resolved
+   or superseded candidates, rescore and select again. Record the changed decision
+   in the existing baseline observations and point the backlog's current selection
+   to it. Reuse unchanged evidence only with its exact source/environment scope;
+   do not rerun a full audit or unchanged failed probe at every checkpoint. If no
+   authorized independent action remains, record the specific blocker and the
+   evidence change needed to resume; do not fabricate progress or busy-loop.
+
+**012 escalation:** WSP 15 helps prioritize consequential unresolved decisions.
+It does not establish an approval threshold or confer permission. Escalate new
+high-consequence ambiguity, irreversible external effects, strategic changes,
+financial/legal decisions or insufficient evidence before dependent work. Include
+the concrete decision, evidence and consequence; honor standing authorization for
+routine reversible work and continue independent authorized actions while waiting.
+
+**External boundary:** `FOUNDUPS/autopost` is owned separately by Remote. Related
+items here are dependency/state inputs, never automatic RSI work. Preserve
+YUMORI.me/eSingularity, active RedDog services and concurrently reserved lanes.
+
+**Measure progress:** fewer unresolved high-value items, duplicates, stale plans,
+undocumented completions, CI debt, drift and unnecessary escalations; more verified
+closures, reusable execution capability and clearer next actions. Count only the
+scope actually observed. Repository convergence is a prerequisite, not proof of
+independent retained learning or production RSI.
+
+**Current selection evidence:** `recursive_prioritization_continuation_20260914` in
+the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
+referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
+existing continuation is updated to execute this rule; it grants no runtime authority.
+
 ## Production-line operating model
 
 Use a **hybrid production line**: qualification → admitted ticket → one worker or bounded team → evidence synthesis → independent audit → governed acceptance → reward eligibility → confirmed settlement. A swarm may self-organize only inside a separately admitted team profile. The existing filename is retained for link compatibility. See the [hybrid decision and current RedDog assessment](../architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md).

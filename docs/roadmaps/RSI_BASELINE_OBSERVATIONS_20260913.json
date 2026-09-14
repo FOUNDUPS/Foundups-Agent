@@ -3410,5 +3410,378 @@
         "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/pending-response-20260914/manifest --tb=short -q"
       }
     }
+  },
+  "recursive_prioritization_continuation_20260914": {
+    "base_commit": "dcf20781a99f975438751d6dd1d906ab1bcea340",
+    "scope": "One local selection/closure policy integration and bounded current-state observation; no full per-file completion audit",
+    "origin": "external_principal",
+    "wsp00": {
+      "software_gate_passed": true,
+      "last_validation": "2026-09-14T10:54:23.908718",
+      "tracked_awakening_writes": false
+    },
+    "normative_sources": [
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieval": {
+      "mode": "lexical",
+      "ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "evaluation": {
+        "noise": "Broad query returned peripheral story-log content; excluded",
+        "ordering": "Refined exact-owner query returned no code hits; verified known owners with tracked-path search and current source",
+        "missing": "WRE contracts/roadmap/logs present; no complete semantic result claimed",
+        "staleness": "Current workspace base pinned; historical briefing/remote-shell snapshots not treated as current state",
+        "duplication": "Existing prototype auditor, MPS evaluator, work contract and WSP97 validator inspected; no new owner"
+      },
+      "query_sha256": "f5a1575e6d39fb22173bf61e5a2a6fd829c86e0b8c16977837cb24a812b37bb4",
+      "refined_query_sha256": "f410f4c8d558aa9059ceb32d1735e53c2afb60f0aef0478f0ebc644c7797ee8f"
+    },
+    "observation": {
+      "tracked_roadmap_name_inventory": 129,
+      "tracked_modlog_name_inventory": 298,
+      "visible_worktrees": 155,
+      "open_prs": 97,
+      "all_26_packet_states_inspected": true,
+      "limits": "Filename inventory is not full content audit; focused source reads cover the highest eligible choices and adjacent owners. No new model, live service or protected FoundUp test.",
+      "current_main_ci": {
+        "commit": "dcf20781a99f975438751d6dd1d906ab1bcea340",
+        "run_id": 34796982784,
+        "conclusion": "success",
+        "freshly_observed": true
+      },
+      "prior_checkpoint": {
+        "pr": 1730,
+        "merge_commit": "dcf20781a99f975438751d6dd1d906ab1bcea340",
+        "status": "merged_and_current_source_inspected",
+        "test_evidence": "226 passed / one platform skip and ten PR checks belong to the prior checkpoint; not rerun or claimed fresh here"
+      },
+      "ownership": "Owned RSI worktree; PR1648 overlaps WSP97 source, which this change does not edit. Main checkout and other worktrees remain untouched."
+    },
+    "ranked_actions_before_sprint": [
+      {
+        "action_id": "R09-R13-runtime-assurance",
+        "task": "Independent verification, promotion and activation",
+        "wsp15": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 19,
+          "priority": "P0"
+        },
+        "state": "blocked_by_current_admission_and_independent_authority",
+        "eligible_for_local_sprint": false,
+        "runtime_dispatchable": false,
+        "evidence": [
+          "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+          "modules/infrastructure/wre_core/ROADMAP.md"
+        ],
+        "dependency_or_blocker": "R08/R10/R11 dependencies and current signed independent runtime evidence; current source does not establish complete generic end-to-end proof",
+        "effort_and_verification": "Major runtime composition plus held-out/security and real activation evidence",
+        "rationale": "Highest systemic value, but cannot manufacture the missing evidence or authority",
+        "next_executable_step": "Reuse existing admission/verifier owners when exact current prerequisites are supplied; do not launch from this planning row"
+      },
+      {
+        "action_id": "R06-admitted-worker",
+        "task": "One admitted WRE/OpenClaw/Hermes worker",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 18,
+          "priority": "P0"
+        },
+        "state": "blocked_for_live_dispatch",
+        "eligible_for_local_sprint": false,
+        "runtime_dispatchable": false,
+        "evidence": [
+          "modules/infrastructure/wre_core/src/improvement_job_contract.py",
+          "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+          "docs/operations/RSI_SWARM_DISPATCH.md"
+        ],
+        "dependency_or_blocker": "No current qualifying signed work/model/runtime receipt established in this observation; older unconfigured-shell findings are not reasserted as a fresh global probe",
+        "effort_and_verification": "Exact source/model/runtime admission and one real artifact with independent verification",
+        "rationale": "Core autonomous capability, but a compatible legacy priority object is not numeric allocation authority",
+        "next_executable_step": "Recheck changed prerequisite evidence through existing owners; no unchanged failing probe"
+      },
+      {
+        "action_id": "R02-recursive-selection",
+        "task": "Make fresh WSP 15/WSP 97 selection mandatory after each sprint",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 5,
+          "impact": 4,
+          "total": 17,
+          "priority": "P0"
+        },
+        "state": "outstanding",
+        "eligible_for_local_sprint": true,
+        "runtime_dispatchable": false,
+        "evidence": [
+          "ROADMAP.md",
+          "docs/operations/RSI_SWARM_DISPATCH.md",
+          "docs/roadmaps/rsi_swarm_backlog.json",
+          "modules/infrastructure/wre_core/ROADMAP.md"
+        ],
+        "dependency_or_blocker": "None for the existing authorized local planning and continuation scope",
+        "effort_and_verification": "One focused documentation/continuation change; numeric, link, preservation and WSP97 receipt validation",
+        "rationale": "Required to prevent automatic continuation down an old dependency chain; improves every later choice without adding a scheduler",
+        "next_executable_step": "Update the canonical policy and existing continuation, verify preservation and then re-observe"
+      },
+      {
+        "action_id": "R03-current-semantic-entry",
+        "task": "Qualify current-source semantic Holo entry",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0"
+        },
+        "state": "partial_current_semantic_evidence_absent",
+        "eligible_for_local_sprint": false,
+        "runtime_dispatchable": false,
+        "evidence": [
+          "holo_index/CLI_REFERENCE.md",
+          "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md"
+        ],
+        "dependency_or_blocker": "This observation uses lexical fallback: UNKNOWN/gap, zero owner attempts; a current semantic owner generation is not established",
+        "effort_and_verification": "Existing governed maintenance and root/source/runtime proof; no query-time reindex",
+        "rationale": "Essential retrieval dependency; successful lexical context cannot close semantic qualification",
+        "next_executable_step": "Use the current governed WRE maintenance owner when its prerequisites are met"
+      },
+      {
+        "action_id": "R11-A-full-record-commitment",
+        "task": "Versioned complete-response commitment through existing root service/client",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0"
+        },
+        "state": "partial",
+        "eligible_for_local_sprint": true,
+        "runtime_dispatchable": false,
+        "evidence": [
+          "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_state.py",
+          "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_service.py",
+          "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_protocol.py"
+        ],
+        "dependency_or_blocker": "Pending storage is merged; next local fixture layer must preserve v1 and bind current owner/peer/proof/revocation and complete wire limits",
+        "effort_and_verification": "Focused authority/protocol work with existing root service/client tests; actual production readback remains separately gated",
+        "rationale": "Current source confirms v1 terminal state binds signature_digest while complete pending-record storage has no service caller",
+        "next_executable_step": "Retrieve existing service/client contracts and tests, define one bounded versioned commitment case, then extend the existing owners"
+      },
+      {
+        "action_id": "project-ci-owned-elsewhere",
+        "task": "Historical eSingularity workflow failure",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability_urgency": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "state": "reserved_external_owner",
+        "eligible_for_local_sprint": false,
+        "runtime_dispatchable": false,
+        "evidence": [
+          ".github/workflows",
+          "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md"
+        ],
+        "dependency_or_blocker": "Protected active project lane; observed failure is workflow run 34789543676 at fb03ff8c, not a claim that latest main CI failed",
+        "effort_and_verification": "Product owner must qualify current failure/deployment context",
+        "rationale": "Observe it as a dependency and avoid competing with the active project worker",
+        "next_executable_step": "Leave remediation with the owning project session"
+      },
+      {
+        "action_id": "auto-researcher-durable-recovery",
+        "task": "Auto Researcher recovery across process/volume failure",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability_urgency": 3,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "state": "partial_later_layer",
+        "eligible_for_local_sprint": true,
+        "runtime_dispatchable": false,
+        "evidence": [
+          "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+          "modules/infrastructure/wre_core/README.md",
+          "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py"
+        ],
+        "dependency_or_blocker": "Python-exception restoration exists; durable process/volume recovery and independent outcome admission remain unproved",
+        "effort_and_verification": "Disposable target/store fault cases; no live model invocation or production target mutation",
+        "rationale": "Useful existing-loop hardening with lower immediate value than completing the response commitment prerequisite",
+        "next_executable_step": "Qualify the existing scratch lifecycle and retained baseline before adding any durable recovery behavior"
+      }
+    ],
+    "selected_before_sprint": "R02-recursive-selection",
+    "reconciled_items": [
+      {
+        "scope": "R11-A pending-response storage",
+        "state": "implemented_and_merged",
+        "evidence": "PR1730 / dcf20781a99f975438751d6dd1d906ab1bcea340",
+        "action": "Remove this local scope from outstanding choices; full R11 remains partial"
+      },
+      {
+        "scope": "R01/registry and current main CI repair",
+        "state": "no_new_failure_established",
+        "action": "Reuse pinned valid evidence; do not invent repair work or silently close broader R19 requirements"
+      },
+      {
+        "scope": "FOUNDUPS/autopost",
+        "state": "external_dependency_owned_by_Remote",
+        "action": "Do not inspect/edit/merge its separate branch as RSI work"
+      },
+      {
+        "scope": "Prototype roadmap auditor",
+        "state": "prototype_advisory_only",
+        "action": "Reuse discovery checklist; checkbox ratios and proposed execution scripts do not establish completion or signed work authority"
+      }
+    ],
+    "sprint": {
+      "status": "LOCAL_VALIDATED_CONTINUATION_UPDATED_AWAITING_PR_CLOSURE",
+      "runtime_changed": false,
+      "new_module_skill_scheduler": false,
+      "canonical_policy": "docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution",
+      "continuation_id": "continue-foundups-rsi",
+      "continuation_update": "observed_active_existing_heartbeat_updated",
+      "continuation_prompt_sha256": "1fd7c12e7d76fc5cf306252bbade153e74e4586c0849d0a4076f03923edf8219",
+      "continuation_cadence_unchanged": true,
+      "continuation_target_unchanged": true
+    },
+    "post_sprint_reobservation": {
+      "status": "LOCAL_CHANGE_REOBSERVED_PENDING_REMOTE_CLOSURE",
+      "observed_at_utc": "2026-09-14T02:09:09.200774+00:00",
+      "main_commit": "dcf20781a99f975438751d6dd1d906ab1bcea340",
+      "unchanged_runtime_input_sha256": {
+        "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_state.py": "60a38fbed8817ab6bc774dcd7ba280c4c47b05fc55f291be41ef8bf2f8469e3b",
+        "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_service.py": "8b2c57e8e19e86704946c87d75f9cd5f1ff9c92739149f0e0858ee74dd6c8679",
+        "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_protocol.py": "5e7d6da24220992092e4f2b50b4ff9dbf13a47a5aef17f4a78831d4b7fa8e864",
+        "modules/infrastructure/wre_core/src/wre_auto_researcher.py": "f6984e50517f6d1330c307e71917311668dc9d39b4756b1ad97aa262c5dc9c1f",
+        "modules/infrastructure/wre_core/src/improvement_job_contract.py": "e0f2b282b958f1ecbffe4d8da68741be07dbe620a2bcb01e55f0b1ad481b3dbf"
+      },
+      "rescored_actions": [
+        {
+          "action_id": "R09-R13-runtime-assurance",
+          "reassessed_wsp15": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability_urgency": 4,
+            "impact": 5,
+            "total": 19,
+            "priority": "P0"
+          },
+          "reconciled_state": "blocked_by_current_admission_and_independent_authority",
+          "eligible_for_local_sprint": false
+        },
+        {
+          "action_id": "R06-admitted-worker",
+          "reassessed_wsp15": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability_urgency": 4,
+            "impact": 5,
+            "total": 18,
+            "priority": "P0"
+          },
+          "reconciled_state": "blocked_for_live_dispatch",
+          "eligible_for_local_sprint": false
+        },
+        {
+          "action_id": "R02-recursive-selection",
+          "reassessed_wsp15": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability_urgency": 5,
+            "impact": 4,
+            "total": 17,
+            "priority": "P0"
+          },
+          "reconciled_state": "implemented_locally_continuation_updated_pr_closure_pending",
+          "eligible_for_local_sprint": false
+        },
+        {
+          "action_id": "R03-current-semantic-entry",
+          "reassessed_wsp15": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability_urgency": 4,
+            "impact": 4,
+            "total": 16,
+            "priority": "P0"
+          },
+          "reconciled_state": "partial_current_semantic_evidence_absent",
+          "eligible_for_local_sprint": false
+        },
+        {
+          "action_id": "R11-A-full-record-commitment",
+          "reassessed_wsp15": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability_urgency": 4,
+            "impact": 4,
+            "total": 16,
+            "priority": "P0"
+          },
+          "reconciled_state": "partial",
+          "eligible_for_local_sprint": true
+        },
+        {
+          "action_id": "project-ci-owned-elsewhere",
+          "reassessed_wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability_urgency": 4,
+            "impact": 3,
+            "total": 14,
+            "priority": "P1"
+          },
+          "reconciled_state": "reserved_external_owner",
+          "eligible_for_local_sprint": false
+        },
+        {
+          "action_id": "auto-researcher-durable-recovery",
+          "reassessed_wsp15": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability_urgency": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "reconciled_state": "partial_later_layer",
+          "eligible_for_local_sprint": true
+        }
+      ],
+      "selected_next_action": "R11-A-full-record-commitment",
+      "reason": "Reconciled the implemented local policy out of eligible work; inspected unchanged v1 service/protocol and pending-store inputs again. Full-record commitment remains the highest eligible local slice at 16/P0; live-assurance/worker/Holo actions still lack qualifying current evidence. This is a fresh assessment, not automatic queue advancement.",
+      "start_condition": "Finish this owned PR and re-observe changed source/ownership/CI at closure before starting the selected fixture layer",
+      "dispatchable": false
+    },
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "validation": {
+      "structural_result_sha256": "b8f9c0ad4ab9a9d78065bbe2cf0934d9465a579db2537f39b03dbd7db85e5a5b",
+      "wsp97_is_compliant": true,
+      "wsp97_validation_sha256": "6f5b80acfffb2c3b0b31e141113df403192674f1e4e97a30414eb564c8b4b9fa",
+      "truth_boundary": "WSP 97 receipt v1.1 validates structural completeness plus repository-bound Retrieve WSPs evidence; all other evidence references remain opaque and no reasoning quality or runtime side effect is proven.",
+      "fresh_pytest_run": false,
+      "rationale": "Documentation and continuation prompt only; runtime, test, manifest and registry bytes unchanged. Numeric, eligibility, source/path, prior-evidence and doc-index contracts checked."
+    }
   }
 }

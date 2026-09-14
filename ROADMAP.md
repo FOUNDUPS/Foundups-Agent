@@ -19,6 +19,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Evidence behind the completion verdict | [Dated audit](docs/audits/rsi/2026-09-09/README.md) |
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
+| Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
 | Next work | Wave 0 below; verify R01 repair is present in the selected source, then R02 authority reconciliation and R03 retrieval entry context |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
@@ -34,6 +35,17 @@ Authority order: 012's applicable instructions and delegated policy → governin
 The baseline below remains `fb58e5279673ef9de30735ccfedc8001c3bb79d6`. Documentation integration started at `eb2994f5d1530d9f086e2f2265c65033acecd93c`; the six intervening commits affect eSingularity/YUMORI and its skill, not the inspected WRE/model-routing files. Their new product work is outside this dated audit. Reconcile the latest commit and active claims again at dispatch.
 
 R00 recovery is historical success at its recorded source/generation. R02 now includes a requirement/owner/test/gap map for R00–R25 and selected WSP 46/CORE and briefing corrections. The [ledger reconciliation](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md#historical-ledger-dispositions--2026-09-13) now covers all 11 pending April rows/tracks and four relevant closed rows; unresolved owner evidence, per-contract archival decisions and separately bound review remain open. Do not mark all of R02 or G0 complete merely because the documentation is discoverable.
+
+## Recursive selection and closure
+
+Follow the [repository prioritization loop](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
+after every completed or blocked sprint: observe current repository evidence,
+apply canonical WSP 15, reconcile under WSP 97, select the highest-ranked eligible
+action, execute, validate, document, then immediately re-observe and rescore.
+The last checkpoint's next step is a candidate, never an automatic assignment.
+The existing backlog points to the current ranked observation; historical packet
+scores below retain their original planning scope. Standing local authorization
+and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
 ## Current delivery checkpoint — 2026-09-14
 

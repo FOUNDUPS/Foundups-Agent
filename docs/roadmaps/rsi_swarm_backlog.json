@@ -1805,5 +1805,22 @@
       "inspection": "source_review_and_36_selected_fixture_tests_passed_no_installation_or_live_integration",
       "monorepo_entry": "modules/foundups/pqn_swarm_hub/README.md"
     }
+  },
+  "recursive_selection_policy": {
+    "authority": "docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution",
+    "score_authority": "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+    "execution_authority": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+    "after_every_completed_or_blocked_sprint": "reobserve_rescore_reconcile_select",
+    "planning_only": true,
+    "external_dependency": "FOUNDUPS/autopost: Remote-owned"
+  },
+  "current_selection": {
+    "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+    "section": "recursive_prioritization_continuation_20260914",
+    "base_commit": "dcf20781a99f975438751d6dd1d906ab1bcea340",
+    "selected_action": "R11-A-full-record-commitment",
+    "status": "selected_for_next_local_preflight_after_owned_pr_closure",
+    "requires_fresh_reobservation_after_closure": true,
+    "dispatchable": false
   }
 }
