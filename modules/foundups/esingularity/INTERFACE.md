@@ -26,6 +26,7 @@ The current eSingularity redesign brief calls for three to four primary content 
 | --- | --- |
 | `/` | eSingularity project/vision landing on eSingularity.ai |
 | `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
+| `/vote-no` | YUMORI.me civic-action record: current VOTE NO position, privacy-bounded council/mayor messages, and official contact routes |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
@@ -69,7 +70,7 @@ The Foundups shell owns discovery and routing. The eSingularity module owns camp
 
 ## Shared campaign ticker
 
-Both homepages render `CampaignTicker.tsx` from the single `content/current-field-status.ts` object. The project page uses `<CampaignTicker />`; the movement page uses `<CampaignTicker movement />`, placing it in normal flow and resolving project-only fragment links to eSingularity.ai. Updating the canonical status and publishing the shared frontend updates both sites. Do not maintain separate ticker copy. The YUMORI language controls occupy a dedicated header slot above the ticker. Scrolling duration is calculated from rendered content width, targeting 18 px/s up to 600px, 24 px/s up to 1200px and 38 px/s above that; a 48-second minimum loop duration may slow short content further. The read-all control stops and wraps the primary set, hiding its duplicate; reduced motion disables animation.
+Both homepages render `CampaignTicker.tsx` from the single `content/current-field-status.ts` object. The project page uses `<CampaignTicker />`; the movement page uses `<CampaignTicker movement />`, placing it in normal flow and resolving project-only fragment links to eSingularity.ai. Updating the canonical status and publishing the shared frontend updates both sites. Do not maintain separate ticker copy. The YUMORI language controls occupy a dedicated header slot above the ticker. Scrolling duration is calculated from rendered content width, targeting 10 px/s up to 600px, 20 px/s up to 1200px and 32 px/s above that; a 48-second minimum loop duration may slow short content further. On phones the ticker is fixed to the safe-area-aware bottom edge; stopping it exposes a horizontally swipeable, snap-aligned action strip. Tablet and desktop placement remains unchanged. The desktop read-all control wraps the primary set, and reduced motion disables animation. Council, mayor and contact actions link to the canonical YUMORI.me `/vote-no` record; obsolete monk-status promotion is not part of the ticker.
 
 ## Shared external actions
 

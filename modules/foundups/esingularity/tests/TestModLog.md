@@ -1,5 +1,9 @@
 # eSingularity TestModLog
 
+## 2026-09-13 — Civic-message route and ticker action coverage
+
+- Extended the existing public-contract suite for the YUMORI.me council/mayor route, supersession notice, privacy boundary, official council contact, removal of the obsolete Monk action, the 10/20/32 px/s responsive ticker ladder, and the phone bottom-dock/swipe contract.
+
 ## 2026-09-13 — Shared ticker consumers
 
 - Extended the existing field-status contract to require exactly one shared ticker on each homepage and correct project-link resolution from the movement page.
