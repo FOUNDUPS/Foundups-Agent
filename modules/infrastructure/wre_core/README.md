@@ -50,6 +50,16 @@ and `researcher.working_target_path` to locate artifacts. Repository-local outpu
 parents reject before directory creation. The [current isolation checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
 records overlapping-run and filename-collision coverage; it does not activate a worker.
 
+## RSI at main.py launch
+
+The [existing launch/evaluation sequence](ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
+plans fast evidence display and bounded campaigns through admitted WRE jobs.
+Current health preflights and queue loops supply insertion points; launch wiring
+for generic RSI results is not enabled. Attempts, evaluations, independent
+acceptances and retained improvements must be reported separately. Five ten-attempt
+diagnostics verify comparison/repetition mechanics; they do not prove RSI.
+Future campaign ceilings depend on measured benefit and budgets, not launch count.
+
 ## PatternMemory connection ownership
 
 Create and close a `PatternMemory` handle inside each worker. Default instances
@@ -64,7 +74,8 @@ The existing admission cache now binds scan severity, invalidates old success
 while refreshing, and retains at most 128 entries per mapping. Pending capacity
 blocks safely; unrelated scans can run concurrently when space exists. Use the
 [existing owner APIs](INTERFACE.md#production-admission) for shared access.
-Report-file and per-execution ownership remain separate follow-ons.
+Private report and per-execution ownership are closed in PRs #1745/#1746;
+complete coordinator concurrency remains unproved.
 
 ## Execution-truth pipeline
 

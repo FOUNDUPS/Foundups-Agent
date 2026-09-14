@@ -1,5 +1,11 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Qualify launch reporting and bounded evaluation
+
+- Mapped 012's main.py proposal onto existing dashboard, resident queue, ROC researcher, model AutoResearch and retention owners. Added the staged contract to this module's existing roadmap and linked system authority/runbook; no launcher/runtime, module, flag or scheduler added.
+- Five ten-attempt diagnostics use isolated output and disabled model construction: 40 candidates plus five baselines. Unchanged/invalid/missing controls yield no gain; fixed-seed heuristic/replay match with six local improvements each. Missing proposals show why attempt count is not evaluation or RSI completion. Source and scratch invariants hold; independent verification/retention remain unproved.
+- 41 existing tests pass, registry 1,650/269 current. PR #1746 and its main workflows are verified closed. Reconciled its already-completed report/fingerprint follow-on wording. WSP 15 selects cache ownership 16/P0 after diagnostic closure; report completeness 15/P1 is a launch dependency. Evidence: `launch_evaluation_continuation_20260915`; WSP 00/15/22/48/50/60/62/84/97.
+
 ## 2026-09-15: Bind scan admission to each execution
 
 - Extended the existing admission owner with a three-value verdict/fingerprint result and preserved the two-value safety API as a forwarding view. The coordinator carries the exact value to existing executor validation; shared skill-name state and late cache readback are removed. No new module, skill, context class or grant.

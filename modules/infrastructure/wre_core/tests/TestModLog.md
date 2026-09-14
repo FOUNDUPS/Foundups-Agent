@@ -1,5 +1,11 @@
 ## 2026-09-15: Execution-owned fingerprint regression
 
+## 2026-09-15: Launch/evaluation diagnostic qualification
+
+- Existing selection: **41 passed, zero failures/errors/skips, 4.64s** (35 researcher, two dashboard export, four mocked main queue cases). Explicit importlib/async plugin, no cache/autoload, external cwd/TEMP/TMP/databases/basetemp. No test source changed or main menu/service launched.
+- Separate diagnostic: five ten-attempt cases, 40 candidate and five baseline evaluations. Seed-97 replay matches original proposal hashes/summary; unchanged, invalid and absent-proposal controls yield zero gain. Every target remains unchanged and scratch restores. Model construction disabled before constructor; no provider call or live Git operation.
+- Same-oracle repeatability is not an independent judge, production campaign or retained RSI benefit. Registry 1,650/269 remains current. Reproduction and results: `launch_evaluation_continuation_20260915` in the canonical RSI observations. WSP 15/22/48/50/97.
+
 - Existing execution/admission suites add six cases: changed/unchanged reentrant execution, explicit/missing fingerprint, cached success/failure and a later call replacing cache contents before the earlier return. Original tests remain; two assertions/mocks now bind explicit receipt values. Identical helper classes are imported/re-exported from the existing admission suite.
 - Before: one failure/one passing control/22 deselected in 2.35s. After: 71 focused passes/one skip in 4.58s; 172 connected passes/four existing link skips in 9.97s. Selections overlap. Manifest 8 passes in 69.93s; fast 15 groups in 5,013ms; registry current 1,650/269. Local files and scanner doubles, no live admission/model/FoundUp call.
 - Commands, exact skipped IDs, source hashes and size checks: `execution_admission_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Legacy public two-value API is explicitly covered.
