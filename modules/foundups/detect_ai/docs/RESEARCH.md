@@ -1,4 +1,4 @@
-# Can You Detect AI? - Research and Decision Record
+# AmIBot - Research and Decision Record
 
 Checked: 2026-09-15. Sources below support the stated limited claims, not product readiness.
 
@@ -27,3 +27,9 @@ Players may value calibrated skill progression; builders may value small-model p
 ## Repository Authority
 
 [WSP 109](../../../../WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md) defines intake-only scope and the eight required artifacts. [WSP 97](../../../../WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md) requires retrieval, comparison and bounded execution. [FoundUps domain index](../../docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md) distinguishes planning from current implementation and identifies existing shared orchestration/ledger owners. The product does not replace those owners.
+
+## 2026-09-15 continuation - implementation research
+
+The FoundUp's display name is now AmIBot. The original product/competitor research above remains provenance, not a claim of a running product.
+
+[CHAT_PWA_SAFETY_RESEARCH.md](CHAT_PWA_SAFETY_RESEARCH.md) records the new primary-source comparison, Socket.IO recommendation and Colyseus alternative, GAPITA dependency risk, PWA/mobile limitations, device-local AI boundary, clean/mature policy design and age-assurance research. Package installation, dependency vulnerability scanning, performance measurements and legal clearance were not performed.

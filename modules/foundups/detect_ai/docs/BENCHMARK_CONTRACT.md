@@ -1,4 +1,4 @@
-# Can You Detect AI? - Benchmark Contract
+# AmIBot - Benchmark Contract
 
 Status: proposed method, no data collected.
 
@@ -45,3 +45,11 @@ After purpose-specific consent and review, derive cases such as: ignored instruc
 Evaluate unchanged held-out cases before promoting any prompt, skill, retrieval or trained-model change. Separate splits by participant/session and near-duplicate content, with time/model holdouts as appropriate. Never train on the live test set. Publish only aggregate or independently consented/redacted evidence. No automatic weight changes or training are claimed.
 
 Game personas stay inside the disclosed game. Deployed Red Dog remains identified as AI; a higher human-judgment rate does not justify concealing that identity.
+
+## Content mode and execution-provenance extension
+
+Add declared `content_mode`, `content_policy_version`, `moderation_version`, `execution_tier` and safety-outcome counts to the proposed evidence contract. Age-assurance details stay restricted and out of partner-visible payloads; record only the minimum eligibility evidence needed for access control and audit.
+
+Clean and any future mature cohorts are separate benchmark strata. Apply equivalent moderation and rejection presentation to human and AI messages, without silently rewriting accepted text or removing difficult rounds to improve model scores. Record the fact of a safety intervention; restrict raw flagged content to the approved safety retention process.
+
+For initial verified model rounds, inference and assignment remain server-controlled. A model running on the judge's own device exposes inspectable state and download/compute cues, so local inference is labeled unverified practice, excluded from ranked rewards and headline model comparisons. Human-controlled routing remains distinct from proven unaided human authorship.

@@ -1,4 +1,4 @@
-# Can You Detect AI?
+# AmIBot
 
 **Working ID:** `detect_ai` | **Owner:** 012 | **Intake:** 0102
 **Status:** WSP 109 intake draft; SPECIFIED_NOT_IMPLEMENTED; TOKEN_DEFERRED.
@@ -27,3 +27,13 @@ This is the intake/documentation node, not a running game or a registered token 
 This describes the intended repository workflow, not evidence of running background workers. WRE acceptance and runtime dispatch have not occurred in this session.
 
 Next bounded slice: `DETECT_AI_PREFLIGHT_AND_POC_CONTRACT_PHASE1`. Resolve retrieval gaps, inspect existing module interfaces, and validate the smallest game contract before runtime construction. Proposed product module remains `modules/foundups/detect_ai`; WSP 49 runtime scaffolding is downstream.
+
+## AmIBot research update - 2026-09-15
+
+Display name: **AmIBot**. Tagline: **Can you detect AI?** The original working name is retained only as provenance. Internal ID and path remain `detect_ai` to avoid a second FoundUp, route, or issue.
+
+[Chat, PWA and safety research](docs/CHAT_PWA_SAFETY_RESEARCH.md) is the current technical decision record. Recommendation: an installable browser client with a small server-authoritative Socket.IO service, subject to the existing-owner preflight. Colyseus is the shortlisted alternative, not an additional runtime.
+
+The first playable slice is invite-only, 18+, text-only and clean-chat only. Pre-delivery moderation, report/block/leave and an operator kill switch are pilot gates. Mature/NSFW rooms and their stronger age-assurance integration are deferred and disabled. Phone-hosted model inference is a later opt-in practice experiment, not the trusted benchmark or an always-on background worker.
+
+Documentation is on draft PR #1751; issue #1750 remains the bounded preflight/build-contract handoff. No application has been built or deployed by this research update.

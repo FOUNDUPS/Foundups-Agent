@@ -1,4 +1,4 @@
-# Can You Detect AI? - Pain Definition
+# AmIBot - Pain Definition
 
 ## Primary Pain Point
 People lack calibrated feedback about their ability to recognize automated conversation. Builders need evidence that a small, affordable model works for a specific conversational role, rather than assuming the biggest model or highest general benchmark score is the right choice.

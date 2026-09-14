@@ -1,4 +1,4 @@
-# Can You Detect AI? - POC Scope
+# AmIBot - POC Scope
 
 ## Minimum Viable POC
 An invite-only, text-only browser game that can run a real human-human round and a human-model round through the same visible interface, record a locked guess and confidence, and reveal the correct server-held assignment. Start with one approved small Qwen-class checkpoint; adding one approved hosted baseline is optional only after the core loop works.
@@ -25,3 +25,13 @@ Proposed usability target: at least 80% completion among matched pilot rounds, w
 Free participation, honest identity reveal, clear score explanations and a published method. No wallet, token purchase or private-archive upload is required.
 
 Status: NOT_BUILT. A mocked or transcript-only demo does not satisfy the live-match POC gate.
+
+## Additional mandatory POC acceptance - AmIBot
+
+Implement and test human-human clean chat first, then the human/AI game, then the combined phone experience. Use a documented adult-only invite-admission process and a staffed pilot window. Do not substitute a self-declared birthday for verified age or label clean stranger chat child-safe.
+
+Before any participant receives a message: authenticate the session; check round membership and policy; apply server-side rate/length checks, profanity rules and a tested contextual safety check (or pre-delivery human review in a tightly bounded pilot). Apply this to human and AI messages alike. Hold/reject uncertain or unavailable moderation; never stream unchecked model tokens. Report, block, immediate leave, blocked-pair exclusion and an operator kill switch must function.
+
+PWA acceptance: install on tested iPhone and Android devices; keep composer and leave/report controls visible above the keyboard; handle network changes and app suspension; restore server state or terminate explicitly; do not cache chats/auth/age proofs or replay expired messages. Updating the service worker must not force a live round reload. Offline mode is the shell/help only, not random chatting.
+
+No mature room, public under-18 access, local-model ranked trial, uploads, video/voice, automatic training or economic rewards in the POC. Full source, safety and real-device tests remain NOT_RUN.

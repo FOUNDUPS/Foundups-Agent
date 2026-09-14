@@ -1,16 +1,38 @@
-# Can You Detect AI? - Roadmap
+# AmIBot - Roadmap
 
-Status: planning_reference. These are acceptance targets, not completed milestones.
+Status: planning_reference; SPECIFIED_NOT_IMPLEMENTED; TOKEN_DEFERRED.
+Display name: AmIBot. Tagline: Can you detect AI? Stable internal ID: `detect_ai`.
+Technical decisions and primary sources: [chat/PWA/safety research](docs/CHAT_PWA_SAFETY_RESEARCH.md).
 
-| Stage | Deliverable | Advancement gate |
+## Layered delivery
+
+| Layer | Deliverable | Required gate |
 |---|---|---|
-| Intake | Outcome, solution, pain, provenance, scope, skills candidates, manifest draft | Required artifacts present; unresolved discovery/runtime checks explicit |
-| Preflight | Current-source HoloIndex/lexical evidence, catalog check, dependency and entitlement review | No unresolved conflicting FoundUp; architect admits bounded work |
-| POC | Invite-only browser game, real human pairing, one approved small model, server-held truth, locked verdict, reveal, provisional points | Scripted security/round tests pass; consenting pilot verifies the loop |
-| Prototype | Versioned multi-model adapter, human/agent judge tracks, ranked accounts, consented evaluation export, moderation and fraud controls | Privacy/security review; repeatable scoring; provider permissions; model and judge isolation |
-| MVP | Public entry, sustainable matching, published methodology, separate leaderboards, operational monitoring | Operational and economic gates pass; honest claims and support processes |
-| Optional expansion | Discord Activity wrapper, API tournaments, additional languages, independent deployment | Reuse the same backend; separate protocol strata; WSP exfoliation review |
+| Intake and research | Eight WSP 109 artifacts; platform comparison; PWA and safety design | Documents reviewed; unresolved checks remain explicit |
+| Preflight | Source-bound retrieval, catalogs, dependencies, existing auth/transport/model owners | No duplicate or incompatible owner; pinned dependencies and license/security review |
+| POC 1 - human chat | Invite login; one clean 18+ queue; random human-human pairs; mobile chat; report/block/leave | Real two-browser test; server authorization; moderation before delivery; adult cohort admission; available operator |
+| POC 2 - detection game | Approved server-hosted small model; randomized human/AI assignment; locked verdict/confidence; coordinated reveal; provisional points | No truth leakage or silent AI replacement; idempotent scores; defined safety/disconnect outcomes |
+| POC 3 - phone acceptance | Installable PWA shell; reconnect/resume; keyboard and safe-area layout; offline notice | Real iPhone and Android tests; stale messages rejected; no private cache; no mid-round forced update |
+| Prototype | Versioned model comparisons; agent judges; authenticated rankings; calibration; consented exports | Existing POC pilot gate; independent security/privacy review; measured operating cost |
+| MVP | Public clean-chat service; dependable matching; support and incident process; published method | Public age/access assessment, tested moderation capacity, costs and rollback; reward gate separate |
+| Optional mature lane | Separate opt-in 18+ mature/NSFW policy and queue | Strong age assurance, jurisdiction/provider review, privacy and safety tests; disabled until all pass |
+| Optional local AI | WebLLM or compatible Transformers.js checkpoint in foreground practice | Device probe, explicit download consent, memory/latency tests; separate unverified practice results |
+| Optional distribution | Discord Activity or other wrapper | Same backend and scoring authority; no duplicate product or automatic permission inheritance |
 
-Token rewards are an explicit downstream MVP gate, not a prerequisite for proving the game. Prototype points are nontransferable and carry no promise of conversion. Authorized FoundUp reward integration must reuse existing ledger/governance owners and remain disabled until independently verified.
+The POC remains incomplete until human chat, model rounds and actual phone acceptance work together. A mock interface, documentation tests or a static preview does not satisfy it. The existing pilot target of 20 consenting adults and 100 valid rounds remains a usability target, not a superiority claim.
 
-Layer discipline: complete and test one bounded slice before expanding. Do not build a second orchestrator, wallet, model gateway, or ranking authority.
+## Safety cannot be postponed beyond real participants
+
+Clean chat is the only enabled initial policy: no profanity, sexual chat, harassment, threats, hate, scams or personal-data solicitation. All participants in the pilot are adults admitted through a documented process. An 18+ checkbox is not verified age, and a clean-content label does not make stranger chat suitable for children.
+
+Require server-side filtering of human and AI messages before delivery; rate/length limits; plain-text rendering; no uploads or active links; reporting, blocking and leaving; non-rematching blocked participants; a moderation operator and queue kill switch. Hold delivery if moderation is unavailable. No filter is guaranteed to catch every harmful message.
+
+The mature lane is a roadmap goal, not an unmoderated exception. Sexual-content permission is a separate unresolved policy/legal/provider gate, not automatically included in mature language. Under-18 participation would require a separate safeguarding design and is not enabled by this roadmap.
+
+## Independent future gates
+
+Token rewards remain deferred. Practice XP, benchmark skill and economic contributions are separate; no promised conversion or automatic payout. Reuse existing ledger/governance owners after authority, budget and verification checks.
+
+Local AI stays out of ranked blinded trials: model downloads or execution on the judge's own phone can reveal assignment, and client code/results are user-controlled. A future volunteer device pool needs a separate provenance and integrity design, not a local-compute flag on ranked rounds.
+
+Next bounded work remains `DETECT_AI_PREFLIGHT_AND_POC_CONTRACT_PHASE1` in issue #1750. WRE admission, runtime bootstrap, dependency installation, model inference, device tests and deployment have not occurred in this documentation slice.

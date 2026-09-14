@@ -1,4 +1,4 @@
-# Can You Detect AI? - Solution Definition
+# AmIBot - Solution Definition
 
 ## Core Solution
 A mobile-friendly browser game with a neutral chat surface. Before joining, participants know their partner may be human or AI and consent to the game. The server holds the assignment, runs a short text conversation, accepts a locked verdict plus probability, then reveals the assigned class and approved model configuration. Participation scores and three separate leaderboard families support learning and comparison.
@@ -30,3 +30,9 @@ POC proves actual human/AI round handling, truth isolation and score integrity. 
 
 ## Reward Design Boundary
 Keep practice XP, statistical skill scores and economic rewards separate. Free POC points have no transferability or promised token conversion. A later authorized reward adapter submits verified contribution evidence to existing FoundUps governance/ledger owners. Rate limits, duplicate prevention, independent verification, a funded budget, disputes and applicable review precede activation. No token symbol, supply or price is assigned here.
+
+## AmIBot technical decision - chat, PWA and content modes
+
+Use [CHAT_PWA_SAFETY_RESEARCH.md](../CHAT_PWA_SAFETY_RESEARCH.md) as the current technical selection record. Recommend Socket.IO plus a minimal application-specific round coordinator, rather than adopting an unsupported random-chat application or introducing both Socket.IO and Colyseus. Reuse a suitable existing transport/auth owner if preflight proves one; no integration compatibility is certified here.
+
+The browser/PWA runs the interface. The trusted server owns login admission, queue policy, assignment, moderation, clocks, verdicts and scores; one approved small model runs behind the existing inference boundary. The POC has only clean-chat adult participants and mandatory safety controls. Mature/NSFW access is a separate, disabled future queue with age-assurance and jurisdiction/provider gates. A later local-model practice mode is opt-in and excluded from verified rankings.

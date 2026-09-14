@@ -1,4 +1,4 @@
-# Can You Detect AI? - Skills Map
+# AmIBot - Skills Map
 
 ## Candidate SKILLz (Not Created - WSP 95 Governs)
 
@@ -30,3 +30,9 @@ Runtime compatibility, permissions and exact callable interfaces require inspect
 DETECT_AI_SKILLZ_WARDROBE_PHASE1
 
 Discover first. WSP 109 creates this map only; WSP 95 governs any actual skill creation, promotion or rollback.
+
+## Research continuation - candidate capabilities only
+
+Inspect existing implementations before creating skills for mobile/PWA acceptance, moderated random-chat sessions, content-policy evaluation or privacy-preserving age-proof verification. No SKILLz were created in this continuation.
+
+The Socket.IO/WebSocket lexical search found dashboard and extension references, not proven reusable game matchmaking. Read the owning implementation and its current tests before reuse. Proposed `@2toad/profanity` and Qwen3Guard components are research candidates, not installed dependencies or validated moderators. See [research](../CHAT_PWA_SAFETY_RESEARCH.md).

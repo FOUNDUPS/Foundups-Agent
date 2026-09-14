@@ -1,11 +1,11 @@
-# Can You Detect AI? - Manifest Draft
+# AmIBot - Manifest Draft
 
 ## Registry Fields (Draft)
 
 | Field | Value |
 |---|---|
 | foundup_id | detect_ai |
-| display_name | Can You Detect AI? |
+| display_name | AmIBot |
 | entity_type | skeleton_candidate |
 | module_path | modules/foundups/detect_ai |
 | stage | incubating |
@@ -22,3 +22,7 @@
 This is Markdown intake, not a runtime manifest or registry mutation. The entity is a consumer-facing token-intended candidate; no token economics are operational. Name/ID are proposed. Full duplicate discovery is pending. Human or Not is an external comparator, not an asserted lineage parent and not a source-code dependency.
 
 No wallet, DNS, chain, route, DAO, CABR-ready, payout-ready or investor entitlement is created. A future architect-owned slice may create a schema-validated manifest and registry entry after preflight and proper authorization. Existing protocol schemas remain authoritative.
+
+## Naming continuity
+
+Display name is AmIBot; tagline is "Can you detect AI?". `detect_ai`, its module path and next-slice identifier remain stable. The older working name is historical provenance. No domain availability, trademark clearance, route activation or registry promotion is claimed.

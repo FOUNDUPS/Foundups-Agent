@@ -1,4 +1,4 @@
-# Can You Detect AI? - Outcome Definition
+# AmIBot - Outcome Definition
 
 ## User Outcome
 People learn how accurately they can distinguish human-controlled conversation from AI, and how well their confidence matches reality. Builders compare small open models and frontier services on the same declared task, protocol, and cost basis. Agent judges are evaluated separately from human judges.
