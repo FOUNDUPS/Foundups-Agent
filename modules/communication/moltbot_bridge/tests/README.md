@@ -1,5 +1,16 @@
 # Tests - OpenClaw Bridge
 
+## Root-owned committed-response retrieval
+
+Reuse `test_foundup_verified_outcome_root_authority_service.py` and its existing
+`record_commit_inputs` fixture. Thirty new cases cover exact bytes after reopening,
+pending/missing/conflicting evidence, foreign pins, generation types and rotation,
+time/ownership rejection, cancellation, concurrent reads and one-sided recovery.
+The proposed read RPC remains rejected; storage retrieval is not read admission.
+Nine connected suites plus three existing size guards pass 348 tests / one Linux-only
+skip. Exact commands and scope: `root_record_read_continuation_20260914` in the RSI
+baseline. Windows ownership/peer checks remain injected; no physical failure proof.
+
 ## Root commitment and mirror restoration
 
 The existing root service suite now covers v2 wire/proof separation, complete

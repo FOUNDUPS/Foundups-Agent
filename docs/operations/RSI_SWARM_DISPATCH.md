@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `mirror_restoration_continuation_20260914` in
+**Current selection evidence:** `root_record_read_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,56 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Root-record readback checkpoint — 2026-09-14
+
+Source: merged PR1735/main `c7e2272fb555d0aef2657b94f142c9d7c7fbbb3d`;
+its exact merge CI and CodeQL succeeded. Fresh WSP 15 retains readback at
+**4+4+4+4 = 16/P0**, ahead of later eligible recovery fixtures. The nine-row
+reassessment, unchanged dependency PRs/alerts and absence of competing root-owner
+PRs are recorded in `root_record_read_continuation_20260914`. Higher runtime,
+model and independent activation candidates still require current admission.
+
+The smallest local prerequisite is now
+`RootVerifiedOutcomeAuthorityState.load_committed_response_for_root(*,
+expected_binding, expected_record_digest, expected_generation, now_epoch) -> bytes`.
+It reuses the existing root lock, installation/ownership checks, fixed pending
+store, bounded snapshot parser and signature/context validators. Before returning
+the exact bytes, it requires the record's generation to match both the supplied
+pin and current mirrored generation, and the authorization marker to be sequence
+2 with the complete record digest. The pending selection must also match. The
+original descriptor/grants must remain valid at the supplied current time.
+
+Healthy repeated/reopened reads preserve the stored payload and terminal state;
+one missing mirror uses the already-validated deterministic recovery path. Pending
+or unavailable bytes, a valid but differently selected response, wrong pins,
+non-integer generation, expired authority, rotation and conflicting state reject.
+The method adds no signing call, reservation reset, caller-selected path or grant.
+
+**Storage integrity is not read authorization.** A separately authenticated
+current read admission must precede any external disclosure. The existing root
+protocol/client/router remain unchanged, and a proposed read RPC still rejects.
+Do not reinterpret conversation/Principal Memex read capabilities or WSP 71
+`get_secret` grants as permission to disclose these records. Cross-generation
+recovery, expired-record recovery and publisher integration remain separate.
+
+Validation: a proposed-API control failed with `AttributeError` before the new
+method existed; it is not an inherited production defect. The 30 new cases pass
+in the existing service suite. Nine connected suites and three unchanged size
+guards pass **348 tests / one Linux-only skip in 133.65s**. The source grows by
+23 lines to 675; the service test file is 1,441 lines and reuses existing fixtures.
+Runtime membership remains 1,400 with one changed source hash; registry remains
+1,650/269. Packaging and exact commands/fingerprints are in the existing baseline.
+Windows peer/ownership checks remain injected; no privileged Linux process or
+physical-volume recovery, runtime activation or retained benefit is claimed.
+
+**Re-scored next action:** purpose-specific current read admission and the
+existing service/client route, **16/P0**. The local storage-read prerequisite is
+removed from outstanding work. Re-observe current authority/source/ownership
+before that slice; this method, its supplied pins and historical signatures
+cannot mint permission. The state owner is at its existing 675-line ceiling;
+future changes must preserve the guard. All 26 packets and six R11 substeps remain
+non-dispatchable, and R11/G4/production RSI remain incomplete.
 
 ### Mirror restoration checkpoint — 2026-09-14
 

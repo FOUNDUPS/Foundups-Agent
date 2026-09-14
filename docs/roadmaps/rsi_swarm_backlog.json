@@ -815,10 +815,10 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_MIRROR_RESTORATION_VERIFIED",
-              "evidence": "mirror_restoration_continuation_20260914",
-              "previous_evidence": "full_record_commit_continuation_20260914",
-              "next": "Independently authenticated response readback (16/P0) through existing root/record/client owners; re-observe current source and admission before execution.",
+              "status": "PARTIAL_ROOT_STORAGE_READ_VERIFIED",
+              "evidence": "root_record_read_continuation_20260914",
+              "previous_evidence": "mirror_restoration_continuation_20260914",
+              "next": "Purpose-specific current read admission and existing root service/client route (16/P0); re-observe exact source/ownership and keep historical grants separate from read authority.",
               "remaining": "Current read authority, ordinary v2 signer/publisher integration, operation deadline, physical process/volume recovery, R11-B-F and retained benefit; no runtime admission"
             }
           },
@@ -1816,12 +1816,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "mirror_restoration_continuation_20260914",
-    "base_commit": "7f4f49b79692a1aa6484544c4e46115fe6690027",
-    "selected_action": "R11-independently-authenticated-response-readback",
-    "status": "selected_after_merged_closure_reobservation",
+    "section": "root_record_read_continuation_20260914",
+    "base_commit": "c7e2272fb555d0aef2657b94f142c9d7c7fbbb3d",
+    "selected_action": "R11-current-read-admission-and-service-route",
+    "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "mirror_restoration_continuation_20260914.post_merge_reobservation"
+    "observation_path": "root_record_read_continuation_20260914.post_sprint_reobservation"
   }
 }

@@ -205,6 +205,29 @@ class RootVerifiedOutcomeAuthorityState:
                 self._advance_pair(authorization_binding(authorization_id), reserved, committed)
             return expected_record_digest
 
+    def load_committed_response_for_root(self, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, expected_generation: ProposalReplayHighWater,
+        now_epoch: int) -> bytes:
+        """Root storage only; the caller must separately authorize any disclosure."""
+        with self._lock():
+            self._require_installed()
+            store = AtomicJsonAuthorityRuntimeStore(
+                self._primary.rollback_domain_root / "verified-outcome-pending-responses.json",
+                allowed_root=self._primary.rollback_domain_root, repo_root=self._repo_root,
+            )
+            self._require_pending_file_ownership(store)
+            records = _pending_response_records(store.load())
+            self._validate_pending_records(records)
+            raw = records.get(expected_binding.authorization_id, "").encode("ascii")
+            generation, _ = _pending_response_context(raw, expected_binding, expected_record_digest, now_epoch)
+            if (type(expected_generation) is not ProposalReplayHighWater
+                or type(expected_generation.sequence) is not int or generation != expected_generation
+                or self._current(GENERATION_BINDING) != generation
+                or self._current(authorization_binding(expected_binding.authorization_id))
+                != ProposalReplayHighWater(2, expected_record_digest[7:])):
+                raise RuntimeError("root_committed_response_context_conflict")
+            return raw
+
     def _validate_pending_records(self, records: Mapping[str, str]) -> None:
         for authorization_id, text in records.items():
             marker = self._current(pending_response_binding(authorization_id))

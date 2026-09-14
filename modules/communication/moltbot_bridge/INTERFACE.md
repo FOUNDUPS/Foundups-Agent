@@ -188,7 +188,7 @@ administered principal-key resolver.
 
 ### Verified-outcome authority, signing and memory
 
-The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [mirror-restoration checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#mirror-restoration-checkpoint--2026-09-14) records the latest local layer.
+The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [root-record readback checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14) records the latest local layer.
 
 | Existing API / owner | Current contract |
 |---|---|
@@ -197,7 +197,7 @@ The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-
 | `VerifiedOutcomeResponseBinding(descriptor_id, owner_config_id, authorization_id, reservation_id)` | Frozen public identifiers, never a root capability. |
 | `build_verified_outcome_response_record(request, response, *, descriptor, binding, signature_verifier) -> bytes` | Canonical v1 full signed history, exact types/schema, complete 64 KiB cap. |
 | `parse_verified_outcome_response_record(raw, *, expected_binding, expected_record_digest, signature_verifier) -> tuple[SigningRequest, SigningResponse]` | Checks independently supplied pins and historical signatures; supplies no current read authorization. |
-| `RootVerifiedOutcomeAuthorityState.persist_pending_response(...)` / `commit_pending_response(raw, *, expected_binding, expected_record_digest, expected_reservation, now_epoch) -> str` | Shared root lock/current generation/record validation and exact atomic readback. Pending preserves sequence 1; commit requires the outer reservation and advances to sequence 2/full-record digest or acknowledges the exact current terminal state. |
+| Root response storage: `persist_pending_response(...)`, `commit_pending_response(...)`, `load_committed_response_for_root(*, expected_binding, expected_record_digest, expected_generation, now_epoch) -> bytes` | Pending preserves sequence 1; commit binds sequence 2 to the full record digest. Root storage read requires exact current generation/selection/terminal pins, ownership, signatures and the original authority time window. It grants no read permission and enables no RPC; current independent admission remains required before disclosure. |
 | `AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` / `publish()` | Validated STAGED/ACTIVE retry evidence; three revision attempts preserve the signed envelope and unrelated state. Staging is invisible to consumable readers. |
 | `SignedVerifiedOutcomeEvidencePublisher.publish()` | Exact durable winner acknowledgment preserves original issuance/signature; no re-signing, renewal or activation. |
 | `ResidentQueueChainResultReceipt.recorded_at` | Canonical held-out event time supplies admission `verified_at`; bootstrap time cannot repair absent historical time. |

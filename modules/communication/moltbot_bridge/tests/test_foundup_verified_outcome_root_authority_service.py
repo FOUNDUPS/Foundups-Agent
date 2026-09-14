@@ -1271,3 +1271,171 @@ def test_full_record_commit_requires_original_process_reservation_before_exchang
     with pytest.raises(ValueError, match="reservation_invalid"):
         client_module.commit_service_response_record_proof_input(v.authority, forged, v.raw, v.digest)
     assert not v.path.exists()
+
+
+def _read_root_record(values, **overrides):
+    arguments = dict(
+        expected_binding=values.binding, expected_record_digest=values.digest,
+        expected_generation=ProposalReplayHighWater(
+            values.descriptor["authority_generation_sequence"], values.binding.owner_config_id[7:],
+        ), now_epoch=NOW,
+    )
+    arguments.update(overrides)
+    return values.state.load_committed_response_for_root(**arguments)
+
+
+def test_root_record_read_returns_exact_commit_without_resigning(record_commit_inputs, tmp_path):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    original = v.path.read_bytes()
+    committed = v.state.load(authorization_binding(v.grant["authorization_id"]))
+    assert _read_root_record(v) == v.raw
+    v.state, *_stores_value = _state(tmp_path, v.descriptor)
+    assert _read_root_record(v) == v.raw
+    assert v.path.read_bytes() == original
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == committed
+    assert v.counts["outcome_signatures"] == 1 and _reserve(v.authority, v.grant) is None
+
+
+@pytest.mark.parametrize("pending", [False, True], ids=["signed-only", "pending-only"])
+def test_root_record_read_never_discloses_uncommitted_bytes(record_commit_inputs, pending):
+    v = record_commit_inputs
+    if pending:
+        v.state.persist_pending_response(v.raw, expected_binding=v.binding,
+                                        expected_record_digest=v.digest, now_epoch=NOW)
+    original = v.path.read_bytes() if pending else None
+    with pytest.raises((ValueError, RuntimeError)):
+        _read_root_record(v)
+    assert (v.path.read_bytes() if v.path.exists() else None) == original
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])).sequence == 1
+
+
+@pytest.mark.parametrize("field", ["descriptor_id", "owner_config_id", "authorization_id", "reservation_id"])
+def test_root_record_read_rejects_each_foreign_binding(record_commit_inputs, field):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    original = v.path.read_bytes()
+    changed = "verified-outcome-authorization-" + "a" * 32 if field == "authorization_id" else _sha("other")
+    with pytest.raises((ValueError, RuntimeError)):
+        _read_root_record(v, expected_binding=replace(v.binding, **{field: changed}))
+    assert v.path.read_bytes() == original and v.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("fault", ["digest", "sequence", "revision", "bool-generation", "float-generation",
+                                  "missing-generation", "expired", "bool-clock", "before-issuance"])
+def test_root_record_read_requires_exact_generation_digest_and_time(record_commit_inputs, fault):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    sequence, revision = v.descriptor["authority_generation_sequence"], v.binding.owner_config_id[7:]
+    arguments = {
+        "digest": {"expected_record_digest": _sha("other")},
+        "sequence": {"expected_generation": ProposalReplayHighWater(sequence + 1, revision)},
+        "revision": {"expected_generation": ProposalReplayHighWater(sequence, "a" * 64)},
+        "bool-generation": {"expected_generation": ProposalReplayHighWater(True, revision)},
+        "float-generation": {"expected_generation": ProposalReplayHighWater(float(sequence), revision)},
+        "missing-generation": {"expected_generation": None},
+        "expired": {"now_epoch": v.descriptor["expires_at"]},
+        "bool-clock": {"now_epoch": True}, "before-issuance": {"now_epoch": 0},
+    }[fault]
+    with pytest.raises((ValueError, RuntimeError)):
+        _read_root_record(v, **arguments)
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+
+
+@pytest.mark.parametrize("current_pin", [False, True], ids=["historical-pin", "new-generation-pin"])
+def test_root_record_read_does_not_turn_generation_rotation_into_read_authority(record_commit_inputs, current_pin):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    next_generation = ProposalReplayHighWater(v.descriptor["authority_generation_sequence"] + 1, _sha("new-owner")[7:])
+    v.state.observe_generation(next_generation.sequence, "sha256:" + next_generation.state_revision)
+    arguments = {"expected_generation": next_generation} if current_pin else {}
+    with pytest.raises(RuntimeError, match="committed_response_context_conflict"):
+        _read_root_record(v, **arguments)
+    assert v.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("loss", ["primary", "witness"])
+def test_root_record_read_uses_existing_one_sided_mirror_recovery(record_commit_inputs, tmp_path, loss):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    getattr(v.state, "_" + loss).path.unlink()
+    v.state, *_stores_value = _state(tmp_path, v.descriptor)
+    assert _read_root_record(v) == v.raw
+    binding = authorization_binding(v.grant["authorization_id"])
+    assert v.state._primary.load(binding) == v.state._witness.load(binding) == ProposalReplayHighWater(2, v.digest[7:])
+
+
+@pytest.mark.parametrize("fault", ["payload-missing", "corrupt-payload", "different-valid-record",
+                                  "selection-missing", "terminal-changed", "both-mirrors"])
+def test_root_record_read_rejects_missing_or_conflicting_durable_evidence(record_commit_inputs, tmp_path, fault):
+    from modules.communication.moltbot_bridge.tests.test_reddog_ed25519_verified_outcome_signing import _alternate_pending_response
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    if fault == "payload-missing": v.path.unlink()
+    elif fault == "corrupt-payload": v.path.write_bytes(b'{"untrusted":true}\n')
+    elif fault == "different-valid-record":
+        other_raw, _digest = _alternate_pending_response(v)
+        snapshot = v.store.load()
+        v.store.commit(state_module._pending_response_snapshot({v.grant["authorization_id"]: other_raw.decode("ascii")}),
+                       expected_revision=snapshot["revision"])
+    elif fault == "selection-missing":
+        for store in (v.state._primary, v.state._witness):
+            with store._connect() as connection:
+                connection.execute("DELETE FROM high_water WHERE binding_digest = ?",
+                                   (state_module.pending_response_binding(v.grant["authorization_id"]),))
+                connection.commit()
+    elif fault == "terminal-changed":
+        v.state.advance(authorization_binding(v.grant["authorization_id"]),
+                        expected=ProposalReplayHighWater(2, v.digest[7:]), next_value=ProposalReplayHighWater(3, "a" * 64))
+    else:
+        v.state._primary.path.unlink()
+        v.state._witness.path.unlink()
+        v.state, *_stores_value = _state(tmp_path, v.descriptor)
+    original = v.path.read_bytes() if v.path.exists() else None
+    with pytest.raises((ValueError, RuntimeError)):
+        _read_root_record(v)
+    assert (v.path.read_bytes() if v.path.exists() else None) == original and v.counts["outcome_signatures"] == 1
+
+
+def test_root_record_read_requires_owner_before_loading_payload(record_commit_inputs, monkeypatch):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    loads = []
+    def deny_owner(): raise ValueError("fixture_root_owner_changed")
+    def observe_load(_store): loads.append(True); raise AssertionError("payload read before owner")
+    monkeypatch.setattr(v.state, "_require_current_ownership", deny_owner)
+    monkeypatch.setattr(state_module.AtomicJsonAuthorityRuntimeStore, "load", observe_load)
+    with pytest.raises(ValueError, match="root_owner_changed"):
+        _read_root_record(v)
+    assert not loads
+
+
+def test_root_record_read_cancellation_does_not_reopen_commit(record_commit_inputs, monkeypatch):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    def cancelled(*_args): raise SystemExit("fixture_read_cancelled")
+    monkeypatch.setattr(state_module, "_pending_response_context", cancelled)
+    with pytest.raises(SystemExit, match="read_cancelled"):
+        _read_root_record(v)
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+    assert v.counts["outcome_signatures"] == 1
+
+
+def test_root_record_read_concurrent_retries_preserve_one_commit(record_commit_inputs):
+    v = record_commit_inputs
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        assert list(pool.map(lambda _index: _read_root_record(v), range(8))) == [v.raw] * 8
+    assert v.counts["outcome_signatures"] == 1
+
+
+def test_root_record_storage_primitive_does_not_enable_a_read_rpc(record_commit_inputs):
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+    wire = decode_message(request.to_bytes())
+    wire["operation"] = "READ_COMMITTED_RECORD"
+    reply = handle_root_authority_request(encode_message(wire), peer=_peer(), state=v.state,
+                                          snapshot_supplier=lambda: v.current["snapshot"], now_epoch=NOW)
+    assert decode_message(reply) == {"status": "REJECT"}
+    assert v.raw not in reply and v.counts["outcome_signatures"] == 1

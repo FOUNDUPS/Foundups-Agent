@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Root-owned committed-response storage read
+
+- Added `load_committed_response_for_root()` to the existing root state owner. Reused fixed pending storage, installed ownership, lock, exact generation/selection/terminal state and historical signature/current original-window validation. Healthy reads retain payload/state; one-sided mirror recovery uses the existing path.
+- Added 30 cases to the existing root service suite. Connected root/signing/revocation/provisioning/runtime/protected-use and unchanged size guards pass 348 tests / one Linux-only skip. Root source is 675 lines; no guard, public wire protocol, authority policy or new module changed.
+- This method is a storage primitive, not current read admission. The existing router rejects the proposed read operation; no grant is minted, no reservation reopened, and no signer/publisher activation occurs. Independent current read authorization/service wiring remains next at 16/P0. Evidence: `root_record_read_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Recover exact later-sequence state from an existing mirror
 
 - Remote closure: PR #1734 merged as `7f4f49b79692a1aa6484544c4e46115fe6690027` after ten successful exact-head checks. The 18 owned Git blobs match the merge. Post-merge WSP 15/WSP 97 re-observation retains authenticated readback 16/P0; local test counts below are preserved evidence, not a new run.
