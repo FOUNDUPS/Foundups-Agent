@@ -8202,5 +8202,496 @@
     ],
     "dispatchable": false,
     "retained_improvement_proven": false
+  },
+  "activation_recovery_continuation_20260914": {
+    "base_commit": "21afc9108fec741ec883efacc47e542dc2461a7b",
+    "observed_at": "2026-09-14T11:00:12.627160+00:00",
+    "last_observed_at": "2026-09-14T11:12:59.682994+00:00",
+    "origin": "external_principal",
+    "execution_plane": "authorized_local_source_authoring",
+    "status": "LOCAL_EXACT_ACTIVATION_RECOVERY_VERIFIED",
+    "wsp00": {
+      "awakening_executed": true,
+      "tracked_state_writes": false,
+      "gate": {
+        "gate_passed": true,
+        "attempted_awakening": false,
+        "awakening_success": false,
+        "is_zen_compliant": true,
+        "requires_awakening": false,
+        "last_validation": "2026-09-14T19:54:44.067460",
+        "session_id": 1789307432,
+        "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+        "action": "check"
+      },
+      "truth_boundary": "Repository software gate only."
+    },
+    "previous_closure": {
+      "number": 1739,
+      "state": "MERGED",
+      "merge_sha": "21afc9108fec741ec883efacc47e542dc2461a7b",
+      "main_ci": {
+        "run": 34833875801,
+        "conclusion": "success"
+      },
+      "codeql": {
+        "run": 34833873984,
+        "conclusion": "success"
+      }
+    },
+    "retrieval": {
+      "mode": "lexical; UNKNOWN; index_gap_detected=true; owner_attempts=0",
+      "noise": "Broad memory/authority hits; direct target docs and exact symbols used to narrow.",
+      "ordering": "Governing WSPs, module contracts, selected source, neighboring stores/readers, existing tests.",
+      "missing": "No required module documents missing; optional memory/README.md and requirements.txt absent.",
+      "staleness": "Workspace HEAD is base; committed semantic authority is a different SHA and is not accepted as current evidence. Direct read paths point to this clean owned worktree.",
+      "duplication": "Existing authority store and publication retry pattern; use existing adversarial test suite and runtime-authority fixtures. No new module/doc/test file.",
+      "improvement": "Must-include docs and exact source/test reads; no owner launch or reindex."
+    },
+    "ranked_queue_before": [
+      {
+        "task": "independent-execution-verification-promotion",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Independent runtime admission absent"
+      },
+      {
+        "task": "integrated-mcp-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+      },
+      {
+        "task": "wre-openclaw-hermes-worker",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current signed job/model/runtime admission absent"
+      },
+      {
+        "task": "chroma-deployment",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current deployment owner and runtime qualification"
+      },
+      {
+        "task": "R11-B-activation-recovery",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "selected",
+        "next_step": "Author existing activation reconciliation using real disposable stores; no new permission or activation binding"
+      },
+      {
+        "task": "authenticated-response-read",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "012 reader-policy question remains unanswered"
+      },
+      {
+        "task": "current-semantic-retrieval",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Governed owner qualification; current fallback UNKNOWN/index gap"
+      },
+      {
+        "task": "protected-foundup-work",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "external",
+        "next_step": "YUMORI/eSingularity and separate autopost ownership"
+      },
+      {
+        "task": "auto-researcher-process-durability",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 13,
+        "priority": "P1",
+        "state": "eligible-later",
+        "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+      }
+    ],
+    "selected_before_sprint": "R11-B-activation-recovery",
+    "wsp97": {
+      "closed": "PR1739 exact accepted-record visibility guard; CI verified.",
+      "micro": "activate commits once and propagates lost acknowledgment or unrelated CAS conflict despite a consistent accepted record.",
+      "macro": "Handler callbacks do not implement one acceptance decision; PatternMemory successful reads inspect skill_outcomes directly. New retry must not reverse callbacks or grant activation.",
+      "alternatives": "New coordinator or activation flag would preempt current admission contract; reusing immutable envelope and existing CAS/readback provides a bounded recovery layer.",
+      "cost": "Single local source owner and existing test fixtures. Qwen/Gemma runtime dispatch has no current admitted binding; no model/provider call is needed for deterministic fault tests.",
+      "execution_plane": "Local source/test maintenance; WRE runtime admission not applicable to this authoring operation.",
+      "decision": "Keep memory-side acceptance decision and accepted row in one future SQLite transaction; authority ACTIVE is a recoverable view, not a substitute grant. Define in existing runbook before activating any factory."
+    },
+    "ownership": {
+      "open_prs_checked": 96,
+      "file_lists_truncated": false,
+      "source_and_test_overlap": [],
+      "generated_only_overlap": {
+        "pr": 1680,
+        "head": "a60ea1e655f5247d871b0e958e7c5387ba40df7e",
+        "paths": [
+          "scripts/reddog_backend_manifest.json",
+          "extensions/reddog/backend_compatibility_constants.js",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "disposition": "Other PR owns public-host source changes, not this outcome adapter. Do not alter its branch; each closure must regenerate against its own exact source."
+      },
+      "shared_document_overlaps": [
+        {
+          "pr": 1648,
+          "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
+          "paths": [
+            "ModLog.md",
+            "modules/communication/moltbot_bridge/ModLog.md",
+            "modules/communication/moltbot_bridge/README.md"
+          ],
+          "disposition": "Shared canonical journals/module navigation; preserve historical bodies and other source lanes. Reconcile current main before closure."
+        },
+        {
+          "pr": 1645,
+          "head": "c3666c02c1a819f8906e56f31fdc67d6ad46111d",
+          "paths": [
+            "modules/communication/moltbot_bridge/INTERFACE.md",
+            "modules/communication/moltbot_bridge/ModLog.md",
+            "modules/communication/moltbot_bridge/README.md",
+            "modules/communication/moltbot_bridge/ROADMAP.md",
+            "modules/communication/moltbot_bridge/tests/README.md",
+            "modules/communication/moltbot_bridge/tests/TestModLog.md"
+          ],
+          "disposition": "Shared canonical journals/module navigation; preserve historical bodies and other source lanes. Reconcile current main before closure."
+        },
+        {
+          "pr": 802,
+          "head": "de63ab95aab0ca11247cf2620cb4bc559bbce16c",
+          "paths": [
+            "ModLog.md"
+          ],
+          "disposition": "Shared canonical journals/module navigation; preserve historical bodies and other source lanes. Reconcile current main before closure."
+        },
+        {
+          "pr": 782,
+          "head": "b8b90afbab605c396054a8171f7c4ae2399fb2c5",
+          "paths": [
+            "ModLog.md"
+          ],
+          "disposition": "Shared canonical journals/module navigation; preserve historical bodies and other source lanes. Reconcile current main before closure."
+        }
+      ]
+    },
+    "changes": {
+      "source": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py",
+      "test": "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py",
+      "behavior": "Retain the initial exact envelope digest, reconcile current durable state and accepted memory after every commit attempt, recover an identical ACTIVE winner/lost acknowledgment, and retry only revision conflicts up to three commits. Other failures remain errors absent exact durable success; cancellation propagates.",
+      "reuse": "Existing publication CAS/readback pattern and real authority/PatternMemory fixtures; no new module, test file, runtime API, manifest member or admission binding.",
+      "source_lines": 306,
+      "test_lines": 416,
+      "old_test_definitions_preserved": 10,
+      "new_cases": 23,
+      "new_test_definitions": 7,
+      "source_sha256": "66f1a65d3d6481380efb3372d54d9a13341ada4681bf7692e4092f0f9c9af134",
+      "test_sha256": "5fb303fee446267ba26de4578ccc74381b473acd330755431916f0b42ed333e1"
+    },
+    "acceptance_decision_contract": {
+      "status": "DESIGN_ONLY_NOT_IMPLEMENTED_OR_ADMITTED",
+      "decision_owner": "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py",
+      "transaction_owner": "modules/infrastructure/wre_core/src/pattern_memory.py",
+      "authority_view_owner": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py",
+      "coordinator_owner": "modules/communication/moltbot_bridge/src/reddog_resident_queue_pattern_memory_admission_handler.py",
+      "commit_rule": "After independently authorized current memory-write validation, commit the acceptance decision and exact accepted skill_outcomes row in one SQLite transaction. The authority ACTIVE view is repaired afterward against that durable decision, not made the memory-write grant.",
+      "required_binding": "Full canonical record digest, exact signed envelope digest, work-order/job/scope identities, memory participant identity, and independently authenticated current write-authority evidence. A short record ID, readiness boolean, receipt supplied by the worker, or Memex read capability is insufficient.",
+      "recovery_rule": "Before memory commit, prepared artifacts remain outside successful recall. After commit, same-decision retries reconstruct the authority view without another memory effect, signature or timestamp. Conflicting decisions are retained and rejected; never undo an accepted winner as generic cleanup.",
+      "reader_boundary": "PatternMemory.recall_successful_patterns and direct skill_outcomes readers do not consult the JSON authority view. The row and acceptance decision therefore must commit together; separately calling store_outcome (which commits itself) before writing a decision cannot satisfy the contract.",
+      "prerequisite": "Resolve existing purpose-specific memory-write authority and protected-use lifetime at the transaction boundary, with admitted participant identity. R11-C/D remain closed; this contract and source retry do not provide that authority.",
+      "proof_remaining": "Composed real participant tests for each fault boundary; process death, concurrent writers, storage/volume failure, expiry/revocation, every successful-memory reader, and measured benefit on a later invocation."
+    },
+    "validation": {
+      "before": {
+        "tests": 23,
+        "failures": 13,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 10,
+        "seconds": 7.056,
+        "junit_sha256": "9a7547b33d459db32427302dbbe6e23a6d3c290f01657f83a9b04787111afd41",
+        "log_sha256": "589e3062eb912c95e1dc39993e009530010022b294d58d154e8df4313c13b50f"
+      },
+      "focused": {
+        "tests": 110,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 110,
+        "seconds": 26.267,
+        "junit_sha256": "a582a9883cab315de7e765b08e3ecea64cdc577caff7ae79f2b820cf4b26c934",
+        "log_sha256": "52ef656fd72ee5a9ebf06de05cc1febd251ee5f22be588ebe9c99180aa57175d"
+      },
+      "connected": {
+        "tests": 204,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 204,
+        "seconds": 28.597,
+        "junit_sha256": "ca6d4c15f86163179e060aea73ddd06aca2afc6e6ca2d41b6c2b1fde8735420f",
+        "log_sha256": "0626ee8bbb9f2204fbf1bc495b6b0ef1ef4420831d8fe997400d4e9f6e52e64c"
+      },
+      "manifest": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 8,
+        "seconds": 77.311,
+        "junit_sha256": "3f40e978811323c3d5b9693adac0ca73a1dfd976bdee0cccbfd05d4ce89ba8e7",
+        "log_sha256": "ffbb44a300f583ef129142b23c8b14d36bfa06275a3ac7470eece907c024a1fa",
+        "members": 1400,
+        "changed_runtime_hashes": [
+          "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py"
+        ],
+        "digest": "68b038e9ec86967c8e9a426e2fe9fa5e798a717966852466167fe8434a935c02"
+      },
+      "before_scope": "23 new activation cases: 13 failed and 10 passed. Failures include missing lost-ack/CAS recovery and expected fail-closed reconciliation outcomes; existing APIs/real stores were used.",
+      "connected_test_files": [
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_operational_memex_snapshot_supplier.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py"
+      ],
+      "commands": {
+        "python": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest <exact files> --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=<artifact-root>/<run> --tb=short -q --junitxml=<artifact-root>/<run>.xml",
+        "manifest_generation": "scripts/generate_reddog_backend_manifest.py --write",
+        "fast": "C:/Program Files/nodejs/node.exe extensions/reddog/tests/run_reddog_test_tier.js fast",
+        "registry": "modules/infrastructure/wre_core/scripts/generate_test_registry.py --check"
+      },
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "TEMP_TMP": "O:\\Foundups-Agent-audits\\20260909-rsi\\acceptance-decision-20260914\\temp",
+        "FOUNDUPS_DB_PATH": "O:\\Foundups-Agent-audits\\20260909-rsi\\acceptance-decision-20260914\\agent.db",
+        "WRE_PATTERN_MEMORY_DB": "O:\\Foundups-Agent-audits\\20260909-rsi\\acceptance-decision-20260914\\patterns.db",
+        "REDDOG_TEST_SITE_PACKAGES": "O:/Foundups-Agent/.venv/Lib/site-packages"
+      },
+      "fast": {
+        "groups": 15,
+        "milliseconds": 3227,
+        "log_sha256": "6ccc948bcd6b0e0150122e91b6843df78e3a9c472593846ace61f6a987aed749",
+        "initial_failure": "Owned pin edit wrote CRLF; existing package byte-contract rejected it. Restored LF in both owned pin files and reran successfully; no guard changed.",
+        "initial_log_sha256": "0e87331ad741acb434d4141fac57564f24ae131fb4d4def0a20689cc1a4164e6"
+      },
+      "registry": {
+        "tracked": 1650,
+        "quarantined": 269,
+        "current": true
+      },
+      "truth_boundary": "Windows local real disposable JSON/SQLite stores, injected commit/read faults and competing object writer, signature doubles. No spawned-process/physical-volume/current-runtime or independent-verifier proof in this sprint. Counts overlap; no skips in selected runs."
+    },
+    "reader_policy": "Earlier 012 question remains unanswered; do not add external response-read access or default to a preselected option.",
+    "remaining": [
+      "Memory acceptance decision implementation and independently authenticated write participant",
+      "R11-C/D current startup and activation admission",
+      "Composed process/volume and concurrent recovery",
+      "Purpose-specific response-read policy and ordinary v2 publisher integration",
+      "Later invocation with measured retained RSI benefit"
+    ],
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\acceptance-decision-20260914",
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T11:06:20.603184+00:00",
+      "origin_main": "21afc9108fec741ec883efacc47e542dc2461a7b",
+      "open_pr_count": 96,
+      "relevant_open_prs": [
+        {
+          "headRefName": "docs/autoagent-lab-park-note",
+          "headRefOid": "bb8d46e61ce98d9934ca506b2b64619436fb7cb0",
+          "number": 418,
+          "title": "docs(autoagent): document Layer 3 cutoff and reactivation gate",
+          "updatedAt": "2026-04-21T12:35:32Z"
+        }
+      ],
+      "ranked_queue": [
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "selected",
+          "next_step": "Bind a durable memory acceptance decision to the existing write-authority/protected-use contract before changing the sink transaction; preserve closed production defaults. Authority activation retry is locally complete."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Governed owner qualification; current fallback UNKNOWN/index gap"
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        }
+      ],
+      "selected_action": "R11-B-memory-acceptance-contract",
+      "score": 16,
+      "priority": "P0",
+      "source_closure": "Activation CAS/readback recovery locally verified: 204 connected cases, 8 manifest tests, 15 fast groups. Exact-head PR closure still required; no candidate remote-check claim.",
+      "external_boundaries": "Separate autopost; protected YUMORI/eSingularity; no production runtime or current reader-policy resolution."
+    },
+    "dispatchable": false
   }
 }

@@ -1,11 +1,12 @@
 # moltbot_bridge Roadmap
 
-- PARTIAL R11-B ACCEPTANCE VISIBILITY: exact accepted-memory content is now
-  required before authority activation and envelope reads. The reproduced local
-  exposure guard passes 181 connected tests; production factories remain unbound.
-  Continue the [canonical R11-B decision](../../../docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14)
-  at 16/P0; cross-store recovery, current runtime composition and retained benefit
-  remain open. No new activation path is enabled.
+- PARTIAL R11-B ACTIVATION RECOVERY: existing authority activation now reconciles
+  exact committed success after lost acknowledgment or competing revisions.
+  204 connected tests, 8 manifest tests and 15 fast groups pass. Continue the
+  [memory acceptance contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14)
+  at 16/P0: bind decision and accepted row to one transaction under independent
+  current write authority. Production factories and sink activation remain closed;
+  composed process/volume recovery and retained benefit remain open.
 
 - COMPLETE AT EXACT MAIN `09e98fff` - PRE-OWNER EXACT-HEAD REPAIR ADMISSION: a
   zero-attempt `REPO_HEAD_MISMATCH` now reaches the existing post-merge task

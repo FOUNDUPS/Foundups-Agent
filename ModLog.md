@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Recover exact authority activation after interrupted acknowledgment
+
+- Existing authority-store activation now pins the envelope digest, reconciles durable ACTIVE state and current accepted memory, and retries only revision conflicts up to three commits. Lost replies and identical winners recover; cancellation, substitution and uncertain state fail closed.
+- Reused the existing adversarial suite and real store/PatternMemory fixtures: 23 new cases, 13 failures before repair; 204 connected tests, 8 manifest tests and 15 fast groups pass. Original test definitions are preserved; source/test files are 306/416 lines. One runtime hash and both existing pins changed; no new module, file or exemption.
+- R11-B remains partial. Its existing runbook now specifies a future atomic memory decision/row commitment under independent current write authority; production composition and activation remain closed. Fresh selection is that contract at 16/P0. Evidence: `activation_recovery_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Require exact accepted memory before outcome exposure
 
 - Reproduced readable durable authority after a rejected memory activation; extended the existing authority-store adapter with exact accepted-record checks before activation, after commit and at envelope reads. Unbound production factories remain closed. No replacement coordinator or sink activation.

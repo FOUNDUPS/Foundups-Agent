@@ -79,33 +79,54 @@ class AuthorityRuntimeVerifiedOutcomeStore:
         raise RuntimeError("revision_conflict")
 
     def activate(self, record_id: str) -> str:
-        """Activate one exact staged envelope after durable outcome admission."""
+        """Reconcile exact activation without renewing evidence or admission."""
 
         candidate = str(record_id or "").strip()
         if not candidate:
             raise ValueError("verified_outcome_activation_record_id_missing")
+        current, state, entry = self._activation_state(candidate)
+        envelope = entry["envelope"]
+        expected_digest = _digest(envelope)
+        for _attempt in range(3):
+            if entry["status"] == "ACTIVE":
+                return candidate
+            state["evidence"][candidate] = {"status": "ACTIVE", "envelope": envelope}
+            updated = dict(current)
+            updated[_STATE_KEY] = state
+            failure = None
+            try:
+                self._store.commit(updated, expected_revision=current.get("revision"))
+            except (OSError, RuntimeError, ValueError) as exc:
+                failure = exc
+            # A commit reply is not evidence. Reopen the exact envelope and
+            # revalidate current accepted memory, including on a lost reply.
+            current, state, entry = self._activation_state(candidate, expected_digest)
+            if entry["status"] == "ACTIVE":
+                return candidate
+            if failure is None:
+                raise RuntimeError("verified_outcome_activation_not_durable")
+            if not isinstance(failure, RuntimeError) or str(failure) != "revision_conflict":
+                raise failure
+        raise RuntimeError("revision_conflict")
+
+    def _activation_state(
+        self, candidate: str, expected_digest: str | None = None
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+        """Read a retryable state without accepting a substituted publication."""
+
         current = self._store.load()
         state = _state_from(current)
-        evidence = dict(state["evidence"])
-        raw = evidence.get(candidate)
+        raw = state["evidence"].get(candidate)
         if not isinstance(raw, Mapping):
             raise ValueError("verified_outcome_activation_stage_missing")
         entry = dict(raw)
         envelope = _validated_envelope(entry.get("envelope"))
-        if envelope["record_id"] != candidate:
+        if envelope["record_id"] != candidate or (
+            expected_digest is not None and _digest(envelope) != expected_digest
+        ):
             raise ValueError("verified_outcome_activation_binding_mismatch")
         self._require_accepted_record(envelope)
-        if entry.get("status") == "ACTIVE":
-            return candidate
-        if set(entry) != {"status", "envelope"} or entry.get("status") != "STAGED":
-            raise ValueError("verified_outcome_activation_state_invalid")
-        evidence[candidate] = {"status": "ACTIVE", "envelope": envelope}
-        state["evidence"] = evidence
-        updated = dict(current)
-        updated[_STATE_KEY] = state
-        self._store.commit(updated, expected_revision=current.get("revision"))
-        self._require_accepted_record(envelope)
-        return candidate
+        return current, state, entry
 
     def load_publication(self, record_id: str) -> Mapping[str, Any] | None:
         """Read staged or active evidence for exact publication retry only.

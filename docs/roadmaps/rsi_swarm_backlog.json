@@ -790,7 +790,7 @@
       "authority_activation_plan": {
         "source_commit": "5c29a0af1eabc49ee97939e7eca800fb36d22407",
         "status": "PLANNING_ONLY_NOT_RUNTIME_ADMITTED",
-        "next_local_substep": "R11-A",
+        "next_local_substep": "R11-B",
         "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#authority_activation_continuation_20260914",
         "runbook": "docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14",
         "invariant": "No accepted, consumable learning outcome until independently authorized evidence and memory acceptance agree durably; retries preserve the admitted event without bypassing fresh authority checks.",
@@ -834,16 +834,19 @@
             "tests": [
               "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py",
               "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py",
-              "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py"
+              "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py",
+              "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py"
             ],
             "acceptance": "A failed memory operation cannot expose accepted evidence to the existing Memex authority/reader. Demonstrate recoverable durable agreement across both stores with real adapters and injected failures. Signer protected-use ordering is not proof of cross-store atomicity.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_EXACT_ACCEPTED_RECORD_VISIBILITY_GUARD_VERIFIED",
-              "evidence": "acceptance_visibility_continuation_20260914",
-              "next": "Re-observe recoverable acceptance decision and admitted participant binding 16/P0 through existing owners.",
-              "remaining": "Cross-store transaction/recovery, every memory consumer, runtime binding, activation and retained benefit remain unproven. No runtime admission."
-            }
+              "status": "PARTIAL_EXACT_ACTIVATION_RECOVERY_VERIFIED",
+              "evidence": "activation_recovery_continuation_20260914",
+              "previous_evidence": "acceptance_visibility_continuation_20260914",
+              "next": "Re-observe memory acceptance/write-authority contract 16/P0 before changing the sink transaction; use the existing owners and runbook contract.",
+              "remaining": "Durable acceptance decision/row transaction, independently authenticated participant, runtime composition/activation, composed recovery and retained benefit."
+            },
+            "acceptance_decision_contract": "docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14"
           },
           {
             "id": "R11-C",
@@ -906,7 +909,8 @@
             "dispatchable": false
           }
         ],
-        "authority": "Substeps refine R11 only; no new scheduler, independent global packet, model binding, budget or executable authorization."
+        "authority": "Substeps refine R11 only; no new scheduler, independent global packet, model binding, budget or executable authorization.",
+        "current_reconciliation_evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#activation_recovery_continuation_20260914"
       },
       "latest_publication_retry_evidence": {
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
@@ -1822,12 +1826,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "acceptance_visibility_continuation_20260914",
-    "base_commit": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
-    "selected_action": "R11-B-recoverable-acceptance-decision",
+    "section": "activation_recovery_continuation_20260914",
+    "base_commit": "21afc9108fec741ec883efacc47e542dc2461a7b",
+    "selected_action": "R11-B-memory-acceptance-contract",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "acceptance_visibility_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "activation_recovery_continuation_20260914.post_sprint_reobservation"
   }
 }

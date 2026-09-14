@@ -6,6 +6,7 @@ import ast
 import copy
 import hashlib
 import pickle
+from types import SimpleNamespace
 
 import pytest
 
@@ -35,6 +36,14 @@ from modules.communication.moltbot_bridge.tests.test_foundup_memex_verified_outc
     _rehash_verifier,
     _signed_receipt,
     _verifier_receipt,
+)
+from modules.communication.moltbot_bridge.tests.test_foundup_memex_verified_outcome_runtime_authority import (
+    _digest,
+    _publication_attempt,
+    _store,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_verified_pattern_memory_sink import (
+    _seed_active,
 )
 
 
@@ -240,3 +249,168 @@ def test_authentication_modules_have_no_model_network_storage_or_holoindex_effec
             for alias in node.names
         }
         assert imports.isdisjoint(banned)
+
+
+def _activation_attempt(tmp_path):
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    assert publisher.publish(**request) == request["record_id"]
+    _seed_active(tmp_path / "memory.db", request["record_id"], request["record"])
+    return store, publisher, signer, request
+
+
+@pytest.mark.parametrize("error_type", [OSError, RuntimeError, ValueError])
+def test_activation_reconciles_lost_commit_acknowledgment(tmp_path, monkeypatch, error_type):
+    store, publisher, signer, request = _activation_attempt(tmp_path)
+    envelope = store.load_publication(request["record_id"])
+    commit, committed = store._store.commit, []
+    def lost_ack(snapshot, *, expected_revision):
+        commit(snapshot, expected_revision=expected_revision)
+        committed.append((tmp_path / "authority.json").read_bytes())
+        raise error_type("activation_ack_lost")
+    monkeypatch.setattr(store._store, "commit", lost_ack)
+    assert publisher.activate(request["record_id"]) == request["record_id"]
+    assert len(committed) == len(signer.requests) == 1
+    assert (tmp_path / "authority.json").read_bytes() == committed[0]
+    assert _store(tmp_path).load_envelope(request["record_id"]) == envelope
+    assert publisher.activate(request["record_id"]) == request["record_id"]
+    assert len(committed) == 1
+
+
+@pytest.mark.parametrize("conflicts", [1, 2, 3])
+def test_activation_reconciles_unrelated_updates_without_replacing_them(tmp_path, monkeypatch, conflicts):
+    store, publisher, signer, request = _activation_attempt(tmp_path)
+    raw, attempts = store._store, []
+    commit = raw.commit
+    envelope = store.load_publication(request["record_id"])
+    def other_writer(snapshot, *, expected_revision):
+        attempts.append(snapshot)
+        if len(attempts) <= conflicts:
+            other = raw.load()
+            other["unrelated_writer_sequence"] = len(attempts)
+            commit(other, expected_revision=other.get("revision"))
+        return commit(snapshot, expected_revision=expected_revision)
+    monkeypatch.setattr(raw, "commit", other_writer)
+    if conflicts == 3:
+        with pytest.raises(RuntimeError, match="revision_conflict"):
+            publisher.activate(request["record_id"])
+        assert store.load_envelope(request["record_id"]) is None
+    else:
+        assert publisher.activate(request["record_id"]) == request["record_id"]
+        assert store.load_envelope(request["record_id"]) == envelope
+    assert len(attempts) == min(conflicts + 1, 3)
+    assert raw.load()["unrelated_writer_sequence"] == conflicts
+    assert store.load_publication(request["record_id"]) == envelope
+    assert len(signer.requests) == 1
+
+
+@pytest.mark.parametrize("winner", ["same-active", "changed-staged", "changed-active", "removed"])
+def test_activation_recovery_preserves_a_competing_winner(tmp_path, monkeypatch, winner):
+    store, publisher, signer, request = _activation_attempt(tmp_path)
+    raw, commits = store._store, []
+    commit = raw.commit
+    def competing_writer(snapshot, *, expected_revision):
+        other = _store(tmp_path)._store
+        candidate = other.load()
+        entries = candidate["foundup_memex_verified_outcome_authority"]["evidence"]
+        if winner == "removed":
+            del entries[request["record_id"]]
+        else:
+            entry = entries[request["record_id"]]
+            entry["status"] = "STAGED" if winner == "changed-staged" else "ACTIVE"
+            if winner.startswith("changed"):
+                envelope = entry["envelope"]
+                envelope["issuer_principal_id"] = "different-principal"
+                envelope.pop("envelope_digest")
+                envelope["envelope_digest"] = _digest(envelope)
+        other.commit(candidate, expected_revision=candidate.get("revision"))
+        commits.append((tmp_path / "authority.json").read_bytes())
+        return commit(snapshot, expected_revision=expected_revision)
+    monkeypatch.setattr(raw, "commit", competing_writer)
+    if winner == "same-active":
+        assert publisher.activate(request["record_id"]) == request["record_id"]
+    else:
+        with pytest.raises(ValueError, match="activation_(binding_mismatch|stage_missing)"):
+            publisher.activate(request["record_id"])
+    assert len(commits) == len(signer.requests) == 1
+    assert (tmp_path / "authority.json").read_bytes() == commits[0]
+
+
+@pytest.mark.parametrize("failure", ["io", "runtime", "value", "conflict", "false-ack"])
+def test_activation_without_durable_commit_is_not_acknowledged(tmp_path, monkeypatch, failure):
+    store, publisher, signer, request = _activation_attempt(tmp_path)
+    original, attempts = (tmp_path / "authority.json").read_bytes(), []
+    def failed_commit(snapshot, *, expected_revision):
+        attempts.append(snapshot)
+        if failure == "false-ack":
+            return "uncommitted-revision"
+        error = {"io": OSError, "runtime": RuntimeError, "value": ValueError, "conflict": RuntimeError}[failure]
+        raise error("revision_conflict" if failure == "conflict" else "activation_failed")
+    monkeypatch.setattr(store._store, "commit", failed_commit)
+    with pytest.raises((OSError, RuntimeError, ValueError)):
+        publisher.activate(request["record_id"])
+    assert len(attempts) == (3 if failure == "conflict" else 1)
+    assert (tmp_path / "authority.json").read_bytes() == original
+    assert store.load_envelope(request["record_id"]) is None
+    assert len(signer.requests) == 1
+
+
+@pytest.mark.parametrize("after_commit", [False, True], ids=["conflict", "lost-ack"])
+def test_activation_reconciliation_rechecks_current_memory(tmp_path, monkeypatch, after_commit):
+    store, publisher, _signer, request = _activation_attempt(tmp_path)
+    source, commit, attempts = store._accepted_outcome_source, store._store.commit, []
+    def lose_memory(snapshot, *, expected_revision):
+        attempts.append(snapshot)
+        if after_commit:
+            commit(snapshot, expected_revision=expected_revision)
+        monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=lambda _id: None))
+        raise RuntimeError("activation_ack_lost" if after_commit else "revision_conflict")
+    with monkeypatch.context() as patch:
+        patch.setattr(store._store, "commit", lose_memory)
+        with pytest.raises(ValueError, match="accepted_record_mismatch"):
+            publisher.activate(request["record_id"])
+        assert len(attempts) == 1
+        assert store.load_envelope(request["record_id"]) is None
+    monkeypatch.setattr(store, "_accepted_outcome_source", source)
+    assert publisher.activate(request["record_id"]) == request["record_id"]
+    assert store.load_verified_outcome(request["record_id"]) == request["record"]
+
+
+@pytest.mark.parametrize("signal", [KeyboardInterrupt, SystemExit])
+@pytest.mark.parametrize("after_commit", [False, True])
+def test_activation_commit_cancellation_remains_visible(tmp_path, monkeypatch, signal, after_commit):
+    store, publisher, signer, request = _activation_attempt(tmp_path)
+    commit, attempts = store._store.commit, []
+    def cancelled(snapshot, *, expected_revision):
+        attempts.append(snapshot)
+        if after_commit:
+            commit(snapshot, expected_revision=expected_revision)
+        raise signal("activation cancelled")
+    with monkeypatch.context() as patch:
+        patch.setattr(store._store, "commit", cancelled)
+        with pytest.raises(signal):
+            publisher.activate(request["record_id"])
+    assert len(attempts) == len(signer.requests) == 1
+    assert (_store(tmp_path).load_envelope(request["record_id"]) is not None) == after_commit
+    assert publisher.activate(request["record_id"]) == request["record_id"]
+
+
+@pytest.mark.parametrize("failure", ["unreadable", "malformed"])
+def test_activation_recovery_does_not_trust_an_unreadable_committed_state(tmp_path, monkeypatch, failure):
+    store, publisher, _signer, request = _activation_attempt(tmp_path)
+    commit, committed = store._store.commit, []
+    def unreadable():
+        if failure == "unreadable":
+            raise OSError("activation_read_failed")
+        return {"foundup_memex_verified_outcome_authority": {"forged": True}}
+    def commit_without_readback(snapshot, *, expected_revision):
+        commit(snapshot, expected_revision=expected_revision)
+        committed.append((tmp_path / "authority.json").read_bytes())
+        monkeypatch.setattr(store._store, "load", unreadable)
+        raise OSError("activation_ack_lost")
+    with monkeypatch.context() as patch:
+        patch.setattr(store._store, "commit", commit_without_readback)
+        with pytest.raises((OSError, ValueError)):
+            publisher.activate(request["record_id"])
+    reopened = _store(tmp_path)
+    assert reopened.activate(request["record_id"]) == request["record_id"]
+    assert len(committed) == 1 and (tmp_path / "authority.json").read_bytes() == committed[0]

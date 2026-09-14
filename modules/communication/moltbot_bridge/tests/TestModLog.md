@@ -1,3 +1,9 @@
+## 2026-09-14: Activation acknowledgment and revision recovery
+
+- Reused `test_foundup_memex_verified_outcome_adversarial.py` and existing runtime-authority/PatternMemory fixtures: 23 cases in seven tests cover lost replies, bounded unrelated revisions, exact/conflicting winners, uncommitted acknowledgments, current-memory loss, cancellation and unreadable state. All pre-existing test definitions remain unchanged.
+- Before: 13 failed / 10 passed / 23 deselected in 7.06s. After: 110 focused tests passed in 26.27s; 204 connected tests passed in 28.60s. These selections overlap. Packaging: 8 tests passed in 77.31s; 15 fast groups passed in 3,227ms. Initial fast rejection caught CRLF in the edited pin; LF correction passed without weakening the byte contract. Registry remains 1,650/269.
+- Source/test are 306/416 lines; no new file or size exemption. Faults are injected into real disposable store calls with signature doubles, not process/volume or live-authority proof. Exact commands/fingerprints: `activation_recovery_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Accepted-record agreement for activation and visibility
 
 - Before: one failed / 49 deselected in 2.76s; the real durable publisher exposed an envelope after the injected memory sink rejected activation. After: 64 runtime-authority tests passed in 21.29s; the eight connected suites passed 181 tests in 22.88s. Counts overlap.

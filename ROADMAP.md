@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,14 +49,16 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
-The [accepted-memory visibility checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14)
-repairs the reproduced exposure of readable authority after a rejected memory
-write. The existing store now requires exact accepted-memory content at activation
-and envelope reads; current production factories remain unbound and closed.
-**181 connected tests, 8 manifest tests and 15 fast groups passed.** R11-B remains
-partial: fresh WSP 15/WSP 97 selection is its recoverable acceptance decision
-**16/P0**, using existing participants. Cross-store atomicity, runtime admission,
-response-read policy and retained benefit remain open.
+The [activation recovery checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14)
+repairs lost activation acknowledgments and competing revisions through the existing
+authority owner. **204 connected tests, 8 manifest tests and 15 fast groups passed.**
+R11-B remains partial: fresh WSP 15/WSP 97 selects the memory acceptance contract
+**16/P0**, binding the accepted row and decision to one future SQLite transaction
+under current independent write authority. Runtime activation and retained benefit
+remain open. This source repair introduces no production admission.
+
+Visibility PR [#1739](https://github.com/FOUNDUPS/Foundups-Agent/pull/1739) merged
+as `21afc9108fec741ec883efacc47e542dc2461a7b`; its main CI and CodeQL passed.
 
 Process-race PR [#1738](https://github.com/FOUNDUPS/Foundups-Agent/pull/1738) merged
 as `916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7`; its main CI and CodeQL passed.

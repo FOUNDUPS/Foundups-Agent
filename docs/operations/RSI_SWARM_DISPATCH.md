@@ -324,6 +324,56 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Activation recovery checkpoint — 2026-09-14
+
+Source: `21afc9108fec741ec883efacc47e542dc2461a7b`, merged PR
+[#1739](https://github.com/FOUNDUPS/Foundups-Agent/pull/1739); its main CI and
+CodeQL passed. Fresh canonical WSP 15 ranks existing R11-B **4/5/3/4 = 16/P0**.
+WSP 97 closes the earlier visibility guard and reuses its authority store.
+
+`activate()` now reconciles a lost commit acknowledgment or identical competing
+activation against the original envelope digest and current accepted memory.
+Only revision conflicts can cause another commit, bounded to three attempts.
+It preserves unrelated state and original evidence; missing/substituted evidence,
+memory disagreement and unreadable state reject. Cancellation propagates.
+This is authority-view recovery, not the memory acceptance transaction.
+
+The 23 new cases reuse the existing adversarial suite and real disposable-store
+fixtures: 13 initially failed; **204 connected tests, 8 manifest tests and 15 fast
+groups pass** after repair. Original test definitions remain unchanged. Source/test
+files are 306/416 lines. The 1,400-member manifest changes only this runtime hash
+and its existing pins. An initial pin edit introduced CRLF; restoring required LF
+bytes resolved the package rejection. Current registry remains 1,650/269.
+
+**R11-B acceptance decision contract — design only.** Keep the decision with the
+existing sink/PatternMemory transaction; the JSON authority ACTIVE state is a
+recoverable view. No new coordinator, store or activation flag is introduced here.
+
+| Boundary | Required behavior before production activation |
+|---|---|
+| Prepare | Preserve the exact signed envelope and staged memory bytes outside successful recall. Bind full record/envelope digests, work lineage, memory participant and independent current write authority. |
+| Accept | Under the current protected write-authority lifetime, commit the decision and accepted `skill_outcomes` row in one SQLite transaction. `store_outcome()` commits itself; calling it before a separate decision write is insufficient. |
+| Recover | After acceptance, repair the authority view against the same decision without repeating the memory effect, signature or timestamps. Retain and reject conflicting winners. |
+| Read | Generic successful-pattern and direct SQL readers do not consult JSON authority. Never expose their accepted row before its transaction commits; Memex still applies current key, expiry, revocation and one-use checks. |
+
+Existing owners: `reddog_verified_pattern_memory_sink.py`, `pattern_memory.py`,
+`reddog_resident_queue_pattern_memory_admission_handler.py` and
+`foundup_memex_verified_outcome_runtime_store.py`. The adjacent architect FIX
+publisher supplies a recovery pattern, not interchangeable bound participants.
+The next eligible local action remains **R11-B memory acceptance contract, 16/P0**:
+resolve the existing purpose-specific write-authority/protected-use binding before
+changing the sink transaction. A readiness marker, worker-supplied receipt or Memex
+read capability cannot grant memory writes. R11-C/D and both production factories
+remain closed. Composed process/volume recovery and retained benefit are unproved.
+
+All 96 open PR file lists were inspected: no outcome-source/test owner collision;
+PR #1680 shares only generated compatibility surfaces in this source slice and
+remains untouched. Fresh source/owner ranking, exact commands, fingerprints and
+limits are in `activation_recovery_continuation_20260914` in the existing baseline.
+The pending 012 reader-policy question and separate AutoPost/product ownership
+remain boundaries. All 26 packets and six substeps remain non-dispatchable;
+re-observe and rescore after owned closure.
+
 ### Accepted-memory visibility checkpoint — 2026-09-14
 
 Source: `916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7`, merged PR
@@ -840,7 +890,11 @@ on retry. `load_envelope()`/`load_verified_outcome()` still hide staging.
 `AuthorityRuntimeVerifiedOutcomeStore(store, *, accepted_outcome_source=None)`
 requires its configured source's `load_verified_outcome(record_id)` to return the
 exact accepted canonical record at activation and envelope reads. A new activation
-checks again after commit; ACTIVE retries recheck the source. Missing, changed or
+checks again after commit; ACTIVE retries recheck the source. Activation pins
+the original envelope digest and reloads durable state after every commit attempt.
+An exact ACTIVE winner recovers a lost acknowledgment; only revision conflicts
+retry, at most three commits. An uncommitted reply, substituted envelope or
+unreadable state cannot acknowledge success. Cancellation propagates. Missing, changed or
 unreadable memory rejects, including a historically ACTIVE envelope with no bound
 source. Publication staging/retry remains available unbound. The source must be
 bound by current admitted runtime composition; this interface supplies no permission
