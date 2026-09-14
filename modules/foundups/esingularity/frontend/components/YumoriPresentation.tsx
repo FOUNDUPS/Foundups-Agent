@@ -7,6 +7,11 @@ import styles from './YumoriPresentation.module.css';
 
 const AUTOPLAY_MS = 9000;
 const SWIPE_DISTANCE = 55;
+const CURRENT_VOTE_ACTION: Record<YumoriLocale, string> = {
+  ja: '解体準備予算に反対を。VOTE NO',
+  en: 'Vote no on the demolition-preparation budget',
+  pt: 'Vote NÃO ao orçamento de preparação da demolição',
+};
 
 export default function YumoriPresentation() {
   const [locale, setLocale] = useState<YumoriLocale>('ja');
@@ -22,6 +27,8 @@ export default function YumoriPresentation() {
   const slides = useMemo(() => getYumoriVisionSlides(locale), [locale]);
   const slide = slides[active];
   const ui = visionUi[locale];
+  const stageAction = slide.id === 'vision' ? CURRENT_VOTE_ACTION[locale] : slide.action;
+  const liveDescription = `${slide.title}${locale === 'ja' ? ' ' : '. '}${slide.summary}`;
 
   const move = useCallback((delta: number) => {
     setPlaying(false);
@@ -54,11 +61,14 @@ export default function YumoriPresentation() {
   }, []);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const requested = Number(url.searchParams.get('slide'));
-    if (Number.isInteger(requested) && requested >= 1 && requested <= slides.length) setActive(requested - 1);
-    if (url.searchParams.get('vision') === '1') setFullscreen(true);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(false);
+    const frame = window.requestAnimationFrame(() => {
+      const url = new URL(window.location.href);
+      const requested = Number(url.searchParams.get('slide'));
+      if (Number.isInteger(requested) && requested >= 1 && requested <= slides.length) setActive(requested - 1);
+      if (url.searchParams.get('vision') === '1') setFullscreen(true);
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(false);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [slides.length]);
 
   useEffect(() => {
@@ -163,7 +173,7 @@ export default function YumoriPresentation() {
           <p>{slide.summary}</p>
         </div>
         <a className={styles.stageAction} href="https://yumori.me">
-          <span>YUMORI</span><strong>{slide.action}</strong><b aria-hidden="true">↗</b>
+          <span>YUMORI.me</span><strong>{stageAction}</strong><b aria-hidden="true">↗</b>
         </a>
         <div className={styles.nav}>
           <button type="button" onClick={() => move(-1)} aria-label={ui.previous}>←</button>
@@ -178,7 +188,7 @@ export default function YumoriPresentation() {
             <button key={item.id} className={index === active ? styles.active : ''} type="button" aria-label={`${index + 1}: ${item.title}`} aria-current={index === active ? 'step' : undefined} onClick={() => select(index)} />
           ))}
         </div>
-        <span className={styles.screenReader} aria-live="polite">{slide.title}. {slide.summary}</span>
+        <span className={styles.screenReader} aria-live="polite">{liveDescription}</span>
       </div>
 
       <div className={styles.meta}>

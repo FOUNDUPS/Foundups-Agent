@@ -11,24 +11,24 @@ All paths below are repository-relative unless explicitly module-relative.
 
 ## Shared branding and language — both sites
 
-012's September 13 branding decisions apply to eSingularity.ai and YUMORI.me, including shared ticker items, participation actions, report links and language variants. Context supports the brand; it does not replace it. Read this section when applying either the eSingularity or YUMORI.me skill, including copy-only reviews.
+012's September 13–14 branding decisions apply to eSingularity.ai and YUMORI.me, including shared ticker items, participation actions, report links and language variants. Context supports the brand; it does not replace it. Read this section when applying either the eSingularity or YUMORI.me skill, including copy-only reviews.
 
 | Use | Canonical wording |
 | --- | --- |
 | Movement/site brand | `YUMORI.me` — preserve uppercase YUMORI and lowercase `.me` |
 | Participation button | `JOIN YUMORI.me / 湯守になる` |
 | Separate participation explanation | `準備委員会への参加はこちら` |
-| Bilingual identity lockup | `私は湯守！ / me GUARDIAN! = YUMORI.me` |
+| Identity lockup | `私は湯守。YUMORI.me` |
 | Japanese report link | `ジャパン・ハイパースケーラー・レポート（JHR）を読む →` |
 | Separate report explanation | `日本の大規模データセンター開発と、地域の選択肢を知る` |
 | English report name | `Japan Hyperscaler Report (JHR)` |
 
 - Keep `.me` in branded wordmarks, headings, link labels, participation buttons and campaign-name references on both sites. Natural references to people as `湯守` need no domain suffix. Lowercase URL hosts, existing code identifiers, and historical quotations are not branding errors; do not mass-rename them.
-- `me GUARDIAN!` is intentional brand language. Preserve lowercase `me`, uppercase `GUARDIAN!`, and Japanese first in the bilingual lockup. Do not silently replace it with `I am a guardian.` as an English grammar correction. Ordinary explanatory prose should still use natural English. The lockup and participation button are different uses; do not cram both into every button.
+- `YUMORI.me` is the brand. `guardian` is only an English explanation of the Japanese idea of a 湯守; it is not a second brand name or domain. Do not use `Guardian.me`, `me GUARDIAN!`, or `I am a guardian.` as the primary identity lockup. When English explanation is useful, write natural prose such as `A yumori is a guardian of the hot spring and place` while leaving the visible brand as `YUMORI.me`.
 - In Japanese explanatory copy, write hyperscaler as `ハイパースケーラー`. Introduce unfamiliar terms in supporting text without replacing the report name with a generic data-center label. Keep `JHR` visible; retain the English series name in English.
-- Japanese remains the default. The approved `JOIN YUMORI.me` and `me GUARDIAN!` brand phrases are deliberate bilingual exceptions, not untranslated UI. Translate all other affected headings, body copy, buttons, captions and current announcements completely when English is selected; changing `html.lang` alone is insufficient.
+- Japanese remains the default. `JOIN YUMORI.me` is an approved bilingual brand phrase; all other affected headings, body copy, buttons, captions and current announcements should translate completely when English is selected. Changing `html.lang` alone is insufficient.
 - Preserve `eSingularity.ai` as the project identity and `YUMORI.info` as its information alias. Shared branding does not merge the two homepages or make every action a link to the movement homepage. Keep the verified signup destination for JOIN, `/reports/jhr` for JHR, and an absolute `https://esingularity.ai/` URL for project links from YUMORI.me.
-- On narrow screens, wrap or stack the brand and its supporting line without clipping `.me`, `GUARDIAN!` or the report name. Do not concatenate replacement suggestions into duplicated text such as `湯守になる湯守になる`.
+- On narrow screens, wrap or stack the brand and its supporting line without clipping `.me` or the report name. Do not concatenate replacement suggestions into duplicated text such as `湯守になる湯守になる`.
 
 For future copy changes, compare the affected rendered brand labels in Japanese and English on the requested site and any shared consumers. This is a maintained specification, not evidence that all live labels or translations already comply. A request to update this skill alone does not authorize a site, form, DNS or hosting change.
 
