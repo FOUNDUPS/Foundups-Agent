@@ -1,6 +1,19 @@
 # wre_core Test Suite
 
-## Terminal researcher reports
+## Phase1 mode integrity
+
+Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
+Seven constructor values and fourteen timing/value cases cover literal-mode
+admission, before-run/proposal/missing-proposal/diff/evaluation/after-loop drift
+and direct private commit calls. Injected commit is a recorder only; the source
+AST also forbids delegated `.commit()` calls in the Phase1 producer.
+All previous tests remain; final **86 pass in 1.91s**. Reports abort on detected
+mode drift, scratch restores and no injected live commit occurs. Five ten-attempt
+controls preserve normal outcomes and saved reports. Tests 742 lines remain a
+cohesive extension under the existing infrastructure review, all functions ≤50.
+Evidence: `research_mode_guard_continuation_20260915`; no sandbox/runtime grant.
+
+## Historical terminal researcher reports
 
 Reuse `test_wre_auto_researcher.py` and its unchanged pre-construction model-disable
 fixture. **66 pass**: baseline/proposal/diff/evaluator exceptions and cancellation,

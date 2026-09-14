@@ -140,7 +140,7 @@ class WREAutoResearcher:
         self.runner = runner or DryRunGitRunner()
 
         # Enforce fail-closed check
-        if not self.dry_run:
+        if self.dry_run is not True:
             raise NotImplementedError("SPECIFIED_NOT_IMPLEMENTED")
 
         # Initialize original content (Read-Only template)
@@ -215,7 +215,7 @@ class WREAutoResearcher:
             
             report["phase"] = "proposal"
             report["attempts_started"] += 1
-            proposed_code = self._propose_change(best_code, best_metrics, history)
+            proposed_code = _propose_dry_run(self, best_code, best_metrics, history)
             if not proposed_code:
                 print("[WARNING] Could not generate new proposal. Skipping.")
                 self._log_to_tsv(iteration, "no_proposal", {}, "No proposal generated")
@@ -284,28 +284,23 @@ class WREAutoResearcher:
             self.working_target_path.write_text(fallback_code, encoding="utf-8")
 
     def _commit(self, iteration: int, metrics: Dict):
-        """Commit progress via Git runner if not running in dry-run mode."""
-        if self.dry_run:
-            # Under dry run, we can log the planned commit but execute nothing live
-            if hasattr(self.runner, "planned_operations"):
-                code = self.working_target_path.read_text(encoding="utf-8")
-                digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
-                op = {
-                    "operation": "commit",
-                    "relative_path": self.target_path.name,
-                    "path_digest": digest,
-                    "iteration": iteration,
-                    "metrics": {
-                        "fitness": metrics.get("fitness", 0.0),
-                        "roc_ratio": metrics.get("roc_ratio", 0.0)
-                    },
-                    "no_execution_performed": True
-                }
-                self.runner.planned_operations.append(op)
-            return
-
-        # Trigger injected commit runner (Prohibited in Phase 1)
-        self.runner.commit(self.target_path, iteration, metrics)
+        """Record a planned commit only; Phase 1 never delegates live commits."""
+        _require_dry_run(self)
+        if hasattr(self.runner, "planned_operations"):
+            code = self.working_target_path.read_text(encoding="utf-8")
+            digest = hashlib.sha256(code.encode("utf-8")).hexdigest()
+            op = {
+                "operation": "commit",
+                "relative_path": self.target_path.name,
+                "path_digest": digest,
+                "iteration": iteration,
+                "metrics": {
+                    "fitness": metrics.get("fitness", 0.0),
+                    "roc_ratio": metrics.get("roc_ratio", 0.0)
+                },
+                "no_execution_performed": True
+            }
+            self.runner.planned_operations.append(op)
 
     def _propose_change(self, current_code: str, current_metrics: Dict, history: List[Dict]) -> Optional[str]:
         """Propose the next iteration of code."""
@@ -407,6 +402,20 @@ AGENT_PREMIUM_MULTIPLIERS = {repr(multipliers)}
         return "\n".join(parsed_lines)
 
 
+def _require_dry_run(researcher: WREAutoResearcher):
+    """A mutable flag cannot supply the unimplemented live-mode authority."""
+    if researcher.dry_run is not True:
+        raise NotImplementedError("SPECIFIED_NOT_IMPLEMENTED")
+
+
+def _propose_dry_run(researcher: WREAutoResearcher, code: str, metrics: Dict, history: List[Dict]):
+    """Validate mode around the backend callback before consuming a proposal."""
+    _require_dry_run(researcher)
+    proposed = researcher._propose_change(code, metrics, history)
+    _require_dry_run(researcher)
+    return proposed
+
+
 def _new_run_report(researcher: WREAutoResearcher) -> Dict:
     """Reserve an invocation namespace; absence of report.json means incomplete."""
     directory = Path(tempfile.mkdtemp(prefix="invocation-", dir=researcher.results_dir))
@@ -414,7 +423,7 @@ def _new_run_report(researcher: WREAutoResearcher) -> Dict:
     return {
         "schema": "wre_auto_research_report.v1", "invocation_id": directory.name,
         "report_path": str(directory / "report.json"), "status": "incomplete",
-        "dry_run": researcher.dry_run, "phase": "preflight", "stop_reason": None,
+        "dry_run": researcher.dry_run is True, "phase": "preflight", "stop_reason": None,
         "attempts_requested": requested if type(requested) is int and requested >= 0 else None,
         "attempts_started": 0, "baseline_evaluations": 0, "candidate_evaluations": 0,
         "baseline": None, "optimized": None, "history": [],
@@ -429,18 +438,19 @@ def _run_with_report(researcher: WREAutoResearcher) -> Dict:
     try:
         try:
             report = _new_run_report(researcher)
+            _require_dry_run(researcher)
             researcher._run_loop(report)
+            _require_dry_run(researcher)
         except BaseException as error:
             if report is not None:
                 report["failure"] = {"type": type(error).__name__, "phase": report["phase"]}
             raise
         finally:
             try:
-                if researcher.dry_run:
-                    researcher._rollback(researcher.original_code)
-                    if report is not None:
-                        report["cleanup"] = "restored"
-                    print("\n[SAFETY] Scratch restored to original baseline.")
+                researcher._rollback(researcher.original_code)
+                if report is not None:
+                    report["cleanup"] = "restored"
+                print("\n[SAFETY] Scratch restored to original baseline.")
             except BaseException as error:
                 if report is not None:
                     report["cleanup_failure"] = {"type": type(error).__name__}

@@ -81,6 +81,8 @@ def test_ast_denylist_for_execution():
                 if isinstance(func, ast.Name):
                     assert func.id not in banned_direct_calls, f"Banned direct call to '{func.id}' found."
                 elif isinstance(func, ast.Attribute):
+                    if src_file.name == "wre_auto_researcher.py":
+                        assert func.attr != "commit", "Phase 1 must not delegate a live commit."
                     if isinstance(func.value, ast.Name) and func.value.id in {"subprocess", "os"}:
                         message = f"Banned method call to '{func.value.id}.{func.attr}' found."
                         assert func.attr not in banned_module_methods, message
@@ -437,23 +439,25 @@ def test_invalid_baseline_stops_before_proposal(temp_research_env, tmp_path, mon
     assert report["improvement"] is None and report["optimized"] is None
 
 
-def test_commit_mode_fail_closed(temp_research_env, tmp_path):
+@pytest.mark.parametrize("mode", [False, None, 0, 1, "true", [], {}])
+def test_commit_mode_fail_closed(temp_research_env, tmp_path, mode):
     """Verify commit/live mode is fail-closed, raising SPECIFIED_NOT_IMPLEMENTED."""
     target_path, program_path = temp_research_env
     results_dir = tmp_path / "runs"
 
-    # Direct initialization of WREAutoResearcher with dry_run=False should raise error
+    # Only the literal dry-run mode is implemented; truthy values cannot admit it.
     with pytest.raises(NotImplementedError) as exc_info:
         WREAutoResearcher(
             target_path=target_path,
             program_path=program_path,
             max_iterations=1,
-            dry_run=False,
+            dry_run=mode,
             runner=DryRunGitRunner(),
             results_dir=results_dir,
         )
     
     assert "SPECIFIED_NOT_IMPLEMENTED" in str(exc_info.value)
+    assert not results_dir.exists()
 
 
 @pytest.mark.parametrize("use_default", [False, True], ids=["explicit-parent", "default-parent"])
@@ -635,6 +639,63 @@ def _assert_reports_preserved(researcher, first, first_bytes, fault):
     assert Path(first["report_path"]).read_bytes() == first_bytes
     restored = researcher.working_target_path.read_bytes() == researcher.target_path.read_bytes()
     assert restored is (fault != "local_write")
+
+
+def _assert_mode_denied(researcher, original, commits, timing):
+    assert not commits
+    assert researcher.target_path.read_text(encoding="utf-8") == original
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original
+    if timing != "direct_commit":
+        report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+        assert report["status"] == "aborted" and report["cleanup"] == "restored"
+        assert report["failure"]["type"] == "NotImplementedError"
+        assert report["dry_run"] is (timing != "before_run")
+        assert report["attempts_started"] == int(timing != "before_run")
+        assert report["candidate_evaluations"] == int(timing in ("diff", "evaluation", "after_loop"))
+
+
+@pytest.mark.parametrize("mode", [False, 1])
+@pytest.mark.parametrize("timing", ["before_run", "proposal", "missing_proposal", "diff", "evaluation", "after_loop", "direct_commit"])
+def test_mode_drift_cannot_delegate_commit_or_skip_cleanup(temp_research_env, tmp_path, monkeypatch, mode, timing):
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    commits, evaluated = [], []
+    baseline = evaluate_target(target)
+    improved = dict(baseline, fitness=baseline["fitness"] + 1)
+    monkeypatch.setattr(researcher.runner, "commit", lambda *args: commits.append(args))
+    def propose(*args):
+        if timing in ("proposal", "missing_proposal"):
+            researcher.dry_run = mode
+        return None if timing == "missing_proposal" else original + "\n# proposed\n"
+    def diff(*args):
+        researcher.dry_run = mode
+        return ""
+    def evaluate(path):
+        evaluated.append(path)
+        if timing == "evaluation" and len(evaluated) > 1:
+            researcher.dry_run = mode
+        return baseline if len(evaluated) == 1 else improved
+    loop = researcher._run_loop
+    def run_loop(report):
+        loop(report)
+        researcher.dry_run = mode
+    monkeypatch.setattr(researcher, "_propose_change", propose)
+    monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
+    if timing == "diff":
+        monkeypatch.setattr(researcher.runner, "diff", diff)
+    if timing == "after_loop":
+        monkeypatch.setattr(researcher, "_run_loop", run_loop)
+    if timing in ("before_run", "direct_commit"):
+        researcher.dry_run = mode
+    if timing == "before_run":
+        researcher.working_target_path.write_text("# stale scratch\n" + original, encoding="utf-8")
+    with pytest.raises(NotImplementedError, match="SPECIFIED_NOT_IMPLEMENTED"):
+        if timing == "direct_commit":
+            researcher._commit(1, improved)
+        else:
+            researcher.run()
+    _assert_mode_denied(researcher, original, commits, timing)
 
 
 @pytest.mark.parametrize("fault", ["none", "publish", "write", "cleanup", "publish_abort", "allocate", "local_write"])

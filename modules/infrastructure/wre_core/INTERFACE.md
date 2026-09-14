@@ -74,6 +74,18 @@ instance paths; existing artifacts under the parent are not migrated or deleted.
 Parents resolving inside `REPO_ROOT` reject before mkdir. This is local namespace
 isolation under a stable filesystem, not process isolation or runtime admission.
 
+Only literal `dry_run=True` is implemented. Constructor and call preflight reject
+other values with `NotImplementedError("SPECIFIED_NOT_IMPLEMENTED")`; truthy
+non-booleans cannot select a mode. The producer checks mode around the proposal
+backend and after the loop. Detected drift aborts through the existing terminal
+report path. A change during evaluation can first become a `crashed` outcome,
+then abort at the mode gate; no injected live commit is called. `_commit()` only
+records planned operations and also rejects unsupported mode when called directly.
+Cleanup always attempts scratch restoration, regardless of the current flag.
+`report["dry_run"]` is the initial literal-True selection expressed as a boolean;
+it is descriptive, not authority. Arbitrary host Python and injected runner code
+are outside this local guard's sandbox claim. Live mode remains unimplemented.
+
 `max_iterations` must be a non-negative built-in integer; booleans and other
 types reject before constructor output/model work and before run baseline
 execution. Each run snapshots the cap for its loop, progress and returned report.

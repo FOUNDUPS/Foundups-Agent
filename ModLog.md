@@ -1,5 +1,10 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI mode boundary before report identity
+
+- Report qualification exposed a Phase1 flag bypass. Existing researcher now rejects unsupported/mutated mode, never delegates a live commit and always attempts cleanup. 86 local tests and five ten-attempt controls pass without live effects.
+- Re-scored observed defect 17/P0, closed locally, then returned report identity/reader qualification to 15/P1. Prior PR1753/main workflows verified; existing root/module plans and canonical backlog/evidence updated. No new modules/skills or activation. Evidence: `research_mode_guard_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: RSI terminal report lifecycle
 
 - Extended existing WRE researcher artifacts with per-invocation completed/aborted evidence after cleanup; errors cannot return success and old reports remain intact. 66 local tests and five ten-attempt controls pass.

@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Phase1 mode integrity before report qualification
+
+- Reproduced a mutable flag reaching recorder-only injected commit, skipping scratch cleanup and returning completed. WSP15 re-prioritized this executable guard defect 17/P0 ahead of report identity 15/P1.
+- Require literal `True` at construction/call preflight, check mode around proposal/loop, remove internal live-commit delegation, and always attempt scratch cleanup. Existing aborted reports preserve failure context. No arbitrary-host sandbox or live authority claim.
+- Initial 12 failed/70 passed; repair 82 passed; expanded/static gate final 86 passed in 1.91s. Five ten-attempt controls preserve 50 attempts/40 candidates/five baselines and saved-report/replay agreement. Source 534/class 285/loop 82; test 742, existing size review retained. Registry/package unchanged.
+- Re-observed and removed the resolved 17/P0 item; input/source/oracle/environment and reader qualification remain 15/P1. Evidence: `research_mode_guard_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: Terminal researcher invocation evidence
 
 - Existing researcher publishes distinct invocation JSON after cleanup, with completed/aborted state, started/finished/evaluated counters and available metrics/failure types. Missing terminal JSON remains unknown; staging files are not evidence.
