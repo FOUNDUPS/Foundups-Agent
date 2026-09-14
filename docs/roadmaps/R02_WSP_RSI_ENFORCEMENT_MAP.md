@@ -272,6 +272,15 @@ separately authorized readback and publisher recovery. The next local layer is
 the bounded record/binding contract; persistence and readback remain unimplemented.
 Object reconstruction is not production process-death recovery or retained RSI.
 
+**Immutable-record follow-up:** the [record checkpoint](../operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14)
+implements exact bounded response bytes in the existing outcome-signing owner,
+reusing the root codec, co-signed descriptor and shared signature validation.
+The connected selection passes 294 tests with one Linux-root skip. This closes
+the local schema prerequisite only. Pending durability, full-response commitment,
+authenticated readback and retained improvement remain open; no runtime caller
+or activation is added. WSP 15's historical 16/P1 label is corrected to 16/P0
+with an additive baseline erratum.
+
 ### R12 — Independent production promoter
 
 **Normative references:** WSP 48 / 71 / 95 / 97. **Evidence level:** `GENERIC_OWNER_MISSING`.

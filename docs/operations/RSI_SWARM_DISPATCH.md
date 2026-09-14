@@ -251,6 +251,62 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Immutable-response record checkpoint — 2026-09-14
+
+Packaging: **15 fast groups in 3,013ms**, **8 staged-manifest tests in 64.36s**
+(two pytest configuration warnings). Runtime membership remains 1,400 with one
+changed source hash and matching pins. The registry is current at 1,650 files /
+269 quarantined; no guard or membership changed.
+
+Base: PR1727/main `1103f7b218d71d8592d1e8b391ea6b8290275496`.
+WSP 00 awakening/strict software gate passed. WSP 97 retrieved current owners
+and reused the existing outcome-signing suite. The refined lexical query returns
+the exact source/test pair; direct imports supplied the codec and full descriptor
+validator. Required module contracts are present. Peripheral memory hits were
+removed; optional design/memory artifacts and requirements remain absent.
+Freshness is UNKNOWN/gap, workspace HEAD matches the base, and semantic-owner
+attempts remain zero. No unchanged blocked runtime/model probe was repeated.
+
+**WSP 15 correction:** canonical section 4 assigns 16–20 to P0, 13–15 to P1.
+This layer scores 4 + 4 + 4 + 4 = **16/P0**: difficult authority/context integration,
+critical recovery dependency, needed next for progress, major retained-learning
+value. Three earlier baseline observations incorrectly labeled 16 as P1. Their
+original objects are preserved with an explicit erratum in
+`response_record_continuation_20260914`; current prose labels are corrected.
+This is local planning under 012's authoring instruction, not runtime allocation.
+
+**Implemented:** the existing `foundup_memex_verified_outcome_signing.py` now
+builds immutable canonical response-record bytes and parses them against an
+external expected context and digest. It reuses the root bounded/duplicate-key
+codec, full co-signed descriptor validation and shared receipt/audit verifier.
+The record binds the complete descriptor/grant context, exact request/response,
+original issuance/key/epoch, root descriptor/owner/authorization/reservation IDs,
+response digest and full-record digest. V1 rejects unknown/missing/coerced fields,
+elevated-consensus proof payloads, malformed anchor identifiers, noncanonical
+bytes, tampering and complete messages over 64 KiB, including the newline.
+Original function/class definitions and root service v1 semantics are preserved.
+
+**Verification:** 51 added cases extend one existing file (72 cases total).
+The first control documented the absent proposed API. Initial implementation:
+67 passed in 19.17s. Extended counterexamples found three malformed co-signed
+anchor fields accepted by the new parser; exact identifier-shape checks fixed
+them. The final nine-suite selection passes **294 tests / one Linux-root skip
+in 51.29s**. Real disposable root stores and Ed25519 fixtures preserve one outcome
+signature and the consumed terminal marker. Serialization survives caller
+mutation, cannot create a root capability, and does not renew ordinary signing.
+A valid 65,536-byte complete record passes; 65,537 bytes reject. Commands, source
+hashes and failure logs are bound in `response_record_continuation_20260914`.
+
+**Remaining:** public identifiers and externally supplied digest arguments are
+data; this parser does not authenticate their provenance or prove a root commit.
+Historical validation at original issuance supplies no current read authorization,
+expiry/revocation check, grant renewal, persistence, publication or activation.
+The next layer is root-owner-bound pending storage using the existing atomic
+store, with exact-byte conflict and durability tests. Full-response terminal
+commitment, separately authorized readback, enclosing-wire capacity, process-kill
+recovery and R11-B–F remain open. No new module, scheduler or active FoundUp test;
+all 26 packets and six R11 substeps remain non-dispatchable.
+
 ### Signer-response handoff checkpoint — 2026-09-14
 
 Packaging passed: **15 fast groups in 3,372ms** and **8 staged-manifest tests
@@ -261,7 +317,7 @@ in 62.51s** (two pytest configuration warnings). Runtime membership remains
 Base: main `96b70c085711da16e57d582b03ffa063b8227025`, containing PR1723 and
 one separate eSingularity frontend change. The latter stays outside this scope.
 WSP 00 awakening/strict software gate passed. Local WSP 15 planning is
-4 + 4 + 4 + 4 = **16/P1**; this app continuation supplies no runtime allocation.
+4 + 4 + 4 + 4 = **16/P0**; this app continuation supplies no runtime allocation.
 
 Retrieval was initially noisy: lexical path matching favored peripheral test
 fixtures. An exact outcome-signing query recovered its current source and test
@@ -307,7 +363,7 @@ ordered within R11-A; none is an executable work order.
 
 | Layer | Existing owner and required contract | Acceptance boundary |
 |---|---|---|
-| Immutable response record — next local layer | `foundup_memex_verified_outcome_signing.py`: bind the exact canonical SigningRequest/SigningResponse, complete outcome-grant context, root reservation, original issuance, key/epoch and full response digest. Reuse the shared response validator. | Exact bounded schema; reject unknown/coerced fields, changed response/audit/signing input, foreign scope and digest substitution. No credentials, private keys, caller-selected paths or executable capabilities in serialized data. |
+| Immutable response record — local prerequisite implemented above | `foundup_memex_verified_outcome_signing.py`: bind the exact canonical SigningRequest/SigningResponse, complete outcome-grant context, root reservation, original issuance, key/epoch and full response digest. Reuse the shared response validator. | Exact bounded schema; reject unknown/coerced fields, changed response/audit/signing input, foreign scope and digest substitution. No credentials, private keys, caller-selected paths or executable capabilities in serialized data. |
 | Durable pending bytes | `RootVerifiedOutcomeAuthorityState` with `AtomicJsonAuthorityRuntimeStore` and existing confined operation locks. Bind storage locations and durability to current root-owner configuration before writes. | Persist validated immutable bytes before terminal response commitment; pending bytes are unreadable to publication/learning. Preserve conflicting winners. Missing replicas or rollback cannot silently create authority. |
 | Terminal commitment | Existing root service/client/protocol. A versioned contract must bind the full response digest, not only the signature digest. | Keep current v1 reserve/commit semantics intact. Unknown recovery fields/operations still reject on v1. Commit only exact pending bytes; lost acknowledgments cannot replace the response or reopen a grant. |
 | Authenticated readback | Existing root owner, current principal/peer resolver and independently authorized work/grant boundaries. Bind current requester and immutable historical response separately. | Revalidate current owner, caller, scope, expiry/revocation and key policy. A consumed secret-access grant or serialized client seal is not read authority. Readback must not invoke ordinary outcome signing or manufacture a fresh grant. Cross-generation recovery requires explicit current independent authority. |
@@ -340,7 +396,7 @@ and unchanged at 1,650 files / 269 quarantined; no guard changed.
 
 Base: PR1722/main `15fafb8d828d93e229796fff722cb5e806988aeb`.
 WSP 00 awakening/strict software gate passed. Local WSP 15 planning is
-4 + 4 + 4 + 4 = **16/P1** under the existing 012 authoring instruction.
+4 + 4 + 4 + 4 = **16/P0** under the existing 012 authoring instruction.
 This isolated source continuation supplies no signed allocation or runtime grant.
 
 WSP 97 retrieval evaluation: the first lexical query was noisy; an exact-owner

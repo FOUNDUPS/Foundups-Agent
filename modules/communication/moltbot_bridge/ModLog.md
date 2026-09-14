@@ -1,5 +1,10 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Bound immutable outcome response history
+
+- Added pure record build/parse and immutable public binding data in the existing outcome-signing owner. Reused root JSON/co-signature validators and shared response verification; enforced complete 64 KiB messages and strict anchor identifiers. No root RPC, owner configuration, publisher call site or persistence change.
+- Added 51 cases to the existing suite; connected result 294 passed / one Linux-root skip. Three malformed anchor-shape cases caught and corrected in the new layer. Next: root-owner-bound pending durability, then terminal commitment/readback. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Share outcome response validation and define durable handoff
 
 - Moved the publisher's receipt/audit verification into the existing outcome-signing module and kept the publisher wired to it. Exact boolean assertions/results and noncontradictory rejection are now required. Thirteen malformed-response counterexamples reproduced the prior acceptance gap.

@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import asdict, replace
 from types import SimpleNamespace
 
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    foundup_memex_verified_outcome_signing as outcome_signing,
     reddog_ed25519_signer_backend as signer_backend_module,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
+    MAX_MESSAGE_BYTES, canonical_bytes, decode_message, digest_mapping, encode_message,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_publisher import (
     _validate_signer_response,
@@ -372,3 +376,300 @@ def test_outcome_response_validation_requires_boolean_verifier_result(
     publisher.signature_verifier = SimpleNamespace(verify=lambda *_args: next(results))
     with pytest.raises(ValueError, match="verified_outcome_publish_signer_rejected"):
         _validate_signer_response(publisher, response, signing_input)
+
+
+@pytest.fixture
+def outcome_response_record_inputs(tmp_path, monkeypatch):
+    values, backend, request, peer, counts = _root_outcome_backend(tmp_path, monkeypatch)
+    descriptor, grant, state, *_stores, current, authority = values
+    captured = {}
+    finalize = signer_backend_module._finalize_signing
+
+    def capture_reservation(*args, **kwargs):
+        captured["reservation"] = args[4]
+        return finalize(*args, **kwargs)
+
+    monkeypatch.setattr(signer_backend_module, "_finalize_signing", capture_reservation)
+    response = backend.sign(request, peer)
+    assert response.accepted is True
+    binding = outcome_signing.VerifiedOutcomeResponseBinding(
+        descriptor_id=descriptor["descriptor_id"],
+        owner_config_id=current["snapshot"].owner_config_id,
+        authorization_id=grant["authorization_id"],
+        reservation_id=captured["reservation"].reservation_id,
+    )
+    return SimpleNamespace(
+        request=request, response=response, descriptor=descriptor, binding=binding,
+        verifier=Ed25519SignatureVerifier(), counts=counts, state=state, grant=grant,
+        authority=authority, backend=backend, peer=peer,
+    )
+
+
+def _build_outcome_record(values, **overrides):
+    arguments = dict(
+        request=values.request, response=values.response,
+        descriptor=values.descriptor, binding=values.binding,
+        signature_verifier=values.verifier,
+    )
+    arguments.update(overrides)
+    return outcome_signing.build_verified_outcome_response_record(**arguments)
+
+
+def _parse_outcome_record(values, raw, **overrides):
+    arguments = dict(
+        expected_binding=values.binding,
+        expected_record_digest=decode_message(raw)["record_digest"],
+        signature_verifier=values.verifier,
+    )
+    arguments.update(overrides)
+    return outcome_signing.parse_verified_outcome_response_record(raw, **arguments)
+
+
+def _repack_outcome_record(data):
+    # Deliberately recompute untrusted hashes to exercise checks beyond integrity.
+    data["response_digest"] = digest_mapping(data["response"])
+    data["record_digest"] = digest_mapping(
+        {key: value for key, value in data.items() if key != "record_digest"}
+    )
+    return encode_message(data)
+
+
+def test_outcome_response_record_preserves_exact_response_without_new_authority(
+    outcome_response_record_inputs,
+) -> None:
+    values = outcome_response_record_inputs
+    marker = values.state.load(authorization_binding(values.grant["authorization_id"]))
+    raw = _build_outcome_record(values)
+    data = decode_message(raw)
+    assert type(raw) is bytes and len(raw) < MAX_MESSAGE_BYTES
+    assert raw == canonical_bytes(data) + b"\n"
+    assert data["request"] == values.request.to_dict()
+    assert data["response"] == values.response.to_dict()
+    assert data["authority_descriptor"] == values.descriptor
+    assert data["binding"] == asdict(values.binding)
+    assert data["response_digest"] == digest_mapping(values.response.to_dict())
+    assert data["record_digest"] == digest_mapping(
+        {key: value for key, value in data.items() if key != "record_digest"}
+    )
+    assert _parse_outcome_record(values, raw) == (values.request, values.response)
+    assert _build_outcome_record(values) == raw
+    # Caller mutation cannot change already returned immutable bytes.
+    values.descriptor["foundup_id"] = "changed-after-build"
+    assert _parse_outcome_record(values, raw) == (values.request, values.response)
+    assert values.state.load(authorization_binding(values.grant["authorization_id"])) == marker
+    assert marker.sequence == 2 and values.counts["outcome_signatures"] == 1
+    with pytest.raises(ValueError, match="root_service_reservation_invalid"):
+        values.authority.commit(asdict(values.binding), data["response_digest"], "")
+    assert values.state.load(authorization_binding(values.grant["authorization_id"])) == marker
+
+
+@pytest.mark.parametrize("field", [
+    "descriptor_id", "owner_config_id", "authorization_id", "reservation_id",
+])
+def test_outcome_response_record_rejects_foreign_expected_binding(
+    outcome_response_record_inputs, field,
+) -> None:
+    values = outcome_response_record_inputs
+    raw = _build_outcome_record(values)
+    changed = replace(values.binding, **{field: "sha256:" + "f" * 64})
+    with pytest.raises(ValueError):
+        _parse_outcome_record(values, raw, expected_binding=changed)
+
+
+@pytest.mark.parametrize("target", ["request", "response", "binding", "authority_descriptor"])
+def test_outcome_response_record_rejects_extra_fields_at_every_boundary(
+    outcome_response_record_inputs, target,
+) -> None:
+    values = outcome_response_record_inputs
+    data = decode_message(_build_outcome_record(values))
+    data[target]["runtime_path"] = "untrusted-path"
+    with pytest.raises(ValueError):
+        _parse_outcome_record(values, _repack_outcome_record(data))
+
+
+@pytest.mark.parametrize("target,field,value", [
+    ("response", "accepted", 1),
+    ("response", "boundary_attested", "false"),
+    ("response", "requester_identity_attested", False),
+    ("response", "signer_loads_no_untrusted_code", 1),
+    ("response", "no_secret_material_returned", "true"),
+    ("response", "rejection_code", "contradiction"),
+    ("response", "audit_mac", 123),
+    ("response", "audit_mac", "tampered"),
+    ("response", "signature", "tampered"),
+    ("response", "audit_attestation_signature", "tampered"),
+    ("response", "key_epoch", "another-epoch"),
+    ("response", "key_fingerprint", "sha256:" + "e" * 64),
+    ("request", "nonce", 123),
+    ("request", "requester_principal_id", "another-principal"),
+    ("request", "consensus_receipt_digest", "sha256:" + "e" * 64),
+    ("request", "requested_operation", "another-operation"),
+    ("request", "elevated_consensus_proof", {}),
+    ("request", "payload_digest", "sha256:" + "e" * 64),
+])
+def test_outcome_response_record_rejects_malformed_or_resigned_hash_claims(
+    outcome_response_record_inputs, target, field, value,
+) -> None:
+    values = outcome_response_record_inputs
+    data = decode_message(_build_outcome_record(values))
+    data[target][field] = value
+    with pytest.raises(ValueError):
+        _parse_outcome_record(values, _repack_outcome_record(data))
+
+
+@pytest.mark.parametrize("field,value", [
+    ("work_order_id", "foreign-work"), ("reddog_id", "foreign-reddog"),
+    ("issued_at", True), ("issued_at", root_fixture.NOW + 1),
+    ("covered_action_digest", "sha256:" + "e" * 64),
+])
+def test_outcome_response_record_rejects_changed_canonical_signing_input(
+    outcome_response_record_inputs, field, value,
+) -> None:
+    values = outcome_response_record_inputs
+    data = decode_message(_build_outcome_record(values))
+    payload = decode_message(data["request"]["signing_input"][len(PREFIX_RECEIPT) + 1:].encode())
+    payload[field] = value
+    data["request"]["signing_input"] = canonical_signing_input(payload, PREFIX_RECEIPT)
+    data["request"]["payload_digest"] = _request_digest(data["request"]["signing_input"])
+    with pytest.raises(ValueError):
+        _parse_outcome_record(values, _repack_outcome_record(data))
+
+
+@pytest.mark.parametrize("field", ["snapshot_content_digest", "runtime_binding_digest", "held_out_signature"])
+def test_outcome_response_record_rejects_grant_tampering_after_rehash(
+    outcome_response_record_inputs, field,
+) -> None:
+    values = outcome_response_record_inputs
+    data = decode_message(_build_outcome_record(values))
+    descriptor = data["authority_descriptor"]
+    descriptor["grants"][0][field] = "sha256:" + "e" * 64
+    descriptor["grants"][0]["authorization_id"] = root_fixture.authorization_id_for(
+        descriptor["grants"][0]
+    )
+    descriptor["descriptor_id"] = root_fixture.descriptor_id_for(descriptor)
+    data["binding"]["descriptor_id"] = descriptor["descriptor_id"]
+    data["binding"]["authorization_id"] = descriptor["grants"][0]["authorization_id"]
+    changed = replace(values.binding, **data["binding"])
+    with pytest.raises(ValueError):
+        _parse_outcome_record(values, _repack_outcome_record(data), expected_binding=changed)
+
+
+@pytest.mark.parametrize("mutation", ["top-extra", "missing", "duplicate", "noncanonical", "version", "digest", "response-digest", "oversize", "deep"])
+def test_outcome_response_record_rejects_wire_and_digest_faults(
+    outcome_response_record_inputs, mutation,
+) -> None:
+    values = outcome_response_record_inputs
+    raw = _build_outcome_record(values)
+    data = decode_message(raw)
+    expected = data["record_digest"]
+    if mutation == "top-extra":
+        data["client_seal"] = "not-authority"
+    elif mutation == "missing":
+        data["response"].pop("rejection_code")
+    elif mutation == "version":
+        data["schema_version"] = "unknown.v2"
+    elif mutation == "digest":
+        data["record_digest"] = "sha256:" + "e" * 64
+    elif mutation == "response-digest":
+        data["response_digest"] = "sha256:" + "e" * 64
+    raw = encode_message(data)
+    if mutation == "duplicate":
+        raw = b'{"record_digest":"duplicate",' + raw[1:]
+    elif mutation == "noncanonical":
+        raw = b" " + raw
+    elif mutation == "oversize":
+        raw = b" " * (MAX_MESSAGE_BYTES + 1)
+    elif mutation == "deep":
+        raw = b'{' + b'"nested":{' * 1500 + b'"value":0' + b'}' * 1501
+    with pytest.raises(ValueError):
+        outcome_signing.parse_verified_outcome_response_record(
+            raw, expected_binding=values.binding, expected_record_digest=expected,
+            signature_verifier=values.verifier,
+        )
+
+
+def test_outcome_response_record_requires_independent_digest_pin(outcome_response_record_inputs):
+    values = outcome_response_record_inputs
+    data = decode_message(_build_outcome_record(values))
+    old_digest = data["record_digest"]
+    data["binding"]["owner_config_id"] = "sha256:" + "e" * 64
+    changed = replace(values.binding, owner_config_id=data["binding"]["owner_config_id"])
+    with pytest.raises(ValueError):
+        _parse_outcome_record(
+            values, _repack_outcome_record(data), expected_binding=changed,
+            expected_record_digest=old_digest,
+        )
+
+
+def test_outcome_response_record_builder_rejects_oversize_and_optional_capability(
+    outcome_response_record_inputs,
+) -> None:
+    values = outcome_response_record_inputs
+    for request in (
+        replace(values.request, signing_input="x" * MAX_MESSAGE_BYTES),
+        replace(values.request, elevated_consensus_proof={"untrusted": "claim"}),
+    ):
+        with pytest.raises(ValueError):
+            _build_outcome_record(values, request=request)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("replay_anchor_sequence", True), ("replay_anchor_binding_digest", "bad"),
+    ("replay_anchor_revision", "bad"),
+])
+def test_outcome_response_record_rejects_malformed_cosigned_anchor_identifiers(
+    outcome_response_record_inputs, tmp_path, field, value,
+) -> None:
+    values = outcome_response_record_inputs
+    descriptor, grant, _store = root_fixture._descriptor(
+        tmp_path / "co-signed-malformed-descriptor",
+        descriptor_overrides={field: value},
+        signer_key=root_fixture._SIGNER_KEYS[values.request.signer_public_key],
+    )
+    # Public co-signature checks alone do not validate mutable replay-store fields.
+    outcome_signing.validate_root_verified_outcome_descriptor_public(
+        descriptor, now_epoch=root_fixture.NOW,
+    )
+    binding = replace(values.binding, descriptor_id=descriptor["descriptor_id"],
+                      authorization_id=grant["authorization_id"])
+    with pytest.raises(ValueError):
+        _build_outcome_record(values, descriptor=descriptor, binding=binding)
+
+
+def test_outcome_response_record_bounds_complete_wire_including_newline(
+    outcome_response_record_inputs,
+) -> None:
+    values = outcome_response_record_inputs
+    original = _build_outcome_record(values)
+    padding = MAX_MESSAGE_BYTES - len(original)
+    mac = values.response.audit_mac + "x" * padding
+
+    def with_mac(value):
+        audit = outcome_signing.canonical_signer_audit_attestation_input(
+            signing_input=values.request.signing_input, signature=values.response.signature,
+            audit_mac=value, signer_public_key=values.request.signer_public_key,
+            key_epoch=values.request.key_epoch,
+            requester_principal_id=values.request.requester_principal_id,
+            domain_prefix=outcome_signing.VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
+        )
+        return replace(values.response, audit_mac=value, audit_attestation_signature=
+                       root_fixture._sign(root_fixture._SIGNER_KEYS[values.request.signer_public_key], audit))
+
+    exact_response = with_mac(mac)
+    exact = _build_outcome_record(values, response=exact_response)
+    assert len(exact) == MAX_MESSAGE_BYTES and exact.endswith(b"\n")
+    assert _parse_outcome_record(values, exact) == (values.request, exact_response)
+    with pytest.raises(ValueError, match="message_too_large"):
+        _build_outcome_record(values, response=with_mac(mac + "x"))
+
+
+def test_outcome_response_record_history_does_not_renew_ordinary_signing(
+    outcome_response_record_inputs,
+) -> None:
+    values = outcome_response_record_inputs
+    raw = _build_outcome_record(values)
+    later = replace(values.backend, proposal_clock=lambda: root_fixture.NOW + 61)
+    rejected = later.sign(values.request, values.peer)
+    assert rejected.accepted is False and rejected.rejection_code == REJECT_ED25519_SIGNER_REQUEST_INVALID
+    assert _parse_outcome_record(values, raw) == (values.request, values.response)
+    assert values.counts["outcome_signatures"] == 1

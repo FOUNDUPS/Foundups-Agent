@@ -1,3 +1,10 @@
+## 2026-09-14: Immutable outcome response records
+
+- Packaging: 15 fast groups / 8 staged-manifest tests passed. One runtime hash/pins updated; 1,400 runtime files, 1,650/269 registry and guards unchanged.
+- Extended the existing outcome-signing suite with 51 cases (72 total); reused root/backend/Ed25519 fixtures and preserved every pre-existing definition/assertion. No new test file.
+- Proposed API control: one setup error / 66 deselected in 2.00s. Initial layer: 67 passed in 19.17s. Three malformed co-signed anchor cases then failed (two controls passed / 67 deselected in 3.37s); corrected identifier-shape validation without weakening their assertions.
+- Final nine-suite result: 294 passed / one Linux-root skip in 51.29s. Exact serialization, external pins, type/scope/signature tampering, bounded parsing, complete 64 KiB limit, historical issuance and unchanged consumed root state are covered. These are disposable fixture proofs, not admitted persistence/readback or production process isolation. Evidence: `response_record_continuation_20260914`. WSP 00/15/22/50/60/71/84/97.
+
 ## 2026-09-14: Outcome response handoff and shared validation
 
 - Packaging: 15 fast groups passed in 3,372ms; 8 staged-manifest tests passed in 62.51s (two pytest configuration warnings). Runtime membership, test registry/quarantine and guards are unchanged.
