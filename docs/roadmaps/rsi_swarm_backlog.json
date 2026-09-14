@@ -815,11 +815,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_PENDING_RESPONSE_STORAGE_VERIFIED",
-              "evidence": "pending_response_continuation_20260914",
-              "previous_evidence": "response_record_continuation_20260914",
-              "next": "Extend the existing root service/client with a versioned full-record commitment contract; bind fresh current owner, peer, proof, revocation and exact pending bytes before the terminal marker, preserving v1 behavior. Then compose separately authorized readback and signer/publisher restart recovery within complete-message and operation-deadline bounds",
-              "remaining": "Versioned full-record terminal commitment, authenticated readback and real process/volume recovery; R11-B-F and retained benefit; no runtime admission"
+              "status": "PARTIAL_FULL_RECORD_COMMIT_VERIFIED",
+              "evidence": "full_record_commit_continuation_20260914",
+              "previous_evidence": "pending_response_continuation_20260914",
+              "next": "Fresh preflight for authenticated restoration of a whole missing mirror at sequence 2+ (17/P0), then separately authorized readback (16/P0). Preserve generic monotonic CAS and complete v1/v2 authority checks.",
+              "remaining": "Mirror restoration, current read authority, ordinary signer/publisher integration, operation deadline, real process/volume recovery; R11-B-F and retained benefit; no runtime admission"
             }
           },
           {
@@ -1816,9 +1816,9 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "recursive_prioritization_continuation_20260914",
-    "base_commit": "dcf20781a99f975438751d6dd1d906ab1bcea340",
-    "selected_action": "R11-A-full-record-commitment",
+    "section": "full_record_commit_continuation_20260914",
+    "base_commit": "b2ae1e159c22bd9de67cfef8eb4bb062e5a517f8",
+    "selected_action": "R11-A-authenticated-later-sequence-mirror-restoration",
     "status": "selected_for_next_local_preflight_after_owned_pr_closure",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false

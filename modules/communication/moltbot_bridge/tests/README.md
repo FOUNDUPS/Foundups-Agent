@@ -1,5 +1,19 @@
 # Tests - OpenClaw Bridge
 
+## Full-record root commitment
+
+The existing root service suite now covers v2 wire/proof separation, complete
+64 KiB enclosing requests, current authority on initial/repeated commits, exact
+reservation/event binding, changed valid responses, lost acknowledgments,
+write/cancellation/partial-mirror failures, competing state instances and restart.
+The signing suite shares its existing pending-response fixture; no new test file.
+Eight-suite local result: 279 passed / one Linux-root skip. Commands and limits:
+`full_record_commit_continuation_20260914` in `docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`.
+Whole-mirror deletion at sequence 2 deliberately rejects in the regression: the
+existing generic CAS cannot restore a later checkpoint from None. This remains
+an open authenticated-repair item, reproduced with v1. No production process,
+Linux ownership, independently authorized readback or retained learning is proven.
+
 ## Pending outcome-response storage
 
 The existing `test_reddog_ed25519_verified_outcome_signing.py` has 22 new pending

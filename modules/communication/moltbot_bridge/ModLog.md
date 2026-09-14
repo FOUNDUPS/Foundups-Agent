@@ -1,5 +1,12 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Commit complete outcome responses through the existing root owner
+
+- Added strict canonical v2 COMMIT_RECORD requests/acknowledgments and domain-separated signer proof to the existing protocol/client/service. V1 serialization/parsers remain separate. The root checks current owner/peer/proof/grant and exact inner/outer reservation context before using the pending writer.
+- The shared state lock now permits a terminal transition only after durable exact-byte verification, with sequence 2 bound to the complete record digest. Exact retries and competing responses preserve the winner; no reservation reset or read grant. Pure pending JSON validation moved into the existing wire codec without changing bytes, capacity or state exports.
+- Local evidence: 279 passed / one Linux-root skip across eight suites. The new recovery matrix exposed whole-mirror deletion at sequence 2: unchanged generic CAS rejects restoration from None. A v1 control confirms it; WSP 15 rescores authenticated restoration at 17/P0 ahead of readback at 16/P0.
+- Ordinary signer finalization is still v1; readback, independent activation, real process/volume recovery and retained benefit remain open. No new module, skill, live runtime or protected FoundUp work. Evidence: `full_record_commit_continuation_20260914`. WSP 00/15/22/50/60/62/71/84/97.
+
 ## 2026-09-14: Root-owned pending response bytes
 
 - Added `persist_pending_response` to the existing root state class: current generation/exact reservation, full-record digest selection in both mirrors, fixed primary-root atomic storage, eight-record/512 KiB bounds, full retained-row validation and exact retry. No RPC, owner schema, terminal grant transition or publisher call site changed.

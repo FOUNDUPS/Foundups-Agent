@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     canonical_signer_instance_input,
     request_id_for,
     response_from_bytes,
+    OP_COMMIT_RECORD,
+    RootAuthorityRecordCommitRequest,
+    record_commit_response_from_bytes,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
     _build_process_local_registry,
@@ -208,6 +211,50 @@ def rollback_service_authority(authority: object, reservation: object) -> None:
     if not isinstance(reservation, _ClientReservation) or reservation.seal is not state.seal:
         raise ValueError("verified_outcome_root_service_reservation_invalid")
     # Reserve is deliberately burned at the root before the signer sees it.
+
+
+def commit_service_response_record(
+    authority: object, reservation: object, raw: bytes, record_digest: str,
+    signer_instance_signature: str,
+) -> str:
+    """One exchange commits exact response bytes; no read grant or implicit retry."""
+    request = _response_record_request(
+        authority, reservation, raw, record_digest, signer_instance_signature,
+    )
+    response = record_commit_response_from_bytes(
+        _lookup_client(authority).exchange.exchange(request.to_bytes()),
+    )
+    if (not _response_matches(response, request, expected_state="COMMITTED",
+                              expected_reservation_id=reservation.reservation_id)
+        or response.record_digest != record_digest):
+        raise ValueError("verified_outcome_root_service_record_commit_rejected")
+    return response.record_digest
+
+
+def commit_service_response_record_proof_input(
+    authority: object, reservation: object, raw: bytes, record_digest: str,
+) -> str:
+    request = _response_record_request(
+        authority, reservation, raw, record_digest, _placeholder_signature(),
+    )
+    return canonical_signer_instance_input(request)
+
+
+def _response_record_request(authority, reservation, raw, record_digest, signature):
+    state = _lookup_client(authority)
+    if (not isinstance(reservation, _ClientReservation)
+        or reservation.seal is not state.seal
+        or type(raw) is not bytes or not 0 < len(raw) <= MAX_MESSAGE_BYTES):
+        raise ValueError("verified_outcome_root_service_reservation_invalid")
+    request = RootAuthorityRecordCommitRequest(**{
+        **asdict(reservation.request), "operation": OP_COMMIT_RECORD,
+        "reservation_id": reservation.reservation_id, "signature_digest": None,
+        "response_record": raw.decode("ascii"), "record_digest": record_digest,
+        "signer_instance_signature": signature,
+    })
+    request = replace(request, request_id=request_id_for(asdict(request)))
+    request.to_bytes()  # Bound the enclosing message before proof signing or RPC.
+    return request
 
 
 def reserve_service_proof_input(
@@ -403,6 +450,8 @@ __all__ = [
     "client_authority_bindings",
     "commit_service_proof_input",
     "commit_service_authority",
+    "commit_service_response_record",
+    "commit_service_response_record_proof_input",
     "reserve_service_authority",
     "reserve_service_proof_input",
     "rollback_service_authority",

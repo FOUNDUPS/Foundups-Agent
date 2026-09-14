@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `recursive_prioritization_continuation_20260914` in
+**Current selection evidence:** `full_record_commit_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -324,6 +324,72 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Full-record commitment checkpoint — 2026-09-14
+
+Base: PR1731/main `b2ae1e159c22bd9de67cfef8eb4bb062e5a517f8`.
+Fresh WSP 15 selected R11-A terminal commitment at **4+4+4+4 = 16/P0**.
+The prior recursion policy is merged and current-main CI passed; no open PR
+claimed these source files. This is authorized isolated local authoring, with
+disposable stores/signatures. It supplies no independent runtime admission.
+
+The existing root protocol/service/client now support exact canonical **v2
+`COMMIT_RECORD`** requests and responses. V1 parsers, wire fields and proof domain
+remain separate. V2 covers the complete immutable response record, its externally
+supplied digest, reservation/request context and a domain-separated current E0
+signer proof. The normal root router reaches the same current descriptor,
+owner/state binding, kernel peer, grant, revocation, expiry and signer checks.
+The inner signing event must also match the exact outer reserved request.
+
+`commit_pending_response()` reuses the pending writer under the existing root
+lock. It validates current generation and exact reservation, pins the record in
+both mirrors, persists and verifies exact bytes, then commits sequence 2 with the
+**full record digest** as its revision. The standalone pending method still
+leaves sequence 1 reserved and rejects terminal state. A competing valid response
+cannot replace the selected winner; v1 and v2 terminal states cannot substitute
+for one another. Exact acknowledgment retries revalidate current authority and
+stored bytes. Caller-retained exact bytes can repair a missing payload file;
+digest-only state cannot reconstruct that payload or authorize a read.
+
+`commit_service_response_record_proof_input()` bounds the entire enclosing
+message before proof signing; `commit_service_response_record()` performs one
+root-authenticated exchange and requires an exact v2 acknowledgment. There is
+no hidden transport retry. Explicit same-process retry retains the original
+reservation seal, record, issuance and proof. Existing transport timeouts remain
+per socket operation (default 5 seconds, maximum 30), not a combined wall deadline.
+The complete request including escaped nested bytes and newline must fit 64 KiB;
+an inner record that fits by itself may still reject before any persistence.
+
+Storage still has eight slots and a complete 512 KiB snapshot, with no eviction
+or retention-policy change. The pure existing pending JSON codec moved into the
+existing root wire-codec owner; serialization and public state exports are kept.
+The root state remains below 675 lines / 50 per function; no exemption was widened.
+Existing signing fixtures are shared with the root service suite, not duplicated.
+
+**Observed recovery gap:** deleting an entire mirror after sequence 2 rejects
+with `monotonic_authority_not_monotonic`. The generic CAS permits only None → 1,
+so the existing `_current()` repair cannot reconstruct a missing later marker.
+A disposable v1 control reproduces this with the repair method unchanged from
+the base. A one-step lagging mirror is repairable; total mirror loss at a later
+sequence is a distinct case. Current behavior preserves the surviving terminal
+marker and fails closed. No intermediate history, reset or authority is fabricated.
+
+Local verification: **279 passed / one Linux-root skip** across eight suites
+(201/1 focused, 78 connected). The first expanded run had one failed positive
+expectation for whole-mirror restoration; the explicit negative regression and
+v1 control now preserve that limitation. Test registry remains 1,650/269; runtime
+membership remains 1,400 with five changed source hashes. Packaging passed
+15 fast groups in 3,529ms and 8 manifest + 16 unchanged WSP 62 checks in 65.51s.
+Exact source/test fingerprints are recorded in `full_record_commit_continuation_20260914`.
+
+Fresh WSP 15/WSP 97 re-observation ranks **authenticated restoration of a missing
+later-sequence mirror at 4+5+4+4 = 17/P0**, ahead of authenticated readback at 16/P0.
+Use the existing root-state/monotonic-store owners and their tests for the next
+preflight; never loosen generic CAS or synthesize a sequence-1 history.
+The ordinary signer finalizer still uses v1. Independently authorized readback,
+normal signer/publisher integration, a whole-operation deadline, real process/volume
+recovery, memory activation and measured retained benefit remain open. R11-A/R11/G4
+and every planning packet remain incomplete/non-dispatchable.
+
 ### Pending-response storage checkpoint — 2026-09-14
 
 Final local verification: **226 passed / one Linux-only skip** across eight
@@ -487,8 +553,9 @@ shape checks without touching their store. Expected bindings/digest must come
 from an independently authenticated owner, not the parsed record. The parser
 does not supply that authentication, fresh expiry/revocation/read authority,
 durable root commitment, process-local seals, persistence or memory activation.
-No production caller is connected in this schema layer. Future enclosing wire
-messages must also respect the existing complete-message limit.
+The local v2 root commit route now consumes this record through the existing
+pending-state owner and checks the complete enclosing wire limit. Ordinary signer
+finalization still uses v1; current read authority and publisher recovery are separate.
 
 `AuthorityRuntimeVerifiedOutcomeStore.publish()` bounds revision-conflict retries
 to three commit attempts, preserving the signed envelope and unrelated current
@@ -632,7 +699,8 @@ The connected run caught an import still used by publication retry: 19 failed /
 contract. Final eight-suite result: **207 passed / one skipped in 31.12s**.
 Exact commands, hashes and failure evidence: `response_handoff_continuation_20260914`.
 
-**Selected remaining design — specified, not runtime implemented:** extend the
+**Remaining handoff design — not runtime admitted:** the full-record checkpoint
+above implements the local terminal-commit route. Continue extending the
 existing root outcome owner for commitment/readback and reuse the current atomic
 JSON store for bounded response bytes. Do not repurpose conversation or control
 receipt authority, and do not add a generic outbox. Keep the following layers
@@ -642,7 +710,7 @@ ordered within R11-A; none is an executable work order.
 |---|---|---|
 | Immutable response record — local prerequisite implemented above | `foundup_memex_verified_outcome_signing.py`: bind the exact canonical SigningRequest/SigningResponse, complete outcome-grant context, root reservation, original issuance, key/epoch and full response digest. Reuse the shared response validator. | Exact bounded schema; reject unknown/coerced fields, changed response/audit/signing input, foreign scope and digest substitution. No credentials, private keys, caller-selected paths or executable capabilities in serialized data. |
 | Durable pending bytes — local primitive implemented above | `RootVerifiedOutcomeAuthorityState` with `AtomicJsonAuthorityRuntimeStore` and existing confined operation locks. Bind storage locations and durability to current root-owner configuration before writes. | Persist validated immutable bytes before terminal response commitment; pending bytes are unreadable to publication/learning. Preserve conflicting winners. Missing replicas or rollback cannot silently create authority. |
-| Terminal commitment | Existing root service/client/protocol. A versioned contract must bind the full response digest, not only the signature digest. | Keep current v1 reserve/commit semantics intact. Unknown recovery fields/operations still reject on v1. Commit only exact pending bytes; lost acknowledgments cannot replace the response or reopen a grant. |
+| Terminal commitment — local v2 route implemented above | Existing root service/client/protocol and pending state owner bind the complete record digest. | V1 remains separate. V2 commits after exact durable readback and acknowledges only the same record under current peer/proof/grant checks. Later-sequence whole-mirror restoration is still blocked. |
 | Authenticated readback | Existing root owner, current principal/peer resolver and independently authorized work/grant boundaries. Bind current requester and immutable historical response separately. | Revalidate current owner, caller, scope, expiry/revocation and key policy. A consumed secret-access grant or serialized client seal is not read authority. Readback must not invoke ordinary outcome signing or manufacture a fresh grant. Cross-generation recovery requires explicit current independent authority. |
 | Publisher handoff | Existing publisher/runtime store and the shared response validator. | Reuse original request, response, issuance and event identity; ordinary signing's 60-second freshness rule is not a recovery API. Verify durable root commitment plus current read authority before publication. No acceptance or memory activation is implied. |
 

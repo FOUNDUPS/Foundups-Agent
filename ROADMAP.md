@@ -49,18 +49,25 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [full-record commitment checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14)
+connects a versioned root commit route to the existing pending writer and mirrored
+terminal state. V1 remains separate; current peer/proof/grant checks and exact-byte
+retry pass locally. Validation: 279 passed / one Linux-root skip.
+The tests exposed an inherited later-sequence whole-mirror restoration gap.
+Fresh WSP 15 ranks its authenticated repair **17/P0**, ahead of readback at 16/P0;
+reconcile source and ownership again before that next local preflight.
+Readback, ordinary signer/publisher integration and retained RSI remain incomplete.
+
 The [pending-response storage checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)
-adds exact bounded persistence in the existing root state owner, reusing its lock,
-mirrored selection markers and atomic writer. This is a local pending primitive;
-the grant remains reserved. Next: versioned full-record terminal commitment,
-freshly authorized readback and signer/publisher recovery. RSI remains incomplete.
+remains the historical proof of the sequence-1-only primitive. The later v2 route
+above adds terminal commitment; neither checkpoint supplies read authority.
 
 The [immutable-response record checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14)
 adds bounded canonical records in the existing signing owner, binding the complete
 grant context and exact response to externally supplied context/digest checks.
 The connected selection passes 294 tests with one Linux-root skip. Historical
-validation creates no current authority. The later checkpoint above adds pending storage;
-full-response commitment and authenticated readback remain open.
+validation creates no current authority. Later checkpoints add pending storage and
+local full-record commitment; authenticated readback remains open.
 
 The [signer-response handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14)
 puts response validation in the existing outcome-signing owner and keeps the

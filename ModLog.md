@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: RSI full-response commitment and fresh recovery prioritization
+
+- R11-A local v2 root commitment now reuses existing pending bytes, mirrors, current authority checks and exact-byte retry. V1 remains separate; normal signer/readback/activation wiring is still pending.
+- 279 local tests passed with one Linux-only skip. A new matrix reproduced an inherited sequence-2 whole-mirror restoration gap; surviving authority remains intact and requests fail closed. Fresh WSP 15 ranks authenticated restoration 17/P0, ahead of readback 16/P0, subject to renewed preflight after closure.
+- Updated the existing root roadmap, runbook/backlog/baseline and owning module/test logs. All 26 planning packets/six R11 substeps remain non-dispatchable. AutoPost stays with Remote; YUMORI/eSingularity and active service lanes remain protected. Evidence: `full_record_commit_continuation_20260914`. WSP 00/15/22/50/60/62/71/84/97.
+
 ## 2026-09-14: Recursive repository prioritization governs RSI selection
 
 - Local validation: seven WSP 15 vectors/eligibility checked, WSP 97 repository-evidence receipt compliant, all 26 packet records and historical baseline entries preserved. Existing 30-minute continuation updated and read back. Fresh local re-observation removes the implemented policy scope and selects R11-A full-record commitment (16/P0), contingent on finishing this owned PR and re-observing again. No runtime tests were rerun for this documentation-only change.
