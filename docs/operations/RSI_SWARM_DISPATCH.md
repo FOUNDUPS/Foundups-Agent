@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `scan_report_ownership_continuation_20260915` in
+**Current selection evidence:** `execution_admission_ownership_continuation_20260915` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,62 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Execution admission ownership checkpoint — 2026-09-15
+
+Source: `cd532a538720b1c659f4625784032ebfb24ed012`, merged RSI PR
+[#1745](https://github.com/FOUNDUPS/Foundups-Agent/pull/1745); both main workflows
+passed. WSP 00's software gate passed. Fresh main and 96 open PR heads are
+unchanged, with no admission/dispatch source or test owner conflict. Governed
+lexical retrieval remains UNKNOWN with an index gap and zero owner attempts;
+current Git reads supply source evidence without claiming semantic qualification.
+
+WSP 15 selected **4/5/4/4 = 17/P0**. A reentrant test reproduced an earlier
+execution consuming a changed bundle admitted by a later execution. The changed
+case failed before repair; the unchanged-bundle control passed. This uses disposable
+files and scanner-result doubles, not a live incident or runtime admission.
+
+The existing admission owner now returns `(ok, message, fingerprint)` through
+`admit_runtime_skill(...)`, with `None` on failure. The fingerprint comes from
+that invocation's cached or fresh verdict, never a later cache lookup. The
+existing `ensure_runtime_skill_safety(...)` preserves its two-value signature
+and result by forwarding to the same implementation.
+
+The coordinator keeps this value in its existing execution call and passes it
+explicitly to the registered executor. It no longer stores/reads a shared skill-name
+fingerprint map. Missing explicit evidence rejects; changed bytes reject through
+the existing capture/manifest guard. Cached success/failure and a second admission
+finishing before the first returns retain their own fingerprint results. No new
+context class, module, skill, test file or admission authority is introduced.
+
+Validation: **172 passed / four existing link-related skips** across seven
+connected files, including **71 passed / one skip** in the three focused files.
+Six cases extend the existing suites. Original test definitions remain; two
+receipt assertions/mocks follow the new private contract. Identical `_Libido` and
+`_Memory` helpers are reused from their existing test owner. Eight manifest tests
+and 15 RedDog fast groups pass; registry remains current at 1,650/269.
+
+The admission owner grows 197→214 lines. Coordinator file/class shrink
+1,165→1,149 and 1,047→1,032; its 250-line execution method does not grow.
+Root test files remain 574/581 lines and the nested test file stays 436. Existing
+size debt is not increased and no exemption changes. Exactly two runtime hashes
+and both existing pins change within the unchanged 1,400-member package.
+
+Fresh WSP 15/WSP 97 removes this reproduced handoff defect. The next eligible
+action is **OpenClaw workspace cache content/policy ownership, 3/5/4/4 = 16/P0**.
+Its existing permission-policy owner returns by TTL before checking current content
+or policy. Retrieve wardrobe/manifest fixtures and reproduce the gap before repair;
+reuse the current owners where their contracts fit. Equal-ranked R11 acceptance
+and reader work retain their write-authority and unanswered 012 policy dependencies.
+Higher-ranked RedDog work remains externally owned; Holo/MCP, worker, independent
+execution/promotion and deployment qualification keep their existing blockers.
+
+The fingerprint is local supply-chain evidence, not an independently authenticated
+permission or revocation lifetime. Whole-coordinator concurrency, current authority
+composition and retained benefit remain unproved. Exact queue, commands, source/test
+fingerprints and skipped IDs: `execution_admission_ownership_continuation_20260915`
+in the existing baseline. All packets remain non-dispatchable. Production RSI remains
+incomplete; re-observe again after closure.
 
 ### Scan-report ownership checkpoint — 2026-09-15
 

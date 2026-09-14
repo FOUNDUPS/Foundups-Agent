@@ -2,13 +2,13 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-The bridge now owns private scan reports per invocation. Independent process and
-reentrant verdict checks pass within 166 connected tests/four existing link skips.
-Current selection is [per-execution fingerprint handoff, 17/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15).
-Reproduce coordinator interleavings before extending its existing execution context.
-OpenClaw workspace cache content/policy ownership is a later 16/P0 candidate;
-whole-coordinator concurrency and signed runtime admission remain unproved.
-Admission-cache PR #1744 and PatternMemory PR #1743 have verified main checks.
+Per-execution fingerprint capture and dispatch are locally verified: 172 connected
+passes/four existing link skips. The coordinator no longer reads shared skill-name
+admission state. Its file/class shrink and its existing execution method does not grow.
+Current selection is [OpenClaw workspace cache content/policy ownership, 16/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#execution-admission-ownership-checkpoint--2026-09-15).
+Reproduce TTL reuse through the existing permission-policy and wardrobe tests.
+Independent runtime admission and whole-coordinator concurrency remain unproved.
+Scan-report PR #1745 has verified main checks.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: this repair reduces the file 1,294→1,279 lines and

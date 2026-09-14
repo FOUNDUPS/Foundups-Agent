@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#execution-admission-ownership-checkpoint--2026-09-15); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,13 +49,16 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-15
 
-The [scan-report ownership checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15)
-isolates each WRE/OpenClaw scan's working report and retains the existing mutable
-latest diagnostic. **166 connected tests pass with four existing link skips**;
-8 manifest tests and 15 RedDog fast groups pass. Fresh WSP 15/WSP 97 selects
-per-execution fingerprint handoff **17/P0** for current-source reproduction.
-Full coordinator concurrency, independent runtime admission and production RSI
+The [execution admission checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#execution-admission-ownership-checkpoint--2026-09-15)
+binds each coordinator call to its own scanner fingerprint and removes shared
+skill-name admission state. **172 connected tests pass with four existing link
+skips**; 8 manifest tests and 15 RedDog fast groups pass. Fresh WSP 15/WSP 97
+selects OpenClaw workspace cache content/policy ownership **16/P0** for reproduction.
+Independent runtime admission, complete coordinator concurrency and production RSI
 remain incomplete.
+
+Scan-report PR [#1745](https://github.com/FOUNDUPS/Foundups-Agent/pull/1745)
+merged as `cd532a538720b1c659f4625784032ebfb24ed012`; both main workflows passed.
 
 Admission-cache PR [#1744](https://github.com/FOUNDUPS/Foundups-Agent/pull/1744)
 merged as `8682d569b1022f35fd357af6b3b20e4b5ce52a7e`; both main workflows passed.

@@ -6,7 +6,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from modules.infrastructure.wre_core.src.libido_monitor import LibidoSignal
+from modules.infrastructure.wre_core.src import skill_runtime_admission as admission
+from modules.infrastructure.wre_core.tests.test_wre_runtime_admission_truth import (
+    _runtime_admission_loader, _Libido, _Memory,
+)
 from modules.infrastructure.wre_core.src.local_skill_inference import (
     execute_local_skill_inference,
 )
@@ -27,32 +30,6 @@ from modules.infrastructure.wre_core.wre_master_orchestrator.src.wre_master_orch
 )
 
 
-class _Libido:
-    def should_execute(self, **_kwargs):
-        return LibidoSignal.ESCALATE
-
-    def validate_step_fidelity(self, **_kwargs):
-        return 1.0
-
-    def record_execution(self, **_kwargs):
-        return None
-
-
-class _Memory:
-    def __init__(self):
-        self.outcomes = []
-        self.counters = {}
-
-    def get_active_ab_test(self, _skill_name):
-        return None
-
-    def store_outcome(self, outcome):
-        self.outcomes.append(outcome)
-
-    def increment_counter(self, name, delta=1):
-        self.counters[name] = self.counters.get(name, 0) + delta
-
-
 def _minimal_orchestrator(monkeypatch, tmp_path):
     orchestrator = object.__new__(WREMasterOrchestrator)
     orchestrator.repo_root = Path(__file__).resolve().parents[4]
@@ -63,7 +40,7 @@ def _minimal_orchestrator(monkeypatch, tmp_path):
     monkeypatch.setattr(
         orchestrator,
         "_ensure_wre_skill_safety",
-        lambda _skill_name, force=False: (True, "test pass"),
+        lambda _skill_name, force=False: (True, "test pass", "f" * 64),
     )
     monkeypatch.setenv("WRE_AGENTIC_RAG", "0")
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
@@ -239,6 +216,43 @@ def _write_executor_bundle(tmp_path, source):
     return executor
 
 
+def _admission_orchestrator(monkeypatch, tmp_path):
+    source = "def execute(task): return {'success': True, 'output': 'original', 'effect_receipts': [{'receipt_id': 'test', 'effect_type': 'test'}]}\n"
+    executor = _write_executor_bundle(tmp_path, source)
+    orchestrator = _minimal_orchestrator(monkeypatch, tmp_path)
+    orchestrator.repo_root = tmp_path
+    orchestrator.skills_loader = _runtime_admission_loader(executor.parent / "SKILLz.md")
+    orchestrator.wre_skill_scan_required = orchestrator.wre_skill_scan_enforced = True
+    orchestrator.wre_skill_scan_always = False
+    orchestrator.wre_skill_scan_ttl_sec = 900
+    orchestrator.wre_skill_scan_max_severity = "medium"
+    monkeypatch.setattr(orchestrator, "_ensure_wre_skill_safety", WREMasterOrchestrator._ensure_wre_skill_safety.__get__(orchestrator))
+    monkeypatch.setattr(admission, "run_skill_scan", lambda **_: SimpleNamespace(available=True, passed=True, manifest_passed=True))
+    return orchestrator, executor
+
+
+@pytest.mark.parametrize("change_bundle", [False, True])
+def test_reentrant_execution_keeps_its_admitted_bundle(monkeypatch, tmp_path, change_bundle):
+    orchestrator, executor = _admission_orchestrator(monkeypatch, tmp_path)
+    nested = []
+
+    def load(*_args):
+        if not nested:
+            nested.append(None)
+            if change_bundle:
+                executor.write_text(executor.read_text(encoding="utf-8").replace("original", "replacement"), encoding="utf-8")
+                generate_skill_manifest(executor.parent, manifest_path=executor.parent / "SKILL_MANIFEST.json")
+            nested[0] = orchestrator._execute_skill_once("skill", "qwen", {}, evolve_on_low_fidelity=False)
+        return "# Skill"
+
+    orchestrator.skills_loader.load_skill = load
+    result = orchestrator._execute_skill_once("skill", "qwen", {}, evolve_on_low_fidelity=False)
+    assert nested[0]["success"] is True
+    assert result["success"] is (not change_bundle)
+    assert result["execution_id"] != nested[0]["execution_id"]
+    assert orchestrator.sqlite_memory.outcomes[-1].success is (not change_bundle)
+
+
 def test_executor_rejects_truthy_string_success(tmp_path):
     executor = _write_executor_bundle(
         tmp_path,
@@ -357,7 +371,8 @@ def test_bundle_fingerprint_frames_file_presence_names_and_content(tmp_path):
     assert skill_bundle_fingerprint(first) != skill_bundle_fingerprint(second)
 
 
-def test_orchestrator_dispatches_only_with_stored_admission_fingerprint(tmp_path):
+@pytest.mark.parametrize("explicit", [False, True])
+def test_orchestrator_dispatches_only_with_stored_admission_fingerprint(tmp_path, explicit):
     executor = _write_executor_bundle(
         tmp_path,
         "def execute(task): return {'success': True, 'output': 'bound', 'effect_receipts': [{'receipt_id': 'bound', 'effect_type': 'test'}]}\n",
@@ -371,10 +386,12 @@ def test_orchestrator_dispatches_only_with_stored_admission_fingerprint(tmp_path
         "bound_skill": skill_bundle_fingerprint(executor.parent)
     }
 
-    result = orchestrator._try_executor_dispatch("bound_skill", {}, "qwen")
+    kwargs = {"admission_fingerprint": skill_bundle_fingerprint(executor.parent)} if explicit else {}
+    result = orchestrator._try_executor_dispatch("bound_skill", {}, "qwen", **kwargs)
 
-    assert result["success"] is True
-    assert result["output"] == "bound"
+    assert result["success"] is explicit
+    if explicit:
+        assert result["output"] == "bound"
 
 
 def test_executor_reparse_attribute_is_rejected_before_resolution(

@@ -1,5 +1,15 @@
 # wre_core Test Suite
 
+## Per-execution admission evidence
+
+Reuse `test_wre_execution_truth.py` and `test_wre_runtime_admission_truth.py` for
+reentrant execution, cached/late fingerprint ownership and explicit dispatch.
+The execution suite imports the existing `_Libido`/`_Memory` fixtures from the
+admission suite. Private admission mocks now return `(ok, message, fingerprint)`;
+the public two-value safety-check API remains unchanged. Three focused files pass
+71 tests/one skip; seven connected files pass 172/four skips. Exact commands and
+fingerprints: `execution_admission_ownership_continuation_20260915` in the RSI baseline.
+
 ## Scanner cache ownership
 
 Reuse `test_wre_runtime_admission_truth.py`: the final connected run contains

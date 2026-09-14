@@ -58,7 +58,7 @@ def _minimal_orchestrator(monkeypatch, tmp_path):
     monkeypatch.setattr(
         orchestrator,
         "_ensure_wre_skill_safety",
-        lambda _skill_name, force=False: (True, "test pass"),
+        lambda _skill_name, force=False: (True, "test pass", "f" * 64),
     )
     monkeypatch.setenv("WRE_AGENTIC_RAG", "0")
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
@@ -102,6 +102,43 @@ def cache_request(tmp_path, monkeypatch):
 
 def _scan_result(passed=True):
     return SimpleNamespace(available=True, passed=passed, manifest_passed=True)
+
+
+@pytest.mark.parametrize("passed", [False, True])
+def test_admission_returns_exact_cached_verdict_and_fingerprint(cache_request, monkeypatch, passed):
+    scans = []
+    monkeypatch.setattr(admission, "run_skill_scan", lambda **_: scans.append(True) or _scan_result(passed))
+    expected = admission.skill_bundle_fingerprint(cache_request["skills_loader"].resolve_skill_file("skill").parent)
+    first = admission.admit_runtime_skill(**cache_request)
+    second = admission.admit_runtime_skill(**cache_request)
+    assert first == second
+    assert first[0] is passed
+    assert first[2] == (expected if passed else None)
+    assert ensure_runtime_skill_safety(**cache_request) == first[:2]
+    assert len(scans) == 1
+
+
+def test_admission_does_not_read_a_later_calls_fingerprint(cache_request, monkeypatch):
+    skill_file = cache_request["skills_loader"].resolve_skill_file("skill")
+    expected = admission.skill_bundle_fingerprint(skill_file.parent)
+    original_scan, later = admission._scan_and_cache, []
+    monkeypatch.setattr(admission, "run_skill_scan", lambda **_: _scan_result())
+
+    def scan(**kwargs):
+        result = original_scan(**kwargs)
+        if not later:
+            later.append(None)
+            skill_file.write_text("# later bundle", encoding="utf-8")
+            later[0] = admission.admit_runtime_skill(**cache_request)
+        return result
+
+    monkeypatch.setattr(admission, "_scan_and_cache", scan)
+    result = admission.admit_runtime_skill(**cache_request)
+    assert result[0] is True and result[2] == expected
+    assert later[0][0] is True and later[0][2] != expected
+    assert admission.admitted_runtime_fingerprint(
+        skills_loader=cache_request["skills_loader"], skill_name="skill", cache=cache_request["cache"]
+    ) == later[0][2]
 
 
 @pytest.mark.parametrize("force_contender", [False, True])
@@ -260,21 +297,20 @@ def test_removed_scan_reservation_cannot_republish(cache_request, monkeypatch):
 def test_orchestrator_reads_the_configured_scan_policy(cache_request, monkeypatch, tmp_path):
     orchestrator = _minimal_orchestrator(monkeypatch, tmp_path)
     orchestrator.skills_loader = cache_request["skills_loader"]
-    orchestrator._wre_skill_admission_fingerprints = {}
     orchestrator.wre_skill_scan_required = True
     orchestrator.wre_skill_scan_enforced = True
     orchestrator.wre_skill_scan_always = False
     orchestrator.wre_skill_scan_ttl_sec = 900
     orchestrator.wre_skill_scan_max_severity = "high"
     monkeypatch.setattr(admission, "run_skill_scan", lambda **_kwargs: _scan_result())
-    ok, _ = WREMasterOrchestrator._ensure_wre_skill_safety(orchestrator, "skill")
+    ok, _, fingerprint = WREMasterOrchestrator._ensure_wre_skill_safety(orchestrator, "skill")
     assert ok is True
     expected = admission.admitted_runtime_fingerprint(
         skills_loader=orchestrator.skills_loader, skill_name="skill",
         cache=orchestrator._wre_skill_scan_cache, max_severity="high",
     )
     assert expected is not None
-    assert orchestrator._wre_skill_admission_fingerprints["skill"] == expected
+    assert fingerprint == expected
 
 
 def test_runtime_admission_rejects_prototype_and_metadata_drift():

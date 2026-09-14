@@ -33,20 +33,35 @@ def ensure_runtime_skill_safety(
     required: bool, enforced: bool, always_scan: bool,
     ttl_seconds: int, max_severity: str, force: bool = False,
 ) -> tuple[bool, str]:
-    """Admit exact production metadata and a content-bound scanner result."""
+    """Compatibility verdict view of the same exact-bundle admission."""
+    ok, message, _ = admit_runtime_skill(
+        skills_loader=skills_loader, skill_name=skill_name, repo_root=repo_root,
+        cache=cache, required=required, enforced=enforced, always_scan=always_scan,
+        ttl_seconds=ttl_seconds, max_severity=max_severity, force=force,
+    )
+    return ok, message
+
+
+def admit_runtime_skill(
+    *, skills_loader: Any, skill_name: str, repo_root: Path,
+    cache: MutableMapping[str, dict[str, Any]],
+    required: bool, enforced: bool, always_scan: bool,
+    ttl_seconds: int, max_severity: str, force: bool = False,
+) -> tuple[bool, str, str | None]:
+    """Return this call's verdict and exact fingerprint; failed scans return None."""
     if required is not True or enforced is not True:
-        return False, "production Skillz scanner must be required and enforced"
+        return False, "production Skillz scanner must be required and enforced", None
     admitted, message = validate_runtime_skill_admission(
         skills_loader=skills_loader, skill_name=skill_name
     )
     if not admitted:
-        return False, message
+        return False, message, None
     try:
         skill_file = skills_loader.resolve_skill_file(skill_name)
         scan_dir = skill_file.parent.resolve()
         fingerprint = skill_bundle_fingerprint(scan_dir)
     except Exception:
-        return False, "registered production Skillz source is unavailable"
+        return False, "registered production Skillz source is unavailable", None
 
     cache_key = f"{scan_dir}:{fingerprint}:{max_severity}"
     now = time.time()
@@ -55,12 +70,13 @@ def ensure_runtime_skill_safety(
         if _cache_is_current(cached, now, ttl_seconds, always_scan, force):
             message = cached.get("message")
             stable_message = message if isinstance(message, str) else "cached scan failed"
-            return cached.get("ok") is True, stable_message
+            ok = cached.get("ok") is True
+            return ok, stable_message, fingerprint if ok else None
         reservation = _reserve_scan(cache, cache_key, f"{scan_dir}:")
     if reservation is None:
-        return False, "production Skillz scan pending or admission cache at capacity"
+        return False, "production Skillz scan pending or admission cache at capacity", None
 
-    return _scan_and_cache(
+    ok, message = _scan_and_cache(
         scan_dir=scan_dir,
         repo_root=repo_root,
         fingerprint=fingerprint,
@@ -72,6 +88,7 @@ def ensure_runtime_skill_safety(
         enforced=enforced,
         max_severity=max_severity,
     )
+    return ok, message, fingerprint if ok is True else None
 
 
 def _reserve_scan(cache: MutableMapping, cache_key: str, prefix: str) -> dict | None:

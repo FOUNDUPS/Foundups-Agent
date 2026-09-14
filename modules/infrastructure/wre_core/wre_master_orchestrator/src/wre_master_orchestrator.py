@@ -51,8 +51,7 @@ try:
         resolve_registered_skill_executor,
     )
     from modules.infrastructure.wre_core.src.skill_runtime_admission import (
-        admitted_runtime_fingerprint,
-        ensure_runtime_skill_safety,
+        admit_runtime_skill,
     )
     from modules.infrastructure.wre_core.src.skill_execution_truth import (
         stable_json_record,
@@ -182,7 +181,6 @@ class WREMasterOrchestrator:
             "WRE_SKILL_SCAN_MAX_SEVERITY", "medium"
         ).strip().lower() or "medium"
         self._wre_skill_scan_cache: Dict[str, Dict[str, Any]] = {}
-        self._wre_skill_admission_fingerprints: Dict[str, str] = {}
 
         # Initialize Sprint 3 components
         if SPRINT3_AVAILABLE and WRE_SKILLS_AVAILABLE:
@@ -417,7 +415,7 @@ class WREMasterOrchestrator:
         }
 
     def _try_executor_dispatch(
-        self, skill_name: str, input_context: Dict, agent: str
+        self, skill_name: str, input_context: Dict, agent: str, admission_fingerprint: Optional[str] = None
     ) -> Optional[Dict]:
         """Dispatch the exact registry-adjacent executor when one exists."""
         executor_path = self._find_skill_executor(skill_name)
@@ -428,9 +426,7 @@ class WREMasterOrchestrator:
             skill_name=skill_name,
             input_context=input_context,
             agent=agent,
-            admission_fingerprint=self._wre_skill_admission_fingerprints.get(
-                skill_name
-            ),
+            admission_fingerprint=admission_fingerprint,
         )
 
     def _find_skill_executor(self, skill_name: str) -> Optional[str]:
@@ -454,9 +450,9 @@ class WREMasterOrchestrator:
         except Exception:
             return None
 
-    def _ensure_wre_skill_safety(self, skill_name: str, force: bool = False) -> tuple[bool, str]:
+    def _ensure_wre_skill_safety(self, skill_name: str, force: bool = False) -> tuple[bool, str, str | None]:
         """Run exact production admission and content-bound scanner gating."""
-        result = ensure_runtime_skill_safety(
+        return admit_runtime_skill(
             skills_loader=self.skills_loader,
             skill_name=skill_name,
             repo_root=self.repo_root,
@@ -468,19 +464,7 @@ class WREMasterOrchestrator:
             max_severity=self.wre_skill_scan_max_severity,
             force=force,
         )
-        if result[0] is True:
-            fingerprint = admitted_runtime_fingerprint(
-                skills_loader=self.skills_loader, skill_name=skill_name,
-                cache=self._wre_skill_scan_cache,
-                max_severity=self.wre_skill_scan_max_severity,
-            )
-            if fingerprint is None:
-                result = (False, "production Skillz admission receipt is unavailable")
-            else:
-                self._wre_skill_admission_fingerprints[skill_name] = fingerprint
-        if result[0] is not True:
-            self._wre_skill_admission_fingerprints.pop(skill_name, None)
-        return result
+
 
     def _execute_skill_with_qwen(
         self,
@@ -589,7 +573,7 @@ class WREMasterOrchestrator:
             }
 
         # Step 1.5: Per-skill supply-chain gate (Cisco scanner).
-        scan_ok, scan_message = self._ensure_wre_skill_safety(skill_name, force=force)
+        scan_ok, scan_message, fingerprint = self._ensure_wre_skill_safety(skill_name, force=force)
         if self.sqlite_memory:
             self.sqlite_memory.increment_counter("wre_skill_scan_checks")
         if not scan_ok:
@@ -644,7 +628,7 @@ class WREMasterOrchestrator:
 
         # Step 3: Check for programmatic executor (executor.py alongside SKILLz.md)
         # Captured executor bytes must match the exact scanner admission receipt.
-        executor_result = self._try_executor_dispatch(skill_name, input_context, agent)
+        executor_result = self._try_executor_dispatch(skill_name, input_context, agent, fingerprint)
         if executor_result is not None:
             execution_result = executor_result
         else:
