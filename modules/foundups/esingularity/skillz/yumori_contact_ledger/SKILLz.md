@@ -1,7 +1,7 @@
 ---
 name: yumori_contact_ledger
-description: Reconcile YUMORI.me campaign contacts with Gmail thread history and the connected YUMORI.me Contacts ledger without duplicating canonical email bodies.
-version: 0.3.0
+description: Reconcile YUMORI.me campaign contacts with Gmail history and the connected ledger; prepare evidence-gated, editorial-beat-specific media outreach without duplicating canonical correspondence.
+version: 0.4.0
 intent_type: MAINTENANCE
 promotion_state: prototype
 category: workflow
@@ -32,6 +32,16 @@ evals:
     expected: material_milestones_and_open_followups_are_recorded_without_private_contact_duplication
   - name: government_correspondence_routing
     expected: japanese_first_government_mail_resolves_verified_routes_and_default_bcc_from_connected_ledgers_without_hard_coded_addresses
+  - name: editorial_hook_contract
+    expected: each_pitch_has_editorial_scope_beat_hook_evidence_caveat_and_one_request
+  - name: protest_novelty_boundary
+    expected: preexisting_japanese_protests_preclude_first_or_begins_in_japan_claims
+  - name: ai_koban_truth_boundary
+    expected: proposed_regional_service_non_export_model_is_not_claimed_deployed_or_financially_validated
+  - name: sent_draft_reconciliation
+    expected: surviving_draft_is_not_proof_of_non_send_and_subject_is_not_a_unique_event_key
+  - name: press_contact_resolution
+    expected: latest_principal_authorized_press_number_is_resolved_live_and_not_hard_coded_in_git
 retirement_date: null
 ---
 # YUMORI.me Contact Ledger
@@ -52,6 +62,8 @@ Decision rule:
 
 For this workflow: **need = yes; live without = poorly; afford not to have = no.** YUMORI.me has repeated multi-party outreach where context loss can cause duplicate contact, inappropriate follow-up, or failure to act on a material reply. Therefore this belongs as one parent Skillz with conditional branches, not many disconnected skills.
 
+The 2026-09-15 media extension belongs inside this existing parent. Editorial beats need different evidence and interview hooks, not a separate skill, contact store, or political demographic-targeting system for every outlet.
+
 ## Purpose
 
 Maintain one recoverable communications picture for the YUMORI.me Save the Onsen / eSingularity effort without copying entire email bodies into the repo or spreadsheet.
@@ -62,6 +74,7 @@ External sources:
 3. `Correspondence Routing` tab in `YUMORI.me Contacts` — mutable To/CC/BCC policy keyed by Contact ID, never by hard-coded repo addresses.
 4. Google Doc `YUMORI.me Moshpit` — dated campaign milestones and material outcomes.
 5. Google Doc `YUMORI.me Contacts Pics` — source imagery/business cards and transcription evidence.
+6. Existing `PRESS — YUMORI Media Outreach & Press Kit` — derived press copy and principal-authorized press contact details. Resolve its stable ID from `docs/DRIVE_DOCUMENT_INDEX.md`; do not create a replacement.
 
 Repository context: `modules/foundups/esingularity/docs/YUMORI_CONTACT_LEDGER_CONTEXT.md`.
 
@@ -76,7 +89,7 @@ Gmail message/thread bytes
   -> model recollection
 ```
 
-Read connected Gmail/Drive before current-state claims.
+Read connected Gmail/Drive before current-state claims. The repository owns project specifications, while external primary records own what their issuers actually said. New explicit principal corrections take precedence over older inferred contact details; record their provenance in the connected operational record, not public Git.
 
 ## Canonical keys
 
@@ -126,6 +139,67 @@ Close the rejected ask cleanly, preserve any useful referral, research the refer
 
 ### Media
 Recover prior pitch and reporter context. Distinguish acknowledgement, request for materials, interview interest, publication decision, and automatic response. Never report press interest as coverage.
+
+#### Editorial positioning: one factual spine, different reporting questions
+
+Match a newsroom's documented editorial beat and requested format. Do not tailor political persuasion to personal demographics, inferred political beliefs, vulnerabilities, or private profiles. Geographic scope here describes the story and newsroom remit, not a demographic persuasion segment. Do not claim affiliated groups or a nationwide coalition merely because outreach is national.
+
+Shared position: oppose hyperscale development that externalizes local burdens without adequate consent, disclosure and regional benefit; propose locally governed regional computing as an alternative. Do not translate this into opposition to every data center: COGDC itself is computing infrastructure. Apply the same scrutiny to Japanese and overseas owners, and to the proposed community model.
+
+| Editorial scope / beat | Reporting hook | Evidence and reporting request |
+| --- | --- | --- |
+| Fukui civic / local news | Can compute help save this onsen before an irreversible asset decision? | Current council documents, request status, field photographs, local interviews; request on-site reporting and independent verification. |
+| Regional economy / industry | Will the region merely host AI infrastructure, or develop computing it can use and govern? | Local workload/customer evidence, power and fiber constraints, land and operating costs; request investigation of ownership and practical demand. |
+| National society / infrastructure | Amid existing data-center opposition, an onsen campaign proposes an AI Koban alternative. | Independently reported existing disputes, JHR source trail and the Fukui case; request comparative national reporting, not a claim to have started all protests. |
+| Technology / AI | A proposed community computing service, not a smaller hyperscaler with a new label. | Proposed topology, workload sizing, data boundary, reliability, security and unit economics; request a technical challenge/interview. |
+| Environment / energy | Compare actual local burdens and usable heat, not green branding. | Site-specific energy, water, noise, land and heat-use measurements; never infer a footprint advantage from size or ownership alone. |
+| Education / work | Regional AI access and locally developed applications, rather than job-loss predictions. | Schools' and firms' expressed needs, skills and demand studies; do not promise jobs, users, participating institutions or displacement avoided. |
+| International / human-interest | An American filmmaker using AI in a Japanese onsen-preservation campaign asks who should own AI infrastructure. | Verified biography, real photographs and dates, Japanese voices and public records; no savior narrative, invented credentials or national-first claim. |
+
+Scope changes the lead and supporting evidence, never the underlying facts, current civic request or unresolved feasibility conditions. A national release is a new editorial edition, not the local release sent unchanged to more addresses.
+
+#### AI Koban / AI交番: internal operating definition
+
+Status: **PROPOSED / NOT DEPLOYED / ECONOMICS NOT VALIDATED**. Principal direction recorded 2026-09-15.
+
+AI Koban means an accessible, accountable regional computing-and-learning service: **compute developed in the region, used by the region, for the region**. COGDC is the proposed locally governed computing infrastructure; AI Koban is its local service, support and governance interface. Several local access points may share a regional compute pool. Do not equate every Koban with a 1 MW installation.
+
+The specified service model is non-export-oriented: regional capacity serves regional workloads and locally developed/adapted applications, rather than being built to sell bulk computing to outside tenants. **Do not assume export-compute revenue** in this model. The eligible regional user/workload boundary and enforceable ownership, scheduling, pricing, accounting and local-benefit rules still require definition.
+
+Data location, compute location, ownership, model provenance and economic distribution are separate claims. There is no implicit permission to export local private data, prompts or workloads to external cloud services. No technical isolation or zero-export guarantee may be advertised until architecture, contracts, routing, telemetry and audit prove it. Sharing public research or open-source software is a distinct decision, not automatically prohibited or authorized by the compute-service definition. Buying external hardware or adapting open models does not mean that all technology was developed locally.
+
+Proposed topology: regional school/business/community access -> AI Koban support and governance -> appropriately sized COGDC regional compute pool. Any external service connection is a separately disclosed design question, not a silent default or existing capability.
+
+The police-box comparison concerns proximity and accountability only; it confers no police powers, surveillance mandate or government approval. Community ownership and green operation remain design goals requiring legal and measured evidence.
+
+**Macro dependency:** before quoting profitability, reconcile the existing FIN model's customer geography, offtake, utilization and pricing with the non-export service model. Local-only demand may support a smaller installation or lower utilization. Never reuse global-market sales assumptions to claim that regional-only compute will fund the onsen. No financial engine is modified by this documentation extension.
+
+#### WSP 97 media preflight
+
+Retrieve -> inspect -> challenge -> simplify -> act -> verify:
+
+1. Retrieve current WSP 97, this skill, the live thread/recipient ledger, existing PRESS copy, latest project authority and relevant JHR article/source records.
+2. **Micro:** inspect the exact draft's subject, lead, recipient list, phone, date, protest count, budget terms, source links, photo identity/caption and attachment bytes.
+3. **Macro:** compare the national story to the actual local campaign; test consistency with AI Koban/COGDC design, the non-export revenue constraint, audience/disclosure boundaries and prior sends.
+4. **Dialectic:** ask whether anti-data-center framing contradicts COGDC; whether a first/begins claim is false; whether distributed infrastructure can be more costly or less efficient; whether refusal of outside demand breaks assumed revenue; whether residents and the city have been represented fairly. Record a short decision/evidence summary, not private reasoning.
+5. Choose the simplest defensible hook. Explain a data center as a facility containing networked computing/storage systems; explain hyperscale as very large cloud/platform infrastructure, not a synonym for every server facility or foreign ownership.
+6. Use campaign language as attributed campaign position. Do not present a committee release as independent news reporting. Keep city findings, reported concerns, hypotheses, demands and proposed solutions distinct.
+7. Resolve actual current JHR and LinkedIn article URLs. JHR is project-authored research, not independent corroboration; link its underlying primary sources. Do not invent a LinkedIn slug or substitute a profile URL for an unverified article.
+8. Check relevant Sent, All Mail and full threads by recipients, normalized subject and distinctive body text before sending. A surviving draft may duplicate a sent copy; a Moshpit SENT label without a Gmail receipt is insufficient. On unresolved ambiguity, preserve the draft and do not resend.
+9. Use the newest explicitly authorized press phone from the connected press/contact record; normalize domestic and international formats. Do not label a phone as WhatsApp-enabled without setup confirmation. Never commit the personal number into this public skill.
+10. Keep unrelated newsrooms in BCC and committee recipients in CC only as authorized. A press list is not authorization for blanket repeated mail. Respect declines and verify alternate routes after bounces.
+11. Send only with authorization; read back SENT status, To/CC/BCC and actual attachments. SENT is not delivered, read, interviewed or published. Log one email event per message ID and one material Moshpit breadcrumb; preserve correction history.
+
+Required internal pitch brief: `editorial_scope`, `editorial_beat`, `hook`, `why_now`, `verified_evidence`, `proposal_and_unknowns`, `strongest_counterpoint`, `single_reporting_request`, `source_urls`, `photo_provenance`, `press_contact_source`, `dedupe_result`, `authorization`, `send_state`.
+
+Reject: unsupported national-first claims; fabricated protest alliances; financial/safety certainty; privacy/zero-export promises without controls; routine bulk repetition; undeclared AI images; historical photos captioned as today's; static day counts carried forward without evidence.
+
+Research anchors checked 2026-09-15 (re-read before reuse): Reuters reported Akishima opposition on 2024-07-10; TV Asahi reported the Inzai residents' lawsuit on 2026-03-09; TV Asahi/ABEMA covered community concerns and local coexistence on 2026-09-02. These establish preexisting opposition, not a YUMORI-led coalition or opposition to every data center.
+- https://www.reuters.com/world/asia-pacific/tokyo-residents-seek-block-building-massive-data-centre-2024-07-10/
+- https://news.tv-asahi.co.jp/news_society/articles/900185571.html
+- https://news.tv-asahi.co.jp/news_economy/articles/900198650.html
+
+This is a human/agent-readable prototype workflow, not evidence of deployed RedDog enforcement or automatic media distribution.
 
 ### Government / political / administrative
 Recover the exact prior request and current procedural status. Separate observed official facts from campaign strategy. Address authority/jurisdiction precisely. Never imply that a meeting, copied email, or receipt equals support.
@@ -192,12 +266,14 @@ Use Moshpit as operational memory/open-loop index, not a mailbox or private addr
 Campaign question:
 > Can compute help save an onsen, revitalize a region, and create a repeatable regional model for Japan?
 
-Immediate civic ask: preserve a short evidence-based review window to compare reuse against irreversible demolition and convene relevant parties; it is not automatic approval of eSingularity.
+Current civic ask: **VOTE NO** on the budget containing demolition preparation at the September 25 council vote. The previous fixed 60-day/short-review-window request is superseded; do not restore it as the current ask. A NO vote does not adopt eSingularity, approve public investment, establish a PPP or guarantee reuse. Re-verify dates and procedural status before later reuse. Source: `docs/VOTE_NO_ALIGNMENT_20260913.md` on current repository main.
+
+National editorial proposition: **Against an export-oriented hyperscale model; for regional-use, locally governed AI infrastructure.** The proposed AI Koban service is an alternative to investigate, not a demonstrated substitute for every hyperscale workload or an already operating national network.
 
 ## RedDog / Rolodex behavior
 
 This is the parent YUMORI.me correspondence Skillz. Branch inside it by task/reply type unless a future branch independently passes the Three Skill Questions and has distinct tools, invariants, evaluation requirements, or lifecycle.
 
-RedDog/WRE should discover it for YUMORI.me contacts, outreach, Gmail replies, campaign email audit, government correspondence, stakeholder follow-up, Moshpit updates, business-card indexing, and communications history.
+RedDog/WRE should discover it for YUMORI.me contacts, outreach, Gmail replies, campaign email audit, government correspondence, stakeholder follow-up, Moshpit updates, business-card indexing, communications history, national/regional press positioning, editorial hooks and AI Koban explanations.
 
 The Skillz grants no Gmail or Drive mutation authority by itself. If connected sources are unavailable, report `NEEDS_VERIFICATION`; never reconstruct live correspondence from repository memory.
