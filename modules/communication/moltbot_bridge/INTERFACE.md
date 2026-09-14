@@ -188,7 +188,7 @@ administered principal-key resolver.
 
 ### Verified-outcome authority, signing and memory
 
-The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [accepted-memory checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14) records the latest local layer.
+The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [activation recovery checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14) records the latest local layer and the unimplemented acceptance transaction contract.
 
 | Existing API / owner | Current contract |
 |---|---|
@@ -201,7 +201,7 @@ The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-
 | `AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` / `publish()` | Validated STAGED/ACTIVE retry evidence; three revision attempts preserve the signed envelope and unrelated state. Staging is invisible to consumable readers. |
 | `SignedVerifiedOutcomeEvidencePublisher.publish()` | Exact durable winner acknowledgment preserves original issuance/signature; no re-signing, renewal or activation. |
 | `ResidentQueueChainResultReceipt.recorded_at` | Canonical held-out event time supplies admission `verified_at`; bootstrap time cannot repair absent historical time. |
-| PatternMemory staging / authority-envelope consumption | `AuthorityRuntimeVerifiedOutcomeStore(store, *, accepted_outcome_source=None)` requires its configured source's `load_verified_outcome(record_id)` to return the exact accepted canonical record before/after new activation and at envelope reads. Unbound/missing/changed/unreadable sources reject; ACTIVE retries recheck memory. Staging/publication retry remains separate. Current source binding, durable authority and opaque one-use capability remain required; the real sink rejects direct activation. |
+| PatternMemory staging / authority-envelope consumption | `AuthorityRuntimeVerifiedOutcomeStore(store, *, accepted_outcome_source=None)` requires its configured source's `load_verified_outcome(record_id)` to return the exact accepted canonical record before/after new activation and at envelope reads. Unbound/missing/changed/unreadable sources reject; ACTIVE retries recheck memory. Activation reloads exact durable evidence after each commit attempt, recovers an identical ACTIVE winner/lost reply, and retries only revision conflicts up to three commits. Cancellation propagates; unreadable/substituted or uncommitted state cannot acknowledge success. Staging/publication retry remains separate. Current source binding, durable authority and opaque one-use capability remain required; the real sink rejects direct activation. |
 | Learning-candidate gate / reconstruction verifier | Bounded `STRUCTURAL_ONLY` evidence, not authenticated provenance, work authority or runtime admission. |
 
 Pending payloads use the fixed primary-root file `verified-outcome-pending-responses.json`, the existing atomic store, at most eight records and a complete 512 KiB snapshot. The payload has one copy; mirrored digests cannot reconstruct lost bytes. Only retained exact bytes can repair a missing file.

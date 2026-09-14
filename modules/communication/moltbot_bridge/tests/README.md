@@ -1,5 +1,20 @@
 # Tests - OpenClaw Bridge
 
+## Activation recovery
+
+Extend the existing `test_foundup_memex_verified_outcome_adversarial.py` for commit
+and readback faults. It imports the single-use publisher and real JSON/SQLite
+fixtures from the existing runtime-authority and sink suites. The new 23 cases
+cover lost replies, competing revisions/winners, missing durable success, current
+memory loss, cancellation and unreadable state; original tests remain intact.
+
+**204 connected tests, 8 manifest tests and 15 fast groups pass.** Use the exact
+files, environment, arguments and fingerprints in `activation_recovery_continuation_20260914`
+in the existing RSI baseline. The Windows tests inject storage-call faults and use
+signature doubles; cross-store acceptance, process/volume failure and admitted
+runtime composition need separate evidence. Previous checkpoint counts below
+retain their source and environment scope.
+
 ## Accepted-memory visibility
 
 The existing `test_foundup_memex_verified_outcome_runtime_authority.py` now binds

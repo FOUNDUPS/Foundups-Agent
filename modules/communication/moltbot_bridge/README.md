@@ -2,12 +2,12 @@
 
 ## Verified-outcome recovery and RSI
 
-The [accepted-memory visibility checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14)
-adds `accepted_outcome_source` to the existing authority store. The source's
-`load_verified_outcome(record_id)` must return exact accepted memory content before
-activation and consumable reads. Unbound factories remain closed; publication
-staging/retry remains available. Current runtime composition must independently
-bind the participant; this parameter grants no write or read permission.
+The [activation recovery checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14)
+reuses the authority store to recover an exact committed activation after a lost
+reply or competing revision. It rechecks the original envelope and current accepted
+memory, with at most three revision attempts. Both production factories remain
+unbound. The documented memory acceptance transaction and its independent write
+authority are still prerequisites; this recovery path grants no activation.
 
 R11 builds on the existing signing, root authority, publication and PatternMemory owners.
 The v2 root commit route persists the bounded full response through the existing
