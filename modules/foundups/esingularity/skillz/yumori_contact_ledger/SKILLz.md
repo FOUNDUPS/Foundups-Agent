@@ -48,6 +48,12 @@ evals:
     expected: regional_non_export_proposal_is_not_claimed_deployed_or_financially_validated
   - name: sent_draft_reconciliation
     expected: surviving_draft_is_not_proof_of_non_send_and_subject_is_not_a_unique_key
+  - name: gmail_sent_first_entry_gate
+    expected: sent_search_then_draft_comparison_then_moshpit_receipts_then_notify_0102_before_status_or_resend
+  - name: earlier_sent_later_draft
+    expected: report_prior_send_and_separate_update_without_claiming_the_campaign_was_never_sent
+  - name: sent_missing_moshpit
+    expected: repair_missing_receipt_not_resend_the_message
   - name: press_contact_resolution
     expected: latest_authorized_press_number_is_resolved_live_not_hard_coded_in_git
   - name: media_role_activation
@@ -110,10 +116,90 @@ Read connected Gmail/Drive before current-state claims. The repository owns proj
 - `Contact ID` (`YMC-####`): stable identity in the private Contacts ledger.
 - Subject: descriptive, never a unique key.
 
+## Mandatory Gmail entry gate: SENT_FIRST_MOSHPIT_NOTIFY_0102
+
+Principal correction, 2026-09-15. This gate applies to every invocation of this
+Gmail/correspondence skill, including morning briefings, draft reviews, media,
+government follow-ups and release-manager handoffs. Run it after governing
+skill/identity intake and before reporting an outgoing item as unsent or
+proposing/executing a resend. It is not merely a final pre-send checklist.
+
+1. **Sent first.** Make the first mailbox search a relevant Sent search. Fix the
+   authorized mailbox/project, date window and as-of boundary. Recover earlier
+   sends for the communication's purpose using recipients, subject variants
+   and distinctive content; do not limit the search to the latest draft title
+   or to today's mail. Exhaust relevant pagination and include sent messages
+   found in All Mail/Trash. Read candidate messages and full threads, including
+   actual To/CC/BCC, message_id, thread_id and offset-aware event time. Missing
+   access, incomplete pages or ambiguous matches mean UNKNOWN, not unsent.
+2. **Compare every relevant draft against Sent.** Read the draft, then repeat
+   or broaden the Sent search with its actual text and recipients. Compare the
+   newly authored content, attachments and recipient coverage; quoted earlier
+   mail, a matching subject or a similar purpose alone does not prove an exact
+   duplicate. Keep the earlier campaign/request and the exact newer version
+   separate. A newer unsent update does not erase an earlier successful send.
+   Classify SAME_MESSAGE_SENT, EARLIER_SENT_NEW_DRAFT, PARTIAL_RECIPIENT_COVERAGE,
+   NO_SENT_MATCH_IN_CHECKED_SCOPE, or UNKNOWN. No relevant draft means
+   NO_RELEVANT_DRAFT, not permission to skip Sent or the receipt check.
+3. **Check the Mosh Pit, not the ModLog.** Resolve each matched sent MID/TID in
+   the live Mosh Pit under its actual project-local day, and cross-check the
+   Email Log. Fetch Gmail IDs referenced by the Mosh Pit that the initial
+   search missed. Gmail evidence is primary; Mosh Pit is a corroborating
+   receipt index, not independent proof of delivery. Sent without a Mosh Pit
+   entry is SENT_LOG_GAP: repair the log, never resend. A Mosh Pit SENT claim
+   with no retrievable Gmail evidence is UNVERIFIED_RECORD: preserve its
+   provenance and HOLD. Conflicting IDs, dates or states require correction
+   notes; never resolve them by guessing. Repository ModLog entries record
+   software work, not whether correspondence was sent.
+4. **Notify 0102 before status or action.** Return a structured reconciliation
+   packet to the supervising 0102 context, then give 012 a precise summary.
+   When 0102 executes directly, this packet belongs in its current handoff and
+   the conclusion is reported to 012; no email-to-self or separate agent is
+   implied. Report an already-sent message before describing a surviving
+   draft. State exactly which version and recipient coverage remain open.
+   Do not notify another channel or claim automatic notification delivery
+   without a configured, authorized channel and a receipt.
+
+Required notification fields:
+`project_scope`, `mailbox_scope`, `checked_window`, `as_of`, `sent_search_complete`,
+`prior_send_state`, `sent_message_ids`, `sent_thread_ids`, `sent_local_dates`,
+`actual_recipient_coverage`, `draft_message_id`, `draft_relation`, `content_delta`,
+`moshpit_receipt_state`, `moshpit_event_dates`, `email_log_state`, `conflicts`,
+`recommended_action`, `send_hold`, `notification_target` (0102).
+Keep actual identifiers and private envelopes in the authorized handoff/ledger,
+not in public Git or a public notification. Evidence fields may be explicitly
+UNKNOWN; missing evidence must never be silently filled from memory.
+
+The gate returns a reconciliation decision, not send authority. SAME_MESSAGE_SENT
+blocks an automatic duplicate send; any deliberate resend requires a separate
+explicit instruction after reporting the prior receipt. EARLIER_SENT_NEW_DRAFT
+requires a version-specific decision, not recycling the old request. Partial
+coverage never authorizes blanket resending to everyone. Unresolved evidence
+keeps send_hold=true. Only a checked, authorized new action can proceed through
+the existing release-manager controls. Do not delete or relabel surviving
+drafts merely because a sent counterpart was found.
+
+### Regression cases from the September 15 error
+
+These are synthetic policy cases, not a live mailbox snapshot. They lock the
+reporting distinction and no-resend behavior; static contract tests do not
+prove deployed Gmail matching or automatic notifications.
+
+| Case | Retrieved evidence | Required result | Automatic action |
+| --- | --- | --- | --- |
+| earlier_sent_later_draft | Earlier VOTE NO request is SENT; later AI Koban update is a distinct draft; earlier receipt is in Mosh Pit | EARLIER_SENT_NEW_DRAFT; say "The earlier VOTE NO message was sent; the later AI Koban update remains a separate draft." | NOTIFY_0102; no automatic resend |
+| exact_sent_copy_draft_remains | Sent content, attachments and recipients match a surviving draft; Mosh Pit agrees | SAME_MESSAGE_SENT | NOTIFY_0102; preserve draft; no duplicate send |
+| sent_missing_moshpit | Gmail verifies SENT; Mosh Pit lacks that message receipt | SENT_LOG_GAP | REPAIR_LOG; NOTIFY_0102; never resend |
+| moshpit_sent_no_gmail_receipt | Mosh Pit says SENT but the Gmail message cannot be verified | UNVERIFIED_RECORD | HOLD; NOTIFY_0102 |
+| incomplete_sent_search | Pagination, mailbox access or content comparison is incomplete | UNKNOWN | HOLD; NOTIFY_0102; never claim unsent |
+| partial_recipient_coverage | Earlier matching content went to only part of the proposed recipient list | PARTIAL_RECIPIENT_COVERAGE | NOTIFY_0102; no blanket resend |
+| draft_without_sent_match | Completed relevant searches and Mosh Pit cross-check find no sent counterpart | NO_SENT_MATCH_IN_CHECKED_SCOPE | NOTIFY_0102; state coverage; await applicable send authorization |
+| no_draft | Relevant Sent search and Mosh Pit receipts checked; no relevant draft | NO_RELEVANT_DRAFT | NOTIFY_0102; report verified prior sends |
+
 ## Parent workflow
 
-1. Resolve the person/organization in `YUMORI.me Contacts`.
-2. Read the complete relevant Gmail thread, not only its latest snippet.
+1. Run `SENT_FIRST_MOSHPIT_NOTIFY_0102` before any draft-status conclusion or resend decision; this is the first correspondence operation, not an optional media branch.
+2. Resolve the person/organization in `YUMORI.me Contacts` and read the complete relevant Gmail thread, not only its latest snippet.
 3. Recover previous asks, promises, sent content and closures.
 4. Read relevant Moshpit milestones and current project evidence.
 5. Research authoritative/current background only when identity, authority, specialty, organization or public position materially affects the response.
