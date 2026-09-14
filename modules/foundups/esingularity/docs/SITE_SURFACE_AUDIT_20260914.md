@@ -83,6 +83,12 @@ The manifest used combined `purpose: 'any maskable'` entries. The current typed/
 
 Repair: explicit `any` and `maskable` entries for both 192 px and 512 px icons.
 
+### 8. Deck URL-state effect failed full lint
+
+Once the inherited stale test gate was temporarily aligned so CI could reach the frontend stages, full ESLint exposed a real runtime-quality defect in `YumoriPresentation.tsx`: URL/deep-link state was restored with synchronous `setState()` calls directly in an effect body (`react-hooks/set-state-in-effect`).
+
+Repair: defer the URL/deep-link restoration through `requestAnimationFrame` and cancel the frame on cleanup. This preserves direct `?vision=1&slide=N` behavior without the cascading-render lint error.
+
 ## Verified defect owned by another active PR — not duplicated here
 
 ### Shared ticker action anchors and mobile ticker behavior — PR #1701
@@ -94,6 +100,22 @@ This branch deliberately does **not** edit the ticker. Reconcile #1701 rather th
 ### Stale presentation CI contracts — PR #1700
 
 The three known eSingularity validation failures are stale tests requiring the retired sprite implementation and removed `content/yumori-presentation.ts`. PR #1700 already owns those contract repairs. This branch does not restore the duplicate retired source merely to satisfy stale tests.
+
+For validation only, the equivalent current-architecture test assertions were temporarily applied on commit `f45eefc302e9c5ff649a9065e0f8ff8a0fe17436`, allowing the full existing workflow to execute. They were then reverted so PR #1700 keeps ownership of that test migration; no `test_contracts.py` delta remains in this audit PR.
+
+## Validation evidence
+
+At `f45eefc302e9c5ff649a9065e0f8ff8a0fe17436`, with the executable frontend identical to this audit branch and only the #1700-equivalent stale tests temporarily aligned:
+
+- eSingularity Python contracts: **30 passed**;
+- public catalog projection: **safe / 0 errors**;
+- hostname routing: **18 passed**;
+- full frontend lint: **passed** after the deck effect repair;
+- production frontend build: **passed**.
+
+The temporary test-contract alignment was subsequently reverted. Therefore the final branch again reports the three inherited stale failures until #1700 is reconciled, but the executable frontend code has already passed the complete lint/build workflow.
+
+The lint run also reported existing `<img>` optimization warnings on JHR and YUMORI surfaces. They are warnings, not build failures; the external R.E.port hotlink is separately recorded below as an availability/provenance risk.
 
 ## Observed risks, not verified failures
 
@@ -111,14 +133,12 @@ Responsive CSS includes narrow-screen containment, dedicated language-control pl
 
 ## Acceptance checks for this branch
 
-Required before promotion:
-
 1. YUMORI brand regression passes: `.me`, guardian lockup, Japanese-first headings and JHR title.
 2. Secondary-route navigation test confirms no `/#innovation-hub` or `/#join` remains in audited routes.
 3. Deck test confirms current VOTE NO action and no `。.` live-region construction.
 4. Existing domain-routing/JHR contracts remain intact from parent PR #1726.
-5. Production build and focused lint complete without new errors.
-6. Compare any eSingularity suite failures against the parent branch; the three known stale presentation failures belong to #1700 and are not a reason to reintroduce retired code.
+5. Production build and full lint passed on the same executable frontend at the validation commit above.
+6. Final branch's remaining three eSingularity suite failures are inherited stale presentation contracts owned by #1700 and are not a reason to reintroduce retired code.
 7. Publication must preserve both distinct homepages and should be followed by fresh custom-domain checks; actual phone/iPad Safari review remains a separate final visual gate.
 
 ## Ownership boundary
