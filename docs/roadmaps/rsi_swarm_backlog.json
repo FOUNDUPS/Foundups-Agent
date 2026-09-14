@@ -818,7 +818,7 @@
               "status": "PARTIAL_FULL_RECORD_COMMIT_VERIFIED",
               "evidence": "full_record_commit_continuation_20260914",
               "previous_evidence": "pending_response_continuation_20260914",
-              "next": "Fresh preflight for authenticated restoration of a whole missing mirror at sequence 2+ (17/P0), then separately authorized readback (16/P0). Preserve generic monotonic CAS and complete v1/v2 authority checks.",
+              "next": "The current system selection is Holo/MCP dependency qualification (18/P0). R11 next remains authenticated missing-mirror restoration at sequence 2+ (17/P0), then independently authorized readback (16/P0); reconcile current ownership/authority before each action.",
               "remaining": "Mirror restoration, current read authority, ordinary signer/publisher integration, operation deadline, real process/volume recovery; R11-B-F and retained benefit; no runtime admission"
             }
           },
@@ -1818,7 +1818,7 @@
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
     "section": "full_record_commit_continuation_20260914",
     "base_commit": "b2ae1e159c22bd9de67cfef8eb4bb062e5a517f8",
-    "selected_action": "R11-A-authenticated-later-sequence-mirror-restoration",
+    "selected_action": "R03-R04-dependency-exposure-and-pin-reconciliation",
     "status": "selected_for_next_local_preflight_after_owned_pr_closure",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false

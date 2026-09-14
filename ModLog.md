@@ -3,7 +3,7 @@
 ## 2026-09-14: RSI full-response commitment and fresh recovery prioritization
 
 - R11-A local v2 root commitment now reuses existing pending bytes, mirrors, current authority checks and exact-byte retry. V1 remains separate; normal signer/readback/activation wiring is still pending.
-- 279 local tests passed with one Linux-only skip. A new matrix reproduced an inherited sequence-2 whole-mirror restoration gap; surviving authority remains intact and requests fail closed. Fresh WSP 15 ranks authenticated restoration 17/P0, ahead of readback 16/P0, subject to renewed preflight after closure.
+- 279 local tests passed with one Linux-only skip. A new matrix reproduced an inherited sequence-2 whole-mirror restoration gap; surviving authority remains intact and requests fail closed. Fresh local scoring ranked authenticated restoration 17/P0, ahead of readback 16/P0. Later GitHub/source observation of critical ChromaDB/FastMCP manifest alerts and pin/runtime divergence makes dependency exposure qualification the next system preflight at 18/P0; no live package or service changes.
 - Updated the existing root roadmap, runbook/backlog/baseline and owning module/test logs. All 26 planning packets/six R11 substeps remain non-dispatchable. AutoPost stays with Remote; YUMORI/eSingularity and active service lanes remain protected. Evidence: `full_record_commit_continuation_20260914`. WSP 00/15/22/50/60/62/71/84/97.
 
 ## 2026-09-14: Recursive repository prioritization governs RSI selection

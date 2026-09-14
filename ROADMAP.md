@@ -54,8 +54,10 @@ connects a versioned root commit route to the existing pending writer and mirror
 terminal state. V1 remains separate; current peer/proof/grant checks and exact-byte
 retry pass locally. Validation: 279 passed / one Linux-root skip.
 The tests exposed an inherited later-sequence whole-mirror restoration gap.
-Fresh WSP 15 ranks its authenticated repair **17/P0**, ahead of readback at 16/P0;
-reconcile source and ownership again before that next local preflight.
+Fresh local scoring ranked its authenticated repair **17/P0**. Subsequent verified
+dependency alerts and pin/runtime drift now put Holo/MCP exposure qualification
+first at **18/P0**, followed by mirror repair and readback (16/P0). Reconcile
+current authority and deployment contracts before any dependency change.
 Readback, ordinary signer/publisher integration and retained RSI remain incomplete.
 
 The [pending-response storage checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)

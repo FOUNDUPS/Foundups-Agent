@@ -4018,7 +4018,7 @@
       "missing_mirror_not_reset_or_fabricated": true
     },
     "post_sprint_reobservation": {
-      "scope": "Fresh local source/test evidence; final PR/CI/merge state requires separate observed closure.",
+      "scope": "Fresh local source/test evidence plus read-only GitHub dependency alert and interpreter-metadata observation. Final PR/CI/merge state remains separate observed closure.",
       "resolved_scope": "Versioned terminal commit and exact same-process acknowledgment; policy integration already merged.",
       "ranked_actions": [
         {
@@ -4031,6 +4031,18 @@
           "priority": "P0",
           "state": "BLOCKED_RUNTIME_ADMISSION",
           "next_executable_step": "Obtain current independently qualified worker/R10/R11 evidence; no packet dispatch."
+        },
+        {
+          "task": "R03/R04 HoloIndex/MCP dependency exposure and pin reconciliation",
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 5,
+          "impact": 5,
+          "total": 18,
+          "priority": "P0",
+          "state": "ELIGIBLE_NEXT_LOCAL_PREFLIGHT",
+          "next_executable_step": "Read the primary advisory and existing Holo/MCP deployment/runtime contracts; qualify actual import/feature/server exposure and signed runtime boundaries against the pinned and observed versions. Reconcile existing mitigation/upgrade work before an isolated change. No live package upgrade, service restart or protected FoundUp edit.",
+          "basis": "New repository-grounded critical dependency findings affect shared retrieval/infrastructure; qualify reachability and version drift before additional capabilities. Complexity is summed canonically; no severity-to-score shortcut or claimed exploitation."
         },
         {
           "task": "R06 admitted WRE/OpenClaw/Hermes worker",
@@ -4099,9 +4111,126 @@
           "next_executable_step": "Revisit existing disposable fixtures; no model or protected project dispatch."
         }
       ],
-      "selected_next": "R11-A authenticated later-sequence missing-mirror restoration",
-      "selection_rationale": "New concrete v1/v2 recovery counterexample raises importance of existing mirrored-state repair; 17/P0 outranks new readback at 16/P0. The prior next item is not inherited automatically.",
-      "requires_fresh_reobservation_after_closure": true
+      "selected_next": "R03/R04 HoloIndex/MCP dependency exposure and pin reconciliation",
+      "selection_rationale": "Later read-only remote/source observation establishes critical ChromaDB/FastMCP manifest alerts and FastMCP pin/runtime divergence. Exposure/pin qualification is an eligible 18/P0 preflight, ahead of mirror restoration 17/P0 and readback 16/P0. It requires no live runtime mutation; other theoretical P0 execution remains admission-blocked.",
+      "requires_fresh_reobservation_after_closure": true,
+      "critical_dependency_observation": {
+        "trigger": "Git push dependency-alert notice; confirmed through read-only GitHub Dependabot API before closure.",
+        "open_critical_alerts_observed": 13,
+        "core_alerts": [
+          {
+            "number": 322,
+            "created_at": "2026-08-24T20:27:57Z",
+            "manifest_path": "holo_index/requirements.txt",
+            "package": "chromadb",
+            "ecosystem": "pip",
+            "scope": "runtime",
+            "summary": "ChromaDB has a code injection vulnerability",
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/security/dependabot/322",
+            "ghsa_id": "GHSA-36p7-vc44-83pf",
+            "vulnerable_range": ">= 0.4.17, <= 1.5.9",
+            "first_patched": null
+          },
+          {
+            "number": 317,
+            "created_at": "2026-08-21T05:15:27Z",
+            "manifest_path": "modules/infrastructure/foundups_mcp_bridge/requirements.txt",
+            "package": "fastmcp",
+            "ecosystem": "pip",
+            "scope": "runtime",
+            "summary": "FastMCP OpenAPI Provider has an SSRF & Path Traversal Vulnerability",
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/security/dependabot/317",
+            "ghsa_id": "GHSA-vv7q-7jx5-f767",
+            "vulnerable_range": "< 3.2.0",
+            "first_patched": {
+              "identifier": "3.2.0"
+            }
+          },
+          {
+            "number": 286,
+            "created_at": "2026-08-02T02:42:30Z",
+            "manifest_path": "holo_index/requirements.txt",
+            "package": "chromadb",
+            "ecosystem": "pip",
+            "scope": "runtime",
+            "summary": "ChromaDB Python project has a pre-authentication code injection vulnerability",
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/security/dependabot/286",
+            "ghsa_id": "GHSA-f4j7-r4q5-qw2c",
+            "vulnerable_range": ">= 1.0.0, <= 1.5.9",
+            "first_patched": null
+          }
+        ],
+        "source_and_interpreter": {
+          "source_head": "750db6cacc0c879afbee2b8c4502f434b401429c",
+          "requirements": {
+            "holo_index/requirements.txt": [
+              "chromadb==1.5.5"
+            ],
+            "modules/infrastructure/foundups_mcp_bridge/requirements.txt": [
+              "fastmcp==2.13.0.2"
+            ]
+          },
+          "query_interpreter_distributions": {
+            "chromadb": "1.5.5",
+            "fastmcp": "3.2.0"
+          },
+          "truth_boundary": "Read-only package metadata; not active service/runtime closure, reachable-vulnerability or upgrade-compatibility proof."
+        },
+        "other_alert_scope": [
+          {
+            "number": 378,
+            "path": "modules/foundups/esingularity/frontend/package-lock.json",
+            "package": "next"
+          },
+          {
+            "number": 376,
+            "path": "modules/foundups/esingularity/frontend/package-lock.json",
+            "package": "next"
+          },
+          {
+            "number": 372,
+            "path": "clerk-nextjs/package-lock.json",
+            "package": "next"
+          },
+          {
+            "number": 370,
+            "path": "clerk-nextjs/package-lock.json",
+            "package": "next"
+          },
+          {
+            "number": 170,
+            "path": "package-lock.json",
+            "package": "protobufjs"
+          },
+          {
+            "number": 118,
+            "path": "modules/platform_integration/acoustic_lab/requirements.txt",
+            "package": "Pillow"
+          },
+          {
+            "number": 103,
+            "path": "modules/foundups/gotjunk/frontend/package-lock.json",
+            "package": "protobufjs"
+          },
+          {
+            "number": 52,
+            "path": "functions/package-lock.json",
+            "package": "protobufjs"
+          },
+          {
+            "number": 23,
+            "path": "clerk-nextjs/package-lock.json",
+            "package": "@clerk/shared"
+          },
+          {
+            "number": 22,
+            "path": "clerk-nextjs/package-lock.json",
+            "package": "@clerk/nextjs"
+          }
+        ],
+        "truth_boundary": "Open manifest alerts and package metadata do not prove a reachable vulnerability in an admitted/live service. Protected FoundUp alerts remain owner inputs; no dependency installation, live service probe or product changes were performed."
+      },
+      "selected_after_local_tests": "R11-A authenticated later-sequence missing-mirror restoration (17/P0)"
     },
     "remaining": [
       "Authenticated later-sequence mirror restoration",

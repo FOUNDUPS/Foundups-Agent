@@ -381,10 +381,24 @@ membership remains 1,400 with five changed source hashes. Packaging passed
 15 fast groups in 3,529ms and 8 manifest + 16 unchanged WSP 62 checks in 65.51s.
 Exact source/test fingerprints are recorded in `full_record_commit_continuation_20260914`.
 
-Fresh WSP 15/WSP 97 re-observation ranks **authenticated restoration of a missing
-later-sequence mirror at 4+5+4+4 = 17/P0**, ahead of authenticated readback at 16/P0.
-Use the existing root-state/monotonic-store owners and their tests for the next
-preflight; never loosen generic CAS or synthesize a sequence-1 history.
+Local re-observation ranked **authenticated restoration of a missing later-sequence
+mirror at 4+5+4+4 = 17/P0**, ahead of authenticated readback at 16/P0. Subsequent
+read-only GitHub/source observation changed the next system action again: critical
+alerts target `chromadb==1.5.5` in `holo_index/requirements.txt` (alerts 322/286)
+and `fastmcp==2.13.0.2` in the MCP bridge requirements (alert 317). The query
+interpreter reports ChromaDB 1.5.5 and FastMCP 3.2.0; this metadata does not prove
+which service is active or whether an affected feature is reachable. GitHub reported
+no first patched ChromaDB version for these alerts at observation. No upgrade is
+assumed safe from the manifest alone.
+
+**Next system preflight: Holo/MCP dependency exposure and pin reconciliation,
+3+5+5+5 = 18/P0.** Read primary advisories and existing service/deployment/runtime
+contracts, verify reachability and current mitigation ownership, then choose an
+isolated fix if supported. No live package changes, service restarts or protected
+FoundUp work occurred. The other critical manifest alerts remain recorded owner/
+scope inputs, including protected eSingularity. After that qualification, rescore
+again. Mirror restoration remains the next R11-specific action; use existing owners
+and tests without loosening generic CAS or synthesizing sequence-1 history.
 The ordinary signer finalizer still uses v1. Independently authorized readback,
 normal signer/publisher integration, a whole-operation deadline, real process/volume
 recovery, memory activation and measured retained benefit remain open. R11-A/R11/G4
