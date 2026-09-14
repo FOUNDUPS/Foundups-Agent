@@ -20,6 +20,7 @@ promotion authority.
 - ReAct retries preserve execution success separately from structural fidelity.
 - Generic A/B activation, automatic promotion, CodeAct, and direct legacy Holo
   retrieval are fail closed.
+- Scan-cache readback uses the configured severity; pending refresh blocks admission.
 - Loader or scanner failure blocks execution. No fallback instruction is
   generated or treated as executed work.
 

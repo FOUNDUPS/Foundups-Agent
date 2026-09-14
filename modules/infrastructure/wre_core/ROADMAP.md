@@ -2,14 +2,13 @@
 
 ## Current local RSI checkpoint — 2026-09-14
 
-PatternMemory default/explicit handles now have independent transactions and
-close lifetimes, with SQLite creating-thread enforcement. **41 focused / 206
-connected tests pass**. Current selection is [admission-cache ownership,
-17/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#patternmemory-connection-ownership-checkpoint--2026-09-14).
-Reproduce its concurrent publication/eviction behavior before repair. Worker
-restart/handoff/disposal, same-instance multi-call transactions and atomic R11
-acceptance remain separate follow-ons. Auto Researcher run isolation is closed
-at PR #1742's verified source; production RSI remains incomplete.
+Admission-cache refresh, policy binding and bounded retention are locally
+verified: 148 connected tests pass with four existing link-related skips.
+Current selection is [scan-report ownership, 17/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#admission-cache-ownership-checkpoint--2026-09-14).
+Reproduce cross-cache/caller reuse of the existing report path before changes.
+The skill-name fingerprint handoff is an equal-ranked downstream candidate;
+whole-coordinator concurrency and signed runtime admission remain unproved.
+PatternMemory owner isolation is closed at PR #1743's verified source.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: this repair reduces the file 1,294→1,279 lines and
@@ -62,8 +61,10 @@ Continue parity-proven decomposition in later focused slices:
 - reconcile cached PatternMemory handle disposal/restart/handoff with the new
   per-instance creating-thread contract before concurrent multi-agent execution;
   same-handle multi-call transactions and R11 acceptance remain unimplemented;
-- bind shared in-process admission caches to an explicit synchronization and
-  bounded-eviction contract before one RedDog process serves many FoundUps.
+- finish report-file ownership across independent caches/processes and bind
+  the per-execution fingerprint handoff before concurrent coordinator use;
+  per-mapping refresh synchronization, policy binding and 128-entry retention
+  are closed at the current local checkpoint.
 
 ## Code-health composition
 

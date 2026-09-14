@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Own pending WRE scans and bind cached policy
+
+- Extended the existing cache with locked mapping operations, per-directory pending slots, exact severity keys and a 128-entry cap per mapping. Refresh invalidates old admission; failure/cancellation removes its slot and lost ownership cannot publish. Scanning remains outside the lock; pending/full capacity blocks admission.
+- Eight initial regressions failed. Final connected verification: 148 passed/four existing link skips, including 20/one skip in the focused file and 23 coordinator passes; 8 manifest tests and 15 fast groups pass. Original 23 definitions / 32 assertions remain. Cache source 168→197; coordinator file/class 1165/1047 unchanged; test file 545. Two runtime hashes and both existing pins change; registry 1650/269 and 1400-member closure remain stable.
+- Fresh WSP 15/WSP 97 selects report-file ownership, 17/P0 for reproduction; separate cache/process report reuse and per-execution fingerprint handoff remain open. Evidence: `admission_cache_ownership_continuation_20260914`; WSP 00/15/22/50/60/62/84/95/97. No new module or runtime admission.
+
 ## 2026-09-14: Give each PatternMemory worker its own connection
 
 - Removed default process-global connection aliases and retained SQLite creating-thread enforcement. Each instance owns its transaction and close lifecycle; schema and every other storage method remain unchanged. Existing per-operation sink/DB ownership supplied the pattern; no new module or pool.

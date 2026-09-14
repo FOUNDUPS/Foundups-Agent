@@ -9397,5 +9397,563 @@
     "pending_reader_policy": "No 012 response; original-signing-agent-only versus separately authorized recovery readers remains unresolved. No new question or inferred default.",
     "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\pattern-memory-ownership-20260914",
     "runtime_admission": false
+  },
+  "admission_cache_ownership_continuation_20260914": {
+    "observed_at": "2026-09-14T13:58:03.169567+00:00",
+    "base_commit": "cfe510f4198de3d1339be6a124b2f529d3d99c79",
+    "origin": "autonomous_trigger",
+    "role": "local_author_coordinator",
+    "wsp00_gate": {
+      "gate_passed": true,
+      "attempted_awakening": false,
+      "awakening_success": false,
+      "is_zen_compliant": true,
+      "requires_awakening": false,
+      "last_validation": "2026-09-14T22:52:07.517257",
+      "session_id": 1789307432,
+      "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+      "action": "check"
+    },
+    "prior_closure": {
+      "pr": 1743,
+      "merge_commit": "cfe510f4198de3d1339be6a124b2f529d3d99c79",
+      "main_ci": "success",
+      "codeql": "success",
+      "run_ids": [
+        34848598624,
+        34848594981
+      ]
+    },
+    "ranking_before": [
+      {
+        "task": "independent-execution-verification-promotion",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Independent runtime admission absent"
+      },
+      {
+        "task": "integrated-mcp-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+      },
+      {
+        "task": "wre-openclaw-hermes-worker",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current signed job/model/runtime admission absent"
+      },
+      {
+        "task": "chroma-deployment",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current deployment owner and runtime qualification"
+      },
+      {
+        "task": "WRE-admission-cache-ownership",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "selected_local_reproduction_and_repair",
+        "evidence": [
+          "modules/infrastructure/wre_core/ROADMAP.md#execution-truth-p0-follow-ons",
+          "modules/infrastructure/wre_core/src/skill_runtime_admission.py:_scan_and_cache",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_wre_skill_scan_cache"
+        ],
+        "next_step": "Reproduce pending-refresh visibility, policy reuse, duplicate scans and bounded entry retention; extend existing skill_runtime_admission owner."
+      },
+      {
+        "task": "R11-B-memory-acceptance-contract",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "partial_transaction_dependency",
+        "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+      },
+      {
+        "task": "authenticated-response-read",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "012 reader-policy question remains unanswered"
+      },
+      {
+        "task": "current-semantic-retrieval",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ]
+      },
+      {
+        "task": "protected-foundup-work",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "external",
+        "next_step": "YUMORI/eSingularity and separate autopost ownership"
+      },
+      {
+        "task": "PatternMemory-worker-lifecycle-integration",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "eligible_later",
+        "evidence": [
+          "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+        ],
+        "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+      },
+      {
+        "task": "auto-researcher-process-durability",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 13,
+        "priority": "P1",
+        "state": "eligible-later",
+        "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+      }
+    ],
+    "selected_action": "WRE-admission-cache-ownership",
+    "score": 17,
+    "priority": "P0",
+    "rationale": "Current exact source and 96 unchanged open PRs leave the existing cache owner unclaimed. Higher runtime/deployment work lacks independent admission; RedDog product and protected FoundUps remain separately owned. Current cache mutations have no pending-scan ownership, policy binding or entry bound. A minimal local repair is eligible.",
+    "retrieval": {
+      "noise": "Broad cache terms include unrelated durable nonce stores; exact source/test owners isolate the selected behavior.",
+      "ordering": "WSP00/15/97, canonical roadmap, Holo module bundle, README/INTERFACE/test inventory, current source and coordinator callers.",
+      "missing": "No required module artifact missing; optional memory README absent.",
+      "staleness": "Holo freshness UNKNOWN and index_gap true; semantic authority differs from current Git. Direct current-source inspection is degraded navigation, not current semantic proof.",
+      "duplication": "Existing mutable cache in skill_runtime_admission and coordinator is the owner. Reuse module-level short-held lock pattern from wre_test_differential_capability; no new cache module, scheduler or DB.",
+      "improvement": "Must-include module docs and existing tests; exact call-site search finds one production fingerprint reader.",
+      "additional_owner_docs": "Coordinator README/INTERFACE/ROADMAP/ModLog and tests/TestModLog were also retrieved during caller reconciliation; the nested interface explicitly projects authoritative WRE Core contracts."
+    },
+    "alternatives": {
+      "global_scan_lock": "Would serialize slow scans for unrelated skills; only cache mutations/read snapshots should share a short critical section.",
+      "per_key_lock_registry": "Unnecessary retained lock registry/lifecycle complexity; existing bounded cache can own its pending slot.",
+      "new_cache_class": "Existing caller-provided mapping contract can be retained with controlled owner operations."
+    },
+    "scope": "One pending scan per skill directory through this owner; short-held module lock, policy-bound cache key, finite mapping entry cap, fail-closed pending/capacity/lost-reservation state, exception cleanup. Whole orchestrator concurrency and durable signed dispatch are not established.",
+    "manual_reason": "Deterministic controlled-thread reproduction and cache/caller contract review; no independently admitted Qwen/Gemma/WRE worker is available. No model invocation or model-verification claim.",
+    "verification_plan": [
+      "Existing runtime-admission regressions before source edit, then full same suite",
+      "Connected WRE executor/loader/admission/orchestrator and bridge safety suites with isolated databases and no providers",
+      "Generated backend closure and pins only for changed packaged sources; manifest and RedDog fast tier",
+      "Exact-base WSP62 growth attribution, registry, WSP97 receipt and GitHub checks"
+    ],
+    "runtime_admission": false,
+    "changes": {
+      "owner": "modules/infrastructure/wre_core/src/skill_runtime_admission.py",
+      "implementation": "Short-held module RLock protects cache reads, reservation and publication. A per-mapping/per-directory pending slot blocks duplicate admission, replaces previous receipts before refresh and is removed on exceptions including cancellation. Only the same slot may publish. Completed entries evict oldest-first at a fixed128 entry bound; pending entries are never evicted. Scanner calls run outside the lock.",
+      "policy": "Cache key includes current scan severity; coordinator passes its configured severity to admitted_runtime_fingerprint (standalone compatibility default remains medium). Old cache keys miss and rescan.",
+      "scope": "Only callers sharing the same mapping through the owner APIs share pending-scan exclusion. Separate caches/processes, raw concurrent mapping mutation, shared report files and per-execution fingerprint handoff remain separate concerns. Metadata is not signed runtime authority.",
+      "source_metrics": {
+        "modules/infrastructure/wre_core/src/skill_runtime_admission.py": {
+          "lines_before": 168,
+          "lines_after": 197,
+          "changed_functions": [
+            "ensure_runtime_skill_safety",
+            "_scan_and_cache",
+            "admitted_runtime_fingerprint",
+            "_cache_is_current"
+          ],
+          "new_functions": [
+            "_reserve_scan",
+            "pending"
+          ],
+          "sha256": "aa4627980961bd154f7f18c30a31f1e82bd266490a5c69a81e1db7d2a163da50"
+        },
+        "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py": {
+          "lines_before": 1165,
+          "lines_after": 1165,
+          "changed_functions": [
+            "_ensure_wre_skill_safety"
+          ],
+          "new_functions": [],
+          "sha256": "00cd9f149b0f3acf362e0318e5ca5a90429a0b98351ca31b54766c7d9ec8ce59",
+          "class_sizes_unchanged": {
+            "WREMasterOrchestrator": 1047
+          }
+        },
+        "modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py": {
+          "lines_before": 351,
+          "lines_after": 545,
+          "changed_functions": [],
+          "new_functions": [
+            "_scan_result",
+            "cache_request",
+            "scan",
+            "test_completed_cache_entries_are_bounded",
+            "test_failed_refresh_removes_prior_admission",
+            "test_orchestrator_reads_the_configured_scan_policy",
+            "test_pending_refresh_blocks_cached_admission",
+            "test_pending_scan_uses_capacity_without_blocking_other_callers",
+            "test_removed_scan_reservation_cannot_republish",
+            "test_scan_policy_change_requires_fresh_admission"
+          ],
+          "sha256": "782f6dfafc27d1f9cd3c573179aa7bd3fc0e7eef0e3f1a9fbb9a93a40330f095",
+          "original_definitions_preserved": 23,
+          "original_assertions_preserved": 32
+        }
+      },
+      "manifest": {
+        "runtime_members": 1400,
+        "changed_hashes": [
+          "modules/infrastructure/wre_core/src/skill_runtime_admission.py",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py"
+        ],
+        "digest": "89d4ad063839723b511408d8f8d5029efc071d4bcc838f3a97bbd44ff91eaa60"
+      }
+    },
+    "validation": {
+      "before": "8 failed, 11 deselected in 1.72s",
+      "initial_focused": "18 passed, 1 skipped in 1.62s before adding the capacity-available control and coordinator policy-read test",
+      "final_focused": "20 passed, 1 skipped inside the connected invocation (21 collected cases)",
+      "connected": "148 passed, 4 skipped in 6.18s (152 collected cases)",
+      "coordinator_subset": "23 passed inside the connected invocation",
+      "manifest": "8 passed in 79.17s",
+      "fast": "15 groups passed in8671ms",
+      "registry": "current1650 tracked/269 quarantined",
+      "skips": [
+        {
+          "test": "modules.infrastructure.wre_core.tests.test_wre_runtime_admission_truth::test_bundle_fingerprint_rejects_linked_executor",
+          "reason": "file links are unavailable on this host"
+        },
+        {
+          "test": "modules.infrastructure.wre_core.tests.test_wre_skills_loader_hygiene.TestCheckoutLocalSkillResolution::test_symlinked_location_cannot_escape_checkout",
+          "reason": "directory symlinks are unavailable on this host"
+        },
+        {
+          "test": "modules.infrastructure.wre_core.tests.test_skill_manifest_guard::test_manifest_rejects_root_directory_link",
+          "reason": "directory links are unavailable on this host"
+        },
+        {
+          "test": "modules.communication.moltbot_bridge.tests.test_skill_safety_guard::test_run_skill_scan_rejects_linked_skill_root",
+          "reason": "directory links are unavailable on this host"
+        }
+      ],
+      "command": "Qualified python -B -m pytest <files> --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=<audit>/<run>-temp --tb=short -q --junitxml=<audit>/<run>.xml. Before: test_wre_runtime_admission_truth.py -k \"pending_refresh or failed_refresh or scan_policy_change or completed_cache_entries or pending_scan_uses or removed_scan_reservation\". Initial focused: whole same file. Connected files listed below. Manifest: scripts/tests/test_generate_reddog_backend_manifest.py. Node extensions/reddog/tests/run_reddog_test_tier.js fast. Registry: python -B modules/infrastructure/wre_core/scripts/generate_test_registry.py --check.",
+      "connected_files": [
+        "modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py",
+        "modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py",
+        "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py",
+        "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py"
+      ],
+      "environment": {
+        "python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "node": "C:/Program Files/nodejs/node.exe",
+        "bytecode": false,
+        "pytest_plugin_autoload": false,
+        "database_temp_cache": "Unique external O: audit directory; explicit async plugin and importlib mode",
+        "model_provider_dispatch": "none; tests inject scanner/worker results or use local fixtures. Codex token cost is not measured."
+      },
+      "truth": "Local/controlled-thread proof only; all original23 function definitions and32 assertion ASTs remain. New functions are below50 lines; coordinator file/class are unchanged at1165/1047 lines. No new module/test file/exemption. Report/provenance and signed runtime admission are unproved."
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T14:12:10.593683+00:00",
+      "origin_main": "cfe510f4198de3d1339be6a124b2f529d3d99c79",
+      "open_pr_count": 96,
+      "other_open_heads_unchanged": true,
+      "ranked_queue": [
+        {
+          "task": "RedDog-extension-decomposition",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 20,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ]
+        },
+        {
+          "task": "RedDog-backend-closure-consolidation",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "RedDog-conversation-durable-adapters",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "WRE-scan-report-ownership",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "selected_for_current_source_reproduction",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/skill_runtime_admission.py:_scan_report_dir",
+            "modules/communication/moltbot_bridge/src/skill_safety_guard.py:run_skill_scan",
+            "modules/communication/moltbot_bridge/src/skill_safety_guard.py:_invoke_scanner",
+            "modules/communication/moltbot_bridge/src/skill_safety_guard.py:_completed_scan_result"
+          ],
+          "next_step": "Retrieve the existing scanner report/parsing tests; reproduce report reuse across independent caches or callers in disposable paths. The current WRE report directory depends only on bundle fingerprint; the bridge unlinks then reads a fixed report filename. No live corruption or verdict substitution is claimed."
+        },
+        {
+          "task": "WRE-per-execution-fingerprint-handoff",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_ensure_wre_skill_safety",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_try_executor_dispatch"
+          ],
+          "next_step": "Inspect the shared skill-name fingerprint map and reuse existing execution-context evidence before concurrent coordinator dispatch. Report provenance is selected first because it supplies the verdict that enters this map."
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        }
+      ],
+      "selected_action": "WRE-scan-report-ownership",
+      "score": 17,
+      "priority": "P0",
+      "closed_local": "WRE-shared-mapping-cache-refresh-policy-capacity",
+      "reconciliation": "The existing cache now owns a pending slot, invalidates prior admission on refresh, binds policy and caps entries. New report-file ownership evidence exposes the next local prerequisite; the separate fingerprint handoff is equal-ranked but downstream. Higher candidates remain blocked or externally owned. No whole-orchestrator concurrency/runtime admission is established.",
+      "runtime_admission": false
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\admission-cache-ownership-20260914",
+    "pending_reader_policy": "012 reader-policy question remains unanswered; no new question or inferred default."
   }
 }

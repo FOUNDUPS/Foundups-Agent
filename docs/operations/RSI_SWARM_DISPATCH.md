@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `pattern_memory_ownership_continuation_20260914` in
+**Current selection evidence:** `admission_cache_ownership_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,59 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Admission cache ownership checkpoint — 2026-09-14
+
+Source: `cfe510f4198de3d1339be6a124b2f529d3d99c79`, merged RSI PR
+[#1743](https://github.com/FOUNDUPS/Foundups-Agent/pull/1743). Its main CI and
+CodeQL passed. WSP 00's software gate passed; the 96 open PR heads and source
+owners were unchanged. Holo supplied required module documents with UNKNOWN
+freshness/index gap; direct current Git reads are explicitly degraded navigation.
+
+Canonical WSP 15 selected existing cache ownership **4/5/4/4 = 17/P0**.
+Eight regressions failed before repair: old successful admission survived a
+pending/failed refresh, different scan severity reused the same result, entries
+were unbounded, and removed scan ownership could be republished.
+
+The existing cache owner now reserves a pending slot before scanning. Within a
+shared mapping, another request for that directory returns blocked while the
+scan is pending. Refresh removes the old admission immediately. Only the same
+reservation may publish; exceptions and cancellation remove its pending slot.
+Cache keys bind severity as well as directory and exact bundle fingerprint.
+The coordinator passes its configured severity to the fingerprint reader.
+
+A short-held module lock protects mapping operations; scanner calls run outside
+it. The mapping retains at most **128 entries**, evicting the oldest completed
+entry first. Pending entries are never evicted; exhausted pending capacity
+returns blocked. Different directories can scan concurrently when space exists.
+This does not serialize separate cache owners/processes or make raw concurrent
+mapping mutation safe. Legacy cache keys miss and rescan.
+
+Validation: **148 passed / four existing link-related skips** in seven connected
+files, including **20 passed / one skip** in the focused admission file and all
+23 coordinator tests. The selections overlap. Eight manifest tests and all
+15 RedDog fast groups passed. All 23 original function definitions and 32
+assertions remain. Cache source grows 168→197 lines; the coordinator remains
+1,165 lines with its inherited class unchanged at 1,047. The test file is 545
+lines. Exactly two of 1,400 runtime hashes and both existing pins change; the
+registry stays current at 1,650/269. No new module, test file or exemption.
+
+Fresh reconciliation retains the external RedDog audit's extension decomposition
+20/P0 and closure/conversation work 19/P0 with that owner. Its broader current-Holo
+qualification 19/P0 consolidates the earlier narrower navigation 16/P0; the existing
+maintenance/runtime blocker remains. Independent execution/promotion 19/P0,
+MCP/worker 18/P0 and Chroma 17/P0 still require their current owners and admission.
+
+The next eligible local action is **scan-report ownership, 4/5/4/4 = 17/P0**.
+`_scan_report_dir()` keys the report directory only by fingerprint; the bridge
+unlinks and reads `openclaw_skill_scan_report.json`. Independent mappings/callers
+can still target that path. Reproduce this through the existing scanner tests
+before repair; no live corruption or substituted verdict is claimed. Equal-ranked
+per-execution fingerprint handoff follows because it consumes this scan evidence.
+R11 acceptance/read policy 16/P0, worker lifecycle 14/P1 and researcher durability 13/P1
+retain their separate dependencies. Evidence: `admission_cache_ownership_continuation_20260914`
+in the canonical baseline. All planning packets remain non-dispatchable;
+production RSI is incomplete. Re-observe again after closure.
 
 ### PatternMemory connection ownership checkpoint — 2026-09-14
 

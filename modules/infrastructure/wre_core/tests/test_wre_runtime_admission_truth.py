@@ -2,10 +2,13 @@
 
 from pathlib import Path
 from types import SimpleNamespace
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 
 import pytest
 
 from modules.infrastructure.wre_core.src.libido_monitor import LibidoSignal
+from modules.infrastructure.wre_core.src import skill_runtime_admission as admission
 from modules.infrastructure.wre_core.src.registered_skill_executor import (
     validate_runtime_skill_admission,
 )
@@ -81,6 +84,197 @@ def _runtime_admission_loader(skill_file: Path) -> SimpleNamespace:
         },
         resolve_skill_file=lambda _name: skill_file,
     )
+
+
+@pytest.fixture
+def cache_request(tmp_path, monkeypatch):
+    skill_file = tmp_path / "skill" / "SKILLz.md"
+    skill_file.parent.mkdir()
+    skill_file.write_text("# skill", encoding="utf-8")
+    (skill_file.parent / "SKILL_MANIFEST.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(admission, "SKILL_SCANNER_AVAILABLE", True)
+    return dict(
+        skills_loader=_runtime_admission_loader(skill_file), skill_name="skill",
+        repo_root=tmp_path, cache={}, required=True, enforced=True,
+        always_scan=False, ttl_seconds=900, max_severity="medium",
+    )
+
+
+def _scan_result(passed=True):
+    return SimpleNamespace(available=True, passed=passed, manifest_passed=True)
+
+
+@pytest.mark.parametrize("force_contender", [False, True])
+def test_pending_refresh_blocks_cached_admission(cache_request, monkeypatch, force_contender):
+    started, release = Event(), Event()
+    calls = []
+
+    def scan(**_kwargs):
+        calls.append(True)
+        if len(calls) == 2:
+            started.set()
+            assert release.wait(5)
+            return _scan_result(False)
+        return _scan_result()
+
+    monkeypatch.setattr(admission, "run_skill_scan", scan)
+    assert ensure_runtime_skill_safety(**cache_request)[0] is True
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        refresh = pool.submit(ensure_runtime_skill_safety, **cache_request, force=True)
+        try:
+            assert started.wait(5)
+            assert ensure_runtime_skill_safety(
+                **cache_request, force=force_contender
+            )[0] is False
+            assert admission.admitted_runtime_fingerprint(
+                skills_loader=cache_request["skills_loader"], skill_name="skill",
+                cache=cache_request["cache"],
+            ) is None
+            assert len(calls) == 2
+        finally:
+            release.set()
+        assert refresh.result(timeout=5)[0] is False
+    assert ensure_runtime_skill_safety(**cache_request)[0] is False
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize("failure", [RuntimeError, KeyboardInterrupt])
+def test_failed_refresh_removes_prior_admission(cache_request, monkeypatch, failure):
+    calls = []
+
+    def scan(**_kwargs):
+        calls.append(True)
+        if len(calls) == 2:
+            raise failure("scanner stopped")
+        return _scan_result()
+
+    monkeypatch.setattr(admission, "run_skill_scan", scan)
+    assert ensure_runtime_skill_safety(**cache_request)[0] is True
+    with pytest.raises(failure, match="scanner stopped"):
+        ensure_runtime_skill_safety(**cache_request, force=True)
+    assert admission.admitted_runtime_fingerprint(
+        skills_loader=cache_request["skills_loader"], skill_name="skill",
+        cache=cache_request["cache"],
+    ) is None
+    assert ensure_runtime_skill_safety(**cache_request)[0] is True
+    assert len(calls) == 3
+
+
+def test_scan_policy_change_requires_fresh_admission(cache_request, monkeypatch):
+    calls = []
+
+    def scan(**kwargs):
+        calls.append(kwargs["max_severity"])
+        return _scan_result(kwargs["max_severity"] == "high")
+
+    monkeypatch.setattr(admission, "run_skill_scan", scan)
+    cache_request["max_severity"] = "high"
+    assert ensure_runtime_skill_safety(**cache_request)[0] is True
+    cache_request["max_severity"] = "low"
+    assert ensure_runtime_skill_safety(**cache_request)[0] is False
+    assert calls == ["high", "low"]
+    cache_request["max_severity"] = "high"
+    assert ensure_runtime_skill_safety(**cache_request)[0] is True
+    reader = dict(skills_loader=cache_request["skills_loader"], skill_name="skill",
+                  cache=cache_request["cache"])
+    assert admission.admitted_runtime_fingerprint(**reader) is None
+    assert admission.admitted_runtime_fingerprint(**reader, max_severity="low") is None
+    assert admission.admitted_runtime_fingerprint(**reader, max_severity="high") is not None
+
+
+def test_completed_cache_entries_are_bounded(cache_request, monkeypatch, tmp_path):
+    calls = []
+    monkeypatch.setattr(admission, "_MAX_CACHE_ENTRIES", 2, raising=False)
+    monkeypatch.setattr(admission, "run_skill_scan",
+                        lambda **kwargs: calls.append(kwargs) or _scan_result())
+    loaders = []
+    for index in range(3):
+        folder = tmp_path / str(index)
+        folder.mkdir()
+        skill_file = folder / "SKILLz.md"
+        skill_file.write_text(f"# {index}", encoding="utf-8")
+        (folder / "SKILL_MANIFEST.json").write_text("{}", encoding="utf-8")
+        loaders.append(_runtime_admission_loader(skill_file))
+        cache_request["skills_loader"] = loaders[-1]
+        assert ensure_runtime_skill_safety(**cache_request)[0] is True
+        assert len(cache_request["cache"]) <= 2
+    cache_request["skills_loader"] = loaders[0]
+    assert ensure_runtime_skill_safety(**cache_request)[0] is True
+    assert len(calls) == 4  # Oldest completed entry was evicted, requiring a scan.
+
+
+@pytest.mark.parametrize("capacity", [1, 2])
+def test_pending_scan_uses_capacity_without_blocking_other_callers(
+    cache_request, monkeypatch, tmp_path, capacity
+):
+    started, release = Event(), Event()
+    calls = []
+
+    def scan(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            started.set()
+            assert release.wait(5)
+        return _scan_result()
+
+    monkeypatch.setattr(admission, "_MAX_CACHE_ENTRIES", capacity, raising=False)
+    monkeypatch.setattr(admission, "run_skill_scan", scan)
+    second_file = tmp_path / "other" / "SKILLz.md"
+    second_file.parent.mkdir()
+    second_file.write_text("# other", encoding="utf-8")
+    other_request = dict(cache_request, skills_loader=_runtime_admission_loader(second_file))
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        first = pool.submit(ensure_runtime_skill_safety, **cache_request)
+        try:
+            assert started.wait(5)
+            assert ensure_runtime_skill_safety(**other_request)[0] is (capacity > 1)
+            assert len(calls) == capacity
+        finally:
+            release.set()
+        assert first.result(timeout=5)[0] is True
+    assert ensure_runtime_skill_safety(**other_request)[0] is True
+    assert len(calls) == 2
+    assert len(cache_request["cache"]) == capacity
+
+
+def test_removed_scan_reservation_cannot_republish(cache_request, monkeypatch):
+    started, release = Event(), Event()
+
+    def scan(**_kwargs):
+        started.set()
+        assert release.wait(5)
+        return _scan_result()
+
+    monkeypatch.setattr(admission, "run_skill_scan", scan)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        work = pool.submit(ensure_runtime_skill_safety, **cache_request)
+        try:
+            assert started.wait(5)
+            cache_request["cache"].clear()
+        finally:
+            release.set()
+        assert work.result(timeout=5)[0] is False
+    assert cache_request["cache"] == {}
+
+
+def test_orchestrator_reads_the_configured_scan_policy(cache_request, monkeypatch, tmp_path):
+    orchestrator = _minimal_orchestrator(monkeypatch, tmp_path)
+    orchestrator.skills_loader = cache_request["skills_loader"]
+    orchestrator._wre_skill_admission_fingerprints = {}
+    orchestrator.wre_skill_scan_required = True
+    orchestrator.wre_skill_scan_enforced = True
+    orchestrator.wre_skill_scan_always = False
+    orchestrator.wre_skill_scan_ttl_sec = 900
+    orchestrator.wre_skill_scan_max_severity = "high"
+    monkeypatch.setattr(admission, "run_skill_scan", lambda **_kwargs: _scan_result())
+    ok, _ = WREMasterOrchestrator._ensure_wre_skill_safety(orchestrator, "skill")
+    assert ok is True
+    expected = admission.admitted_runtime_fingerprint(
+        skills_loader=orchestrator.skills_loader, skill_name="skill",
+        cache=orchestrator._wre_skill_scan_cache, max_severity="high",
+    )
+    assert expected is not None
+    assert orchestrator._wre_skill_admission_fingerprints["skill"] == expected
 
 
 def test_runtime_admission_rejects_prototype_and_metadata_drift():

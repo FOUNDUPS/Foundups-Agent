@@ -209,6 +209,24 @@ result. An exact bundle uses Cisco `scan` with `SKILLz.md`; a wardrobe root uses
 `scan-all --recursive`. Its cache key changes when Skillz, executor, or
 manifest bytes change.
 
+The cache key also includes `max_severity`. A refresh reserves a pending slot
+and invalidates the prior result before calling the scanner. Within one shared
+mapping, a pending scan for that directory blocks further admission; readers
+cannot use its previous success. Only the owning slot can publish. Exceptions,
+including cancellation, release the slot without restoring the old receipt.
+
+Mapping operations use a short-held module lock. Scanning runs outside that
+lock. Each mapping retains at most 128 entries, evicting oldest completed entries
+first; pending slots are never evicted and exhausted pending capacity blocks.
+Callers share it through these owner functions, not raw concurrent mutation.
+This is not cross-process/separate-mapping exclusion or report-file ownership.
+
+`admitted_runtime_fingerprint(..., max_severity="medium")` reads matching content
+and policy after a successful safety check; the coordinator passes its configured
+severity. The reader alone does not enforce a new TTL or authenticate execution
+permission. Old keys rescan; same-instance execution-context handoff and signed
+runtime admission remain independent requirements.
+
 ## Programmatic executor
 
 ```python
