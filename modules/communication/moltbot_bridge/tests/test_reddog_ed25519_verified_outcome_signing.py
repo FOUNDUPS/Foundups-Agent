@@ -681,6 +681,10 @@ def test_outcome_response_record_history_does_not_renew_ordinary_signing(
 
 @pytest.fixture
 def pending_response_inputs(tmp_path, monkeypatch):
+    return _pending_response_inputs(tmp_path, monkeypatch)
+
+
+def _pending_response_inputs(tmp_path, monkeypatch):
     values, backend, request, peer, counts = _root_outcome_backend(tmp_path, monkeypatch)
     descriptor, grant, state, *_stores, current, authority = values
     captured = {}
@@ -703,6 +707,7 @@ def pending_response_inputs(tmp_path, monkeypatch):
         descriptor=descriptor, grant=grant, state=state, request=request,
         response=response, binding=binding, verifier=Ed25519SignatureVerifier(),
         counts=counts, authority=authority, current=current, backend=backend, peer=peer,
+        reservation=captured["reservation"],
     )
     pending.raw = _build_outcome_record(pending)
     pending.digest = decode_message(pending.raw)["record_digest"]

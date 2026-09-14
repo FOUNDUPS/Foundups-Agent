@@ -1,3 +1,10 @@
+## 2026-09-14: Full-response terminal commitment
+
+- Final focused selection: 201 passed / one Linux-only skip in 81.99s; five connected suites: 78 passed in 26.11s. Existing v1 cases and all pending storage cases remain passing; no test/guard was removed.
+- Initial selection: 177 passed / one skip in 63.40s. Expanded selection: 200 passed / one failed whole-mirror restoration expectation / one skip in 80.69s. The failure exposed the unchanged generic None → 1 CAS limit at terminal sequence 2; a separate disposable v1 control reproduces it. The explicit negative regression preserves fail-closed behavior and the open repair, not a restoration-success claim.
+- One connected invocation used a nonexistent runtime-binding test name and collected no tests; the exact existing `test_foundup_verified_outcome_root_runtime_binding.py` was then selected for the passing run.
+- Reused the root service suite and existing signing fixture for real Ed25519/SQLite and router/client checks. Normal signer finalization remains v1. Full process/volume recovery, current read authority, whole-operation deadlines and memory activation remain open. Evidence: `full_record_commit_continuation_20260914`. WSP 00/15/22/50/60/62/71/84/97.
+
 ## 2026-09-14: Pending outcome-response storage
 
 - Final evidence: 226 passed / one Linux-only skip across eight suites; 15 fast groups / eight staged-manifest tests passed. Registry 1650/269 and runtime membership 1400 unchanged; one source hash and matching pins updated.

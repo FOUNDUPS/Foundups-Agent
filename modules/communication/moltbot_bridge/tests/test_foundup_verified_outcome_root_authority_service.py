@@ -11,7 +11,7 @@ import tempfile
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -20,6 +20,10 @@ import pytest
 from modules.communication.moltbot_bridge.src import (
     foundup_verified_outcome_root_authority as authority_module,
     foundup_verified_outcome_root_authority_client as client_module,
+    foundup_verified_outcome_root_authority_protocol as protocol,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
+    decode_message, encode_message,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
     descriptor_id_for,
@@ -973,3 +977,293 @@ def test_non_root_exchange_cannot_mint_authority(
             exchange=exchange,
             now_epoch=NOW,
         )
+
+
+@pytest.fixture
+def record_commit_inputs(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.tests.test_reddog_ed25519_verified_outcome_signing import (
+        _pending_response_inputs,
+    )
+    return _pending_response_inputs(tmp_path, monkeypatch)
+
+
+def _record_commit_request(values, raw=None, digest=None, **changes):
+    raw, digest = (values.raw if raw is None else raw), (values.digest if digest is None else digest)
+    request = client_module._response_record_request(
+        values.authority, values.reservation, raw, digest, client_module._placeholder_signature(),
+    )
+    request = replace(request, **changes)
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import _SIGNER_KEYS
+    signature = _sign(_SIGNER_KEYS[values.request.signer_public_key],
+                      protocol.canonical_signer_instance_input(request))
+    request = replace(request, signer_instance_signature=signature)
+    return replace(request, request_id=protocol.request_id_for(asdict(request)))
+
+
+def _record_reply(values, request, **overrides):
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_router import (
+        handle_root_authority_wire_request,
+    )
+    arguments = dict(peer=_peer(), state=values.state, now_epoch=NOW,
+                     snapshot_supplier=lambda: values.current["snapshot"], revocation_authority=None)
+    arguments.update(overrides)
+    return handle_root_authority_wire_request(request.to_bytes(), **arguments)
+
+
+@pytest.mark.parametrize("already_pending", [False, True])
+def test_full_record_commit_stores_exact_bytes_before_terminal_ack(record_commit_inputs, already_pending):
+    v = record_commit_inputs
+    if already_pending:
+        v.state.persist_pending_response(v.raw, expected_binding=v.binding,
+                                         expected_record_digest=v.digest, now_epoch=NOW)
+    request = _record_commit_request(v)
+    assert client_module.commit_service_response_record_proof_input(
+        v.authority, v.reservation, v.raw, v.digest,
+    ) == protocol.canonical_signer_instance_input(request)
+    assert client_module.commit_service_response_record(
+        v.authority, v.reservation, v.raw, v.digest, request.signer_instance_signature,
+    ) == v.digest
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+    assert v.store.load()["records"] == {v.grant["authorization_id"]: v.raw.decode("ascii")}
+    original = v.path.read_bytes()
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+    assert v.path.read_bytes() == original and v.counts["outcome_signatures"] == 1
+    assert _reserve(v.authority, v.grant) is None
+    with pytest.raises(ValueError, match="commit_rejected"):
+        _commit(v.authority, v.reservation, _sha("v1-signature"))
+    with pytest.raises(RuntimeError, match="context_conflict"):
+        v.state.persist_pending_response(v.raw, expected_binding=v.binding,
+                                         expected_record_digest=v.digest, now_epoch=NOW)
+
+
+def test_full_record_commit_keeps_v1_codec_and_proof_domain_separate(record_commit_inputs):
+    v = record_commit_inputs
+    first = v.reservation.request
+    raw_v1 = first.to_bytes()
+    assert decode_message(raw_v1) == {"schema_version": protocol.SCHEMA_VERSION, **asdict(first)}
+    assert request_from_bytes(raw_v1) == first
+    v2 = _record_commit_request(v)
+    assert protocol.record_commit_request_from_bytes(v2.to_bytes()) == v2
+    assert protocol.canonical_signer_instance_input(first).startswith(protocol.SIGNER_PROOF_PREFIX)
+    assert protocol.canonical_signer_instance_input(v2).startswith(protocol.RECORD_COMMIT_PROOF_PREFIX)
+    with pytest.raises(ValueError):
+        request_from_bytes(v2.to_bytes())
+    with pytest.raises(ValueError):
+        protocol.record_commit_request_from_bytes(raw_v1)
+    reply = _record_reply(v, v2)
+    with pytest.raises(ValueError):
+        protocol.response_from_bytes(reply)
+
+
+@pytest.mark.parametrize("mutation", ["schema", "operation", "extra", "missing", "duplicate", "noncanonical", "id", "raw-type", "signature-digest", "issued-bool"])
+def test_full_record_commit_rejects_malformed_wire_before_state(record_commit_inputs, mutation):
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    data = decode_message(request.to_bytes())
+    if mutation == "schema": data["schema_version"] = protocol.SCHEMA_VERSION
+    elif mutation == "operation": data["operation"] = protocol.OP_COMMIT
+    elif mutation == "extra": data["read_authority"] = "untrusted"
+    elif mutation == "missing": data.pop("response_record")
+    elif mutation == "id": data["request_id"] = _sha("other-request")
+    elif mutation == "raw-type": data["response_record"] = {}
+    elif mutation == "signature-digest": data["signature_digest"] = _sha("signature")
+    elif mutation == "issued-bool": data["issued_at"] = True
+    raw = encode_message(data)
+    if mutation == "duplicate": raw = b'{"record_digest":"duplicate",' + raw[1:]
+    elif mutation == "noncanonical": raw = b" " + raw
+    before = v.state.load(authorization_binding(v.grant["authorization_id"]))
+    with pytest.raises(ValueError):
+        protocol.record_commit_request_from_bytes(raw)
+    assert handle_root_authority_request(raw, peer=_peer(), state=v.state,
+        snapshot_supplier=lambda: v.current["snapshot"], now_epoch=NOW) == b'{"status":"REJECT"}\n'
+    assert not v.path.exists()
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == before
+
+
+@pytest.mark.parametrize("after_commit", [False, True])
+@pytest.mark.parametrize("fault", ["uid", "gid", "owner", "revocation", "expiry", "proof", "record-digest", "record-tamper", "issued-at", "reservation"])
+def test_full_record_commit_requires_current_peer_proof_and_exact_record(record_commit_inputs, fault, after_commit):
+    v = record_commit_inputs
+    if after_commit:
+        assert protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    original = v.path.read_bytes() if v.path.exists() else None
+    changes, overrides = {}, {}
+    if fault == "uid": overrides["peer"] = _peer(uid=1002)
+    elif fault == "gid": overrides["peer"] = _peer(gid=1002)
+    elif fault == "expiry": overrides["now_epoch"] = int(v.grant["expires_at"])
+    elif fault == "owner": v.current["snapshot"] = replace(v.current["snapshot"], owner_config_id=_sha("changed-owner"))
+    elif fault == "revocation":
+        descriptor = copy.deepcopy(v.descriptor)
+        descriptor["revoked_authorization_ids"] = [v.grant["authorization_id"]]
+        descriptor["descriptor_id"] = descriptor_id_for(descriptor)
+        v.current["snapshot"] = replace(v.current["snapshot"], descriptor=descriptor)
+    elif fault == "record-digest": changes["record_digest"] = _sha("other-record")
+    elif fault == "record-tamper": changes["response_record"] = v.raw.decode("ascii").replace('"accepted":true', '"accepted":false')
+    elif fault == "issued-at": changes["issued_at"] = NOW + 1
+    elif fault == "reservation": changes["reservation_id"] = _sha("other-reservation")
+    request = _record_commit_request(v, **changes)
+    if fault == "proof":
+        request = replace(request, signer_instance_signature=_sign(_private_key(), "wrong-domain"))
+        request = replace(request, request_id=protocol.request_id_for(asdict(request)))
+    before = v.state.load(authorization_binding(v.grant["authorization_id"]))
+    assert not protocol.record_commit_response_from_bytes(_record_reply(v, request, **overrides)).accepted
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == before
+    assert (v.path.read_bytes() if v.path.exists() else None) == original
+
+
+def test_full_record_commit_rejects_different_valid_response(record_commit_inputs):
+    from modules.communication.moltbot_bridge.tests.test_reddog_ed25519_verified_outcome_signing import _alternate_pending_response
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+    original = v.path.read_bytes()
+    other_raw, other_digest = _alternate_pending_response(v)
+    other = _record_commit_request(v, other_raw, other_digest)
+    assert not protocol.record_commit_response_from_bytes(_record_reply(v, other)).accepted
+    assert v.path.read_bytes() == original
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+
+
+def test_full_record_commit_cannot_replace_v1_terminal_state(record_commit_inputs):
+    v = record_commit_inputs
+    _commit(v.authority, v.reservation, _sha("v1-signature"))
+    before = v.state.load(authorization_binding(v.grant["authorization_id"]))
+    assert not protocol.record_commit_response_from_bytes(_record_reply(v, _record_commit_request(v))).accepted
+    assert not v.path.exists() and v.state.load(authorization_binding(v.grant["authorization_id"])) == before
+
+
+def test_full_record_commit_lost_ack_has_no_hidden_retry_and_explicit_retry_is_exact(record_commit_inputs, monkeypatch):
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    attempts = []
+    def lost_ack(_path, raw, _uid, _timeout):
+        attempts.append(raw)
+        reply = _record_reply(v, protocol.record_commit_request_from_bytes(raw))
+        if len(attempts) == 1: raise ConnectionResetError("fixture_lost_reply")
+        return reply
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", lost_ack)
+    with pytest.raises(ConnectionResetError):
+        client_module.commit_service_response_record(v.authority, v.reservation, v.raw, v.digest, request.signer_instance_signature)
+    assert len(attempts) == 1
+    assert client_module.commit_service_response_record(v.authority, v.reservation, v.raw, v.digest, request.signer_instance_signature) == v.digest
+    assert attempts[0] == attempts[1] and v.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("fault", ["write", "terminal-mirror", "cancel-after-persist"])
+def test_full_record_commit_recovers_incomplete_write_without_reopening_grant(record_commit_inputs, monkeypatch, fault):
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    original_commit = state_module.AtomicJsonAuthorityRuntimeStore.commit
+    original_advance = v.state._advance_pair
+    def broken_store(*args, **kwargs): raise OSError("fixture_before_write")
+    def interrupted_advance(binding, expected, next_value):
+        if binding == authorization_binding(v.grant["authorization_id"]):
+            if fault == "cancel-after-persist": raise SystemExit("fixture_cancel")
+            v.state._primary.advance(binding, expected=expected, next_value=next_value)
+            raise RuntimeError("fixture_terminal_witness_missing")
+        return original_advance(binding, expected, next_value)
+    if fault == "write": monkeypatch.setattr(state_module.AtomicJsonAuthorityRuntimeStore, "commit", broken_store)
+    else: monkeypatch.setattr(v.state, "_advance_pair", interrupted_advance)
+    if fault == "cancel-after-persist":
+        with pytest.raises(SystemExit): _record_reply(v, request)
+        assert v.path.exists()
+    else:
+        assert not protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+    marker = v.state.load(authorization_binding(v.grant["authorization_id"]))
+    assert marker.sequence == (2 if fault == "terminal-mirror" else 1)
+    monkeypatch.setattr(state_module.AtomicJsonAuthorityRuntimeStore, "commit", original_commit)
+    monkeypatch.setattr(v.state, "_advance_pair", original_advance)
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+    assert v.store.load()["records"][v.grant["authorization_id"]] == v.raw.decode("ascii")
+    assert v.counts["outcome_signatures"] == 1 and _reserve(v.authority, v.grant) is None
+
+
+def test_full_record_commit_concurrent_state_instances_preserve_one_valid_winner(record_commit_inputs, tmp_path):
+    from modules.communication.moltbot_bridge.tests.test_reddog_ed25519_verified_outcome_signing import _alternate_pending_response
+    v = record_commit_inputs
+    other_raw, other_digest = _alternate_pending_response(v)
+    candidates = [_record_commit_request(v), _record_commit_request(v, other_raw, other_digest)]
+    second, *_stores_value = _state(tmp_path, v.descriptor)
+    barrier = threading.Barrier(2)
+    def compete(index):
+        barrier.wait()
+        return protocol.record_commit_response_from_bytes(_record_reply(v, candidates[index], state=[v.state, second][index]))
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        replies = list(executor.map(compete, [0, 1]))
+    assert sum(reply.accepted for reply in replies) == 1
+    winner = next(reply.record_digest for reply in replies if reply.accepted)
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, winner[7:])
+    stored = v.store.load()["records"][v.grant["authorization_id"]]
+    assert decode_message(stored.encode("ascii"))["record_digest"] == winner
+
+
+@pytest.mark.parametrize("loss", ["restart", "primary", "payload", "both-mirrors", "corrupt-payload"])
+def test_full_record_commit_retry_requires_durable_binding_and_exact_retained_bytes(record_commit_inputs, tmp_path, loss):
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+    if loss in {"primary", "both-mirrors"}: v.state._primary.path.unlink()
+    if loss == "both-mirrors": v.state._witness.path.unlink()
+    if loss == "payload": v.path.unlink()
+    if loss == "corrupt-payload": v.path.write_bytes(b'{"untrusted":true}\n')
+    state, *_rest = _state(tmp_path, v.descriptor)
+    reply = protocol.record_commit_response_from_bytes(_record_reply(v, request, state=state))
+    assert reply.accepted is (loss not in {"primary", "both-mirrors", "corrupt-payload"})
+    if loss == "primary":
+        # Existing CAS permits None -> sequence 1 only; whole-mirror restoration
+        # at sequence 2 needs a separately authenticated recovery contract.
+        with pytest.raises(ValueError, match="monotonic_authority_not_monotonic"):
+            state.load(authorization_binding(v.grant["authorization_id"]))
+        assert state._witness.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+    if reply.accepted:
+        assert state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+        assert v.store.load()["records"][v.grant["authorization_id"]] == v.raw.decode("ascii")
+    assert v.counts["outcome_signatures"] == 1
+
+
+def test_full_record_commit_bounds_enclosing_wire_before_proof_or_persistence(record_commit_inputs):
+    from modules.communication.moltbot_bridge.tests.test_reddog_ed25519_verified_outcome_signing import _alternate_pending_response
+    v = record_commit_inputs
+    base_size = len(_record_commit_request(v).to_bytes())
+    exact_raw, exact_digest = _alternate_pending_response(v, "x" * (protocol.MAX_MESSAGE_BYTES - base_size))
+    request = _record_commit_request(v, exact_raw, exact_digest)
+    assert len(request.to_bytes()) == protocol.MAX_MESSAGE_BYTES
+    too_large, too_large_digest = _alternate_pending_response(v, "x" * (protocol.MAX_MESSAGE_BYTES - base_size + 1))
+    assert len(too_large) < protocol.MAX_MESSAGE_BYTES  # Inner record alone still fits.
+    with pytest.raises(ValueError, match="message_too_large"):
+        client_module.commit_service_response_record_proof_input(v.authority, v.reservation, too_large, too_large_digest)
+    assert not v.path.exists()
+    assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
+
+
+@pytest.mark.parametrize("mutation", ["v1", "digest", "request", "reservation", "rejected", "noncanonical"])
+def test_full_record_commit_client_rejects_substituted_ack_without_retry(record_commit_inputs, monkeypatch, mutation):
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    attempts = []
+    def substituted(_path, raw, _uid, _timeout):
+        attempts.append(raw)
+        data = decode_message(_record_reply(v, protocol.record_commit_request_from_bytes(raw)))
+        if mutation == "v1":
+            data["schema_version"] = protocol.SCHEMA_VERSION
+            data.pop("record_digest")
+        elif mutation == "digest": data["record_digest"] = _sha("other")
+        elif mutation == "request": data["request_id"] = _sha("other")
+        elif mutation == "reservation": data["reservation_id"] = _sha("other")
+        elif mutation == "rejected":
+            data.update(status="REJECT", state="REJECTED", reason="fixture_reject", reservation_id=None, record_digest="")
+        reply = encode_message(data)
+        return b" " + reply if mutation == "noncanonical" else reply
+    monkeypatch.setattr(client_module, "_root_socket_roundtrip", substituted)
+    with pytest.raises(ValueError):
+        client_module.commit_service_response_record(v.authority, v.reservation, v.raw, v.digest, request.signer_instance_signature)
+    assert len(attempts) == 1
+    assert v.state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+
+
+def test_full_record_commit_requires_original_process_reservation_before_exchange(record_commit_inputs):
+    v = record_commit_inputs
+    forged = replace(v.reservation, seal=object())
+    with pytest.raises(ValueError, match="reservation_invalid"):
+        client_module.commit_service_response_record_proof_input(v.authority, forged, v.raw, v.digest)
+    assert not v.path.exists()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import secrets
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
@@ -19,6 +19,16 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     STATUS_REJECT,
     canonical_signer_instance_input,
     request_from_bytes,
+    RECORD_COMMIT_SCHEMA,
+    RootAuthorityRecordCommitRequest,
+    RootAuthorityRecordCommitResponse,
+    record_commit_request_from_bytes,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
+    decode_message,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeResponseBinding,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
     RootVerifiedOutcomeAuthorityState,
@@ -113,17 +123,20 @@ def handle_root_authority_request(
     """Handle one bounded request; malformed input receives no trusted receipt."""
 
     try:
-        request = request_from_bytes(raw)
+        request = (record_commit_request_from_bytes(raw)
+                   if decode_message(raw).get("schema_version") == RECORD_COMMIT_SCHEMA
+                   else request_from_bytes(raw))
         snapshot = validated_root_authority_snapshot(
             state, snapshot_supplier=snapshot_supplier, now_epoch=now_epoch
         )
         require_root_authority_peer(peer, snapshot)
         grant = _matching_grant(request, snapshot)
-        response = (
-            _commit(request, grant, snapshot, state)
-            if request.operation == OP_COMMIT
-            else _reserve(request, grant, snapshot, state)
-        )
+        if type(request) is RootAuthorityRecordCommitRequest:
+            response = _commit_record(request, snapshot, state, now_epoch)
+        else:
+            response = (_commit(request, grant, snapshot, state)
+                        if request.operation == OP_COMMIT
+                        else _reserve(request, grant, snapshot, state))
     except Exception:
         if "request" not in locals():
             return b'{"status":"REJECT"}\n'
@@ -295,6 +308,27 @@ def _reservation_payload(
     }
 
 
+def _commit_record(
+    request: RootAuthorityRecordCommitRequest, snapshot: RootAuthoritySnapshot,
+    state: RootVerifiedOutcomeAuthorityState, now_epoch: int,
+) -> RootAuthorityRecordCommitResponse:
+    binding = VerifiedOutcomeResponseBinding(
+        descriptor_id=request.descriptor_id, owner_config_id=request.owner_config_id,
+        authorization_id=request.authorization_id, reservation_id=request.reservation_id,
+    )
+    digest = state.commit_pending_response(
+        request.response_record.encode("ascii"), expected_binding=binding,
+        expected_record_digest=request.record_digest, now_epoch=now_epoch,
+        expected_reservation=ProposalReplayHighWater(
+            1, state_revision(_reservation_payload(request, request.reservation_id)),
+        ),
+    )
+    return RootAuthorityRecordCommitResponse(
+        **asdict(_accept(request, snapshot, request.reservation_id, STATE_COMMITTED)),
+        record_digest=digest,
+    )
+
+
 def require_root_authority_peer(
     peer: KernelPeerIdentity, snapshot: RootAuthoritySnapshot
 ) -> None:
@@ -336,7 +370,9 @@ def _accept(
 
 
 def _reject(request: RootAuthorityRequest, reason: str) -> RootAuthorityResponse:
-    return RootAuthorityResponse(
+    response_type = (RootAuthorityRecordCommitResponse
+                     if type(request) is RootAuthorityRecordCommitRequest else RootAuthorityResponse)
+    return response_type(
         status=STATUS_REJECT,
         request_id=request.request_id,
         descriptor_id=request.descriptor_id,

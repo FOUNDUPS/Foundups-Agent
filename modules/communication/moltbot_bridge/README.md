@@ -3,17 +3,17 @@
 ## Verified-outcome recovery and RSI
 
 R11 builds on the existing signing, root authority, publication and PatternMemory owners.
-The root state can now persist a bounded, exact pending response under its existing
-primary root after pinning its digest in both state mirrors. Retries preserve bytes;
-the grant stays reserved. This local primitive has no root RPC or publisher caller.
+The v2 root commit route persists the bounded full response through the existing
+pending writer, then commits its complete digest in both state mirrors. Exact retries
+retain current authority checks. Ordinary signer finalization still uses v1.
 
 The [API index](INTERFACE.md#verified-outcome-authority-signing-and-memory) and
 [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference)
 cover signed records, strict response validation, root COMMIT acknowledgment retry,
 immutable publication, canonical event time and invisible PatternMemory staging.
-The [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)
-separates tested pending storage from remaining full-response commitment,
-authenticated recovery, independent activation and measured retained improvement.
+The [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14)
+records local commitment and the next repair: authenticated restoration of a missing
+later-sequence mirror. Readback, activation and retained improvement remain open.
 
 ## HoloIndex runtime truth
 

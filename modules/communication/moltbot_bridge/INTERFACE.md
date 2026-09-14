@@ -188,16 +188,16 @@ administered principal-key resolver.
 
 ### Verified-outcome authority, signing and memory
 
-The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [pending-storage checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14) records the latest local layer.
+The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [full-record checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14) records the latest local layer.
 
 | Existing API / owner | Current contract |
 |---|---|
-| Root service / `commit_service_authority(...)` | Current co-signed grants, root-owned disjoint stores, fresh peer/proof/revocation checks; exact terminal acknowledgment retry never reopens a reservation. V1 retains its per-exchange timeout and process-local seal. |
+| Root service / `commit_service_authority(...)` / `commit_service_response_record(...)` | V1 signature-digest commitment remains separate. V2 commits the full record after exact pending-byte readback under current peer/proof/grant checks; requires exact v2 digest acknowledgment. Its proof-input companion bounds the complete 64 KiB wire before signing; one exchange, no implicit retry or read authority. |
 | `validate_verified_outcome_signing_response(response, signing_input, *, signer_public_key, key_epoch, requester_principal_id, signature_verifier)` | Exact-True attestations, empty rejection code and verified receipt/audit signatures; a predicate cannot confer authority. |
 | `VerifiedOutcomeResponseBinding(descriptor_id, owner_config_id, authorization_id, reservation_id)` | Frozen public identifiers, never a root capability. |
 | `build_verified_outcome_response_record(request, response, *, descriptor, binding, signature_verifier) -> bytes` | Canonical v1 full signed history, exact types/schema, complete 64 KiB cap. |
 | `parse_verified_outcome_response_record(raw, *, expected_binding, expected_record_digest, signature_verifier) -> tuple[SigningRequest, SigningResponse]` | Checks independently supplied pins and historical signatures; supplies no current read authorization. |
-| `RootVerifiedOutcomeAuthorityState.persist_pending_response(raw, *, expected_binding, expected_record_digest, now_epoch) -> str` | Current owner generation and exact sequence-1 reservation; mirrored selection digest before atomic exact-byte storage. Returns the record digest while leaving the grant reserved. |
+| `RootVerifiedOutcomeAuthorityState.persist_pending_response(...)` / `commit_pending_response(raw, *, expected_binding, expected_record_digest, expected_reservation, now_epoch) -> str` | Shared root lock/current generation/record validation and exact atomic readback. Pending preserves sequence 1; commit requires the outer reservation and advances to sequence 2/full-record digest or acknowledges the exact current terminal state. |
 | `AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` / `publish()` | Validated STAGED/ACTIVE retry evidence; three revision attempts preserve the signed envelope and unrelated state. Staging is invisible to consumable readers. |
 | `SignedVerifiedOutcomeEvidencePublisher.publish()` | Exact durable winner acknowledgment preserves original issuance/signature; no re-signing, renewal or activation. |
 | `ResidentQueueChainResultReceipt.recorded_at` | Canonical held-out event time supplies admission `verified_at`; bootstrap time cannot repair absent historical time. |
@@ -205,7 +205,7 @@ The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-
 | Learning-candidate gate / reconstruction verifier | Bounded `STRUCTURAL_ONLY` evidence, not authenticated provenance, work authority or runtime admission. |
 
 Pending payloads use the fixed primary-root file `verified-outcome-pending-responses.json`, the existing atomic store, at most eight records and a complete 512 KiB snapshot. The payload has one copy; mirrored digests cannot reconstruct lost bytes. Only retained exact bytes can repair a missing file.
-Pending storage adds no RPC, terminal commitment, authenticated readback or publisher call site. Full-response recovery, independent memory activation and retained improvement remain open. Production signer isolation and deployment prerequisites remain in the complete contract.
+The local v2 commit route adds no authenticated readback or ordinary signer/publisher caller. Later-sequence whole-mirror restoration fails closed and is the next repair; current CAS requires None → 1. Operation deadlines, production isolation, independent activation and retained improvement remain open.
 
 `build_grant_service_archive_from_git()` reads only exact commit-tree blobs and
 emits canonical archive schema v2. `validate_grant_service_archive_git_provenance()`

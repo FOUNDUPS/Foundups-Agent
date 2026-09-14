@@ -18,7 +18,9 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     validate_root_verified_outcome_descriptor_public,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
-    decode_message,
+    decode_message, PENDING_RESPONSE_SCHEMA, MAX_PENDING_RESPONSE_RECORDS,
+    MAX_PENDING_RESPONSE_STORE_BYTES, pending_response_records as _pending_response_records,
+    pending_response_snapshot as _pending_response_snapshot,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
@@ -48,9 +50,6 @@ PROTECTED_USE_BINDING = "sha256:" + hashlib.sha256(
 ).hexdigest()
 _STATE_BINDING_NAMES = ("state", "state_witness", "installation")
 _STATE_BINDING_FIELDS = ("root", "path", "store_id", "durability_receipt_id")
-PENDING_RESPONSE_SCHEMA = "foundup_verified_outcome_pending_responses.v1"
-MAX_PENDING_RESPONSE_RECORDS = 8
-MAX_PENDING_RESPONSE_STORE_BYTES = 512 * 1024
 
 
 class RootVerifiedOutcomeAuthorityState:
@@ -141,22 +140,42 @@ class RootVerifiedOutcomeAuthorityState:
         self, raw: bytes, *, expected_binding: VerifiedOutcomeResponseBinding,
         expected_record_digest: str, now_epoch: int,
     ) -> str:
-        """Persist only pending bytes; no terminal commit, read grant or RPC.
+        """Persist selected bytes while leaving the exact grant reserved."""
+        return self._persist_response(
+            raw, expected_binding=expected_binding, expected_record_digest=expected_record_digest,
+            now_epoch=now_epoch, terminal=False,
+        )
 
-        Location derives from the existing owner-bound primary state directory.
-        A mirrored selection marker forbids replacing bytes even after file loss.
-        Only caller-retained exact bytes can repair a missing pending file.
-        """
+    def commit_pending_response(
+        self, raw: bytes, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, expected_reservation: ProposalReplayHighWater,
+        now_epoch: int,
+    ) -> str:
+        """Commit the full record only after durable exact-byte readback."""
+        return self._persist_response(
+            raw, expected_binding=expected_binding, expected_record_digest=expected_record_digest,
+            now_epoch=now_epoch, terminal=True, expected_reservation=expected_reservation,
+        )
+
+    def _persist_response(
+        self, raw: bytes, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, now_epoch: int, terminal: bool,
+        expected_reservation: ProposalReplayHighWater | None = None,
+    ) -> str:
         generation, reserved = _pending_response_context(
             raw, expected_binding, expected_record_digest, now_epoch,
         )
+        if terminal and reserved != expected_reservation:
+            raise ValueError("root_record_commit_reservation_mismatch")
         authorization_id = expected_binding.authorization_id
         selection = pending_response_binding(authorization_id)
         wanted = ProposalReplayHighWater(1, expected_record_digest[7:])
+        committed = ProposalReplayHighWater(2, expected_record_digest[7:])
         with self._lock():
             self._require_installed()
+            current_grant = self._current(authorization_binding(authorization_id))
             if (self._current(GENERATION_BINDING) != generation
-                or self._current(authorization_binding(authorization_id)) != reserved):
+                or current_grant not in ({reserved, committed} if terminal else {reserved})):
                 raise RuntimeError("root_pending_response_context_conflict")
             store = AtomicJsonAuthorityRuntimeStore(
                 self._primary.rollback_domain_root / "verified-outcome-pending-responses.json",
@@ -170,7 +189,7 @@ class RootVerifiedOutcomeAuthorityState:
             marker = self._current(selection)
             if (previous is not None and previous != raw.decode("ascii")) or (
                 marker is not None and marker != wanted
-            ) or (previous is not None and marker is None):
+            ) or ((previous is not None or current_grant == committed) and marker is None):
                 raise RuntimeError("root_pending_response_conflict")
             snapshot = _pending_response_snapshot({**records, authorization_id: raw.decode("ascii")})
             if marker is None:
@@ -182,6 +201,8 @@ class RootVerifiedOutcomeAuthorityState:
             self._validate_pending_records(persisted)
             if persisted.get(authorization_id) != raw.decode("ascii"):
                 raise RuntimeError("root_pending_response_write_unverified")
+            if terminal and current_grant != committed:
+                self._advance_pair(authorization_binding(authorization_id), reserved, committed)
             return expected_record_digest
 
     def _validate_pending_records(self, records: Mapping[str, str]) -> None:
@@ -471,33 +492,6 @@ def _pending_response_context(raw, binding, record_digest, now_epoch):
         ProposalReplayHighWater(descriptor["authority_generation_sequence"], binding.owner_config_id[7:]),
         ProposalReplayHighWater(1, state_revision(reservation)),
     )
-
-
-def _pending_response_records(snapshot: Mapping[str, Any]) -> dict[str, str]:
-    if not snapshot:
-        return {}
-    if (set(snapshot) != {"schema_version", "records", "revision"}
-        or snapshot["schema_version"] != PENDING_RESPONSE_SCHEMA
-        or type(snapshot["records"]) is not dict):
-        raise ValueError("root_pending_response_snapshot_invalid")
-    checked = _pending_response_snapshot(snapshot["records"])
-    if snapshot["revision"] != checked["revision"]:
-        raise ValueError("root_pending_response_snapshot_revision_invalid")
-    return dict(snapshot["records"])
-
-
-def _pending_response_snapshot(records: Mapping[str, str]) -> dict[str, Any]:
-    if len(records) > MAX_PENDING_RESPONSE_RECORDS:
-        raise ValueError("root_pending_response_capacity_exceeded")
-    if any(type(key) is not str or not key.startswith("verified-outcome-authorization-")
-           or type(raw) is not str or not raw.isascii() or not raw or len(raw) > 64 * 1024
-           for key, raw in records.items()):
-        raise ValueError("root_pending_response_record_invalid")
-    snapshot = {"schema_version": PENDING_RESPONSE_SCHEMA, "records": dict(records)}
-    snapshot["revision"] = state_revision(snapshot)
-    if len((json.dumps(snapshot, sort_keys=True, indent=2) + "\n").encode("utf-8")) > MAX_PENDING_RESPONSE_STORE_BYTES:
-        raise ValueError("root_pending_response_store_too_large")
-    return snapshot
 
 
 def _commit_pending_response(store, snapshot, expected_revision):
