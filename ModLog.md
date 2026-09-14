@@ -1,16 +1,23 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: R11 immutable outcome response records
+
+- Packaging: 15 fast groups / 8 staged-manifest tests passed. One runtime hash/pins updated; 1,400 runtime files, 1,650/269 registry and guards unchanged.
+- Extended the existing signing owner and test suite; canonical bytes bind full grant context and exact response with strict schema, signature and externally supplied digest checks. No original runtime function/class changed. WSP 00/15/22/50/60/71/84/97.
+- Final connected evidence: 294 passed / one Linux-root skip; 51 new cases. Corrected three new-parser anchor-shape failures before acceptance. Root-owner-bound pending storage, full-response commitment and authenticated readback remain next.
+- Canonical WSP 15 maps 16 to P0. Corrected current RSI prose and recorded an erratum for three immutable historical baseline entries. Planning packets remain non-dispatchable; no live service or protected FoundUp was exercised.
+
 ## 2026-09-14: R11 response validation and durable handoff contract
 
 - Packaging: 15 fast groups and 8 staged-manifest tests passed. The 1,400-file runtime list has two changed source hashes and matching pins; the current 1,650/269 test registry and guards are unchanged.
-- Reconciled owned work from main `96b70c08`, passed the WSP 00 software gate and used WSP 97 retrieval/fixture reuse. Existing outcome signing now owns shared response validation; the publisher calls it and rejects malformed boolean claims or contradictory rejection. Local planning 16/P1 is not runtime allocation.
+- Reconciled owned work from main `96b70c08`, passed the WSP 00 software gate and used WSP 97 retrieval/fixture reuse. Existing outcome signing now owns shared response validation; the publisher calls it and rejects malformed boolean claims or contradictory rejection. Local planning 16/P0 is not runtime allocation.
 - Twenty new cases extend an existing test file; final connected result is 207 passed / one Linux-root skip. Preserved both original acceptance-gap evidence and the corrected import failure from integration testing.
 - Canonical roadmap, R02 map, runbook and backlog now specify immutable response records → pending durability → full-response commitment → separately authorized readback → publisher recovery. Those runtime layers and retained benefit remain open. Shared checkout, protected FoundUps and live services were untouched. WSP 00/15/22/50/60/71/84/97.
 
 ## 2026-09-14: R11 root commit acknowledgment recovery
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. Runtime membership stays at 1,400 with two source hashes and matching pins; the current 1,650/269 registry and guards are unchanged.
-- Resumed PR1722/main `15fafb8d`, passed the WSP 00 software gate and applied WSP 97 retrieval/test discipline to the existing root service/client. Local planning 16/P1 supplies no runtime allocation.
+- Resumed PR1722/main `15fafb8d`, passed the WSP 00 software gate and applied WSP 97 retrieval/test discipline to the existing root service/client. Local planning 16/P0 supplies no runtime allocation.
 - Exact committed receipts can be acknowledged after current authority checks; one transient transport retry retains identical encoded bytes. No reserve reset, second signing use or protocol expansion. Connected verification: 115 passed / one Linux-root skip; existing Windows test import repaired without weakening its ownership assertion.
 - Root roadmap, R02 map, runbook, backlog and immutable baseline history record this R11-A prerequisite and the remaining full-response durability/restart boundary. No new module, scheduler, deployed signer or protected FoundUp experiment. R11-B–F and retained benefit remain open. WSP 00/15/22/50/60/71/84/97.
 
@@ -67,7 +74,7 @@
 - Extended the downstream review through the existing real sink/canary integration tests: 26 fixture failures/11 passes became 37 passes after one existing shared fixture supplied actual producer fields. Total selected cases: 315. Existing staging is idempotent and outside normal recall; live activation remains intentionally blocked pending independent durable authority. CI's initial stale-registry failure was an import-time test helper call; a literal parameter restores the unchanged 1,650-file/269-quarantine registry without excluding tests.
 - Packaging: all 15 RedDog fast groups pass (3,137ms), and all 8 staged-manifest tests pass (65.74s). Runtime membership remains 1,400; only four included file hashes and the two compatibility pins change. Structural review preserves all original packet fields, prior observations and the frozen audit; two existing document-index rows update hash/size only.
 - No new module/test file, provider call, active FoundUp experiment or production-memory write. Authentication, transactional/idempotent retention, callback-after-write recovery, concurrency and subsequent benefit remain open. All 26 planning packet contracts remain non-dispatchable.
-- Retrieval used governed local bundles, UNKNOWN freshness/index-gap and zero semantic-owner attempts. Existing code/docs/test histories came first; peripheral/duplicate hits were discarded. Local WSP 15 score 3+5+4+4=16/P1. Deterministic tests resolved this connected dependency without a new model route. WSP 00/15/22/48/50/60/84/95/97.
+- Retrieval used governed local bundles, UNKNOWN freshness/index-gap and zero semantic-owner attempts. Existing code/docs/test histories came first; peripheral/duplicate hits were discarded. Local WSP 15 score 3+5+4+4=16/P0. Deterministic tests resolved this connected dependency without a new model route. WSP 00/15/22/48/50/60/84/95/97.
 
 ## 2026-09-14: Preserve stop rules in the compact worker handoff
 

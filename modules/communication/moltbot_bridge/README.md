@@ -1,5 +1,14 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## Immutable verified-outcome response records
+
+The existing outcome-signing module provides `build_verified_outcome_response_record`
+and `parse_verified_outcome_response_record`. Records preserve complete signed
+history as bounded immutable bytes; parsing requires independently supplied
+expected context and digest. These functions grant no current read/signing rights
+and have no persistence or publisher wiring. See [INTERFACE.md](INTERFACE.md) and
+the [current R11-A checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14).
+
 ## Verified-outcome response validation
 
 The publisher uses `validate_verified_outcome_signing_response(...)` in the

@@ -252,6 +252,26 @@ bound. The predicate performs no persistence, issuance renewal, state transition
 read-authorization check or record deserialization. Malformed attributes or
 dependency exceptions can still raise; consumers must fail closed. Its result
 cannot authorize durable response replay or construct a process-local capability.
+`VerifiedOutcomeResponseBinding(descriptor_id, owner_config_id,
+authorization_id, reservation_id)` is frozen public identifier data, never a root
+reservation capability. `build_verified_outcome_response_record(request, response,
+*, descriptor, binding, signature_verifier) -> bytes` snapshots a v1 record using
+the existing root codec. `parse_verified_outcome_response_record(raw, *,
+expected_binding, expected_record_digest, signature_verifier) ->
+tuple[SigningRequest, SigningResponse]` returns the original typed pair after
+canonical/full-record digest, scope, co-signed descriptor and receipt/audit checks.
+The complete record includes its response digest, full descriptor/grant context
+and the four root identifiers. V1 requires exact string/boolean fields, omits the
+unsupported elevated-consensus proof, rejects unknown/missing fields and duplicate
+keys, and caps the full ASCII canonical JSON plus newline at 65,536 bytes.
+Historical validation uses original issuance; replay anchor identifiers receive
+shape checks without touching their store. Expected bindings/digest must come
+from an independently authenticated owner, not the parsed record. The parser
+does not supply that authentication, fresh expiry/revocation/read authority,
+durable root commitment, process-local seals, persistence or memory activation.
+No production caller is connected in this schema layer. Future enclosing wire
+messages must also respect the existing complete-message limit.
+
 `AuthorityRuntimeVerifiedOutcomeStore.publish()` bounds revision-conflict retries
 to three commit attempts, preserving the signed envelope and unrelated current
 state. Other errors are not retried. On publication OSError/RuntimeError/ValueError,

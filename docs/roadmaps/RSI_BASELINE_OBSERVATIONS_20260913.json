@@ -3084,5 +3084,160 @@
         "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/response-handoff-20260914/manifest --tb=short -q"
       }
     }
+  },
+  "response_record_continuation_20260914": {
+    "base_commit": "1103f7b218d71d8592d1e8b391ea6b8290275496",
+    "scope": "R11-A immutable outcome response record in the existing signing owner; no persistence or runtime recovery wiring",
+    "wsp00": {
+      "software_gate_passed": true,
+      "last_validation": "2026-09-14T08:56:34.357610",
+      "tracked_awakening_writes": false
+    },
+    "wsp15_local_planning": {
+      "complexity": 4,
+      "importance": 4,
+      "deferability_urgency": 4,
+      "impact": 4,
+      "total": 16,
+      "priority": "P0",
+      "runtime_allocation_receipt": false,
+      "rationale": "Full grant/signature/context boundaries require careful integration; exact bytes are the prerequisite for bounded durable recovery and subsequent retained learning"
+    },
+    "wsp15_erratum": {
+      "authority": "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md#4-priority-classification",
+      "correct_classification": "16-20 = P0; 13-15 = P1",
+      "historical_16_P1_nodes": [
+        "outcome_retention_continuation_20260914.wsp15_local_selection",
+        "outcome_response_continuation_20260914.wsp15_local_planning",
+        "response_handoff_continuation_20260914.wsp15_local_planning"
+      ],
+      "disposition": "Historical baseline objects preserved byte-semantically; this erratum corrects their label to P0. Current prose labels corrected. Scores and runtime authority are unchanged."
+    },
+    "execution_plane": "Existing 012-authorized local authoring; architect/worker role, external_principal origin; no WRE admission or independent verifier role",
+    "ownership": {
+      "branch": "agent/rsi-immutable-outcome-response-20260914",
+      "worktree": "O:/Foundups-Agent-worktrees/agent-rsi-baseline-context-evidence-20260913",
+      "open_prs_checked": 96,
+      "target_source_or_test_overlaps": [],
+      "main_checkout_mutated": false,
+      "protected_foundup_or_live_runtime_exercised": false
+    },
+    "retrieval": {
+      "mode": "documented lexical fallback",
+      "initial_query": "reddog_ed25519_verified_outcome_signing immutable response record",
+      "refined_query": "reddog_ed25519_verified_outcome_signing",
+      "ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "bundle_authority": {
+        "evidence_authority": "workspace_head",
+        "repo_head_sha": "1103f7b218d71d8592d1e8b391ea6b8290275496",
+        "repo_root_digest": "sha256:40d60ad71436d43150e37a6d118fa2066a806f876c8f4c85e97c0cb2de85dcb2",
+        "workspace_overlay_present": false
+      },
+      "semantic_authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "receipt_sha256": "450c869e59c26b193bfc1abd72e8684e8c0e850b2e1738f48f3df3a48715c53f",
+      "evaluation": {
+        "noise": "Initial false-positive memory hits were peripheral; exact signing query removed them",
+        "ordering": "Exact source and existing test first; direct imports resolve codec, descriptor, publisher and root store",
+        "missing": "Required README/INTERFACE present; existing ROADMAP, ModLog and test docs read; optional design/memory artifacts and requirements absent",
+        "staleness": "Workspace HEAD context only; no current semantic-generation claim",
+        "duplication": "Deduplicated two exact paths; extended one existing module and test file"
+      },
+      "manual_reason": "Cryptographic/history and authority boundaries require source/test review. Reused deterministic validators; no unchanged blocked model/runtime probe or new model route."
+    },
+    "changes": [
+      "Immutable canonical bytes include exact request/response, full co-signed descriptor/grant context, root identifiers, response digest and full-record digest",
+      "Strict v1 shape/types, original issuance and signatures, independent expected binding/digest, duplicate keys, unknown fields, noncanonical bytes and complete 64 KiB limit",
+      "Historical replay anchor identifiers checked structurally; no mutable replay-store or current read authority asserted",
+      "No existing function/class definition changed; no new module or test file"
+    ],
+    "source_sha256": {
+      "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_signing.py": "def4067f0ab42161093e23301252d04a7c5d84a3eb2aa6f569ab61622bf71d23",
+      "modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py": "9c671433173db4fdd16283b80fa027d5ac174857e88af80ab1a67065c67f4dbd"
+    },
+    "source_hash_basis": "LF-normalized Git source bytes",
+    "test_evidence": {
+      "new_cases": 51,
+      "existing_test_file_final_cases": 72,
+      "initial_contract": {
+        "errors": 1,
+        "deselected": 66,
+        "seconds": 2.0,
+        "reason": "Proposed record API absent, not an existing production defect",
+        "log_sha256": "e00429ba96a1befd5439d1a0d2f140d409c72e6b2d21ed7ebd35f4643cca2fa1"
+      },
+      "initial_focused": {
+        "passed": 67,
+        "seconds": 19.17,
+        "log_sha256": "5c7158d5b8258eba7a716bd3b7b2cbacaf7b0c2bc7b7ee1cadf47eeb0681c209"
+      },
+      "extended_before_shape_fix": {
+        "failed": 3,
+        "passed": 2,
+        "deselected": 67,
+        "seconds": 3.37,
+        "reason": "New parser accepted co-signed malformed anchor identifiers; fixed in this slice",
+        "log_sha256": "b4682f493766f7875537057622b528715e9fc1414388e4c9a44584725a682f6f"
+      },
+      "connected": {
+        "passed": 294,
+        "skipped": 1,
+        "seconds": 51.29,
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_signer_backend.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/response-record-20260914/connected --tb=short -q",
+        "log_sha256": "45add3ab7346c208120f3b8729beacde4b0fb8b3d13f14170971205c2fe5dfa0"
+      },
+      "environment": [
+        "qualified main .venv dependencies, task checkout source",
+        "-B/PYTHONDONTWRITEBYTECODE=1/PYTHONUTF8=1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1; explicit pytest_asyncio plugin; no cache",
+        "TEMP/TMP and FOUNDUPS_DB_PATH/WRE_PATTERN_MEMORY_DB/ANTIFAFM_LYRICS_DB confined to disposable response-record-20260914 audit roots"
+      ],
+      "skip": "Existing real Linux-root socket test; Windows fixtures do not establish production UID/process isolation"
+    },
+    "limits": [
+      "Record and binding constructors return data, not signing capabilities; caller-supplied pins are not authenticated by the pure parser",
+      "Historical descriptor validated at original issuance; no current expiry/revocation/read grant or root commitment check",
+      "No pending store, root owner configuration, v1 root RPC, publisher call site, memory visibility or activation change",
+      "Future enclosing wire messages must independently satisfy the 64 KiB outer-message limit",
+      "No production process death/restart, replica durability, runtime dispatch or retained improvement proof"
+    ],
+    "next_authorable_step": "Bind bounded pending response storage to the existing root-owner configuration and AtomicJsonAuthorityRuntimeStore; verify exact-byte persistence, conflicting winners and durability failures before versioned full-response commitment or authenticated readback",
+    "completion_gate_advanced": false,
+    "dispatchable": false,
+    "retained_improvement_proven": false,
+    "packaging": {
+      "registry": {
+        "current": true,
+        "total_files": 1650,
+        "quarantined_files": 269,
+        "changed": false,
+        "log_sha256": "af28182d893f69c07c80096e78f45ae3c700aad53be2b2a25a19224bac571bad"
+      },
+      "guard_changes": false,
+      "fast": {
+        "groups_passed": 15,
+        "duration_ms": 3013,
+        "log_sha256": "15409f43021cbd7ce344aa1c961aed07753acfc834afcdfc7e650ea51d20b7de",
+        "command": "node tests/run_reddog_test_tier.js fast",
+        "working_directory": "extensions/reddog",
+        "environment": [
+          "REDDOG_TEST_SITE_PACKAGES=O:/Foundups-Agent/.venv/Lib/site-packages",
+          "REDDOG_TEST_PYTHON=O:/Foundups-Agent/.venv/Scripts/python.exe",
+          "TEMP/TMP in disposable O: audit directory"
+        ]
+      },
+      "manifest": {
+        "passed": 8,
+        "warnings": 2,
+        "elapsed_seconds": 64.36,
+        "runtime_membership": 1400,
+        "changed_runtime_files": 1,
+        "digest": "a63d6a685f5cf2d286d83162320caf6fffcf51c500722a253b4deac13be93da6",
+        "log_sha256": "2ccecf30656bacb759c5815411c6298c4b6cd91a4b228527ac0cd56689ca6a15",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/response-record-20260914/manifest --tb=short -q"
+      }
+    }
   }
 }

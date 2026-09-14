@@ -802,20 +802,22 @@
             "reuse": [
               "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py",
               "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py",
-              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py"
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py",
+              "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_signing.py"
             ],
             "tests": [
               "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py",
-              "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py"
+              "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py",
+              "modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py"
             ],
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_SHARED_RESPONSE_VALIDATION_AND_HANDOFF_CONTRACT_VERIFIED",
-              "evidence": "response_handoff_continuation_20260914",
-              "previous_evidence": "outcome_response_continuation_20260914",
-              "next": "Implement the bounded immutable outcome-response record and full-context digest validator in the existing outcome-signing owner, reusing shared response verification; test exact serialization, tampering and size limits before root persistence or readback wiring",
-              "remaining": "Immutable response schema, pending durability, full-response commitment, authenticated readback, real process recovery; legacy events, R11-B-F and retained benefit; no runtime admission"
+              "status": "PARTIAL_IMMUTABLE_RESPONSE_RECORD_VERIFIED",
+              "evidence": "response_record_continuation_20260914",
+              "previous_evidence": "response_handoff_continuation_20260914",
+              "next": "Bind bounded pending response storage to the existing root-owner configuration and AtomicJsonAuthorityRuntimeStore; verify exact-byte persistence, conflicting winners and durability failures before versioned full-response commitment or authenticated readback",
+              "remaining": "Pending durability, full-response commitment, independently authorized readback and real process recovery; legacy events, R11-B-F and retained benefit; no runtime admission"
             }
           },
           {
@@ -926,6 +928,12 @@
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "section": "response_handoff_continuation_20260914",
         "base_commit": "96b70c085711da16e57d582b03ffa063b8227025",
+        "acceptance_satisfied": false
+      },
+      "latest_response_record_evidence": {
+        "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+        "section": "response_record_continuation_20260914",
+        "base_commit": "1103f7b218d71d8592d1e8b391ea6b8290275496",
         "acceptance_satisfied": false
       }
     },

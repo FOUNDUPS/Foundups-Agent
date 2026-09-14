@@ -1,5 +1,19 @@
 # Tests - OpenClaw Bridge
 
+## Immutable outcome-response record contracts
+
+Reuse `test_reddog_ed25519_verified_outcome_signing.py`: 51 additional cases
+cover exact-byte/context/digest binding, real Ed25519/co-signed history, malformed
+types and anchor identifiers, changed signing input, unknown/duplicate fields,
+independent expected digest, deep/oversize JSON, exact 64 KiB limit, caller mutation,
+and preservation of consumed root authority. The root peer/transport boundary is
+injected; real production ownership and process death remain unproven.
+
+Focused command: `python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q`.
+The final nine-suite command and disposable environment are in
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json` →
+`response_record_continuation_20260914`: **294 passed / one Linux-root skip**.
+
 ## Signer response handoff and validation
 
 `test_reddog_ed25519_verified_outcome_signing.py` now owns the composed

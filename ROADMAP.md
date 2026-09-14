@@ -37,6 +37,13 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [immutable-response record checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14)
+adds bounded canonical records in the existing signing owner, binding the complete
+grant context and exact response to externally supplied context/digest checks.
+The connected selection passes 294 tests with one Linux-root skip. Historical
+validation creates no current authority. Root-owner-bound pending storage is next,
+followed by full-response commitment and authenticated readback; RSI stays incomplete.
+
 The [signer-response handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14)
 puts response validation in the existing outcome-signing owner and keeps the
 publisher using it. Malformed boolean claims, contradictory rejection and
