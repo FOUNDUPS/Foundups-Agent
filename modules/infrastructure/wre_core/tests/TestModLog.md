@@ -1,3 +1,9 @@
+## 2026-09-15: Mode-drift and injected-commit regressions
+
+- Extended existing AST/constructor-mode tests and added a timing matrix using the same pre-construction model-disable fixture. All 24 prior function names retained; 22 definitions unchanged. Seven constructor values and fourteen timing/value cases cover unsupported/truthy modes, late mutation, missing proposals, diff/evaluator callbacks and direct commit calls.
+- Recorder-only pre-fix probes showed delegated commit, unrestored scratch and completed reports. Initial 12 failures/70 passes; first repair 82 passes; final 86 passes in 1.91s including static delegated-commit denial. These runs overlap.
+- Five normal ten-attempt controls retain 50 attempts/40 candidate/five baseline counts, report equality and seed97 replay. Test 742 lines remain within general 800 guideline with existing infrastructure review, all functions ≤50. No live model/Git/FoundUp, authenticated provenance or arbitrary-host sandbox proof. Evidence: `research_mode_guard_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
 ## 2026-09-15: Terminal reporting and failure boundaries
 
 - Extended four existing lifecycle/accounting tests with the unchanged model-disable fixture; all 21 prior function names retained, 17 definitions unchanged. Added namespace/publication assertions and repeated-call fault cases; total 66 pass in 1.49s.

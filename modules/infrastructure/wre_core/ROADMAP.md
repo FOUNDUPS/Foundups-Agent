@@ -2,31 +2,31 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-The existing ROC researcher publishes distinct completed/aborted invocation JSON
-only after cleanup settles. Interrupted work retains actual entered counters,
-finished outcomes, available metrics and failure/cleanup state. Reporting failures
-cannot produce successful returns; old invocation reports remain unchanged.
-Namespace allocation failure still attempts restoration. No launch reader is enabled.
+Report qualification exposed a prior mode-flag gap: recorder-only probes reached
+injected commit, skipped cleanup and returned completed. Fresh WSP15 ranked this
+**17/P0** (3+5+5+4), ahead of identity metadata. The existing Phase1 producer now
+requires literal `True`, rejects mode drift, never delegates a live commit, and
+always attempts scratch cleanup. No live Git/model/FoundUp action was used.
 
-**66 tests pass**. Five ten-attempt controls record 50 attempts, 40 candidate and
-five baseline evaluations; each saved completed report equals its returned mapping,
-with 11 TSV rows and restored scratch. Seed97 replay matches outcomes/metrics while
-invocation identities differ. These simulations prove no independently retained RSI.
+**86 tests pass**: seven constructor modes, fourteen mode/timing combinations,
+static commit-dispatch denial and prior validation/report/cleanup cases. All 24
+prior function/fixture names remain; 22 definitions are unchanged. Five ten-attempt
+controls still report 50 attempts/40 candidate and five baseline evaluations,
+with saved/returned equality and matching seed97 replay except invocation identity.
 
-Source 491→524; inherited class 297→290 and loop 84→82 shrink. Tests 585→681 cross the
-600-line infrastructure review guideline: retain this cohesive lifecycle fixture,
-with all functions ≤50 and no new file/exemption. WRE Core maintainers own remaining
-class/loop decomposition after report contracts; a warning alone is not a split mandate.
-Registry 1650/269 and all 1400 RedDog package members remain unchanged; no new package
-validation is claimed. Prior accounting PR1752 merged at `0c45c6b3`; both main
-workflows passed. Independent YUMORI PR1644 advanced; its files remain disjoint.
+Source 524→534; class 290→285, loop 82 unchanged. Tests 681→742 remain below the
+800-line general guideline; the existing infrastructure 600 review stays with the
+cohesive fixture. All test/new functions ≤50; no new module/skill/file/exemption.
+WRE maintainers retain inherited class/loop decomposition after report contracts.
+Registry 1650/269 and 1400 package members stay unchanged; no new package run claimed.
+Prior terminal PR1753 merged at `701146b1`; both main workflows passed.
 
-Fresh WSP15/97 retains **report completeness 15/P1** as a partial parent. Next bind
-exact input/source/oracle/environment identities and qualify the existing report
-reader seam before launch display. Missing/stale/aborted/unauthenticated data cannot
-admit work. Resources, independent retention and process/power durability remain
-separate gates. Read `research_terminal_report_continuation_20260915` in the
-canonical observations; prior accounting evidence is preserved separately.
+Re-observation removes the closed mode defect from outstanding work and re-scores
+**report identity/reader qualification 15/P1** (4+4+3+4). Bind input/source/oracle/
+environment evidence before startup display. Missing/stale/aborted/unauthenticated
+reports cannot admit work. Provider costs, independent retention and process/power
+durability remain separate. Read `research_mode_guard_continuation_20260915` in
+canonical observations; all earlier checkpoints remain preserved.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: the recorded ownership repair reduced the file 1,294→1,279 lines and
