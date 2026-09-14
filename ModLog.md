@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Exact committed-response retrieval inside the existing root owner
+
+- Added a 23-line root storage read primitive using existing locks, ownership, generation, snapshot and signature validators. Healthy reads preserve exact committed bytes and consumed state; pending, absent, conflicting, rotated or expired context rejects. Current read permission and a public route remain separate.
+- Extended the existing root service tests by 30 cases; connected validation passes 348 tests / one Linux-only skip. Existing size guards pass at 675 source lines; no new module, skill, test file or grant. Registry 1650/269 and runtime membership 1400 are unchanged; one runtime hash/pins updated.
+- Reapplied WSP 15/WSP 97 and recorded the next 16/P0 current-read-admission/service slice in existing roadmap/runbook/backlog evidence. Protected products, AutoPost, live services and independent admission remain outside this local source layer. Evidence: `root_record_read_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Close merged recovery and re-observe RSI selection
 
 - Verified PR #1734 merged as `7f4f49b79692a1aa6484544c4e46115fe6690027` after ten successful exact-head checks. All 18 changed Git blobs and 13 protected incoming YUMORI paths are preserved. Local results retain their original source/environment scope; no fresh runtime test run is claimed by this documentation closure.

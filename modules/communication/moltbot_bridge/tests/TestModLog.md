@@ -1,3 +1,10 @@
+## 2026-09-14: Root storage readback of exact committed responses
+
+- Proposed API control: one failure / 100 deselected in 2.54s (`AttributeError` for the missing method, not an existing production bug). Initial method plus three size guards: four passed in 2.87s. Expanded new selection: 30 passed / 100 deselected in 18.34s.
+- Final nine connected suites and three unchanged size guards: 348 passed / one Linux-only skip in 133.65s. Existing root/signing/revocation/provisioning/runtime/protected-use cases remain passing; the 30 new cases reuse `record_commit_inputs`, exact v2 commitment, real disposable stores and signatures.
+- Coverage: byte identity and consumed-state preservation; pending/missing/conflicting payload and markers; binding/digest/generation/time rejection; rotation under old/new pins; one-sided recovery; ownership-before-payload; cancellation and concurrent retries; unchanged RPC rejection. No new test file or relaxed assertion. Root source is 675 lines; this service test file is 1,441 lines.
+- Runs use the vetted interpreter, `-B`, disabled plugin autoload/cacheprovider, explicit async plugin and external temp/DB roots. Windows principal/peer decisions are injected, and the privileged Linux service case is skipped. No current read permission, external read route, production failure or retained-learning claim. Evidence: `root_record_read_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Identity-checked mirror restoration
 
 - Pre-change expanded service control: **4 failed, 2 passed, 92 deselected in 3.61s**. Sequence 1 succeeded; 2 and 5 failed for primary and witness loss with the existing `monotonic_authority_not_monotonic` error. Failure evidence is retained.

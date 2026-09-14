@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#mirror-restoration-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -48,6 +48,14 @@ scores below retain their original planning scope. Standing local authorization
 and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
 ## Current delivery checkpoint — 2026-09-14
+
+The [root-record readback checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14)
+adds exact committed-byte retrieval inside the existing root storage owner. It
+checks installed state, ownership, the pinned generation, record/selection digests,
+historical signatures and the original authority's current time window. The
+connected selection passes **348 tests / one Linux-only skip**. This storage
+primitive creates no read grant or RPC; purpose-specific current read admission
+and service wiring remain the next **16/P0** local work. R11 remains partial.
 
 Recovery [PR #1734](https://github.com/FOUNDUPS/Foundups-Agent/pull/1734) is merged
 as `7f4f49b79692a1aa6484544c4e46115fe6690027`. All ten reported checks passed at
