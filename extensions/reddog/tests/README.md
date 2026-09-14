@@ -633,6 +633,15 @@ npm run test:contract       # plan and shard authentication
 npm run test:release        # exact exhaustive promotion closure
 ```
 
+On Windows, the conversation runner resolves the primary checkout through the
+current worktree's Git common directory, then validates and uses that checkout's
+`.venv\\Scripts\\python.exe` and `.venv\\Lib\\site-packages`. This keeps the
+canonical commands usable from linked task worktrees without creating a local
+venv or accepting ambient/user-site Python. `REDDOG_TEST_PYTHON` and
+`REDDOG_TEST_SITE_PACKAGES` remain explicit absolute O:/E: overrides. Temporary
+artifacts use the task worktree's ignored `.tmp\\reddog-tests` by default;
+`REDDOG_TEST_TEMP` may select another existing absolute O:/E: directory.
+
 The release command is the legacy `node tests/verify_extension_contract.js`
 entry. It authenticates the 18-shard aggregate and exactly seven committed-
 main tail members before starting four process-isolated groups. The separate

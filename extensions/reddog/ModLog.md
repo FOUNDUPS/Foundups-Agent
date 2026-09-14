@@ -1,5 +1,31 @@
 # RedDog ModLog
 
+## 2026-09-14 - Reconcile 0.4.141 release identity contract
+
+- Replaced the exhaustive release contract's stale architect-product identity
+  assertions with the canonical fast-RedDog/deep-0102 boundary already
+  enforced by the focused identity test and package manifest.
+- Corrected the remaining README sentence that described RedDog as the
+  principal-scoped 0102 identity. No command, authority, runtime, provider,
+  package membership, or release version changed. WSP 15, 22, 50, 97.
+- Made the existing package test commands work from linked task worktrees on
+  Windows by deriving the primary checkout from Git's common directory and
+  validating its O:/E: venv. Explicit runtime overrides remain authoritative;
+  ambient and user-site Python remain excluded. Temporary test artifacts now
+  default to the isolated worktree's ignored O:/E: directory instead of the
+  ambient Windows temp root.
+- Hostile independent review then rejected the first Git lookup because ambient
+  executable/environment controls could redirect the reported common directory.
+  The final path reuses the existing identity-bound Git executable and closed
+  environment, pins Git worktree controls, and validates primary/linked metadata
+  topology before selecting the venv. Foreign O:/E: repositories fail closed.
+- Closed the candidate with the unchanged 67-file package boundary. The full
+  four-group release gate passes after the hostile-review repair in 229.074
+  seconds; the package remains 950,440 raw bytes at
+  `sha256:aeace93f0386c549ac6c70e6aae25ba6aaac10738ea76ee76585735668135773`.
+  This is local candidate evidence only: no VSIX was published and no runtime
+  or Git authority was added.
+
 ## 2026-09-13 - Pin compact fidelity stop-condition correction
 
 - Refreshed the existing 1,400-file backend manifest after the token-efficiency

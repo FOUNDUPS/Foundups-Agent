@@ -29,6 +29,7 @@ not mean RedDog has 376 canonical specifications.
 | Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
 | FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |
 | Phase-1 alignment findings | `docs/audits/architecture/REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1.md` | Evidence audit, not runtime authority |
+| Current-main WSP 15 / WSP 97 audit and ranked queue | `docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md` | Point-in-time evidence and PR disposition; not runtime authority |
 | Lick/Gemini/rESP findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Historical evidence audit, not runtime or patent-status authority |
 | Public member digital-twin contract | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | Public-surface contract |
 | FoundUps domain integration | `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` | FoundUps domain navigation |

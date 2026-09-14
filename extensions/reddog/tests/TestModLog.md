@@ -1,5 +1,44 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-14 - 0.4.141 release identity reconciliation
+
+- Reproduced the exhaustive core failure against exact current main: the
+  package exposes `RedDog - FoundUps Interface` while the authenticated shard
+  still required the superseded architect display name.
+- Rebound the three stale package/README/ROADMAP assertions to the canonical
+  identity and extended the focused active-document negative set to reject the
+  surviving README wording that collapsed RedDog into 0102.
+- Reproduced `npm test` failing before its first tier member in a linked Windows
+  worktree because it assumed a worktree-local `.venv`. The runner now derives
+  the primary checkout through governed `--git-common-dir`, validates the
+  resulting O:/E: topology, and uses its validated venv defaults. The executable
+  is identity-bound and Git runs with the existing closed environment. Hostile
+  Git controls and foreign common-directory cases are executable regressions.
+- Removed the second undocumented prerequisite: Windows test temp now defaults
+  to `.tmp\\reddog-tests` inside the isolated task worktree, with cleanup of the
+  per-run pytest base and an explicit validated O:/E: override when needed.
+- Regenerated the authenticated contract as 18 shards / 6,942 lines / 492
+  assertions at
+  `sha256:e653fd5c3cbe0de8e6a235939d0531bb213748d6fa7c9a750f903c1aacc81f2e`.
+- Final local evidence: focused identity PASS; shard integrity PASS;
+  candidate WSP-62 PASS; backend manifest PASS at 1,400 files and
+  `sha256:68b038e9ec86967c8e9a426e2fe9fa5e798a717966852466167fe8434a935c02`;
+  fast tier 15/15 PASS in 5.394 seconds; conversation 32 Python tests and 15
+  JavaScript vectors PASS; contract 3/3 PASS; package PASS at 67 files / 950,440
+  raw bytes / `sha256:aeace93f0386c549ac6c70e6aae25ba6aaac10738ea76ee76585735668135773`.
+- Independent hostile review found the first common-directory resolver used
+  ambient Git authority. Added a governed executable/closed-environment path,
+  exact primary-versus-linked topology validation, and regressions for hostile
+  `GIT_DIR`, `GIT_WORK_TREE`, injected config and a valid-looking foreign O:/E:
+  repository. Focused tiering and candidate WSP-62 checks pass. The complete
+  four-group release gate passes in 229.074 seconds with no timeout (`core`
+  228.988 seconds, `governed_git` 143.794 seconds,
+  `git_formats_environment` 85.472 seconds, `bridge_wsp62` 7.174 seconds).
+  Hostile fixture stderr is expected evidence from passing groups. The two
+  Python warnings report unavailable pytest-asyncio configuration under the
+  deliberately sealed plugin environment; no test was skipped or failed.
+  WSP 15, 22, 50, 62, 97.
+
 ## 2026-09-13 - Backend inventory versus current main
 
 - Remote roadmap CI failed `test_backend_compatibility_contract.js` because two already-merged phone/voice files differed from their stale inventory hashes. Local preflight reproduced exactly those two paths.
