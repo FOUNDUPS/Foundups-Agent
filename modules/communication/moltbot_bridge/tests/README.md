@@ -1,5 +1,21 @@
 # Tests - OpenClaw Bridge
 
+## Writer-process response recovery
+
+Reuse `test_root_record_recovers_after_writer_process_exit` in the existing
+`test_foundup_verified_outcome_root_authority_service.py`. The canonical-imported
+spawn target receives public fixture context and the already signed request.
+Four cases cover clean exit and abrupt exits after payload commit, primary terminal
+write, and built reply. Exact exit codes, pre-recovery mirror states, reopened
+request retries, payload identity and consumed authorization are asserted.
+
+Full service suite plus three unchanged size guards: **136 passed / one Linux-only
+skip in 71.44s**. Exact command, case IDs and environment are in
+`process_exit_continuation_20260914` in the existing RSI baseline. Use external O:
+temp/DB roots, `-B`, explicit async plugin and disabled cache/plugin autoload.
+This validates selected writer-process failures; current read permission, competing
+full-record processes, physical-volume failure and privileged-service proof remain open.
+
 ## Root-owned committed-response retrieval
 
 Reuse `test_foundup_verified_outcome_root_authority_service.py` and its existing

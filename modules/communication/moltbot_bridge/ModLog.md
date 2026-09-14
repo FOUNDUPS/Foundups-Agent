@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Verify root response recovery across writer process exit
+
+- Reused the existing signed record and real root stores in four spawned-child cases: clean return, exit after payload persistence, primary terminal write, and built reply. Reopened exact-request retries preserve payload, mirrored terminal digest and consumed authorization.
+
+- Full service suite plus three unchanged guards: 136 passed / one Linux-only skip in 71.44s. All 64 original definitions are preserved; the test file is 1497 lines. No runtime implementation/API/manifest change. This is local process proof with injected peer identity; physical-volume and privileged-service proof remain open.
+
+- Evidence: `process_exit_continuation_20260914` in the existing RSI baseline; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Root-owned committed-response storage read
 
 - Added `load_committed_response_for_root()` to the existing root state owner. Reused fixed pending storage, installed ownership, lock, exact generation/selection/terminal state and historical signature/current original-window validation. Healthy reads retain payload/state; one-sided mirror recovery uses the existing path.

@@ -12,6 +12,7 @@ import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import asdict, replace
+from multiprocessing import get_context
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -1439,3 +1440,58 @@ def test_root_record_storage_primitive_does_not_enable_a_read_rpc(record_commit_
                                           snapshot_supplier=lambda: v.current["snapshot"], now_epoch=NOW)
     assert decode_message(reply) == {"status": "REJECT"}
     assert v.raw not in reply and v.counts["outcome_signatures"] == 1
+
+
+def _exit_root_record_writer(path, descriptor, snapshot, raw, phase):
+    """Disposable child: exit at a real durable boundary without Python cleanup."""
+    state, *_stores_value = _state(Path(path), descriptor)
+    target = authorization_binding(descriptor["grants"][0]["authorization_id"])
+    commit = state_module.AtomicJsonAuthorityRuntimeStore.commit
+    advance = state._advance_pair
+
+    def commit_then_exit(*args, **kwargs):
+        result = commit(*args, **kwargs)
+        if phase == "payload": os._exit(71)
+        return result
+
+    def advance_then_exit(binding, expected, next_value):
+        if phase == "primary" and binding == target and next_value.sequence == 2:
+            state._primary.advance(binding, expected=expected, next_value=next_value)
+            os._exit(72)
+        return advance(binding, expected, next_value)
+
+    state_module.AtomicJsonAuthorityRuntimeStore.commit = commit_then_exit
+    state._advance_pair = advance_then_exit
+    reply = handle_root_authority_request(raw, peer=_peer(), state=state,
+        snapshot_supplier=lambda: snapshot, now_epoch=NOW)
+    assert protocol.record_commit_response_from_bytes(reply).accepted
+    if phase == "reply": os._exit(73)
+
+
+@pytest.mark.parametrize("phase,exitcode", [("clean", 0), ("payload", 71), ("primary", 72), ("reply", 73)])
+def test_root_record_recovers_after_writer_process_exit(record_commit_inputs, tmp_path, phase, exitcode):
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority_service import _exit_root_record_writer
+    v = record_commit_inputs
+    request = _record_commit_request(v)
+    child = get_context("spawn").Process(target=_exit_root_record_writer,
+        args=(str(tmp_path), v.descriptor, v.current["snapshot"], request.to_bytes(), phase))
+    child.start()
+    try:
+        child.join(30)
+        assert child.exitcode == exitcode
+    finally:
+        if child.is_alive():
+            child.terminate()
+            child.join(5)
+        child.close()
+    binding = authorization_binding(v.grant["authorization_id"])
+    assert v.state._primary.load(binding).sequence == (1 if phase == "payload" else 2)
+    assert v.state._witness.load(binding).sequence == (1 if phase in {"payload", "primary"} else 2)
+    original = v.path.read_bytes()
+    v.state, *_stores_value = _state(tmp_path, v.descriptor)
+    for _attempt in range(2):
+        reply = protocol.record_commit_response_from_bytes(_record_reply(v, request))
+        assert reply.accepted and reply.record_digest == v.digest
+        assert _read_root_record(v) == v.raw and v.path.read_bytes() == original
+    assert v.state._primary.load(binding) == v.state._witness.load(binding) == ProposalReplayHighWater(2, v.digest[7:])
+    assert _reserve(v.authority, v.grant) is None and v.counts["outcome_signatures"] == 1
