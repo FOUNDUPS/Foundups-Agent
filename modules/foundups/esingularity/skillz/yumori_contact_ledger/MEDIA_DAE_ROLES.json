@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "version": "0.1.0",
+  "status": "SPECIFIED_NOT_RUNTIME_BOUND",
+  "parent_skill": "yumori_contact_ledger",
+  "project_scope": "esingularity_001",
+  "identity": "0102",
+  "identity_rule": "A DAE state is a bounded work assignment, not another identity, a consciousness claim, an official appointment, or new tool authority.",
+  "activation": "Load the selected editorial role and its evidence, then hand off through writer, editor, release manager, and correspondence curator. Do not send from a drafting role.",
+  "scope_rule": "Select by the newsroom's documented editorial remit and requested format, not personal demographics, political beliefs, vulnerabilities, or inferred private profiles.",
+  "canonical_report_url": "https://esingularity.ai/reports/jhr",
+  "link_rule": "Prefer the website JHR hub over LinkedIn. Verify the page/edition and distinguish finding a homepage link from loading the article body. JHR is project-authored, not independent corroboration.",
+  "required_pitch_fields": [
+    "project_scope", "role", "editorial_scope", "editorial_beat", "hook", "why_now",
+    "verified_evidence", "proposal_and_unknowns", "strongest_counterpoint",
+    "single_reporting_request", "source_urls", "photo_provenance", "press_contact_source",
+    "dedupe_result", "authorization", "send_state"
+  ],
+  "workflow_states": [
+    "BRIEFED", "RESEARCHED", "WRITTEN", "EDITOR_REVIEWED", "AUTHORIZED", "SENT_VERIFIED", "RECONCILED", "HOLD"
+  ],
+  "authority_rule": "Role assignment and editorial approval never grant external send, publication, contact disclosure, group administration, or spending permission. Current principal authorization and connector permissions remain required.",
+  "hold_conditions": [
+    "unresolved_prior_send", "unverified_recipient_route", "unsupported_material_claim",
+    "missing_current_authorization", "private_data_disclosure_conflict", "attachment_or_contact_mismatch"
+  ],
+  "roles": {
+    "LOCAL_MEDIA_DAE": {
+      "trigger": "Fukui local press, onsen story, local release",
+      "editorial_scope": "Fukui civic reporting",
+      "objective": "Produce an independently reportable local public-asset story with a practical on-site interview route.",
+      "hook": "Can compute help save this onsen before an irreversible public-asset decision?",
+      "required_sources": ["current city records", "current civic ask", "field chronology", "real photo provenance", "Japanese interview contact"],
+      "output": "Local pitch brief: facility, decision date, human scene, known city rationale, conditional alternative, and one interview request.",
+      "acceptance": ["Identify the actual facility and decision", "State the current VOTE NO request without reviving withdrawn deadlines", "Separate current protest schedule from historical attendance", "Represent the city and resident perspectives fairly"],
+      "handoff": "PRESS_WRITER"
+    },
+    "REGIONAL_MEDIA_DAE": {
+      "trigger": "regional economy, Hokuriku industry, local compute demand",
+      "editorial_scope": "Regional economy and industry reporting",
+      "objective": "Explain whether the region can use, develop and govern computing instead of merely hosting equipment.",
+      "hook": "Who uses the region's AI infrastructure, who pays its costs, and who keeps the economic value?",
+      "required_sources": ["regional workload evidence", "power and fiber constraints", "land and operating costs", "non-export service specification", "ownership and finance conditions"],
+      "output": "Regional pitch brief centered on practical demand and governance, with an identified technical or business question to investigate.",
+      "acceptance": ["Do not equate interested users with customers", "Do not assume global GPU sales for a regional-only service", "Treat smaller scale and community ownership as hypotheses, not proof of lower costs or impacts"],
+      "handoff": "PRESS_WRITER"
+    },
+    "NATIONAL_MEDIA_DAE": {
+      "trigger": "national media, hyperscaler story, Japan infrastructure reporting",
+      "editorial_scope": "National society, technology and infrastructure reporting",
+      "objective": "Make the Fukui case a testable national infrastructure-ownership question, not a copied local release.",
+      "hook": "A monk's onsen-preservation campaign proposes an AI Koban alternative amid Japan's existing data-center disputes.",
+      "required_sources": ["website JHR and underlying primary sources", "independent reporting of existing disputes", "verified Fukui case", "AI Koban service boundary", "strongest competing infrastructure model"],
+      "output": "National pitch brief: national question, concrete Fukui scene, verified wider context, alternative, limitations, and one comparative-reporting request.",
+      "acceptance": ["Do not claim protests begin in Japan or Japan-first without proof", "Do not invent a coalition", "Explain hyperscale versus all data centers", "Apply scrutiny to domestic and overseas owners alike", "Keep onsen preservation distinct from proof of COGDC viability"],
+      "handoff": "PRESS_WRITER"
+    },
+    "PRESS_WRITER": {
+      "trigger": "approved pitch brief ready for drafting",
+      "objective": "Write usable press copy, not an internal strategy memo or generic outreach template.",
+      "required_sources": ["selected editorial pitch brief", "verified factual spine", "source-backed quotations if any", "approved photos and captions", "current press contact record"],
+      "output": "Headline, dateline and issuer, concrete opening scene, why-now lead, story body, attributed alternative, known constraints, one reporting request, sources and contact block.",
+      "acceptance": ["First two paragraphs identify the human story and actual decision", "No invented quotes, credentials, endorsements or completion", "No internal role/debug notes in release body", "Plain explanation of compute, COGDC and AI Koban", "Use a confirmed edition URL or the JHR hub, not an invented article slug"],
+      "can_send": false,
+      "handoff": "PRESS_EDITOR"
+    },
+    "PRESS_EDITOR": {
+      "trigger": "draft copy and evidence packet ready for review",
+      "objective": "Challenge the story's weakest claims and check correspondence consistency before release.",
+      "required_sources": ["draft", "primary evidence", "previous sent versions", "current project specification", "recipient and disclosure scope"],
+      "output": "Decision summary with PASS or HOLD, corrected copy, evidence conflicts, and remaining uncertainties.",
+      "acceptance": ["Micro-check dates, figures, names, photos and exact ask", "Macro-check local-only demand and financial assumptions", "Distinguish activist assertion from official finding", "Separate salutation from actual envelope recipients", "Do not present a self-review as independent third-party review"],
+      "can_send": false,
+      "handoff": "RELEASE_MANAGER"
+    },
+    "RELEASE_MANAGER": {
+      "trigger": "editor-reviewed copy plus an explicit current send instruction",
+      "objective": "Execute exactly the authorized distribution once, with an auditable Gmail receipt.",
+      "required_sources": ["reviewed copy", "current user authorization", "live contact/routing records", "Sent and All Mail duplicate check", "actual attachment files"],
+      "output": "Verified send receipt or HOLD. Preserve message_id, thread_id, recipient classes and attachment metadata in the authorized private ledger.",
+      "acceptance": ["Check prior sends by envelope and distinctive content, not only subject", "Do not infer unsent from a surviving draft", "Keep unrelated newsrooms BCC and approved committee contacts CC", "Resolve current phone without hard-coding it in public Git", "Read back SENT and actual attachments", "SENT is not delivery, interview or publication"],
+      "can_send": "ONLY_WITH_CURRENT_PRINCIPAL_AUTHORIZATION_AND_CONNECTOR_PERMISSION",
+      "handoff": "CORRESPONDENCE_CURATOR"
+    },
+    "CORRESPONDENCE_CURATOR": {
+      "trigger": "send/read receipt, reply, closure, or audit request",
+      "objective": "Ensure no project correspondence event disappears between Gmail, Email Log and the Mosh Pit.",
+      "required_sources": ["primary Gmail message and thread IDs", "offset-aware timestamp or explicit unknown", "existing Email Log", "existing Mosh Pit", "disclosure policy"],
+      "output": "One Email Log event and one Mosh Pit receipt per scoped message_id on its actual Asia/Tokyo event day; material outcome/open-loop update.",
+      "acceptance": ["All scoped emails retain receipts, not just prominent milestones", "Draft creation is never a sent event", "Human replies, auto-replies, bounces and tests remain distinct", "Preserve correction history", "Reconcile complete ID sets and report gaps", "Do not place phone, addresses, BCC lists or full bodies in Mosh Pit/public Git", "Verify saved readback before reporting reconciliation complete"],
+      "can_send": false,
+      "handoff": "RECONCILED"
+    }
+  }
+}
