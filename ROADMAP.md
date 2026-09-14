@@ -51,18 +51,19 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Current delivery checkpoint — 2026-09-15
 
 The [workspace scan checkpoint](modules/communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15)
-removes unbound TTL verdict reuse and runs the existing guard every call.
-Twelve regressions failed before repair; **191 connected tests/four existing link
-skips**, eight manifest tests and 15 fast groups now pass. Fresh selection is
-per-call verdict handoff **16/P0**; report completeness and qualified caching
-follow at **15/P1**. Added scan cost and remaining concurrency/dispatch gaps are explicit.
+returns per-call verdicts and rejects observed policy drift inside the existing guard.
+Eighteen regressions failed before repair; **211 connected tests/four existing link
+skips**, eight manifest tests and all 15 fast groups pass locally. Fresh selection:
+**AutoResearcher report completeness 15/P1**, using the existing report/runner owners.
+Latest diagnostics, atomic policy updates and dispatch binding remain separate.
 
-Launch-plan PR [#1747](https://github.com/FOUNDUPS/Foundups-Agent/pull/1747) merged
-as `cf8ad130cae2345a4080e4690eccd709dc5c6970` with exact reviewed-tree parity.
-Nine workflow jobs passed; CodeQL's aggregate was neutral, not successful. Actual
-branch rules require a PR but no status checks; the normal merge used no bypass.
-Main CI passed; the separate main CodeQL run remained in progress at observation.
-The plan adds no startup execution or automatic cycle-budget growth.
+TTL PR [#1748](https://github.com/FOUNDUPS/Foundups-Agent/pull/1748) merged as
+`7c9e3b8dc3e74a26653d16f283a5208bcd32257b`; all ten exact-head checks and both
+main workflows passed. It disabled unbound reuse; restoring caching needs qualification.
+Launch-plan PR [#1747](https://github.com/FOUNDUPS/Foundups-Agent/pull/1747) is merged
+at `cf8ad130cae2345a4080e4690eccd709dc5c6970`; both main workflows have now passed.
+Its earlier neutral PR aggregate remains historical advisory evidence. The plan
+enables no startup execution or automatic cycle-budget growth.
 
 Execution-admission PR [#1746](https://github.com/FOUNDUPS/Foundups-Agent/pull/1746)
 merged as `af29f082e866a05bb0d05a8f32e27414f8c1939b`; main CI and CodeQL passed.

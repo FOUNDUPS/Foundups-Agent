@@ -13670,5 +13670,658 @@
       "runtime_admission": false
     },
     "artifact_root": "O:/Foundups-Agent-audits/20260909-rsi/workspace-cache-20260915"
+  },
+  "workspace_verdict_handoff_continuation_20260915": {
+    "observed_at": "2026-09-14T19:28:44.786489+00:00",
+    "origin": "autonomous_trigger",
+    "role": "worker",
+    "base_commit": "7c9e3b8dc3e74a26653d16f283a5208bcd32257b",
+    "wsp00_gate": {
+      "gate_passed": true,
+      "attempted_awakening": false,
+      "awakening_success": false,
+      "is_zen_compliant": true,
+      "requires_awakening": false,
+      "last_validation": "2026-09-15T04:24:14.137606",
+      "session_id": 1789307432,
+      "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+      "action": "check"
+    },
+    "ranking_before": [
+      {
+        "task": "RedDog-extension-decomposition",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 20,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "independent-execution-verification-promotion",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Independent runtime admission absent"
+      },
+      {
+        "task": "current-semantic-retrieval",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ]
+      },
+      {
+        "task": "RedDog-backend-closure-consolidation",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "RedDog-conversation-durable-adapters",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "integrated-mcp-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+      },
+      {
+        "task": "wre-openclaw-hermes-worker",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current signed job/model/runtime admission absent"
+      },
+      {
+        "task": "chroma-deployment",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current deployment owner and runtime qualification"
+      },
+      {
+        "task": "R11-B-memory-acceptance-contract",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "partial_transaction_dependency",
+        "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+      },
+      {
+        "task": "authenticated-response-read",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "012 reader-policy question remains unanswered"
+      },
+      {
+        "task": "OpenClaw-per-call-verdict-handoff",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "selected_for_source_reproduction",
+        "evidence": [
+          "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298",
+          "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py",
+          "modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py:121"
+        ],
+        "next_step": "Reproduce shared-verdict substitution at diagnostic publication and required/enforced/severity policy drift inside a scan; extend the existing guard and fixtures.",
+        "effort": "One existing function and one existing test file; bounded deterministic repair.",
+        "cost": "No model/provider calls or installations; qualified local Python and existing package checks.",
+        "verification_burden": "Failing focused cases, connected WRE/scanner suites, manifest/pins, registry, WSP62 and exact PR checks."
+      },
+      {
+        "task": "AutoResearcher-report-completeness",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 15,
+        "priority": "P1",
+        "state": "eligible_later",
+        "next_step": "PR1747 is merged and main-verified; extend the existing researcher report to distinguish attempts/evaluations/failures and complete denominators before launch display wiring."
+      },
+      {
+        "task": "OpenClaw-content-bound-cache-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 15,
+        "priority": "P1",
+        "state": "contract_eligible_live_measurement_blocked",
+        "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution."
+      },
+      {
+        "task": "protected-foundup-work",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "external",
+        "next_step": "YUMORI/eSingularity and separate autopost ownership"
+      },
+      {
+        "task": "PatternMemory-worker-lifecycle-integration",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "eligible_later",
+        "evidence": [
+          "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+        ],
+        "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+      },
+      {
+        "task": "auto-researcher-process-durability",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 13,
+        "priority": "P1",
+        "state": "eligible-later",
+        "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+      }
+    ],
+    "selected_action": "OpenClaw-per-call-verdict-handoff",
+    "score": 16,
+    "priority": "P0",
+    "rationale": "Highest eligible unblocked action; boolean route decisions may borrow another call result. Higher priorities require external owners or independent runtime/write authority. Reporting is 15/P1.",
+    "retrieval": {
+      "source_head": "7c9e3b8dc3e74a26653d16f283a5208bcd32257b",
+      "mode": "governed lexical bundle",
+      "semantic_freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "noise": "Top code hits include broad README; use explicit policy/test owners and function windows.",
+      "ordering": "Must-include canonical docs/tests before source edits; neighboring WRE per-call pattern checked.",
+      "missing": [
+        "modules/communication/moltbot_bridge/requirements.txt",
+        "modules/communication/moltbot_bridge/memory/README.md"
+      ],
+      "staleness": "Archive continuity reused only as historical; prior tested tree equals this main tree. No CURRENT semantic claim.",
+      "duplication": "NAVIGATION points to absent SkillSafetyGuard class; actual run_skill_scan and policy helper found; extend current tests and consolidate only duplicate cache-control fixtures.",
+      "wsp_hashes": {
+        "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md": "dc90ec9a3362bbe3994e2054400b769e98c63a6618e2ea57fe488b17743e3ea6",
+        "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md": "cf096245470f3f800ae87b10b532daaa7eec36d95e424c144941f232485f7503",
+        "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md": "deab9a85acc99956490e08df0d2d1dd9a2c92b19c9ee6c5bdbeea43ec44cb429"
+      },
+      "prior_tree_reuse": "Prior ce8a1d5e and current main7c9e3b8d trees are equal; unchanged archive/module evidence reused only there. Current code/test/contract windows inspected.",
+      "navigation_corrections": [
+        "Absent runtime_skill_admission.py corrected via tracked-file inventory to skill_runtime_admission.py; it returns local verdict/message/fingerprint.",
+        "README still said cached preflight after TTL removal; corrected in place.",
+        "Broad branch CI list returned old runs; exact prior-merge run IDs independently confirmed success."
+      ]
+    },
+    "alternatives": {
+      "local_result": "Use the existing local-verdict pattern; preserve latest diagnostic fields for compatibility.",
+      "locking": "A new DAE/global lock would add serialization and would not establish an external policy writer/dispatch contract.",
+      "cache": "Restoring TTL reuse still requires whole-wardrobe/scanner/policy and ownership qualification.",
+      "paid_models": "Deterministic reproduction and existing-owner edit suffice; no model runtime admitted."
+    },
+    "manual_reason": "Deterministic Python scheduling/policy fixtures and a small existing-owner change are sufficient; paid Qwen/Gemma invocation adds no validation and has no admitted runtime in this lane.",
+    "scope": "Local source authoring/validation only; no WRE/model/promotion admission; external AutoPost/FoundUps preserved.",
+    "runtime_admission": "unchanged; no current grant available to this lane",
+    "prior_closure": {
+      "pr": 1748,
+      "merge_commit": "7c9e3b8dc3e74a26653d16f283a5208bcd32257b",
+      "ci_run": 34883383467,
+      "codeql_run": 34883383386,
+      "both_exact_main_runs": "success"
+    },
+    "changes": {
+      "owner": "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298",
+      "behavior": "All scan/import-unavailable/scanner-unavailable branches return a per-call local bool. Snapshot required/enforced/severity and reject observed drift before publishing diagnostics.",
+      "reuse": "Existing skill_runtime_admission local-result pattern and guard fixtures; no new source/test/module/skill/cache.",
+      "tests": "Six deterministic nested-call cases cover both verdicts and all three result paths. Fourteen policy cases cover both scanner availability values, six changes and unchanged controls. Two existing duplicate fixture pairs become parameterized tests with preserved/stronger assertions.",
+      "source_validation": {
+        "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py": {
+          "before_lines": 326,
+          "after_lines": 322,
+          "unchanged_definitions": 8,
+          "removed_definitions": [],
+          "added_definitions": [],
+          "changed_functions": {
+            "ensure_skill_safety": 25
+          },
+          "sha256_lf": "4803379cb7e6f547f61c6d9052f13ac46a850ae1e2266bafb0f5285c6afbb1f8"
+        },
+        "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py": {
+          "before_lines": 650,
+          "after_lines": 658,
+          "unchanged_definitions": 30,
+          "removed_definitions": [
+            "test_openclaw_dae_cache_expiry_triggers_rescan",
+            "test_openclaw_dae_enforced_mode_blocks_failed_scan",
+            "test_openclaw_dae_non_enforced_mode_allows_failed_scan",
+            "test_openclaw_dae_skill_scan_always_bypasses_cache"
+          ],
+          "added_definitions": [
+            "test_openclaw_dae_enforced_mode_decides_failed_scan",
+            "test_openclaw_dae_legacy_cache_controls_rescan",
+            "test_openclaw_dae_rejects_policy_drift",
+            "test_openclaw_dae_returns_own_verdict"
+          ],
+          "changed_functions": {},
+          "sha256_lf": "c208004b78fc83ecb40dc182186ae7f0b377a8fbf9e40d92641f98dacad853eb"
+        }
+      },
+      "manifest": {
+        "digest": "5904c3b0665451b4abf2be354afbf78d7b4a59d421e4e3c057d3ddf4ac4f9d43",
+        "prior_digest": "b563011dd2c66729377aab1c2fb5d3416289f9ac8c1e56ea532e6084b1c500f0",
+        "members": 1400,
+        "changed_runtime_hashes": {
+          "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py": "4803379cb7e6f547f61c6d9052f13ac46a850ae1e2266bafb0f5285c6afbb1f8"
+        },
+        "both_pins_updated": true
+      },
+      "limits": [
+        "No atomic policy snapshot, change-and-revert detection, changes after final comparison, or file/dispatch-byte stability proof.",
+        "Deterministic reentrance covers verdict handoff; no whole-DAE process/volume or production concurrency claim.",
+        "Shared messages and timestamps remain latest diagnostics.",
+        "No WRE worker, model, FoundUp, runtime promotion or startup campaign enabled."
+      ]
+    },
+    "validation": {
+      "local": {
+        "focused-before": {
+          "tests": 80,
+          "failures": 18,
+          "errors": 0,
+          "skipped": 1,
+          "elapsed_seconds": 7.613
+        },
+        "connected": {
+          "tests": 215,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 4,
+          "elapsed_seconds": 24.658
+        },
+        "manifest": {
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 76.072
+        }
+      },
+      "scanner_subset": "79 passed / one existing linked-root skip; included within215 connected collected tests.",
+      "fast_groups": 15,
+      "fast_artifact": "fast-final.txt",
+      "registry": "current total1650 quarantined269",
+      "preserved_failures": [
+        "Initial proposed test layout677/675 rejected before write; consolidate identical enforcement setup, final658.",
+        "Initial fast command named nonexistent run_fast_tests.js; no tests ran. Read package.json and use existing run_reddog_test_tier.js fast; corrected run passes."
+      ],
+      "test_commands": {
+        "focused-before": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\workspace-verdict-handoff-20260915\\\\focused-before-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\workspace-verdict-handoff-20260915\\\\focused-before.xml']",
+        "connected": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py', 'modules/infrastructure/wre_core/tests/test_wre_execution_truth.py', 'modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py', 'modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py', 'modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py', 'modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py', 'modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\workspace-verdict-handoff-20260915\\\\connected-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\workspace-verdict-handoff-20260915\\\\connected.xml']",
+        "manifest": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'scripts/tests/test_generate_reddog_backend_manifest.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\workspace-verdict-handoff-20260915\\\\manifest-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\workspace-verdict-handoff-20260915\\\\manifest.xml']"
+      },
+      "truth": "Local deterministic/injected scanner evidence; no real scanner/model/provider/FoundUp. Current PR remote checks have not yet run. WSP97 receipt validates structure/references only.",
+      "structural": {
+        "owned_paths": 19,
+        "prior_observations_preserved": 49,
+        "planning_packets_unchanged": 26,
+        "doc_index_rows": 564,
+        "new_links_checked": 3,
+        "no_new_files_or_exemptions": true,
+        "wsp97_receipt_structurally_compliant": true,
+        "truth": "Receipt and JSON references checked; no independent reasoning or effect authority certified."
+      }
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T19:36:22.992140+00:00",
+      "origin_main": "7c9e3b8dc3e74a26653d16f283a5208bcd32257b",
+      "open_pr_count": 96,
+      "other_open_heads_unchanged": true,
+      "closed_local_scope": [
+        "OpenClaw per-call boolean handoff",
+        "Observed required/enforced/severity policy drift rejection"
+      ],
+      "ranked_queue": [
+        {
+          "task": "RedDog-extension-decomposition",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 20,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ]
+        },
+        {
+          "task": "RedDog-backend-closure-consolidation",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "RedDog-conversation-durable-adapters",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "AutoResearcher-report-completeness",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "selected_for_source_reproduction",
+          "next_step": "Inspect current runner/result contracts and extend existing reports with attempt, evaluation and failure accounting before launch-display integration.",
+          "effort": "One bounded reporting/measurement layer in the existing AutoResearcher owner.",
+          "cost": "Deterministic controls and seeded replay; no model/provider admission.",
+          "verification_burden": "Existing researcher tests plus rejected/invalid/missing-proposal controls; complete denominator and restoration evidence."
+        },
+        {
+          "task": "OpenClaw-content-bound-cache-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "contract_eligible_live_measurement_blocked",
+          "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution."
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        },
+        {
+          "task": "OpenClaw-invocation-diagnostic-attribution",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "state": "partial_diagnostic_contract",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_process_loop.py:115",
+            "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
+          ],
+          "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence."
+        }
+      ],
+      "selected_next": "AutoResearcher-report-completeness",
+      "score": 15,
+      "priority": "P1",
+      "rationale": "All higher-scored candidates remain externally owned or lack current independent authority. Report completeness directly precedes qualified launch display. Cache restoration is tied at15 but depends on broader content/stability qualification and admitted cost measurement; diagnostic attribution is12/P2.",
+      "remaining_scope_limits": [
+        "No atomic policy snapshot, change-and-revert detection, changes after final comparison, or file/dispatch-byte stability proof.",
+        "Deterministic reentrance covers verdict handoff; no whole-DAE process/volume or production concurrency claim.",
+        "Shared messages and timestamps remain latest diagnostics.",
+        "No WRE worker, model, FoundUp, runtime promotion or startup campaign enabled."
+      ]
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\workspace-verdict-handoff-20260915"
   }
 }

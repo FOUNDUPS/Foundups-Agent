@@ -552,68 +552,76 @@ def test_openclaw_dae_rechecks_changed_wardrobe(tmp_path, change):
     assert "manifest verification failed" in dae._skill_scan_message
 
 
-def test_openclaw_dae_cache_expiry_triggers_rescan():
-    """Cache expiry: expired cache triggers new scan (WSP 95)."""
-    dae = _openclaw_dae(ttl=1)
-
-    # Seed expired cache (2 seconds ago)
-    dae._skill_scan_checked_at = time.time() - 2
+@pytest.mark.parametrize("ttl,age,always", [(1, 2, False), (300, 0, True)])
+def test_openclaw_dae_legacy_cache_controls_rescan(ttl, age, always):
+    dae = _openclaw_dae(ttl=ttl)
+    dae._skill_scan_always = always
+    dae._skill_scan_checked_at = time.time() - age
     dae._skill_scan_ok = True
-    dae._skill_scan_message = "old cached pass"
-
-    with patch(
-        "modules.communication.moltbot_bridge.src.skill_safety_guard.run_skill_scan",
-        return_value=_failed_scan_result("new scan found issues")
-    ):
-        result = dae._ensure_skill_safety(force=False)
-
-    assert result is False  # New scan failed
+    with patch.object(guard, "run_skill_scan", return_value=_failed_scan_result("fresh")) as scan:
+        assert dae._ensure_skill_safety(force=False) is False
+    scan.assert_called_once()
 
 
-def test_openclaw_dae_skill_scan_always_bypasses_cache():
-    """OPENCLAW_SKILL_SCAN_ALWAYS=1 forces fresh scan even within TTL."""
-    dae = _openclaw_dae(ttl=300)
-    dae._skill_scan_always = True
-
-    # Seed valid cache that would normally short-circuit.
-    dae._skill_scan_checked_at = time.time()
-    dae._skill_scan_ok = True
-    dae._skill_scan_message = "cached pass"
-
-    with patch(
-        "modules.communication.moltbot_bridge.src.skill_safety_guard.run_skill_scan",
-        return_value=_failed_scan_result("fresh scan failed"),
-    ) as mock_scan:
-        result = dae._ensure_skill_safety(force=False)
-
-    assert mock_scan.call_count == 1
-    assert result is False
-
-
-def test_openclaw_dae_enforced_mode_blocks_failed_scan():
-    """Enforced mode: failed scan => route blocked (WSP 95)."""
+@pytest.mark.parametrize("mode", ["scan", "unavailable", "import_error"])
+@pytest.mark.parametrize("passed", [False, True])
+def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
     dae = _openclaw_dae()
+    dae._skill_scan_required = not passed
+    first = guard.SkillScanResult(mode == "scan", passed, 0, "/test", None, "first")
+    second = guard.SkillScanResult(True, not passed, 0, "/test", None, "second")
+    results = [] if mode == "import_error" else [first]
+    results.append(second)
+    later = []
 
-    with patch(
-        "modules.communication.moltbot_bridge.src.skill_safety_guard.run_skill_scan",
-        return_value=_failed_scan_result("high severity findings")
-    ):
-        result = dae._ensure_skill_safety(force=True)
+    def publish(self, name, value):
+        object.__setattr__(self, name, value)
+        if self is dae and name == "_skill_scan_message" and not later:
+            later.append(None)
+            monkeypatch.setitem(sys.modules, guard.__name__, guard)
+            later[0] = dae._ensure_skill_safety()
 
-    assert result is False
+    monkeypatch.setattr(type(dae), "__setattr__", publish)
+    if mode == "import_error":
+        monkeypatch.setitem(sys.modules, guard.__name__, None)
+    with patch.object(guard, "run_skill_scan", side_effect=results) as scan:
+        assert dae._ensure_skill_safety() is passed
+    assert later == [not passed]
+    assert dae._skill_scan_ok is (not passed)  # Latest diagnostics are not this call's verdict.
+    assert scan.call_count == len(results)
 
 
-def test_openclaw_dae_non_enforced_mode_allows_failed_scan():
-    """Non-enforced mode: failed scan => route allowed with warning (WSP 95)."""
-    dae = _openclaw_dae(enforced=False)
+@pytest.mark.parametrize("available", [False, True])
+@pytest.mark.parametrize("field,before,after", [
+    ("required", False, True), ("required", True, False),
+    ("enforced", False, True), ("enforced", True, False),
+    ("max_severity", "medium", "low"), ("max_severity", "medium", "high"),
+    (None, None, None),
+])
+def test_openclaw_dae_rejects_policy_drift(available, field, before, after):
+    dae = _openclaw_dae()
+    if field:
+        setattr(dae, "_skill_scan_" + field, before)
+    threshold = dae._skill_scan_max_severity
 
-    with patch(
-        "modules.communication.moltbot_bridge.src.skill_safety_guard.run_skill_scan",
-        return_value=_failed_scan_result("high severity findings")
-    ):
-        result = dae._ensure_skill_safety(force=True)
+    def scan(**kwargs):
+        assert kwargs["max_severity"] == threshold
+        if field:
+            setattr(dae, "_skill_scan_" + field, after)
+        return guard.SkillScanResult(available, True, 0, "/test", None, "current")
 
-    assert result is True  # Allowed in non-enforced mode
+    with patch.object(guard, "run_skill_scan", side_effect=scan) as call:
+        assert dae._ensure_skill_safety() is (available and field is None)
+    call.assert_called_once()
+    if field:
+        assert dae._skill_scan_message == "skill scan policy changed during scan"
+
+
+@pytest.mark.parametrize("enforced", [False, True])
+def test_openclaw_dae_enforced_mode_decides_failed_scan(enforced):
+    dae = _openclaw_dae(enforced=enforced)
+    with patch.object(guard, "run_skill_scan", return_value=_failed_scan_result("high severity")):
+        assert dae._ensure_skill_safety(force=True) is (not enforced)
 
 
 def test_openclaw_dae_process_downgrades_foundup_on_safety_failure():

@@ -2,15 +2,16 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-The existing OpenClaw workspace guard now scans each call; unbound TTL reuse is
-removed. **191 connected tests pass/four existing link skips**; packaging and fast
-checks pass. See the [bridge checkpoint](../../communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15).
-Per-call shared-verdict handoff is the freshly selected 16/P0 reproduction target;
-report completeness and qualified caching are 15/P1. Runtime admission remains open.
-PR #1747's launch plan is merged; its neutral advisory CodeQL is retained as such.
+OpenClaw now returns a local verdict and rejects observed scan-policy drift.
+**211 connected tests pass/four existing link skips**; eight manifest tests and
+15 fast groups pass. See the [bridge checkpoint](../../communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15).
+Fresh selection is **AutoResearcher report completeness 15/P1** before launch
+report integration. Latest diagnostics and atomic policy/dispatch binding remain
+separate contracts. No startup campaign, runtime admission or retained RSI proof.
+Prior TTL PR #1748 is merged and both main workflows passed.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
-cohesion debt under WSP 62: this repair reduces the file 1,294→1,279 lines and
+cohesion debt under WSP 62: the recorded ownership repair reduced the file 1,294→1,279 lines and
 class 1,164→1,149. Continue decomposition through existing storage/schema owners
 after their transaction contracts are established; no new exemption is added.
 

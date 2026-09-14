@@ -1857,7 +1857,7 @@
     "modules/communication/moltbot_bridge/src/openclaw_maintenance_selector.py": "91681fe1a1f4adade391c259cbdf5aa85319a83f695fcb6d3abb21a0998a25ea",
     "modules/communication/moltbot_bridge/src/openclaw_memory_queries.py": "cd6108b873f4c6e3310cca55c8b8daa24e79421f1e708288b5f0286a2b70540a",
     "modules/communication/moltbot_bridge/src/openclaw_model_policy.py": "e2e492601580c585419a973361f4e2bc1598035f6078f465311f53c4c0124152",
-    "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py": "0c032420c73ae53c6220439c13cb6f6ff7277a6b368c597e953033ef55b2ab03",
+    "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py": "4803379cb7e6f547f61c6d9052f13ac46a850ae1e2266bafb0f5285c6afbb1f8",
     "modules/communication/moltbot_bridge/src/openclaw_process_loop.py": "34301213539284fc74ff95b065779c32ed24a8955e186489f8ded1f057e49dbb",
     "modules/communication/moltbot_bridge/src/openclaw_provider_chain.py": "3bc6afa4d986b87ba3a467989c6bc122b73b3410af79bec1d9fd245d1c94ed7e",
     "modules/communication/moltbot_bridge/src/openclaw_result_memory.py": "d816f0c413095af0d08acb5d325d9e399baaec90e7212a5e9224c6138e21aa97",

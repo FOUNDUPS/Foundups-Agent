@@ -296,31 +296,27 @@ def check_containment(dae: Any, sender: str, channel: str) -> Optional[Dict[str,
 
 
 def ensure_skill_safety(dae: Any, force: bool = False) -> bool:
-    """Scan current skills; unbound diagnostic timestamps cannot authorize reuse."""
+    """Return this call's verdict; diagnostics cannot authorize another call."""
     now = time.time()
-
+    policy = (dae._skill_scan_required, dae._skill_scan_enforced, dae._skill_scan_max_severity)
+    required, enforced, max_severity = policy
     try:
         from .skill_safety_guard import run_skill_scan
     except Exception as exc:
-        dae._skill_scan_checked_at = now
-        dae._skill_scan_ok = not dae._skill_scan_required
-        dae._skill_scan_message = f"skill safety guard unavailable: {exc}"
-        return dae._skill_scan_ok
-
-    skills_dir = dae.repo_root / "modules/communication/moltbot_bridge/workspace/skills"
-    report_dir = dae.repo_root / "modules/communication/moltbot_bridge/reports"
-    result = run_skill_scan(
-        skills_dir=skills_dir,
-        max_severity=dae._skill_scan_max_severity,
-        report_dir=report_dir,
-    )
+        allowed, message = not required, f"skill safety guard unavailable: {exc}"
+    else:
+        skills_dir = dae.repo_root / "modules/communication/moltbot_bridge/workspace/skills"
+        report_dir = dae.repo_root / "modules/communication/moltbot_bridge/reports"
+        result = run_skill_scan(
+            skills_dir=skills_dir,
+            max_severity=max_severity,
+            report_dir=report_dir,
+        )
+        allowed = (result.passed or not enforced) if result.available else not required
+        message = result.message
+    if policy != (dae._skill_scan_required, dae._skill_scan_enforced, dae._skill_scan_max_severity):
+        allowed, message = False, "skill scan policy changed during scan"
     dae._skill_scan_checked_at = now
-
-    if not result.available:
-        dae._skill_scan_ok = not dae._skill_scan_required
-        dae._skill_scan_message = result.message
-        return dae._skill_scan_ok
-
-    dae._skill_scan_ok = result.passed or (not dae._skill_scan_enforced)
-    dae._skill_scan_message = result.message
-    return dae._skill_scan_ok
+    dae._skill_scan_ok = allowed
+    dae._skill_scan_message = message
+    return allowed

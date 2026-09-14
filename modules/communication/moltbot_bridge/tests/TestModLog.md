@@ -1,3 +1,9 @@
+## 2026-09-15: Local verdict handoff and policy drift
+
+- Extended the existing scanner test file with six deterministic nested-call cases and 14 availability/policy/control cases. Existing cache expiry/ALWAYS and enforced/non-enforced fixture pairs consolidated without removing their cases; other definitions remain AST-identical. Source 322/test 658 lines; no new test file or size exemption.
+- Before: 18 failed/61 passed/one existing link skip. Connected211 passed/four existing link skips, including 79/one skip here. Manifest: 8 passes; fast: 15 groups; registry 1650/269 current. No scanner/model/provider/FoundUp invocation; reentrance is controlled scheduling, not whole-DAE concurrency proof.
+- Initial proposed layout677/675 was rejected before writing. An invalid fast-runner filename ran no tests; canonical package.json runner then passed. Commands, results and remaining bounds: `workspace_verdict_handoff_continuation_20260915`. WSP15/22/50/62/95/97.
+
 ## 2026-09-15: Independent scanner report evidence and cleanup
 
 ## 2026-09-15: Workspace TTL verdict regression

@@ -2,29 +2,29 @@
 
 ## Local RSI scanner checkpoint — 2026-09-15
 
-The existing workspace guard now scans every invocation. Unbound TTL verdict
-reuse is removed; constructor/call compatibility and diagnostic fields remain.
-Twelve regressions failed before repair. The connected selection now passes
-**191 tests/four existing link skips**; eight manifest tests and 15 fast groups pass.
-Source/test shrink 333→326 and 668→650; two packaged hashes and both pins change (caller docstring included).
+The existing policy owner now returns each call's local verdict and rejects
+observed REQUIRED/ENFORCED/MAX_SEVERITY drift before diagnostic publication.
+All three result paths retain current scanner/constructor/call contracts.
+Shared message/timestamp/verdict fields remain latest diagnostics.
 
-This closes only stale TTL reuse. Scanner cost increases; no latency benefit is
-claimed. Whole-wardrobe content, manifest, policy/scanner identity, pre/post
-stability and concurrent ownership must be qualified before restoring caching.
-The single-skill WRE fingerprint/cache does not cover the nested wardrobe.
-Current manifest/scanner enforcement remains; shared diagnostic-field returns,
-mutation during scanning, dispatch binding and production RSI remain unproved.
+Before: **18 failed / 61 passed / one skip**. After: **211 connected passes /
+four existing link skips**; eight manifest tests and all 15 fast groups pass.
+Policy shrinks 326→322; test fixtures consolidate and coverage grows within 658 lines.
+Only one packaged source hash and both existing pins change; 1,400 members remain.
 
-Re-scoring selects **per-call verdict handoff 16/P0** for reproduction: overlapping
-calls still return shared `dae._skill_scan_ok`. Reuse this guard and its fixtures.
-Report completeness and qualified cache restoration follow at 15/P1. Read the
-[current selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
-and `workspace_scan_cache_continuation_20260915` before execution.
+Deterministic nested calls prove local handoff, not complete DAE concurrency.
+Policy comparison is not an atomic writer lease or change-and-revert detector;
+post-check changes, wardrobe mutation and dispatch-byte binding remain unproved.
+Route explanations still read latest shared messages (12/P2); they are not receipts.
 
-PR #1747's launch plan is merged with exact documentation-tree parity and nine
-successful jobs. The CodeQL aggregate remained neutral; actual branch rules do not
-require that status. Normal PR merge used no bypass. Main CI passed; the separate
-main CodeQL run was still running at this observation. Runtime admission is unchanged.
+Fresh WSP15 selects **AutoResearcher report completeness 15/P1** before launch
+report wiring. Qualify attempt/evaluation/failure denominators in the existing owner.
+Caching remains disabled; restoring it requires content/scanner/policy qualification
+and admitted cost measurement. Read the [current selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
+and `workspace_verdict_handoff_continuation_20260915` before execution.
+
+Prior TTL PR #1748 merged as `7c9e3b8d`; all ten exact-head checks and both
+main workflows passed. Launch plan #1747 is merged; startup campaigns remain disabled.
 
 - PARTIAL R11-B ACTIVATION RECOVERY: existing authority activation now reconciles
   exact committed success after lost acknowledgment or competing revisions.

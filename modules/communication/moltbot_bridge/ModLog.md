@@ -1,5 +1,12 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-15: Per-call workspace verdict and observed policy drift
+
+- Existing permission policy returns local verdicts across scan success/failure, unavailable scanner and import failure. Snapshots REQUIRED/ENFORCED/MAX_SEVERITY and rejects observed drift before diagnostics; no new module, lock, cache or runtime grant.
+- Six nested-call and fourteen policy/control cases extend existing guard fixtures. Before: 18 failures/61 passes/one skip; after: 211 connected passes/four existing skips. Eight manifest tests and 15 fast groups pass; registry 1650/269 unchanged. Policy 326→322, tests 650→658; two duplicate fixture pairs consolidated.
+- One runtime hash and both pins updated; 1400 members. Canonical digest `5904c3b0665451b4abf2be354afbf78d7b4a59d421e4e3c057d3ddf4ac4f9d43`. Initial layout rejected before write and mistyped fast-runner path preserved; corrected validations pass.
+- Shared route messages remain latest diagnostics; atomic/ABA policy, file stability, dispatch binding and production concurrency are not established. Prior PR1748/main CI/CodeQL closed; fresh WSP15 selects existing AutoResearcher report completeness 15/P1. Evidence: `workspace_verdict_handoff_continuation_20260915`; WSP00/15/22/50/62/84/95/97.
+
 ## 2026-09-15: Remove unbound workspace scan reuse
 
 - Deleted the TTL shortcut in the existing permission-policy owner. Every call runs current manifest/scanner checks; force/TTL/ALWAYS inputs remain compatible but cannot reuse a workspace verdict. WRE's single-skill cache is unchanged. No new module, cache, skill or runtime grant.
