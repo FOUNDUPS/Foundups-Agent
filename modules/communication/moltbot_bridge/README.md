@@ -966,12 +966,12 @@ scanner or workspace/publication error fails closed. Raw scanner streams are
 omitted and its environment excludes credentials. `SkillScanResult` is supply-chain
 evidence only; it grants no execution, effect, evaluation or promotion authority.
 
-Environment toggles:
+Each guard call scans current inputs; `force`, TTL and ALWAYS remain compatible inputs, not permission to reuse a verdict.
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
 - `OPENCLAW_SKILL_SCAN_ENFORCED=1` (default): block risky scans above threshold
 - `OPENCLAW_SKILL_SCAN_MAX_SEVERITY=medium` (default)
-- `OPENCLAW_SKILL_SCAN_TTL_SEC=900` (default cache window)
-- `OPENCLAW_SKILL_SCAN_ALWAYS=0` (default): set `1` to force scan on every mutating route
+- `OPENCLAW_SKILL_SCAN_TTL_SEC=900`: retained compatibility setting; workspace TTL reuse is disabled
+- `OPENCLAW_SKILL_SCAN_ALWAYS=0`: retained compatibility setting; every guard invocation scans regardless
 - `OPENCLAW_SKILL_MANIFEST_REQUIRED=1` (default): require `workspace/skills/SKILL_MANIFEST.json`
 - `OPENCLAW_SKILL_MANIFEST_ENFORCED=1` (default): block on missing/mismatched manifest
 - `OPENCLAW_SKILL_MANIFEST_VERIFY_SIGNATURE=0` (default): verify HMAC signature when enabled

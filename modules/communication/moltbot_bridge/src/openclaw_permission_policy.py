@@ -296,15 +296,8 @@ def check_containment(dae: Any, sender: str, channel: str) -> Optional[Dict[str,
 
 
 def ensure_skill_safety(dae: Any, force: bool = False) -> bool:
-    """Run cached Cisco skill scan for OpenClaw workspace skills."""
+    """Scan current skills; unbound diagnostic timestamps cannot authorize reuse."""
     now = time.time()
-    if (
-        not force
-        and not dae._skill_scan_always
-        and dae._skill_scan_checked_at > 0
-        and (now - dae._skill_scan_checked_at) < dae._skill_scan_ttl_sec
-    ):
-        return dae._skill_scan_ok
 
     try:
         from .skill_safety_guard import run_skill_scan

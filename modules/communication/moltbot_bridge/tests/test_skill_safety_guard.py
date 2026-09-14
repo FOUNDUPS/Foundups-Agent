@@ -498,70 +498,58 @@ def test_run_skill_scan_blocks_on_manifest_hash_mismatch(tmp_path: Path):
 # ---------------------------------------------------------------------------
 
 
-def test_openclaw_dae_required_mode_blocks_when_scanner_missing():
-    """Required mode: scanner unavailable => route blocked (WSP 95 fail-closed)."""
-    from modules.communication.moltbot_bridge.src.skill_safety_guard import SkillScanResult
-
-    dae = _openclaw_dae(ttl=0)
-
-    mock_result = SkillScanResult(
-        available=False,
-        passed=False,
-        exit_code=127,
-        skills_dir="/test",
-        report_path=None,
-        message="skill-scanner not installed",
-    )
-
-    with patch(
-        "modules.communication.moltbot_bridge.src.skill_safety_guard.run_skill_scan",
-        return_value=mock_result
-    ):
-        result = dae._ensure_skill_safety(force=True)
-
-    assert result is False
-    assert "unavailable" in dae._skill_scan_message.lower() or "not installed" in dae._skill_scan_message.lower()
+@pytest.mark.parametrize("available", [False, True])
+def test_openclaw_dae_required_mode_uses_current_scanner(available):
+    dae = _openclaw_dae()
+    message = "skills passed safety scan" if available else "skill-scanner not installed"
+    result = guard.SkillScanResult(available, available, 0 if available else 127,
+                                  "/test", None, message)
+    with patch.object(guard, "run_skill_scan", return_value=result):
+        assert dae._ensure_skill_safety(force=True) is available
+    assert dae._skill_scan_message == message
 
 
-def test_openclaw_dae_required_mode_allows_when_scanner_passes():
-    """Required mode: scanner passes => route allowed."""
-    from modules.communication.moltbot_bridge.src.skill_safety_guard import SkillScanResult
-
-    dae = _openclaw_dae(ttl=0)
-
-    mock_result = SkillScanResult(
-        available=True,
-        passed=True,
-        exit_code=0,
-        skills_dir="/test",
-        report_path=None,
-        message="skills passed safety scan",
-    )
-
-    with patch(
-        "modules.communication.moltbot_bridge.src.skill_safety_guard.run_skill_scan",
-        return_value=mock_result
-    ):
-        result = dae._ensure_skill_safety(force=True)
-
-    assert result is True
-
-
-def test_openclaw_dae_cache_ttl_prevents_rescan():
-    """Cache TTL: cached result used within TTL window (WSP 95)."""
-
+@pytest.mark.parametrize("cached", [False, True])
+@pytest.mark.parametrize("age", [-30, 1])
+@pytest.mark.parametrize("severity", ["low", "high"])
+@pytest.mark.parametrize("force", [False, True])
+def test_openclaw_dae_cached_verdict_never_skips_current_scan(cached, age, severity, force):
     dae = _openclaw_dae(ttl=300)
+    dae._skill_scan_always = False
+    dae._skill_scan_checked_at = time.time() - age
+    dae._skill_scan_ok = cached
+    dae._skill_scan_max_severity = severity
+    result = guard.SkillScanResult(True, not cached, int(cached), "/test", None, "current")
+    with patch.object(guard, "run_skill_scan", return_value=result) as scan:
+        assert dae._ensure_skill_safety(force=force) is (not cached)
+    scan.assert_called_once()
+    assert scan.call_args.kwargs["max_severity"] == severity
+    assert dae._skill_scan_message == "current"
 
-    # Seed cached state
-    dae._skill_scan_checked_at = time.time()
-    dae._skill_scan_ok = True
-    dae._skill_scan_message = "cached pass"
 
-    # Should NOT call run_skill_scan (using cache)
-    # The method returns early if cache is valid, so we just verify the return value
-    result = dae._ensure_skill_safety(force=False)
-
-    assert result is True
+@pytest.mark.parametrize("change", ["edit", "add", "delete", "manifest"])
+def test_openclaw_dae_rechecks_changed_wardrobe(tmp_path, change):
+    dae = _openclaw_dae(ttl=300)
+    dae.repo_root = tmp_path
+    dae._skill_scan_always = False
+    parent = tmp_path / "modules/communication/moltbot_bridge/workspace"
+    skills = _wardrobe(parent)
+    instruction = skills / "sample/SKILL.md"
+    with patch.object(guard, "_locate_scanner", return_value="scanner"), patch.object(
+        guard.subprocess, "run", side_effect=_scanner_process({})
+    ) as scan:
+        assert dae._ensure_skill_safety(force=True) is True
+        if change == "edit":
+            instruction.write_text("changed", encoding="utf-8")
+        elif change == "add":
+            (skills / "SKILLz.md").write_text("unlisted", encoding="utf-8")
+        elif change == "delete":
+            instruction.unlink()
+        else:
+            (skills / "SKILL_MANIFEST.json").write_text("{}", encoding="utf-8")
+        assert dae._ensure_skill_safety(force=False) is False
+    assert scan.call_count == 1  # Current manifest rejection precedes the scanner.
+    assert "manifest verification failed" in dae._skill_scan_message
 
 
 def test_openclaw_dae_cache_expiry_triggers_rescan():
@@ -635,12 +623,6 @@ def test_openclaw_dae_process_downgrades_foundup_on_safety_failure():
     dae = OpenClawDAE()
     dae._skill_scan_required = True
     dae._skill_scan_enforced = True
-    dae._skill_scan_ttl_sec = 300  # Use cache
-
-    # Pre-seed failed cache state (avoids calling run_skill_scan)
-    dae._skill_scan_checked_at = time.time()
-    dae._skill_scan_ok = False
-    dae._skill_scan_message = "blocked by test"
 
     # Classify a FOUNDUP intent
     intent = dae.classify_intent(
@@ -663,6 +645,6 @@ def test_openclaw_dae_process_downgrades_foundup_on_safety_failure():
     )
     assert should_check is True
 
-    # And the gate would fail (using cached state)
-    gate_result = dae._ensure_skill_safety(force=False)
+    with patch.object(guard, "run_skill_scan", return_value=_failed_scan_result("blocked by test")):
+        gate_result = dae._ensure_skill_safety(force=False)
     assert gate_result is False

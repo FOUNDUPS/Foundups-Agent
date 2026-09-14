@@ -1159,8 +1159,8 @@ Token symbol resolution:
 | `OPENCLAW_SKILL_SCAN_REQUIRED` | No | `1` fail-closed if scanner missing (default) |
 | `OPENCLAW_SKILL_SCAN_ENFORCED` | No | `1` block risky scans above threshold (default) |
 | `OPENCLAW_SKILL_SCAN_MAX_SEVERITY` | No | Scanner threshold (default `medium`) |
-| `OPENCLAW_SKILL_SCAN_TTL_SEC` | No | Cached scan TTL in seconds (default `900`) |
-| `OPENCLAW_SKILL_SCAN_ALWAYS` | No | `1` bypass TTL and scan every mutating route |
+| `OPENCLAW_SKILL_SCAN_TTL_SEC` | No | Retained (`900`); workspace TTL reuse disabled, every call scans |
+| `OPENCLAW_SKILL_SCAN_ALWAYS` | No | Retained; every guard call scans even with `0`/`force=False` |
 | `OPENCLAW_SKILL_MANIFEST_REQUIRED` | No | `1` require workspace skill hash manifest (default) |
 | `OPENCLAW_SKILL_MANIFEST_ENFORCED` | No | `1` block on manifest mismatch/missing (default) |
 | `OPENCLAW_SKILL_MANIFEST_VERIFY_SIGNATURE` | No | `1` verify HMAC signature in manifest |

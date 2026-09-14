@@ -1,5 +1,12 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-15: Remove unbound workspace scan reuse
+
+- Deleted the TTL shortcut in the existing permission-policy owner. Every call runs current manifest/scanner checks; force/TTL/ALWAYS inputs remain compatible but cannot reuse a workspace verdict. WRE's single-skill cache is unchanged. No new module, cache, skill or runtime grant.
+- Twelve regressions reproduced cached pass/fail, future/recent timestamps and changed wardrobe/manifest failures. Final connected selection: 191 passed/four existing link skips; eight manifest tests and 15 fast groups pass. Source/test shrink 333→326 and 668→650. Existing availability cases are consolidated; current gate failure replaces a cached test shortcut.
+- Canonical manifest digest `b563011dd2c66729377aab1c2fb5d3416289f9ac8c1e56ea532e6084b1c500f0`; 1,400 members, two source hashes (policy and caller docstring) and both pins updated. Initial registry-description and raw-vs-canonical-digest validation failures are preserved and corrected; no check weakened.
+- More scans may cost time; reintroducing caching requires whole-wardrobe/policy/scanner and concurrency qualification. Fresh WSP 15 selects per-call shared-verdict handoff 16/P0. PR #1747 closed under actual required-check policy with neutral advisory CodeQL preserved. Evidence: `workspace_scan_cache_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Runtime RSI remains incomplete.
+
 ## 2026-09-15: Isolate scanner report ownership
 
 - Extended the existing bridge guard with per-invocation report/TMP directories. Verdicts read private evidence before atomic publication of the existing latest diagnostic. Normal returns/errors/cancellation clean only owned temporary files; allocation/publication failures cannot admit. No immutable report or crash-scavenging claim.

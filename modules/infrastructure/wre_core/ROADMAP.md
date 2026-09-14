@@ -2,12 +2,12 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-The launch/evaluation plan and controlled rehearsal below address 012's proposal.
-41 existing tests pass; runtime source and startup behavior are unchanged.
-PR #1746's per-execution ownership is merged with successful main workflows.
-Fresh scoring retains OpenClaw cache ownership 16/P0 and records report completeness
-15/P1. Re-observe the [canonical selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
-before execution. Independent runtime admission and production RSI remain open.
+The existing OpenClaw workspace guard now scans each call; unbound TTL reuse is
+removed. **191 connected tests pass/four existing link skips**; packaging and fast
+checks pass. See the [bridge checkpoint](../../communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15).
+Per-call shared-verdict handoff is the freshly selected 16/P0 reproduction target;
+report completeness and qualified caching are 15/P1. Runtime admission remains open.
+PR #1747's launch plan is merged; its neutral advisory CodeQL is retained as such.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: this repair reduces the file 1,294→1,279 lines and
@@ -94,8 +94,8 @@ boundary cases pass (**41 total**); registry remains 1,650/269 quarantined.
 
 Evidence and reproduction inputs: `launch_evaluation_continuation_20260915` in the
 [canonical observations](../../../docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
-The diagnostic layer closes at 16/P0. Re-scoring leaves the outstanding OpenClaw
-cache-content/policy guard at **16/P0**, ahead of report completeness **15/P1**.
+At that diagnostic checkpoint, re-scoring left OpenClaw cache ownership at
+**16/P0**, ahead of report completeness **15/P1**; the current checkpoint above supersedes that selection.
 Report completeness is a launch-display dependency; do not enable startup RSI to
 work around it. The existing production admission and unanswered reader-policy
 dependencies remain unchanged.

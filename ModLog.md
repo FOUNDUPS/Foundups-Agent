@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: Reconcile launch plan and remove stale workspace verdict reuse
+
+- PR #1747 merged as `cf8ad130cae2345a4080e4690eccd709dc5c6970` after verifying documentation-only tree parity, nine successful jobs and actual PR/required-check policy. CodeQL aggregate remains recorded NEUTRAL; no success claim or admin bypass. Main CI passed; separate main CodeQL still running at observation.
+- The isolated scanner sprint removes the existing OpenClaw TTL shortcut. 12 regressions reproduced; 191 connected tests/four existing link skips, eight manifest tests and 15 fast groups pass. Source/test shrink; two runtime hashes and two pins change. No new module, runtime activation or protected FoundUp work.
+- Fresh WSP 15/WSP 97 selects per-call verdict handoff 16/P0; report completeness and measured/content-bound cache restoration 15/P1. Evidence: `workspace_scan_cache_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97.
+
 ## 2026-09-15: Ground RSI launch proposal in existing WRE evidence
 
 - Qualified the launch/reporting proposal through existing main.py, WRE and model-evaluation paths. The canonical roadmap now points to staged evidence display, admitted bounded campaigns and measured budget growth; launch count does not double work. No runtime/startup change or new scheduler/module.
