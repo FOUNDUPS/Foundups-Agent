@@ -8,6 +8,7 @@ dry-run safety, path write protection, and fail-closed SPECIFIED_NOT_IMPLEMENTED
 """
 
 import ast
+import csv
 import math
 import os
 import sys
@@ -473,3 +474,112 @@ def test_concurrent_research_construction_owns_distinct_directories(temp_researc
     for researcher in researchers:
         assert researcher.working_target_path.read_bytes() == target.read_bytes()
         assert researcher.results_path.read_text(encoding="utf-8").startswith("timestamp\titeration\t")
+
+
+@pytest.mark.parametrize("outcomes", [
+    [], ["no_proposal"] * 3, ["rejected"] * 3, ["failed_validation"] * 3,
+    ["crashed"] * 3, ["accepted"] * 3,
+    ["no_proposal", "rejected", "failed_validation", "crashed", "accepted"],
+])
+def test_completed_run_accounts_for_every_attempt(temp_research_env, tmp_path, monkeypatch, outcomes):
+    target, program = temp_research_env
+    original = target.read_bytes()
+    researcher = WREAutoResearcher(target, program, max_iterations=len(outcomes), results_dir=tmp_path / "runs")
+    active, calls = [], []
+
+    def propose(*args):
+        state = outcomes[len(active)]
+        active.append(state)
+        return None if state == "no_proposal" else original.decode("utf-8") + "\n# candidate\n"
+
+    def evaluate(path):
+        calls.append(path)
+        metrics = dict(fitness=0.0, roc_ratio=1.0, monthly_margin_usd=0.0, is_roi_sustainable=False)
+        if active:
+            if active[-1] == "crashed":
+                raise RuntimeError("evaluation interrupted")
+            if active[-1] == "failed_validation":
+                metrics["error"] = "invalid candidate"
+            if active[-1] == "accepted":
+                metrics["fitness"] = float(len(calls))
+        return metrics
+
+    monkeypatch.setattr(researcher, "_propose_change", propose)
+    monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
+    result = researcher.run()
+    counts = {state: outcomes.count(state) for state in ("no_proposal", "accepted", "rejected", "failed_validation", "crashed")}
+    assert result["attempts_requested"] == result["attempts_started"] == result["iterations_run"] == len(outcomes)
+    assert result["baseline_evaluations"] == 1
+    assert result["candidate_evaluations"] == len(calls) - 1 == len(outcomes) - counts["no_proposal"]
+    assert result["outcome_counts"] == counts
+    assert result["independently_verified"] is None and result["retained_improvements"] is None
+    assert result["resource_usage"] is None
+    assert [row["status"] for row in result["history"]] == outcomes
+    with researcher.results_path.open(encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream, delimiter="\t"))
+    assert [row["status"] for row in rows] == ["baseline"] + outcomes
+    assert [int(row["iteration"]) for row in rows] == list(range(len(outcomes) + 1))
+    previous_fitness = 0.0
+    for row in rows:
+        if row["status"] == "accepted":
+            assert row["info"] == f"Improved from {previous_fitness:.4f}"
+            previous_fitness = float(row["fitness"])
+        if row["status"] in ("no_proposal", "crashed"):
+            assert all(row[key] == "" for key in ("fitness", "roc_ratio", "monthly_margin"))
+    assert target.read_bytes() == researcher.working_target_path.read_bytes() == original
+
+
+@pytest.mark.parametrize("cap", [-1, True, False, 1.5, "2", None])
+def test_invalid_attempt_cap_rejects_before_output(temp_research_env, tmp_path, monkeypatch, cap):
+    target, program = temp_research_env
+    output = tmp_path / "must_not_exist"
+    monkeypatch.setattr(researcher_module, "get_qwen_engine", lambda: pytest.fail("invalid cap initialized model"))
+    with pytest.raises(ValueError, match="max_iterations"):
+        WREAutoResearcher(target, program, max_iterations=cap, results_dir=output)
+    assert not output.exists()
+    monkeypatch.setattr(researcher_module, "get_qwen_engine", lambda: None)
+    researcher = WREAutoResearcher(target, program, max_iterations=0, results_dir=tmp_path / "valid")
+    researcher.max_iterations = cap
+    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path: pytest.fail("invalid cap evaluated baseline"))
+    with pytest.raises(ValueError, match="max_iterations"):
+        researcher.run()
+
+
+@pytest.mark.parametrize("failure", ["commit", "accepted_log"])
+def test_failed_acceptance_preserves_reported_best(temp_research_env, tmp_path, monkeypatch, failure):
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    baseline = evaluate_target(target)
+    candidate = dict(baseline, fitness=baseline["fitness"] + 1)
+    metrics = iter([baseline, candidate])
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: original + "\n# candidate\n")
+    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path: next(metrics))
+    log = researcher._log_to_tsv
+
+    def fail(*args):
+        raise RuntimeError("acceptance recording failed")
+
+    def fail_accepted(iteration, status, values, info=""):
+        return fail() if status == "accepted" else log(iteration, status, values, info)
+
+    monkeypatch.setattr(researcher, "_commit" if failure == "commit" else "_log_to_tsv",
+                        fail if failure == "commit" else fail_accepted)
+    result = researcher.run()
+    assert result["optimized"] == result["baseline"] == baseline
+    assert result["improvement"] == 0
+    assert [row["status"] for row in result["history"]] == ["crashed"]
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original
+
+
+def test_report_keeps_invocation_attempt_cap(temp_research_env, tmp_path, monkeypatch):
+    target, program = temp_research_env
+    researcher = WREAutoResearcher(target, program, max_iterations=2, results_dir=tmp_path / "runs")
+
+    def propose(*args):
+        researcher.max_iterations = 99
+        return None
+
+    monkeypatch.setattr(researcher, "_propose_change", propose)
+    result = researcher.run()
+    assert result["attempts_requested"] == result["attempts_started"] == result["iterations_run"] == 2

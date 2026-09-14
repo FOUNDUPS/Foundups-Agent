@@ -1,5 +1,19 @@
 # wre_core Test Suite
 
+## Completed-call researcher accounting
+
+Reuse `test_wre_auto_researcher.py` and its pre-construction model-disable fixture.
+Seven outcome mixes cover zero/all-missing/rejected/invalid/crashed/accepted/mixed
+calls; six cap cases reject before constructor output and baseline execution;
+two acceptance failures preserve best metrics; one cap-mutation case preserves
+the invocation's requested count. Original tests/fixtures remain AST-identical.
+**51 pass**, including existing AST execution denial and cleanup/isolation cases.
+Five ten-attempt controls use the real dry-run evaluator:50 attempts/40 candidates,
+five baselines and11 TSV rows per case. Seed97 replay matches; no provider call.
+Exact commands, source hashes and preserved failures are in
+`research_report_accounting_continuation_20260915`. Counts/rehearsals overlap with
+prior runs and do not prove terminal persistence, independent RSI or retained benefit.
+
 ## Launch and evaluation evidence
 
 Reuse `test_wre_auto_researcher.py` (35) and `test_dashboard_snapshot_export.py` (2).

@@ -50,12 +50,20 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-15
 
-The [workspace scan checkpoint](modules/communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15)
-returns per-call verdicts and rejects observed policy drift inside the existing guard.
-Eighteen regressions failed before repair; **211 connected tests/four existing link
-skips**, eight manifest tests and all 15 fast groups pass locally. Fresh selection:
-**AutoResearcher report completeness 15/P1**, using the existing report/runner owners.
-Latest diagnostics, atomic policy updates and dispatch binding remain separate.
+The [researcher checkpoint](modules/infrastructure/wre_core/ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
+adds complete attempt/evaluation/outcome accounting to successful dry-run returns.
+Missing proposals remain visible; invalid/changing caps cannot falsify requested
+counts, and failed acceptance recording preserves the baseline/best result.
+**51 local tests pass**; five ten-attempt controls report 50 attempts/40 candidate
+and five baseline evaluations with unchanged sources/restored scratch.
+Independent verification, retained improvements and resource usage remain unknown.
+
+Fresh WSP15/97 keeps **report completeness 15/P1** partial: qualify terminal/aborted
+reports and invocation/source/oracle identity before the planned launch reader.
+A separate Detect-AI intake PR1751 appeared; its docs remain independently owned.
+OpenClaw PR [#1749](https://github.com/FOUNDUPS/Foundups-Agent/pull/1749) merged as
+`b12d75400b3ff819d42c191f87c46e3ed3022e74`; all ten exact-head checks and both
+main workflows passed. The current researcher change enables no startup campaign.
 
 TTL PR [#1748](https://github.com/FOUNDUPS/Foundups-Agent/pull/1748) merged as
 `7c9e3b8dc3e74a26653d16f283a5208bcd32257b`; all ten exact-head checks and both
