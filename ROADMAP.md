@@ -50,14 +50,19 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-15
 
-The [launch/evaluation checkpoint](modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
-maps startup reporting onto existing WRE paths. Five ten-attempt diagnostic runs
-produce 40 candidate evaluations and five baselines; missing proposals show why
-attempts cannot be counted as verified RSI cycles. **41 existing tests pass**.
-Launch wiring, independent verification and retained benefit remain unimplemented
-or unproved. Budgets do not double merely because main.py launches again.
-Fresh WSP 15/WSP 97 retains OpenClaw cache ownership **16/P0** ahead of the newly
-grounded report-completeness follow-on **15/P1**.
+The [workspace scan checkpoint](modules/communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15)
+removes unbound TTL verdict reuse and runs the existing guard every call.
+Twelve regressions failed before repair; **191 connected tests/four existing link
+skips**, eight manifest tests and 15 fast groups now pass. Fresh selection is
+per-call verdict handoff **16/P0**; report completeness and qualified caching
+follow at **15/P1**. Added scan cost and remaining concurrency/dispatch gaps are explicit.
+
+Launch-plan PR [#1747](https://github.com/FOUNDUPS/Foundups-Agent/pull/1747) merged
+as `cf8ad130cae2345a4080e4690eccd709dc5c6970` with exact reviewed-tree parity.
+Nine workflow jobs passed; CodeQL's aggregate was neutral, not successful. Actual
+branch rules require a PR but no status checks; the normal merge used no bypass.
+Main CI passed; the separate main CodeQL run remained in progress at observation.
+The plan adds no startup execution or automatic cycle-budget growth.
 
 Execution-admission PR [#1746](https://github.com/FOUNDUPS/Foundups-Agent/pull/1746)
 merged as `af29f082e866a05bb0d05a8f32e27414f8c1939b`; main CI and CodeQL passed.

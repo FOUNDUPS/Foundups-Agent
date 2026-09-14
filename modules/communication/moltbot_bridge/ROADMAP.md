@@ -2,11 +2,29 @@
 
 ## Local RSI scanner checkpoint — 2026-09-15
 
-Private report ownership is locally verified with independent processes and
-reentrant callers: 166 connected passes/four existing link skips. Reuse the
-[current RSI selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15):
-per-execution fingerprint handoff 17/P0; existing OpenClaw workspace cache
-content/policy ownership follows at 16/P0. R11 remains partial. No runtime admission.
+The existing workspace guard now scans every invocation. Unbound TTL verdict
+reuse is removed; constructor/call compatibility and diagnostic fields remain.
+Twelve regressions failed before repair. The connected selection now passes
+**191 tests/four existing link skips**; eight manifest tests and 15 fast groups pass.
+Source/test shrink 333→326 and 668→650; two packaged hashes and both pins change (caller docstring included).
+
+This closes only stale TTL reuse. Scanner cost increases; no latency benefit is
+claimed. Whole-wardrobe content, manifest, policy/scanner identity, pre/post
+stability and concurrent ownership must be qualified before restoring caching.
+The single-skill WRE fingerprint/cache does not cover the nested wardrobe.
+Current manifest/scanner enforcement remains; shared diagnostic-field returns,
+mutation during scanning, dispatch binding and production RSI remain unproved.
+
+Re-scoring selects **per-call verdict handoff 16/P0** for reproduction: overlapping
+calls still return shared `dae._skill_scan_ok`. Reuse this guard and its fixtures.
+Report completeness and qualified cache restoration follow at 15/P1. Read the
+[current selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
+and `workspace_scan_cache_continuation_20260915` before execution.
+
+PR #1747's launch plan is merged with exact documentation-tree parity and nine
+successful jobs. The CodeQL aggregate remained neutral; actual branch rules do not
+require that status. Normal PR merge used no bypass. Main CI passed; the separate
+main CodeQL run was still running at this observation. Runtime admission is unchanged.
 
 - PARTIAL R11-B ACTIVATION RECOVERY: existing authority activation now reconciles
   exact committed success after lost acknowledgment or competing revisions.

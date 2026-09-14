@@ -1851,12 +1851,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "launch_evaluation_continuation_20260915",
-    "base_commit": "af29f082e866a05bb0d05a8f32e27414f8c1939b",
-    "selected_action": "OpenClaw-workspace-cache-content-policy-ownership",
+    "section": "workspace_scan_cache_continuation_20260915",
+    "base_commit": "cf8ad130cae2345a4080e4690eccd709dc5c6970",
+    "selected_action": "OpenClaw-per-call-verdict-handoff",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "launch_evaluation_continuation_20260915.post_sprint_reobservation"
+    "observation_path": "workspace_scan_cache_continuation_20260915.post_sprint_reobservation"
   }
 }

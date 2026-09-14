@@ -1,5 +1,10 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Reconcile workspace scanner admission
+
+- Existing OpenClaw permission policy now always invokes its manifest/scanner path; unbound TTL verdict reuse is removed. The WRE per-skill cache stays unchanged. 191 connected tests/four existing link skips, eight manifest tests and 15 fast groups pass; no new module or runtime admission.
+- Bridge source/test shrink to 326/650 lines; registry stays 1,650/269 and runtime closure stays 1,400. Fresh next action is shared per-call verdict handoff 16/P0; report completeness/caching qualification 15/P1. PR #1747's normal documentation merge and neutral CodeQL are recorded distinctly. Evidence: `workspace_scan_cache_continuation_20260915`; WSP 00/15/22/50/62/95/97.
+
 ## 2026-09-15: Qualify launch reporting and bounded evaluation
 
 - Mapped 012's main.py proposal onto existing dashboard, resident queue, ROC researcher, model AutoResearch and retention owners. Added the staged contract to this module's existing roadmap and linked system authority/runbook; no launcher/runtime, module, flag or scheduler added.

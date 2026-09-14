@@ -1007,7 +1007,7 @@ class OpenClawDAE:
         return _policy_check_containment(self, sender, channel)
 
     def _ensure_skill_safety(self, force: bool = False) -> bool:
-        """Run cached Cisco skill scan for OpenClaw workspace skills."""
+        """Scan current workspace skills; force remains a compatibility input."""
         return _policy_ensure_skill_safety(self, force=force)
 
     # ------------------------------------------------------------------

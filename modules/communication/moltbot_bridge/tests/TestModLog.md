@@ -1,5 +1,11 @@
 ## 2026-09-15: Independent scanner report evidence and cleanup
 
+## 2026-09-15: Workspace TTL verdict regression
+
+- Before: **12 failed/eight passed/40 deselected, 1.91s**. After: **191 connected passes/four existing link skips, 8.58s**; scanner suite contributes 59 passes/one skip. Four real file/manifest changes and 16 controlled verdict/timestamp/severity/force cases reuse existing helpers. Existing scanner-required cases are parameterized; FOUNDUP failure is injected instead of cached. No scanner binary/model/provider invocation.
+- Registry initially stale only because of a cosmetic module-description edit; preserving the still-correct description restores the unchanged 1,650/269 projection. Initial manifest test: one failure/seven passes after raw-file hash was mistaken for canonical digest. Correct existing digest function and pins yield **eight passes, 67.42s**; **15 fast groups pass, 4,935ms**. Failures retained, no assertions weakened.
+- Source/test sizes 326/650; package count 1,400 unchanged. Tests prove fresh-path invocation and current manifest rejection, not mutation-during-scan or per-call concurrency. Commands/results: `workspace_scan_cache_continuation_20260915`; WSP 15/22/50/62/95/97.
+
 - Reused `test_skill_safety_guard.py`: 18 added cases across reentrant report substitution/missing evidence, timeout/OSError/KeyboardInterrupt cleanup, allocation/publication failure and two-process interleavings. All 27 old top-level definitions and 56 unchanged assertions remain; the old TMP assertion now checks private-parent equality plus containment/cleanup. Shared fixture extraction keeps the file 665→668 lines.
 - Before: 12 failures/23 deselected in 1.39s. Final connected run: 166 passes/four existing link skips in 8.81s, including scanner 40/one skip. Manifest: 8 passes in 67.53s; fast: 15 groups in 4,806ms; registry current 1,650/269. Initial stale pins caused one manifest failure and fast rejection, then passed after manifest completion and ordered pin update. Selections overlap; no live scanner/model/FoundUp call.
 - Exact commands, skipped IDs, fingerprints, source size (394), packaging and limitations: `scan_report_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97.
