@@ -29,7 +29,7 @@ function ActionSet({ duplicate = false, movement = false }: { duplicate?: boolea
           </a>
         );
       })}
-      <a href={movement ? 'https://esingularity.ai/#act-now' : '#act-now'} tabIndex={duplicate ? -1 : undefined}><strong>SAVE THE DRAGON</strong><span>九頭竜を守れ。温泉を守れ。</span></a>
+      <a href="https://yumori.me/vote-no" target="_blank" rel="noreferrer" tabIndex={duplicate ? -1 : undefined}><strong>SAVE THE DRAGON</strong><span>九頭竜を守れ。温泉を守れ。</span></a>
     </div>
   );
 }
