@@ -1,5 +1,11 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Invocation baseline snapshot for report qualification
+
+- Reused the existing researcher to remove constructor target rereads and freeze invocation baseline text for preparation, first proposal and cleanup. Reports include a UTF-8 text hash; source/program/oracle/environment authentication is still pending.
+- Ten LF/CRLF regressions initially failed while 86 existing cases passed. Final 96 pass in 2.04s, including pre-evaluation preparation failure and preserved mode/report/cleanup behavior. Five ten-attempt controls bind hashes to observed baselines and preserve seed97 replay.
+- Source 537/class 285/loop 82; tests 797 with all functions ≤50 and existing size review. Registry 1650/269 and package unchanged. Re-observed report qualification 15/P1; prior PR1754 main workflows passed. Evidence: `research_input_snapshot_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: Phase1 mode integrity before report qualification
 
 - Reproduced a mutable flag reaching recorder-only injected commit, skipping scratch cleanup and returning completed. WSP15 re-prioritized this executable guard defect 17/P0 ahead of report identity 15/P1.

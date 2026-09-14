@@ -1,3 +1,9 @@
+## 2026-09-15: Baseline snapshot and preparation regressions
+
+- Reused the unchanged pre-construction model-disable fixture. Ten new LF/CRLF cases cover live source changes during construction, dirty scratch between calls, and baseline/proposal/interruption callbacks changing original_code. Assertions bind evaluated text, proposal seed, restored scratch and saved report digest while preserving source bytes.
+- All 26 prior function/fixture names remain; 24 definitions unchanged. Existing mode wrapper follows the private loop signature; existing local-write fault now asserts baseline_preparation and zero evaluator/proposal entries. Initial 10 failed/86 passed; repaired 96 passed; final 96 passed in 2.04s. Runs overlap.
+- Five ten-attempt controls verify baseline text hashes, saved/returned equality and seed97 replay. Tests 797 lines retain existing infrastructure review; all functions ≤50. Registry/package unchanged. Local diagnostics only; no authenticated provenance, live model, independent retention or launch proof. Evidence: `research_input_snapshot_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
 ## 2026-09-15: Mode-drift and injected-commit regressions
 
 - Extended existing AST/constructor-mode tests and added a timing matrix using the same pre-construction model-disable fixture. All 24 prior function names retained; 22 definitions unchanged. Seven constructor values and fourteen timing/value cases cover unsupported/truthy modes, late mutation, missing proposals, diff/evaluator callbacks and direct commit calls.

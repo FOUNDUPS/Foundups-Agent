@@ -2,31 +2,33 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-Report qualification exposed a prior mode-flag gap: recorder-only probes reached
-injected commit, skipped cleanup and returned completed. Fresh WSP15 ranked this
-**17/P0** (3+5+5+4), ahead of identity metadata. The existing Phase1 producer now
-requires literal `True`, rejects mode drift, never delegates a live commit, and
-always attempts scratch cleanup. No live Git/model/FoundUp action was used.
+Report input consistency is locally closed within **15/P1** qualification work.
+Constructor scratch no longer rereads the live target. Each invocation freezes
+baseline text for scratch preparation, initial proposal and cleanup; its report
+records `baseline_input_sha256`. This identifies UTF-8 encoded captured text,
+not raw-file bytes or authenticated program/source/oracle/environment provenance.
 
-**86 tests pass**: seven constructor modes, fourteen mode/timing combinations,
-static commit-dispatch denial and prior validation/report/cleanup cases. All 24
-prior function/fixture names remain; 22 definitions are unchanged. Five ten-attempt
-controls still report 50 attempts/40 candidate and five baseline evaluations,
-with saved/returned equality and matching seed97 replay except invocation identity.
+**96 tests pass in 2.04s.** Ten new LF/CRLF cases reproduced construction drift,
+stale reused scratch and callback/interruption mutation before repair. All 26
+prior function/fixture names remain; 24 definitions are unchanged. Preparation
+write failure now asserts zero baseline/proposal entries. Five ten-attempt
+controls preserve 50 attempts/40 candidate/five baseline evaluations; each hash
+matches the evaluator's observed text and seed97 replay matches except invocation
+identity. These are local simulations, with zero completed repository RSI cycles.
 
-Source 524→534; class 290→285, loop 82 unchanged. Tests 681→742 remain below the
-800-line general guideline; the existing infrastructure 600 review stays with the
-cohesive fixture. All test/new functions ≤50; no new module/skill/file/exemption.
-WRE maintainers retain inherited class/loop decomposition after report contracts.
-Registry 1650/269 and 1400 package members stay unchanged; no new package run claimed.
-Prior terminal PR1753 merged at `701146b1`; both main workflows passed.
+Source 534→537; class 285 and loop 82 stay unchanged. Tests 742→797 remain below
+the 800-line general guideline, with existing infrastructure 600 review retained.
+All test/new functions ≤50; no new module/skill/file/exemption. WRE maintainers
+retain inherited class/loop decomposition after report contracts. Registry 1650/269
+and all 1400 package members stay unchanged; no new package run claimed.
+Prior mode PR1754 merged at `07a465cd`; both main workflows passed.
 
-Re-observation removes the closed mode defect from outstanding work and re-scores
-**report identity/reader qualification 15/P1** (4+4+3+4). Bind input/source/oracle/
-environment evidence before startup display. Missing/stale/aborted/unauthenticated
-reports cannot admit work. Provider costs, independent retention and process/power
-durability remain separate. Read `research_mode_guard_continuation_20260915` in
-canonical observations; all earlier checkpoints remain preserved.
+Re-observation retains report qualification **15/P1** (4+4+3+4): program/proposal,
+oracle, environment and reader evidence must be qualified before startup display.
+A baseline digest grants no launch/admission or automatic budget growth. Resource
+measurement, independent retention and process/power durability remain separate.
+Read `research_input_snapshot_continuation_20260915` in canonical observations;
+all earlier checkpoints remain preserved.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: the recorded ownership repair reduced the file 1,294→1,279 lines and
