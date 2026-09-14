@@ -60,4 +60,4 @@ def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> Non
     assert project_page.count('href="/reports/jhr') >= 3
     assert "JHR・最新レポート" in project_page
     assert "const JHR_URL = '/reports/jhr'" in movement_page
-    assert "JAPAN HYPERSCALER REPORTを読む" in movement_page
+    assert "ジャパン・ハイパースケーラー・レポート（JHR）を読む" in movement_page
