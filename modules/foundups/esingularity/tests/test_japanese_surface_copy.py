@@ -27,11 +27,15 @@ def test_japanese_surface_uses_innovation_space_not_hub() -> None:
 
 def test_foundup_is_a_project_not_a_person_label() -> None:
     polisher = read("components/JapaneseSurfacePolisher.tsx")
+    yumori = read("app/yumori/page.tsx")
+    future = read("app/future/page.tsx")
     assert "学生・チームと初期FoundUpプロジェクト" in polisher
     assert "実証を通過したFoundUpプロジェクト" in polisher
     assert "課題を解くFoundUpプロジェクト" in polisher
     assert "収益化は目的ではなく" in polisher
     assert "そこで働く学生、FoundUpプロジェクト、研究・地域プロジェクト" in polisher
+    assert "FoundUpプロジェクトと地域企業" in yumori
+    assert "学生・FoundUpプロジェクト" in future
 
 
 def test_japanese_structural_labels_are_available() -> None:
@@ -47,6 +51,9 @@ def test_japanese_structural_labels_are_available() -> None:
         "議会に求める判断",
         "しくみ · AIの田んぼ",
         "誰がつくるか · 地域",
+        "福井の経済的な未来",
+        "組織より、まず人から",
+        "この人がここにいる理由",
     ):
         assert phrase in polisher
 
@@ -75,3 +82,40 @@ def test_japanese_tab_replaces_decorative_english_labels() -> None:
         "顧客・協力者",
     ):
         assert phrase in polisher
+
+
+def test_secondary_routes_point_to_current_root_sections() -> None:
+    future = read("app/future/page.tsx")
+    team = read("app/team/page.tsx")
+    profile = read("app/team/[slug]/page.tsx")
+    for source in (future, team, profile):
+        assert '/#innovation-hub' not in source
+        assert '/#innovation-space' in source
+    assert '/#join' not in team
+    assert 'https://yumori.me/' in team
+
+
+def test_default_secondary_route_source_is_japanese_first() -> None:
+    future = read("app/future/page.tsx")
+    team = read("app/team/page.tsx")
+    profile = read("app/team/[slug]/page.tsx")
+    for forbidden in (
+        'FUKUI ECONOMIC FUTURE',
+        'WHAT FUKUI GETS',
+        'KEEP VALUE IN FUKUI',
+        'START SMALL · GROW WITH DEMAND',
+    ):
+        assert forbidden not in future
+    for forbidden in ('PEOPLE BEFORE ORGANIZATION', 'LAUNCH TEAM', 'FOUNDING PAIR', 'THE DIRECTORY GROWS WITH PERMISSION'):
+        assert forbidden not in team
+    for forbidden in ('WHY THIS PERSON IS HERE', 'A MEMORY FROM THE ONSEN', 'FIELD NOTES', 'VERIFIED PUBLIC LINKS', 'BACK TO THE PEOPLE'):
+        assert forbidden not in profile
+
+
+def test_deck_action_uses_current_vote_request_and_clean_live_text() -> None:
+    component = read("components/YumoriPresentation.tsx")
+    assert "CURRENT_VOTE_ACTION" in component
+    assert "解体準備予算に反対を。VOTE NO" in component
+    assert "<span>YUMORI.me</span>" in component
+    assert "liveDescription" in component
+    assert "{slide.title}. {slide.summary}" not in component
