@@ -5699,7 +5699,8 @@
         }
       ],
       "resolved": [
-        "Merged local missing-mirror repair and its stale pending-PR closure state."
+        "Merged local missing-mirror repair and its stale pending-PR closure state.",
+        "The current remaining-handoff table still described later-sequence mirror restoration as blocked; corrected to the scoped local reopened-store result, retaining both-mirror/physical recovery limits."
       ],
       "selected_action": "R11-independently-authenticated-response-readback",
       "selection_rationale": "Re-observation of merged source, absent read route, current dependency alerts/PRs and no selected-owner overlap leaves independently authenticated readback at 4+4+4+4=16/P0 as the highest eligible local authoring action. Higher candidates still require current runtime/model/independent admission; semantic qualification remains with its governed owner.",
