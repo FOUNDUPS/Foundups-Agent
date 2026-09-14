@@ -147,29 +147,17 @@ class WREAutoResearcher:
         # Load program instructions
         self.program_instructions = self.program_path.read_text(encoding="utf-8")
 
-        # Setup results directory under system temp or isolated path (never under repo source)
-        if results_dir:
-            self.results_dir = Path(results_dir)
-        else:
-            self.results_dir = Path(tempfile.gettempdir()) / "wre_autoresearch_runs"
-        
-        self.results_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Working target file copy located outside main repo (in sandbox)
-        self.working_target_path = self.results_dir / self.target_path.name
-
-        # WSP 97 Hardening: Assert the write target is not under REPO_ROOT
-        # Resolving absolute path to prevent symlink traversal
-        abs_working = self.working_target_path.resolve()
-        abs_repo = REPO_ROOT.resolve()
-        if abs_repo in abs_working.parents or abs_working == abs_repo:
-             raise PermissionError("WSP_97 violation: Writing to target file under REPO_ROOT is strictly prohibited.")
+        # Each invocation owns its scratch and log, even with the same parent.
+        self.results_dir = _isolated_run_directory(results_dir)
+        self.working_target_path = self.results_dir / "target" / self.target_path.name
+        self.working_target_path.parent.mkdir()
 
         # Copy baseline config to the working sandboxed target file
         shutil.copy(self.target_path, self.working_target_path)
 
         self.results_path = self.results_dir / "results.tsv"
         self._init_results_file()
+        print(f"[AUTO-RESEARCHER] Results: {self.results_path}")
 
         # Attempt to load LLM engine
         self.llm = get_qwen_engine()
@@ -431,6 +419,22 @@ AGENT_PREMIUM_MULTIPLIERS = {repr(multipliers)}
                 parsed_lines.append(line)
 
         return "\n".join(parsed_lines)
+
+
+def _isolated_run_directory(results_dir: Optional[Path]) -> Path:
+    """Allocate a unique run under a validated output parent, before any copy."""
+
+    parent = (
+        Path(results_dir) if results_dir
+        else Path(tempfile.gettempdir()) / "wre_autoresearch_runs"
+    ).resolve()
+    repo = REPO_ROOT.resolve()
+    if parent == repo or repo in parent.parents:
+        raise PermissionError(
+            "WSP_97 violation: Writing to target file under REPO_ROOT is strictly prohibited."
+        )
+    parent.mkdir(parents=True, exist_ok=True)
+    return Path(tempfile.mkdtemp(prefix="run-", dir=parent))
 
 
 def _sanitize_tsv_field(value: object) -> str:

@@ -64,6 +64,16 @@ The producer's program may require a narrower, fully populated target. Invalid
 syntax or non-literal expressions can still raise through the loader; callers
 must retain the existing exception-handling boundary.
 
+`WREAutoResearcher(..., results_dir=parent)` treats `results_dir` as an output
+parent. The instance's `results_dir` names a newly allocated `run-*` child;
+`working_target_path` names `target/<original basename>` and `results_path` names
+the run's `results.tsv`. Initialization reports the results path. The default parent
+remains `<system temp>/wre_autoresearch_runs`. Reusing a parent creates a separate
+run instead of resuming or sharing the previous target/log. Callers must use the
+instance paths; existing artifacts under the parent are not migrated or deleted.
+Parents resolving inside `REPO_ROOT` reject before mkdir. This is local namespace
+isolation under a stable filesystem, not process isolation or runtime admission.
+
 `WREAutoResearcher.run()` consumes those errors through its existing
 `failed_validation`/restore path. The negative-allocation regression proves it
 keeps baseline metrics and does not record a planned commit for the invalid

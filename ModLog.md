@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Isolate overlapping Auto Researcher runs
+
+- Reused the existing researcher/tempfile owner: each invocation owns a unique output child, target namespace and TSV log. Initialization reports the actual results path. Repository-local output parents reject before directory creation; dry-run cleanup cannot overwrite another run's target.
+- Five regressions failed before repair; the existing suite now passes 35 cases. Four added cases cover explicit/default-parent overlap, target/log aliasing and concurrent construction. All 47 original assertions remain; three existing path/setup definitions use the new contract and a disposable fake repo. Source/test are 466/475 lines; the inherited class shrinks 316→304. Registry remains 1,650/269; no packaged runtime/pin change.
+- R11 trace reuses the canonical admission identity but has no current memory transaction binding. Re-observation selects the existing PatternMemory connection-ownership investigation at 17/P0. No live model, memory activation, protected FoundUp, or production recovery proof. Evidence: `research_run_isolation_continuation_20260914`; WSP 00/15/22/48/50/62/84/97.
+
 ## 2026-09-14: Recover exact authority activation after interrupted acknowledgment
 
 - Existing authority-store activation now pins the envelope digest, reconciles durable ACTIVE state and current accepted memory, and retries only revision conflicts up to three commits. Lost replies and identical winners recover; cancellation, substitution and uncertain state fail closed.

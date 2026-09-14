@@ -720,6 +720,11 @@
         "observed_on": "2026-09-14",
         "scope": "Local recorder, retention and final memory-admission contract integrity; synthetic composed fixture",
         "acceptance_satisfied": false
+      },
+      "latest_run_isolation_evidence": {
+        "section": "research_run_isolation_continuation_20260914",
+        "status": "LOCAL_DRY_RUN_NAMESPACE_ISOLATION_VERIFIED",
+        "scope": "35 researcher tests; no runtime admission or production crash/benefit proof."
       }
     },
     {
@@ -846,7 +851,12 @@
               "next": "Re-observe memory acceptance/write-authority contract 16/P0 before changing the sink transaction; use the existing owners and runbook contract.",
               "remaining": "Durable acceptance decision/row transaction, independently authenticated participant, runtime composition/activation, composed recovery and retained benefit."
             },
-            "acceptance_decision_contract": "docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14"
+            "acceptance_decision_contract": "docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14",
+            "acceptance_binding_trace": {
+              "evidence": "research_run_isolation_continuation_20260914",
+              "reuse": "canonical_pattern_memory_admission_identity",
+              "remaining": "Bind existing WRE write authorization and the independently admitted memory transaction participant; do not infer writes from signing/read authority or introduce a duplicate identity."
+            }
           },
           {
             "id": "R11-C",
@@ -1064,6 +1074,11 @@
         "observed_on": "2026-09-14",
         "scope": "Local dry-run scratch recovery and invalid-baseline gate only",
         "acceptance_satisfied": false
+      },
+      "latest_run_isolation_evidence": {
+        "section": "research_run_isolation_continuation_20260914",
+        "status": "LOCAL_DRY_RUN_NAMESPACE_ISOLATION_VERIFIED",
+        "scope": "35 researcher tests; no runtime admission or production crash/benefit proof."
       }
     },
     {
@@ -1204,6 +1219,11 @@
         "observed_on": "2026-09-14",
         "scope": "Local staging replay/snapshot and commit-exception recovery; no authority activation",
         "acceptance_satisfied": false
+      },
+      "latest_run_isolation_evidence": {
+        "section": "research_run_isolation_continuation_20260914",
+        "status": "LOCAL_DRY_RUN_NAMESPACE_ISOLATION_VERIFIED",
+        "scope": "35 researcher tests; no runtime admission or production crash/benefit proof."
       }
     },
     {
@@ -1826,12 +1846,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "activation_recovery_continuation_20260914",
-    "base_commit": "21afc9108fec741ec883efacc47e542dc2461a7b",
-    "selected_action": "R11-B-memory-acceptance-contract",
+    "section": "research_run_isolation_continuation_20260914",
+    "base_commit": "9b056d641442022022925bb2ad4b934f621298e3",
+    "selected_action": "PatternMemory-transaction-ownership",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "activation_recovery_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "research_run_isolation_continuation_20260914.post_sprint_reobservation"
   }
 }
