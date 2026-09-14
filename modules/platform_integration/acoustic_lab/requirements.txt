@@ -16,7 +16,7 @@ soundfile==0.12.1
 Pillow==10.1.0
 
 # HTTP Requests and APIs
-requests==2.31.0
+requests==2.33.0
 
 # Video/Audio Download (X integration)
 yt-dlp==2024.3.10
