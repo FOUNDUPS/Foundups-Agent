@@ -8,7 +8,8 @@ import FukuiComparisonMap from '../components/FukuiComparisonMap';
 const YUMORI_URL = 'https://yumori.me';
 
 function YumoriAction({ children }: { children: string }) {
-  return <a className="section-action" href={YUMORI_URL}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
+  const currentAction = children === '壊す前に、再利用案を比べる時間を求める' ? '解体準備予算に反対を。VOTE NO' : children;
+  return <a className="section-action" href={YUMORI_URL}><span>行動はYUMORI.me</span><strong>{currentAction}</strong><b aria-hidden="true">↗</b></a>;
 }
 
 export default function Home() {
@@ -32,7 +33,7 @@ export default function Home() {
             <a href="#innovation-space">イノベーション・スペース</a>
             <a href="#proposal">COGDC</a>
             <Link href="/future">福井の未来</Link>
-          <Link className="jhr-nav-link" href="/reports/jhr">JHR・最新レポート</Link>
+            <Link className="jhr-nav-link" href="/reports/jhr">JHR・最新レポート</Link>
             <a href={YUMORI_URL}>参加・行動はYUMORI.me ↗</a>
           </div>
         </details>
