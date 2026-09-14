@@ -263,6 +263,18 @@ Generated proposal: `unverified_model_proposal`.
 
 ## PatternMemory
 
+Every `PatternMemory(db_path=None)` or explicit-path instance owns a separate
+SQLite connection. Construct, use and close it on the same worker thread;
+foreign-thread database operations raise `sqlite3.ProgrammingError`. Default
+instances share the database path and committed records, not a live connection,
+transaction or close lifecycle. The previous process-global alias is removed.
+
+Use one handle per work item; do not pass a cached handle across worker handoff
+or thread restart. This is a connection ownership boundary, not a transaction
+pool, async-task isolation, authenticated memory write or atomic R11 acceptance.
+Existing mutators still commit individually; multi-call acceptance needs its own
+independently bound transaction participant.
+
 `PatternMemory.store_outcome()` records actual post-dispatch execution
 success and structural fidelity. `outcome_quality` remains `0.0` until an
 independent authenticated evaluator supplies quality evidence.

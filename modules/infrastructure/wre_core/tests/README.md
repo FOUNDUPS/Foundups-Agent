@@ -1,5 +1,17 @@
 # wre_core Test Suite
 
+## PatternMemory owner isolation
+
+Reuse `test_pattern_memory.py`: **41 tests pass**, including 17 added cases for
+pending-write visibility/commit/rollback/close, foreign-thread rejection and two
+workers with independent close lifetimes. The default-path fixture redirects
+the module path into pytest's temporary directory; it never opens the repository
+store. SQLite's authorizer denies a real commit for the pending-write reproduction.
+Use the isolation setup below with importlib mode, explicit `pytest_asyncio.plugin`,
+no cache provider and a unique external basetemp. The connected 206-case selection
+and exact commands are recorded in `pattern_memory_ownership_continuation_20260914`.
+These selections overlap; thread isolation is not production concurrency proof.
+
 ## Auto Researcher run isolation
 
 Reuse `test_wre_auto_researcher.py` and its fixture that disables model construction

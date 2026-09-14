@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `acceptance_visibility_continuation_20260914` in
+**Current selection evidence:** `pattern_memory_ownership_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,57 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### PatternMemory connection ownership checkpoint — 2026-09-14
+
+Source: `477cde2b80f2171e05343b398e4a73f7503a9735`. Prior RSI PR
+[#1742](https://github.com/FOUNDUPS/Foundups-Agent/pull/1742) is merged as
+`cc2ef5d8023b5c88669143d25a482148482a75d7`; its main CI and CodeQL passed.
+The intervening RedDog identity/CLI change is separately owned. WSP 00's software
+gate passed. Holo retrieval remains explicitly degraded (UNKNOWN/index gap);
+current Git source and required module/test documents supplied the evidence.
+
+Canonical WSP 15 selected the existing PatternMemory ownership item at
+**4/5/4/4 = 17/P0**. A real SQLite commit denial leaves a pending proposal:
+the second default instance could read, commit, roll back or close its owner's
+connection. Foreign-thread operations also succeeded; closing one worker broke
+the other. The 17-case reproduction had **13 failures and four explicit-path
+controls passing** before repair.
+
+The existing constructor now creates an independent connection for every default
+or explicit-path instance. SQLite's creating-thread check is retained. Construct,
+use and close the memory handle inside its owning worker. Sharing a database path
+still shares committed records, while each handle owns its transaction and close
+lifecycle. A foreign-thread call raises `sqlite3.ProgrammingError`; this deliberately
+rejects the formerly unguarded use. Schema and all other storage methods are unchanged.
+
+**41 focused tests and 206 connected tests pass** (overlapping selections), plus
+8 manifest tests and all 15 RedDog fast groups. All original 24 test/fixture
+definitions and 55 assertions remain. The source shrinks 1,294→1,279 lines and its
+inherited class 1,164→1,149; the test file is 569 lines with no grown existing class.
+The 1,400-member manifest changes only PatternMemory's hash; both existing pins
+are refreshed. Registry remains current at 1,650/269. No new module or exemption.
+
+Fresh WSP 15/WSP 97 reconciliation selects **WRE admission-cache ownership**:
+
+| Action | C/I/D/Im | Score | Current next step |
+|---|---|---|---|
+| Independent execution/verification/promotion | 5/5/4/5 | 19/P0 | Blocked on independent runtime admission. |
+| Integrated MCP qualification; WRE/OpenClaw/Hermes worker | 4/5/4/5 each | 18/P0 each | Existing owners and current signed job/model/runtime qualification. |
+| Chroma deployment | 3/5/4/5 | 17/P0 | Existing deployment owner and qualification. |
+| **WRE admission-cache ownership** | **4/5/4/4** | **17/P0** | Retrieve current tests; reproduce overlapping cache publication and assess bounded eviction. |
+| R11 memory acceptance contract | 4/5/3/4 | 16/P0 | Existing write-authorization and independently bound transaction participant remain unresolved. |
+| Response-read authorization; current semantic retrieval | 4/4/4/4; 3/5/4/4 | 16/P0 each | Pending 012 reader policy; governed Holo owner qualification. |
+| Protected FoundUps; memory worker lifecycle | 3/4/4/3; 3/4/3/4 | 14/P1 each | Preserve external ownership; later inspect handle disposal/restart/handoff. |
+| Auto Researcher process/volume durability | 4/3/3/3 | 13/P1 | Later disposable failure fixtures. |
+
+The existing `_wre_skill_scan_cache` and `_scan_and_cache()` mutate a caller-supplied
+mapping without a synchronization or total-entry bound. The roadmap already names
+this gap; no live race is claimed. Thread-confined storage does not make the whole
+orchestrator concurrently safe. Same-instance multi-call transactions, handle
+restart/disposal, atomic R11 acceptance and independently admitted production RSI
+remain open. Evidence and exact execution contract: `pattern_memory_ownership_continuation_20260914`
+in the existing baseline. All packets remain non-dispatchable. Re-observe at closure.
 
 ### Research run isolation checkpoint — 2026-09-14
 

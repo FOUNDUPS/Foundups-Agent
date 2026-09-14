@@ -79,19 +79,14 @@ class PatternMemory(PatternABEvidenceMixin):
 
     def __init__(self, db_path: Optional[Path] = None):
         """
-        Initialize pattern memory database
+        Own a connection for one work item on the creating thread.
+
+        Instances may share a database path, never a transaction or close
+        lifecycle. Construct and close each instance in its worker thread.
 
         Args:
             db_path: Path to SQLite database file
         """
-        # Reuse shared singleton only for default production path.
-        # Tests and explicit db paths must get isolated storage.
-        self._uses_shared_singleton = db_path is None
-        if self._uses_shared_singleton and getattr(PatternMemory, "_initialized", False):
-            self.__dict__.update(getattr(PatternMemory, "_shared_state", {}))
-            logger.debug("[PATTERN-MEMORY] Reusing existing singleton instance")
-            return
-
         if db_path is None:
             self.db_path = Path(__file__).parent.parent / "data" / "pattern_memory.db"
         else:
@@ -100,21 +95,14 @@ class PatternMemory(PatternABEvidenceMixin):
         # Ensure data directory exists
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
+        self.conn = sqlite3.connect(str(self.db_path))
         self.conn.row_factory = sqlite3.Row  # Access columns by name
         self.false_positive_columns: set = set()
 
         self._initialize_schema()
         self._seed_false_positive_memory()
 
-        # Log init once per process to reduce telemetry spam for shared instance.
-        if self._uses_shared_singleton:
-            if not getattr(PatternMemory, "_initialized", False):
-                logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
-            PatternMemory._shared_state = dict(self.__dict__)
-            PatternMemory._initialized = True
-        else:
-            logger.info(f"[PATTERN-MEMORY] Initialized (isolated) - db={self.db_path}")
+        logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
 
     def _initialize_schema(self) -> None:
         """
@@ -1216,11 +1204,8 @@ class PatternMemory(PatternABEvidenceMixin):
         return scored
 
     def close(self) -> None:
-        """Close database connection"""
+        """Close only this instance's connection, on its creating thread."""
         self.conn.close()
-        if getattr(self, "_uses_shared_singleton", False):
-            PatternMemory._initialized = False
-            PatternMemory._shared_state = {}
         logger.debug("[PATTERN-MEMORY] Connection closed")
 
 

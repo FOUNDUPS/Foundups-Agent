@@ -2649,7 +2649,7 @@
     "modules/infrastructure/wre_core/src/libido_monitor.py": "e4b54db49c788da9ef9e8f6c8863428e6ba8903d06dc4203c20b86f8b2cc0d28",
     "modules/infrastructure/wre_core/src/local_skill_inference.py": "c7d32a2802736bef75430dfd908c90415d442255d2e397bfd5d43d08904cf11e",
     "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "bf03c370ac7e7563c0184937de90ab7c1c1dc3bff525d3083415805e4db7d850",
-    "modules/infrastructure/wre_core/src/pattern_memory.py": "79a3ddd8fb987569e879e50a9bfd0068e576b7521f6936c9c774da01849aea33",
+    "modules/infrastructure/wre_core/src/pattern_memory.py": "68d360a986afd9bbc87a9032b65ef0df9a1a12dab6c0a75f92c0289888e29789",
     "modules/infrastructure/wre_core/src/reddog_direction.py": "b4d1aa123c4aef6fc95717d04c61efc3ec34cb0fd1d0f2ea403f3ee61c298ba8",
     "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py": "7ff3aced800e5a585359f01d2672455566a0f8311d4df09327533f5631008910",
     "modules/infrastructure/wre_core/src/reddog_verified_draft_pr_publish.py": "cf2cc756b5f003aed297f4ccd4a235ff8acc7311dc1a4dd8b102461b3976e82c",

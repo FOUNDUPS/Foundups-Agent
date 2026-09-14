@@ -1,5 +1,11 @@
 ## 2026-09-14: Auto Researcher run directory and log ownership
 
+## 2026-09-14: PatternMemory transaction and thread ownership
+
+- Extended the existing suite with 17 cases; baseline: 13 failed / 4 passed / 24 deselected. SQLite commit-denial preserves a pending proposal for foreign read/commit/rollback/close checks; real worker threads cover wrong-thread rejection and independent lifetimes. Default database paths are redirected into disposable fixtures.
+- Final local evidence: 41 focused tests in 1.72s; 206 connected tests in 84.51s; 8 manifest tests in 69.80s; 15 RedDog fast groups in 10,081ms. Selections overlap, no skips. All 24 previous test/fixture definitions and 55 assertions are preserved. Registry remains 1,650/269.
+- Exact files, commands, qualified interpreter, environment, fingerprints and external logs are in `pattern_memory_ownership_continuation_20260914` in the canonical baseline. No model dispatch, live database or independent production RSI claim; WSP 00/15/22/48/50/60/62/84/97.
+
 - Existing `test_wre_auto_researcher.py`: five failures before repair / 30 deselected in 0.68s. Final full suite: **35 passed in 0.81s**, including four new cases. The initial 35-case pass before adding the results-path output assertion is overlapping evidence, not another 35 tests.
 - Reproduce explicit/default output collisions, preservation of another run's proposal during cleanup, independent TSV rows, a target named `results.tsv`, and concurrent constructor allocation. The existing path guard now uses a disposable fake repository and verifies no mkdir on rejection. All 47 original assertions remain; two output-location tests use actual run attributes.
 - Model construction is disabled before initialization. Real files and threads do not prove process/volume recovery, hostile filesystem isolation or independent RSI benefit. No new test file or packaged runtime change; registry remains current at 1,650/269. Commands and fingerprints: `research_run_isolation_continuation_20260914`; WSP 00/15/22/48/50/62/84/97.

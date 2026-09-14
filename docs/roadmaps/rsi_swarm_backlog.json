@@ -963,6 +963,11 @@
         "section": "pending_response_continuation_20260914",
         "base_commit": "bec40ffe52cd0076013a4bb9e5f7629b683741be",
         "acceptance_satisfied": false
+      },
+      "latest_connection_ownership_evidence": {
+        "section": "pattern_memory_ownership_continuation_20260914",
+        "status": "LOCAL_PER_INSTANCE_THREAD_OWNERSHIP_VERIFIED",
+        "scope": "41 focused / 206 connected tests; no atomic acceptance/write authority or production concurrency admission."
       }
     },
     {
@@ -1846,12 +1851,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "research_run_isolation_continuation_20260914",
-    "base_commit": "9b056d641442022022925bb2ad4b934f621298e3",
-    "selected_action": "PatternMemory-transaction-ownership",
+    "section": "pattern_memory_ownership_continuation_20260914",
+    "base_commit": "477cde2b80f2171e05343b398e4a73f7503a9735",
+    "selected_action": "WRE-admission-cache-ownership",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "research_run_isolation_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "pattern_memory_ownership_continuation_20260914.post_sprint_reobservation"
   }
 }

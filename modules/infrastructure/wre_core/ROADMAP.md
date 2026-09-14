@@ -2,12 +2,19 @@
 
 ## Current local RSI checkpoint — 2026-09-14
 
-Auto Researcher run namespace isolation is locally verified in 35 tests: unique
-run directories, separate target/log paths, and no directory creation on rejected
-repository output. Current selection is [PatternMemory transaction ownership,
-17/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14),
-already listed below. Reproduce the shared-connection behavior before repair;
-concurrency, process/volume durability and runtime admission are separate gates.
+PatternMemory default/explicit handles now have independent transactions and
+close lifetimes, with SQLite creating-thread enforcement. **41 focused / 206
+connected tests pass**. Current selection is [admission-cache ownership,
+17/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#patternmemory-connection-ownership-checkpoint--2026-09-14).
+Reproduce its concurrent publication/eviction behavior before repair. Worker
+restart/handoff/disposal, same-instance multi-call transactions and atomic R11
+acceptance remain separate follow-ons. Auto Researcher run isolation is closed
+at PR #1742's verified source; production RSI remains incomplete.
+
+WRE Core maintainers retain the inherited PatternMemory schema/telemetry
+cohesion debt under WSP 62: this repair reduces the file 1,294→1,279 lines and
+class 1,164→1,149. Continue decomposition through existing storage/schema owners
+after their transaction contracts are established; no new exemption is added.
 
 ## Repository prioritization and closure
 
@@ -52,9 +59,9 @@ Continue parity-proven decomposition in later focused slices:
 - prove a production end-to-end RSI canary before describing WRE as production RSI;
 - add typed admission-failure audit storage without conflating it with successful
   PatternMemory outcomes.
-- replace process-global PatternMemory/cache mutation with per-work-item
-  connections or serialized transaction ownership before concurrent multi-agent
-  execution; `check_same_thread=False` is not a concurrency proof;
+- reconcile cached PatternMemory handle disposal/restart/handoff with the new
+  per-instance creating-thread contract before concurrent multi-agent execution;
+  same-handle multi-call transactions and R11 acceptance remain unimplemented;
 - bind shared in-process admission caches to an explicit synchronization and
   bounded-eviction contract before one RedDog process serves many FoundUps.
 
