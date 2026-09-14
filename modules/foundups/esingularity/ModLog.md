@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-13 — Public council/mayor messages and responsive action ticker
+
+- Added the canonical YUMORI.me `/vote-no` civic-action page with the September 10 council/mayor VOTE NO message, the September 7 mayor-focused historical request, a prominent supersession note, official contact routes, and no BCC/private distribution details.
+- Replaced the obsolete Monk ticker action with council, mayor, and contact actions. The shared status now points to the action page on both public homepages.
+- Slowed the measured ticker ladder to 10 px/s on phones, 20 px/s on tablets, and 32 px/s on wider screens; shortened the persistent stop/read control. Phones now dock the ticker at the safe-area-aware bottom edge and switch to a horizontal touch-scroll strip when stopped; tablet/desktop placement, keyboard, resize, and reduced-motion behavior remain intact.
+- WSP 00/22/50/97: exact sent-mail records, ticker consumers, current public truth boundary, tests, and the FoundUp website/ticker skills were retrieved before editing. Validation and publication status are recorded with the PR.
+- Five dependency-free public-contract functions and all 18 hostname-routing checks passed; focused ESLint passed. `tsc --noEmit` remains red only on pre-existing manifest purpose and duplicate translation-key errors outside this slice. Vinext build timed out during client-reference analysis, and the local preview hit the previously documented Cloudflare `uv_interface_addresses` runtime failure; no patched visual-preview or production deployment claim is made.
+
 ## 2026-09-13 — Shared YUMORI.me branding in both website skills
 
 - Recorded 012's branding direction in the existing FoundUp-owned website skill: preserve YUMORI.me, the branded JOIN action, Japanese-first `me GUARDIAN!` identity line, katakana JHR title, Japanese default and complete English coverage. Supporting context must retain the brand, and responsive layouts must avoid clipped or duplicated labels.

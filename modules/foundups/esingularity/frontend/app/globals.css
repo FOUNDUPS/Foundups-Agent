@@ -213,7 +213,7 @@ html:not([lang="ja"]) .ja-only-break{display:none}
 .campaign-ticker{display:flex;align-items:stretch;max-width:100%;min-width:0;white-space:normal}
 .campaign-ticker-window{flex:1;min-width:0;overflow:hidden}
 .campaign-ticker-track{animation-duration:var(--ticker-duration,300s);white-space:nowrap}
-.campaign-ticker-control{flex:0 0 auto;align-self:stretch;min-height:54px;max-width:110px;padding:8px 12px;border:0;border-right:1px solid #55d9ff66;background:#071525;color:#fff;font:700 14px/1.5 var(--font-noto),sans-serif;cursor:pointer;white-space:normal}
+.campaign-ticker-control{flex:0 0 126px;align-self:stretch;min-height:60px;padding:8px 12px;border:0;border-right:1px solid #55d9ff66;background:#071525;color:#fff;font:700 14px/1.4 var(--font-noto),sans-serif;cursor:pointer;white-space:nowrap}
 .campaign-ticker-control:focus-visible{outline:3px solid #f2c766;outline-offset:-3px}
 .campaign-ticker[data-reading=true] .campaign-ticker-track{animation:none;transform:none;width:100%;white-space:normal}
 .campaign-ticker[data-reading=true] .campaign-ticker-set{display:flex;flex-direction:column;width:100%;min-width:0}
@@ -221,9 +221,27 @@ html:not([lang="ja"]) .ja-only-break{display:none}
 .campaign-ticker[data-reading=true] a{white-space:normal;overflow-wrap:anywhere;padding:12px;line-height:1.7;min-width:0;align-items:flex-start}
 .campaign-ticker[data-reading=true] a span{min-width:0}
 .campaign-ticker[data-reading=true] a strong{flex-shrink:0}
-@media(max-width:600px){.campaign-ticker{font-size:15px}.campaign-ticker-control{max-width:88px;font-size:13px}.campaign-ticker a{padding-inline:18px}}
+@media(max-width:600px){.campaign-ticker{font-size:15px}.campaign-ticker-control{flex-basis:96px;padding-inline:8px;font-size:12px}.campaign-ticker a{padding-inline:18px}}
 @media(prefers-reduced-motion:reduce){.campaign-ticker-window{overflow-x:auto}.campaign-ticker-track{animation:none!important;transform:none!important}.campaign-ticker-set[aria-hidden=true]{display:none}}
 
 @media(hover:hover) and (pointer:fine){.campaign-ticker:hover .campaign-ticker-track{animation-play-state:paused}}
 
 .campaign-ticker[data-reading=true] .campaign-ticker-control{align-self:flex-start}
+
+/* YUMORI.me civic-message record: public transcript, private distribution data omitted. */
+.civic-page{min-height:100vh;color:#f4f1e8;background:radial-gradient(circle at 80% 0,rgba(21,88,145,.35),transparent 34%),#07111d;font-family:var(--font-noto),sans-serif}
+.civic-header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px clamp(20px,6vw,84px);border-bottom:1px solid rgba(85,217,255,.24);background:#07111d}.civic-header>a{font-weight:900;letter-spacing:-.03em}.civic-header nav{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px}.civic-header nav a{color:#bfeeff}.civic-hero,.civic-content{padding:clamp(52px,8vw,100px) clamp(20px,8vw,120px)}.civic-hero{border-bottom:1px solid rgba(85,217,255,.22)}.civic-kicker{margin:0 0 18px;color:var(--gold);font:700 12px/1.5 var(--font-mono),monospace;letter-spacing:.12em}.civic-hero h1{max-width:1000px;margin:0;font-size:clamp(3rem,9vw,8rem);line-height:.98;letter-spacing:-.07em}.civic-lead{max-width:900px;margin:28px 0 0;font-size:clamp(1.1rem,2vw,1.45rem);line-height:1.9}.civic-now{max-width:900px;margin:32px 0 0;padding:20px 24px;border-left:4px solid var(--gold);background:rgba(242,199,102,.1);line-height:1.8}.civic-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.civic-actions a{display:inline-flex;min-height:48px;align-items:center;padding:12px 18px;border:1px solid rgba(85,217,255,.5);background:#0b3157;font-weight:800}.civic-actions a:first-child{color:#06101c;background:var(--gold);border-color:var(--gold)}.civic-content{display:grid;gap:32px;max-width:1180px;margin:auto}.civic-record{scroll-margin-top:24px;border:1px solid rgba(85,217,255,.25);background:rgba(5,22,39,.88)}.civic-record>header{padding:clamp(22px,4vw,38px);border-bottom:1px solid rgba(85,217,255,.2)}.civic-record h2{margin:6px 0 10px;font-size:clamp(1.7rem,4vw,3rem);line-height:1.2}.civic-meta{margin:0;color:#9fd9ea;font-size:13px;line-height:1.7}.civic-record details>summary{cursor:pointer;min-height:56px;padding:18px clamp(22px,4vw,38px);color:#06101c;background:#8ce2ee;font-weight:900}.civic-transcript{padding:clamp(24px,5vw,52px);white-space:pre-wrap;font-family:inherit;font-size:clamp(.95rem,1.5vw,1.08rem);line-height:2;color:#edf6f7}.civic-history{margin:20px clamp(22px,4vw,38px);padding:16px 18px;border-left:3px solid #ffb36b;background:rgba(255,179,107,.1);line-height:1.8}.civic-contact{scroll-margin-top:24px;padding:clamp(28px,5vw,50px);color:#07111d;background:#edf4ef}.civic-contact h2{margin-top:0;font-size:clamp(2rem,5vw,4rem);letter-spacing:-.05em}.civic-contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.civic-contact a{display:flex;min-height:92px;flex-direction:column;justify-content:center;padding:18px;border:1px solid #9bb3b6;background:#fff;font-weight:850}.civic-contact small{margin-top:7px;color:#52666a;font-weight:500}.civic-source-note{font-size:13px;line-height:1.8;color:#b6c7cb}.civic-footer{padding:28px clamp(20px,8vw,120px);border-top:1px solid rgba(85,217,255,.2);color:#b6c7cb}.civic-footer a{color:#bfeeff}
+@media(max-width:700px){.civic-header{align-items:flex-start;flex-direction:column}.civic-header nav{font-size:12px}.civic-hero h1{font-size:clamp(3.2rem,19vw,5.4rem)}.civic-contact-grid{grid-template-columns:1fr}.civic-transcript{padding-inline:20px}}
+
+/* Phone ticker: thumb-reachable bottom dock; stop, then swipe actions horizontally. */
+@media(max-width:600px){
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}
+  .campaign-ticker,.campaign-ticker.campaign-ticker-inline{position:fixed!important;z-index:90;top:auto!important;right:0;bottom:0;left:0;min-height:62px;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -12px 34px rgba(0,0,0,.38)}
+  .campaign-ticker-window{overscroll-behavior-x:contain;touch-action:pan-x}
+  .campaign-ticker[data-reading=true] .campaign-ticker-window{overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .campaign-ticker[data-reading=true] .campaign-ticker-track{display:flex;width:max-content;min-width:100%;white-space:nowrap}
+  .campaign-ticker[data-reading=true] .campaign-ticker-set{display:flex;flex-direction:row;width:max-content}
+  .campaign-ticker[data-reading=true] .campaign-ticker-set[aria-hidden=true]{display:none}
+  .campaign-ticker[data-reading=true] a{flex:0 0 auto;max-width:82vw;min-height:62px;align-items:center;padding:10px 18px;white-space:normal;scroll-snap-align:start}
+  .campaign-ticker[data-reading=true] .campaign-ticker-control{align-self:stretch}
+}
