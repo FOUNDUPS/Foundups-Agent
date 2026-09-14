@@ -9955,5 +9955,663 @@
     },
     "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\admission-cache-ownership-20260914",
     "pending_reader_policy": "012 reader-policy question remains unanswered; no new question or inferred default."
+  },
+  "scan_report_ownership_continuation_20260915": {
+    "role": "local_author_coordinator",
+    "pending_reader_policy": "012 reader-policy question remains unanswered; no new question or inferred default.",
+    "observed_at": "2026-09-14T15:05:38.524403+00:00",
+    "base_commit": "8682d569b1022f35fd357af6b3b20e4b5ce52a7e",
+    "origin": "autonomous_trigger",
+    "wsp00_gate": true,
+    "prior_closure": {
+      "pr": 1744,
+      "merge": "8682d569b1022f35fd357af6b3b20e4b5ce52a7e",
+      "main_runs": {
+        "34855216574": "success",
+        "34855216213": "success"
+      }
+    },
+    "ranking_before": [
+      {
+        "task": "RedDog-extension-decomposition",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 20,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "independent-execution-verification-promotion",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Independent runtime admission absent"
+      },
+      {
+        "task": "current-semantic-retrieval",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ]
+      },
+      {
+        "task": "RedDog-backend-closure-consolidation",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "RedDog-conversation-durable-adapters",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "integrated-mcp-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+      },
+      {
+        "task": "wre-openclaw-hermes-worker",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current signed job/model/runtime admission absent"
+      },
+      {
+        "task": "chroma-deployment",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current deployment owner and runtime qualification"
+      },
+      {
+        "task": "WRE-scan-report-ownership",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "selected_for_current_source_reproduction",
+        "evidence": [
+          "modules/infrastructure/wre_core/src/skill_runtime_admission.py:_scan_report_dir",
+          "modules/communication/moltbot_bridge/src/skill_safety_guard.py:run_skill_scan",
+          "modules/communication/moltbot_bridge/src/skill_safety_guard.py:_invoke_scanner",
+          "modules/communication/moltbot_bridge/src/skill_safety_guard.py:_completed_scan_result"
+        ],
+        "next_step": "Retrieve the existing scanner report/parsing tests; reproduce report reuse across independent caches or callers in disposable paths. The current WRE report directory depends only on bundle fingerprint; the bridge unlinks then reads a fixed report filename. No live corruption or verdict substitution is claimed."
+      },
+      {
+        "task": "WRE-per-execution-fingerprint-handoff",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "eligible_later",
+        "evidence": [
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_ensure_wre_skill_safety",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_try_executor_dispatch"
+        ],
+        "next_step": "Inspect the shared skill-name fingerprint map and reuse existing execution-context evidence before concurrent coordinator dispatch. Report provenance is selected first because it supplies the verdict that enters this map."
+      },
+      {
+        "task": "R11-B-memory-acceptance-contract",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "partial_transaction_dependency",
+        "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+      },
+      {
+        "task": "authenticated-response-read",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "012 reader-policy question remains unanswered"
+      },
+      {
+        "task": "protected-foundup-work",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "external",
+        "next_step": "YUMORI/eSingularity and separate autopost ownership"
+      },
+      {
+        "task": "PatternMemory-worker-lifecycle-integration",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "eligible_later",
+        "evidence": [
+          "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+        ],
+        "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+      },
+      {
+        "task": "auto-researcher-process-durability",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 13,
+        "priority": "P1",
+        "state": "eligible-later",
+        "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+      }
+    ],
+    "selected_action": "WRE-scan-report-ownership",
+    "score": 17,
+    "priority": "P0",
+    "rationale": "The shared scanner verdict feeds both independent WRE cache owners and OpenClaw callers. Reentrant real-file tests reproduce report substitution: an unsafe or missing report consumes a competing clean result. Close this upstream ownership gap before the equal-ranked per-execution fingerprint handoff. Higher-ranked work remains blocked or externally owned.",
+    "retrieval": {
+      "mode": "governed lexical bundle followed by exact Git source reads",
+      "semantic_freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "noise": "Broad roadmap/search output was too large; narrowed to exact sections and owners.",
+      "ordering": "WSP00/15/97, owner instructions, contract/test journals, source and neighboring consumers before edits.",
+      "missing_artifacts": [
+        "modules/communication/moltbot_bridge/memory/README.md",
+        "modules/communication/moltbot_bridge/requirements.txt"
+      ],
+      "staleness": "Lexical retrieval is degraded navigation, not current semantic evidence; source tree matches verified main. Historical bootstrap/unchanged lanes retain earlier evidence scope.",
+      "duplication": "No new module/skill/test file. Extend existing scanner guard and tests; preserve caller-facing diagnostic filename.",
+      "navigation_drift": "NAVIGATION.py points to nonexistent SkillSafetyGuard class; the actual owner is run_skill_scan, confirmed by source.",
+      "improvement": "Must-include docs/test paths plus direct range reads and full source owner reads."
+    },
+    "alternatives": {
+      "selected": "Per-invocation TemporaryDirectory; validate private report, atomically replace the existing latest diagnostic copy, clean temporary files on return/exception.",
+      "rejected": [
+        "Cache-local locking cannot coordinate separate caches/processes.",
+        "A cross-process lock around the fixed report adds lock lifecycle/crash obligations and serializes independent scans.",
+        "Persisting a new report per call creates unbounded normal report retention; keep the existing bounded latest-copy contract."
+      ],
+      "limits": "The latest diagnostic path is mutable and is never per-invocation immutable evidence or authority. Hard process termination may orphan an isolated temporary directory; no crash scavenger in this scope."
+    },
+    "scope": {
+      "source": [
+        "modules/communication/moltbot_bridge/src/skill_safety_guard.py"
+      ],
+      "tests": [
+        "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py"
+      ],
+      "protected": [
+        "shared checkout and services",
+        "YUMORI/eSingularity",
+        "FOUNDUPS/autopost",
+        "runtime/model admission"
+      ]
+    },
+    "manual_reason": "Deterministic fixture/process interleavings and source-level lifecycle review are appropriate here; no admitted Qwen/Gemma runtime is available. Reuse standard-library temporary-directory ownership and existing scanner helpers, with no paid model calls.",
+    "verification_plan": [
+      "Demonstrate unsafe/missing report cross-talk and interrupted workspace leakage before repair.",
+      "Preserve original assertion coverage while consolidating repeated fixture setup to stay within WSP62.",
+      "Verify independent processes, allocation/publication failures, temporary cleanup and existing WRE/OpenClaw callers.",
+      "Run exact connected suites, canonical registry, backend manifest and fast tier; exact-head remote checks before any merge."
+    ],
+    "runtime_admission": false,
+    "changes": {
+      "owner": "modules/communication/moltbot_bridge/src/skill_safety_guard.py:run_skill_scan",
+      "behavior": "Allocate a private TemporaryDirectory per scan, including scanner TMP/TEMP. Parse that invocation's report before atomically replacing the existing latest diagnostic. Normal return, scanner errors and Python cancellation clean only the owned workspace. Storage errors cannot admit.",
+      "compatibility": "Signature and SkillScanResult fields remain. report_path still names openclaw_skill_scan_report.json in the selected directory; it is mutable latest diagnostics, may be absent, and is never an immutable per-call receipt. Existing severity/manifest/timeout/environment helpers remain unchanged.",
+      "limits": "No live Cisco scan, process-crash scavenging, hostile-filesystem isolation, complete coordinator concurrency or runtime/model admission. Abrupt process termination can leave an isolated temporary directory. No new persistent per-scan archive.",
+      "test_reuse": "Existing file and helpers retained; repeated wardrobe/threshold/DAE setup consolidated to keep the file below 675 lines. All 27 old top-level definitions and 56 unchanged assertions remain; the previous TMP assertion now targets the private report directory with containment/cleanup assertions."
+    },
+    "validation": {
+      "before": {
+        "tests": "12",
+        "failures": "12",
+        "errors": "0",
+        "skipped": "0",
+        "time": "1.389"
+      },
+      "focused": {
+        "tests": "41",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "1",
+        "time": "5.383"
+      },
+      "connected": {
+        "tests": "170",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "4",
+        "time": "8.806"
+      },
+      "manifest": {
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "67.535"
+      },
+      "connected_files": [
+        "modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py",
+        "modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py",
+        "modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py",
+        "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py",
+        "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py"
+      ],
+      "pytest_command": "python -B -m pytest <connected_files or selected file> --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=<artifact_root>/<run>-temp --tb=short -q --junitxml=<artifact_root>/<run>.xml",
+      "python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "TEMP/TMP": "<artifact_root>/temp",
+        "FOUNDUPS_DB_PATH": "<artifact_root>/agent.db",
+        "WRE_PATTERN_MEMORY_DB": "<artifact_root>/patterns.db",
+        "ANTIFAFM_LYRICS_DB": "<artifact_root>/lyrics.db"
+      },
+      "registry": {
+        "total": 1650,
+        "quarantined": 269,
+        "current": true,
+        "command": "python -B modules/infrastructure/wre_core/scripts/generate_test_registry.py --check"
+      },
+      "fast": {
+        "members": 15,
+        "passed": true,
+        "duration_ms": 4806,
+        "command": "node extensions/reddog/tests/run_reddog_test_tier.js fast",
+        "REDDOG_TEST_PYTHON": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "REDDOG_TEST_SITE_PACKAGES": "O:/Foundups-Agent/.venv/Lib/site-packages"
+      },
+      "manifest_proof": {
+        "base_digest": "89d4ad063839723b511408d8f8d5029efc071d4bcc838f3a97bbd44ff91eaa60",
+        "candidate_digest": "167da39350127e21f96ae43e582a3e4d7b940a287822d5ac9c39436a494a6d2e",
+        "runtime_members": 1400,
+        "changed_members": [
+          "modules/communication/moltbot_bridge/src/skill_safety_guard.py"
+        ],
+        "only_changed_hashes": true,
+        "pins_updated": true,
+        "hash_semantics": "Generator canonical LF bytes; local Windows raw hashes separately recorded.",
+        "generation_completed_before_final_pins": true,
+        "initial_validation_error": "Pins were read before asynchronous manifest generation completed. Initial manifest 1 failed/7 passed and fast tier rejected old digest; logs retained. Final checks passed after ordered regeneration/pin update."
+      },
+      "source_validation": {
+        "base": "8682d569b1022f35fd357af6b3b20e4b5ce52a7e",
+        "old_test_definitions": 27,
+        "old_assertions": 57,
+        "removed_assertions": [
+          "Assert(test=Compare(left=Subscript(value=Subscript(value=Attribute(value=Attribute(value=Name(id='mock_run', ctx=Load()), attr='call_args', ctx=Load()), attr='kwargs', ctx=Load()), slice=Constant(value='env'), ctx=Load()), slice=Constant(value='TMP'), ctx=Load()), ops=[Eq()], comparators=[Call(func=Name(id='str', ctx=Load()), args=[Attribute(value=Call(func=Name(id='Path', ctx=Load()), args=[Attribute(value=Name(id='result', ctx=Load()), attr='report_path', ctx=Load())], keywords=[]), attr='parent', ctx=Load())], keywords=[])]))"
+        ],
+        "assertion_contract_change": "TMP now equals private report parent; additionally assert parent containment and cleanup. Every other old assertion is preserved. Reused wardrobe/threshold/DAE setup without removing test names.",
+        "source": {
+          "before_lines": 370,
+          "after_lines": 394,
+          "unchanged_existing_helpers": 13,
+          "sha256": "f998d5597f2254269d821e8358ea23791f22bf4b6ceafebd7561db4219f071c9"
+        },
+        "test": {
+          "before_lines": 665,
+          "after_lines": 668,
+          "sha256": "61a1edd65bc7b6300274b3bb7fb3eb7308aa65997ad1f31dd16565eb1c911490"
+        },
+        "new_size_debt": false
+      },
+      "scope": "Real temporary files and two Python processes; Cisco subprocess output is injected. No production scanner/provider/model/service or active FoundUp is invoked. Focused 40/1 and connected 166/4 overlap; final focused subset is included in the connected run.",
+      "initial_failures_preserved": [
+        "before.txt",
+        "initial-manifest.txt",
+        "initial-fast.txt"
+      ],
+      "remote": "Not yet run for this candidate; prior merge verification is separate.",
+      "skips": [
+        {
+          "class": "modules.infrastructure.wre_core.tests.test_wre_runtime_admission_truth",
+          "test": "test_bundle_fingerprint_rejects_linked_executor",
+          "reason": "file links are unavailable on this host"
+        },
+        {
+          "class": "modules.infrastructure.wre_core.tests.test_wre_skills_loader_hygiene.TestCheckoutLocalSkillResolution",
+          "test": "test_symlinked_location_cannot_escape_checkout",
+          "reason": "directory symlinks are unavailable on this host"
+        },
+        {
+          "class": "modules.infrastructure.wre_core.tests.test_skill_manifest_guard",
+          "test": "test_manifest_rejects_root_directory_link",
+          "reason": "directory links are unavailable on this host"
+        },
+        {
+          "class": "modules.communication.moltbot_bridge.tests.test_skill_safety_guard",
+          "test": "test_run_skill_scan_rejects_linked_skill_root",
+          "reason": "directory links are unavailable on this host"
+        }
+      ]
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T15:14:48.563915+00:00",
+      "origin_main": "8682d569b1022f35fd357af6b3b20e4b5ce52a7e",
+      "open_pr_count": 96,
+      "other_open_heads_unchanged": true,
+      "ranked_queue": [
+        {
+          "task": "RedDog-extension-decomposition",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 20,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ]
+        },
+        {
+          "task": "RedDog-backend-closure-consolidation",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "RedDog-conversation-durable-adapters",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "WRE-per-execution-fingerprint-handoff",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "selected_for_current_source_reproduction",
+          "evidence": [
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_ensure_wre_skill_safety",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:_try_executor_dispatch"
+          ],
+          "next_step": "Extend the existing runtime admission/executor tests with interleaved coordinator calls. Trace current execution context before replacing the shared skill-name fingerprint handoff. Source now proves private scanner evidence; this next handoff has not yet been reproduced or repaired."
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "OpenClaw-workspace-cache-content-policy-ownership",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "eligible_later_source_gap",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:ensure_skill_safety"
+          ],
+          "next_step": "The existing OpenClaw cache returns by TTL before inspecting current content/policy and keeps shared DAE state. Reuse the WRE admission owner where compatible after inspecting wardrobe contracts; no live stale-admission incident is claimed."
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        }
+      ],
+      "selected_action": "WRE-per-execution-fingerprint-handoff",
+      "score": 17,
+      "priority": "P0",
+      "closed_local": "WRE/OpenClaw private scanner report ownership and normal-return workspace cleanup",
+      "reconciliation": "Removed the reproduced scanner report substitution from executable work after local validation. Per-execution admission now wins at 17/P0; higher candidates retain existing external owners or runtime dependencies. Newly traced OpenClaw TTL-only workspace cache is an existing-owner 16/P0 gap. Re-observe main, owners and CI again at closure.",
+      "runtime_admission": false
+    },
+    "artifact_root": "O:/Foundups-Agent-audits/20260909-rsi/scan-report-ownership-20260914"
   }
 }

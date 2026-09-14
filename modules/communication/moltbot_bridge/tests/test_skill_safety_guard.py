@@ -17,6 +17,7 @@ Test Coverage:
 import asyncio
 import json
 import subprocess
+import sys
 import time
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -24,6 +25,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from modules.communication.moltbot_bridge.src.skill_safety_guard import run_skill_scan
+from modules.communication.moltbot_bridge.src import skill_safety_guard as guard
 from modules.infrastructure.wre_core.src.skill_manifest_guard import generate_skill_manifest
 
 
@@ -37,6 +39,29 @@ def _write_manifest(skills_dir: Path) -> None:
         skills_dir=skills_dir,
         manifest_path=skills_dir / "SKILL_MANIFEST.json",
     )
+
+
+def _wardrobe(tmp_path):
+    skills_dir = tmp_path / "skills"
+    instruction = skills_dir / "sample" / "SKILL.md"
+    instruction.parent.mkdir(parents=True)
+    instruction.write_text("# test", encoding="utf-8")
+    _write_manifest(skills_dir)
+    return skills_dir
+
+
+def _threshold_scan(tmp_path, counts, max_severity="medium"):
+    skills_dir = _wardrobe(tmp_path)
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    # Seed old evidence as well as emitting a current report.
+    (reports / "openclaw_skill_scan_report.json").write_text(
+        json.dumps({"summary": {"findings_by_severity": counts}}), encoding="utf-8"
+    )
+    with patch.object(guard, "_locate_scanner", return_value="skill-scanner"), patch.object(
+        guard.subprocess, "run", side_effect=_scanner_process(counts)
+    ):
+        return run_skill_scan(skills_dir, max_severity=max_severity, report_dir=reports)
 
 
 def _scanner_process(
@@ -79,13 +104,134 @@ def _failed_scan_result(message):
     return SkillScanResult(True, False, 1, "/test", None, message)
 
 
+@pytest.fixture(params=[False, True], ids=["wardrobe", "bundle"])
+def scan_subject(tmp_path, monkeypatch, request):
+    skills = tmp_path / "skills"
+    instruction = skills / "SKILLz.md" if request.param else skills / "sample" / "SKILL.md"
+    instruction.parent.mkdir(parents=True)
+    instruction.write_text("# test", encoding="utf-8")
+    _write_manifest(skills)
+    monkeypatch.setattr(guard, "_locate_scanner", lambda _: "skill-scanner")
+    return skills, tmp_path / "reports", request.param
+
+
+@pytest.mark.parametrize("first,second", [({"high": 1}, {}), ({}, {"high": 1}), (None, {})])
+def test_overlapping_scans_keep_own_verdict(scan_subject, monkeypatch, first, second):
+    skills, reports, single = scan_subject
+    paths, nested = [], []
+
+    def scan(command, **kwargs):
+        path = Path(command[command.index("--output") + 1])
+        paths.append(path)
+        assert kwargs["env"]["TMP"] == kwargs["env"]["TEMP"] == str(path.parent)
+        counts = first if len(paths) == 1 else second
+        completed = MagicMock(returncode=0, stdout="", stderr="")
+        if counts is not None:
+            completed = _scanner_process(counts, single_skill=single)(command, **kwargs)
+        if len(paths) == 1:
+            nested.append(run_skill_scan(skills, report_dir=reports))
+        return completed
+
+    monkeypatch.setattr(guard.subprocess, "run", scan)
+    result = run_skill_scan(skills, report_dir=reports)
+    assert result.passed is (first == {})
+    assert nested[0].passed is (second == {})
+    assert paths[0].parent != paths[1].parent
+    assert all(not path.parent.exists() for path in paths)
+    assert result.report_path == str(reports / "openclaw_skill_scan_report.json")
+
+
+@pytest.mark.parametrize("error", [subprocess.TimeoutExpired("synthetic", 1), OSError("synthetic"), KeyboardInterrupt()])
+def test_interrupted_scan_cleans_only_its_workspace(scan_subject, monkeypatch, error):
+    skills, reports, single = scan_subject
+    paths = []
+
+    def scan(command, **kwargs):
+        paths.append(Path(command[command.index("--output") + 1]))
+        _scanner_process({}, single_skill=single)(command, **kwargs)
+        raise error
+
+    monkeypatch.setattr(guard.subprocess, "run", scan)
+    if isinstance(error, KeyboardInterrupt):
+        with pytest.raises(KeyboardInterrupt):
+            run_skill_scan(skills, report_dir=reports)
+    else:
+        result = run_skill_scan(skills, report_dir=reports)
+        assert result.passed is False
+        assert result.exit_code == (124 if isinstance(error, subprocess.TimeoutExpired) else 126)
+    assert not paths[0].exists()
+    assert reports.is_dir() and not list(reports.iterdir())
+
+
+@pytest.mark.parametrize("operation", ["TemporaryDirectory", "replace"])
+def test_report_storage_failure_cannot_admit(scan_subject, monkeypatch, operation):
+    skills, reports, single = scan_subject
+    monkeypatch.setattr(guard.subprocess, "run", _scanner_process({}, single_skill=single))
+    owner = guard.tempfile if operation == "TemporaryDirectory" else guard.os
+    with patch.object(owner, operation, side_effect=OSError("synthetic detail")):
+        result = run_skill_scan(skills, report_dir=reports)
+    assert result.passed is False and result.exit_code == 4
+    assert "synthetic detail" not in result.message
+    assert reports.is_dir() and not list(reports.iterdir())
+
+
+_SCAN_PROCESS = '''
+import json, sys, time
+from pathlib import Path
+from modules.communication.moltbot_bridge.src import skill_safety_guard as guard
+from modules.communication.moltbot_bridge.tests.test_skill_safety_guard import _scanner_process
+skills, reports, kind = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+ready, done = reports.parent / "ready", reports.parent / "done"
+def wait_for(path):
+    deadline = time.monotonic() + 10
+    while not path.exists():
+        if time.monotonic() > deadline: raise TimeoutError("peer scan did not finish")
+        time.sleep(0.01)
+def scan(command, **kwargs):
+    global private
+    private = Path(command[command.index("--output") + 1])
+    if kind == "clean": wait_for(ready)
+    completed = _scanner_process({} if kind == "clean" else {"high": 1})(command, **kwargs)
+    if kind != "clean":
+        ready.touch()
+        wait_for(done)
+    return completed
+guard._locate_scanner = lambda _: "skill-scanner"
+guard.subprocess.run = scan
+result = guard.run_skill_scan(skills, report_dir=reports)
+if kind == "clean": done.touch()
+print(json.dumps({"passed": result.passed, "private": str(private.parent)}))
+'''
+
+
+def test_independent_processes_keep_own_scan_evidence(scan_subject):
+    skills, reports, _ = scan_subject
+    workers = []
+    try:
+        for kind in ("unsafe", "clean"):
+            workers.append(subprocess.Popen(
+                [sys.executable, "-B", "-c", _SCAN_PROCESS, str(skills), str(reports), kind],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
+            ))
+        results = []
+        for worker in workers:
+            stdout, stderr = worker.communicate(timeout=20)
+            assert worker.returncode == 0, stderr
+            results.append(json.loads(stdout))
+    finally:
+        for worker in workers:
+            if worker.poll() is None:
+                worker.kill()
+            worker.wait(timeout=5)
+    assert [result["passed"] for result in results] == [False, True]
+    assert results[0]["private"] != results[1]["private"]
+    assert all(not Path(result["private"]).exists() for result in results)
+    assert [path.name for path in reports.iterdir()] == ["openclaw_skill_scan_report.json"]
+
+
 def test_run_skill_scan_reports_missing_scanner(tmp_path: Path):
     """Scanner unavailable: available=False, passed=False (WSP 95 fail-closed)."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
+    skills_dir = _wardrobe(tmp_path)
 
     with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value=None):
         result = run_skill_scan(skills_dir=skills_dir)
@@ -98,11 +244,7 @@ def test_run_skill_scan_reports_missing_scanner(tmp_path: Path):
 
 def test_run_skill_scan_passes_on_zero_exit(tmp_path: Path, monkeypatch):
     """Scanner runs successfully with no findings: passed=True."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
+    skills_dir = _wardrobe(tmp_path)
 
     monkeypatch.setenv("SYNTHETIC_SECRET", "must-not-reach-scanner")
     with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value="skill-scanner"):
@@ -120,7 +262,10 @@ def test_run_skill_scan_passes_on_zero_exit(tmp_path: Path, monkeypatch):
     assert "--recursive" in command
     assert "SYNTHETIC_SECRET" not in mock_run.call_args.kwargs["env"]
     assert result.report_path is not None
-    assert mock_run.call_args.kwargs["env"]["TMP"] == str(Path(result.report_path).parent)
+    private_report = Path(command[command.index("--output") + 1])
+    assert mock_run.call_args.kwargs["env"]["TMP"] == str(private_report.parent)
+    assert private_report.parent.parent == Path(result.report_path).parent
+    assert not private_report.parent.exists()
 
 
 def test_run_skill_scan_uses_exact_skillz_bundle_contract(tmp_path: Path):
@@ -169,11 +314,7 @@ def test_run_skill_scan_blocks_single_skill_at_threshold(tmp_path: Path):
 
 def test_run_skill_scan_fails_on_nonzero_exit(tmp_path: Path):
     """Scanner exits with error code: passed=False."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
+    skills_dir = _wardrobe(tmp_path)
 
     class _Completed:
         returncode = 3
@@ -220,150 +361,32 @@ def test_run_skill_scan_rejects_linked_skill_root(tmp_path: Path):
 
 def test_run_skill_scan_high_severity_blocks(tmp_path: Path):
     """High severity findings exceed medium threshold: passed=False (WSP 95)."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
-    report_dir = tmp_path / "reports"
-    report_dir.mkdir()
-
-    # Create a report with high severity findings
-    report_path = report_dir / "openclaw_skill_scan_report.json"
-    report_path.write_text(json.dumps({
-        "summary": {
-            "findings_by_severity": {
-                "high": 1,
-                "medium": 0,
-                "low": 0,
-            }
-        }
-    }))
-
-    with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value="skill-scanner"):
-        with patch(
-            "modules.communication.moltbot_bridge.src.skill_safety_guard.subprocess.run",
-            side_effect=_scanner_process({"high": 1, "medium": 0, "low": 0}),
-        ):
-            result = run_skill_scan(
-                skills_dir=skills_dir,
-                max_severity="medium",  # Threshold is medium, high exceeds it
-                report_dir=report_dir,
-            )
-
+    result = _threshold_scan(tmp_path, {'high': 1, 'medium': 0, 'low': 0}, 'medium')
     assert result.available is True
-    assert result.passed is False  # High severity blocked by medium threshold
+    assert result.passed is False
 
 
 def test_run_skill_scan_medium_at_threshold_blocks(tmp_path: Path):
     """Medium severity at medium threshold: passed=False (at-or-above blocks)."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
-    report_dir = tmp_path / "reports"
-    report_dir.mkdir()
-
-    report_path = report_dir / "openclaw_skill_scan_report.json"
-    report_path.write_text(json.dumps({
-        "summary": {
-            "findings_by_severity": {
-                "medium": 2,
-                "low": 1,
-            }
-        }
-    }))
-
-    with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value="skill-scanner"):
-        with patch(
-            "modules.communication.moltbot_bridge.src.skill_safety_guard.subprocess.run",
-            side_effect=_scanner_process({"medium": 2, "low": 1}),
-        ):
-            result = run_skill_scan(
-                skills_dir=skills_dir,
-                max_severity="medium",
-                report_dir=report_dir,
-            )
-
-    assert result.passed is False  # Medium at medium threshold blocks
+    result = _threshold_scan(tmp_path, {'medium': 2, 'low': 1}, 'medium')
+    assert result.passed is False
 
 
 def test_run_skill_scan_low_below_threshold_allows(tmp_path: Path):
     """Low severity below medium threshold: passed=True (WSP 95)."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
-    report_dir = tmp_path / "reports"
-    report_dir.mkdir()
-
-    report_path = report_dir / "openclaw_skill_scan_report.json"
-    report_path.write_text(json.dumps({
-        "summary": {
-            "findings_by_severity": {
-                "low": 5,
-                "info": 10,
-            }
-        }
-    }))
-
-    with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value="skill-scanner"):
-        with patch(
-            "modules.communication.moltbot_bridge.src.skill_safety_guard.subprocess.run",
-            side_effect=_scanner_process({"low": 5, "info": 10}),
-        ):
-            result = run_skill_scan(
-                skills_dir=skills_dir,
-                max_severity="medium",
-                report_dir=report_dir,
-            )
-
-    assert result.passed is True  # Low severity allowed at medium threshold
+    result = _threshold_scan(tmp_path, {'low': 5, 'info': 10}, 'medium')
+    assert result.passed is True
 
 
 def test_run_skill_scan_critical_severity_always_blocks(tmp_path: Path):
     """Critical severity always blocks regardless of threshold (WSP 95)."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
-    report_dir = tmp_path / "reports"
-    report_dir.mkdir()
-
-    report_path = report_dir / "openclaw_skill_scan_report.json"
-    report_path.write_text(json.dumps({
-        "summary": {
-            "findings_by_severity": {
-                "critical": 1,
-            }
-        }
-    }))
-
-    with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value="skill-scanner"):
-        with patch(
-            "modules.communication.moltbot_bridge.src.skill_safety_guard.subprocess.run",
-            side_effect=_scanner_process({"critical": 1}),
-        ):
-            # Even with high threshold, critical should block
-            result = run_skill_scan(
-                skills_dir=skills_dir,
-                max_severity="high",
-                report_dir=report_dir,
-            )
-
-    assert result.passed is False  # Critical blocked even at high threshold
+    result = _threshold_scan(tmp_path, {'critical': 1}, 'high')
+    assert result.passed is False
 
 
 def test_run_skill_scan_rejects_missing_or_stale_report(tmp_path: Path):
     """A zero exit cannot reuse prior safe evidence or pass without a report."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
+    skills_dir = _wardrobe(tmp_path)
     report_dir = tmp_path / "reports"
     report_dir.mkdir()
     report_path = report_dir / "openclaw_skill_scan_report.json"
@@ -416,11 +439,7 @@ def test_run_skill_scan_rejects_malformed_single_skill_evidence(tmp_path: Path):
 
 def test_run_skill_scan_timeout_is_stable_failure(tmp_path: Path):
     """Scanner timeout is normalized without escaping exception details."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
+    skills_dir = _wardrobe(tmp_path)
 
     with patch(
         "modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which",
@@ -439,11 +458,7 @@ def test_run_skill_scan_timeout_is_stable_failure(tmp_path: Path):
 
 def test_run_skill_scan_rejects_unknown_threshold(tmp_path: Path):
     """An unknown policy threshold cannot silently become medium."""
-    skills_dir = tmp_path / "skills"
-    skills_dir.mkdir()
-    (skills_dir / "sample").mkdir()
-    (skills_dir / "sample" / "SKILL.md").write_text("# test", encoding="utf-8")
-    _write_manifest(skills_dir)
+    skills_dir = _wardrobe(tmp_path)
 
     with patch(
         "modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which",
@@ -485,13 +500,9 @@ def test_run_skill_scan_blocks_on_manifest_hash_mismatch(tmp_path: Path):
 
 def test_openclaw_dae_required_mode_blocks_when_scanner_missing():
     """Required mode: scanner unavailable => route blocked (WSP 95 fail-closed)."""
-    from modules.communication.moltbot_bridge.src.openclaw_dae import OpenClawDAE
     from modules.communication.moltbot_bridge.src.skill_safety_guard import SkillScanResult
 
-    dae = OpenClawDAE()
-    dae._skill_scan_required = True
-    dae._skill_scan_enforced = True
-    dae._skill_scan_ttl_sec = 0  # Force re-scan
+    dae = _openclaw_dae(ttl=0)
 
     mock_result = SkillScanResult(
         available=False,
@@ -514,13 +525,9 @@ def test_openclaw_dae_required_mode_blocks_when_scanner_missing():
 
 def test_openclaw_dae_required_mode_allows_when_scanner_passes():
     """Required mode: scanner passes => route allowed."""
-    from modules.communication.moltbot_bridge.src.openclaw_dae import OpenClawDAE
     from modules.communication.moltbot_bridge.src.skill_safety_guard import SkillScanResult
 
-    dae = OpenClawDAE()
-    dae._skill_scan_required = True
-    dae._skill_scan_enforced = True
-    dae._skill_scan_ttl_sec = 0
+    dae = _openclaw_dae(ttl=0)
 
     mock_result = SkillScanResult(
         available=True,
@@ -542,12 +549,8 @@ def test_openclaw_dae_required_mode_allows_when_scanner_passes():
 
 def test_openclaw_dae_cache_ttl_prevents_rescan():
     """Cache TTL: cached result used within TTL window (WSP 95)."""
-    from modules.communication.moltbot_bridge.src.openclaw_dae import OpenClawDAE
 
-    dae = OpenClawDAE()
-    dae._skill_scan_required = True
-    dae._skill_scan_enforced = True
-    dae._skill_scan_ttl_sec = 300  # 5 minute TTL
+    dae = _openclaw_dae(ttl=300)
 
     # Seed cached state
     dae._skill_scan_checked_at = time.time()

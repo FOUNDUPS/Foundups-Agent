@@ -1136,9 +1136,9 @@ Token symbol resolution:
 ### Security
 - Non-commanders: ADVISORY only (no mutations)
 - COMMAND/SYSTEM intents blocked for non-commanders (WSP 50)
-- `run_skill_scan(skills_dir, report_dir=...)` invokes Cisco `scan --skill-file
-  SKILLz.md` for a bundle or recursive `scan-all` for a wardrobe; failures close.
-  Its stable result is supply-chain evidence, never effect or promotion authority.
+- `run_skill_scan(skills_dir, report_dir=...)` owns private report/TMP files per call,
+  validates before publishing a mutable latest diagnostic, and fails closed on errors.
+  [Full scanner contract](README.md#skill-safety-gate-cisco-skill-scanner): evidence grants no effect/promotion authority.
 - Secret patterns (AIza*, sk-*, oauth_token*) redacted from output
 - Key-isolation mode:
   - `OPENCLAW_NO_API_KEYS=1` blocks cloud provider fallback in conversation/FAM paths.

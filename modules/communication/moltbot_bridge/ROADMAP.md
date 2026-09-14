@@ -1,5 +1,13 @@
 # moltbot_bridge Roadmap
 
+## Local RSI scanner checkpoint — 2026-09-15
+
+Private report ownership is locally verified with independent processes and
+reentrant callers: 166 connected passes/four existing link skips. Reuse the
+[current RSI selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15):
+per-execution fingerprint handoff 17/P0; existing OpenClaw workspace cache
+content/policy ownership follows at 16/P0. R11 remains partial. No runtime admission.
+
 - PARTIAL R11-B ACTIVATION RECOVERY: existing authority activation now reconciles
   exact committed success after lost acknowledgment or competing revisions.
   204 connected tests, 8 manifest tests and 15 fast groups pass. Continue the

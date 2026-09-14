@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-14. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-15. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#admission-cache-ownership-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -47,15 +47,18 @@ The existing backlog points to the current ranked observation; historical packet
 scores below retain their original planning scope. Standing local authorization
 and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
-## Current delivery checkpoint — 2026-09-14
+## Current delivery checkpoint — 2026-09-15
 
-The [admission-cache ownership checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#admission-cache-ownership-checkpoint--2026-09-14)
-repairs refresh ownership, policy reuse and bounded retention in the existing
-WRE cache. **148 connected tests pass with four existing link-related skips**;
+The [scan-report ownership checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#scan-report-ownership-checkpoint--2026-09-15)
+isolates each WRE/OpenClaw scan's working report and retains the existing mutable
+latest diagnostic. **166 connected tests pass with four existing link skips**;
 8 manifest tests and 15 RedDog fast groups pass. Fresh WSP 15/WSP 97 selects
-scanner report ownership **17/P0** for disposable reproduction. Separate cache
-owners/processes and per-execution admission still need proof; production RSI
-remains incomplete.
+per-execution fingerprint handoff **17/P0** for current-source reproduction.
+Full coordinator concurrency, independent runtime admission and production RSI
+remain incomplete.
+
+Admission-cache PR [#1744](https://github.com/FOUNDUPS/Foundups-Agent/pull/1744)
+merged as `8682d569b1022f35fd357af6b3b20e4b5ce52a7e`; both main workflows passed.
 
 PatternMemory PR [#1743](https://github.com/FOUNDUPS/Foundups-Agent/pull/1743)
 merged as `cfe510f4198de3d1339be6a124b2f529d3d99c79`; main CI and CodeQL passed.

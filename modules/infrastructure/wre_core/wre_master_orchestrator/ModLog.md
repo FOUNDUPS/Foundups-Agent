@@ -1,5 +1,9 @@
 # WRE Master Orchestrator - Module Development Log
 
+## 2026-09-15: Reconcile the scanner ownership follow-on
+
+- Root WRE/bridge checkpoint verifies private report ownership; all 23 existing coordinator cases pass within 166 connected passes/four existing link skips. The projection now points to per-execution fingerprint handoff at 17/P0. Coordinator source is unchanged and whole-coordinator concurrency remains unproved. Evidence: `scan_report_ownership_continuation_20260915`; WSP 15/22/50/97.
+
 ## 2026-09-14: Preserve configured severity in cache readback
 
 - `_ensure_wre_skill_safety()` passes its configured severity to the existing
