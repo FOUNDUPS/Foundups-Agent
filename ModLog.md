@@ -1,5 +1,10 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI completed-run report accounting
+
+- Extended the existing WRE AutoResearcher report/TSV with truthful attempt/evaluation/outcome denominators, cap binding and acceptance-failure metrics.51 tests pass; five ten-attempt controls/replay pass without source or provider effects.
+- Root/module roadmap and existing backlog/observations reconcile the partial reporting parent; terminal/aborted evidence is next 15/P1. Prior PR1749/main workflows closed; new Detect-AI PR1751 remains external. Registry/package inputs unchanged. Evidence: `research_report_accounting_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: RSI per-call verdict handoff
 
 - Closed stale diagnostic-verdict reads and observed scan-policy drift in the existing OpenClaw guard. Local: 211 passes/four skips,8 manifest tests and 15 fast groups; one runtime hash and both pins, no new module/skill/test file. Exact source, failures and limits: `workspace_verdict_handoff_continuation_20260915`.

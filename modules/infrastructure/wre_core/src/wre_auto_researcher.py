@@ -129,6 +129,8 @@ class WREAutoResearcher:
         runner: Optional[IGitRunner] = None,
         results_dir: Optional[Path] = None,
     ):
+        if type(max_iterations) is not int or max_iterations < 0:
+            raise ValueError("max_iterations must be a non-negative integer")
         self.target_path = Path(target_path)
         self.program_path = Path(program_path)
         self.max_iterations = max_iterations
@@ -175,11 +177,13 @@ class WREAutoResearcher:
     def _log_to_tsv(self, iteration: int, status: str, metrics: Dict, info: str = ""):
         """Log iteration results in a TSV format in the isolated directory."""
         timestamp = int(time.time())
-        fitness = metrics.get("fitness", 0.0)
-        roc = metrics.get("roc_ratio", 0.0)
-        margin = metrics.get("monthly_margin_usd", 0.0)
+        values = (metrics.get("fitness"), metrics.get("roc_ratio"), metrics.get("monthly_margin_usd"))
+        numbers = "\t".join(
+            "" if value is None else format(value, spec)
+            for value, spec in zip(values, (".6f", ".6f", ".2f"))
+        )
         safe_info = _sanitize_tsv_field(info)
-        row = f"{timestamp}\t{iteration}\t{status}\t{fitness:.6f}\t{roc:.6f}\t{margin:.2f}\t{safe_info}\n"
+        row = f"{timestamp}\t{iteration}\t{status}\t{numbers}\t{safe_info}\n"
         with open(self.results_path, "a", encoding="utf-8") as f:
             f.write(row)
 
@@ -194,7 +198,10 @@ class WREAutoResearcher:
 
     def _run_loop(self) -> Dict:
         """Evaluate proposals only after a valid baseline has been established."""
-        print(f"[AUTO-RESEARCHER] Starting research loop (max_iterations={self.max_iterations}, dry_run={self.dry_run})")
+        requested = self.max_iterations
+        if type(requested) is not int or requested < 0:
+            raise ValueError("max_iterations must be a non-negative integer")
+        print(f"[AUTO-RESEARCHER] Starting research loop (max_iterations={requested}, dry_run={self.dry_run})")
 
         # Baseline evaluation on working copy
         baseline_metrics = evaluate_target(self.working_target_path)
@@ -208,13 +215,15 @@ class WREAutoResearcher:
         best_metrics = baseline_metrics
         history: List[Dict] = []
 
-        for iteration in range(1, self.max_iterations + 1):
-            print(f"\n--- Iteration {iteration}/{self.max_iterations} ---")
+        for iteration in range(1, requested + 1):
+            print(f"\n--- Iteration {iteration}/{requested} ---")
             
             # 1. Propose change
             proposed_code = self._propose_change(best_code, best_metrics, history)
             if not proposed_code:
                 print("[WARNING] Could not generate new proposal. Skipping.")
+                self._log_to_tsv(iteration, "no_proposal", {}, "No proposal generated")
+                history.append({"iteration": iteration, "status": "no_proposal"})
                 continue
 
             # 2. Write proposed code to sandboxed working target copy
@@ -241,10 +250,10 @@ class WREAutoResearcher:
                 # 4. Compare and commit/rollback
                 if metrics["fitness"] > best_metrics["fitness"]:
                     print(f"[ACCEPTED] Fitness improved: {best_metrics['fitness']:.4f} -> {metrics['fitness']:.4f}")
-                    best_code = proposed_code
-                    best_metrics = metrics
                     self._commit(iteration, metrics)
                     self._log_to_tsv(iteration, "accepted", metrics, f"Improved from {best_metrics['fitness']:.4f}")
+                    best_code = proposed_code
+                    best_metrics = metrics
                     history.append({
                         "iteration": iteration,
                         "status": "accepted",
@@ -268,25 +277,9 @@ class WREAutoResearcher:
                 self._log_to_tsv(iteration, "crashed", {}, str(eval_err))
                 history.append({"iteration": iteration, "status": "crashed", "error": str(eval_err)})
 
-        summary = {
-            "baseline": baseline_metrics,
-            "optimized": best_metrics,
-            "improvement": best_metrics["fitness"] - baseline_metrics["fitness"],
-            "iterations_run": self.max_iterations,
-            "history": history,
-            "dry_run": self.dry_run,
-        }
-
-        print("\n" + "=" * 50)
-        print("OPTIMIZATION SUMMARY")
-        print("=" * 50)
-        print(f"Baseline Fitness:  {summary['baseline']['fitness']:.4f}")
-        print(f"Optimized Fitness: {summary['optimized']['fitness']:.4f}")
-        print(f"ROC Improvement:   {summary['improvement']:.4f}")
-        print(f"ROI Sustainable:   {summary['optimized']['is_roi_sustainable']}")
-        print("=" * 50)
-
-        return summary
+        return _summarize_run(
+            baseline_metrics, best_metrics, history, self.dry_run, requested
+        )
 
     def _rollback(self, fallback_code: str):
         """Rollback modifications using injected Git runner and restore file state."""
@@ -419,6 +412,38 @@ AGENT_PREMIUM_MULTIPLIERS = {repr(multipliers)}
                 parsed_lines.append(line)
 
         return "\n".join(parsed_lines)
+
+
+def _summarize_run(baseline: Dict, best: Dict, history: List[Dict], dry_run: bool, requested: int) -> Dict:
+    """Account for completed attempts; independent evidence and cost remain unknown."""
+    statuses = ("no_proposal", "accepted", "rejected", "failed_validation", "crashed")
+    counts = {status: sum(row["status"] == status for row in history) for status in statuses}
+    summary = {
+        "baseline": baseline,
+        "optimized": best,
+        "improvement": best["fitness"] - baseline["fitness"],
+        "iterations_run": len(history),
+        "history": history,
+        "dry_run": dry_run,
+        "attempts_requested": requested,
+        "attempts_started": len(history),
+        "baseline_evaluations": 1,
+        "candidate_evaluations": len(history) - counts["no_proposal"],
+        "outcome_counts": counts,
+        "independently_verified": None,
+        "retained_improvements": None,
+        "resource_usage": None,
+    }
+    print("\n" + "=" * 50)
+    print("OPTIMIZATION SUMMARY")
+    print("=" * 50)
+    print(f"Baseline Fitness:  {summary['baseline']['fitness']:.4f}")
+    print(f"Optimized Fitness: {summary['optimized']['fitness']:.4f}")
+    print(f"ROC Improvement:   {summary['improvement']:.4f}")
+    print(f"ROI Sustainable:   {summary['optimized']['is_roi_sustainable']}")
+    print(f"Attempts: {len(history)}/{requested}; candidate evaluations: {summary['candidate_evaluations']}")
+    print("=" * 50)
+    return summary
 
 
 def _isolated_run_directory(results_dir: Optional[Path]) -> Path:

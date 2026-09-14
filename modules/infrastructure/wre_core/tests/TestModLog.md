@@ -1,3 +1,10 @@
+## 2026-09-15: Research report denominator and acceptance regression
+
+- Extended the existing researcher test file with 16 cases: seven outcome sequences, six invalid caps, two acceptance-recording failures and one mutable-cap regression. All original tests/fixtures remain AST-identical; model construction is disabled before setup.
+- Initial 15 failed/35 passed; initial repair 50 passed. Added cap snapshot test:1 failed/50 passed, then51 passed. Reused-instance invalid caps:6 failed/45 passed, then final 51 passed in 1.08s. These runs overlap and are not summed.
+- Five final ten-attempt diagnostics validate report/history/TSV agreement with actual evaluator calls and blank missing metrics.50 attempts,40 candidates,five baselines; all11-row logs complete for normal returns. Source/mtime and scratch restoration hold; seed97 replay matches.
+- Source 491/test585 lines; class/loop shrink. Registry 1650/269 unchanged; no backend package source affected. No terminal persistence, independent verifier, provider or live FoundUp proof. Commands/hashes/failures: `research_report_accounting_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
 ## 2026-09-15: Execution-owned fingerprint regression
 
 ## 2026-09-15: Launch/evaluation diagnostic qualification

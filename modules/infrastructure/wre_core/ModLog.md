@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Completed-return research accounting
+
+- Existing researcher records missing proposals and reports requested/started attempts, baseline/candidate evaluations and five outcome counts. Invalid caps reject; invocation cap is frozen for loop/report. Unmeasured metrics stay blank/None.
+- Best metrics/code move only after successful acceptance recording; old improvement info names the prior fitness. Existing evaluator, runner and cleanup behavior remain; no terminal artifact or model/runtime admission added.
+- Initial 15 regressions failed/35 passed; cap-mutation and reused-instance cap checks exposed further gaps. Final 51 pass. Five ten-attempt controls report 50 attempts/40 candidates/five baselines and11 rows each; seeded6-accept/4-reject replay matches. Failures and overlapping intermediate runs preserved.
+- Source466→491, class 304→297, loop 95→84, tests 475→585. Bounded same-module summary function reduces inherited class/loop debt. Registry 1650/269 and package inputs unchanged. Existing parent report completeness remains partial15/P1 for terminal/aborted evidence; new Detect-AI PR1751 is disjoint. Evidence: `research_report_accounting_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: OpenClaw local verdict handoff
 
 - Reused WRE's local-result pattern in the existing OpenClaw policy; 211 connected tests/four existing link skips, 8 manifest tests and 15 fast groups pass. No WRE runtime source or admission changed.

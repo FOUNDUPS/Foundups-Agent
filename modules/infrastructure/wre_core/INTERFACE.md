@@ -74,6 +74,34 @@ instance paths; existing artifacts under the parent are not migrated or deleted.
 Parents resolving inside `REPO_ROOT` reject before mkdir. This is local namespace
 isolation under a stable filesystem, not process isolation or runtime admission.
 
+`max_iterations` must be a non-negative built-in integer; booleans and other
+types reject before constructor output/model work and before run baseline
+execution. Each run snapshots the cap for its loop, progress and returned report.
+Zero requests no proposal attempts and still evaluates one valid baseline.
+
+A successful `run()` retains the existing baseline/optimized/improvement/history/
+dry_run fields and adds completed-call accounting:
+
+| Field | Meaning |
+|---|---|
+| `attempts_requested` | Cap observed at invocation entry |
+| `attempts_started`, `iterations_run` | Actual attempts, including missing proposals |
+| `baseline_evaluations` | One valid baseline evaluation for a successful return |
+| `candidate_evaluations` | Evaluator calls, including validation/error results; excludes missing proposals |
+| `outcome_counts` | Counts for `no_proposal`, `accepted`, `rejected`, `failed_validation`, `crashed` |
+| `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence is available from this local producer |
+
+`history` and TSV now include one `no_proposal` record per missing proposal;
+unmeasured TSV metric cells are blank. `crashed` can reflect evaluation or later
+acceptance/logging work, so it is not an evaluator-only failure count. Best
+metrics advance only after acceptance recording succeeds; accepted info names
+the previous fitness. Existing exception propagation/cleanup semantics remain.
+These counts are returned only after successful cleanup; console output or a
+partial TSV is not a terminal receipt. Reusing an instance appends another
+baseline/iteration group to its TSV; immutable invocation IDs, source/oracle
+binding, aborted-run reports, resource measurement and launch reader qualification
+remain unimplemented. No runtime admission or production RSI claim follows.
+
 `WREAutoResearcher.run()` consumes those errors through its existing
 `failed_validation`/restore path. The negative-allocation regression proves it
 keeps baseline metrics and does not record a planned commit for the invalid

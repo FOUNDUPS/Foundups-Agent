@@ -2,13 +2,27 @@
 
 ## Current local RSI checkpoint — 2026-09-15
 
-OpenClaw now returns a local verdict and rejects observed scan-policy drift.
-**211 connected tests pass/four existing link skips**; eight manifest tests and
-15 fast groups pass. See the [bridge checkpoint](../../communication/moltbot_bridge/ROADMAP.md#local-rsi-scanner-checkpoint--2026-09-15).
-Fresh selection is **AutoResearcher report completeness 15/P1** before launch
-report integration. Latest diagnostics and atomic policy/dispatch binding remain
-separate contracts. No startup campaign, runtime admission or retained RSI proof.
-Prior TTL PR #1748 is merged and both main workflows passed.
+The existing ROC researcher now reports completed-call attempt/evaluation/outcome
+counts, including missing proposals, and retains the invocation's requested cap.
+Invalid caps reject before output/model work or baseline evaluation. Failed
+acceptance recording cannot advance best metrics; missing TSV metrics are blank.
+Unmeasured resources, independent verification and retained improvements are None.
+
+**51 tests pass**. Five ten-attempt controls report 50 attempts,40 candidate and
+five baseline evaluations; all five logs have 11 rows. Unchanged/invalid/missing
+controls have zero gain; seed97 and replay match 6 local acceptances/4 rejections.
+Those simulated gains establish no independent verification or retained RSI.
+Source 491/test585 lines; inherited class 304→297 and loop 95→84 shrink through a
+30-line summary function in the same owner. WRE Core maintainers retain the
+remaining class/loop decomposition after report/lifecycle contracts; no exemption.
+Registry 1650/269 and RedDog package inputs are unchanged; no new package run claimed.
+
+WSP15/97 retains **report completeness 15/P1** as a partial parent: next qualify
+terminal/aborted-run evidence and invocation/source/oracle identity in the existing
+run directory before launch display. Partial TSV/console output cannot certify
+completion; resource measurement and independent retention remain separate gates.
+Read `research_report_accounting_continuation_20260915` in the canonical observations.
+Prior OpenClaw PR1749 is merged at `b12d7540`; main CI and CodeQL passed.
 
 WRE Core maintainers retain the inherited PatternMemory schema/telemetry
 cohesion debt under WSP 62: the recorded ownership repair reduced the file 1,294→1,279 lines and
@@ -38,7 +52,7 @@ and a complete repository RSI cycle are different units.
 |---|---|---|
 | `main.py:run_wre_dashboard_preflight` and `src/dashboard_alerts.py` | Current startup health/sample warnings; may dispatch resolution events. Not an RSI benefit report or a wholly read-only path. | Extend the existing report/display seam after report-input qualification; do not infer learning from health/sample count. |
 | `main.py:_reddog_run_bounded_control_rounds` | Existing resident serial/claim rounds, configured default eight, idle/failure stops and receipt persistence. Count bounds alone are not time/cost bounds. | Compile an eligible campaign into current admitted jobs; retain stop, claim and receipt owners. No new ten-round default is enabled here. |
-| `src/wre_auto_researcher.py` / `src/wre_research_evaluator.py` | Isolated dry-run ROC configuration proposal/evaluation and per-run TSV; constructor attempts Qwen loading. | Complete attempt/evaluation/terminal reporting in this owner before using its results at launch. Keep its simulator judge task-specific. |
+| `src/wre_auto_researcher.py` / `src/wre_research_evaluator.py` | Isolated dry-run ROC configuration proposal/evaluation and per-run TSV; constructor attempts Qwen loading. | Completed-return accounting is implemented; terminal/aborted reports and source/oracle binding still precede launch reading. Keep its simulator judge task-specific. |
 | AI Gateway model AutoResearch | Existing [benchmark and feedback contracts](../../ai_intelligence/ai_gateway/INTERFACE.md#benchmark-evidence-and-outcome-receipts) bind task family/split, model, verifier, cost and latency. | Reuse for model selection under current provider budgets/admission. A model campaign is not a generic repository editor. |
 | WRE differential tests, independent slice verifier and PatternMemory | Existing [verification and retention contracts](INTERFACE.md#outcome-recording-and-retention). Production acceptance/activation and later benefit remain incomplete. | Bind accepted evidence to the exact artifact and prove a later invocation consumes it successfully; keep write/read/promotion authorities distinct. |
 

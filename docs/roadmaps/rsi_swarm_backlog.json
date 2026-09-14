@@ -1851,12 +1851,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "workspace_verdict_handoff_continuation_20260915",
-    "base_commit": "7c9e3b8dc3e74a26653d16f283a5208bcd32257b",
+    "section": "research_report_accounting_continuation_20260915",
+    "base_commit": "b12d75400b3ff819d42c191f87c46e3ed3022e74",
     "selected_action": "AutoResearcher-report-completeness",
-    "status": "selected_after_local_validation_reobserve_before_execution",
+    "status": "partial_accounting_closed_terminal_evidence_selected",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "workspace_verdict_handoff_continuation_20260915.post_sprint_reobservation"
+    "observation_path": "research_report_accounting_continuation_20260915.post_sprint_reobservation"
   }
 }

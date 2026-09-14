@@ -14323,5 +14323,889 @@
       ]
     },
     "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\workspace-verdict-handoff-20260915"
+  },
+  "research_report_accounting_continuation_20260915": {
+    "observed_at": "2026-09-14T20:25:33.794486+00:00",
+    "origin": "autonomous_trigger",
+    "role": "worker",
+    "base_commit": "b12d75400b3ff819d42c191f87c46e3ed3022e74",
+    "wsp00_gate": {
+      "gate_passed": true,
+      "attempted_awakening": false,
+      "awakening_success": false,
+      "is_zen_compliant": true,
+      "requires_awakening": false,
+      "last_validation": "2026-09-15T05:19:38.678566",
+      "session_id": 1789307432,
+      "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+      "action": "check"
+    },
+    "ranking_before": [
+      {
+        "task": "RedDog-extension-decomposition",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 20,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "independent-execution-verification-promotion",
+        "dimensions": {
+          "complexity": 5,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Independent runtime admission absent"
+      },
+      {
+        "task": "current-semantic-retrieval",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ]
+      },
+      {
+        "task": "RedDog-backend-closure-consolidation",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "RedDog-conversation-durable-adapters",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 5
+        },
+        "score": 19,
+        "priority": "P0",
+        "state": "external_owner",
+        "evidence": [
+          "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+        ],
+        "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+      },
+      {
+        "task": "integrated-mcp-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+      },
+      {
+        "task": "wre-openclaw-hermes-worker",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current signed job/model/runtime admission absent"
+      },
+      {
+        "task": "chroma-deployment",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 5,
+          "deferability": 4,
+          "impact": 5
+        },
+        "score": 17,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "Current deployment owner and runtime qualification"
+      },
+      {
+        "task": "R11-B-memory-acceptance-contract",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "partial_transaction_dependency",
+        "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+      },
+      {
+        "task": "authenticated-response-read",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 16,
+        "priority": "P0",
+        "state": "blocked",
+        "next_step": "012 reader-policy question remains unanswered"
+      },
+      {
+        "task": "AutoResearcher-report-completeness",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "score": 15,
+        "priority": "P1",
+        "state": "selected_for_local_completed_run_accounting",
+        "next_step": "Record missing proposals in existing history/TSV; report requested/started/baseline/candidate/outcome counts for successful returns; keep best metrics unchanged if acceptance processing fails. Preserve raised failures and cleanup; terminal persistence/provenance remain later layers.",
+        "effort": "One current researcher module plus its existing fixture/test suite and canonical docs.",
+        "cost": "No model/provider/scanner/FoundUp calls or installs. Existing deterministic simulations/fixtures only.",
+        "verification_burden": "Failing denominator/acceptance/cap regressions, full researcher suite, five controlled ten-attempt rehearsals, source preservation/size checks and registry. Backend manifest does not package this source."
+      },
+      {
+        "task": "OpenClaw-content-bound-cache-qualification",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 15,
+        "priority": "P1",
+        "state": "contract_eligible_live_measurement_blocked",
+        "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution."
+      },
+      {
+        "task": "protected-foundup-work",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "external",
+        "next_step": "YUMORI/eSingularity and separate autopost ownership"
+      },
+      {
+        "task": "PatternMemory-worker-lifecycle-integration",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "eligible_later",
+        "evidence": [
+          "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+        ],
+        "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+      },
+      {
+        "task": "auto-researcher-process-durability",
+        "dimensions": {
+          "complexity": 4,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 13,
+        "priority": "P1",
+        "state": "eligible-later",
+        "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+      },
+      {
+        "task": "OpenClaw-invocation-diagnostic-attribution",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3
+        },
+        "score": 12,
+        "priority": "P2",
+        "state": "partial_diagnostic_contract",
+        "evidence": [
+          "modules/communication/moltbot_bridge/src/openclaw_process_loop.py:115",
+          "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
+        ],
+        "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence."
+      }
+    ],
+    "selected_action": "AutoResearcher-report-completeness",
+    "score": 15,
+    "priority": "P1",
+    "rationale": "Highest currently eligible action after exact-main closure of1749. Higher-scored work remains separately owned or lacks current runtime/read/write authority; complete accounting is prerequisite to the planned launch report.",
+    "retrieval": {
+      "mode": "governed lexical bundle",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "workspace_head": "b12d75400b3ff819d42c191f87c46e3ed3022e74",
+      "noise": "Broad WRE README hits; targeted researcher/evaluator/test function windows used.",
+      "ordering": "Canonical module README/interface/roadmap/test logs and nearest fixtures read before source edit.",
+      "missing": [
+        "modules/infrastructure/wre_core/memory/README.md"
+      ],
+      "staleness": "Historical bootstrap remains archive only. Previous reviewed/merged trees match; no current semantic claim.",
+      "duplication": "Existing summary/TSV and evaluator reused; no other research-summary helper found. Large _run_loop and class must shrink as accounting moves into a cohesive function in this same module.",
+      "callers": "Tracked Python search finds this owner CLI and existing tests only; no newly wired generic main/WRE consumer.",
+      "requirements": "Existing requirements.txt present; no installation.",
+      "source_scope": "Previous c2744b23 reviewed tree equals main b12d7540. Current researcher/evaluator/tests/contracts read; archive context remains historical."
+    },
+    "alternatives": {
+      "selected": "Extend current returned report and TSV first, reusing proposal/evaluation and cleanup contracts.",
+      "full_campaign": "Terminal persistence, interrupted-run accounting, signed provenance, budgets and startup UI are separate layers.",
+      "new_reporter": "No new report module, registry, scheduler or skill; factor current summary code within its existing owner to reduce inherited size debt."
+    },
+    "manual_reason": "Small deterministic contract change and fixture validation; no model invocation is needed or admitted.",
+    "scope": "Authorized local dry-run source/test/docs only; no WRE/model/runtime/promotion admission. Preserve shared main and all external lanes.",
+    "runtime_admission": "No current model/WRE/promotion grant available to this lane.",
+    "prior_closure": {
+      "pr": 1749,
+      "merge_commit": "b12d75400b3ff819d42c191f87c46e3ed3022e74",
+      "ci_run": 34889020639,
+      "codeql_run": 34889020517,
+      "both_main_runs": "success"
+    },
+    "changes": {
+      "owner": "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+      "behavior": [
+        "Missing proposals now append no_proposal history/TSV rows with blank unmeasured metric cells.",
+        "Returned reports include requested/started attempts, baseline/candidate evaluations and five outcome counters; iterations_run is actual started-attempt count for completed returns.",
+        "Constructor and run entry reject invalid caps; range/progress/report use one invocation cap snapshot.",
+        "Best code/metrics update only after acceptance recording succeeds; accepted info records the prior fitness.",
+        "Independent verification, retained improvements and resource usage are None.",
+        "Existing summary formatting/accounting moved into a bounded function in the same module; evaluator, runner, target and program unchanged."
+      ],
+      "source_validation": {
+        "modules/infrastructure/wre_core/src/wre_auto_researcher.py": {
+          "before_lines": 466,
+          "after_lines": 491,
+          "classes_before": {
+            "IGitRunner": 20,
+            "DryRunGitRunner": 42,
+            "WREAutoResearcher": 304
+          },
+          "classes_after": {
+            "IGitRunner": 20,
+            "DryRunGitRunner": 42,
+            "WREAutoResearcher": 297
+          },
+          "functions_after": {
+            "_summarize_run": 30,
+            "_isolated_run_directory": 14,
+            "_sanitize_tsv_field": 4,
+            "restore": 10,
+            "commit": 3,
+            "diff": 7,
+            "__init__": 47,
+            "_init_results_file": 5,
+            "_log_to_tsv": 12,
+            "run": 8,
+            "_run_loop": 84,
+            "_rollback": 8,
+            "_commit": 23,
+            "_propose_change": 6,
+            "_propose_via_llm": 39,
+            "_propose_via_heuristic": 34,
+            "_parse_python_block": 16
+          },
+          "sha256_lf": "89745c6202c48016778b0d6d29180bca57b0ee398726a3a8629eaa85f27971c2",
+          "original_definitions_preserved_except": [
+            "__init__",
+            "_log_to_tsv",
+            "_run_loop"
+          ],
+          "new_functions": [
+            "_summarize_run"
+          ]
+        },
+        "modules/infrastructure/wre_core/src/wre_research_evaluator.py": {
+          "before_lines": 233,
+          "after_lines": 233,
+          "classes_before": {
+            "ResearchSustainabilityCalculator": 51
+          },
+          "classes_after": {
+            "ResearchSustainabilityCalculator": 51
+          },
+          "functions_after": {
+            "load_target_config_from_source": 18,
+            "load_target_config": 4,
+            "_coerce_metric_map": 17,
+            "evaluate_target": 93,
+            "__init__": 4,
+            "calculate_compute_revenue": 40
+          },
+          "sha256_lf": "490378c4e7d4b61dc179a83c9864f8846623f4e3a8eb3aa5c4431fa7164a9315",
+          "original_definitions_preserved_except": [],
+          "new_functions": []
+        },
+        "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py": {
+          "before_lines": 475,
+          "after_lines": 585,
+          "classes_before": {},
+          "classes_after": {},
+          "functions_after": {
+            "temp_research_env": 18,
+            "test_ast_denylist_for_execution": 32,
+            "test_evaluator_valid_target": 10,
+            "test_evaluator_rejects_invalid_input_before_simulation": 21,
+            "test_evaluator_keeps_valid_numeric_boundaries": 11,
+            "test_auto_researcher_rejects_impossible_allocation": 23,
+            "test_evaluator_does_not_execute_target_code": 34,
+            "test_auto_researcher_dry_run_contract": 44,
+            "test_repo_source_isolation_block": 21,
+            "test_results_tsv_path_isolation": 26,
+            "test_dry_run_restores_after_diff_interruption": 19,
+            "test_dry_run_restores_local_copy_when_cleanup_dependencies_fail": 38,
+            "test_invalid_baseline_stops_before_proposal": 20,
+            "test_commit_mode_fail_closed": 17,
+            "test_overlapping_research_runs_preserve_each_others_files": 30,
+            "test_research_target_named_like_log_keeps_separate_artifacts": 11,
+            "test_concurrent_research_construction_owns_distinct_directories": 14,
+            "test_completed_run_accounts_for_every_attempt": 46,
+            "test_invalid_attempt_cap_rejects_before_output": 13,
+            "test_failed_acceptance_preserves_reported_best": 24,
+            "test_report_keeps_invocation_attempt_cap": 11,
+            "unexpected_simulation": 2,
+            "interrupted_diff": 2,
+            "failed_restore": 2,
+            "unexpected_proposal": 2,
+            "construct": 3,
+            "propose": 3,
+            "evaluate": 11,
+            "fail": 2,
+            "fail_accepted": 2,
+            "failed_cleanup_output": 4
+          },
+          "sha256_lf": "8f33a23493de3babe1b466e0ff8bd474dbc1535b638ca80ded954ba54965dce6",
+          "original_definitions_preserved_except": [],
+          "new_functions": [
+            "test_failed_acceptance_preserves_reported_best",
+            "test_completed_run_accounts_for_every_attempt",
+            "test_report_keeps_invocation_attempt_cap",
+            "test_invalid_attempt_cap_rejects_before_output"
+          ]
+        }
+      },
+      "limits": [
+        "No successful summary on propagated baseline/proposal/diff/cleanup exceptions; existing TSV may be partial and is not a terminal receipt.",
+        "Repeated run() calls append baseline/iteration groups to the same instance TSV; no per-invocation immutable identity/reader contract is added.",
+        "Resource usage, independent verification and retained improvements remain None; 50 diagnostic attempts are not repository RSI cycles.",
+        "No model/runtime admission, production worker, startup campaign or protected FoundUp activity."
+      ]
+    },
+    "validation": {
+      "local": {
+        "focused-before": {
+          "tests": 50,
+          "failures": 15,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 1.513
+        },
+        "focused": {
+          "tests": 50,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 1.061
+        },
+        "focused-cap-before": {
+          "tests": 51,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 1.103
+        },
+        "focused-final": {
+          "tests": 51,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 1.095
+        },
+        "focused-invalid-run-before": {
+          "tests": 51,
+          "failures": 6,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 1.312
+        },
+        "focused-closure": {
+          "tests": 51,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 1.074
+        }
+      },
+      "commands": {
+        "focused-before": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-before-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-before.xml']",
+        "focused": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused.xml']",
+        "focused-cap-before": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-cap-before-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-cap-before.xml']",
+        "focused-final": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-final-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-final.xml']",
+        "focused-invalid-run-before": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-invalid-run-before-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-invalid-run-before.xml']",
+        "focused-closure": "['O:\\\\Foundups-Agent\\\\.venv\\\\Scripts\\\\python.exe', '-B', '-m', 'pytest', 'modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py', '--import-mode=importlib', '-p', 'pytest_asyncio.plugin', '-p', 'no:cacheprovider', '--tb=short', '-q', '--basetemp=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-closure-temp', '--junitxml=O:\\\\Foundups-Agent-audits\\\\20260909-rsi\\\\research-report-accounting-20260915\\\\focused-closure.xml']"
+      },
+      "rehearsal": {
+        "source_sha256": {
+          "modules/infrastructure/wre_core/src/wre_research_target.py": "c25157a7f2ef3e851a102c58f1152bf8f3918ccdb93663ca1d6ef695448dc1df",
+          "modules/infrastructure/wre_core/src/wre_research_program.md": "695275a000c7a1b6d6438a779fd10f4a31d33efdee13fc3ca60ab729c85fe3b8",
+          "modules/infrastructure/wre_core/src/wre_auto_researcher.py": "89745c6202c48016778b0d6d29180bca57b0ee398726a3a8629eaa85f27971c2",
+          "modules/infrastructure/wre_core/src/wre_research_evaluator.py": "dfa3d9adff23b28fc72f2236a3bc224e874abefa09c146e87d8df782b67b355a"
+        },
+        "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "seed": 97,
+        "attempt_slots": 50,
+        "candidate_evaluations": 40,
+        "baseline_evaluations": 5,
+        "cases": [
+          {
+            "case": "unchanged-control",
+            "attempts": 10,
+            "candidate_evaluations": 10,
+            "outcomes": {
+              "no_proposal": 0,
+              "accepted": 0,
+              "rejected": 10,
+              "failed_validation": 0,
+              "crashed": 0
+            },
+            "tsv_rows": 11,
+            "improvement": 0.0,
+            "elapsed_seconds": 0.024890700005926192,
+            "scratch_restored": true,
+            "source_unchanged": true
+          },
+          {
+            "case": "invalid-control",
+            "attempts": 10,
+            "candidate_evaluations": 10,
+            "outcomes": {
+              "no_proposal": 0,
+              "accepted": 0,
+              "rejected": 0,
+              "failed_validation": 10,
+              "crashed": 0
+            },
+            "tsv_rows": 11,
+            "improvement": 0.0,
+            "elapsed_seconds": 0.023233799962326884,
+            "scratch_restored": true,
+            "source_unchanged": true
+          },
+          {
+            "case": "missing-proposal-control",
+            "attempts": 10,
+            "candidate_evaluations": 0,
+            "outcomes": {
+              "no_proposal": 10,
+              "accepted": 0,
+              "rejected": 0,
+              "failed_validation": 0,
+              "crashed": 0
+            },
+            "tsv_rows": 11,
+            "improvement": 0.0,
+            "elapsed_seconds": 0.00604510004632175,
+            "scratch_restored": true,
+            "source_unchanged": true
+          },
+          {
+            "case": "heuristic-97",
+            "attempts": 10,
+            "candidate_evaluations": 10,
+            "outcomes": {
+              "no_proposal": 0,
+              "accepted": 6,
+              "rejected": 4,
+              "failed_validation": 0,
+              "crashed": 0
+            },
+            "tsv_rows": 11,
+            "improvement": 0.33304450568799315,
+            "elapsed_seconds": 0.026405900018289685,
+            "scratch_restored": true,
+            "source_unchanged": true
+          },
+          {
+            "case": "heuristic-97-replay",
+            "attempts": 10,
+            "candidate_evaluations": 10,
+            "outcomes": {
+              "no_proposal": 0,
+              "accepted": 6,
+              "rejected": 4,
+              "failed_validation": 0,
+              "crashed": 0
+            },
+            "tsv_rows": 11,
+            "improvement": 0.33304450568799315,
+            "elapsed_seconds": 0.02478289999999106,
+            "scratch_restored": true,
+            "source_unchanged": true
+          }
+        ],
+        "seeded_replay_matches": true,
+        "completed_repository_rsi_cycles": 0,
+        "resource_usage_claim": "External diagnostic wall time measured only; production provider/token/cost/retained benefit unmeasured.",
+        "artifact": "rehearsal-final/rehearsal-report.json"
+      },
+      "registry": "current1650/269 unchanged",
+      "packaging": {
+        "changed_runtime_members": [],
+        "manifest_members": 1400,
+        "manifest_sha256_lf": "19bbf47ba26d5187aab064db0390f63a39a38b178a9f43ffffca24852c84bd60",
+        "validation_scope": "Existing researcher module tests/rehearsal, AST denylist and registry. RedDog package files are unchanged; no new manifest/fast run claimed."
+      },
+      "preserved_failures": [
+        "Initial15 new regressions failed with35 existing passes;50 passed after initial repair.",
+        "One cap-mutation regression exposed requested99 for2 actual attempts; captured cap fixed it,51 passed.",
+        "Six reused-instance invalid-cap probes reached baseline evaluation; entry revalidation fixed them. Final51 passed.",
+        "First re-observation equality guard noticed a new peerPR1751; verified its Detect-AI docs are disjoint and added external ownership to the queue."
+      ],
+      "truth": "Counts describe successful local dry-run returns. Existing exceptions still propagate through scratch restoration; no terminal artifact or independent RSI proof. Prior/intermediate and final runs overlap and are not summed.",
+      "structural": {
+        "owned_paths": 14,
+        "prior_observations_preserved": 50,
+        "planning_packets_preserved": 26,
+        "doc_index_rows": 564,
+        "links_checked": 3,
+        "no_new_files_or_exemptions": true,
+        "source_and_final_rehearsal_hashes_match": true,
+        "wsp97_receipt_structurally_compliant": true,
+        "truth": "Structural/reference checks do not certify independent reasoning, runtime admission or retained benefit."
+      }
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T20:36:35.073109+00:00",
+      "origin_main": "b12d75400b3ff819d42c191f87c46e3ed3022e74",
+      "existing_96_open_heads_unchanged": true,
+      "open_pr_count": 97,
+      "ownership_changes": [
+        {
+          "pr": 1751,
+          "head": "fdc40bcc5f81792fa0764159d0e41b9ec14952df",
+          "scope": "modules/foundups/detect_ai documentation; disjoint external owner"
+        }
+      ],
+      "ranked_queue": [
+        {
+          "task": "RedDog-extension-decomposition",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 20,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ]
+        },
+        {
+          "task": "RedDog-backend-closure-consolidation",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "RedDog-conversation-durable-adapters",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "AutoResearcher-report-completeness",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "partial_selected_terminal_evidence",
+          "next_step": "Reuse the existing per-run artifact directory and TSV to qualify terminal/aborted-run reporting: exact invocation/source/oracle identity, started attempts and failures, truthful cleanup state, and partial-log rejection before launch display. Completed-return denominators and acceptance-failure metrics are now locally verified.",
+          "effort": "One current researcher module plus its existing fixture/test suite and canonical docs.",
+          "cost": "No model/provider/scanner/FoundUp calls or installs. Existing deterministic simulations/fixtures only.",
+          "verification_burden": "Failing denominator/acceptance/cap regressions, full researcher suite, five controlled ten-attempt rehearsals, source preservation/size checks and registry. Backend manifest does not package this source.",
+          "closed_scope": [
+            "completed-return attempt/evaluation/outcome accounting",
+            "immutable per-invocation cap reporting and invalid-cap rejection",
+            "best metrics update only after acceptance recording succeeds"
+          ],
+          "remaining_scope": [
+            "interrupted/terminal durable report",
+            "per-invocation/source/oracle identity",
+            "resource measurement",
+            "qualified read-only launch consumer",
+            "independent verification/retention"
+          ]
+        },
+        {
+          "task": "OpenClaw-content-bound-cache-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "contract_eligible_live_measurement_blocked",
+          "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution."
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        },
+        {
+          "task": "OpenClaw-invocation-diagnostic-attribution",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "state": "partial_diagnostic_contract",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_process_loop.py:115",
+            "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
+          ],
+          "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence."
+        },
+        {
+          "task": "Detect-AI-WSP109-intake",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 11,
+          "priority": "P2",
+          "state": "external_owner",
+          "evidence": [
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+          ],
+          "next_step": "Preserve the independently owned Detect-AI intake/docs lane; no source overlap with this researcher reporting repair and no runtime completion inferred."
+        }
+      ],
+      "selected_next": "AutoResearcher-report-completeness",
+      "score": 15,
+      "priority": "P1",
+      "rationale": "Completed-return accounting closes one reporting layer. Higher scored work still requires external ownership or independent current authority. Terminal/aborted-run evidence is the highest eligible next step for trustworthy launch reports; the tied cache work lacks broader qualification and admitted measurement. New Detect-AI intake is separately owned and disjoint.",
+      "limits": [
+        "No successful summary on propagated baseline/proposal/diff/cleanup exceptions; existing TSV may be partial and is not a terminal receipt.",
+        "Repeated run() calls append baseline/iteration groups to the same instance TSV; no per-invocation immutable identity/reader contract is added.",
+        "Resource usage, independent verification and retained improvements remain None; 50 diagnostic attempts are not repository RSI cycles.",
+        "No model/runtime admission, production worker, startup campaign or protected FoundUp activity."
+      ]
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\research-report-accounting-20260915"
   }
 }
