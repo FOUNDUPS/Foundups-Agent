@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,13 +49,15 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
-The [activation recovery checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14)
-repairs lost activation acknowledgments and competing revisions through the existing
-authority owner. **204 connected tests, 8 manifest tests and 15 fast groups passed.**
-R11-B remains partial: fresh WSP 15/WSP 97 selects the memory acceptance contract
-**16/P0**, binding the accepted row and decision to one future SQLite transaction
-under current independent write authority. Runtime activation and retained benefit
-remain open. This source repair introduces no production admission.
+The [research run isolation checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
+repairs overlapping Auto Researcher scratch/log storage through the existing runner.
+**35 local tests pass**, with models disabled and source templates preserved.
+R11 memory transaction binding remains partial. Fresh WSP 15/WSP 97 selects the
+existing PatternMemory shared-connection ownership investigation **17/P0**; reproduce
+it in disposable databases before changes. Production RSI remains incomplete.
+
+Activation recovery PR [#1740](https://github.com/FOUNDUPS/Foundups-Agent/pull/1740)
+merged as `9b056d641442022022925bb2ad4b934f621298e3`; its main CI and CodeQL passed.
 
 Visibility PR [#1739](https://github.com/FOUNDUPS/Foundups-Agent/pull/1739) merged
 as `21afc9108fec741ec883efacc47e542dc2461a7b`; its main CI and CodeQL passed.

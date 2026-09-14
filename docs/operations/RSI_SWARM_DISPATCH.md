@@ -324,6 +324,52 @@ transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
+### Research run isolation checkpoint — 2026-09-14
+
+Source: `9b056d641442022022925bb2ad4b934f621298e3`, merged PR
+[#1740](https://github.com/FOUNDUPS/Foundups-Agent/pull/1740); its main CI and
+CodeQL passed. WSP 00's software gate passed. Governed Holo lexical bundles name
+the clean owned source; UNKNOWN freshness/index gap remains navigation evidence.
+
+R11-B contract tracing found the existing `canonical_pattern_memory_admission_identity()`
+and its full record digest. Reuse it. The root outcome capability reserves/commits
+signatures; the protected-use oracle binds signer grants and signing-request
+digests. Neither currently composes the PatternMemory transaction. Resolve the
+existing WRE write-authorization and participant binding before wiring acceptance;
+unsigned metadata and read/signing capabilities are not a substitute. No new grant
+architecture or activation path is chosen here. R11 remains partial.
+
+WSP 97 reconciliation exposed an independent executable defect in the existing
+Auto Researcher: overlapping invocations reused one working filename and TSV log.
+Canonical WSP 15 scored its repair **3/4/4/4 = 15/P1**. Five failure cases reproduced
+the collision, target/log aliasing and mkdir-before-rejection behavior.
+
+`WREAutoResearcher(..., results_dir=parent)` now allocates a unique `run-*` child
+under that parent (or the existing default temp parent). Its `results_dir` is the
+actual run directory, `working_target_path` is `target/<original basename>` inside
+it, and `results_path` names its `results.tsv`. Initialization reports that path.
+Output parents resolving inside `REPO_ROOT` reject before mkdir. Cleanup restores
+only that run's target; original templates and other run logs remain separate.
+
+**35 tests pass** in the existing suite: four added cases plus the original 31,
+with all 47 original assertions preserved. Three setup/path definitions now use
+the actual run attributes and a disposable fake repository. Source/test files are
+466/475 lines; the inherited researcher class shrinks from 316 to 304 lines.
+Registry remains current at 1,650/269. These files are outside the unchanged RedDog
+runtime manifest, so package checks were not repeated. Tests disable model
+construction and use real files/concurrent threads. Process death, hostile storage,
+production authority and independently measured RSI benefit remain unproved.
+
+Fresh re-observation adds the existing WRE roadmap's **PatternMemory transaction
+ownership, 4/5/4/4 = 17/P0**, as the next eligible local investigation. Its default
+instances share a SQLite connection created with `check_same_thread=False`; that
+flag is not transaction ownership. Reproduce interleaving in disposable databases
+and inspect existing connection owners before editing. No live corruption is claimed.
+This candidate outranks the remaining 13/P1 Auto Researcher durability work; the
+previous next item does not automatically win. Exact ranking, source hashes, test
+commands and boundaries are in `research_run_isolation_continuation_20260914` in
+the existing baseline. All packets stay non-dispatchable; re-observe after closure.
+
 ### Activation recovery checkpoint — 2026-09-14
 
 Source: `21afc9108fec741ec883efacc47e542dc2461a7b`, merged PR

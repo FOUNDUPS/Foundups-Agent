@@ -8693,5 +8693,278 @@
       "external_boundaries": "Separate autopost; protected YUMORI/eSingularity; no production runtime or current reader-policy resolution."
     },
     "dispatchable": false
+  },
+  "research_run_isolation_continuation_20260914": {
+    "base_commit": "9b056d641442022022925bb2ad4b934f621298e3",
+    "origin": "autonomous_trigger",
+    "execution_plane": "authorized_local_source_authoring",
+    "status": "LOCAL_AUTORESEARCH_RUN_ISOLATION_VERIFIED",
+    "observed_at": "2026-09-14T12:01:04.532553+00:00",
+    "wsp00": {
+      "awakening_executed": true,
+      "tracked_state_writes": false,
+      "gate": {
+        "gate_passed": true,
+        "attempted_awakening": false,
+        "awakening_success": false,
+        "is_zen_compliant": true,
+        "requires_awakening": false,
+        "last_validation": "2026-09-14T20:53:13.675151",
+        "session_id": 1789307432,
+        "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+        "action": "check"
+      },
+      "truth_boundary": "Repository software gate only."
+    },
+    "previous_closure": {
+      "pr": 1740,
+      "head": "11c92dac8b65ba26fb0dacca1eb19ad6ad46ee2b",
+      "merge": "9b056d641442022022925bb2ad4b934f621298e3",
+      "main_ci": {
+        "run": 34837759092,
+        "conclusion": "success"
+      },
+      "codeql": {
+        "run": 34837758672,
+        "conclusion": "success"
+      }
+    },
+    "retrieval": {
+      "mode": "Existing query_once lexical fallback, correct owned workspace head; UNKNOWN/index gap/zero owner attempts in both saved bundles.",
+      "noise": "Initial broad memory/authority results were narrowed to exact owner functions; no missing required module docs.",
+      "ordering": "WSP00/15/97, current selection/contracts, signer/admission owners, then existing researcher and test inventory.",
+      "missing": "No admitted transaction participant supplied; optional memory README/requirements retrieved only if present.",
+      "staleness": "Semantic authority SHA differs from workspace; direct paths and Git source are used as navigation evidence only.",
+      "duplication": "Reuse existing researcher, tempfile and tests; do not create another journal, grant class, scheduler or test module."
+    },
+    "r11_contract_trace": {
+      "canonical_identity": "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py:canonical_pattern_memory_admission_identity",
+      "root_signing": "RootVerifiedOutcomeSigningAuthority reserves/commits signatures; descriptor binds pattern_memory_record_digest but supplies no memory transaction method.",
+      "protected_use": "RootAuthorizedSignerGrantRevocationOracle orders use of signer grants; current grant/request digest is not silently remapped to a memory transaction.",
+      "state": "Source contract mapping progressed; transaction participant binding remains unresolved. No new authority schema or production activation was created."
+    },
+    "ranking_before": {
+      "reference": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#activation_recovery_continuation_20260914.post_sprint_reobservation",
+      "fresh_reconciliation": "R11 transaction work cannot treat signing/read capabilities or unsigned admission metadata as write authority. Among independent source work, overlapping AutoResearcher runs have a concrete shared-scratch defect that must be repaired before reliable parallel experiments. 3/4/4/4=15/P1; physical-crash recovery remains13/P1.",
+      "selected": "AutoResearcher-overlapping-run-isolation",
+      "dimensions": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4
+      },
+      "score": 15,
+      "priority": "P1",
+      "effort_and_cost": "One existing source/test pair; deterministic fixture proposals and no provider/model dispatch. APIs must document that results_dir is a parent and results_path identifies a unique run."
+    },
+    "changes": {
+      "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+      "test": "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py",
+      "behavior": "Allocate a unique tempfile run directory under the requested/default parent. Keep the target under target/<basename> and its log at results.tsv; report the actual results path. Reject output parents resolving within REPO_ROOT before mkdir. Existing source templates, other runs and logs remain separate.",
+      "reuse": "Existing WREAutoResearcher, tempfile, DryRunGitRunner, evaluator and tests. No new module/test file/dependency or runtime grant.",
+      "api": "Constructor results_dir is an output parent; instance.results_dir is its allocated run. instance.working_target_path and instance.results_path identify actual artifacts. The only non-test constructor caller is the existing local CLI.",
+      "source_lines": 466,
+      "test_lines": 475,
+      "source_sha256": "e1975fc4abc85214a09a10abb3feb67fe676905a088fc0e2531b548cb9875714",
+      "test_sha256": "74680f00173dddb7c95d191646bdf07463cbef89a9fbef74b95c8ead04c6a867",
+      "class_lines_before": 316,
+      "class_lines_after": 304,
+      "unchanged_class_methods_except_constructor": true,
+      "original_assertions_preserved": 47
+    },
+    "validation": {
+      "before": {
+        "tests": 5,
+        "failures": 5,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0,
+        "seconds": 0.678,
+        "junit_sha256": "b33030563e926cf99c5ce0fd6617e5bbac5b0774ead81057df9b4bdb22d5bd80",
+        "log_sha256": "91f4d1d10f4c7f9148303ce5ff804738bce47b30912bc087209bf10bf77a57cc"
+      },
+      "final": {
+        "tests": 35,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 35,
+        "seconds": 0.805,
+        "junit_sha256": "c50bb633e3bef95b7c597b7bb7fd00587cedf61ddac4e857f702dd7d1ab02cad",
+        "log_sha256": "a5ddf23317019c08f73bf329c80cbbc8f7d1191a5caf65a586bc04b2ab05b391"
+      },
+      "scope": "Existing 31 cases plus four new cases: overlapping explicit/default-parent runs, target/log filename collision, concurrent construction. Strengthened existing repository-path case uses a disposable fake repo and proves rejection before directory creation. All 47 original assertions remain.",
+      "initial_pass": {
+        "cases": 35,
+        "seconds": 0.96,
+        "scope": "Before adding reported results-path assertion; final result supersedes it."
+      },
+      "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=<artifact-root>/focused-final --tb=short -q --junitxml=<artifact-root>/focused.xml",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "TEMP_TMP": "O:\\Foundups-Agent-audits\\20260909-rsi\\memory-acceptance-contract-20260914\\temp",
+        "FOUNDUPS_DB_PATH": "O:\\Foundups-Agent-audits\\20260909-rsi\\memory-acceptance-contract-20260914\\agent.db",
+        "WRE_PATTERN_MEMORY_DB": "O:\\Foundups-Agent-audits\\20260909-rsi\\memory-acceptance-contract-20260914\\patterns.db"
+      },
+      "registry": {
+        "current": true,
+        "tracked": 1650,
+        "quarantined": 269
+      },
+      "packaging": "Researcher and test are outside the unchanged RedDog runtime manifest; no package/pin edit or repeated package suite. Previous package evidence retains its PR1740 exact-byte scope.",
+      "limits": "Model construction disabled before initialization. Real disposable files and concurrent threads; no provider/model run, spawned-process isolation, hostile filesystem-race/volume proof, crash recovery, independent benefit measurement or runtime admission."
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T12:08:17.697912+00:00",
+      "origin_main": "9b056d641442022022925bb2ad4b934f621298e3",
+      "open_pr_count": 97,
+      "ranked_queue": [
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "PatternMemory-transaction-ownership",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "selected_for_current_source_reproduction",
+          "evidence": [
+            "modules/infrastructure/wre_core/ROADMAP.md#execution-truth-p0-follow-ons",
+            "modules/infrastructure/wre_core/src/pattern_memory.py:PatternMemory.__init__"
+          ],
+          "next_step": "Inspect/reproduce logical transaction interleaving on the existing shared connection and reuse current database ownership primitives. Keep default stores and active FoundUps untouched; use explicit disposable databases. No live corruption claim."
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Governed owner qualification; current fallback UNKNOWN/index gap"
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "YUMORI/eSingularity and separate autopost ownership"
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        }
+      ],
+      "selected_action": "PatternMemory-transaction-ownership",
+      "score": 17,
+      "priority": "P0",
+      "reconciliation": "Local AutoResearcher run namespace isolated; 35 tests pass. Current WRE roadmap separately identifies shared PatternMemory/cache ownership; constructor reuses one connection with check_same_thread=False and no explicit transaction owner in this class. Reproduce before changing it. This newly reconciled local candidate17/P0 outranks remaining AutoResearcher durability13/P1 and R11 contract16/P0.",
+      "closed_local": "AutoResearcher-overlapping-run-isolation",
+      "runtime_admission": false
+    },
+    "reader_policy": "Earlier 012 response-read question remains pending; no default or new read authority.",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\memory-acceptance-contract-20260914",
+    "dispatchable": false
   }
 }

@@ -36,12 +36,19 @@ Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionarie
 without executing target code. It now rejects negative/out-of-range allocations,
 non-finite values, booleans and unknown catalog agents before simulation;
 allocation totals must equal one within `1e-9`. An invalid negative allocation
-previously outscored the baseline. The [31 focused tests](tests/test_wre_auto_researcher.py)
+previously outscored the baseline. The [35 focused tests](tests/test_wre_auto_researcher.py)
 include invalid-input rejection, cancellation/failure cleanup and the invalid
 baseline gate. The producer restores its scratch baseline on Python exception
 exits and surfaces cleanup errors; process termination and storage failure are
 not a proven durable-recovery boundary. These simulated results
 are not independently verified RSI benefit or live economic evidence.
+
+Each constructor now allocates a unique `run-*` child under the requested/default
+output parent. Its target lives under `target/`; its `results.tsv` and cleanup stay
+within that run. Use `researcher.results_path` (also reported at initialization)
+and `researcher.working_target_path` to locate artifacts. Repository-local output
+parents reject before directory creation. The [current isolation checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
+records overlapping-run and filename-collision coverage; it does not activate a worker.
 
 ## Execution-truth pipeline
 

@@ -1,5 +1,14 @@
 # WRE Core Roadmap
 
+## Current local RSI checkpoint — 2026-09-14
+
+Auto Researcher run namespace isolation is locally verified in 35 tests: unique
+run directories, separate target/log paths, and no directory creation on rejected
+repository output. Current selection is [PatternMemory transaction ownership,
+17/P0](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14),
+already listed below. Reproduce the shared-connection behavior before repair;
+concurrency, process/volume durability and runtime admission are separate gates.
+
 ## Repository prioritization and closure
 
 Use the [canonical RSI selection loop](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)

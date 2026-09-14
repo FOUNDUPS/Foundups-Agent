@@ -15,7 +15,9 @@ import shutil
 import pytest
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Barrier
 
 # Add repo root to sys.path
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -23,6 +25,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from modules.infrastructure.wre_core.src.wre_research_evaluator import evaluate_target
+from modules.infrastructure.wre_core.src import wre_auto_researcher as researcher_module
 from modules.infrastructure.wre_core.src.wre_auto_researcher import WREAutoResearcher, DryRunGitRunner
 
 
@@ -249,16 +252,21 @@ def test_auto_researcher_dry_run_contract(temp_research_env, tmp_path):
     assert target_path.read_text(encoding="utf-8") == original_code
 
     # Check that the modified files only exist in the sandboxed runs folder
-    working_file = results_dir / target_path.name
+    working_file = researcher.working_target_path
+    assert researcher.results_dir.parent == results_dir.resolve()
+    assert working_file.parent.parent == researcher.results_dir
     assert working_file.exists()
 
 
-def test_repo_source_isolation_block(temp_research_env):
+def test_repo_source_isolation_block(temp_research_env, tmp_path, monkeypatch):
     """Verify WSP_97 path protection block when target_path resolves under REPO_ROOT."""
     target_path, program_path = temp_research_env
 
     # Point results_dir to be under REPO_ROOT to trigger PermissionError
-    repo_results_dir = Path(REPO_ROOT) / "modules" / "infrastructure" / "wre_core" / "src" / "sandbox_test"
+    isolated_repo = tmp_path / "repo"
+    isolated_repo.mkdir()
+    monkeypatch.setattr(researcher_module, "REPO_ROOT", isolated_repo)
+    repo_results_dir = isolated_repo / "sandbox_test"
 
     with pytest.raises(PermissionError) as exc_info:
         WREAutoResearcher(
@@ -270,9 +278,10 @@ def test_repo_source_isolation_block(temp_research_env):
         )
 
     assert "strictly prohibited" in str(exc_info.value)
+    assert not repo_results_dir.exists()
 
 
-def test_results_tsv_path_isolation(temp_research_env, tmp_path):
+def test_results_tsv_path_isolation(temp_research_env, tmp_path, capsys):
     """Verify results.tsv is written inside the custom directory, not in repo source."""
     target_path, program_path = temp_research_env
     results_dir = tmp_path / "sandbox_runs"
@@ -287,10 +296,13 @@ def test_results_tsv_path_isolation(temp_research_env, tmp_path):
     researcher.llm = None
     researcher.run()
 
-    # Check results file created under results_dir
-    expected_file = results_dir / "results.tsv"
+    # The requested directory is a parent; this invocation owns a unique run.
+    expected_file = researcher.results_path
+    assert researcher.results_dir.parent == results_dir.resolve()
+    assert expected_file.parent == researcher.results_dir
     assert expected_file.exists()
     assert "timestamp" in expected_file.read_text(encoding="utf-8")
+    assert str(expected_file) in capsys.readouterr().out
 
     # Ensure no results.tsv was written to repo source folder
     source_results = Path(REPO_ROOT) / "modules" / "infrastructure" / "wre_core" / "src" / "results.tsv"
@@ -399,3 +411,65 @@ def test_commit_mode_fail_closed(temp_research_env, tmp_path):
         )
     
     assert "SPECIFIED_NOT_IMPLEMENTED" in str(exc_info.value)
+
+
+@pytest.mark.parametrize("use_default", [False, True], ids=["explicit-parent", "default-parent"])
+def test_overlapping_research_runs_preserve_each_others_files(temp_research_env, tmp_path, monkeypatch, use_default):
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    original_mtime = target.stat().st_mtime_ns
+    monkeypatch.setattr(researcher_module.tempfile, "gettempdir", lambda: str(tmp_path / "default-temp"))
+    options = {} if use_default else {"results_dir": tmp_path / "runs"}
+    first = WREAutoResearcher(target, program, max_iterations=0, **options)
+    first_proposal = "# first proposal\n" + original
+    first.working_target_path.write_text(first_proposal, encoding="utf-8")
+    first._log_to_tsv(7, "first_only", {}, "first")
+    first_log = first.results_path.read_bytes()
+    second = WREAutoResearcher(target, program, max_iterations=0, **options)
+    assert first.working_target_path.read_text(encoding="utf-8") == first_proposal
+    assert first.results_path.read_bytes() == first_log
+    assert first.results_dir != second.results_dir
+    assert first.results_dir.parent == second.results_dir.parent
+    second_proposal = "# second proposal\n" + original
+    second.working_target_path.write_text(second_proposal, encoding="utf-8")
+    second._log_to_tsv(8, "second_only", {}, "second")
+    second_log = second.results_path.read_bytes()
+    first.run()
+    assert second.working_target_path.read_text(encoding="utf-8") == second_proposal
+    assert second.results_path.read_bytes() == second_log
+    assert "second_only" not in first.results_path.read_text(encoding="utf-8")
+    assert "first_only" not in second.results_path.read_text(encoding="utf-8")
+    second.run()
+    assert first.working_target_path.read_text(encoding="utf-8") == original
+    assert second.working_target_path.read_text(encoding="utf-8") == original
+    assert target.read_text(encoding="utf-8") == original
+    assert target.stat().st_mtime_ns == original_mtime
+
+
+def test_research_target_named_like_log_keeps_separate_artifacts(temp_research_env, tmp_path):
+    target, program = temp_research_env
+    original = target.read_bytes()
+    named_like_log = tmp_path / "results.tsv"
+    named_like_log.write_bytes(original)
+    researcher = WREAutoResearcher(named_like_log, program, max_iterations=0, results_dir=tmp_path / "runs")
+    researcher.run()
+    assert researcher.results_path != researcher.working_target_path
+    assert researcher.results_path.read_text(encoding="utf-8").startswith("timestamp\titeration\t")
+    assert researcher.working_target_path.read_text(encoding="utf-8") == named_like_log.read_text(encoding="utf-8")
+    assert named_like_log.read_bytes() == original
+
+
+def test_concurrent_research_construction_owns_distinct_directories(temp_research_env, tmp_path):
+    target, program = temp_research_env
+    barrier = Barrier(2)
+    def construct(_index):
+        barrier.wait(timeout=10)
+        return WREAutoResearcher(target, program, max_iterations=0, results_dir=tmp_path / "runs")
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        researchers = list(workers.map(construct, range(2)))
+    assert len({r.results_dir for r in researchers}) == 2
+    assert len({r.working_target_path for r in researchers}) == 2
+    assert len({r.results_path for r in researchers}) == 2
+    for researcher in researchers:
+        assert researcher.working_target_path.read_bytes() == target.read_bytes()
+        assert researcher.results_path.read_text(encoding="utf-8").startswith("timestamp\titeration\t")

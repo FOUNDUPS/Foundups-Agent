@@ -1,5 +1,15 @@
 # wre_core Test Suite
 
+## Auto Researcher run isolation
+
+Reuse `test_wre_auto_researcher.py` and its fixture that disables model construction
+before initialization. **35 tests pass**: overlapping explicit/default-parent runs,
+concurrent construction, target/log filename separation, rejection before mkdir,
+and the existing evaluator/lifecycle boundaries. Read the actual per-run
+`results_path` and `working_target_path`; the constructor argument is their parent.
+Use the existing O:-resident temporary/database setup below. These file/thread
+tests do not prove process/volume recovery or production admission.
+
 **Coverage claim:** focused contract coverage only
 **Framework:** pytest
 **Last verified:** 2026-08-27
