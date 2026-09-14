@@ -1,18 +1,29 @@
 # wre_core Test Suite
 
-## Completed-call researcher accounting
+## Terminal researcher reports
 
-Reuse `test_wre_auto_researcher.py` and its pre-construction model-disable fixture.
-Seven outcome mixes cover zero/all-missing/rejected/invalid/crashed/accepted/mixed
-calls; six cap cases reject before constructor output and baseline execution;
-two acceptance failures preserve best metrics; one cap-mutation case preserves
-the invocation's requested count. Original tests/fixtures remain AST-identical.
-**51 pass**, including existing AST execution denial and cleanup/isolation cases.
-Five ten-attempt controls use the real dry-run evaluator:50 attempts/40 candidates,
-five baselines and11 TSV rows per case. Seed97 replay matches; no provider call.
-Exact commands, source hashes and preserved failures are in
-`research_report_accounting_continuation_20260915`. Counts/rehearsals overlap with
-prior runs and do not prove terminal persistence, independent RSI or retained benefit.
+Reuse `test_wre_auto_researcher.py` and its unchanged pre-construction model-disable
+fixture. **66 pass**: baseline/proposal/diff/evaluator exceptions and cancellation,
+partial attempts, cleanup/output failures, allocation/write/publication failures,
+sequential reuse and prior-report preservation, plus existing validation/accounting.
+All 21 prior function/fixture names remain; 17 definitions are AST-identical, four
+are extended, and terminal tests reuse that fixture. All functions stay ≤50.
+The 681-line file crosses the infrastructure review guideline; keep the cohesive
+contract together while WRE maintainers track decomposition, without exemption.
+
+Five ten-attempt controls use the real evaluator: 50 attempts/40 candidate and five
+baseline evaluations. Saved terminal reports equal returns; seed97 replay matches
+except distinct invocation identity. Sources/mtime and scratch are preserved.
+Commands, failure reproductions and hashes are in
+`research_terminal_report_continuation_20260915`. Counts overlap with prior runs;
+these do not prove source/oracle authenticity, process/power durability, runtime
+admission or independently retained RSI. See INTERFACE for terminal/temporary-file rules.
+
+## Historical completed-call accounting
+
+PR1752's 51-pass checkpoint and its five ten-attempt controls remain recorded in
+`research_report_accounting_continuation_20260915`. Its completed-return accounting
+is extended by the terminal layer above; do not add overlapping test totals.
 
 ## Launch and evaluation evidence
 

@@ -1,3 +1,10 @@
+## 2026-09-15: Terminal reporting and failure boundaries
+
+- Extended four existing lifecycle/accounting tests with the unchanged model-disable fixture; all 21 prior function names retained, 17 definitions unchanged. Added namespace/publication assertions and repeated-call fault cases; total 66 pass in 1.49s.
+- Initial terminal expectations: 21 failed/39 passed; first repair: 60 passed. Partial counters/write faults: 64 passed. Allocation failure exposed skipped restoration: 1 failed/65 passed; final 66 passed. Runs overlap, not cumulative evidence.
+- Real filesystem controls cover separate reports, partial progress, keyboard interruption, failed runner/local writes/output, failed report write/replacement and preservation of earlier exceptions/reports. Five ten-attempt controls preserve source/mtime, restore scratch and match saved/returned JSON; seed97 replay differs only in invocation identity.
+- Source 524/test 681 lines; file review recorded in module ROADMAP, all test functions ≤50. Registry 1650/269 and package inputs unchanged. No authenticated source/oracle, power/process durability, independent verifier or live provider proof. Evidence: `research_terminal_report_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
 ## 2026-09-15: Research report denominator and acceptance regression
 
 - Extended the existing researcher test file with 16 cases: seven outcome sequences, six invalid caps, two acceptance-recording failures and one mutable-cap regression. All original tests/fixtures remain AST-identical; model construction is disabled before setup.

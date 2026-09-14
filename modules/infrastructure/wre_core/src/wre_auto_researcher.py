@@ -149,7 +149,7 @@ class WREAutoResearcher:
         # Load program instructions
         self.program_instructions = self.program_path.read_text(encoding="utf-8")
 
-        # Each invocation owns its scratch and log, even with the same parent.
+        # Each instance owns its scratch and log, even with the same parent.
         self.results_dir = _isolated_run_directory(results_dir)
         self.working_target_path = self.results_dir / "target" / self.target_path.name
         self.working_target_path.parent.mkdir()
@@ -188,23 +188,18 @@ class WREAutoResearcher:
             f.write(row)
 
     def run(self) -> Dict:
-        """Run the dry-run loop and restore its scratch baseline on every exit."""
-        try:
-            return self._run_loop()
-        finally:
-            if self.dry_run:
-                self._rollback(self.original_code)
-                print("\n[SAFETY] Scratch restored to original baseline.")
+        """Persist this invocation's terminal evidence after scratch cleanup."""
+        return _run_with_report(self)
 
-    def _run_loop(self) -> Dict:
+    def _run_loop(self, report: Dict):
         """Evaluate proposals only after a valid baseline has been established."""
-        requested = self.max_iterations
+        requested = report["attempts_requested"]
         if type(requested) is not int or requested < 0:
             raise ValueError("max_iterations must be a non-negative integer")
         print(f"[AUTO-RESEARCHER] Starting research loop (max_iterations={requested}, dry_run={self.dry_run})")
-
-        # Baseline evaluation on working copy
-        baseline_metrics = evaluate_target(self.working_target_path)
+        report["phase"] = "baseline"
+        report["baseline_evaluations"] += 1
+        baseline_metrics = report["baseline"] = evaluate_target(self.working_target_path)
         if "error" in baseline_metrics:
             self._log_to_tsv(0, "failed_baseline", baseline_metrics, baseline_metrics["error"])
             raise ValueError(f"Baseline validation failed: {baseline_metrics['error']}")
@@ -212,13 +207,14 @@ class WREAutoResearcher:
         self._log_to_tsv(0, "baseline", baseline_metrics, "Initial baseline parameters")
 
         best_code = self.original_code
-        best_metrics = baseline_metrics
-        history: List[Dict] = []
+        best_metrics = report["optimized"] = baseline_metrics
+        history = report["history"]
 
         for iteration in range(1, requested + 1):
             print(f"\n--- Iteration {iteration}/{requested} ---")
             
-            # 1. Propose change
+            report["phase"] = "proposal"
+            report["attempts_started"] += 1
             proposed_code = self._propose_change(best_code, best_metrics, history)
             if not proposed_code:
                 print("[WARNING] Could not generate new proposal. Skipping.")
@@ -226,7 +222,7 @@ class WREAutoResearcher:
                 history.append({"iteration": iteration, "status": "no_proposal"})
                 continue
 
-            # 2. Write proposed code to sandboxed working target copy
+            report["phase"] = "candidate_preparation"
             self.working_target_path.write_text(proposed_code, encoding="utf-8")
 
             # Calculate and display diff using injected runner
@@ -234,8 +230,9 @@ class WREAutoResearcher:
             print("[DIFF OF PROPOSAL]:")
             print(diff_text)
 
-            # 3. Evaluate proposed code on sandboxed working target copy
             try:
+                report["phase"] = "evaluation"
+                report["candidate_evaluations"] += 1
                 metrics = evaluate_target(self.working_target_path)
                 print(f"[EVALUATION] Fitness: {metrics.get('fitness'):.4f} (ROC: {metrics.get('roc_ratio'):.4f})")
 
@@ -253,7 +250,7 @@ class WREAutoResearcher:
                     self._commit(iteration, metrics)
                     self._log_to_tsv(iteration, "accepted", metrics, f"Improved from {best_metrics['fitness']:.4f}")
                     best_code = proposed_code
-                    best_metrics = metrics
+                    best_metrics = report["optimized"] = metrics
                     history.append({
                         "iteration": iteration,
                         "status": "accepted",
@@ -276,10 +273,6 @@ class WREAutoResearcher:
                 self._rollback(best_code)
                 self._log_to_tsv(iteration, "crashed", {}, str(eval_err))
                 history.append({"iteration": iteration, "status": "crashed", "error": str(eval_err)})
-
-        return _summarize_run(
-            baseline_metrics, best_metrics, history, self.dry_run, requested
-        )
 
     def _rollback(self, fallback_code: str):
         """Rollback modifications using injected Git runner and restore file state."""
@@ -414,36 +407,76 @@ AGENT_PREMIUM_MULTIPLIERS = {repr(multipliers)}
         return "\n".join(parsed_lines)
 
 
-def _summarize_run(baseline: Dict, best: Dict, history: List[Dict], dry_run: bool, requested: int) -> Dict:
-    """Account for completed attempts; independent evidence and cost remain unknown."""
+def _new_run_report(researcher: WREAutoResearcher) -> Dict:
+    """Reserve an invocation namespace; absence of report.json means incomplete."""
+    directory = Path(tempfile.mkdtemp(prefix="invocation-", dir=researcher.results_dir))
+    requested = researcher.max_iterations
+    return {
+        "schema": "wre_auto_research_report.v1", "invocation_id": directory.name,
+        "report_path": str(directory / "report.json"), "status": "incomplete",
+        "dry_run": researcher.dry_run, "phase": "preflight", "stop_reason": None,
+        "attempts_requested": requested if type(requested) is int and requested >= 0 else None,
+        "attempts_started": 0, "baseline_evaluations": 0, "candidate_evaluations": 0,
+        "baseline": None, "optimized": None, "history": [],
+        "failure": None, "cleanup_failure": None, "cleanup": "not_performed",
+        "independently_verified": None, "retained_improvements": None, "resource_usage": None,
+    }
+
+
+def _run_with_report(researcher: WREAutoResearcher) -> Dict:
+    """Preserve ordinary exception chaining and publish only after cleanup settles."""
+    report = None
+    try:
+        try:
+            report = _new_run_report(researcher)
+            researcher._run_loop(report)
+        except BaseException as error:
+            if report is not None:
+                report["failure"] = {"type": type(error).__name__, "phase": report["phase"]}
+            raise
+        finally:
+            try:
+                if researcher.dry_run:
+                    researcher._rollback(researcher.original_code)
+                    if report is not None:
+                        report["cleanup"] = "restored"
+                    print("\n[SAFETY] Scratch restored to original baseline.")
+            except BaseException as error:
+                if report is not None:
+                    report["cleanup_failure"] = {"type": type(error).__name__}
+                    if report["cleanup"] != "restored":
+                        report["cleanup"] = "failed"
+                raise
+    except BaseException as error:
+        if report is not None:
+            report["status"] = "aborted"
+            report["stop_reason"] = "interrupted" if isinstance(error, (KeyboardInterrupt, SystemExit)) else "error"
+            _write_run_report(_summarize_run(report))
+        raise
+    report["status"], report["stop_reason"] = "completed", "attempt_limit"
+    return _write_run_report(_summarize_run(report))
+
+
+def _write_run_report(report: Dict) -> Dict:
+    """Publish complete JSON via a same-directory replacement; errors propagate."""
+    destination = Path(report["report_path"])
+    temporary = destination.with_suffix(".tmp")
+    temporary.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    temporary.replace(destination)
+    return report
+
+
+def _summarize_run(report: Dict) -> Dict:
+    """Distinguish started work from recorded outcomes, including aborted calls."""
+    baseline, best, history = report["baseline"], report["optimized"], report["history"]
     statuses = ("no_proposal", "accepted", "rejected", "failed_validation", "crashed")
     counts = {status: sum(row["status"] == status for row in history) for status in statuses}
-    summary = {
-        "baseline": baseline,
-        "optimized": best,
-        "improvement": best["fitness"] - baseline["fitness"],
-        "iterations_run": len(history),
-        "history": history,
-        "dry_run": dry_run,
-        "attempts_requested": requested,
-        "attempts_started": len(history),
-        "baseline_evaluations": 1,
-        "candidate_evaluations": len(history) - counts["no_proposal"],
-        "outcome_counts": counts,
-        "independently_verified": None,
-        "retained_improvements": None,
-        "resource_usage": None,
-    }
-    print("\n" + "=" * 50)
-    print("OPTIMIZATION SUMMARY")
-    print("=" * 50)
-    print(f"Baseline Fitness:  {summary['baseline']['fitness']:.4f}")
-    print(f"Optimized Fitness: {summary['optimized']['fitness']:.4f}")
-    print(f"ROC Improvement:   {summary['improvement']:.4f}")
-    print(f"ROI Sustainable:   {summary['optimized']['is_roi_sustainable']}")
-    print(f"Attempts: {len(history)}/{requested}; candidate evaluations: {summary['candidate_evaluations']}")
-    print("=" * 50)
-    return summary
+    report.update(
+        improvement=best["fitness"] - baseline["fitness"] if best is not None else None,
+        iterations_run=report["attempts_started"], attempts_finished=len(history),
+        outcome_counts=counts,
+    )
+    return report
 
 
 def _isolated_run_directory(results_dir: Optional[Path]) -> Path:

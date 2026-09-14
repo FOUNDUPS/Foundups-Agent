@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Terminal researcher invocation evidence
+
+- Existing researcher publishes distinct invocation JSON after cleanup, with completed/aborted state, started/finished/evaluated counters and available metrics/failure types. Missing terminal JSON remains unknown; staging files are not evidence.
+- Exceptions retain their chains; publication errors cannot return success. A fault test caught allocation outside the cleanup boundary; allocation now participates in restoration. Previous reports remain unchanged on reuse/failure.
+- Final 66 tests pass; five ten-attempt controls yield 50 attempts/40 candidates/five baselines with saved/returned equality. No model/provider calls, independent retention or production FoundUp execution.
+- Source 491→524, class 297→290, loop 84→82; test 585→681 review documented in ROADMAP, all test functions ≤50. No new module/skill/test file/exemption or package change. Reporting remains partial 15/P1 for exact identities/reader qualification; PR1644 stays external. Evidence: `research_terminal_report_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: Completed-return research accounting
 
 - Existing researcher records missing proposals and reports requested/started attempts, baseline/candidate evaluations and five outcome counts. Invalid caps reject; invocation cap is frozen for loop/report. Unmeasured metrics stay blank/None.

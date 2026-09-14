@@ -1,5 +1,10 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI terminal report lifecycle
+
+- Extended existing WRE researcher artifacts with per-invocation completed/aborted evidence after cleanup; errors cannot return success and old reports remain intact. 66 local tests and five ten-attempt controls pass.
+- Re-observed/rescored reporting parent 15/P1 for input/source/oracle/environment qualification before launch reading. Prior PR1752/main workflows closed; advancing YUMORI PR1644 remains separately owned. Root/module roadmap and canonical backlog/evidence updated, with no new modules/skills or activation. Evidence: `research_terminal_report_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: RSI completed-run report accounting
 
 - Extended the existing WRE AutoResearcher report/TSV with truthful attempt/evaluation/outcome denominators, cap binding and acceptance-failure metrics.51 tests pass; five ten-attempt controls/replay pass without source or provider effects.

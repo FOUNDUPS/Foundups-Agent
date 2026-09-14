@@ -9,6 +9,7 @@ dry-run safety, path write protection, and fail-closed SPECIFIED_NOT_IMPLEMENTED
 
 import ast
 import csv
+import json
 import math
 import os
 import sys
@@ -310,23 +311,57 @@ def test_results_tsv_path_isolation(temp_research_env, tmp_path, capsys):
     assert not source_results.exists()
 
 
+def _assert_interrupted_report(researcher, phase, error_type):
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    completed = phase == "evaluation" and error_type is RuntimeError
+    assert report["status"] == ("completed" if completed else "aborted")
+    assert report["cleanup"] == "restored"
+    assert report["attempts_started"] == (2 if phase == "later_proposal" else int(phase != "baseline"))
+    assert report["attempts_finished"] == int(completed or phase == "later_proposal")
+    assert report["outcome_counts"]["no_proposal"] == int(phase == "later_proposal")
+    assert report["baseline_evaluations"] == 1
+    assert report["candidate_evaluations"] == int(phase == "evaluation")
+
+
+@pytest.mark.parametrize("phase", ["baseline", "proposal", "diff", "evaluation", "later_proposal"])
 @pytest.mark.parametrize("error_type", [RuntimeError, KeyboardInterrupt])
-def test_dry_run_restores_after_diff_interruption(temp_research_env, tmp_path, monkeypatch, error_type):
+def test_dry_run_restores_after_diff_interruption(temp_research_env, tmp_path, monkeypatch, error_type, phase):
     target_path, program_path = temp_research_env
     original_code = target_path.read_text(encoding="utf-8")
     runner = DryRunGitRunner()
     researcher = WREAutoResearcher(
-        target_path, program_path, max_iterations=1,
+        target_path, program_path, max_iterations=2 if phase == "later_proposal" else 1,
         runner=runner, results_dir=tmp_path / "interrupted_run",
     )
     monkeypatch.setattr(researcher, "_propose_change", lambda *args: original_code + "\n# candidate\n")
 
+    proposals = []
     def interrupted_diff(*args):
+        if phase == "later_proposal" and not proposals:
+            proposals.append(None)
+            return None
         raise error_type("interrupted diff")
 
-    monkeypatch.setattr(runner, "diff", interrupted_diff)
-    with pytest.raises(error_type, match="interrupted diff"):
-        researcher.run()
+    if phase in ("baseline", "evaluation"):
+        actual_evaluate = researcher_module.evaluate_target
+        calls = []
+        def evaluate(path):
+            calls.append(path)
+            if phase == "baseline" or len(calls) > 1:
+                interrupted_diff()
+            return actual_evaluate(path)
+        monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
+    else:
+        monkeypatch.setattr(runner if phase == "diff" else researcher,
+                            "diff" if phase == "diff" else "_propose_change", interrupted_diff)
+    # Ordinary evaluator exceptions are handled as crashed outcomes, not aborts.
+    if phase == "evaluation" and error_type is RuntimeError:
+        result = researcher.run()
+        assert result["outcome_counts"]["crashed"] == 1
+    else:
+        with pytest.raises(error_type, match="interrupted diff"):
+            researcher.run()
+    _assert_interrupted_report(researcher, phase, error_type)
     assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
     assert target_path.read_text(encoding="utf-8") == original_code
     assert not any(op["operation"] == "commit" for op in runner.planned_operations)
@@ -371,6 +406,10 @@ def test_dry_run_restores_local_copy_when_cleanup_dependencies_fail(
     assert "interrupted diff" in str(caught.value.__context__)
     assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
     assert target_path.read_text(encoding="utf-8") == original_code
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    assert report["status"] == "aborted" and report["failure"]["type"] == "RuntimeError"
+    assert report["cleanup"] == ("failed" if cleanup_fault == "runner" else "restored")
+    assert report["cleanup_failure"]["type"] == error_type.__name__
 
 
 def test_invalid_baseline_stops_before_proposal(temp_research_env, tmp_path, monkeypatch):
@@ -393,6 +432,9 @@ def test_invalid_baseline_stops_before_proposal(temp_research_env, tmp_path, mon
         researcher.run()
     assert researcher.working_target_path.read_text(encoding="utf-8") == invalid_source
     assert not any(op["operation"] == "commit" for op in researcher.runner.planned_operations)
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    assert report["status"] == "aborted" and report["attempts_started"] == 0
+    assert report["improvement"] is None and report["optimized"] is None
 
 
 def test_commit_mode_fail_closed(temp_research_env, tmp_path):
@@ -507,6 +549,7 @@ def test_completed_run_accounts_for_every_attempt(temp_research_env, tmp_path, m
     monkeypatch.setattr(researcher, "_propose_change", propose)
     monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
     result = researcher.run()
+    assert json.loads(Path(result["report_path"]).read_text()) == result
     counts = {state: outcomes.count(state) for state in ("no_proposal", "accepted", "rejected", "failed_validation", "crashed")}
     assert result["attempts_requested"] == result["attempts_started"] == result["iterations_run"] == len(outcomes)
     assert result["baseline_evaluations"] == 1
@@ -583,3 +626,56 @@ def test_report_keeps_invocation_attempt_cap(temp_research_env, tmp_path, monkey
     monkeypatch.setattr(researcher, "_propose_change", propose)
     result = researcher.run()
     assert result["attempts_requested"] == result["attempts_started"] == result["iterations_run"] == 2
+
+
+def _assert_reports_preserved(researcher, first, first_bytes, fault):
+    reports = [json.loads(p.read_text()) for p in researcher.results_dir.glob("invocation-*/report.json")]
+    assert len(reports) == (2 if fault in ("none", "cleanup", "local_write") else 1)
+    assert sum(r["status"] == "completed" for r in reports) == (2 if fault == "none" else 1)
+    assert Path(first["report_path"]).read_bytes() == first_bytes
+    restored = researcher.working_target_path.read_bytes() == researcher.target_path.read_bytes()
+    assert restored is (fault != "local_write")
+
+
+@pytest.mark.parametrize("fault", ["none", "publish", "write", "cleanup", "publish_abort", "allocate", "local_write"])
+def test_terminal_reports_preserve_prior_invocations(temp_research_env, tmp_path, monkeypatch, fault):
+    target, program = temp_research_env
+    researcher = WREAutoResearcher(target, program, max_iterations=0, results_dir=tmp_path / "runs")
+    first = researcher.run()
+    first_path = Path(first["report_path"])
+    first_bytes = first_path.read_bytes()
+    researcher.working_target_path.write_text("# stale scratch\n" + target.read_text(), encoding="utf-8")
+    original_replace = Path.replace
+    original_write = Path.write_text
+    def replace(path, destination):
+        assert (researcher.working_target_path.read_bytes() == target.read_bytes()) is (fault != "local_write")
+        if fault.startswith("publish"):
+            raise OSError("publication failed")
+        return original_replace(path, destination)
+    def write(path, *args, **kwargs):
+        if fault == "write" and path.name == "report.tmp":
+            raise OSError("publication failed")
+        if fault == "local_write" and path == researcher.working_target_path:
+            raise OSError("restoration failed")
+        return original_write(path, *args, **kwargs)
+    def restore(*args, **kwargs):
+        raise OSError("restoration failed")
+    monkeypatch.setattr(Path, "replace", replace)
+    monkeypatch.setattr(Path, "write_text", write)
+    if fault == "cleanup":
+        monkeypatch.setattr(researcher.runner, "restore", restore)
+    if fault == "allocate":
+        monkeypatch.setattr(researcher_module.tempfile, "mkdtemp", restore)
+    if fault == "publish_abort":
+        researcher.max_iterations = -1
+    if fault == "none":
+        second = researcher.run()
+        assert second["invocation_id"] != first["invocation_id"]
+        assert json.loads(Path(second["report_path"]).read_text()) == second
+        assert second["attempts_started"] == 0 and second["baseline_evaluations"] == 1
+    else:
+        with pytest.raises(OSError, match="restoration failed" if fault in ("cleanup", "local_write", "allocate") else "publication failed") as caught:
+            researcher.run()
+        if fault == "publish_abort":
+            assert isinstance(caught.value.__context__, ValueError)
+    _assert_reports_preserved(researcher, first, first_bytes, fault)
