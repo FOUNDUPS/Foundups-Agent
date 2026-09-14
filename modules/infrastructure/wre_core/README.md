@@ -81,7 +81,7 @@ See [current callable boundaries](INTERFACE.md#outcome-recording-and-retention).
 registry entry
   -> exact production frontmatter match
   -> checkout/link/reparse validation
-  -> manifest + scanner admission with stable pre/post fingerprint
+  -> per-call manifest/scanner verdict with stable pre/post fingerprint
   -> captured exact-fingerprint adjacent executor OR proposal-only local inference
   -> typed effect result
   -> structural fidelity

@@ -1,11 +1,11 @@
 # WRE Master Orchestrator - Development Roadmap
 
-## Local cache checkpoint — 2026-09-14
+## Local execution admission checkpoint — 2026-09-15
 
-Configured severity is now passed to the existing cache reader. The root
-[WRE roadmap](../ROADMAP.md#current-local-rsi-checkpoint--2026-09-15) owns the
-current per-execution fingerprint-handoff, 17/P0 follow-on. This closes neither full coordinator
-concurrency nor the historical consolidation tasks below.
+Per-invocation fingerprint handoff is locally verified and shared skill-name
+admission state is removed. The [WRE roadmap](../ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
+owns the next OpenClaw cache content/policy candidate at 16/P0. Full coordinator
+concurrency and the historical consolidation tasks below remain open.
 
 ## Current State: POC (1.1.1)
 - Basic pattern memory implementation

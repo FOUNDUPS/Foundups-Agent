@@ -203,9 +203,11 @@ ok, message = validate_runtime_skill_admission(
 Admission requires exact production registry/frontmatter agreement for
 `name`, `version`, `intent_type`, and `promotion_state`.
 
-`ensure_runtime_skill_safety(...)` additionally binds the current Skillz
-bundle fingerprint, manifest verification, and required/enforced scanner
-result. An exact bundle uses Cisco `scan` with `SKILLz.md`; a wardrobe root uses
+`admit_runtime_skill(...) -> (ok, message, fingerprint)` binds the current
+Skillz bundle, manifest verification and required/enforced scanner result.
+The fingerprint belongs to that invocation and is `None` on failure. The same
+explicit parameters remain available through `ensure_runtime_skill_safety(...)`,
+which forwards to this owner and preserves its original `(ok, message)` result. An exact bundle uses Cisco `scan` with `SKILLz.md`; a wardrobe root uses
 `scan-all --recursive`. Its cache key changes when Skillz, executor, or
 manifest bytes change.
 
@@ -221,11 +223,13 @@ first; pending slots are never evicted and exhausted pending capacity blocks.
 Callers share it through these owner functions, not raw concurrent mutation.
 Separate mappings/processes are not serialized; [the bridge scanner](../../communication/moltbot_bridge/README.md#skill-safety-gate-cisco-skill-scanner) owns private report files per call.
 
-`admitted_runtime_fingerprint(..., max_severity="medium")` reads matching content
-and policy after a successful safety check; the coordinator passes its configured
-severity. The reader alone does not enforce a new TTL or authenticate execution
-permission. Old keys rescan; same-instance execution-context handoff and signed
-runtime admission remain independent requirements.
+The coordinator carries the fingerprint returned by `admit_runtime_skill()` in
+its execution call and passes it explicitly to the registered executor. It does
+not consult shared skill-name admission state or perform a second cache lookup.
+`admitted_runtime_fingerprint(..., max_severity="medium")` remains a legacy cache
+observation, not per-execution admission or a TTL validator. Neither API creates
+a signed permission, independent scan authentication or revocation lifetime.
+Complete coordinator concurrency and signed runtime admission remain separate.
 
 ## Programmatic executor
 

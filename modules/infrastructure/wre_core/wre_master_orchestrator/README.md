@@ -1,5 +1,12 @@
 # WRE Master Orchestrator
 
+## Per-execution scanner evidence
+
+The coordinator carries its own admission fingerprint directly to executor
+validation. The shared skill-name fingerprint map is removed; a later execution
+cannot supply a different admitted bundle for the earlier call. See the
+[root admission contract](../INTERFACE.md#production-admission) for API and authority limits.
+
 **Status:** compatibility orchestrator with WSP 95 admitted Skillz execution;
 production RSI is incomplete.
 

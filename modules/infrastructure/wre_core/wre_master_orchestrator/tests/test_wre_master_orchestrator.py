@@ -32,7 +32,7 @@ class TestWREMasterOrchestrator:
         monkeypatch.setattr(
             orchestrator,
             "_ensure_wre_skill_safety",
-            lambda _skill_name, force=False: (True, "test pass"),
+            lambda _skill_name, force=False: (True, "test pass", "f" * 64),
         )
         monkeypatch.setattr(
             orchestrator,
@@ -167,7 +167,7 @@ class TestWREMasterOrchestrator:
         monkeypatch.setattr(
             orchestrator,
             "_ensure_wre_skill_safety",
-            lambda skill_name, force=False: (False, "blocked by test"),
+            lambda skill_name, force=False: (False, "blocked by test", None),
         )
         result = orchestrator.execute_skill(
             "auto_test_registry_audit",
@@ -369,7 +369,7 @@ class TestWRESkillsIntegration:
         monkeypatch.setattr(
             orchestrator,
             "_ensure_wre_skill_safety",
-            lambda _skill_name, force=False: (True, "test pass"),
+            lambda _skill_name, force=False: (True, "test pass", "f" * 64),
         )
         monkeypatch.setattr(
             orchestrator,

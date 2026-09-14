@@ -17,9 +17,10 @@ surfaces, not historical autonomy claims.
 `execute_skill()` requires WSP 95 admission and exact scanner-to-dispatch
 fingerprint continuity. Success requires typed effect evidence. Loader,
 scanner, executor, or result-shape failure returns a stable fail-closed record;
-there is no executable fallback instruction. The coordinator passes its configured
-scan severity to cache readback; see the root production-admission contract for
-pending-scan and retention behavior.
+there is no executable fallback instruction. The coordinator receives the exact
+fingerprint with its scan verdict and passes it explicitly to executor validation;
+it no longer reads shared skill-name state. The root production-admission contract
+owns cache behavior and the separate signed-runtime authority boundary.
 
 `execute_skill_with_reasoning()` reports `execution_success` independently of
 fidelity acceptance. `evolve_skill()` returns `True` only when a non-production
