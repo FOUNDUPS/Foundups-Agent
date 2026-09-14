@@ -9,6 +9,7 @@ dry-run safety, path write protection, and fail-closed SPECIFIED_NOT_IMPLEMENTED
 
 import ast
 import csv
+import hashlib
 import json
 import math
 import os
@@ -522,6 +523,56 @@ def test_concurrent_research_construction_owns_distinct_directories(temp_researc
         assert researcher.results_path.read_text(encoding="utf-8").startswith("timestamp\titeration\t")
 
 
+@pytest.mark.parametrize("drift", ["construction", "between_calls", "baseline", "proposal", "interrupted"])
+@pytest.mark.parametrize("newline", ["\n", "\r\n"], ids=["lf", "crlf"])
+def test_invocation_uses_one_baseline_snapshot(temp_research_env, tmp_path, monkeypatch, drift, newline):
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    target.write_bytes(original.replace("\n", newline).encode("utf-8"))
+    changed = original + "\n# changed outside this invocation\n"
+    read_text = Path.read_text
+    def read(path, *args, **kwargs):
+        if path == program and drift == "construction":
+            target.write_text(changed, encoding="utf-8")
+        return read_text(path, *args, **kwargs)
+    monkeypatch.setattr(Path, "read_text", read)
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original
+    source_bytes = target.read_bytes()
+    evaluated, proposed = [], []
+    def evaluate(path):
+        evaluated.append(path.read_text(encoding="utf-8"))
+        if drift == "baseline":
+            researcher.original_code = changed
+        return evaluate_target(path)
+    def propose(code, *args):
+        proposed.append(code)
+        if drift in ("proposal", "interrupted"):
+            researcher.original_code = changed
+        if drift == "interrupted":
+            raise KeyboardInterrupt("proposal interrupted")
+        return None
+    monkeypatch.setattr(researcher, "_propose_change", propose)
+    if drift == "between_calls":
+        researcher.run()
+        proposed.clear()
+        researcher.working_target_path.write_text(changed, encoding="utf-8")
+    monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
+    if drift == "interrupted":
+        with pytest.raises(KeyboardInterrupt, match="proposal interrupted"):
+            researcher.run()
+        report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    else:
+        report = researcher.run()
+    assert evaluated == proposed == [original]
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original
+    assert target.read_bytes() == source_bytes
+    assert report["baseline_input_sha256"] == hashlib.sha256(original.encode("utf-8")).hexdigest()
+    assert report["cleanup"] == "restored"
+    assert report["status"] == ("aborted" if drift == "interrupted" else "completed")
+    assert json.loads(Path(report["report_path"]).read_text()) == report
+
+
 @pytest.mark.parametrize("outcomes", [
     [], ["no_proposal"] * 3, ["rejected"] * 3, ["failed_validation"] * 3,
     ["crashed"] * 3, ["accepted"] * 3,
@@ -677,8 +728,8 @@ def test_mode_drift_cannot_delegate_commit_or_skip_cleanup(temp_research_env, tm
             researcher.dry_run = mode
         return baseline if len(evaluated) == 1 else improved
     loop = researcher._run_loop
-    def run_loop(report):
-        loop(report)
+    def run_loop(report, baseline_code):
+        loop(report, baseline_code)
         researcher.dry_run = mode
     monkeypatch.setattr(researcher, "_propose_change", propose)
     monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
@@ -739,4 +790,8 @@ def test_terminal_reports_preserve_prior_invocations(temp_research_env, tmp_path
             researcher.run()
         if fault == "publish_abort":
             assert isinstance(caught.value.__context__, ValueError)
+        if fault == "local_write":
+            failed = json.loads(next(p for p in researcher.results_dir.glob("invocation-*/report.json") if p != first_path).read_text())
+            assert failed["failure"] == {"type": "OSError", "phase": "baseline_preparation"}
+            assert failed["baseline_evaluations"] == failed["attempts_started"] == 0
     _assert_reports_preserved(researcher, first, first_bytes, fault)

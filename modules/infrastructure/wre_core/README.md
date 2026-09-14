@@ -36,7 +36,7 @@ Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionarie
 without executing target code. It now rejects negative/out-of-range allocations,
 non-finite values, booleans and unknown catalog agents before simulation;
 allocation totals must equal one within `1e-9`. An invalid negative allocation
-previously outscored the baseline. The [86 focused tests](tests/test_wre_auto_researcher.py)
+previously outscored the baseline. The [96 focused tests](tests/test_wre_auto_researcher.py)
 include invalid-input rejection, cancellation/failure cleanup and the invalid
 baseline gate. The producer restores its scratch baseline on Python exception
 exits and surfaces cleanup errors; process termination and storage failure are
@@ -48,6 +48,13 @@ preflight and proposal/loop boundaries reject unsupported or changed modes.
 The private commit path never delegates a live commit; scratch cleanup does not
 depend on a mutable flag. This repairs a completed-report/cleanup inconsistency,
 not an OS sandbox for arbitrary host Python or arbitrary runner implementations.
+
+Construction prepares scratch from captured target text without rereading the
+live source. Each run freezes the current `original_code` text, prepares scratch,
+and uses that snapshot for the initial proposal and terminal cleanup. The report's
+`baseline_input_sha256` hashes the captured text encoded as UTF-8. Constructor
+reads normalize newlines; this is not a raw-file or authenticated source identity.
+Program, oracle, environment and reader qualification remain outstanding.
 
 Completed and aborted invocations now publish their own
 `invocation-*/report.json` under the existing run directory. The returned

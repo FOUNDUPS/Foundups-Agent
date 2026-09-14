@@ -86,6 +86,15 @@ Cleanup always attempts scratch restoration, regardless of the current flag.
 it is descriptive, not authority. Arbitrary host Python and injected runner code
 are outside this local guard's sandbox claim. Live mode remains unimplemented.
 
+Construction writes scratch from the target text captured by `read_text`, without
+a second live-source read. Each `run()` freezes the current `original_code` text
+before report allocation. It prepares scratch from that snapshot before baseline
+evaluation; the first proposal and terminal cleanup use the same snapshot even
+if a callback later changes `original_code`. A caller changing that field before
+a later run supplies that later invocation's baseline. Sequential reuse discards
+leftover scratch. Preparation failure aborts before an evaluator entry; cleanup
+is still attempted. Same-instance concurrency remains unsupported.
+
 `max_iterations` must be a non-negative built-in integer; booleans and other
 types reject before constructor output/model work and before run baseline
 execution. Each run snapshots the cap for its loop, progress and returned report.
@@ -108,6 +117,7 @@ available an aborted mapping is published before propagation.
 | `attempts_finished`, `outcome_counts` | Recorded history outcomes; an aborted started attempt may have no finished outcome |
 | `baseline_evaluations`, `candidate_evaluations` | Actual evaluator entries, including calls that raise; zero before entry |
 | `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
+| `baseline_input_sha256` | SHA-256 of the invocation's captured baseline text encoded as UTF-8; constructor reads normalize newlines. Describes prepared input even on abort before evaluation; not raw source bytes, program/oracle identity or authenticated provenance |
 | `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
 
 Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,

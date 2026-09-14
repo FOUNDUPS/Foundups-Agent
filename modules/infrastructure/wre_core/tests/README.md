@@ -1,6 +1,18 @@
 # wre_core Test Suite
 
-## Phase1 mode integrity
+## Researcher baseline snapshot
+
+Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
+Five drift timings × LF/CRLF cover construction rereads, reused scratch and
+baseline/proposal/interruption mutation. The existing write-fault case checks
+preparation failure before evaluation. All 26 prior function names remain;
+24 definitions are unchanged. **96 pass in 2.04s**, after 10 failures/86 passes
+before the repair. Five ten-attempt controls bind report hashes to observed
+baseline text. Tests 797 lines retain the cohesive fixture and existing size
+review; all functions ≤50. Evidence: `research_input_snapshot_continuation_20260915`.
+Program/oracle/runtime provenance and startup reading remain unqualified.
+
+## Historical Phase1 mode integrity
 
 Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
 Seven constructor values and fourteen timing/value cases cover literal-mode

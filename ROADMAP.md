@@ -51,17 +51,16 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Current delivery checkpoint — 2026-09-15
 
 The [researcher checkpoint](modules/infrastructure/wre_core/ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
-closes a Phase1 mode-flag defect discovered while qualifying terminal reports.
-Unsupported/mutated modes cannot delegate a live commit or skip scratch cleanup;
-mode drift produces aborted evidence through the existing report path.
-**86 local tests pass**; five ten-attempt controls preserve normal report behavior.
+now binds scratch preparation, initial proposal and cleanup to one invocation
+baseline. A local diagnostic hash identifies that captured text. **96 local tests
+pass**; five ten-attempt controls match their observed baseline and seeded replay.
 
-WSP15/97 selected the observed guard defect at 17/P0, closed it locally, then
-re-observed/rescored report identity/reader qualification at **15/P1**. Exact
-input/source/oracle/environment identities, resource measurement and independently
-retained benefit remain incomplete. Active FoundUps and peer ownership stay separate.
-Terminal PR [#1753](https://github.com/FOUNDUPS/Foundups-Agent/pull/1753) merged at
-`701146b117eb57736da5891b56e791e3bad1620a`; both main workflows passed.
+WSP15/97 closed the input consistency layer and re-scored remaining report
+qualification at **15/P1**. Program/proposal, oracle, environment and authenticated
+reader evidence remain incomplete, as do resource measurement and independently
+retained benefit. Active FoundUps and peer ownership stay separate.
+Mode PR [#1754](https://github.com/FOUNDUPS/Foundups-Agent/pull/1754) merged at
+`07a465cdbaa1a77acb7210b75503219a438b57a2`; both main workflows passed.
 The current change enables no startup campaign, live mode or automatic budget growth.
 
 TTL PR [#1748](https://github.com/FOUNDUPS/Foundups-Agent/pull/1748) merged as

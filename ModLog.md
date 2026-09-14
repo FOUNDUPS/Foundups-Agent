@@ -1,5 +1,10 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI report baseline consistency
+
+- Existing researcher now uses one invocation baseline for scratch preparation, proposal seed, cleanup and its diagnostic text hash. Ten reproduced drift cases are fixed; 96 local tests and five ten-attempt controls pass.
+- WSP15/97 closed this input layer and retained report qualification 15/P1 for program/oracle/environment/reader evidence. Prior PR1754 main workflows verified. Canonical roadmap/backlog and module records updated without new modules/skills or launch activation. Evidence: `research_input_snapshot_continuation_20260915`; WSP00/15/22/48/50/62/84/97.
+
 ## 2026-09-15: RSI mode boundary before report identity
 
 - Report qualification exposed a Phase1 flag bypass. Existing researcher now rejects unsupported/mutated mode, never delegates a live commit and always attempts cleanup. 86 local tests and five ten-attempt controls pass without live effects.

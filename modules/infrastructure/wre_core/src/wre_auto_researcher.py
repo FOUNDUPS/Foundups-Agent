@@ -32,7 +32,6 @@ import random
 import time
 import tempfile
 import difflib
-import shutil
 import hashlib
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -154,8 +153,8 @@ class WREAutoResearcher:
         self.working_target_path = self.results_dir / "target" / self.target_path.name
         self.working_target_path.parent.mkdir()
 
-        # Copy baseline config to the working sandboxed target file
-        shutil.copy(self.target_path, self.working_target_path)
+        # Prepare scratch from the captured text, without rereading a live source.
+        self.working_target_path.write_text(self.original_code, encoding="utf-8")
 
         self.results_path = self.results_dir / "results.tsv"
         self._init_results_file()
@@ -191,7 +190,7 @@ class WREAutoResearcher:
         """Persist this invocation's terminal evidence after scratch cleanup."""
         return _run_with_report(self)
 
-    def _run_loop(self, report: Dict):
+    def _run_loop(self, report: Dict, baseline_code: str):
         """Evaluate proposals only after a valid baseline has been established."""
         requested = report["attempts_requested"]
         if type(requested) is not int or requested < 0:
@@ -206,7 +205,7 @@ class WREAutoResearcher:
         print(f"[BASELINE] Fitness: {baseline_metrics.get('fitness'):.4f} (ROC: {baseline_metrics.get('roc_ratio'):.4f})")
         self._log_to_tsv(0, "baseline", baseline_metrics, "Initial baseline parameters")
 
-        best_code = self.original_code
+        best_code = baseline_code
         best_metrics = report["optimized"] = baseline_metrics
         history = report["history"]
 
@@ -416,7 +415,7 @@ def _propose_dry_run(researcher: WREAutoResearcher, code: str, metrics: Dict, hi
     return proposed
 
 
-def _new_run_report(researcher: WREAutoResearcher) -> Dict:
+def _new_run_report(researcher: WREAutoResearcher, baseline_code: str) -> Dict:
     """Reserve an invocation namespace; absence of report.json means incomplete."""
     directory = Path(tempfile.mkdtemp(prefix="invocation-", dir=researcher.results_dir))
     requested = researcher.max_iterations
@@ -427,6 +426,7 @@ def _new_run_report(researcher: WREAutoResearcher) -> Dict:
         "attempts_requested": requested if type(requested) is int and requested >= 0 else None,
         "attempts_started": 0, "baseline_evaluations": 0, "candidate_evaluations": 0,
         "baseline": None, "optimized": None, "history": [],
+        "baseline_input_sha256": hashlib.sha256(baseline_code.encode("utf-8")).hexdigest(),
         "failure": None, "cleanup_failure": None, "cleanup": "not_performed",
         "independently_verified": None, "retained_improvements": None, "resource_usage": None,
     }
@@ -435,11 +435,14 @@ def _new_run_report(researcher: WREAutoResearcher) -> Dict:
 def _run_with_report(researcher: WREAutoResearcher) -> Dict:
     """Preserve ordinary exception chaining and publish only after cleanup settles."""
     report = None
+    baseline_code = researcher.original_code
     try:
         try:
-            report = _new_run_report(researcher)
+            report = _new_run_report(researcher, baseline_code)
             _require_dry_run(researcher)
-            researcher._run_loop(report)
+            report["phase"] = "baseline_preparation"
+            researcher.working_target_path.write_text(baseline_code, encoding="utf-8")
+            researcher._run_loop(report, baseline_code)
             _require_dry_run(researcher)
         except BaseException as error:
             if report is not None:
@@ -447,7 +450,7 @@ def _run_with_report(researcher: WREAutoResearcher) -> Dict:
             raise
         finally:
             try:
-                researcher._rollback(researcher.original_code)
+                researcher._rollback(baseline_code)
                 if report is not None:
                     report["cleanup"] = "restored"
                 print("\n[SAFETY] Scratch restored to original baseline.")
