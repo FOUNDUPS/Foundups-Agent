@@ -1,5 +1,12 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-09-14] Dependency candidate and immutable-query qualification
+
+- Base `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`: `test_mcp_launcher_http.py`, `test_mcp_server_sse.py`, `test_holo_query_snapshot_store.py`: **38 passed, 2 deselected in 7.87s**. Includes a temporary real-Chroma export and subsequent immutable-reader query.
+- Fresh external venv with FastMCP 3.2.0, MCP 1.28.1, Pydantic 2.12.3, Uvicorn 0.38.0, pytest 9.0.3 and pytest-asyncio 1.3.0: the first two suites **25 passed, 2 deselected in 3.68s**. This repeats the same 25 MCP cases; there are 38 distinct passing cases across both environments, not 63 distinct cases.
+- Both use `-B`, importlib mode, disabled plugin autoload/cacheprovider, explicit async plugin and external temporary/DB paths. Both exclude `test_protocol_readiness_canary_auth_and_concurrency_lifecycle` and `test_canary_rejects_unauthenticated_connection`; no fixed-port service was started. Exact paired live lifecycle/closure/admission is unverified.
+- PyPI wheel-only dry runs: FastMCP-only quartet fails resolution; MCP-only and paired quartets resolve. No shared package or test-source changes. Commands, source fingerprints and environment evidence are recorded in the existing RSI baseline under `dependency_qualification_continuation_20260914`. WSP 22, 50, 97.
+
 ## [2026-09-13] Existing Windows runtime-selection regression
 
 - `test_reddog_sealed_holo_runtime.py -k 'trusted_holo_site_packages or actual_windows_primary_checkout'`: **2 passed, 16 deselected in 0.39s**. Vetted primary-checkout venv, `-B`, disabled plugin autoload, explicit async plugin, isolated temporary/cache paths and importlib mode.

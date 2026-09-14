@@ -4242,5 +4242,412 @@
     ],
     "dispatchable": false,
     "retained_improvement_proven": false
+  },
+  "dependency_qualification_continuation_20260914": {
+    "base_commit": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+    "observed_at": "2026-09-14T04:39:38.154142+00:00",
+    "origin": "autonomous_trigger",
+    "execution_plane": "authorized_local_documentation",
+    "scope": "R03/R04 dependency preflight; isolated deterministic qualification, no runtime or production pin mutation",
+    "wsp00": {
+      "software_gate": "passed",
+      "evidence": "zen-gate.json",
+      "runtime_admission": false
+    },
+    "retrieval": {
+      "mode": "lexical",
+      "source": "holoindex_bundle",
+      "ok": true,
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "authority": "workspace_head",
+      "authority_head": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+      "overlay_included": false,
+      "required_docs_found": 6,
+      "required_docs_missing": 0,
+      "docs_truncated": 6,
+      "bundle_doc_byte_limit": 12000,
+      "evaluation": {
+        "noise": "Broad module history dominated the bundle; searched exact server/pin/snapshot symbols.",
+        "ordering": "Read protocol/navigation, owning contracts and nearest test history before qualification.",
+        "missing_artifacts": "No mandatory document missing; completed six truncated documents with targeted owner/test reads.",
+        "staleness": "Lexical evidence is source-bound only; semantic freshness, expired audit decision and live topology remain unproved.",
+        "duplication": "Existing audit, upgrade PRs, exact-pin guard and snapshot tests reused; no new module/skill/upgrade PR."
+      }
+    },
+    "selected_before_sprint": {
+      "task": "R03-R04 dependency exposure and pin reconciliation",
+      "complexity": 3,
+      "importance": 5,
+      "deferability_urgency": 5,
+      "impact": 5,
+      "total": 18,
+      "priority": "P0"
+    },
+    "selection_rationale": "Qualified the higher-value dependency prerequisite before returning to R11. Static call paths, exact pin compatibility and repository-owned tests supply bounded local evidence; model speculation or a live upgrade would not.",
+    "cost_context": "Public metadata/wheel-only resolution, one disposable candidate venv and existing tests. No additional model-provider call, new agent dispatch, live listener or protected FoundUp operation.",
+    "findings": {
+      "critical_alerts_open": 13,
+      "core_alerts": [
+        {
+          "number": 322,
+          "state": "open",
+          "manifest": "holo_index/requirements.txt",
+          "package": "chromadb",
+          "ghsa": "GHSA-36p7-vc44-83pf",
+          "range": ">= 0.4.17, <= 1.5.9",
+          "first_patched_version": null
+        },
+        {
+          "number": 317,
+          "state": "open",
+          "manifest": "modules/infrastructure/foundups_mcp_bridge/requirements.txt",
+          "package": "fastmcp",
+          "ghsa": "GHSA-vv7q-7jx5-f767",
+          "range": "< 3.2.0",
+          "first_patched_version": {
+            "identifier": "3.2.0"
+          }
+        },
+        {
+          "number": 286,
+          "state": "open",
+          "manifest": "holo_index/requirements.txt",
+          "package": "chromadb",
+          "ghsa": "GHSA-f4j7-r4q5-qw2c",
+          "range": ">= 1.0.0, <= 1.5.9",
+          "first_patched_version": null
+        }
+      ],
+      "feature_search": {
+        "scope": [
+          "holo_index",
+          "modules/infrastructure/foundups_mcp_bridge",
+          "scripts",
+          ".github"
+        ],
+        "file_types": [
+          "py",
+          "ps1",
+          "sh",
+          "yaml",
+          "yml",
+          "Dockerfile*"
+        ],
+        "affected_setup_matches": 0,
+        "error_output": "",
+        "limit": "Static reviewed scope only; dynamic/external/other-consumer paths and live deployment unverified."
+      },
+      "source_path_summary": "MCP uses direct single-tool decorators. Readonly Holo uses immutable query snapshots; maintenance uses local PersistentClient.",
+      "pr_contract": {
+        "observed_at": "2026-09-14T04:30:00.538587+00:00",
+        "source_head": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+        "launcher_contract": {
+          "fastmcp": "2.13.0.2",
+          "mcp": "1.20.0",
+          "pydantic": "2.12.3",
+          "uvicorn": "0.38.0"
+        },
+        "prs": [
+          {
+            "number": 1526,
+            "head": "9b17a56c61189bcca48bd130a41d9d3dcec35229",
+            "state": "OPEN",
+            "files": [
+              "modules/infrastructure/foundups_mcp_bridge/requirements.txt"
+            ],
+            "added_requirement": [
+              "fastmcp==3.2.0"
+            ],
+            "launcher_contract_updated": false
+          },
+          {
+            "number": 1525,
+            "head": "b94bbda640fd50579301e8bd187269f4d20184cc",
+            "state": "OPEN",
+            "files": [
+              "modules/infrastructure/foundups_mcp_bridge/requirements.txt"
+            ],
+            "added_requirement": [
+              "mcp==1.28.1"
+            ],
+            "launcher_contract_updated": false
+          }
+        ]
+      },
+      "resolver": [
+        {
+          "scenario": "fastmcp_only",
+          "pins": [
+            "fastmcp==3.2.0",
+            "mcp==1.20.0",
+            "pydantic==2.12.3",
+            "uvicorn==0.38.0"
+          ],
+          "exit_code": 1,
+          "elapsed_seconds": 3.45,
+          "resolution_impossible": true,
+          "report_written": false
+        },
+        {
+          "scenario": "mcp_only",
+          "pins": [
+            "fastmcp==2.13.0.2",
+            "mcp==1.28.1",
+            "pydantic==2.12.3",
+            "uvicorn==0.38.0"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 7.41,
+          "resolution_impossible": false,
+          "report_written": true
+        },
+        {
+          "scenario": "paired",
+          "pins": [
+            "fastmcp==3.2.0",
+            "mcp==1.28.1",
+            "pydantic==2.12.3",
+            "uvicorn==0.38.0"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 6.81,
+          "resolution_impossible": false,
+          "report_written": true
+        }
+      ],
+      "candidate_versions": {
+        "fastmcp": "3.2.0",
+        "mcp": "1.28.1",
+        "pydantic": "2.12.3",
+        "uvicorn": "0.38.0",
+        "pytest": "9.0.3",
+        "pytest-asyncio": "1.3.0"
+      },
+      "query_interpreter_versions": {
+        "fastmcp": "3.2.0",
+        "mcp": "1.27.0",
+        "pydantic": "2.12.5",
+        "uvicorn": "0.40.0",
+        "chromadb": "1.5.5"
+      },
+      "production_exposure_verified": false,
+      "alert_closed": false,
+      "runtime_activated": false
+    },
+    "validation": {
+      "local_query_environment": {
+        "passed": 38,
+        "deselected": 2,
+        "elapsed_seconds": 7.87,
+        "suites": [
+          "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py",
+          "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_server_sse.py",
+          "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_snapshot_store.py"
+        ]
+      },
+      "local_candidate_environment": {
+        "passed": 25,
+        "deselected": 2,
+        "elapsed_seconds": 3.68,
+        "suites": [
+          "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py",
+          "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_server_sse.py"
+        ]
+      },
+      "distinct_passing_cases": 38,
+      "candidate_repeats_existing_cases": true,
+      "excluded_both_runs": [
+        "test_protocol_readiness_canary_auth_and_concurrency_lifecycle",
+        "test_canary_rejects_unauthenticated_connection"
+      ],
+      "command_contract": "python -B -m pytest <existing suites> --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -k <two listener exclusions> --basetemp=<unique external path> --tb=short -q; disabled plugin autoload and external DB/TEMP paths",
+      "resolver_command": "python -I -B -m pip --isolated install --dry-run --ignore-installed --only-binary=:all: --disable-pip-version-check --no-cache-dir --index-url https://pypi.org/simple --report <external report> -r <candidate quartet>",
+      "base_remote_ci": [
+        {
+          "conclusion": "success",
+          "databaseId": 34803625970,
+          "headSha": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+          "status": "completed",
+          "workflowName": "CI"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 34803625558,
+          "headSha": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+          "status": "completed",
+          "workflowName": "CodeQL"
+        }
+      ],
+      "new_documentation_ci": "not_yet_run",
+      "candidate_live_lifecycle": "not_run",
+      "source_and_test_sha256": {
+        "modules/infrastructure/foundups_mcp_bridge/scripts/launch.py": "36e540a3571422ff6e432ee89abc3a7839b55e17c4afb2b07c06bfc0ee457e76",
+        "modules/infrastructure/foundups_mcp_bridge/src/mcp_server.py": "397a10a81ba3c2c3d5838d441a63dcbea58b63303dd3d62e1a0e59c3384b8eca",
+        "modules/infrastructure/foundups_mcp_bridge/src/bridge_server.py": "62c5578adaf2120991c323f324fca4db2cebbdf6e90158b7811d0bb4fb04e244",
+        "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_store.py": "14ead1ed0065789c4e86b5994ef4b2788fd8805bb94443660b8b22ecfda9a18e",
+        "holo_index/core/holo_index.py": "f7be72faba4785c998e55577d6e5a99d0f9e2456b4d7d185431b83d2375dbf23",
+        "modules/infrastructure/foundups_mcp_bridge/requirements.txt": "462b51e89354eada3ef764dbda1abbf02f69f5837d56de261adddfacc9e5e028",
+        "holo_index/requirements.txt": "ee0c4be68e20ea038351506706233e092a059b2e0fcee5530f3796ff472f83c3",
+        "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py": "27366180d9663a4d2014348dc0a6c40e1f8fb2d016e7afa4170578367cba2ae0",
+        "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_server_sse.py": "fd9a6ff2befa7d56bd57ee41036fbf3ae7acaa9405efa51042c55269b4f36d98",
+        "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_snapshot_store.py": "67fd266f6f8b0e0674bb090550d6df27c14012ec62214f7d1e04a3707ea56c5c"
+      },
+      "external_evidence_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\dependency-qualification-20260914",
+      "artifact_sha256": {
+        "holo-mcp-bundle.json": "66cc53f7e31ed29650419c9f39d733f32bf0705c52fb80e69d9104d27b91abea",
+        "zen-gate.json": "8ba621f5931bc3fa4f4efa649c8e880b21161974b9c42c5dc05370070082d56b",
+        "resolver-results.json": "79448b17834df7d124b580b31ff93b9348988cbe5c2e4055434590dd94dfbf13",
+        "pr-pin-contract-findings.json": "2c207b1da1e2153426ab9959f5ca34e771f43308860dc714aae54a6cfd498bb3",
+        "qualification-tests.xml": "9269d1a1ee5e281f290cb4a206ff06df932d0943bb53d567dd458b31d3d8defb",
+        "candidate-tests.xml": "829663a927c9ba7e56878c50c57378b027aa6c73da714fc1ed46fe16f71a3061",
+        "candidate-versions.json": "541b44ed0483e24f644b8b55bd9774c806d3db7e77e90cc1e4e8f7430858b7c2",
+        "candidate-install.json": "09ec962ab040f5872c83f30d5802230654151b20afeb3681cd9c59ef6c4d61f2",
+        "critical-alerts.json": "9b12a1662a2bc6525d28e49c53e8fbc9d97ddb9e7dea763ed28e9e42d45772e9",
+        "main-ci.json": "8066f7d04fe229be320a34684417dc971771d6933daba2f20dfa65d94b70160c",
+        "affected-feature-search.txt": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+        "open-pr-ownership.json": "0c5578ee0ca04e415311073f5bd0995d196d4e3142c3c994a1f75004a638ef40"
+      }
+    },
+    "reconciled_work": {
+      "local_dependency_preflight": "COMPLETE_WITH_EXPLICIT_EXPOSURE_AND_LIVE_VALIDATION_LIMITS",
+      "existing_upgrade_prs": "OPEN_RECONCILIATION_REQUIRED_NO_BRANCH_MODIFIED",
+      "expired_august_decision": "HISTORICAL_NOT_RENEWED",
+      "runtime_source_and_requirement_changes": 0,
+      "new_canonical_docs_modules_skills": 0,
+      "root_next_work_pointer": "Replaced stale fixed packet order with the current recursive selection."
+    },
+    "post_sprint_reobservation": {
+      "origin_main": "1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3",
+      "open_prs_observed": 97,
+      "planned_doc_overlap_prs": [
+        1648,
+        802,
+        782
+      ],
+      "overlap_disposition": "Root ModLog append-only; retain prior history. No source/requirements PR ownership changed.",
+      "ranked_actions": [
+        {
+          "task": "R09-R13 independent execution/verification/promotion/activation",
+          "complexity": 5,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 19,
+          "priority": "P0",
+          "state": "BLOCKED_RUNTIME_ADMISSION",
+          "next_executable_step": "Reconcile current independent admission evidence before any packet dispatch.",
+          "evidence": "ROADMAP.md"
+        },
+        {
+          "task": "R03-R04 integrated FastMCP/MCP runtime migration",
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 18,
+          "priority": "P0",
+          "state": "BLOCKED_CURRENT_OWNER_RUNTIME_ADMISSION",
+          "next_executable_step": "Reconcile PR1526/1525 and launcher pins; qualify replacement runtime and owned live lifecycle before activation.",
+          "evidence": "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md#6-dependency-qualification--2026-09-14"
+        },
+        {
+          "task": "R06 admitted WRE/OpenClaw/Hermes worker",
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 18,
+          "priority": "P0",
+          "state": "CURRENT_ADMISSION_NOT_ESTABLISHED",
+          "next_executable_step": "Use changed signed work/model/runtime evidence; no repeated unconfigured provider probe.",
+          "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#worker-readiness-checkpoint--2026-09-13"
+        },
+        {
+          "task": "R11 authenticated restoration of a missing later-sequence mirror",
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 17,
+          "priority": "P0",
+          "state": "ELIGIBLE_LOCAL_AUTHORING",
+          "next_executable_step": "Inspect existing root authority and monotonic store recovery contract; extend authenticated restoration and closest tests without relaxing generic CAS.",
+          "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14"
+        },
+        {
+          "task": "R03-R04 Chroma deployment qualification/mitigation",
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 17,
+          "priority": "P0",
+          "state": "RUNTIME_OWNER_DEPENDENCY",
+          "next_executable_step": "Establish affected live deployment and mitigation authority; no patched version or exposure is inferred from package metadata.",
+          "evidence": "holo_index/core/holo_index.py"
+        },
+        {
+          "task": "R11 independently authenticated response readback",
+          "complexity": 4,
+          "importance": 4,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0",
+          "state": "ELIGIBLE_AFTER_RECOVERY_CONTRACT",
+          "next_executable_step": "Reuse record/root-service owners after mirror recovery qualification; do not treat digests as read authority.",
+          "evidence": "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_state.py"
+        },
+        {
+          "task": "R03 current semantic retrieval",
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0",
+          "state": "CURRENT_AUTHORITY_NOT_REQUALIFIED",
+          "next_executable_step": "Existing governed maintenance owner must authenticate exact current-source qualification; query cannot reindex.",
+          "evidence": "holo_index/CLI_REFERENCE.md"
+        },
+        {
+          "task": "Protected eSingularity observation",
+          "complexity": 3,
+          "importance": 4,
+          "deferability_urgency": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1",
+          "state": "EXTERNAL_RESERVED_LANE",
+          "next_executable_step": "Keep evidence with the product owner; no RSI product edits.",
+          "evidence": "ROADMAP.md"
+        },
+        {
+          "task": "Existing AutoResearcher process/volume durability",
+          "complexity": 4,
+          "importance": 3,
+          "deferability_urgency": 3,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1",
+          "state": "ELIGIBLE_LATER_LOCAL_FIXTURES",
+          "next_executable_step": "Revisit existing disposable process/volume fixtures without product dispatch.",
+          "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#existing-component-coverage-and-rsi-insertion-points"
+        }
+      ],
+      "selected_action": "R11-authenticated-missing-mirror-restoration",
+      "selection_rationale": "Completed preflight leaves the integrated migration needing current owner/runtime admission and live lifecycle proof. Mirror restoration is the highest eligible local authoring action at 17/P0; the other equal-score Chroma action lacks deployment/owner evidence. Reconcile existing stores and authenticate the surviving witness; keep generic CAS unchanged.",
+      "reobserve_again_after_closure": true
+    },
+    "remaining": [
+      "Paired runtime source/pin/owner reconciliation and owned live lifecycle",
+      "Current Chroma deployment qualification and any admitted mitigation",
+      "Authenticated mirror restoration, readback and normal signer/publisher wiring",
+      "Independent runtime admission, retained benefit and production RSI"
+    ],
+    "dispatchable": false,
+    "retained_improvement_proven": false
   }
 }
