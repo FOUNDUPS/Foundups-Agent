@@ -1,5 +1,10 @@
 # WRE Core - ModLog
 
+## 2026-09-14: Re-score repository work after every sprint
+
+- Linked WRE's roadmap to the existing system selection/closure rule. Canonical WSP 15 ranks actionable work; WSP 97 reconciles scope and current evidence before execution and again after completion/blockage.
+- Reused the prototype auditor's discovery checklist as advisory. Existing `IssueMPSEvaluator`, `ImprovementJob`, WRE/AgentDB admission and execution-evidence owners were inspected; no runtime, model or scheduler was added. Actual numeric allocation and independent verification remain required at their existing admission boundaries. WSP 00/15/22/50/97.
+
 ## 2026-09-14: WSP 15 priority-label correction
 
 - The outcome-retention entry below recorded 3+5+4+4=16 as P1. Canonical WSP 15 section 4 maps 16-20 to **P0**. The live dispatch checkpoint is corrected; the raw dated observation is preserved with an appended correction. This changes no packet score, authority, completion status or runtime allocation.
