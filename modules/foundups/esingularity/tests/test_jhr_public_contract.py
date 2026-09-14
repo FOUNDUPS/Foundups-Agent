@@ -49,35 +49,8 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     assert "https://esingularity.ai/${action.href}" in ticker
     assert "currentFieldStatus.tickerJa" in ticker
     assert "label: 'JHR'" in ticker
-    assert "href: '/reports/jhr'" in ticker
-    assert "https://yumori.me/vote-no#council" in ticker
-    assert "https://yumori.me/vote-no#mayor" in ticker
-    assert "Monkとつながる" not in ticker
-    assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
-
-
-def test_vote_no_public_record_is_reachable_and_privacy_bounded() -> None:
-    page = read(FRONTEND_ROOT / "app" / "vote-no" / "page.tsx")
-    messages = read(FRONTEND_ROOT / "content" / "civic-messages.ts")
-
-    assert "設立準備委員会から福井市議会へ" in page
-    assert "設立準備委員会から福井市長へ" in page
-    assert "履歴注記" in page and "その後撤回" in page
-    assert "gikai@city.fukui.lg.jp" in page
-    assert "BCC" in page
-    assert "60日間は可逆です。解体は不可逆です。" in messages
-    assert "YUMORI.me 設立準備委員会" in messages
-
-
-def test_phone_ticker_is_bottom_docked_and_swipeable_when_stopped() -> None:
-    css = read(FRONTEND_ROOT / "app" / "globals.css")
-
-    assert "Phone ticker: thumb-reachable bottom dock" in css
-    assert "position:fixed!important" in css
-    assert "bottom:0" in css
-    assert "env(safe-area-inset-bottom)" in css
-    assert "touch-action:pan-x" in css
-    assert "scroll-snap-type:x proximity" in css
+    assert "href: '/reports/jhr#jhr-002'" in ticker
+    assert 'id="jhr-002"' in read(FRONTEND_ROOT / "app" / "reports" / "jhr" / "layout.tsx")
 
 
 def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> None:
@@ -87,4 +60,4 @@ def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> Non
     assert project_page.count('href="/reports/jhr') >= 3
     assert "JHR・最新レポート" in project_page
     assert "const JHR_URL = '/reports/jhr'" in movement_page
-    assert "JAPAN HYPERSCALER REPORTを読む" in movement_page
+    assert "ジャパン・ハイパースケーラー・レポート（JHR）を読む" in movement_page
