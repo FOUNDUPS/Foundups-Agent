@@ -3,8 +3,8 @@
 ## Local cache checkpoint — 2026-09-14
 
 Configured severity is now passed to the existing cache reader. The root
-[WRE roadmap](../ROADMAP.md#current-local-rsi-checkpoint--2026-09-14) owns the
-current report-ownership, 17/P0 follow-on. This closes neither full coordinator
+[WRE roadmap](../ROADMAP.md#current-local-rsi-checkpoint--2026-09-15) owns the
+current per-execution fingerprint-handoff, 17/P0 follow-on. This closes neither full coordinator
 concurrency nor the historical consolidation tasks below.
 
 ## Current State: POC (1.1.1)

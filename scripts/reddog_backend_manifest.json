@@ -2212,7 +2212,7 @@
     "modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py": "8225572d52717870892a77d83df9bb0130819a022d7c5288d320bc327e0af677",
     "modules/communication/moltbot_bridge/src/reddog_wre_worktree_runner.py": "fb33a67346988afe63c2ece42ba89804e4c0022ecb9d9f789d89ab7aebf077c8",
     "modules/communication/moltbot_bridge/src/reddog_wsp15_allocation_receipt.py": "2ba33010ae1bdc22861409d8c0bb42816bd7ef64beb19bc70d1253c7ccf559d4",
-    "modules/communication/moltbot_bridge/src/skill_safety_guard.py": "db45a6c52e3dd344fa5b94c8361f80f8c636f34c17bbddd6b8e6169ea505434b",
+    "modules/communication/moltbot_bridge/src/skill_safety_guard.py": "9ce20cd80ab5356f629d1a0049e538f61c591e4628972fa9c8be9d5c5e53ec2b",
     "modules/communication/moltbot_bridge/src/social_campaign_adapter.py": "fcbddba73a78c8df526941af2bbe37e0306409cadc25e648cd796ef05a84c738",
     "modules/communication/moltbot_bridge/src/webhook_receiver.py": "0da74a026f18e7d08051884395386429b99cc9463cfd9e3bd9085a76086a4a7a",
     "modules/communication/moltbot_bridge/src/x_social_adapter.py": "0d062b23c7d1a5e6fa24e9a26a8345ac6f1a453cdbb407fbcbb31e59904d9f4c",

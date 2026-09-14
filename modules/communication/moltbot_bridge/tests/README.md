@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## Scanner report ownership
+
+Extend `test_skill_safety_guard.py` and its existing scanner/manifest helpers.
+The suite adds reentrant and two-process verdict isolation, interrupted workspace
+cleanup and allocation/publication failures. Scanner subprocess results are injected.
+Final connected subset: 40 passed/one link skip; seven connected files: 166/four skips.
+Exact commands and limits: `scan_report_ownership_continuation_20260915` in the
+canonical RSI baseline. The retained report path is latest diagnostics only.
+
 ## Activation recovery
 
 Extend the existing `test_foundup_memex_verified_outcome_adversarial.py` for commit

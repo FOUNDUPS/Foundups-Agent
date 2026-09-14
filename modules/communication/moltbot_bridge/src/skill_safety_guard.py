@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import tempfile
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -321,6 +322,40 @@ def _scanner_preflight(
     return scanner_cmd, None
 
 
+def _scan_in_workspace(
+    scanner_cmd: str, skills_dir: Path, report_path: Path,
+    manifest: SkillManifestResult, max_severity: str, timeout_sec: int,
+) -> SkillScanResult:
+    """Own verdict input per invocation; retain only a latest diagnostic copy."""
+    try:
+        report_path.unlink(missing_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".skill-scan-", dir=report_path.parent) as raw:
+            private_report = Path(raw) / report_path.name
+            command = _build_scanner_command(scanner_cmd, skills_dir, private_report)
+            completed, exit_code, error = _invoke_scanner(command, private_report, timeout_sec)
+            if completed is None:
+                return _result(
+                    skills_dir=skills_dir, report_path=report_path, manifest=manifest,
+                    available=True, passed=False, exit_code=exit_code, message=error,
+                )
+            result = _completed_scan_result(
+                completed, skills_dir=skills_dir, report_path=private_report,
+                manifest=manifest, max_severity=max_severity,
+            )
+            if path_has_link_or_reparse(private_report) or path_has_link_or_reparse(report_path.parent):
+                raise OSError("report path changed")
+            if private_report.is_file():
+                os.replace(private_report, report_path)
+            result.report_path = str(report_path)
+            return result
+    except OSError:
+        return _result(
+            skills_dir=skills_dir, report_path=report_path, manifest=manifest,
+            available=True, passed=False, exit_code=4,
+            message="skill scan report workspace or diagnostic publication is unavailable",
+        )
+
+
 def run_skill_scan(
     skills_dir: Path,
     *,
@@ -334,7 +369,7 @@ def run_skill_scan(
     manifest_path: Optional[Path] = None,
     manifest_hmac_key: Optional[str] = None,
 ) -> SkillScanResult:
-    """Run Cisco skill scanner with manifest and report evidence gates."""
+    """Scan with owned evidence; report_path is a mutable latest diagnostic."""
     skills_dir = absolute_unresolved(skills_dir)
     report_dir = absolute_unresolved(report_dir or skills_dir.parent / "reports")
     report_path = report_dir / "openclaw_skill_scan_report.json"
@@ -354,17 +389,6 @@ def run_skill_scan(
     )
     if failure is not None or scanner_cmd is None:
         return failure
-    command = _build_scanner_command(scanner_cmd, skills_dir, report_path)
-    completed, exit_code, process_error = _invoke_scanner(command, report_path, timeout_sec)
-    if completed is None:
-        return _result(
-            skills_dir=skills_dir, report_path=report_path, manifest=manifest,
-            available=True, passed=False, exit_code=exit_code, message=process_error,
-        )
-    return _completed_scan_result(
-        completed,
-        skills_dir=skills_dir,
-        report_path=report_path,
-        manifest=manifest,
-        max_severity=max_severity,
+    return _scan_in_workspace(
+        scanner_cmd, skills_dir, report_path, manifest, max_severity, timeout_sec,
     )

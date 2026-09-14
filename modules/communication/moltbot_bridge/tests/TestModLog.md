@@ -1,3 +1,9 @@
+## 2026-09-15: Independent scanner report evidence and cleanup
+
+- Reused `test_skill_safety_guard.py`: 18 added cases across reentrant report substitution/missing evidence, timeout/OSError/KeyboardInterrupt cleanup, allocation/publication failure and two-process interleavings. All 27 old top-level definitions and 56 unchanged assertions remain; the old TMP assertion now checks private-parent equality plus containment/cleanup. Shared fixture extraction keeps the file 665→668 lines.
+- Before: 12 failures/23 deselected in 1.39s. Final connected run: 166 passes/four existing link skips in 8.81s, including scanner 40/one skip. Manifest: 8 passes in 67.53s; fast: 15 groups in 4,806ms; registry current 1,650/269. Initial stale pins caused one manifest failure and fast rejection, then passed after manifest completion and ordered pin update. Selections overlap; no live scanner/model/FoundUp call.
+- Exact commands, skipped IDs, fingerprints, source size (394), packaging and limitations: `scan_report_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97.
+
 ## 2026-09-14: Activation acknowledgment and revision recovery
 
 - Reused `test_foundup_memex_verified_outcome_adversarial.py` and existing runtime-authority/PatternMemory fixtures: 23 cases in seven tests cover lost replies, bounded unrelated revisions, exact/conflicting winners, uncommitted acknowledgments, current-memory loss, cancellation and unreadable state. All pre-existing test definitions remain unchanged.

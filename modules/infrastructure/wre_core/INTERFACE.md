@@ -219,7 +219,7 @@ Mapping operations use a short-held module lock. Scanning runs outside that
 lock. Each mapping retains at most 128 entries, evicting oldest completed entries
 first; pending slots are never evicted and exhausted pending capacity blocks.
 Callers share it through these owner functions, not raw concurrent mutation.
-This is not cross-process/separate-mapping exclusion or report-file ownership.
+Separate mappings/processes are not serialized; [the bridge scanner](../../communication/moltbot_bridge/README.md#skill-safety-gate-cisco-skill-scanner) owns private report files per call.
 
 `admitted_runtime_fingerprint(..., max_severity="medium")` reads matching content
 and policy after a successful safety check; the coordinator passes its configured

@@ -1,5 +1,11 @@
 # WRE Core - ModLog
 
+## 2026-09-15: Isolate scanner report ownership
+
+- Extended the existing bridge guard with per-invocation report/TMP directories. Verdicts read private evidence before atomic publication of the existing latest diagnostic. Normal returns/errors/cancellation clean only owned temporary files; allocation/publication failures cannot admit. No immutable report or crash-scavenging claim.
+- Twelve regressions failed before repair. Final local validation: 166 connected passes/four existing link skips, including 40/one skip in the scanner suite; 8 manifest tests and 15 fast groups pass. Two real Python processes use injected scanner output. Original test/helper names and severity/manifest assertions remain; the TMP assertion now binds the private path. Source/test sizes are 394/668, with no new file or exemption.
+- One runtime hash and both existing pins change; 1,400 runtime members and registry 1,650/269 remain. Initial stale-pin validation is retained and corrected. Fresh selection: per-execution fingerprint handoff 17/P0; OpenClaw workspace cache gap 16/P0. Evidence: `scan_report_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Runtime admission remains closed.
+
 ## 2026-09-14: Own pending WRE scans and bind cached policy
 
 - Extended the existing cache with locked mapping operations, per-directory pending slots, exact severity keys and a 128-entry cap per mapping. Refresh invalidates old admission; failure/cancellation removes its slot and lost ownership cannot publish. Scanning remains outside the lock; pending/full capacity blocks admission.

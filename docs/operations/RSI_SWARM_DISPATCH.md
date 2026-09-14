@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `admission_cache_ownership_continuation_20260914` in
+**Current selection evidence:** `scan_report_ownership_continuation_20260915` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,60 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Scan-report ownership checkpoint — 2026-09-15
+
+Source: `8682d569b1022f35fd357af6b3b20e4b5ce52a7e`, merged RSI PR
+[#1744](https://github.com/FOUNDUPS/Foundups-Agent/pull/1744); both main workflows
+passed. WSP 00's software gate passed. Fresh Git and ownership reads retain
+96 unchanged open PR heads with no scan-source/test owner conflict. Governed
+lexical retrieval remains UNKNOWN with an index gap and zero owner attempts;
+direct Git reads establish the source used here, not current semantic qualification.
+
+WSP 15 selected **4/5/4/4 = 17/P0**. The existing scanner tests reproduced
+12 failures: an unsafe or missing report could consume another call's clean
+report, a clean call could consume unsafe findings, and interrupted scans left
+working evidence behind. This is a disposable reproduction, not a live incident.
+
+The existing bridge scanner owner now creates a private temporary directory
+for each invocation, including scanner TMP/TEMP. It computes the verdict from
+that private report, then atomically replaces the existing latest diagnostic
+file. Normal returns, timeouts, process errors and Python cancellation clean
+only that call's workspace. Allocation/publication failures return a failed scan.
+The public signature and result fields are unchanged. `report_path` names a
+mutable latest diagnostic, can be absent, and is never immutable per-call evidence.
+Hard process termination may leave an isolated directory; crash scavenging and
+hostile-filesystem isolation are not established by this change.
+
+Validation: **166 passed / four existing link-related skips** across seven
+connected files, including **40 passed / one skip** in the scanner suite.
+Two independent Python processes and reentrant callers retain their own verdicts.
+Scanner output is injected; no live provider, scanner or FoundUp is used.
+Eight manifest tests and all 15 RedDog fast groups passed. An initial packaging
+run caught pins read before asynchronous manifest generation completed; the logs
+are retained and final checks passed after regeneration/pin ordering was corrected.
+
+The source is 394 lines (was 370); the test file is 668 (was 665). Reused setup
+keeps all 27 original test/helper definitions and 56 unchanged assertions. One
+TMP assertion follows the private-directory contract with added containment and
+cleanup checks. No module, test file, skill, registry entry or size exemption is
+added. The 1,400-member runtime manifest changes one source hash and both existing
+digest pins; the test registry remains current at 1,650/269.
+
+Fresh WSP 15/WSP 97 removes this local report-ownership defect and selects
+**per-execution fingerprint handoff, 4/5/4/4 = 17/P0**. The coordinator still
+stores admission by skill name and dispatches from that shared map; retrieve
+existing execution-context evidence and reproduce interleavings before repair.
+The adjacent OpenClaw workspace cache returns by TTL before current content/policy
+checks; record that existing-owner gap at **3/5/4/4 = 16/P0** for later work.
+Higher-ranked RedDog work remains externally owned; independent execution,
+current Holo/MCP, worker and deployment qualification keep their existing blockers.
+R11 acceptance and the unanswered 012 reader-policy decision remain separate.
+
+Exact queue, source/test fingerprints, commands, skipped IDs, failure history and
+evidence are in `scan_report_ownership_continuation_20260915` in the canonical
+baseline. Planning packets remain non-dispatchable and production RSI remains
+incomplete. Re-observe main, ownership and checks again after sprint closure.
 
 ### Admission cache ownership checkpoint — 2026-09-14
 

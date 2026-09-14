@@ -951,13 +951,20 @@ records (`action_cli_<route>_<action>`), enabling recall of:
 
 ## Skill Safety Gate (Cisco Skill Scanner)
 
-`src.skill_safety_guard.run_skill_scan()` is OpenClaw's cached preflight for
-mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
-a wardrobe uses recursive `scan-all`. Reports use a caller-selected directory.
-Missing/malformed evidence, manifest failure, timeout, or a required unavailable
-scanner fails closed. Scanner output is redacted and its environment excludes
-credentials. `SkillScanResult` is supply-chain evidence only; it grants no
-execution, effect, outcome-evaluation, or promotion authority.
+`src.skill_safety_guard.run_skill_scan()` supplies OpenClaw's cached preflight
+for mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
+a wardrobe uses recursive `scan-all`. The caller selects the report directory.
+Each invocation owns a temporary subdirectory for its report and scanner TMP/TEMP.
+The verdict uses only that private report, then atomically replaces
+`openclaw_skill_scan_report.json`. Returned `report_path` is a mutable latest
+diagnostic, may be absent, and is not an immutable receipt for that invocation.
+Normal return, timeout, process error and Python cancellation clean the private
+workspace. Hard process termination can leave isolated temporary files; this
+change adds no crash scavenger or persistent per-scan archive.
+Missing/malformed evidence, manifest failure, timeout, unavailable required
+scanner or workspace/publication error fails closed. Raw scanner streams are
+omitted and its environment excludes credentials. `SkillScanResult` is supply-chain
+evidence only; it grants no execution, effect, evaluation or promotion authority.
 
 Environment toggles:
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
