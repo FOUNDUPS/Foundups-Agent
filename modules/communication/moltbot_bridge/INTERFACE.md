@@ -186,129 +186,26 @@ capability. Production startup remains fail closed until it receives the
 attestation, a current signer-runtime configuration, and an independently
 administered principal-key resolver.
 
-Architect proposal attestation v2 requires a typed `OperationalMemexSupplyReceipt`;
-promotion rehydrates its complete serialized form, recomputes the canonical ID,
-rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcome
-rehydration checks canonical verifier/held-out receipts. The system-service
-signer loads an exact root-owned v2 outcome-authority descriptor and an opaque
-client for a separately launched root authority service. The service owns
-disjoint primary, witness, and one-time installation monotonic stores; the
-signer owns none of them. Each
-co-signed grant binds FoundUp, snapshot,
-work order, slice, job, worker, exact head/content, runtime, PatternMemory record,
-signer key/epoch, and the current signer run packet/config/session/manifest
-generation through an immutable authority-context digest covered by both
-independent signatures. Only a root-UID-authenticated socket exchange can mint
-the opaque E0 capability; every key-provider constructor verifies that boundary
-before resolving key material. Every reserve and commit additionally carries a
-domain-separated Ed25519 proof from the exact current E0 signer key, while fresh
-kernel UID/GID credentials are checked against the current root config. The
-root service burns a reservation before signing, then re-reads current root
-configuration and rechecks revocation, generation, grant, reservation, signer
-proof, and signature digest before commit. After those same checks, an exact
-already-committed reservation/digest is acknowledged without advancing or resetting
-the terminal marker. `commit_service_authority(...)` retries identical encoded
-request bytes once for ConnectionError/TimeoutError only. Plain OSError ownership
-or size failures, malformed replies, explicit rejection and cancellation do not
-retry. Each exchange retains its configured timeout (default 5 seconds, maximum
-30); there is no combined deadline across the two attempts. No protocol/schema or
-method signature changes. The response contains no full outcome signature payload,
-and the opaque reservation seal remains process-local; acknowledgment recovery
-does not supply durable outcome-response recovery. Runtime startup cannot initialize or
-reset replay state. The separate installer rejects after its third-domain
-commit, including after both replay stores are deleted. A failed or crashed
-reservation never reopens. Every current snapshot must match the exact roots,
-paths, store IDs, and durability receipts opened at service startup; state-store
-rotation therefore rejects until a supervised restart. The production isolated
-signer applies its Linux E0 boundary before key resolution: distinct non-root
-UID/GID matching the root-owned v2 owner config, YAMA ptrace controls, no
-`CAP_SYS_PTRACE`, disabled core/dumpable state, and a cleared inherited
-environment. The legacy CLI and one-shot isolated-process composer reject every
-non-test provider before authority, resolver, or socket access. Only the stable
-service is production; it derives manifest, outcome authority, owner ID, and
-signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
-test-only dry-run is non-authoritative. The same root service optionally routes opaque `RootRevocationAnchorAuthority.load()`/`advance_snapshot()` operations with no caller-selected CAS state, holding `lease_validated_owner_e0_current_admission()` through signed policy, topology, snapshot, witness, and monotonic validation.
-An absent outcome policy leaves unrelated signer operations available. The root protected-use protocol can atomically order revocation and one callback, but production E0 activation remains blocked until the service startup factory supplies that capability with authenticated grants and WSP71 resolution.
-Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
-Resident production admission remains blocked until the root service is deployed
-and independent verifier runtimes issue both grant signatures. Staged authority
-envelopes remain non-consumable until exact activation.
-`AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` reads STAGED
-or ACTIVE evidence for the existing publisher's retry check, returns `None` when
-absent, and raises on invalid durable state. It is not the consumable source.
-`SignedVerifiedOutcomeEvidencePublisher.publish()` acknowledges a byte-equivalent
-existing envelope after checking exact requested evidence, publisher identity,
-original issuance and signature. It does not re-sign, rewrite, renew or activate
-on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
-runtime authority still checks current key, revocation and expiry.
-`validate_verified_outcome_signing_response(response, signing_input, *,
-signer_public_key, key_epoch, requester_principal_id, signature_verifier)` is the
-shared predicate in `foundup_memex_verified_outcome_signing.py`; the publisher's
-existing validation wrapper calls it. Acceptance, boundary/requester attestations,
-untrusted-code exclusion and secret exclusion require exact `True`, as do both
-signature-verifier results. A present rejection code must be empty. Original
-receipt and outcome-domain audit signatures, key, fingerprint and epoch remain
-bound. The predicate performs no persistence, issuance renewal, state transition, current
-read-authorization check or record deserialization. Malformed attributes or
-dependency exceptions can still raise; consumers must fail closed. Its result
-cannot authorize durable response replay or construct a process-local capability.
-`VerifiedOutcomeResponseBinding(descriptor_id, owner_config_id,
-authorization_id, reservation_id)` is frozen public identifier data, never a root
-reservation capability. `build_verified_outcome_response_record(request, response,
-*, descriptor, binding, signature_verifier) -> bytes` snapshots a v1 record using
-the existing root codec. `parse_verified_outcome_response_record(raw, *,
-expected_binding, expected_record_digest, signature_verifier) ->
-tuple[SigningRequest, SigningResponse]` returns the original typed pair after
-canonical/full-record digest, scope, co-signed descriptor and receipt/audit checks.
-The complete record includes its response digest, full descriptor/grant context
-and the four root identifiers. V1 requires exact string/boolean fields, omits the
-unsupported elevated-consensus proof, rejects unknown/missing fields and duplicate
-keys, and caps the full ASCII canonical JSON plus newline at 65,536 bytes.
-Historical validation uses original issuance; replay anchor identifiers receive
-shape checks without touching their store. Expected bindings/digest must come
-from an independently authenticated owner, not the parsed record. The parser
-does not supply that authentication, fresh expiry/revocation/read authority,
-durable root commitment, process-local seals, persistence or memory activation.
-No production caller is connected in this schema layer. Future enclosing wire
-messages must also respect the existing complete-message limit.
+### Verified-outcome authority, signing and memory
 
-`AuthorityRuntimeVerifiedOutcomeStore.publish()` bounds revision-conflict retries
-to three commit attempts, preserving the signed envelope and unrelated current
-state. Other errors are not retried. On publication OSError/RuntimeError/ValueError,
-the signed publisher may acknowledge only a reloaded, fully validated durable
-publication, including an equivalent winner with its original issuance/signature.
-Missing or invalid evidence still rejects. Signing failures and cancellation are
-not publication recovery; no burned signer reservation is reset. This does not
-recover process death before an envelope is durable or activate memory.
-`ResidentQueueChainResultReceipt.recorded_at` is optional for historical objects;
-new accepted `record_resident_queue_stage_result()` writes require a timezone-aware
-`now_iso` and persist it once. Earlier receipts and transition IDs are preserved;
-the canonical snapshot revision covers the field. Admission derivation requires
-one held-out-stage receipt with a matching queue/slice/transition ID and valid
-nonfuture timestamp in a canonical snapshot. It reuses that time as `verified_at`.
-Snapshot `updated_at` and the current bootstrap clock cannot backfill missing
-historical event time. Old histories remain readable; timestamp-less admission
-requires owner-controlled recovery. This integrity check is not signed authority.
-PatternMemory admission
-uses an invisible staging table in the existing database. Conflicting existing
-rows and legacy hash-shaped compatibility markers reject. Staging snapshots
-the input, reconciles a competing record-key insert without replacing the
-winner, and checks exact stored payload/agent before commit. Same-record retry
-returns the same ID; staging remains outside recall. Active-row retries compare
-the stored payload's canonical JSON with the requested canonical JSON. Values
-such as `true`/`1`, `12`/`12.0` and `0.0`/`-0.0` conflict even when Python
-equality accepts them; existing record IDs and digest serialization are unchanged.
-This does not make
-activation and authority revalidation one atomic transaction. The real sink is deliberately
-not activation-ready until it can independently revalidate a durable authority
-source; direct sink activation is forbidden. Authority-envelope consumption reloads
-the durable envelope, resolves the key from the current committed authority profile,
-checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worker/
-verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain
-assembler consumes that capability against the same durable replay state. Raw
-booleans, raw receipt IDs, caller-supplied records, and serializable capability
-markers are never authority. `gate_foundup_memex_learning_candidates()` emits exception-total, pre-traversal-bounded, canonical, digest-bound `STRUCTURAL_ONLY` candidates from structurally self-consistent assembly-receipt-bound Memex views plus Breadcrumb/verified-outcome evidence; this is not authenticated view provenance. Governed research fails closed until an authenticated authority exists, and caller-supplied receipt IDs never authorize it. `verify_foundup_memex_learning_candidate_reconstruction(candidate, proposal, evidence)` requires the exact proposal and evidence closure. The gate is non-runtime-admissible and performs no persistence or mutation.
-Brain writes, runtime source adapters, roadmap writes, default Memex supply, and HoloIndex mutation remain outside this interface. `ExternalSignerAuthoritativeUseLeaseIssuer` extends socket-v2/E0 with an opaque exact-effect capability bound to the root-selected signer profile, current generation, and durable replay root; substitution, replay, expiry overrun, rollback revival, and socket-v1 downgrade reject, while production remains inactive until the external signer lifecycle and live canary are provisioned.
+The [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference) retains the root, signer, publication and memory boundaries previously listed here. The [pending-storage checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14) records the latest local layer.
+
+| Existing API / owner | Current contract |
+|---|---|
+| Root service / `commit_service_authority(...)` | Current co-signed grants, root-owned disjoint stores, fresh peer/proof/revocation checks; exact terminal acknowledgment retry never reopens a reservation. V1 retains its per-exchange timeout and process-local seal. |
+| `validate_verified_outcome_signing_response(response, signing_input, *, signer_public_key, key_epoch, requester_principal_id, signature_verifier)` | Exact-True attestations, empty rejection code and verified receipt/audit signatures; a predicate cannot confer authority. |
+| `VerifiedOutcomeResponseBinding(descriptor_id, owner_config_id, authorization_id, reservation_id)` | Frozen public identifiers, never a root capability. |
+| `build_verified_outcome_response_record(request, response, *, descriptor, binding, signature_verifier) -> bytes` | Canonical v1 full signed history, exact types/schema, complete 64 KiB cap. |
+| `parse_verified_outcome_response_record(raw, *, expected_binding, expected_record_digest, signature_verifier) -> tuple[SigningRequest, SigningResponse]` | Checks independently supplied pins and historical signatures; supplies no current read authorization. |
+| `RootVerifiedOutcomeAuthorityState.persist_pending_response(raw, *, expected_binding, expected_record_digest, now_epoch) -> str` | Current owner generation and exact sequence-1 reservation; mirrored selection digest before atomic exact-byte storage. Returns the record digest while leaving the grant reserved. |
+| `AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` / `publish()` | Validated STAGED/ACTIVE retry evidence; three revision attempts preserve the signed envelope and unrelated state. Staging is invisible to consumable readers. |
+| `SignedVerifiedOutcomeEvidencePublisher.publish()` | Exact durable winner acknowledgment preserves original issuance/signature; no re-signing, renewal or activation. |
+| `ResidentQueueChainResultReceipt.recorded_at` | Canonical held-out event time supplies admission `verified_at`; bootstrap time cannot repair absent historical time. |
+| PatternMemory staging / authority-envelope consumption | Immutable payload/agent and exact row identity; current durable authority and opaque one-use capability remain required for consumption. The real sink rejects direct activation. |
+| Learning-candidate gate / reconstruction verifier | Bounded `STRUCTURAL_ONLY` evidence, not authenticated provenance, work authority or runtime admission. |
+
+Pending payloads use the fixed primary-root file `verified-outcome-pending-responses.json`, the existing atomic store, at most eight records and a complete 512 KiB snapshot. The payload has one copy; mirrored digests cannot reconstruct lost bytes. Only retained exact bytes can repair a missing file.
+Pending storage adds no RPC, terminal commitment, authenticated readback or publisher call site. Full-response recovery, independent memory activation and retained improvement remain open. Production signer isolation and deployment prerequisites remain in the complete contract.
 
 `build_grant_service_archive_from_git()` reads only exact commit-tree blobs and
 emits canonical archive schema v2. `validate_grant_service_archive_git_provenance()`

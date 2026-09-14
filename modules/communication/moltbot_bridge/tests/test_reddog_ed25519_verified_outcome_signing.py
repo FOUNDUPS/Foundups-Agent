@@ -9,7 +9,11 @@ import pytest
 
 from modules.communication.moltbot_bridge.src import (
     foundup_memex_verified_outcome_signing as outcome_signing,
+    foundup_verified_outcome_root_authority_state as outcome_state,
     reddog_ed25519_signer_backend as signer_backend_module,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    AtomicJsonAuthorityRuntimeStore,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
     MAX_MESSAGE_BYTES, canonical_bytes, decode_message, digest_mapping, encode_message,
@@ -673,3 +677,379 @@ def test_outcome_response_record_history_does_not_renew_ordinary_signing(
     assert rejected.accepted is False and rejected.rejection_code == REJECT_ED25519_SIGNER_REQUEST_INVALID
     assert _parse_outcome_record(values, raw) == (values.request, values.response)
     assert values.counts["outcome_signatures"] == 1
+
+
+@pytest.fixture
+def pending_response_inputs(tmp_path, monkeypatch):
+    values, backend, request, peer, counts = _root_outcome_backend(tmp_path, monkeypatch)
+    descriptor, grant, state, *_stores, current, authority = values
+    captured = {}
+
+    def hold_before_terminal_commit(*args, **kwargs):
+        captured["reservation"] = args[4]
+        return args[1]
+
+    # Capture real signed bytes before v1 finalization; this is not a live RPC.
+    monkeypatch.setattr(signer_backend_module, "_finalize_signing", hold_before_terminal_commit)
+    response = backend.sign(request, peer)
+    assert response.accepted is True
+    binding = outcome_signing.VerifiedOutcomeResponseBinding(
+        descriptor_id=descriptor["descriptor_id"],
+        owner_config_id=current["snapshot"].owner_config_id,
+        authorization_id=grant["authorization_id"],
+        reservation_id=captured["reservation"].reservation_id,
+    )
+    pending = SimpleNamespace(
+        descriptor=descriptor, grant=grant, state=state, request=request,
+        response=response, binding=binding, verifier=Ed25519SignatureVerifier(),
+        counts=counts, authority=authority, current=current, backend=backend, peer=peer,
+    )
+    pending.raw = _build_outcome_record(pending)
+    pending.digest = decode_message(pending.raw)["record_digest"]
+    pending.path = state.rollback_domain_root / "verified-outcome-pending-responses.json"
+    pending.store = AtomicJsonAuthorityRuntimeStore(
+        pending.path, allowed_root=state.rollback_domain_root, repo_root=root_fixture.REPO_ROOT,
+    )
+    return pending
+
+
+def _persist_pending_response(values, **overrides):
+    arguments = dict(
+        raw=values.raw, expected_binding=values.binding,
+        expected_record_digest=values.digest, now_epoch=root_fixture.NOW,
+    )
+    arguments.update(overrides)
+    return values.state.persist_pending_response(**arguments)
+
+
+def _alternate_pending_response(values, audit_suffix="-different-response"):
+    mac = values.response.audit_mac + audit_suffix
+    audit = outcome_signing.canonical_signer_audit_attestation_input(
+        signing_input=values.request.signing_input, signature=values.response.signature,
+        audit_mac=mac, signer_public_key=values.request.signer_public_key,
+        key_epoch=values.request.key_epoch,
+        requester_principal_id=values.request.requester_principal_id,
+        domain_prefix=outcome_signing.VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
+    )
+    altered = replace(values.response, audit_mac=mac, audit_attestation_signature=
+                      root_fixture._sign(root_fixture._SIGNER_KEYS[values.request.signer_public_key], audit))
+    raw = _build_outcome_record(values, response=altered)
+    return raw, decode_message(raw)["record_digest"]
+
+
+def test_pending_response_storage_roundtrip_preserves_reservation_and_exact_bytes(
+    pending_response_inputs, tmp_path,
+) -> None:
+    values = pending_response_inputs
+    grant_binding = authorization_binding(values.grant["authorization_id"])
+    before = values.state.load(grant_binding)
+    assert before.sequence == 1
+    assert _persist_pending_response(values) == values.digest
+    snapshot = values.store.load()
+    assert snapshot["records"] == {values.grant["authorization_id"]: values.raw.decode("ascii")}
+    raw_snapshot = values.path.read_bytes()
+    marker = values.state.load(outcome_state.pending_response_binding(values.grant["authorization_id"]))
+    assert marker.sequence == 1 and marker.state_revision == values.digest[7:]
+    rebuilt, *_stores = service_fixture._state(tmp_path, values.descriptor)
+    values.state = rebuilt
+    assert _persist_pending_response(values) == values.digest
+    assert values.path.read_bytes() == raw_snapshot
+    assert rebuilt.load(grant_binding) == before and values.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("after_write", [False, True], ids=["before-write", "lost-ack"])
+def test_pending_response_storage_retries_exact_bytes_after_write_error(
+    pending_response_inputs, monkeypatch, after_write,
+) -> None:
+    values = pending_response_inputs
+    commit = AtomicJsonAuthorityRuntimeStore.commit
+
+    def interrupted(store, *args, **kwargs):
+        if store.path != values.path:
+            return commit(store, *args, **kwargs)
+        if after_write:
+            commit(store, *args, **kwargs)
+        raise OSError("test_pending_write_interrupted")
+
+    monkeypatch.setattr(AtomicJsonAuthorityRuntimeStore, "commit", interrupted)
+    if after_write:
+        assert _persist_pending_response(values) == values.digest
+    else:
+        with pytest.raises(OSError, match="pending_write_interrupted"):
+            _persist_pending_response(values)
+        assert not values.path.exists()
+    marker = values.state.load(outcome_state.pending_response_binding(values.grant["authorization_id"]))
+    assert marker.state_revision == values.digest[7:]
+    monkeypatch.setattr(AtomicJsonAuthorityRuntimeStore, "commit", commit)
+    assert _persist_pending_response(values) == values.digest
+    assert values.store.load()["records"][values.grant["authorization_id"]] == values.raw.decode("ascii")
+    assert values.counts["outcome_signatures"] == 1
+
+
+def test_pending_response_storage_cancellation_keeps_selection_consumed(
+    pending_response_inputs, monkeypatch,
+) -> None:
+    values = pending_response_inputs
+    commit = AtomicJsonAuthorityRuntimeStore.commit
+
+    def cancelled(*args, **kwargs):
+        raise SystemExit("test_pending_cancelled")
+
+    monkeypatch.setattr(AtomicJsonAuthorityRuntimeStore, "commit", cancelled)
+    with pytest.raises(SystemExit, match="pending_cancelled"):
+        _persist_pending_response(values)
+    marker = values.state.load(outcome_state.pending_response_binding(values.grant["authorization_id"]))
+    assert marker.state_revision == values.digest[7:] and not values.path.exists()
+    monkeypatch.setattr(AtomicJsonAuthorityRuntimeStore, "commit", commit)
+    assert _persist_pending_response(values) == values.digest
+
+
+@pytest.mark.parametrize("missing_file", [False, True], ids=["existing", "lost-file"])
+def test_pending_response_storage_rejects_replacement_even_after_file_loss(
+    pending_response_inputs, missing_file,
+) -> None:
+    values = pending_response_inputs
+    assert _persist_pending_response(values) == values.digest
+    original = values.path.read_bytes()
+    alternate, alternate_digest = _alternate_pending_response(values)
+    if missing_file:
+        values.path.unlink()
+    with pytest.raises((ValueError, RuntimeError)):
+        _persist_pending_response(values, raw=alternate, expected_record_digest=alternate_digest)
+    assert not values.path.exists() if missing_file else values.path.read_bytes() == original
+    assert _persist_pending_response(values) == values.digest
+    assert values.path.read_bytes() == original
+    assert values.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("loss", ["primary", "both"])
+def test_pending_response_storage_reconstructs_one_replica_but_rejects_dual_reset(
+    pending_response_inputs, tmp_path, loss,
+) -> None:
+    values = pending_response_inputs
+    assert _persist_pending_response(values) == values.digest
+    original = values.path.read_bytes()
+    values.state._primary.path.unlink()
+    if loss == "both":
+        values.state._witness.path.unlink()
+    rebuilt, *_stores = service_fixture._state(tmp_path, values.descriptor)
+    values.state = rebuilt
+    if loss == "both":
+        with pytest.raises((ValueError, RuntimeError)):
+            _persist_pending_response(values)
+    else:
+        assert _persist_pending_response(values) == values.digest
+    assert values.path.read_bytes() == original and values.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("drift", ["expired", "generation", "reservation", "digest", "terminal"])
+def test_pending_response_storage_requires_current_exact_reserved_context(
+    pending_response_inputs, drift,
+) -> None:
+    values = pending_response_inputs
+    arguments = {}
+    if drift == "expired":
+        arguments["now_epoch"] = root_fixture.NOW + 301
+    elif drift == "generation":
+        values.state.observe_generation(2, root_fixture._sha("new-owner"))
+    elif drift == "reservation":
+        arguments["expected_binding"] = replace(values.binding, reservation_id=root_fixture._sha("wrong"))
+    elif drift == "digest":
+        arguments["expected_record_digest"] = root_fixture._sha("wrong")
+    else:
+        grant_binding = authorization_binding(values.grant["authorization_id"])
+        before = values.state.load(grant_binding)
+        values.state.advance(grant_binding, expected=before,
+                             next_value=replace(before, sequence=2))
+    with pytest.raises((ValueError, RuntimeError)):
+        _persist_pending_response(values, **arguments)
+    assert not values.path.exists()
+
+
+def test_pending_response_storage_preserves_conflicting_durable_bytes(pending_response_inputs):
+    values = pending_response_inputs
+    assert _persist_pending_response(values) == values.digest
+    alternate, _digest = _alternate_pending_response(values)
+    snapshot = values.store.load()
+    snapshot["records"][values.grant["authorization_id"]] = alternate.decode("ascii")
+    values.store.commit(snapshot, expected_revision=snapshot["revision"])
+    conflicting = values.path.read_bytes()
+    with pytest.raises((ValueError, RuntimeError)):
+        _persist_pending_response(values)
+    assert values.path.read_bytes() == conflicting
+
+
+def _many_pending_responses(tmp_path, monkeypatch):
+    original = service_fixture._descriptor
+
+    def descriptor_with_nine_grants(*args, **kwargs):
+        descriptor, first, store = original(*args, **kwargs)
+        for index in range(1, 9):
+            verifier_key, held_out_key = _private_key(), _private_key()
+            grant = dict(first, receipt_id=f"verified-outcome-capacity-{index}",
+                         work_order_id=f"work-order-{index}",
+                         evidence_digest=root_fixture._sha(f"evidence-{index}"),
+                         verifier_public_key=_public_text(verifier_key),
+                         held_out_verifier_public_key=_public_text(held_out_key))
+            grant["authorization_id"] = root_fixture.authorization_id_for(grant)
+            grant["verification_signature"] = root_fixture._sign(
+                verifier_key, root_fixture.canonical_verifier_authorization_input(grant))
+            grant["held_out_signature"] = root_fixture._sign(
+                held_out_key, root_fixture.canonical_held_out_authorization_input(grant))
+            descriptor["grants"].append(grant)
+        descriptor["descriptor_id"] = root_fixture.descriptor_id_for(descriptor)
+        return descriptor, first, store
+
+    monkeypatch.setattr(service_fixture, "_descriptor", descriptor_with_nine_grants)
+    values, backend, template, peer, counts = _root_outcome_backend(tmp_path, monkeypatch)
+    descriptor, _grant, state, *_stores, current, _authority = values
+    captured = {}
+
+    def hold(*args, **kwargs):
+        captured["reservation"] = args[4]
+        return args[1]
+
+    monkeypatch.setattr(signer_backend_module, "_finalize_signing", hold)
+    results = []
+    for grant in descriptor["grants"]:
+        payload = build_receipt_payload_for_signing(
+            receipt_id=grant["receipt_id"], work_order_id=grant["work_order_id"],
+            reddog_id=descriptor["reddog_id"], prev_receipt_hash=None,
+            covered_action_digest=grant["evidence_digest"], reward_account=None,
+            issued_at=root_fixture.NOW)
+        signing_input = canonical_signing_input(payload, PREFIX_RECEIPT)
+        request = replace(template, signing_input=signing_input,
+                          payload_digest=_request_digest(signing_input), nonce=grant["receipt_id"])
+        response = backend.sign(request, peer)
+        assert response.accepted is True
+        item = SimpleNamespace(
+            request=request, response=response, descriptor=descriptor, grant=grant,
+            state=state, verifier=Ed25519SignatureVerifier(), counts=counts,
+            binding=outcome_signing.VerifiedOutcomeResponseBinding(
+                descriptor["descriptor_id"], current["snapshot"].owner_config_id,
+                grant["authorization_id"], captured["reservation"].reservation_id))
+        item.raw = _build_outcome_record(item)
+        item.digest = decode_message(item.raw)["record_digest"]
+        item.path = state.rollback_domain_root / "verified-outcome-pending-responses.json"
+        item.store = AtomicJsonAuthorityRuntimeStore(
+            item.path, allowed_root=state.rollback_domain_root, repo_root=root_fixture.REPO_ROOT)
+        results.append(item)
+    return results
+
+
+def test_pending_response_storage_enforces_real_eight_record_capacity(tmp_path, monkeypatch):
+    values = _many_pending_responses(tmp_path, monkeypatch)
+    for item in values[:8]:
+        assert _persist_pending_response(item) == item.digest
+    original = values[0].path.read_bytes()
+    assert len(values[0].store.load()["records"]) == 8
+    with pytest.raises(ValueError, match="capacity_exceeded"):
+        _persist_pending_response(values[8])
+    assert values[0].path.read_bytes() == original
+    assert values[8].state.load(outcome_state.pending_response_binding(values[8].grant["authorization_id"])) is None
+    assert values[8].state.load(authorization_binding(values[8].grant["authorization_id"])).sequence == 1
+    assert values[0].counts["outcome_signatures"] == 9
+
+
+def test_pending_response_storage_bounds_complete_pretty_printed_snapshot(tmp_path, monkeypatch):
+    values = _many_pending_responses(tmp_path, monkeypatch)
+    accepted = 0
+    for item in values:
+        raw, digest = _alternate_pending_response(item, "x" * (MAX_MESSAGE_BYTES - len(item.raw)))
+        assert len(raw) == MAX_MESSAGE_BYTES
+        before = item.path.read_bytes() if item.path.exists() else None
+        try:
+            _persist_pending_response(item, raw=raw, expected_record_digest=digest)
+        except ValueError as exc:
+            assert "store_too_large" in str(exc)
+            assert item.path.read_bytes() == before
+            break
+        accepted += 1
+        assert len(item.path.read_bytes()) <= 512 * 1024
+    else:
+        pytest.fail("Complete pending snapshot byte limit was not exercised")
+    assert 0 < accepted < 8
+
+
+def test_pending_response_storage_concurrent_instances_keep_one_record(
+    pending_response_inputs, tmp_path,
+) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+    values = pending_response_inputs
+    rebuilt, *_stores = service_fixture._state(tmp_path, values.descriptor)
+    second = SimpleNamespace(**vars(values))
+    second.state = rebuilt
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(_persist_pending_response, (values, second)))
+    assert results == [values.digest, values.digest]
+    assert values.store.load()["records"] == {values.grant["authorization_id"]: values.raw.decode("ascii")}
+    assert values.state.load(authorization_binding(values.grant["authorization_id"])).sequence == 1
+    assert values.counts["outcome_signatures"] == 1
+
+
+@pytest.mark.parametrize("after_advance", [False, True], ids=["partial-mirror", "lost-mirror-ack"])
+def test_pending_response_storage_retains_selection_across_mirror_failure(
+    pending_response_inputs, monkeypatch, after_advance,
+) -> None:
+    values = pending_response_inputs
+    binding = outcome_state.pending_response_binding(values.grant["authorization_id"])
+    advance = values.state._witness.advance
+
+    def failed(digest, *args, **kwargs):
+        if digest != binding:
+            return advance(digest, *args, **kwargs)
+        if after_advance:
+            advance(digest, *args, **kwargs)
+        raise RuntimeError("test_pending_witness_failure")
+
+    monkeypatch.setattr(values.state._witness, "advance", failed)
+    if after_advance:
+        assert _persist_pending_response(values) == values.digest
+    else:
+        with pytest.raises(RuntimeError, match="pending_witness_failure"):
+            _persist_pending_response(values)
+        assert not values.path.exists()
+        assert values.state._witness.load(binding) is None
+    assert values.state._primary.load(binding).state_revision == values.digest[7:]
+    monkeypatch.setattr(values.state._witness, "advance", advance)
+    assert _persist_pending_response(values) == values.digest
+
+
+@pytest.mark.parametrize("fail_on_call", [1, 2], ids=["before-write", "before-ack"])
+def test_pending_response_storage_rechecks_file_ownership(
+    pending_response_inputs, monkeypatch, fail_on_call,
+) -> None:
+    values = pending_response_inputs
+    values.state._require_ownership = True
+    checks = []
+    monkeypatch.setattr(outcome_state, "_require_root_owned", lambda *_args: None)
+
+    def check(*paths):
+        if values.path in paths:
+            checks.append(paths)
+            if len(checks) == fail_on_call:
+                raise ValueError("test_pending_owner_changed")
+        else:
+            assert set(paths) == {
+                values.state._primary.path, values.state._witness.path,
+                values.state._installation.path,
+            }
+
+    # This injects the ownership decision, not production Linux UID evidence.
+    monkeypatch.setattr(outcome_state, "_require_root_files", check)
+    with pytest.raises(ValueError, match="pending_owner_changed"):
+        _persist_pending_response(values)
+    assert values.path.exists() is (fail_on_call == 2)
+    assert values.state.load(authorization_binding(values.grant["authorization_id"])).sequence == 1
+
+
+def test_pending_response_storage_rejects_unanchored_unrelated_row(pending_response_inputs):
+    values = pending_response_inputs
+    assert _persist_pending_response(values) == values.digest
+    snapshot = values.store.load()
+    snapshot["records"]["verified-outcome-authorization-unanchored"] = values.raw.decode("ascii")
+    values.store.commit(snapshot, expected_revision=snapshot["revision"])
+    original = values.path.read_bytes()
+    with pytest.raises(ValueError, match="selection_missing"):
+        _persist_pending_response(values)
+    assert values.path.read_bytes() == original

@@ -37,12 +37,18 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-14
 
+The [pending-response storage checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)
+adds exact bounded persistence in the existing root state owner, reusing its lock,
+mirrored selection markers and atomic writer. This is a local pending primitive;
+the grant remains reserved. Next: versioned full-record terminal commitment,
+freshly authorized readback and signer/publisher recovery. RSI remains incomplete.
+
 The [immutable-response record checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14)
 adds bounded canonical records in the existing signing owner, binding the complete
 grant context and exact response to externally supplied context/digest checks.
 The connected selection passes 294 tests with one Linux-root skip. Historical
-validation creates no current authority. Root-owner-bound pending storage is next,
-followed by full-response commitment and authenticated readback; RSI stays incomplete.
+validation creates no current authority. The later checkpoint above adds pending storage;
+full-response commitment and authenticated readback remain open.
 
 The [signer-response handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14)
 puts response validation in the existing outcome-signing owner and keeps the

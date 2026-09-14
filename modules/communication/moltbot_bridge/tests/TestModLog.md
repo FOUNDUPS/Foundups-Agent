@@ -1,3 +1,11 @@
+## 2026-09-14: Pending outcome-response storage
+
+- Final evidence: 226 passed / one Linux-only skip across eight suites; 15 fast groups / eight staged-manifest tests passed. Registry 1650/269 and runtime membership 1400 unchanged; one source hash and matching pins updated.
+- Added 22 cases to the existing signing suite (94 total). Proposed missing-method control: one failure / 85 deselected in 2.12s; this was a proposed API, not a pre-existing production bug. Initial 14 cases passed in 7.86s.
+- Expanded run found two ownership-fixture failures (19 passed / 88 deselected): the Windows fixture inadvertently invoked production UID checks for pre-admitted SQLite paths. Corrected only the injected fixture boundary, preserving rejection assertions. The `-k` selection excluded WSP 62 guards in that run.
+- The next combined run passed 109 with one inherited interface metadata failure in 36.70s (1527 declared versus 1620 actual lines). Consolidated the original interface contract into the existing runbook and reduced its metadata; no guard was weakened. Final results are added to the current baseline evidence after validation.
+- Connected root service/descriptor/startup/provisioning/runtime/protected-use selection: 116 passed / one Linux-only skip in 36.89s. Tests use disposable real stores/signatures, captured pre-terminal responses, thread concurrency and injected ownership decisions. Production process/volume recovery, readback and terminal commitment are not covered. WSP 00/15/22/50/60/62/71/84/97.
+
 ## 2026-09-14: Immutable outcome response records
 
 - Packaging: 15 fast groups / 8 staged-manifest tests passed. One runtime hash/pins updated; 1,400 runtime files, 1,650/269 registry and guards unchanged.

@@ -1,58 +1,19 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
-## Immutable verified-outcome response records
+## Verified-outcome recovery and RSI
 
-The existing outcome-signing module provides `build_verified_outcome_response_record`
-and `parse_verified_outcome_response_record`. Records preserve complete signed
-history as bounded immutable bytes; parsing requires independently supplied
-expected context and digest. These functions grant no current read/signing rights
-and have no persistence or publisher wiring. See [INTERFACE.md](INTERFACE.md) and
-the [current R11-A checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14).
+R11 builds on the existing signing, root authority, publication and PatternMemory owners.
+The root state can now persist a bounded, exact pending response under its existing
+primary root after pinning its digest in both state mirrors. Retries preserve bytes;
+the grant stays reserved. This local primitive has no root RPC or publisher caller.
 
-## Verified-outcome response validation
-
-The publisher uses `validate_verified_outcome_signing_response(...)` in the
-existing outcome-signing module for receipt and audit verification. Acceptance
-and attestation flags, plus verifier results, must be actual `True`; a nonempty
-rejection code rejects. This reusable validation grants no replay authority.
-Durable response storage and authenticated readback remain the next R11-A layers
-in the [system runbook](../../../docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14).
-
-## Verified-outcome root commit recovery
-
-The existing root service acknowledges an exact already-committed receipt after
-fresh authority checks. Its client retries identical COMMIT bytes once after a
-connection error or timeout. A changed receipt, authority rejection or malformed
-reply still fails; reservations never reopen. Each attempt uses its own configured
-timeout. This does not persist the full signer response for process restart;
-that R11-A handoff remains open. See [INTERFACE.md](INTERFACE.md).
-
-## Verified-outcome publication retries
-
-Publication retains its signed envelope through at most three authority-store
-revision attempts. A lost acknowledgment or competing write is reconciled by
-validating the durable winner; missing or conflicting evidence rejects. The
-publisher does not retry signing or change staging visibility. Process death
-before durable evidence still requires owner-controlled recovery.
-
-The existing signed publisher reuses exact durable evidence after restart or
-clock advancement. It verifies the original signature, evidence and publisher
-identity, preserving bytes and issuance time. A retry acknowledgment neither
-activates staged evidence nor renews expiry/revocation authority. Queue admission
-now reuses the recorded time from its canonical held-out-stage receipt, so a
-later bootstrap/snapshot clock does not change the outcome. Legacy receipts
-without that time reject new admission; see [INTERFACE.md](INTERFACE.md).
-
-## Verified-outcome staging
-
-The existing `reddog_verified_pattern_memory_sink.py` stages records in an
-explicit outside-repository database. It snapshots input and reconciles
-record-key conflicts against exact stored payload/agent; retries preserve the
-winning row and its timestamp. Staging is outside normal recall, and the real
-sink still rejects direct activation without independent durable authority.
-Active-row retries compare canonical JSON, so Python's boolean/numeric equality
-cannot acknowledge a row with a different record identity.
-See [INTERFACE.md](INTERFACE.md) and the existing sink tests for this boundary.
+The [API index](INTERFACE.md#verified-outcome-authority-signing-and-memory) and
+[complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference)
+cover signed records, strict response validation, root COMMIT acknowledgment retry,
+immutable publication, canonical event time and invisible PatternMemory staging.
+The [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)
+separates tested pending storage from remaining full-response commitment,
+authenticated recovery, independent activation and measured retained improvement.
 
 ## HoloIndex runtime truth
 

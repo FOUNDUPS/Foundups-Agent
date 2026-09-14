@@ -281,6 +281,13 @@ authenticated readback and retained improvement remain open; no runtime caller
 or activation is added. WSP 15's historical 16/P1 label is corrected to 16/P0
 with an additive baseline erratum.
 
+**Pending-storage follow-up:** the [checkpoint](../operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)
+adds a local primitive to the existing root state owner: exact current reservation,
+mirrored record-digest selection, bounded atomic pending bytes and exact retry.
+The outcome grant stays reserved. This is single-copy payload storage with tested
+local failures, not root RPC admission, terminal commitment or authorized readback.
+Those integrations, process recovery and R11-B–F remain open.
+
 ### R12 — Independent production promoter
 
 **Normative references:** WSP 48 / 71 / 95 / 97. **Evidence level:** `GENERIC_OWNER_MISSING`.

@@ -1,5 +1,20 @@
 # Tests - OpenClaw Bridge
 
+## Pending outcome-response storage
+
+The existing `test_reddog_ed25519_verified_outcome_signing.py` has 22 new pending
+storage cases (94 total signing/record/storage cases). Real disposable SQLite
+mirrors and Ed25519 signatures are reused; the fixture captures bytes before v1
+finalization. Two ownership tests inject the decision on Windows. Test names and
+exact commands/results are in `pending_response_continuation_20260914` in
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`.
+Coverage includes exact-byte retry, write/cancellation/mirror failures, file loss,
+changed generation/reservation/digest/expiry, terminal rejection, conflicting or
+unanchored rows, real count/complete-byte limits and concurrent state instances.
+Future root RPC/readback tests belong in the existing root service/client suites;
+the signing file is in WSP 62's 1000–1500-line review window. No production Linux
+ownership, live runtime, process-kill recovery or activation is claimed here.
+
 ## Immutable outcome-response record contracts
 
 Reuse `test_reddog_ed25519_verified_outcome_signing.py`: 51 additional cases
