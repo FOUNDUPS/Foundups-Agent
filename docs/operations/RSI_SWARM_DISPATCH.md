@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `root_record_read_continuation_20260914` in
+**Current selection evidence:** `process_exit_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,48 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Writer-process recovery checkpoint — 2026-09-14
+
+PR [#1736](https://github.com/FOUNDUPS/Foundups-Agent/pull/1736) merged as
+`18981983c1935bfed55ca8703b05629d2b9634ad`; its exact-head checks and subsequent
+main CI/CodeQL succeeded. This cycle adds four cases to the existing root service
+suite, using its real signed-record, SQLite and atomic-store fixtures.
+
+An independently spawned writer exits normally, or uses `os._exit` after payload
+persistence, after the primary terminal write before the witness, or after the
+accepted reply is built. No Python cleanup runs on those three abrupt exits.
+The parent confirms the exact exit code and both pre-recovery checkpoints, reopens
+the existing stores, and retries the same signed request twice. Both mirrors reach
+the same terminal digest, exact response bytes are preserved, and the consumed
+authorization cannot be reserved again. The child receives public descriptor,
+snapshot and signed-request data; no new outcome signing is needed in that child.
+
+Validation: **136 passed / one Linux-only skip in 71.44s**, including the full
+service suite and three unchanged size guards. The first run had four failures
+from a misplaced test assertion; it was restored to its original case. All 64
+previous definitions remain AST-identical. The file is 1,497 lines; no runtime
+source, manifest pin, skill, module or new test file changed. Registry stays
+1,650/269. Exact IDs, command, environment and hashes are recorded in
+`process_exit_continuation_20260914` in the existing baseline.
+
+This proves the selected local writer-process exits. It does not prove physical
+volume/power failure, a privileged Linux socket service, competing full-record
+processes, production runtime admission or retained learning. Peer/UID decisions
+remain injected; the production read RPC is still absent.
+
+**WSP 97 reconciliation:** read authorization remains **16/P0**, but the broad
+prior `ELIGIBLE_LOCAL_AUTHORING` designation lacked an eligible-reader policy.
+Existing signing, `get_secret`, and conversation-read grants do not establish it.
+012 has been asked whether readership is limited to the current original signer
+or also admits separately authorized recovery agents. That decision is pending;
+elapsed time supplies no policy or authorization.
+
+**Re-scored next action:** competing-process full-response commitment/recovery,
+**4/4/3/4 = 15/P1**, using existing full-record thread and process-reservation
+fixtures. Single-writer exit recovery leaves the outstanding queue. Higher runtime
+and model items remain separately gated. Re-observe after closure, including any
+012 policy answer. All 26 planning packets and six R11 substeps stay non-dispatchable.
 
 ### Root-record readback checkpoint — 2026-09-14
 

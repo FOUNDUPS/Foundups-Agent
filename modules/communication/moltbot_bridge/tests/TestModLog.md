@@ -1,3 +1,13 @@
+## 2026-09-14: Root response writer-process exit recovery
+
+- Added four cases to the existing root service suite with its existing record fixture and a canonical-imported spawn target. Observed normal exit 0 and abrupt exits 71/72/73 at payload commit, primary terminal advance and built reply, then preserved exact bytes/digest and consumed authority over two recovery retries. Child lifecycle is bounded and cleaned up.
+
+- Initial four failures were a test-edit error: an existing no-disclosure assertion was displaced during insertion. Restored that assertion without weakening it; all 64 original test/fixture definitions remain AST-identical. Final full service and three existing guards: 136 passed / one Linux-only skip in 71.44s. New file count 0; test source 1497 lines; registry 1650/269 unchanged.
+
+- Runtime source and packaging pins are identical to base 18981983. No fresh full-connection/manifest run is claimed. Windows peer/UID boundaries remain injected; os._exit proves selected process exits, not power/physical-volume failure or privileged runtime admission.
+
+- Evidence: `process_exit_continuation_20260914` in the existing RSI baseline; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Root storage readback of exact committed responses
 
 - Proposed API control: one failure / 100 deselected in 2.54s (`AttributeError` for the missing method, not an existing production bug). Initial method plus three size guards: four passed in 2.87s. Expanded new selection: 30 passed / 100 deselected in 18.34s.

@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#writer-process-recovery-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,13 +49,19 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
-The [root-record readback checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14)
-adds exact committed-byte retrieval inside the existing root storage owner. It
-checks installed state, ownership, the pinned generation, record/selection digests,
-historical signatures and the original authority's current time window. The
-connected selection passes **348 tests / one Linux-only skip**. This storage
-primitive creates no read grant or RPC; purpose-specific current read admission
-and service wiring remain the next **16/P0** local work. R11 remains partial.
+The [writer-process recovery checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#writer-process-recovery-checkpoint--2026-09-14)
+validates exact response recovery after a spawned writer exits at three durable
+boundaries, with a clean-exit control. The full service suite and existing size
+guards pass **136 tests / one Linux-only skip**. Runtime implementation is unchanged.
+Read admission remains **16/P0**, pending the eligible-reader policy decision;
+competing full-response writer processes are the next eligible **15/P1** local
+validation. No default read permission, physical-volume or production RSI proof
+follows from this test layer. R11 remains partial.
+
+Storage-read PR [#1736](https://github.com/FOUNDUPS/Foundups-Agent/pull/1736) merged
+as `18981983c1935bfed55ca8703b05629d2b9634ad`. Its exact-head checks and main
+CI/CodeQL passed. The previous storage implementation and its broader test counts
+retain their original source/environment scope.
 
 Recovery [PR #1734](https://github.com/FOUNDUPS/Foundups-Agent/pull/1734) is merged
 as `7f4f49b79692a1aa6484544c4e46115fe6690027`. All ten reported checks passed at

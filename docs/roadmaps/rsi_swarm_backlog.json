@@ -815,11 +815,11 @@
             "acceptance": "Same admitted event survives advancing clocks and restart with one exact publication. Preserve event identity, verified_at/issued_at meaning, signed bytes and fresh use-time expiry/revocation checks. Changed evidence, scope, key or expired authority still rejects; no conflicting-envelope replacement.",
             "dispatchable": false,
             "local_progress": {
-              "status": "PARTIAL_ROOT_STORAGE_READ_VERIFIED",
-              "evidence": "root_record_read_continuation_20260914",
-              "previous_evidence": "mirror_restoration_continuation_20260914",
-              "next": "Purpose-specific current read admission and existing root service/client route (16/P0); re-observe exact source/ownership and keep historical grants separate from read authority.",
-              "remaining": "Current read authority, ordinary v2 signer/publisher integration, operation deadline, physical process/volume recovery, R11-B-F and retained benefit; no runtime admission"
+              "status": "PARTIAL_ROOT_WRITER_PROCESS_EXIT_RECOVERY_VERIFIED",
+              "evidence": "process_exit_continuation_20260914",
+              "previous_evidence": "root_record_read_continuation_20260914",
+              "next": "Re-observe competing-process full-response writer qualification15/P1. Read admission16/P0 waits for the eligible-reader policy decision; no default disclosure.",
+              "remaining": "Purpose-specific current read authority, competing full-record processes, physical volume/privileged runtime qualification, ordinary v2 publisher integration, R11-B-F and retained benefit; no runtime admission."
             }
           },
           {
@@ -1816,12 +1816,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "root_record_read_continuation_20260914",
-    "base_commit": "c7e2272fb555d0aef2657b94f142c9d7c7fbbb3d",
-    "selected_action": "R11-current-read-admission-and-service-route",
+    "section": "process_exit_continuation_20260914",
+    "base_commit": "18981983c1935bfed55ca8703b05629d2b9634ad",
+    "selected_action": "R11-competing-process-full-response-recovery",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "root_record_read_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "process_exit_continuation_20260914.post_sprint_reobservation"
   }
 }

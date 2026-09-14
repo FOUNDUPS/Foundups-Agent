@@ -1,5 +1,13 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Bounded writer-process recovery and RSI re-selection
+
+- Extended the existing root service tests with four real spawned-writer cases; exact retries preserve stored bytes and consumed authorization after payload, primary-mirror and reply exits. Full service/guard selection: 136 passed / one Linux-only skip. Runtime source and manifest pins are unchanged.
+
+- Closed prior PR #1736 main CI/CodeQL evidence. WSP 15/WSP 97 corrects read admission 16/P0 to a pending eligible-reader policy decision and selects competing full-response processes 15/P1 for fresh re-observation. All planning packets remain non-dispatchable; active products and AutoPost stay outside scope.
+
+- Evidence: `process_exit_continuation_20260914` in the existing RSI baseline; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Exact committed-response retrieval inside the existing root owner
 
 - Added a 23-line root storage read primitive using existing locks, ownership, generation, snapshot and signature validators. Healthy reads preserve exact committed bytes and consumed state; pending, absent, conflicting, rotated or expired context rejects. Current read permission and a public route remain separate.
