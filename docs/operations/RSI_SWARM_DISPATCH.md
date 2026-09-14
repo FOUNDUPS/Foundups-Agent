@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `dependency_qualification_continuation_20260914` in
+**Current selection evidence:** `mirror_restoration_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,66 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Mirror restoration checkpoint — 2026-09-14
+
+Base: PR1733/main `84e72cd55442a7cbe04e834642269d929b90e362`; exact merge CI and
+CodeQL succeeded. Fresh ownership review found no open PR on the two selected
+source owners or their closest tests. WSP 15 selected local mirror restoration
+at **4+5+4+4 = 17/P0**; the higher migration/worker/activation candidates remained
+without current admission. No packet order supplied an automatic assignment.
+
+`SqliteMonotonicAuthorityStore.restore_missing_from_witness(binding_digest, *,
+witness: SqliteMonotonicAuthorityReader, expected: ProposalReplayHighWater)`
+reuses the existing readonly reader and identity checks. It requires the exact
+reader class, the same repository context and disjoint storage roots; the source
+must contain the exact expected checkpoint. Within a destination `BEGIN IMMEDIATE`
+transaction it rechecks destination metadata and the source, then inserts only
+when missing. An identical destination is an idempotent no-op; any other existing
+checkpoint rejects. It verifies both stores again after commit. Exceptions before
+commit roll back; an exception after commit can leave exact copied state and must
+not be interpreted as acknowledgment. Retries revalidate current state.
+
+The two missing-side branches of `RootVerifiedOutcomeAuthorityState._current()`
+now call that operation under the existing confined root lock. Existing principal,
+installation, peer, grant and generation checks remain with their current owners.
+The generic `advance()` and readonly reader implementations are unchanged: normal
+writes still require None → 1 or exact +1. No intermediate history is synthesized.
+The store primitive supplies no grant, readback API or runtime admission by itself.
+Its caller must serialize mirror use; it is not a cross-volume atomic transaction.
+
+Tests reopen an exact configured store after its database file is lost, then
+restore either side at sequences 1, 2 and 5. V1 and v2 commitment retries retain
+the original terminal state. Corrupt identity, stale/wrong checkpoint, overlapping
+domains, foreign repository context, conflicting destination, cancellation,
+source changes and competing restorations reject or preserve the exact winner.
+Loss of both mirrors still fails service use; this change cannot reconstruct
+unavailable signed response bytes. The payload remains a separate single copy.
+Physical volume failure and privileged Linux service recovery need later proof.
+
+Validation: the expanded pre-change recovery test had **4 failures / 2 passes**,
+reproducing the sequence-2/5 defect in both directions. Focused validation passed
+136 with one skip. Final connected selection: **318 passed / one Linux-only skip
+in 113.80s**, including three unchanged size guards. Packaging passed 8 manifest
+tests in 68.57s and 15 fast groups in 3,804ms. The fast harness first rejected a
+default C: temporary path, then CRLF in the edited JavaScript pin; setting the
+required O: temp root and restoring LF resolved both without changing a guard.
+Runtime membership remains 1,400; exactly two source hashes change. Test registry
+remains 1,650/269. Source is 450/652 lines; interface/guard ceilings are unchanged.
+
+**Re-scored next action: independently authenticated response readback, 16/P0.**
+The local missing-mirror implementation is removed from outstanding work.
+Higher candidates remain blocked: independent execution/promotion/activation
+19/P0; integrated MCP migration and admitted WRE worker 18/P0; Chroma deployment
+qualification 17/P0. Semantic qualification is 16/P0 under its existing owner.
+Local process/volume recovery qualification is 15/P1, protected product observation
+14/P1, and AutoResearcher durability 13/P1. Readback wins as the highest eligible
+local action after the new evidence/ownership review. Use the existing record,
+root protocol/client/service and current authorization owners; a digest or
+historical signing grant cannot create current read authority. Re-observe again
+after closure. Normal v2 signer/publisher wiring, readback, whole-operation
+deadlines, independent activation and retained benefit remain open; R11/G4 and
+all 26 planning packets/six R11 substeps remain incomplete/non-dispatchable.
 
 ### Dependency qualification checkpoint — 2026-09-14
 

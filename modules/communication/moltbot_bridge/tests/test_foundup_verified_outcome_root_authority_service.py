@@ -286,15 +286,21 @@ def test_root_service_reserve_commit_and_replay_reject(
     assert _reserve(authority, grant) is None
 
 
+@pytest.mark.parametrize("loss", ["none", "primary", "witness"])
 def test_root_commit_recovery_acknowledges_only_exact_committed_state(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, loss: str,
 ) -> None:
-    _descriptor_value, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
+    descriptor, grant, state, *_rest, authority = _runtime(tmp_path, monkeypatch)
     reservation = _reserve(authority, grant)
     assert reservation is not None
     _commit(authority, reservation, _sha("signature"))
     binding = authorization_binding(grant["authorization_id"])
     committed = state.load(binding)
+    if loss != "none":
+        missing = state._primary if loss == "primary" else state._witness
+        missing.path.unlink()
+        reopened, *_rest = _state(tmp_path, descriptor)
+        assert reopened.state_binding_digest == state.state_binding_digest
     _commit(authority, reservation, _sha("signature"))
     assert state.load(binding) == committed
     assert committed.sequence == 2
@@ -786,34 +792,38 @@ def test_response_substitution_rejects(
     assert _reserve(authority, grant) is None
 
 
+@pytest.mark.parametrize("lost_side", ["primary", "witness"])
+@pytest.mark.parametrize("sequence", [1, 2, 5])
 def test_one_sided_state_loss_repairs_from_witness(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, lost_side: str, sequence: int,
 ) -> None:
     descriptor, _grant, state, primary, witness, installation, *_rest = _runtime(
         tmp_path, monkeypatch
     )
     binding = descriptor["replay_anchor_binding_digest"]
     expected = state.load(binding)
-    primary_path = (
-        primary.rollback_domain_root / "verified-outcome-authority.sqlite3"
-    )
-    primary_path.unlink()
-    fresh_primary = SqliteMonotonicAuthorityStore(
-        primary_path,
-        allowed_root=primary.rollback_domain_root,
+    for number in range(2, sequence + 1):
+        next_value = ProposalReplayHighWater(number, str(number) * 64)
+        state.advance(binding, expected=expected, next_value=next_value)
+        expected = next_value
+    missing = primary if lost_side == "primary" else witness
+    missing.path.unlink()
+    restored = SqliteMonotonicAuthorityStore(
+        missing.path,
+        allowed_root=missing.rollback_domain_root,
         repo_root=REPO_ROOT,
-        store_id=primary.store_id,
-        durability_receipt_id=primary.durability_receipt_id,
+        store_id=missing.store_id,
+        durability_receipt_id=missing.durability_receipt_id,
     )
     repaired = RootVerifiedOutcomeAuthorityState(
-        fresh_primary,
-        witness,
+        restored if lost_side == "primary" else primary,
+        restored if lost_side == "witness" else witness,
         installation,
         repo_root=REPO_ROOT,
         require_root_ownership=False,
     )
     assert repaired.load(binding) == expected
-    assert fresh_primary.load(binding) == expected
+    assert restored.load(binding) == expected
 
 
 def test_primary_commit_crash_repairs_exact_one_step_from_witness(
@@ -1197,24 +1207,18 @@ def test_full_record_commit_concurrent_state_instances_preserve_one_valid_winner
     assert decode_message(stored.encode("ascii"))["record_digest"] == winner
 
 
-@pytest.mark.parametrize("loss", ["restart", "primary", "payload", "both-mirrors", "corrupt-payload"])
+@pytest.mark.parametrize("loss", ["restart", "primary", "witness", "payload", "both-mirrors", "corrupt-payload"])
 def test_full_record_commit_retry_requires_durable_binding_and_exact_retained_bytes(record_commit_inputs, tmp_path, loss):
     v = record_commit_inputs
     request = _record_commit_request(v)
     assert protocol.record_commit_response_from_bytes(_record_reply(v, request)).accepted
     if loss in {"primary", "both-mirrors"}: v.state._primary.path.unlink()
-    if loss == "both-mirrors": v.state._witness.path.unlink()
+    if loss in {"witness", "both-mirrors"}: v.state._witness.path.unlink()
     if loss == "payload": v.path.unlink()
     if loss == "corrupt-payload": v.path.write_bytes(b'{"untrusted":true}\n')
     state, *_rest = _state(tmp_path, v.descriptor)
     reply = protocol.record_commit_response_from_bytes(_record_reply(v, request, state=state))
-    assert reply.accepted is (loss not in {"primary", "both-mirrors", "corrupt-payload"})
-    if loss == "primary":
-        # Existing CAS permits None -> sequence 1 only; whole-mirror restoration
-        # at sequence 2 needs a separately authenticated recovery contract.
-        with pytest.raises(ValueError, match="monotonic_authority_not_monotonic"):
-            state.load(authorization_binding(v.grant["authorization_id"]))
-        assert state._witness.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
+    assert reply.accepted is (loss not in {"both-mirrors", "corrupt-payload"})
     if reply.accepted:
         assert state.load(authorization_binding(v.grant["authorization_id"])) == ProposalReplayHighWater(2, v.digest[7:])
         assert v.store.load()["records"][v.grant["authorization_id"]] == v.raw.decode("ascii")

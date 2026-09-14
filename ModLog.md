@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: RSI mirror restoration through existing authority stores
+
+- Closed the selected local recovery gap: either missing mirror can recover a later checkpoint after exact store reopening. Reused the existing identity-checked reader and root lock; conflicts and stale sources reject. Generic +1 CAS and readonly readers are unchanged; no reconstructed history or new runtime authority.
+- Final local selection: 318 passed / one Linux-only skip; 8 manifest tests and 15 fast groups passed. Initial recovery controls reproduced four failures. Fast packaging rejected default C: temp and an edited pin's CRLF; corrected the invocation/EOL without changing guards. Runtime membership remains 1400 with two changed source hashes; registry 1650/269.
+- Updated the existing root/module contracts, journals and canonical RSI selection. Fresh WSP 15/WSP 97 scoring selects independently authenticated readback 16/P0; higher runtime/migration items remain separately gated. Both-mirror loss, physical process/volume proof, ordinary v2 wiring, activation and retained learning remain open. Evidence: `mirror_restoration_continuation_20260914`; WSP 00, 15, 22, 50, 62, 84, 97.
+
 ## 2026-09-14: RSI dependency qualification and queue reconciliation
 
 - Completed the selected Holo/MCP local preflight at main `1173d1ab`. Reused the existing MCP audit, PR1526/1525 and tests. FastMCP alone cannot resolve with MCP 1.20.0; the paired candidate resolves, but both PRs omit the exact launcher-version contract.

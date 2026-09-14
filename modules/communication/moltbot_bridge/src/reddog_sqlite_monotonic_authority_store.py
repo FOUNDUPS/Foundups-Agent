@@ -134,6 +134,27 @@ class SqliteMonotonicAuthorityStore:
         if self.load(binding) != next_value:
             raise RuntimeError("monotonic_authority_commit_unverified")
 
+    def restore_missing_from_witness(
+        self,
+        binding_digest: str,
+        *,
+        witness: "SqliteMonotonicAuthorityReader",
+        expected: ProposalReplayHighWater,
+    ) -> None:
+        """Copy an exact witness checkpoint; the mirror owner must serialize use.
+
+        Existing unequal destination state is never replaced. An exception after
+        commit may leave the exact copied checkpoint; it is not an acknowledgment.
+        """
+        binding = _digest(binding_digest, "binding")
+        _validate_value(expected)
+        _require_restore_domains(self, witness)
+        if witness.load(binding) != expected:
+            raise RuntimeError("monotonic_authority_restore_witness_changed")
+        _restore_missing_checkpoint(self, binding, witness, expected)
+        if self.reader().load(binding) != expected or witness.load(binding) != expected:
+            raise RuntimeError("monotonic_authority_restore_unverified")
+
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
         target = validate_runtime_artifact_path(
@@ -272,6 +293,50 @@ class SqliteMonotonicAuthorityReader:
             yield connection
         finally:
             connection.close()
+
+
+def _require_restore_domains(
+    destination: SqliteMonotonicAuthorityStore,
+    witness: SqliteMonotonicAuthorityReader,
+) -> None:
+    if type(witness) is not SqliteMonotonicAuthorityReader:
+        raise ValueError("monotonic_authority_restore_witness_invalid")
+    first, second = destination.rollback_domain_root, witness.rollback_domain_root
+    if (
+        first.is_relative_to(second) or second.is_relative_to(first)
+        or destination._repo_root != witness._repo_root
+    ):
+        raise ValueError("monotonic_authority_restore_domain_invalid")
+
+
+def _restore_missing_checkpoint(
+    destination: SqliteMonotonicAuthorityStore,
+    binding: str,
+    witness: SqliteMonotonicAuthorityReader,
+    expected: ProposalReplayHighWater,
+) -> None:
+    with destination._connect() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            _require_reader_metadata(
+                connection, store_id=destination.store_id,
+                durability_receipt_id=destination.durability_receipt_id,
+            )
+            if witness.load(binding) != expected:
+                raise RuntimeError("monotonic_authority_restore_witness_changed")
+            current = _read_current(connection, binding)
+            if current is not None and current != expected:
+                raise RuntimeError("monotonic_authority_conflict")
+            if current is None:
+                connection.execute(
+                    "INSERT INTO high_water(binding_digest, sequence, state_revision) "
+                    "VALUES (?, ?, ?)",
+                    (binding, expected.sequence, expected.state_revision),
+                )
+            connection.commit()
+        except BaseException:
+            connection.rollback()
+            raise
 
 
 def _validate_reader_identity(reader: SqliteMonotonicAuthorityReader) -> None:

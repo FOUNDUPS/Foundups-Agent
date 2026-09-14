@@ -1,18 +1,22 @@
 # Tests - OpenClaw Bridge
 
-## Full-record root commitment
+## Root commitment and mirror restoration
 
 The existing root service suite now covers v2 wire/proof separation, complete
 64 KiB enclosing requests, current authority on initial/repeated commits, exact
 reservation/event binding, changed valid responses, lost acknowledgments,
 write/cancellation/partial-mirror failures, competing state instances and restart.
 The signing suite shares its existing pending-response fixture; no new test file.
-Eight-suite local result: 279 passed / one Linux-root skip. Commands and limits:
-`full_record_commit_continuation_20260914` in `docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`.
-Whole-mirror deletion at sequence 2 deliberately rejects in the regression: the
-existing generic CAS cannot restore a later checkpoint from None. This remains
-an open authenticated-repair item, reproduced with v1. No production process,
-Linux ownership, independently authorized readback or retained learning is proven.
+Nine connected suites plus three size guards: 318 passed / one Linux-root skip.
+Commands and limits: `mirror_restoration_continuation_20260914` in the existing RSI baseline observations.
+Whole-mirror deletion now recovers either side after exact store reopening at
+sequences 1, 2 and 5; v1/v2 commitment retry preserves the original terminal state.
+The monotonic-store suite checks witness/destination identity, disjoint roots,
+exact checkpoints, conflicts, cancellation, source changes and concurrent copying.
+Generic CAS and readonly reader implementations remain unchanged. Both-mirror
+loss and unavailable signed bytes without a retained copy remain fail-closed.
+Windows tests inject ownership/peer decisions; production process/volume recovery,
+Linux ownership, independently authorized readback and retained learning remain unproved.
 
 ## Pending outcome-response storage
 

@@ -1,3 +1,11 @@
+## 2026-09-14: Identity-checked mirror restoration
+
+- Pre-change expanded service control: **4 failed, 2 passed, 92 deselected in 3.61s**. Sequence 1 succeeded; 2 and 5 failed for primary and witness loss with the existing `monotonic_authority_not_monotonic` error. Failure evidence is retained.
+- Initial focused/store/service/size selection: **136 passed, one skipped in 46.18s**. After adding v1 loss and conflicting-copy race cases, final nine connected suites plus three size guards: **318 passed, one Linux-only skip in 113.80s**. Do not sum these overlapping runs. Existing v1, v2, provisioning, revocation, runtime binding and protected-use cases remain passing.
+- Existing service tests now cover either missing side at 1/2/5 after exact store reopening and v1/v2 terminal retry. Existing monotonic tests cover metadata changes, invalid/overlapping/foreign-context readers, exact source pins, conflicting destination, source advancement before/after copying, cancellation and competing/idempotent copies. No new test file; generic CAS and readonly reader source stay identical to base `84e72cd5`.
+- Packaging: **8 manifest tests in 68.57s; 15 fast groups in 3,804ms**. The first fast run rejected the default C: temp root; the next caught CRLF in the edited JS digest pin. Corrected only the O: temp invocation and owned pin's LF bytes, retaining both failed logs and all guards. Registry remains 1650/269; runtime membership 1400 with two changed hashes.
+- Tests use `-B`, importlib mode, disabled plugin autoload/cacheprovider, explicit async plugin and external temp/DB roots. Windows ownership/kernel peers remain injected and a privileged Linux service case is skipped. No new production process/volume, readback or retained-learning claim. Exact commands/source fingerprints: `mirror_restoration_continuation_20260914` in the existing RSI baseline. WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Full-response terminal commitment
 
 - Final focused selection: 201 passed / one Linux-only skip in 81.99s; five connected suites: 78 passed in 26.11s. Existing v1 cases and all pending storage cases remain passing; no test/guard was removed.
