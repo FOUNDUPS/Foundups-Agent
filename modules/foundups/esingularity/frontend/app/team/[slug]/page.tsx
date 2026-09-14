@@ -37,7 +37,7 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
     <>
       <header className="site-header team-site-header">
         <Brand href="/#top" />
-        <nav aria-label="Primary navigation"><Link href="/">温泉を守る</Link><Link href="/#innovation-hub">AI拠点</Link><Link href="/future">福井の未来</Link><Link href="/team">チーム</Link></nav>
+        <nav aria-label="主要ナビゲーション"><Link href="/">温泉を守る</Link><Link href="/#innovation-space">イノベーション・スペース</Link><Link href="/future">福井の未来</Link><Link href="/team">チーム</Link></nav>
         <LineButton />
       </header>
 
@@ -45,7 +45,7 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
         <section className="profile-hero">
           <div className="profile-photo"><Image src={profile.image} alt={profile.imageAlt} fill priority sizes="(max-width: 900px) 100vw, 50vw" style={{ objectPosition: profile.imagePosition ?? '50% 50%' }} /><span>{profile.role}</span></div>
           <div className="profile-title">
-            <Link href="/team">← TEAM DIRECTORY</Link>
+            <Link href="/team">← チーム一覧</Link>
             <p>{profile.role}</p>
             <h1>{profile.name}</h1>
             <strong>{profile.secondary}</strong>
@@ -54,8 +54,8 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
         </section>
 
         <section className="profile-story">
-          <div className="profile-lead"><p className="eyebrow"><span /> WHY THIS PERSON IS HERE</p><h2>{profile.introduction}</h2></div>
-          <div className="profile-statement"><p>{profile.statement}</p>{profile.disclosure && <aside><span>TRANSPARENCY</span>{profile.disclosure}</aside>}</div>
+          <div className="profile-lead"><p className="eyebrow"><span /> この人がここにいる理由</p><h2>{profile.introduction}</h2></div>
+          <div className="profile-statement"><p>{profile.statement}</p>{profile.disclosure && <aside><span>透明性</span>{profile.disclosure}</aside>}</div>
         </section>
 
         <section className="profile-facts">
@@ -64,22 +64,22 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
 
         {profile.slug === '012' && (
           <section className="profile-memory" id="onsen-memory">
-            <div><p className="eyebrow light"><span /> A MEMORY FROM THE ONSEN</p><h2>温泉は、建物ではなく、<br />思い出も残す。</h2></div>
+            <div><p className="eyebrow light"><span /> 温泉の思い出</p><h2>温泉は、建物ではなく、<br />思い出も残す。</h2></div>
             <blockquote><p>長男トミーを初めて温泉に抱いて入った日のことを覚えています。見上げて笑い、声を上げて喜んでいました。次の瞬間、小さな「うんち」が湯にぷかり。驚いたけれど、いま振り返ると家族で笑える、昨日のことのような思い出です。</p><footer>— 012 · Monk UnDaoDu</footer></blockquote>
           </section>
         )}
 
         {profile.slug === '012' && (
           <section className="profile-special">
-            <div><p className="eyebrow light"><span /> THE EDUCATIONAL SINGULARITY</p><h2>2007年に名づけた未来が、<br />第3段階へ向かう。</h2></div>
-            <ol><li><span>01 · 2019–</span><strong>基礎教育へ到達できる</strong><p>数学、科学、言語科目のおよそ8年生相当まで、自律して学べる入口。</p></li><li><span>02 · NOW</span><strong>ほとんど何でも学べる</strong><p>生成AIが専門知識、言語、創作、技術を対話によって教える。</p></li><li><span>03 · NEXT</span><strong>AIが地域革新の基盤になる</strong><p>学校、大学、農業、企業、地域が自分たちの計算力を使う。</p></li></ol>
+            <div><p className="eyebrow light"><span /> Educational Singularity</p><h2>2007年に名づけた未来が、<br />第3段階へ向かう。</h2></div>
+            <ol><li><span>01 · 2019–</span><strong>基礎教育へ到達できる</strong><p>数学、科学、言語科目のおよそ8年生相当まで、自律して学べる入口。</p></li><li><span>02 · 現在</span><strong>ほとんど何でも学べる</strong><p>生成AIが専門知識、言語、創作、技術を対話によって教える。</p></li><li><span>03 · 次へ</span><strong>AIが地域革新の基盤になる</strong><p>学校、大学、農業、企業、地域が自分たちの計算力を使う。</p></li></ol>
           </section>
         )}
 
         {profile.slug === '0102' && (
           <section className="profile-special ai-principles">
-            <div><p className="eyebrow light"><span /> HUMAN AUTHORITY · AI CAPABILITY</p><h2>速く考える。<br />勝手には決めない。</h2></div>
-            <ol><li><span>01</span><strong>Evidence</strong><p>根拠、出典、仮説を分ける。</p></li><li><span>02</span><strong>Options</strong><p>一つの答えではなく、比較できる選択肢をつくる。</p></li><li><span>03</span><strong>Human decision</strong><p>地域、市、土地所有者、専門家が最終判断する。</p></li></ol>
+            <div><p className="eyebrow light"><span /> 人間の権限 · AIの能力</p><h2>速く考える。<br />勝手には決めない。</h2></div>
+            <ol><li><span>01</span><strong>根拠</strong><p>根拠、出典、仮説を分ける。</p></li><li><span>02</span><strong>選択肢</strong><p>一つの答えではなく、比較できる選択肢をつくる。</p></li><li><span>03</span><strong>人間の判断</strong><p>地域、市、土地所有者、専門家が最終判断する。</p></li></ol>
           </section>
         )}
 
@@ -87,10 +87,10 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
           <section className="profile-music" aria-labelledby="music-title">
             <div className="music-cover">
               <Image src="/team/0102-music-cover.jpeg" alt="The Cry of Kuzuryu playlist cover showing rain over a bridge and papers illuminated on a table" fill sizes="(max-width: 760px) 100vw, 48vw" />
-              <span>01 · PLAYLIST</span>
+              <span>01 · プレイリスト</span>
             </div>
             <div className="music-copy">
-              <p className="eyebrow light"><span /> LISTEN TO KUZURYU</p>
+              <p className="eyebrow light"><span /> 九頭竜を聴く</p>
               <h2 id="music-title">0102 MUSIC</h2>
               <strong>The Cry of Kuzuryu<br />— The Monk, the Boy, and the Spring</strong>
               <p>九頭竜の物語を、言葉だけでなく音からも感じるための音楽。0102の創作レイヤーです。</p>
@@ -104,15 +104,15 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
         )}
 
         {profile.gallery.length > 0 && (
-          <section className="profile-gallery"><div className="profile-gallery-heading"><span>FIELD NOTES</span><h2>一枚の顔から、<br />活動の背景へ。</h2></div><div className="profile-gallery-grid">{profile.gallery.map((item) => <figure key={item.src}><div><Image src={item.src} alt={item.alt} fill sizes="(max-width: 760px) 92vw, 45vw" style={{ objectPosition: item.position ?? '50% 50%' }} /></div><figcaption>{item.caption}</figcaption></figure>)}</div></section>
+          <section className="profile-gallery"><div className="profile-gallery-heading"><span>活動記録</span><h2>一枚の顔から、<br />活動の背景へ。</h2></div><div className="profile-gallery-grid">{profile.gallery.map((item) => <figure key={item.src}><div><Image src={item.src} alt={item.alt} fill sizes="(max-width: 760px) 92vw, 45vw" style={{ objectPosition: item.position ?? '50% 50%' }} /></div><figcaption>{item.caption}</figcaption></figure>)}</div></section>
         )}
 
-        {profile.links && <section className="profile-links"><span>VERIFIED PUBLIC LINKS</span>{profile.links.map((link) => <a href={link.href} key={link.href} target="_blank" rel="noreferrer">{link.label} <b>↗</b></a>)}</section>}
+        {profile.links && <section className="profile-links"><span>確認済みの公開リンク</span>{profile.links.map((link) => <a href={link.href} key={link.href} target="_blank" rel="noreferrer">{link.label} <b>↗</b></a>)}</section>}
 
-        <section className="profile-next"><span>BACK TO THE PEOPLE</span><h2>この一人から、<br />チーム全体を見る。</h2><Link className="button button-primary" href="/team">TEAM DIRECTORY <span>→</span></Link></section>
+        <section className="profile-next"><span>チームへ戻る</span><h2>この一人から、<br />チーム全体を見る。</h2><Link className="button button-primary" href="/team">チーム一覧 <span>→</span></Link></section>
       </main>
 
-      <footer><Brand href="/#top" /><p>PEOPLE × PLACE × COMPUTE × COMMUNITY</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで参加 ↗</a></footer>
+      <footer><Brand href="/#top" /><p>人 × 場所 × コンピュート × 地域</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで参加 ↗</a></footer>
     </>
   );
 }
