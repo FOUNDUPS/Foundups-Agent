@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-12T16:40:00+09:00",
+  "last_updated": "2026-09-15",
   "total_skills": 30,
   "skills": {
     "gemma_pqn_data_processor": {
@@ -453,7 +453,7 @@
         "gemma"
       ],
       "intent_type": "MAINTENANCE",
-      "version": "0.1.0",
+      "version": "0.5.0",
       "promotion_state": "prototype",
       "domain": "foundup_operations",
       "wsp_chain": [
@@ -464,7 +464,16 @@
         "WSP 95",
         "WSP 97"
       ],
-      "description": "Reconcile YUMORI.me Gmail correspondence with the connected Contacts and Email Log ledger while preserving message/thread lineage."
+      "description": "Role-bound local/regional/national press, writer/editor/release-manager handoffs and every-email Gmail/Mosh Pit receipt reconciliation. Prototype; no automatic send authority.",
+      "logical_roles": [
+        "LOCAL_MEDIA_DAE",
+        "REGIONAL_MEDIA_DAE",
+        "NATIONAL_MEDIA_DAE",
+        "PRESS_WRITER",
+        "PRESS_EDITOR",
+        "RELEASE_MANAGER",
+        "CORRESPONDENCE_CURATOR"
+      ]
     },
     "yumori_financial_model": {
       "location": "modules/foundups/esingularity/skillz/yumori_financial_model",
