@@ -13,8 +13,9 @@ def source() -> str:
 def test_yumori_landing_exists_and_is_japanese_first() -> None:
     text = source()
     assert "YUMORI.me / 湯守" in text
-    assert "私は湯守！" in text
-    assert "me GUARDIAN! = YUMORI.me" in text
+    assert "私は湯守。" in text
+    assert "YUMORI.me" in text
+    assert "me GUARDIAN!" not in text
     assert "I am a guardian" not in text
     assert "日本の地域を守り、地域のAIをつくる。" not in text
     assert "準備委員会の最初の目標：1,000人" in text
