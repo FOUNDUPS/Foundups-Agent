@@ -329,8 +329,8 @@ R20/R23, authenticate a verifier or establish the PQN hypothesis.
 Source: merged PR1732/main `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`.
 Its exact CI/CodeQL runs succeeded. WSP 97 reuses the
 [existing MCP assumption audit](../../modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md#6-dependency-qualification--2026-09-14),
-PR1526/1525, launcher pin checks and existing snapshot tests. No dependency PR,
-module, skill or runtime was duplicated or promoted.
+PR1526/1525, launcher pin checks and existing snapshot tests. Production source,
+pins and runtime admission are unchanged; the candidate venv is a disposable test.
 
 The FastMCP-only upgrade fails dependency resolution. The paired quartet resolves
 and passes 25 existing MCP tests in a disposable venv. The query interpreter passes
