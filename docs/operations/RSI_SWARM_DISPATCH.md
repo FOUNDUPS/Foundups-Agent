@@ -326,6 +326,22 @@ R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
 ### Mirror restoration checkpoint — 2026-09-14
 
+**Remote closure:** [PR #1734](https://github.com/FOUNDUPS/Foundups-Agent/pull/1734)
+merged at `7f4f49b79692a1aa6484544c4e46115fe6690027` on 2026-09-14 06:07:08 UTC.
+Its exact head `4f4e466f4151eb06676b60394a98a6cfb37c7d24` passed all ten reported
+checks; GitHub reported no required-check set and no independent review. All
+18 owned Git blobs match the merge, and the 13 incoming YUMORI paths are preserved.
+The current selection is now based on post-merge observation, not pending PR
+closure. WSP 15 was reapplied: the merged local repair leaves the queue; current
+dependency alerts/PRs and runtime-admission dependencies do not change the remaining
+scores. Readback remains **16/P0**, with its absent route confirmed in the existing
+root protocol/service/router. Its next bounded step is to bind a fresh read request
+to current authorization, exact record/context and terminal state using those
+owners and their existing tests. A historical signing grant supplies no read grant.
+See `merge_closure` and `post_merge_reobservation` under this checkpoint's existing
+baseline key for separate local, exact-head CI and merge-CI evidence. This closure
+adds no runtime implementation, service activation or retained-learning claim.
+
 Base: PR1733/main `84e72cd55442a7cbe04e834642269d929b90e362`; exact merge CI and
 CodeQL succeeded. Fresh ownership review found no open PR on the two selected
 source owners or their closest tests. WSP 15 selected local mirror restoration
@@ -823,7 +839,7 @@ ordered within R11-A; none is an executable work order.
 |---|---|---|
 | Immutable response record — local prerequisite implemented above | `foundup_memex_verified_outcome_signing.py`: bind the exact canonical SigningRequest/SigningResponse, complete outcome-grant context, root reservation, original issuance, key/epoch and full response digest. Reuse the shared response validator. | Exact bounded schema; reject unknown/coerced fields, changed response/audit/signing input, foreign scope and digest substitution. No credentials, private keys, caller-selected paths or executable capabilities in serialized data. |
 | Durable pending bytes — local primitive implemented above | `RootVerifiedOutcomeAuthorityState` with `AtomicJsonAuthorityRuntimeStore` and existing confined operation locks. Bind storage locations and durability to current root-owner configuration before writes. | Persist validated immutable bytes before terminal response commitment; pending bytes are unreadable to publication/learning. Preserve conflicting winners. Missing replicas or rollback cannot silently create authority. |
-| Terminal commitment — local v2 route implemented above | Existing root service/client/protocol and pending state owner bind the complete record digest. | V1 remains separate. V2 commits after exact durable readback and acknowledges only the same record under current peer/proof/grant checks. Later-sequence whole-mirror restoration is still blocked. |
+| Terminal commitment — local v2 route implemented above | Existing root service/client/protocol and pending state owner bind the complete record digest. | V1 remains separate. V2 commits after exact durable readback and acknowledges only the same record under current peer/proof/grant checks. The mirror-restoration checkpoint above closes local one-sided recovery after exact store reopening; both-mirror loss and physical process/volume qualification remain open. |
 | Authenticated readback | Existing root owner, current principal/peer resolver and independently authorized work/grant boundaries. Bind current requester and immutable historical response separately. | Revalidate current owner, caller, scope, expiry/revocation and key policy. A consumed secret-access grant or serialized client seal is not read authority. Readback must not invoke ordinary outcome signing or manufacture a fresh grant. Cross-generation recovery requires explicit current independent authority. |
 | Publisher handoff | Existing publisher/runtime store and the shared response validator. | Reuse original request, response, issuance and event identity; ordinary signing's 60-second freshness rule is not a recovery API. Verify durable root commitment plus current read authority before publication. No acceptance or memory activation is implied. |
 

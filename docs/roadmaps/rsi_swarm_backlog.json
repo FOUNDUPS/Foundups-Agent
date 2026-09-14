@@ -1817,10 +1817,11 @@
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
     "section": "mirror_restoration_continuation_20260914",
-    "base_commit": "84e72cd55442a7cbe04e834642269d929b90e362",
+    "base_commit": "7f4f49b79692a1aa6484544c4e46115fe6690027",
     "selected_action": "R11-independently-authenticated-response-readback",
-    "status": "selected_after_local_validation_pending_owned_pr_closure",
+    "status": "selected_after_merged_closure_reobservation",
     "requires_fresh_reobservation_after_closure": true,
-    "dispatchable": false
+    "dispatchable": false,
+    "observation_path": "mirror_restoration_continuation_20260914.post_merge_reobservation"
   }
 }

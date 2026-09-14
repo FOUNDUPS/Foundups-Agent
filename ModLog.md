@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Close merged recovery and re-observe RSI selection
+
+- Verified PR #1734 merged as `7f4f49b79692a1aa6484544c4e46115fe6690027` after ten successful exact-head checks. All 18 changed Git blobs and 13 protected incoming YUMORI paths are preserved. Local results retain their original source/environment scope; no fresh runtime test run is claimed by this documentation closure.
+- Reapplied canonical WSP 15 and WSP 97 against the merged source, current alerts/PRs and ownership evidence. Removed stale pending-PR state; authenticated response readback remains the highest eligible local action at 16/P0. Existing root owners lack the read operation; no duplicate module or scheduler is needed.
+- Updated the existing roadmap/runbook, baseline and backlog only for closure/selection, preserving historical evidence and all non-dispatchable packets. The existing recursive continuation already implements 012's work-selection objective; production runtime enforcement and retained RSI remain incomplete. WSP 00/15/22/50/97.
+
 ## 2026-09-14: RSI mirror restoration through existing authority stores
 
 - Closed the selected local recovery gap: either missing mirror can recover a later checkpoint after exact store reopening. Reused the existing identity-checked reader and root lock; conflicts and stale sources reject. Generic +1 CAS and readonly readers are unchanged; no reconstructed history or new runtime authority.
