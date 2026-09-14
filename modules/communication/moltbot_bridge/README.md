@@ -2,6 +2,13 @@
 
 ## Verified-outcome recovery and RSI
 
+The [accepted-memory visibility checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14)
+adds `accepted_outcome_source` to the existing authority store. The source's
+`load_verified_outcome(record_id)` must return exact accepted memory content before
+activation and consumable reads. Unbound factories remain closed; publication
+staging/retry remains available. Current runtime composition must independently
+bind the participant; this parameter grants no write or read permission.
+
 R11 builds on the existing signing, root authority, publication and PatternMemory owners.
 The v2 root commit route persists the bounded full response through the existing
 pending writer, then commits its complete digest in both state mirrors. Exact retries
@@ -11,7 +18,7 @@ The [API index](INTERFACE.md#verified-outcome-authority-signing-and-memory) and
 [complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference)
 cover signed records, strict response validation, root COMMIT acknowledgment retry,
 immutable publication, canonical event time and invisible PatternMemory staging.
-The [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14)
+The [storage-read checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14)
 adds `load_committed_response_for_root()` to the existing root state owner. It
 returns only exact committed bytes under installed ownership, generation, selection,
 signature and time checks. Healthy reads preserve the original state; one-sided

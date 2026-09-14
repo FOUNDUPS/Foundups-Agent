@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-14: Require exact accepted memory before outcome exposure
+
+- Reproduced readable durable authority after a rejected memory activation; extended the existing authority-store adapter with exact accepted-record checks before activation, after commit and at envelope reads. Unbound production factories remain closed. No replacement coordinator or sink activation.
+- 181 connected Python tests, 8 manifest tests and 15 fast extension groups passed. Existing real-store/seed fixtures were reused; runtime membership remains 1,400 with one changed hash and updated compatibility pins. Registry 1,650/269 is current.
+- Fresh WSP 15/WSP 97 retains existing R11-B recoverable acceptance decision 16/P0. Source guarding is locally verified; cross-store atomicity, current participant admission and retained benefit remain open. Previous PR #1738 main CI/CodeQL passed. Evidence: `acceptance_visibility_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Full-response process races and fresh RSI selection
 
 - Closed the selected 15/P1 process-race layer with two spawned-writer cases in the existing service suite. Conflicting records preserve one winner; identical retries preserve exact bytes, mirrored digest and consumed authority. Full service plus three existing guards: 138 passed / one Linux-only skip. Runtime source and pins are unchanged.

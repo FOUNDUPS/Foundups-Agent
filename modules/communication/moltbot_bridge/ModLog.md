@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-14: Gate authority activation and reads on accepted memory
+
+- `AuthorityRuntimeVerifiedOutcomeStore` now requires a configured source returning the exact canonical accepted record before activation, after a new commit and at each envelope read. Staged/readiness-only, absent, conflicting or unreadable evidence rejects; cancellation and publication retry remain intact. Current production factories stay unbound.
+- Reused the existing runtime-authority tests and real PatternMemory seed fixture: 15 new cases; 181 connected cases pass, plus 8 manifest tests and 15 fast groups. Source/test files are 285/927 lines; no new module, test file or exemption. One runtime manifest hash and both existing pins changed.
+- This closes the reproduced local exposure guard, not recoverable agreement or live activation. Next existing R11-B decision work remains 16/P0. Evidence: `acceptance_visibility_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Verify competing full-response writer processes
 
 - Added identical/conflicting response races using the existing record fixture, root handler and disposable stores. Two distinct spawned PIDs, exact winner/retry behavior, reopened bytes, terminal mirrors and consumed authorization are verified.

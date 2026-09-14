@@ -1,3 +1,10 @@
+## 2026-09-14: Accepted-record agreement for activation and visibility
+
+- Before: one failed / 49 deselected in 2.76s; the real durable publisher exposed an envelope after the injected memory sink rejected activation. After: 64 runtime-authority tests passed in 21.29s; the eight connected suites passed 181 tests in 22.88s. Counts overlap.
+- Added 15 cases using the existing real store, PatternMemory reader and seed fixture. Existing setup seeds accepted memory explicitly; original signature, conflicting-publication and one-use assertions remain. Source/test files are 285/927 lines.
+- Packaging: 8 tests passed in 66.37s and 15 fast groups in 4,203ms. Initial fast-tier invocation failed because this worktree has no local .venv; configured the existing qualified site-packages root and passed. No dependency install or relaxed guard. Registry remains 1,650/269.
+- The source guard is verified at activation/read boundaries. Current factories are unbound; coordinated writes, every memory consumer, runtime admission and physical durability remain separate. Evidence: `acceptance_visibility_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
 ## 2026-09-14: Identical and conflicting full-response process races
 
 - Focused existing reservation/exit/new-race selection: seven passed / 129 deselected in 18.88s. Full root service suite plus three unchanged size guards: 138 passed / one Linux-only skip in 76.65s. No failing fixture run occurred in this continuation; overlapping runs are not summed.

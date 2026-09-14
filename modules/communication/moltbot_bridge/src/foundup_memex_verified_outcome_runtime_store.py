@@ -20,12 +20,35 @@ _STATE_KEY = "foundup_memex_verified_outcome_authority"
 class AuthorityRuntimeVerifiedOutcomeStore:
     """Use one existing authority store for evidence and one-use replay."""
 
-    def __init__(self, store: AuthorityRuntimeStore) -> None:
+    def __init__(
+        self, store: AuthorityRuntimeStore, *, accepted_outcome_source: Any = None
+    ) -> None:
         if not callable(getattr(store, "load", None)) or not callable(
             getattr(store, "commit", None)
         ):
             raise ValueError("verified_outcome_authority_store_invalid")
+        if accepted_outcome_source is not None and not callable(
+            getattr(accepted_outcome_source, "load_verified_outcome", None)
+        ):
+            raise ValueError("verified_outcome_acceptance_source_invalid")
         self._store = store
+        self._accepted_outcome_source = accepted_outcome_source
+
+    def _require_accepted_record(self, envelope: Mapping[str, Any]) -> None:
+        """Require exact current memory agreement; a source is not admission."""
+
+        loader = getattr(self._accepted_outcome_source, "load_verified_outcome", None)
+        if not callable(loader):
+            raise ValueError("verified_outcome_acceptance_source_required")
+        try:
+            record = loader(envelope["record_id"])
+            matches = isinstance(record, Mapping) and _digest(dict(record)) == _digest(
+                envelope["record"]
+            )
+        except Exception as exc:
+            raise ValueError("verified_outcome_acceptance_source_unavailable") from exc
+        if not matches:
+            raise ValueError("verified_outcome_accepted_record_mismatch")
 
     def publish(self, envelope: Mapping[str, Any]) -> str:
         """Stage signed evidence; staged records are not consumable."""
@@ -71,6 +94,7 @@ class AuthorityRuntimeVerifiedOutcomeStore:
         envelope = _validated_envelope(entry.get("envelope"))
         if envelope["record_id"] != candidate:
             raise ValueError("verified_outcome_activation_binding_mismatch")
+        self._require_accepted_record(envelope)
         if entry.get("status") == "ACTIVE":
             return candidate
         if set(entry) != {"status", "envelope"} or entry.get("status") != "STAGED":
@@ -80,6 +104,7 @@ class AuthorityRuntimeVerifiedOutcomeStore:
         updated = dict(current)
         updated[_STATE_KEY] = state
         self._store.commit(updated, expected_revision=current.get("revision"))
+        self._require_accepted_record(envelope)
         return candidate
 
     def load_publication(self, record_id: str) -> Mapping[str, Any] | None:
@@ -102,7 +127,9 @@ class AuthorityRuntimeVerifiedOutcomeStore:
             entry = state["evidence"].get(record_id)
             if not isinstance(entry, Mapping) or entry.get("status") != "ACTIVE":
                 return None
-            return copy.deepcopy(_validated_envelope(entry.get("envelope")))
+            envelope = _validated_envelope(entry.get("envelope"))
+            self._require_accepted_record(envelope)
+            return copy.deepcopy(envelope)
         except (RuntimeError, TypeError, ValueError):
             return None
 

@@ -20,7 +20,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
-| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#competing-process-response-checkpoint--2026-09-14); packet order is not an automatic assignment |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14); packet order is not an automatic assignment |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
@@ -49,14 +49,18 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Current delivery checkpoint — 2026-09-14
 
-The [competing-process response checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#competing-process-response-checkpoint--2026-09-14)
-closes the selected identical/conflicting full-response writer race scope using
-existing tests and stores. The full service suite and three existing size guards
-pass **138 tests / one Linux-only skip**; runtime implementation is unchanged.
-Fresh WSP 15/WSP 97 selection promotes existing **R11-B acceptance/visibility
-16/P0** for isolated composition regression and recoverable-decision work.
-Read admission separately awaits the eligible-reader policy decision. Physical
-volume, privileged runtime and retained-benefit proof remain open; R11 is partial.
+The [accepted-memory visibility checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14)
+repairs the reproduced exposure of readable authority after a rejected memory
+write. The existing store now requires exact accepted-memory content at activation
+and envelope reads; current production factories remain unbound and closed.
+**181 connected tests, 8 manifest tests and 15 fast groups passed.** R11-B remains
+partial: fresh WSP 15/WSP 97 selection is its recoverable acceptance decision
+**16/P0**, using existing participants. Cross-store atomicity, runtime admission,
+response-read policy and retained benefit remain open.
+
+Process-race PR [#1738](https://github.com/FOUNDUPS/Foundups-Agent/pull/1738) merged
+as `916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7`; its main CI and CodeQL passed.
+The following checkpoints preserve their historical scopes and priorities.
 
 Writer-exit PR [#1737](https://github.com/FOUNDUPS/Foundups-Agent/pull/1737) merged
 as `35eb1e863b7ab73024f6d430f9b116bfeebd49d7`; its main CI and CodeQL runs are
