@@ -1,7 +1,7 @@
 ---
 name: reddog_mosh_pit
-description: Curate a FoundUp Mosh Pit as newest-first daily activity bullets with expandable detail. Use for activity capture, timeline cleanup, and project-history retrieval; keep system notices and future plans out of the activity feed.
-version: 0.1.0
+description: Curate newest-first FoundUp activity with expandable evidence. Every scoped correspondence event requires its Gmail message/thread receipt under the actual project-local date; retain plans and unrelated notices outside completed activity.
+version: 0.2.0
 intent_type: GENERATION
 promotion_state: prototype
 category: workflow
@@ -9,15 +9,26 @@ logical_roles:
   - researcher
   - implementer
   - verifier
+  - correspondence_curator
 evals:
   - name: mixed_activity_and_notifications
-    expected: retain_activities_exclude_system_noise
+    expected: retain_activities_exclude_unrelated_system_noise
   - name: planned_meeting
     expected: plan_outside_completed_activity_feed
   - name: stakeholder_scope
     expected: authorized_project_and_explicit_disclosure_view
   - name: duplicate_capture
     expected: one_event_with_source_preserving_correction
+  - name: gmail_receipt_required
+    expected: every_scoped_email_has_message_id_thread_id_and_actual_local_day
+  - name: gmail_exhaustive_audit
+    expected: paginate_primary_ids_reconcile_sets_and_report_missing_or_unknown_records
+  - name: surviving_draft
+    expected: compare_sent_envelopes_and_content_before_resend_never_infer_non_send_from_draft
+  - name: utc_date_boundary
+    expected: convert_source_timestamp_to_project_timezone_not_audit_or_creation_date
+  - name: communication_privacy
+    expected: private_envelopes_and_bodies_stay_in_gmail_and_contact_ledger
 retirement_date: null
 ---
 # RedDog Mosh Pit
@@ -43,10 +54,12 @@ meeting is an activity today; the future meeting itself remains a plan.
 2. Read the existing activity and evidence before adding or editing. Capture
    meaningful meetings, actions, decisions, research, artifacts, replies and
    outcomes. Attribute 012, 0102, joint work or committee work accurately.
-3. Exclude automated copyright/Content ID and blocked-video notices, delivery
-   diagnostics, sync logs and unrelated entertainment. A meaningful action
-   taken in response can be recorded as its own concise activity; do not copy
-   the notification into the feed. Do not use artist-name keyword bans.
+3. Exclude automated copyright/Content ID and blocked-video notices, sync logs
+   and unrelated entertainment. A meaningful action taken in response can be
+   recorded as its own concise activity. Scoped email bounces and auto-replies
+   are an exception for receipt completeness: retain their compact evidence
+   beneath the corresponding communication, not copied diagnostic bodies or
+   inflated accomplishment bullets. Do not use artist-name keyword bans.
 4. Reuse one canonical event identity across capture receipts. Keep exact
    timestamps only when evidenced. Preserve OBSERVED, REPORTED_BY_012,
    INFERRED and PROPOSED distinctions; never invent causation or completion.
@@ -63,6 +76,92 @@ meeting is an activity today; the future meeting itself remains a plan.
 8. Show completion only after the destination readback or accepted effect
    receipt proves it. A proposed entry or a local candidate is not a saved
    activity or a deployed system.
+
+## Mandatory correspondence receipts: GMAIL_RECEIPT_REQUIRED
+
+Principal clarification, 2026-09-15: every email within the authorized FoundUp
+correspondence scope must be recoverable from the Mosh Pit on the day it was
+actually sent or received. Materiality determines the top-level story, not
+whether a scoped message retains evidence. This supersedes any interpretation
+of 'material milestones only' that drops individual email references.
+
+### Event identity and date
+
+- `message_id` is one email event; `thread_id` is its conversation lineage.
+  Never substitute a subject, draft ID, or thread ID for the message ID.
+- Preserve a Gmail message URL in the connected Email Log. In an authorized
+  private/team Mosh Pit, show the MID/TID pair in an evidence child. An approved
+  public projection can redact these identifiers; it must not expose the
+  private Gmail envelope, contact record or attachment.
+- Convert an offset-aware source timestamp to the project's timezone. For
+  YUMORI this is `Asia/Tokyo`. Do not use the audit day, thread's latest date,
+  device timezone, or draft-creation day as the sent day. A date-only record
+  retains date-only precision; missing or conflicting time remains UNKNOWN.
+- Replies, forwards, corrections and supplements are distinct message events,
+  even with identical subjects or the same thread. Group them under one
+  activity when appropriate, retaining each individual receipt exactly once.
+- A later correction may reference an earlier receipt without creating another
+  email event. Preserve original evidence and an explicit supersession link.
+
+Private/team evidence-child template:
+
+```text
+2026-09-15
+- 012 + 0102: issued a press release; recipient response remains open.
+  Evidence: SENT | actual time JST | short purpose | MID=<message_id>; TID=<thread_id>
+  Follow-up: awaiting substantive reply; sent is not delivery or coverage.
+```
+
+### State and privacy
+
+`DRAFT`, `SENT`, `RECEIVED`, `AUTO-REPLY`, `BOUNCE`, and `TECHNICAL_SEND` are
+distinct states/classes. A draft can be recorded as a drafting activity on its
+creation date, but never in the sent count. A sent message later moved to Trash
+is still a sent event. Technical self-tests and accidental diagnostic sends
+remain auditable but do not count as substantive outreach.
+
+A human reply may close an ask; an automatic acknowledgment is not human
+engagement. An absence of bounce is not confirmed delivery. The name of the
+mayor/governor/council in a salutation is not evidence of that person's actual
+receipt or of distribution to every member. Retain envelope details in Gmail
+and the contact ledger, not in the Mosh Pit prose.
+
+Never paste full email bodies, BCC lists, personal addresses, phone numbers,
+Contact IDs, source-card indexes, or identity-resolution records into this
+projection or public Git. A short role/name may explain an activity without
+becoming a contact record.
+
+### Audit and post-send reconciliation
+
+1. Fix the authorized project, mailbox coverage, date window and as-of boundary.
+   Inventory primary Gmail IDs over that window, including relevant archived
+   and trashed sent mail. Exhaust pagination; do not interpret a snippet-only
+   search as a complete mailbox inventory.
+2. Union relevant recipient, subject and distinctive-body searches with the
+   existing Email Log and Mosh Pit references. Read disputed messages and full
+   threads. Classify unrelated messages instead of importing the whole mailbox.
+3. Reconcile unique primary IDs against Email Log IDs and Mosh Pit evidence
+   children. Compute missing IDs, duplicate canonical entries, incorrect local
+   dates, unresolved lineage and state conflicts. Report unknowns explicitly.
+4. Compare surviving drafts against sent envelopes, subjects and substantive
+   content, not just matching titles. If a send result is ambiguous, hold the
+   resend and inspect Gmail. A stale draft alone proves neither sent nor unsent.
+5. For an authorized new send, read back Gmail's SENT state and actual recipient
+   and attachment metadata first. Then upsert one Email Log event and one
+   Mosh Pit receipt, update the relevant contact/open-loop state, and verify
+   destination readback. Failure to log after a send is a reconciliation error,
+   never permission to send the message again.
+6. Backfill older receipts beneath their actual day. Preserve existing field
+   narratives and links. Keep obsolete demands in historical messages labeled
+   historical; do not silently apply them to today's campaign position.
+7. Close the audit only with coverage totals and unresolved exclusions stated.
+   An ID-index audit is not a fresh verification of every historical claim in
+   every message. More detailed envelope/content validation must say what it
+   covered. Scheduled automatic capture is not implied by this manual workflow.
+
+For YUMORI recipient resolution, government/publication preflight and press
+roles, reuse the existing module-owned `yumori_contact_ledger` skill. Do not
+create another address book or separate correspondence database.
 
 ## Access and implementation boundary
 
