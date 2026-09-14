@@ -1851,12 +1851,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "research_report_accounting_continuation_20260915",
-    "base_commit": "b12d75400b3ff819d42c191f87c46e3ed3022e74",
+    "section": "research_terminal_report_continuation_20260915",
+    "base_commit": "0c45c6b33a210c07162fd85360056d3f324fc721",
     "selected_action": "AutoResearcher-report-completeness",
-    "status": "partial_accounting_closed_terminal_evidence_selected",
+    "status": "partial_terminal_closed_source_qualification_selected",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "research_report_accounting_continuation_20260915.post_sprint_reobservation"
+    "observation_path": "research_terminal_report_continuation_20260915.post_sprint_reobservation"
   }
 }

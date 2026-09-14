@@ -51,19 +51,20 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Current delivery checkpoint — 2026-09-15
 
 The [researcher checkpoint](modules/infrastructure/wre_core/ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
-adds complete attempt/evaluation/outcome accounting to successful dry-run returns.
-Missing proposals remain visible; invalid/changing caps cannot falsify requested
-counts, and failed acceptance recording preserves the baseline/best result.
-**51 local tests pass**; five ten-attempt controls report 50 attempts/40 candidate
-and five baseline evaluations with unchanged sources/restored scratch.
-Independent verification, retained improvements and resource usage remain unknown.
+adds separate completed/aborted invocation reports after cleanup, with partial
+progress and failure evidence. Publication failures cannot return success or replace
+prior reports. **66 local tests pass**; five ten-attempt controls produce 50 attempts,
+40 candidate/five baseline evaluations and matching saved/returned reports.
 
-Fresh WSP15/97 keeps **report completeness 15/P1** partial: qualify terminal/aborted
-reports and invocation/source/oracle identity before the planned launch reader.
-A separate Detect-AI intake PR1751 appeared; its docs remain independently owned.
-OpenClaw PR [#1749](https://github.com/FOUNDUPS/Foundups-Agent/pull/1749) merged as
-`b12d75400b3ff819d42c191f87c46e3ed3022e74`; all ten exact-head checks and both
-main workflows passed. The current researcher change enables no startup campaign.
+Fresh WSP15/97 keeps **report completeness 15/P1** partial: qualify exact input,
+source, oracle and environment identities before the planned launch reader.
+Independent verification, retained improvements and resource usage remain unknown.
+YUMORI PR1644 advanced independently with disjoint files; its ownership is preserved.
+Accounting PR [#1752](https://github.com/FOUNDUPS/Foundups-Agent/pull/1752) merged
+as `0c45c6b33a210c07162fd85360056d3f324fc721`; both main workflows passed.
+OpenClaw PR [#1749](https://github.com/FOUNDUPS/Foundups-Agent/pull/1749) remains
+merged at `b12d75400b3ff819d42c191f87c46e3ed3022e74` with passing main workflows.
+The current researcher change enables no startup campaign or automatic budget growth.
 
 TTL PR [#1748](https://github.com/FOUNDUPS/Foundups-Agent/pull/1748) merged as
 `7c9e3b8dc3e74a26653d16f283a5208bcd32257b`; all ten exact-head checks and both

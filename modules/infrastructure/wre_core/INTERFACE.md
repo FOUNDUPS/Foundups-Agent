@@ -79,28 +79,40 @@ types reject before constructor output/model work and before run baseline
 execution. Each run snapshots the cap for its loop, progress and returned report.
 Zero requests no proposal attempts and still evaluates one valid baseline.
 
-A successful `run()` retains the existing baseline/optimized/improvement/history/
-dry_run fields and adds completed-call accounting:
+`run()` retains baseline/optimized/improvement/history/dry_run accounting and
+returns the same mapping saved in its invocation's `report.json` after successful
+cleanup and publication. Python exceptions still propagate; when reporting is
+available an aborted mapping is published before propagation.
 
 | Field | Meaning |
 |---|---|
-| `attempts_requested` | Cap observed at invocation entry |
-| `attempts_started`, `iterations_run` | Actual attempts, including missing proposals |
-| `baseline_evaluations` | One valid baseline evaluation for a successful return |
-| `candidate_evaluations` | Evaluator calls, including validation/error results; excludes missing proposals |
-| `outcome_counts` | Counts for `no_proposal`, `accepted`, `rejected`, `failed_validation`, `crashed` |
-| `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence is available from this local producer |
+| `schema` | `wre_auto_research_report.v1`; local diagnostic, not signed authority |
+| `invocation_id`, `report_path` | Distinct `invocation-*` namespace within the instance run directory and its JSON path |
+| `status`, `stop_reason` | `completed`/`attempt_limit` or `aborted` with `error`/`interrupted`; completion does not imply improvement |
+| `phase`, `failure`, `cleanup_failure` | Last work phase and available error types; original exception chains still propagate |
+| `cleanup` | `restored`, `failed` or `not_performed`; output failure after restoration still aborts without denying restored bytes |
+| `attempts_requested` | Valid cap frozen at invocation entry; `None` for a rejected mutated invalid cap |
+| `attempts_started`, `iterations_run` | Entered proposal attempts, including missing and unfinished proposals |
+| `attempts_finished`, `outcome_counts` | Recorded history outcomes; an aborted started attempt may have no finished outcome |
+| `baseline_evaluations`, `candidate_evaluations` | Actual evaluator entries, including calls that raise; zero before entry |
+| `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
+| `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
 
-`history` and TSV now include one `no_proposal` record per missing proposal;
-unmeasured TSV metric cells are blank. `crashed` can reflect evaluation or later
-acceptance/logging work, so it is not an evaluator-only failure count. Best
-metrics advance only after acceptance recording succeeds; accepted info names
-the previous fitness. Existing exception propagation/cleanup semantics remain.
-These counts are returned only after successful cleanup; console output or a
-partial TSV is not a terminal receipt. Reusing an instance appends another
-baseline/iteration group to its TSV; immutable invocation IDs, source/oracle
-binding, aborted-run reports, resource measurement and launch reader qualification
-remain unimplemented. No runtime admission or production RSI claim follows.
+Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
+`crashed`. History/TSV record missing proposals with blank metric cells. `crashed`
+may include evaluation or later acceptance/logging failures. Best metrics advance
+only after acceptance recording succeeds; accepted info names previous fitness.
+
+Each sequential call reserves a distinct subdirectory, stages complete JSON in
+`report.tmp`, then replaces `report.json` in that directory after cleanup settles.
+Allocation errors still attempt cleanup. Serialization/write/publication errors
+propagate, preserving earlier exception context; no completed return follows.
+Previous invocation files remain unchanged. Missing JSON, partial TSV or temporary
+files cannot certify completion; do not read temporary files as terminal evidence.
+The existing TSV still combines repeated-call groups and is not invocation-qualified.
+Abrupt process death/power loss, same-instance concurrency, authenticated source/
+oracle/environment identity, freshness, resource measurement and launch reading
+remain unqualified. This artifact creates no runtime or promotion authority.
 
 `WREAutoResearcher.run()` consumes those errors through its existing
 `failed_validation`/restore path. The negative-allocation regression proves it
