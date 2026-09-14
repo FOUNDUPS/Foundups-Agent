@@ -7756,5 +7756,451 @@
     ],
     "dispatchable": false,
     "retained_improvement_proven": false
+  },
+  "acceptance_visibility_continuation_20260914": {
+    "base_commit": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+    "origin": "autonomous_trigger",
+    "execution_plane": "authorized_local_source_authoring",
+    "observed_at": "2026-09-14T10:04:54.553803+00:00",
+    "last_observed_at": "2026-09-14T10:26:25.905588+00:00",
+    "status": "LOCAL_EXACT_ACCEPTED_RECORD_VISIBILITY_GUARD_VERIFIED",
+    "wsp00": {
+      "awakening_executed": true,
+      "awakening_exit_code": 0,
+      "tracked_state_writes": false,
+      "gate": {
+        "gate_passed": true,
+        "attempted_awakening": false,
+        "awakening_success": false,
+        "is_zen_compliant": true,
+        "requires_awakening": false,
+        "last_validation": "2026-09-14T19:04:12.045489",
+        "session_id": 1789307432,
+        "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+        "action": "check"
+      },
+      "truth_boundary": "Repository software gate only."
+    },
+    "observation": {
+      "observed_at": "2026-09-14T10:04:54.553803+00:00",
+      "owned_head": "648903fa61935b7c512f4ad4347c186a900c071c",
+      "owned_branch": "agent/rsi-root-response-process-race-20260914",
+      "owned_clean": true,
+      "origin_main": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+      "previous_pr": {
+        "headRefOid": "648903fa61935b7c512f4ad4347c186a900c071c",
+        "mergeCommit": {
+          "oid": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7"
+        },
+        "mergedAt": "2026-09-14T09:32:01Z",
+        "number": 1738,
+        "state": "MERGED",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1738"
+      },
+      "previous_merge_runs": [
+        {
+          "conclusion": "success",
+          "databaseId": 34828487314,
+          "headSha": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/34828487314",
+          "workflowName": "CI"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 34828487090,
+          "headSha": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/34828487090",
+          "workflowName": "CodeQL"
+        }
+      ],
+      "open_pr_count": 96,
+      "relevant_open_prs": [],
+      "visible_worktrees": 155,
+      "dependency_prs": [
+        {
+          "number": 1526,
+          "head": "9b17a56c61189bcca48bd130a41d9d3dcec35229"
+        },
+        {
+          "number": 1525,
+          "head": "b94bbda640fd50579301e8bd187269f4d20184cc"
+        }
+      ]
+    },
+    "retrieval": {
+      "first_bundle": "canonical shared overlay at0c81418f; not selected-source authority",
+      "corrected_entry": "Existing query_once API with explicit repo_root=owned workspace",
+      "workspace_head": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+      "freshness": "UNKNOWN",
+      "index_gap_detected": true,
+      "owner_attempts": 0,
+      "noise": "Initial bundle targeted shared checkout; existing read-only API corrected root. Targeted owner/test paths supersede peripheral lexical hits.",
+      "ordering": "WSP00,15,97 and canonical selection, module contracts/journals, exact source and existing fixtures.",
+      "missing": "No durable authority/PatternMemory acceptance participant contract is wired; optional memory README and requirements absent.",
+      "duplication": "Reuse AuthorityRuntimeVerifiedOutcomeStore, real RedDogVerifiedPatternMemorySink and existing seeded outcome fixture; adjacent architect-promotion transaction has different bound participants and is not copied.",
+      "staleness": "Lexical UNKNOWN remains navigation only; exact owned source, current Git and explicit scope were checked.",
+      "no_reindex": true
+    },
+    "ranking_before_sprint": {
+      "reference": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#process_race_continuation_20260914.post_sprint_reobservation.ranked_actions",
+      "fresh_reassessment": "Scores and eligibility were rechecked at current identical source, owner/PR and previous-merge CI state; R11-B remained 16/P0. Refined the first layer after exact source and neighboring transaction inspection."
+    },
+    "selected_before_sprint": "R11-B-exact-accepted-record-visibility-guard",
+    "selection_rationale": "Previous merged tree and both main checks are verified; current source and ownership are unchanged. Higher runtime gates and pending read policy remain independent. Existing handler can activate its real authority before a sink failure; source guard is one bounded prerequisite toward recoverable acceptance. AutoResearcher durability remains13/P1.",
+    "cost_context": {
+      "work": "Current composed regression, one existing adapter guard, existing fixtures and connected tests; refresh packaging for actual source changes.",
+      "external_model_calls": 0,
+      "native_worker": "No new signed model/worker/runtime admission evidence; deterministic local tests are sufficient.",
+      "usage_cost": "Not measured."
+    },
+    "changes": {
+      "owner": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py",
+      "public_api": "AuthorityRuntimeVerifiedOutcomeStore(store, *, accepted_outcome_source=None). The existing source load_verified_outcome(record_id) must return the exact accepted canonical record. Staging/retry is available unbound; activation and consumable reads fail closed.",
+      "behavior": "Check actual accepted content before activation including ACTIVE retries, after a new authority commit, and at each envelope read. Preserve exact staged publication, current signature/expiry/revocation and one-use replay checks. Read failures and content mismatches reject; cancellation propagates.",
+      "reuse": "Existing authority adapter, canonical digest, real PatternMemory sink and seed fixture; no callback reversal, activation method or replacement transaction system.",
+      "test_scope": "15 additional cases in the existing runtime-authority suite; five setup definitions now supply/seed a real accepted-memory participant while preserving their original assertions."
+    },
+    "validation": {
+      "before": {
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0,
+        "seconds": 2.76,
+        "junit_sha256": "17c2cd3acd71845bce167877e44e4277c7f3ab116e2c5b8978b1a369f66b789f",
+        "log_sha256": "5bf27f4cba5596689f9e16dd8a41b88b4165f3af71208c628023d9ef8a048ee0"
+      },
+      "before_reason": "The real publisher/authority store exposed an ACTIVE envelope after the injected memory sink rejected activation. This reproduces the existing composition defect, not a proposed-API failure.",
+      "focused": {
+        "tests": 64,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 64,
+        "seconds": 21.29,
+        "junit_sha256": "707abe859bafa1dc1dddae903c9da8baec1534ec24cbc4ffc99b9148c05c78cd",
+        "log_sha256": "f1a26d9fc5af618e4275fff584710e9c6d7ab4a6e5b8fe7abf52c5e29f95e16d"
+      },
+      "connected": {
+        "tests": 181,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 181,
+        "seconds": 22.88,
+        "junit_sha256": "3eb691900a975d0a16bf1441c6aea37ab67b08ff2df4e02f408cb936991fa3d1",
+        "log_sha256": "2ada4f416d4043cd0389d252fa043e915f89ef1c8713a19adadcb75564b2de7b"
+      },
+      "connected_test_files": [
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_operational_memex_snapshot_supplier.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py"
+      ],
+      "pytest_arguments": [
+        "--import-mode=importlib",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=O:/Foundups-Agent-audits/20260909-rsi/acceptance-visibility-20260914/<run>",
+        "--tb=short",
+        "-q",
+        "--junitxml=O:/Foundups-Agent-audits/20260909-rsi/acceptance-visibility-20260914/<run>.xml"
+      ],
+      "manifest": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 8,
+        "seconds": 66.37,
+        "junit_sha256": "fee18adbdafb9060f558ae35c66a69f7b6ddc9240ed0c0513ebf3ce8fc0086c2",
+        "log_sha256": "83de39d5612175b407efd8570fd02589ea762b5c73842185fb2f6e93cc917bd7"
+      },
+      "manifest_command": "python -B -m pytest scripts/tests/test_generate_reddog_backend_manifest.py with the recorded isolated pytest arguments",
+      "fast": {
+        "groups_passed": 15,
+        "milliseconds": 4203,
+        "command": "node extensions/reddog/tests/run_reddog_test_tier.js fast",
+        "initial_failure": "First tier run exited at dependency-root validation: the isolated worktree has no .venv. Read the existing harness and supplied REDDOG_TEST_SITE_PACKAGES pointing to the existing qualified environment; no package installation or guard change."
+      },
+      "registry": {
+        "tracked": 1650,
+        "quarantined": 269,
+        "state": "current",
+        "command": "python -B modules/infrastructure/wre_core/scripts/generate_test_registry.py --check"
+      },
+      "runtime_manifest": {
+        "old_digest": "f5d086951318ef0b5be22df5b9657bc0834be4a70fd9c8b277b396029990819a",
+        "new_digest": "752c20f06303be5bb8dadc7445541a992cee280d11395928c0136341f994f05d",
+        "runtime_members": 1400,
+        "membership_unchanged": true,
+        "runtime_hash_changes": [
+          "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py"
+        ]
+      },
+      "structure": {
+        "source_lines": 285,
+        "test_lines": 927,
+        "unchanged_prior_test_definitions": 29,
+        "updated_fixture_definitions": [
+          "_publish",
+          "_store",
+          "test_attacker_rehashed_record_and_envelope_cannot_reuse_signature",
+          "test_publication_commit_reconciles_valid_competing_first_publisher",
+          "test_staged_evidence_is_not_consumable_before_activation"
+        ],
+        "new_test_definitions": [
+          "test_acceptance_read_preserves_cancellation_without_mutation",
+          "test_acceptance_readiness_marker_is_not_a_record_source",
+          "test_failed_memory_activation_cannot_expose_durable_authority",
+          "test_memory_disagreement_rejects_activation_and_readback",
+          "test_memory_loss_at_authority_commit_is_unacknowledged_and_retryable",
+          "test_memory_staging_is_not_accepted_record_evidence",
+          "test_unbound_acceptance_source_hides_preexisting_active_evidence"
+        ],
+        "new_test_cases": 15,
+        "new_modules": 0,
+        "new_test_files": 0,
+        "new_size_exemptions": 0,
+        "cohesion_review": "The 927-line existing suite remains focused on runtime outcome authority, reuses its real-store/publisher fixtures and the existing PatternMemory seed helper, and remains below the 1,000-line critical window. No file split or exemption is needed for this bounded addition."
+      },
+      "environment": {
+        "python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "node": "C:/Program Files/nodejs/node.exe",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "explicit_plugin": "pytest_asyncio.plugin",
+        "temp_and_database_root": "O:/Foundups-Agent-audits/20260909-rsi/acceptance-visibility-20260914",
+        "REDDOG_TEST_SITE_PACKAGES": "O:/Foundups-Agent/.venv/Lib/site-packages"
+      },
+      "source_test_fingerprints": {
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py": "e1dacd5c120e15a5871f7cd47a4a4053faef2cdb1ff71b58cbd658fc64c76454",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py": "2df0227cdabeabdcfc1dea5a86a39fe9de1ef6712a39ede4a2b92ef2ca4dfcd9",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py": "38490fcf7f8397176bee9d43810faa7fd1fa2d6a8c38a5ab3423c4b1e554c204",
+        "modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py": "3395e20ce6dfce717993c42e846131e21a97b08fb80135d0f113e92569df7be4",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py": "9eb011e5993baf34bbdb5b3c44028ec932c852ab57c4451e2f8594f6b665f2a6",
+        "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "d47635a5ce75305e76bde383d80d11df1e2f12f09ade2ba4fed307453fdd4902",
+        "modules/communication/moltbot_bridge/tests/test_reddog_operational_memex_snapshot_supplier.py": "9c53a749c92ce354993454e7d1540cb4d6f807ea5e33554de25ec304541b9c02",
+        "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "026a4d5d3a8f4999fed00ff0a2d00eded388783c89fbc70cecdfb46549bc1a09",
+        "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_store.py": "409a23cb560f8232b07f026f5f25f1cd8e503fb28bd04315c1a56cf8a3e80735",
+        "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_publisher.py": "6af3dc5b061be16ceb29b91e97527ff89e3f85e97bf090d88f3fd46c3548f860",
+        "modules/communication/moltbot_bridge/src/reddog_resident_queue_pattern_memory_admission_handler.py": "37a5e238f9a9f263e4f2c82ec6a62ea85812f21a0cb2adfaf2c6e7034ca962eb",
+        "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "2997668e74677e2f8cd7a540669f083e5ac56cf0e00f7ee608d8f406812a4468",
+        "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_runtime_authority.py": "a71d7145191aeff9d10a80c8a8bd3e6c4656b05fa3839f9f34bbb831900886a6",
+        "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_queue_binding.py": "04a0fae427a56c16761e26e52b257c1665876ba9c6f8ecaac04d2fda0e910e8c",
+        "scripts/reddog_resident_architect_session_once.py": "6954987e40e6193bf83ae20125c119ee727646f710d695855ab1568b4cf3034d",
+        "scripts/reddog_backend_manifest.json": "1612eb5eaa0fd1e1ab91a3b948beb0b6f3ed26c263871f22c090d45909c47947",
+        "extensions/reddog/backend_compatibility_constants.js": "45fe0260d8a7b3fd5796ea39cc0bb4edcba5994333b015129915818230a07b8a",
+        "scripts/tests/test_generate_reddog_backend_manifest.py": "74e7a791a6827d3edb3e3182c68ebb6ddbdbe63162cd54f533c09d311d25d9f2"
+      },
+      "limits": [
+        "Focused 64 cases overlap the connected 181 and are not added to that total.",
+        "Actual disposable AtomicJson and SQLite PatternMemory stores; existing digest-signature doubles and injected memory failures, not production signing or current runtime admission.",
+        "Checks occur at activation and envelope reads. This is not a cross-store transaction, process/volume durability proof, or protection for every direct PatternMemory reader.",
+        "Current production publisher and reader factories remain unbound, so activation/consumable reads reject until independently admitted composition supplies the correct source. No source object or readiness marker itself confers permission."
+      ]
+    },
+    "reader_policy_decision": {
+      "state": "PENDING_012",
+      "choices": [
+        "original signing agent while authority is current",
+        "also separately authorized recovery agents"
+      ],
+      "reason": "The current readback plan requires independent permission but adjacent signing, secrets/get_secret and conversation-read contracts do not define outcome-record readership. No default or new permission is inferred.",
+      "effect": "Read authorization remains16/P0 pending scope clarification; test-only process qualification can proceed independently."
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-14T10:22:08.314859+00:00",
+      "origin_main": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+      "owned_head": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+      "open_pr_count": 96,
+      "relevant_open_prs": [],
+      "dependency_prs": [
+        {
+          "number": 1526,
+          "head": "9b17a56c61189bcca48bd130a41d9d3dcec35229"
+        },
+        {
+          "number": 1525,
+          "head": "b94bbda640fd50579301e8bd187269f4d20184cc"
+        }
+      ],
+      "alerts": [
+        {
+          "number": 286,
+          "state": "open",
+          "updated_at": "2026-08-02T02:42:30Z",
+          "ghsa_id": "GHSA-f4j7-r4q5-qw2c"
+        },
+        {
+          "number": 317,
+          "state": "open",
+          "updated_at": "2026-08-21T05:15:27Z",
+          "ghsa_id": "GHSA-vv7q-7jx5-f767"
+        },
+        {
+          "number": 322,
+          "state": "open",
+          "updated_at": "2026-08-24T20:27:57Z",
+          "ghsa_id": "GHSA-36p7-vc44-83pf"
+        }
+      ],
+      "selected_action": "R11-B-recoverable-acceptance-decision",
+      "selected_score": 16,
+      "selected_priority": "P0",
+      "selection_rationale": "The premature-exposure counterexample is closed locally by exact accepted-record checks. Fresh source/owner/dependency observation leaves a distinct R11-B gap: neither current factory binds an admitted memory participant and the handler still uses separate activate callbacks. Next establish recoverable acceptance through existing store/sink owners with fault boundaries before runtime activation. This 16/P0 eligible local contract work remains above AutoResearcher 13/P1; higher runtime gates and pending read policy are unchanged.",
+      "resolved_scope": "Local source guard rejects unbound/missing/changed/unreadable accepted memory before activation and envelope exposure. Publication staging, signatures, fresh revocation/expiry and replay owners remain separate.",
+      "required_next_step": "Inspect the existing two-phase promotion pattern and exact PatternMemory staging/read owners, define a recoverable decision for these actual participants, and reproduce failure boundaries without enabling the production sink.",
+      "reader_policy_question": "PENDING_012; no default or second question",
+      "dispatchable": false,
+      "reobserve_after_closure": true,
+      "ranked_actions": [
+        {
+          "task": "R09-R13 independent execution/verification/promotion/activation",
+          "complexity": 5,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 19,
+          "priority": "P0",
+          "state": "BLOCKED_RUNTIME_ADMISSION",
+          "next_executable_step": "Reconcile current independent admission evidence before any packet dispatch.",
+          "evidence": "ROADMAP.md",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "BLOCKED_RUNTIME_ADMISSION"
+        },
+        {
+          "task": "R03-R04 integrated FastMCP/MCP runtime migration",
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 18,
+          "priority": "P0",
+          "state": "BLOCKED_CURRENT_OWNER_RUNTIME_ADMISSION",
+          "next_executable_step": "Reconcile PR1526/1525 and launcher pins; qualify replacement runtime and owned live lifecycle before activation.",
+          "evidence": "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md#6-dependency-qualification--2026-09-14",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "BLOCKED_CURRENT_OWNER_RUNTIME_ADMISSION"
+        },
+        {
+          "task": "R06 admitted WRE/OpenClaw/Hermes worker",
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 18,
+          "priority": "P0",
+          "state": "CURRENT_ADMISSION_NOT_ESTABLISHED",
+          "next_executable_step": "Use changed signed work/model/runtime evidence; no repeated unconfigured provider probe.",
+          "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#worker-readiness-checkpoint--2026-09-13",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "CURRENT_ADMISSION_NOT_ESTABLISHED"
+        },
+        {
+          "task": "R03-R04 Chroma deployment qualification/mitigation",
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 5,
+          "total": 17,
+          "priority": "P0",
+          "state": "RUNTIME_OWNER_DEPENDENCY",
+          "next_executable_step": "Establish affected live deployment and mitigation authority; no patched version or exposure is inferred from package metadata.",
+          "evidence": "holo_index/core/holo_index.py",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "RUNTIME_OWNER_DEPENDENCY"
+        },
+        {
+          "task": "R11 independently authenticated response readback",
+          "complexity": 4,
+          "importance": 4,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0",
+          "state": "BLOCKED_READER_POLICY_DECISION",
+          "next_executable_step": "012 to resolve eligible reader class: original signing agent with current authority, or separately authorized recovery agents. Then author purpose-specific current authorization through existing owners; no historical or unrelated grant is sufficient.",
+          "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14",
+          "wsp97_action": "Correct previous broad ELIGIBLE_LOCAL_AUTHORING designation: discovery found adjacent signing/secret/conversation authority but no eligible-reader contract for outcomes. Read RPC stays rejected; question pending, no default inferred.",
+          "blocker_dependency": "BLOCKED_READER_POLICY_DECISION"
+        },
+        {
+          "task": "R03 current semantic retrieval",
+          "complexity": 3,
+          "importance": 5,
+          "deferability_urgency": 4,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0",
+          "state": "CURRENT_AUTHORITY_NOT_REQUALIFIED",
+          "next_executable_step": "Existing governed maintenance owner must authenticate exact current-source qualification; query cannot reindex.",
+          "evidence": "holo_index/CLI_REFERENCE.md",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "CURRENT_AUTHORITY_NOT_REQUALIFIED"
+        },
+        {
+          "task": "R11-B recoverable acceptance and memory visibility",
+          "complexity": 4,
+          "importance": 5,
+          "deferability_urgency": 3,
+          "impact": 4,
+          "total": 16,
+          "priority": "P0",
+          "state": "SELECTED_LOCAL_RECOVERABLE_ACCEPTANCE_DECISION",
+          "evidence": "modules/communication/moltbot_bridge/src/reddog_resident_queue_pattern_memory_admission_handler.py:_activate_published; docs/roadmaps/rsi_swarm_backlog.json:R11.authority_activation_plan.R11-B",
+          "blocker_dependency": "No blocker to isolated regression/contract work. Live sink activation still depends on separate R11-C/D admission and immutable publication/read integration.",
+          "wsp97_action": "Close exact-record visibility guard. Reuse the current store, staging sink, handler and adjacent two-phase pattern to establish recoverable agreement; current factories remain unbound and activation stays closed.",
+          "next_executable_step": "Inspect the existing two-phase promotion pattern and exact PatternMemory staging/read owners, define a recoverable decision for these actual participants, and reproduce failure boundaries without enabling the production sink.",
+          "score_rationale": "Complexity 4: coupled durable stores and retry. Importance 5: accepted-memory integrity is essential to retained RSI. Deferability 3: production remains closed, so no active incident is claimed. Impact 4: major correction across authority, retention and reader composition.",
+          "cost_context": "Bounded deterministic composition regression and owner-contract work; no external model inference or live product dispatch. Re-scope only if the reproduced failure demands it."
+        },
+        {
+          "task": "Protected eSingularity observation",
+          "complexity": 3,
+          "importance": 4,
+          "deferability_urgency": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1",
+          "state": "EXTERNAL_OWNER_PROGRESS_OBSERVED",
+          "next_executable_step": "PR1701 merged civic/mobile source changes. Preserve its 13 paths; deployment/remaining product issues are not established by that merge.",
+          "evidence": "ROADMAP.md",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "EXTERNAL_OWNER_PROGRESS_OBSERVED"
+        },
+        {
+          "task": "Existing AutoResearcher process/volume durability",
+          "complexity": 4,
+          "importance": 3,
+          "deferability_urgency": 3,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1",
+          "state": "ELIGIBLE_LATER_LOCAL_FIXTURES",
+          "next_executable_step": "Revisit existing disposable process/volume fixtures without product dispatch.",
+          "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#existing-component-coverage-and-rsi-insertion-points",
+          "wsp97_action": "Retain the existing owner and recorded partial/blocked scope; current source and unchanged dependencies do not authorize duplicate work or runtime activation.",
+          "blocker_dependency": "ELIGIBLE_LATER_LOCAL_FIXTURES"
+        }
+      ]
+    },
+    "remaining": [
+      "Recoverable acceptance decision and current participant binding through existing authority/PatternMemory owners.",
+      "Purpose-specific response-read policy and authorization remain pending separately.",
+      "R11-C-F independent runtime/verification/activation, full process/volume proof and measured retained benefit."
+    ],
+    "dispatchable": false,
+    "retained_improvement_proven": false
   }
 }

@@ -837,7 +837,13 @@
               "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py"
             ],
             "acceptance": "A failed memory operation cannot expose accepted evidence to the existing Memex authority/reader. Demonstrate recoverable durable agreement across both stores with real adapters and injected failures. Signer protected-use ordering is not proof of cross-store atomicity.",
-            "dispatchable": false
+            "dispatchable": false,
+            "local_progress": {
+              "status": "PARTIAL_EXACT_ACCEPTED_RECORD_VISIBILITY_GUARD_VERIFIED",
+              "evidence": "acceptance_visibility_continuation_20260914",
+              "next": "Re-observe recoverable acceptance decision and admitted participant binding 16/P0 through existing owners.",
+              "remaining": "Cross-store transaction/recovery, every memory consumer, runtime binding, activation and retained benefit remain unproven. No runtime admission."
+            }
           },
           {
             "id": "R11-C",
@@ -1816,12 +1822,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "process_race_continuation_20260914",
-    "base_commit": "35eb1e863b7ab73024f6d430f9b116bfeebd49d7",
-    "selected_action": "R11-B-recoverable-acceptance-visibility",
+    "section": "acceptance_visibility_continuation_20260914",
+    "base_commit": "916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7",
+    "selected_action": "R11-B-recoverable-acceptance-decision",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "process_race_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "acceptance_visibility_continuation_20260914.post_sprint_reobservation"
   }
 }

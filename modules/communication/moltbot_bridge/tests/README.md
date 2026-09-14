@@ -1,5 +1,21 @@
 # Tests - OpenClaw Bridge
 
+## Accepted-memory visibility
+
+The existing `test_foundup_memex_verified_outcome_runtime_authority.py` now binds
+its real authority store to the existing PatternMemory reader/seed fixture.
+Fifteen new cases cover the composed failed-write exposure, unbound and invalid
+sources, staging versus accepted records, changed/missing/unreadable content,
+post-commit uncertainty, exact retry and cancellation. Existing signature/replay
+assertions remain; five setup definitions now supply the required memory evidence.
+
+The 64-case suite is included in **181 connected passing tests**. **8 manifest tests
+and 15 fast groups** pass separately. Exact file selections, arguments, source and
+artifact fingerprints are in `acceptance_visibility_continuation_20260914` in the
+existing RSI baseline. Use its qualified Python, external temp/database roots and
+`REDDOG_TEST_SITE_PACKAGES` for the extension tier. These are disposable store tests
+with signature doubles; cross-store atomicity and runtime admission remain open.
+
 ## Competing full-response writer processes
 
 Reuse `test_root_record_process_race_preserves_one_durable_response` in the existing

@@ -1,5 +1,12 @@
 # moltbot_bridge Roadmap
 
+- PARTIAL R11-B ACCEPTANCE VISIBILITY: exact accepted-memory content is now
+  required before authority activation and envelope reads. The reproduced local
+  exposure guard passes 181 connected tests; production factories remain unbound.
+  Continue the [canonical R11-B decision](../../../docs/operations/RSI_SWARM_DISPATCH.md#accepted-memory-visibility-checkpoint--2026-09-14)
+  at 16/P0; cross-store recovery, current runtime composition and retained benefit
+  remain open. No new activation path is enabled.
+
 - COMPLETE AT EXACT MAIN `09e98fff` - PRE-OWNER EXACT-HEAD REPAIR ADMISSION: a
   zero-attempt `REPO_HEAD_MISMATCH` now reaches the existing post-merge task
   only after exact authority/no-effect validation and independent reproduction

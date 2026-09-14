@@ -10,6 +10,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -59,8 +60,12 @@ from modules.communication.moltbot_bridge.src.reddog_signed_receipt_chain import
     build_receipt_payload_for_signing,
 )
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    RedDogVerifiedPatternMemorySink,
     reddog_verified_pattern_memory_record_digest,
     reddog_verified_pattern_memory_record_id,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_verified_pattern_memory_sink import (
+    _seed_active,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PREFIX_RECEIPT,
@@ -155,7 +160,8 @@ def _store(tmp_path: Path) -> AuthorityRuntimeVerifiedOutcomeStore:
             tmp_path / "authority.json",
             allowed_root=tmp_path,
             repo_root=REPO_ROOT,
-        )
+        ),
+        accepted_outcome_source=RedDogVerifiedPatternMemorySink(tmp_path / "memory.db"),
     )
 
 
@@ -224,6 +230,7 @@ def _publish(
     )
     assert store.load_envelope(record_id) is None
     if activate:
+        _seed_active(tmp_path / "memory.db", record_id, record)
         assert publisher.activate(record_id) == record_id
     return store, record, verifier, held_out, _reference(record)
 
@@ -330,6 +337,7 @@ def test_publication_commit_reconciles_valid_competing_first_publisher(
         winner = _publisher(_store(tmp_path), now_epoch=NOW)
         assert winner.publish(**request) == request["record_id"]
         if activate_winner:
+            _seed_active(tmp_path / "memory.db", request["record_id"], request["record"])
             winner.activate(request["record_id"])
         winner_bytes.append((tmp_path / "authority.json").read_bytes())
         return commit(snapshot, expected_revision=expected_revision)
@@ -536,6 +544,7 @@ def test_staged_evidence_is_not_consumable_before_activation(tmp_path: Path) -> 
     with pytest.raises(ValueError, match="durable_source_missing"):
         _authority(store).issue(reference)
 
+    _seed_active(tmp_path / "memory.db", reference.record_id, _record_value)
     assert store.activate(reference.record_id) == reference.record_id
     assert _authority(store).issue(reference) is not None
 
@@ -749,6 +758,7 @@ def test_attacker_rehashed_record_and_envelope_cannot_reuse_signature(
         key_epoch=KEY_EPOCH,
     )
     store.publish(forged)
+    _seed_active(tmp_path / "memory.db", forged_id, forged_record)
     store.activate(forged_id)
 
     with pytest.raises(ValueError, match="signed_digest_mismatch"):
@@ -811,3 +821,107 @@ def test_signer_policy_binds_exact_canonical_payload() -> None:
             )
             is None
         )
+
+
+def test_failed_memory_activation_cannot_expose_durable_authority(tmp_path: Path) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_pattern_memory_admission_handler import _activate_published
+    from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_pattern_memory_admission_handler import _CanonicalPatternMemorySink
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=False)
+    sink = _CanonicalPatternMemorySink(activation_fail=True)
+    result = _activate_published(publisher=_publisher(store), sink=sink,
+        payload={}, record=record, record_id=reference.record_id)
+    assert result["pattern_memory_write_performed"] is False
+    assert store.load_envelope(reference.record_id) is None
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(store).issue(reference)
+    assert sink.records == []
+
+
+def test_unbound_acceptance_source_hides_preexisting_active_evidence(tmp_path: Path) -> None:
+    store, record, _verifier, _held_out, reference = _publish(tmp_path)
+    unbound = AuthorityRuntimeVerifiedOutcomeStore(store._store)
+    original = (tmp_path / "authority.json").read_bytes()
+    assert unbound.load_envelope(reference.record_id) is None
+    assert unbound.load_verified_outcome(reference.record_id) is None
+    with pytest.raises(ValueError, match="acceptance_source_required"):
+        unbound.activate(reference.record_id)
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(unbound).issue(reference)
+    assert unbound.load_publication(reference.record_id)["record"] == record
+    assert (tmp_path / "authority.json").read_bytes() == original
+
+
+@pytest.mark.parametrize("active", [False, True])
+@pytest.mark.parametrize("failure", ["missing", "changed", "invalid", "read_error"])
+def test_memory_disagreement_rejects_activation_and_readback(tmp_path, monkeypatch, active, failure):
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=active)
+    original = (tmp_path / "authority.json").read_bytes()
+    def load(_record_id):
+        assert _record_id == reference.record_id
+        if failure == "read_error":
+            raise OSError("fixture storage failure")
+        return {"missing": None, "changed": {**record, "unexpected": True}, "invalid": True}[failure]
+    monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=load))
+    with pytest.raises(ValueError, match="accepted_record_mismatch|acceptance_source_unavailable"):
+        store.activate(reference.record_id)
+    assert store.load_envelope(reference.record_id) is None
+    assert store.load_verified_outcome(reference.record_id) is None
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(store).issue(reference)
+    assert (tmp_path / "authority.json").read_bytes() == original
+
+
+def test_memory_staging_is_not_accepted_record_evidence(tmp_path: Path) -> None:
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=False)
+    assert store._accepted_outcome_source.stage_verified_outcome(record) == reference.record_id
+    original = (tmp_path / "authority.json").read_bytes()
+    with pytest.raises(ValueError, match="accepted_record_mismatch"):
+        store.activate(reference.record_id)
+    assert store.load_envelope(reference.record_id) is None
+    assert (tmp_path / "authority.json").read_bytes() == original
+    _seed_active(tmp_path / "memory.db", reference.record_id, record)
+    assert store.activate(reference.record_id) == reference.record_id
+    assert _store(tmp_path).load_verified_outcome(reference.record_id) == record
+
+
+def test_memory_loss_at_authority_commit_is_unacknowledged_and_retryable(tmp_path, monkeypatch):
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=False)
+    _seed_active(tmp_path / "memory.db", reference.record_id, record)
+    source, commit = store._accepted_outcome_source, store._store.commit
+    calls = []
+    def lose_memory_after_commit(*args, **kwargs):
+        value = commit(*args, **kwargs)
+        calls.append(True)
+        monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=lambda _id: None))
+        return value
+    monkeypatch.setattr(store._store, "commit", lose_memory_after_commit)
+    with pytest.raises(ValueError, match="accepted_record_mismatch"):
+        store.activate(reference.record_id)
+    assert calls == [True]
+    original = (tmp_path / "authority.json").read_bytes()
+    assert store.load_envelope(reference.record_id) is None
+    assert store.load_publication(reference.record_id)["record"] == record
+    monkeypatch.setattr(store, "_accepted_outcome_source", source)
+    assert store.activate(reference.record_id) == reference.record_id
+    assert store.load_verified_outcome(reference.record_id) == record
+    assert calls == [True] and (tmp_path / "authority.json").read_bytes() == original
+
+
+@pytest.mark.parametrize("source", [True, {"activation_ready": True}])
+def test_acceptance_readiness_marker_is_not_a_record_source(tmp_path, source):
+    store = _store(tmp_path)
+    with pytest.raises(ValueError, match="acceptance_source_invalid"):
+        AuthorityRuntimeVerifiedOutcomeStore(store._store, accepted_outcome_source=source)
+
+
+def test_acceptance_read_preserves_cancellation_without_mutation(tmp_path, monkeypatch):
+    store, _record_value, _verifier, _held_out, reference = _publish(tmp_path)
+    original = (tmp_path / "authority.json").read_bytes()
+    def cancelled(_record_id):
+        raise KeyboardInterrupt("fixture cancellation")
+    monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=cancelled))
+    with pytest.raises(KeyboardInterrupt):
+        store.activate(reference.record_id)
+    with pytest.raises(KeyboardInterrupt):
+        store.load_envelope(reference.record_id)
+    assert (tmp_path / "authority.json").read_bytes() == original

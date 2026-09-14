@@ -70,7 +70,7 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `process_race_continuation_20260914` in
+**Current selection evidence:** `acceptance_visibility_continuation_20260914` in
 the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
 referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
 existing continuation is updated to execute this rule; it grants no runtime authority.
@@ -323,6 +323,47 @@ and test state were separate from the active monorepo/product lanes. A later
 transfer experiment must bind both repository SHAs to the same admitted
 system-improvement lineage. Passing these project tests alone does not close
 R20/R23, authenticate a verifier or establish the PQN hypothesis.
+
+### Accepted-memory visibility checkpoint — 2026-09-14
+
+Source: `916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7`, merged PR
+[#1738](https://github.com/FOUNDUPS/Foundups-Agent/pull/1738); its main CI and
+CodeQL runs are verified successful. Fresh WSP 15/WSP 97 selected existing R11-B
+**4/5/3/4 = 16/P0** after current source, ownership and dependency reconciliation.
+
+The current composed regression failed: a real durable authority envelope became
+readable after an injected memory activation failure. The existing
+`AuthorityRuntimeVerifiedOutcomeStore` now accepts an explicitly configured
+`accepted_outcome_source`. Its existing `load_verified_outcome(record_id)` method
+must return the exact canonical accepted record before activation, after a new
+authority commit, and at every consumable envelope read. Missing, changed or
+unreadable records reject. Staged memory and readiness markers do not satisfy this
+check. Cancellation propagates; exact publication history remains retryable.
+
+The production publisher/reader factories remain unbound and therefore closed
+for activation/consumable reads. Supplying a source object grants no authority;
+current admitted composition must bind the correct participant. This guard is a
+prerequisite for recoverable acceptance, not a cross-store transaction or a change
+to every direct PatternMemory consumer. No production sink activation was added.
+
+Validation: **181 connected Python tests passed**, including 64 runtime-authority
+cases; **8 manifest tests** and **15 fast extension groups** also passed. One
+initial fast-tier invocation lacked the worktree dependency-root setting; the
+existing qualified environment resolved it without installation or a relaxed
+guard. The runtime file is 285 lines and its existing test suite is 927 lines.
+The 1,400-member manifest changes only this runtime hash and its two existing pins;
+registry 1,650/269 remains current. Fixtures use real disposable JSON/SQLite
+stores, digest-signature doubles and injected failures; no live admission proof.
+
+Fresh re-observation closes this exposure guard and retains **R11-B recoverable
+acceptance decision, 16/P0**, as the next eligible local work. The handler still
+has separate activation callbacks and no factory binds an admitted participant;
+reuse those owners and the existing adjacent two-phase publication pattern to
+establish fault/retry behavior before activation. Higher runtime dependencies,
+read-policy clarification and external product ownership remain separate. The
+complete ranked queue, commands, source fingerprints and limits are in
+`acceptance_visibility_continuation_20260914` in the existing baseline. All packets
+and substeps remain non-dispatchable; re-observe again after owned closure.
 
 ### Competing-process response checkpoint — 2026-09-14
 
@@ -795,8 +836,16 @@ absent, and raises on invalid durable state. It is not the consumable source.
 `SignedVerifiedOutcomeEvidencePublisher.publish()` acknowledges a byte-equivalent
 existing envelope after checking exact requested evidence, publisher identity,
 original issuance and signature. It does not re-sign, rewrite, renew or activate
-on retry. `load_envelope()`/`load_verified_outcome()` still hide staging, and
-runtime authority still checks current key, revocation and expiry.
+on retry. `load_envelope()`/`load_verified_outcome()` still hide staging.
+`AuthorityRuntimeVerifiedOutcomeStore(store, *, accepted_outcome_source=None)`
+requires its configured source's `load_verified_outcome(record_id)` to return the
+exact accepted canonical record at activation and envelope reads. A new activation
+checks again after commit; ACTIVE retries recheck the source. Missing, changed or
+unreadable memory rejects, including a historically ACTIVE envelope with no bound
+source. Publication staging/retry remains available unbound. The source must be
+bound by current admitted runtime composition; this interface supplies no permission
+or cross-store transaction. Runtime authority still checks current key, revocation
+and expiry.
 `validate_verified_outcome_signing_response(response, signing_input, *,
 signer_public_key, key_epoch, requester_principal_id, signature_verifier)` is the
 shared predicate in `foundup_memex_verified_outcome_signing.py`; the publisher's
