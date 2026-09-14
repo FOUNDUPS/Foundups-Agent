@@ -132,3 +132,99 @@ def test_media_profiles_are_registered_without_new_skill_entries() -> None:
     entry = registry["skills"]["yumori_contact_ledger"]
     assert set(entry["logical_roles"]) == set(packet["roles"])
     assert not (set(packet["roles"]) & set(registry["skills"]))
+
+
+def _gmail_entry_gate() -> str:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    start = skill.index("## Mandatory Gmail entry gate: SENT_FIRST_MOSHPIT_NOTIFY_0102")
+    return skill[start:skill.index("## Parent workflow", start)]
+
+
+def _gmail_regression_cases() -> dict[str, tuple[str, str, str]]:
+    cases = {}
+    for line in _gmail_entry_gate().splitlines():
+        if not line.startswith("| "):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) == 4 and cells[0] not in {"Case", "---"}:
+            assert cells[0] not in cases, "Duplicate regression case"
+            cases[cells[0]] = (cells[1], cells[2], cells[3])
+    return cases
+
+
+def test_gmail_entry_gate_runs_in_required_order_before_branching() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    gate = _gmail_entry_gate()
+    ordered_steps = (
+        "1. **Sent first.**",
+        "2. **Compare every relevant draft against Sent.**",
+        "3. **Check the Mosh Pit, not the ModLog.**",
+        "4. **Notify 0102 before status or action.**",
+    )
+    positions = [gate.index(step) for step in ordered_steps]
+    assert positions == sorted(positions)
+    parent = skill.split("## Parent workflow", 1)[1].split("## Conditional reply branches", 1)[0]
+    assert parent.lstrip().startswith("1. Run `SENT_FIRST_MOSHPIT_NOTIFY_0102`")
+    assert "applies to every invocation" in gate
+    assert "first mailbox search" in gate
+
+
+def test_gmail_entry_gate_preserves_earlier_send_with_distinct_newer_draft() -> None:
+    cases = _gmail_regression_cases()
+    evidence, result, action = cases["earlier_sent_later_draft"]
+    assert "Earlier VOTE NO request is SENT" in evidence
+    assert "distinct draft" in evidence
+    assert result.startswith("EARLIER_SENT_NEW_DRAFT;")
+    assert "The earlier VOTE NO message was sent; the later AI Koban update remains a separate draft." in result
+    assert "NOTIFY_0102" in action
+    assert "no automatic resend" in action
+    assert "A newer unsent update does not erase an earlier successful send." in _gmail_entry_gate()
+
+
+def test_gmail_entry_gate_repairs_missing_receipt_instead_of_resending() -> None:
+    cases = _gmail_regression_cases()
+    assert cases["sent_missing_moshpit"][1] == "SENT_LOG_GAP"
+    assert "REPAIR_LOG" in cases["sent_missing_moshpit"][2]
+    assert "never resend" in cases["sent_missing_moshpit"][2]
+    assert cases["moshpit_sent_no_gmail_receipt"][1] == "UNVERIFIED_RECORD"
+    assert "HOLD" in cases["moshpit_sent_no_gmail_receipt"][2]
+    gate = " ".join(_gmail_entry_gate().split())
+    assert "Fetch Gmail IDs referenced by the Mosh Pit that the initial search missed." in gate
+    assert "Repository ModLog entries record software work, not whether correspondence was sent." in gate
+
+
+def test_gmail_entry_gate_notification_has_evidence_and_no_implied_send_power() -> None:
+    gate = _gmail_entry_gate()
+    for field in (
+        "project_scope", "mailbox_scope", "checked_window", "as_of", "sent_search_complete",
+        "prior_send_state", "sent_message_ids", "sent_thread_ids", "sent_local_dates",
+        "actual_recipient_coverage", "draft_message_id", "draft_relation", "content_delta",
+        "moshpit_receipt_state", "moshpit_event_dates", "email_log_state", "conflicts",
+        "recommended_action", "send_hold", "notification_target",
+    ):
+        assert f"`{field}`" in gate, field
+    assert "notification_target` (0102)" in gate
+    normalized = " ".join(gate.split())
+    assert "The gate returns a reconciliation decision, not send authority." in normalized
+    assert "no email-to-self or separate agent is implied" in normalized
+    assert "without a configured, authorized channel and a receipt" in normalized
+
+
+def test_gmail_entry_gate_covers_uncertainty_duplicates_and_partial_recipients() -> None:
+    cases = _gmail_regression_cases()
+    assert set(cases) == {
+        "earlier_sent_later_draft", "exact_sent_copy_draft_remains", "sent_missing_moshpit",
+        "moshpit_sent_no_gmail_receipt", "incomplete_sent_search", "partial_recipient_coverage",
+        "draft_without_sent_match", "no_draft",
+    }
+    assert all("NOTIFY_0102" in case[2] for case in cases.values())
+    assert cases["incomplete_sent_search"][1] == "UNKNOWN"
+    assert "HOLD" in cases["incomplete_sent_search"][2]
+    assert "never claim unsent" in cases["incomplete_sent_search"][2]
+    assert cases["exact_sent_copy_draft_remains"][1] == "SAME_MESSAGE_SENT"
+    assert "preserve draft; no duplicate send" in cases["exact_sent_copy_draft_remains"][2]
+    assert cases["partial_recipient_coverage"][1] == "PARTIAL_RECIPIENT_COVERAGE"
+    assert "no blanket resend" in cases["partial_recipient_coverage"][2]
+    assert cases["draft_without_sent_match"][1] == "NO_SENT_MATCH_IN_CHECKED_SCOPE"
+    assert "await applicable send authorization" in cases["draft_without_sent_match"][2]
+    assert cases["no_draft"][1] == "NO_RELEVANT_DRAFT"
