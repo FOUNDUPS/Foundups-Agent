@@ -1,5 +1,10 @@
 ## 2026-09-14: Auto Researcher run directory and log ownership
 
+## 2026-09-14: Admission cache refresh and ownership
+
+- Existing suite extended with 10 cases; initial 8 regressions failed in 1.72s. Final focused subset 20 passed/one file-link skip; seven-file connected run 148 passed/four existing link skips in 6.18s, including 23 coordinator tests. Exact skipped IDs and commands are in `admission_cache_ownership_continuation_20260914`.
+- Manifest 8 passed in 79.17s; RedDog fast 15 groups passed in 8,671ms; registry current 1650/269. Original 23 function definitions and 32 assertions preserved. Real threads/files with injected scanner results; no model/provider or production-store execution. Same-mapping cache isolation is not report-file or full-orchestrator concurrency proof. WSP 00/15/22/50/60/62/84/95/97.
+
 ## 2026-09-14: PatternMemory transaction and thread ownership
 
 - Extended the existing suite with 17 cases; baseline: 13 failed / 4 passed / 24 deselected. SQLite commit-denial preserves a pending proposal for foreign read/commit/rollback/close checks; real worker threads cover wrong-thread rejection and independent lifetimes. Default database paths are redirected into disposable fixtures.

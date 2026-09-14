@@ -1851,12 +1851,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "pattern_memory_ownership_continuation_20260914",
-    "base_commit": "477cde2b80f2171e05343b398e4a73f7503a9735",
-    "selected_action": "WRE-admission-cache-ownership",
+    "section": "admission_cache_ownership_continuation_20260914",
+    "base_commit": "cfe510f4198de3d1339be6a124b2f529d3d99c79",
+    "selected_action": "WRE-scan-report-ownership",
     "status": "selected_after_local_validation_reobserve_before_execution",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "pattern_memory_ownership_continuation_20260914.post_sprint_reobservation"
+    "observation_path": "admission_cache_ownership_continuation_20260914.post_sprint_reobservation"
   }
 }

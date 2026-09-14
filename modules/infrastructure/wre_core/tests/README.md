@@ -1,5 +1,17 @@
 # wre_core Test Suite
 
+## Scanner cache ownership
+
+Reuse `test_wre_runtime_admission_truth.py`: the final connected run contains
+20 passed / one existing file-link skip. Ten added cases cover pending refresh,
+failed/cancelled refresh, severity changes, eviction, full and available pending
+capacity, lost reservation and coordinator policy readback. Controlled Events
+exercise concurrency with injected scan results and disposable files.
+The seven-file connected selection passes 148 with four existing link skips;
+exact IDs/commands are recorded in `admission_cache_ownership_continuation_20260914`.
+Use the isolation setup below. Cache tests do not prove report-file/process
+ownership or signed runtime admission.
+
 ## PatternMemory owner isolation
 
 Reuse `test_pattern_memory.py`: **41 tests pass**, including 17 added cases for

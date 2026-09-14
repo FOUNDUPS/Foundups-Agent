@@ -470,9 +470,9 @@ class WREMasterOrchestrator:
         )
         if result[0] is True:
             fingerprint = admitted_runtime_fingerprint(
-                skills_loader=self.skills_loader,
-                skill_name=skill_name,
+                skills_loader=self.skills_loader, skill_name=skill_name,
                 cache=self._wre_skill_scan_cache,
+                max_severity=self.wre_skill_scan_max_severity,
             )
             if fingerprint is None:
                 result = (False, "production Skillz admission receipt is unavailable")

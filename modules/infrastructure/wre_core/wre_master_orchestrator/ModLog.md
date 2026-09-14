@@ -1,5 +1,14 @@
 # WRE Master Orchestrator - Module Development Log
 
+## 2026-09-14: Preserve configured severity in cache readback
+
+- `_ensure_wre_skill_safety()` passes its configured severity to the existing
+  fingerprint reader; its function/class/file sizes do not grow. The root WRE
+  cache owns pending refresh and bounded retention. Root interface remains authoritative.
+- All 23 existing coordinator tests and the added root-suite policy-read case pass
+  within 148 connected passes/four existing link skips. Evidence:
+  `admission_cache_ownership_continuation_20260914`; WSP 22/50/62/95/97.
+
 <!-- Per WSP 22: Journal format - NEWEST entries at TOP, oldest at bottom -->
 
 ## External-Audit Repair: Compatibility Plugin Gate

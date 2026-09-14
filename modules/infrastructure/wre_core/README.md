@@ -58,6 +58,14 @@ SQLite rejects use on another thread. Read the [interface](INTERFACE.md#patternm
 for transaction and worker-handoff limits. The existing tests reproduce foreign
 commit/rollback/close interference and verify independent owner lifetimes.
 
+## Scanner cache ownership
+
+The existing admission cache now binds scan severity, invalidates old success
+while refreshing, and retains at most 128 entries per mapping. Pending capacity
+blocks safely; unrelated scans can run concurrently when space exists. Use the
+[existing owner APIs](INTERFACE.md#production-admission) for shared access.
+Report-file and per-execution ownership remain separate follow-ons.
+
 ## Execution-truth pipeline
 
 The 2026-09-14 retention continuation hardens the existing outcome recorder,
