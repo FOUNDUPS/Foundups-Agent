@@ -137,8 +137,7 @@ From `extensions/reddog`, `npm test` runs the bounded fast developer tier,
 `npm run test:release` runs the complete promotion closure. The default command
 does not silently start the multi-minute release audit and no dependency
 install is required.
-`npm run test:package` is the explicit local package-surface contract. The fast
-tier checks only static manifest, ignore-policy, and runtime-closure truth; the
+`npm run test:package` is the explicit local package-surface contract. On Windows, the fast and conversation tiers resolve the primary checkout's validated `.venv` through the linked worktree's Git common directory; explicit absolute O:/E: test-runtime overrides remain supported. The fast tier checks only static manifest, ignore-policy, and runtime-closure truth; the
 release owner executes the live VSCE listing through its existing worker plan.
 
 The exact release parallelism, timeout, termination, hostile-selector, and
@@ -748,7 +747,7 @@ against the exact post-merge HoloIndex maintenance runtime. The integrity gate
 remains fail-closed: RedDog accepts the backend only when all 1,000 generated
 runtime dependencies match their normalized SHA-256 digests.
 
-This local Cursor/VS Code extension opens an IDE-side thin-client webview for RedDog, the resident principal-scoped 0102 FoundUps architect identity.
+This local Cursor/VS Code extension opens an IDE-side thin-client webview for RedDog, the fast interaction and attention surface backed by the deeper, principal-scoped 0102 Digital Twin.
 
 Version 0.4.22 serializes the exact semantic buckets and metadata that RedDog may consume, binds that serialization's SHA-256 digest and item count into the canonical HoloIndex query receipt, and verifies both before semantic evidence enters prompt construction. Mutable outer `raw_result` data is no longer an evidence source. Missing, oversized, malformed, altered, or count-mismatched evidence fails closed before Fusion.
 

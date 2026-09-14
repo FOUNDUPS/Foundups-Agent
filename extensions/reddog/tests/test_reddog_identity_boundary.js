@@ -91,6 +91,7 @@ for (const stale of [
   'operator-facing identity/persona of the principal-scoped 0102',
   'RedDog/0102 is the continuous principal-scoped identity',
   'RedDog is the resident FoundUps architect identity',
+  'resident principal-scoped 0102 FoundUps architect identity',
   'reddog_is_0102_operational_state',
   '0102_operating_as_reddog'
 ]) {
