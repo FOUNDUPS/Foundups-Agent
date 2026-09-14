@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'YUMORI.meは、ハイパースケール時代に地域の建物・電力・知識・文化を守り、既存資産を地域向けCOG DCへ再生する市民運動です。目標1,000人。',
   keywords: ['YUMORI.me','湯守','Japan Hyperscaler Report','JHR','COG DC','地域コンピュート','ハイパースケーラー','印西','福井','eSingularity'],
   alternates: { canonical: 'https://yumori.me/' },
-  openGraph: { title: 'YUMORI.me — 私は湯守！', description: '知る。守る。つくる。湯守になる。', type: 'website', url: 'https://yumori.me/' },
+  openGraph: { title: 'YUMORI.me — 湯守になる。', description: '知る。守る。つくる。湯守になる。', type: 'website', url: 'https://yumori.me/' },
 };
 
 const join = { display:'inline-block', padding:'14px 22px', borderRadius:999, background:'#f4f1e8', color:'#0b0d0c', textDecoration:'none', fontWeight:850 } as const;
@@ -31,7 +31,7 @@ export default function YumoriPage() {
     <section className="yumori-hero" style={panel}>
       <p style={{ letterSpacing:'.18em', fontWeight:850 }}>YUMORI.me / 湯守</p>
       <h1 className="yumori-wordmark">YUMORI<span style={{opacity:.5}}>.me</span></h1>
-      <p style={{ fontSize:'clamp(1.6rem,4vw,3.5rem)', lineHeight:1.15, fontWeight:800, maxWidth:1000 }}>私は湯守！<br/><span lang="en">me GUARDIAN! = YUMORI.me</span></p>
+      <p style={{ fontSize:'clamp(1.6rem,4vw,3.5rem)', lineHeight:1.15, fontWeight:800, maxWidth:1000 }}>私は湯守。<br/><span>YUMORI.me</span></p>
       <figure className="yumori-hero-image"><img src="/yumori-compute-field.png" width="1672" height="941" alt="田園と地域の小規模AI計算基盤を組み合わせた再生構想" fetchPriority="high" /><figcaption>地域の未来を、地域でつくる。<span>再生構想のイメージ・実在の完成施設ではありません</span></figcaption></figure>
       <p style={body}>湯守は、本来、湯と場所を守る人。YUMORI.meは、その考えを地域へ広げます。AIインフラは必要です。しかし、土地・電力・知識・文化の未来を、地域の外だけで決めさせない。知る。守る。そして別の形をつくる。</p>
       <div style={{marginTop:30}}><Join /></div>
