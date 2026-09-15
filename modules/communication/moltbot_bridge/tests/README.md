@@ -1,5 +1,17 @@
 # Tests - OpenClaw Bridge
 
+## Explicit M2M profile admission
+
+Reuse the exact-schema, source-supply and model-runtime integration test owners.
+Keep absent-field controls, complete JSON type/identity preservation, resource
+bounds, literal/stringified path aliases and nested policy predicates. Direct
+source/queue/materializer tests reject before recursive traversal/publication.
+Signer fixtures compare the final full-order digest before tampering; do not
+rebind it afterward. 582 connected passes / three existing platform skips;
+exact commands and independent probes are in the backlog current observation.
+These tests qualify normalized mappings, not raw duplicate-key wire fidelity or
+live provider admission.
+
 ## Generation admission regressions
 
 Reuse `test_reddog_resident_queue_bounded_worker_model_authority.py` and its

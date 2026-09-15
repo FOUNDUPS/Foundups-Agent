@@ -72,8 +72,8 @@ independent retained learning or production RSI.
 
 **Current selection evidence:** `current_observation` in the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
 The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) is preserved at 55 entries near its local size budget; Git retains subsequent observation history.
-The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: codec merged; generation now checks a detached order against its signed full-order digest.
-Next: admitted normalization and provider-bound canonical bytes/context, 18/P0. No planning, codec or local test grants runtime authority.
+The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: registry candidate held in draft PR1751; explicit M2M profile carriage/signing locally qualified.
+Next: normalized producer and provider-bound prompt/context, 18/P0. Local validation grants no runtime authority.
 
 ## Production-line operating model
 

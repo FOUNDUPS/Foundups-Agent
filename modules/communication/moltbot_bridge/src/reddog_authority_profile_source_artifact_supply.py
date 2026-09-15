@@ -36,6 +36,7 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety im
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
     rehydrate_authority_profile_seed,
     rehydrate_authority_profile_source,
+    snapshot_authority_profile_m2m,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
@@ -146,6 +147,10 @@ def run_reddog_authority_profile_source_artifact_supply(
 
     root = Path(repo_root).resolve()
     seed = _mapping(authority_seed)
+    try:
+        seed = snapshot_authority_profile_m2m(seed)
+    except ValueError:
+        return _reject((AuthorityProfileSourceSupplyReason.TYPED_SCHEMA,))
     reasons: list[str] = []
     if not seed:
         reasons.append(AuthorityProfileSourceSupplyReason.SEED_MISSING)

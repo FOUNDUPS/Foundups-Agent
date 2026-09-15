@@ -8,6 +8,8 @@ import re
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
+
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
     authority_profile_malformed_digest_paths,
     authority_profile_runtime_unknown_field_paths,
@@ -230,6 +232,7 @@ def rehydrate_authority_profile_effect_scope(value: Any) -> dict[str, Any]:
 
     if type(value) is not dict:
         raise ValueError("authority_profile_not_plain_mapping")
+    value = snapshot_authority_profile_m2m(value)
     unsafe = tuple(_invalid_type_paths(value)) + tuple(
         field
         for field in _NO_EFFECT_FIELDS
@@ -254,6 +257,7 @@ def rehydrate_authority_profile_effect_scope(value: Any) -> dict[str, Any]:
 def _rehydrate(value: Any, *, mode: str) -> dict[str, Any]:
     if type(value) is not dict:
         raise ValueError("authority_profile_not_plain_mapping")
+    value = snapshot_authority_profile_m2m(value)
     if mode == "runtime":
         unknown = authority_profile_runtime_unknown_field_paths(value)
     else:
@@ -290,11 +294,16 @@ def _rehydrate(value: Any, *, mode: str) -> dict[str, Any]:
 def _invalid_type_paths(value: Any) -> tuple[str, ...]:
     found: list[str] = []
     for key, child in value.items():
-        _visit_type_paths(child, str(key), str(key), found)
+        if type(key) is not str:
+            found.append("$key")
+            continue
+        _visit_type_paths(child, key, key, found)
     return tuple(dict.fromkeys(found))
 
 
 def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> None:
+    if field == "m2m_envelope" and path == "bounded_worker_plan.m2m_envelope":
+        return  # Complete JSON and nested policies checked before generic traversal.
     if item is None:
         if not any(path.endswith(suffix) for suffix in _NULLABLE_RUNTIME_SUFFIXES):
             found.append(path)
@@ -371,9 +380,51 @@ def _is_mapping_list(value: Any) -> bool:
     )
 
 
+def snapshot_authority_profile_m2m(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Bound the one optional normalized packet before any profile traversal.
+
+    This is profile data validation, not prompt or execution admission. An absent
+    field retains legacy behavior; a present packet is detached without coercion.
+    Callers must still apply their complete profile, ASCII and authority gates.
+    """
+    plan = value.get("bounded_worker_plan")
+    if not isinstance(plan, Mapping) or "m2m_envelope" not in plan:
+        return value
+    path = "bounded_worker_plan.m2m_envelope"
+    try:
+        if type(plan) is not dict:
+            raise ValueError("plan_not_plain_mapping")
+        packet = decode_m2m_envelope(encode_m2m_envelope(plan["m2m_envelope"]))
+    except ValueError:
+        raise ValueError(f"authority_profile_invalid:{path}") from None
+    unsafe = list(authority_profile_secret_field_paths(packet))
+    unsafe.extend(authority_profile_malformed_digest_paths(packet))
+    _m2m_policy_paths(packet, "", unsafe)
+    if unsafe:
+        raise ValueError(f"authority_profile_invalid:{path}.{unsafe[0]}")
+    return {**value, "bounded_worker_plan": {**plan, "m2m_envelope": packet}}
+
+
+def _m2m_policy_paths(item: Any, path: str, found: list[str]) -> None:
+    if type(item) is dict:
+        for key, child in item.items():
+            child_path = f"{path}.{key}" if path else key
+            if key.startswith("no_") or key == "secret_env_refs":
+                policy_errors: list[str] = []
+                _visit_type_paths(child, "", key, policy_errors)
+                if policy_errors:
+                    found.append(child_path)
+            else:
+                _m2m_policy_paths(child, child_path, found)
+    elif type(item) is list:
+        for index, child in enumerate(item):
+            _m2m_policy_paths(child, f"{path}[{index}]", found)
+
+
 __all__ = [
     "rehydrate_authority_profile_effect_scope",
     "rehydrate_authority_profile_runtime",
     "rehydrate_authority_profile_seed",
     "rehydrate_authority_profile_source",
+    "snapshot_authority_profile_m2m",
 ]
