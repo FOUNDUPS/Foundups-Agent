@@ -118,5 +118,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add clerk-nextjs/package.json clerk-nextjs/package-lock.json modules/foundups/esingularity/frontend/package.json modules/foundups/esingularity/frontend/package-lock.json
           git commit -m 'fix(security): patch Next.js/sharp and align Cloudflare peers'
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer $GH_TOKEN" push origin "HEAD:refs/heads/$BRANCH"
+          GIT_AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$GIT_AUTH"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $GIT_AUTH" push origin "HEAD:refs/heads/$BRANCH"
           echo 'Prepared only; build/test/merge/deployment and Dependabot closure still require verification.'
