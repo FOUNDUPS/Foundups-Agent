@@ -58,12 +58,13 @@ Use **principal prose → Prometheus normalization → ORCH → WSP 99 M2M → a
 OpenClaw/Hermes workers** through existing WRE/AgentDB owners. This session's two
 read-only Codex audit lanes are coordinator assistance, not admitted build workers.
 
-**Current result: G0 controlled failure.** At main `582cbe82`, the 17 AmIBot
-documents are only in open [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751)
-at `c9a33a12435e836c454387b3d6b9199c259ba38c`; [issue #1750](https://github.com/FOUNDUPS/Foundups-Agent/issues/1750)
-is open. `modules/foundups/detect_ai/` is absent from this base. Retrieve that
-exact package and its intake/research/benchmark/safety contracts; do not copy a
-second module or treat the open package as merged authority. The package has
+**Current result: G0 controlled failure; registry prerequisite completed locally.**
+This revision continues the 17-document intake from [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751)
+at `c9a33a124` on main `67db49496`, adding the required declarative manifest,
+interface and single `detect_ai` registry entry. Follow [AmIBot's roadmap](modules/foundups/detect_ai/ROADMAP.md)
+and [validation](modules/foundups/detect_ai/docs/VALIDATION.md); preserve [issue #1750](https://github.com/FOUNDUPS/Foundups-Agent/issues/1750).
+AmIBot stays hidden, unbuilt and token-deferred. Registry membership is not WRE
+admission or public readiness. The package has
 13 planning orders and an acyclic DAG, but its five G1 writers have ten overlapping
 scope pairs. No AmIBot build order has been admitted or executed.
 
@@ -72,14 +73,14 @@ scope pairs. No AmIBot build order has been admitted or executed.
 | OpenClaw | Native Windows npm metadata: 2026.5.2. Governed WSL installation/service unverified today; September13 WSL 2026.7.1-2 is historical. |
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
 | Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
-| WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
+| WSP 109 intake | Existing eight preparation documents are preserved. Registry/manifest/interface now identify the hidden candidate; current normalizer does not automatically consume intake prose. |
 | WSP 99 handoff | Legacy emission rejects lossy invariants. The same module now has a bounded canonical JSON codec for already normalized identity, task ID and nested constraints. Producer/consumer handoff and admission remain unqualified. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
 | Execution valve | Current resolver explicitly returns `authoritative_use_lease=None`. Current trust/effect/model authority remains required. |
-| Skillz | Reuse existing intake and diligence skills. Intake registry/wardrobe eligibility and freshness remain unqualified. |
-| Validation | 174 runtime-contract tests pass. Route suites: 53 pass/11 fail; genesis: 27 pass/1 fail. Existing failures concern removed UI expectations and earlier commander authentication; preserve the gates. |
+| Skillz | Existing genesis-intake guidance applied; strict pure-envelope validation and duplicate-rejection control pass. Prototype skill runtime/wardrobe admission remains unqualified. |
+| Validation | Registration: 106 pass, five identical baseline namespace/README failures outside AmIBot. Earlier G0 runtime probes: 174 pass; route 53 pass/11 fail; genesis 27 pass/1 fail. No product acceptance follows. |
 | Documentation | Static Firebase `/f/**` owner exists; package claims do not establish the game. Root npm build merely echoes a message and is not frontend acceptance. |
 
 The smallest selected reusable repair was the legacy invariant guard in
@@ -88,7 +89,7 @@ The smallest selected reusable repair was the legacy invariant guard in
 cases. Independent review caught two representable-input regressions; after the
 author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedDog fast groups pass.
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
-This closes unsafe legacy emission, not the canonical envelope or the RSI system.
+This closed unsafe legacy emission; later layers below extend its evidence.
 
 The canonical JSON codec merged through PR #1757 as `15d653d1`; all ten
 exact-head checks and both merged-main workflows passed. Its 356 local cases
@@ -96,18 +97,18 @@ qualify normalized serialization, not principal-prose compilation or admission.
 Handoff review then exposed a use-time gap: generation did not compare the
 resolved complete work order with the signer's existing digest. The existing
 handler now checks a detached snapshot before model verification or generation.
-Fourteen new cases reproduced the gap; 115 connected local tests pass, including
-two signer-backed final-order changes. Independent evidence is in the backlog's
-`current_observation`; supplied-artifact behavior and provider code stay unchanged.
+Fourteen new cases reproduced the gap; 115 connected local tests and 12 extra
+independent probes pass. PR #1758 merged at `67db49496`; all ten exact-head checks
+and both main workflows passed. Supplied-artifact behavior and provider code stay unchanged.
 Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**.
 Next qualify admitted normalization and provider-bound canonical bytes, including
 redaction and output-contract context. Higher items remain blocked or separately
-owned. The 55-entry dated baseline and 26 packets stay unchanged; Git retains
+owned. The historical observation file and 26 packets stay unchanged; Git retains
 observation history. AutoResearcher reporting remains 15/P1. No dispatch is enabled.
 
 | Gate | Planned work and advancement rule |
 |---|---|
-| G0 serial | Reconcile PR/package, registry identity, typed genesis/Skillz, current runtime/update evidence, signed admission and route owner; validate complete M2M packets and disjoint scopes. |
+| G0 serial | Registry identity/metadata reconciled in existing PR1751. Qualify typed intake/Skillz, current runtime/update evidence, signed admission and route owner; validate complete M2M packets and disjoint scopes. |
 | G1 parallel | Transport/session, moderation, scoring/state, PWA and AI adapter lanes; separate test-fixture lane only where ownership is disjoint. Each depends on accepted G0 and has its own worktree, claim and verifier. |
 | G2 integration | Prove clean two-browser human↔human chat, authorization, disconnect/reconnect and moderation before game assignment. |
 | G3 game | Hidden randomized human↔AI/human↔human assignment, server-held truth, locked verdict/confidence, reveal and benchmark scoring. |
@@ -134,11 +135,12 @@ Record per-order provider/model, retries, failures, scopes, conflicts, independe
 rejections, 012/0102 interventions, tokens/cost when available, elapsed time, tests,
 integration/public defects, package changes and reusable repairs/accepted retention.
 Current counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
-lanes; 1 locally independently accepted shared repair; 0 WRE-retained improvements.
+lanes; 3 independently reviewed shared source changes; 0 WRE-retained improvements.
 No OpenClaw/Hermes provider invocation occurred; Codex token/cost metadata is unavailable.
 Unrun device/public tests and integration defects are unknown, not zero. Detailed
-evidence and the re-scored queue are in `amibot_g0_continuation_20260915` in the
-[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+G0 evidence remains in `amibot_g0_continuation_20260915` in the [dated observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+Current registration evidence and the re-scored queue are in the [existing backlog](docs/roadmaps/rsi_swarm_backlog.json),
+`current_observation`; prior source checkpoints remain in Git history.
 After every accepted or blocked layer, reapply WSP15/97 before the next assignment.
 
 ## Current delivery checkpoint — 2026-09-15

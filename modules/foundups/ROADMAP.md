@@ -11,6 +11,8 @@ implementation sources of truth:
 - `modules/foundups/agent/ROADMAP.md`
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`
 - `modules/foundups/social_twin/ROADMAP.md`
+- `modules/foundups/detect_ai/ROADMAP.md` - AmIBot: registered, hidden and specified;
+  autonomous-build G0 remains blocked on shared admission/runtime prerequisites.
 
 ## First-Principles Constraints
 1. No market claims without an auditable event/state trail.
