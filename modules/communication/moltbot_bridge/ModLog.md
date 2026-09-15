@@ -1,3 +1,9 @@
+## 2026-09-15: Resolve the RSI producer contract boundary
+
+- Closed PR #1763 at `da79e5efa` after ten exact-head checks; reviewed merge tree verified. A concurrent fetch ref update was reconciled by read-back without deleting locks or retrying the merge.
+- Two read-only audits (40/32 scoped file hashes, overlapping) found the missing plan at existing proposal admission, not a handoff field drop. Recorded a bounded 18/P0 source packet covering explicit typed input, old-receipt compatibility, scope validation and digest lineage. Startup remains unwired; no new input route or source/runtime change.
+- Reconciled the 17/P0 genesis alternative: declared intent lacks the future payload attachment; a NOT_READY-only assertion can accept commander denial. Existing roadmap/backlog holds the evidence and next work. No tests were rerun or acceptance criteria changed. WSP00/15/22/50/84/97/99.
+
 ## 2026-09-15: Explicit normalized seed input
 
 - Reused the supplier/bootstrap and existing typed profile/ASCII owners. Both entries snapshot before receipt work; the seed hash includes the plan, None preserves legacy bytes, empty mappings remain explicit, and nonce basis is unchanged. No new module, skill, parser, env route or runtime authority. WSP00/15/22/34/50/62/84/97/99.

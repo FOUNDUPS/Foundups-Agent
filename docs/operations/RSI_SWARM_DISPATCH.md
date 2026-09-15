@@ -73,7 +73,7 @@ independent retained learning or production RSI.
 **Current selection evidence:** `current_observation` in the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
 The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) is preserved near its size budget; its 55 top-level fields are not 55 observations. Git retains subsequent checkpoints.
 The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: registry candidate held in draft PR1751; explicit M2M profile/signing, provider fidelity and seed API input qualified locally; runtime admission remains open.
-Next: retrieve the actual producer/caller contract, 18/P0; main startup still omits the normalized plan. Seed-input 69/independent 320 checks pass; manifest/pins stay unchanged because these seed owners are outside its runtime closure. Full context/native-child fidelity and live admission remain separate.
+Next: explicit normalized plan admission in the existing architect proposal/receipt owners, 18/P0. PR1763 seed APIs are merged; two source audits confirm the producer field is missing. Preserve receipt compatibility, scope and digest lineage before startup forwarding. The backlog holds the bounded planning packet; no new ingress or runtime authority is granted.
 
 ## Production-line operating model
 
