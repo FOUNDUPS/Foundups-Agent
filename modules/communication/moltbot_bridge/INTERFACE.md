@@ -38,20 +38,20 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
-The resident handler's generation request compares a detached complete order
-with recorded signed `work_order_digest` using the existing canonical full-order
-digest. `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects missing/mismatched
-or unserializable content before model verification or issuance. This does not
-change the injected-artifact writer path or introduce optional M2M metadata.
+The generation handler checks a detached full order against signed `work_order_digest`.
+`FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects missing/changed/unserializable
+orders before verification or issuance. Injected artifacts retain their writer path.
+`snapshot_authority_profile_m2m(profile)` bounds and detaches optional `bounded_worker_plan.m2m_envelope` in four readers and
+source/direct materializers. Complete JSON and secret/digest/no-effect/env-reference
+rules survive; null/opaque/partial/oversized packets reject. Direct queue failures use
+`FAIL_PROFILE_M2M_ENVELOPE`; source supply uses its existing typed-schema reason.
+ASCII/path/model/effect/file-budget gates remain; no raw-wire/prose/provider fidelity or authority follows.
 
-`build_generation_dependencies(...)` injects exactly one provider and an explicit
-`available_model_providers` inventory. `generate_bounded_artifact_contents(...)`
-uses the AI Gateway to bind invocation, selection, current runtime verification,
-resolution receipt and endpoint sequence into one one-shot capability.
-`FoundupsFusionArtifactGenerationRunner`, `OpenClawGatewayArtifactGenerationRunner`
-and `HermesApiArtifactGenerationRunner` consume it once. Fusion requires
-OpenRouter; upstream workers preserve the provider/model pair. Default inventories
-are empty; fallback, environment names and worker identity cannot select models.
+`build_generation_dependencies(...)` supplies one provider plus explicit inventory.
+`generate_bounded_artifact_contents(...)` uses AI Gateway one-shot capabilities bound to
+invocation, selection, current runtime verification, resolution receipt and endpoints.
+Fusion requires OpenRouter; OpenClaw/Hermes preserve the resolved principal provider/model.
+Default inventories are empty; fallback, environment names and worker identity cannot select models.
 
 ## RedDog advisory bridge support
 

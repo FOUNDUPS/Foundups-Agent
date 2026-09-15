@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-15: Preserve explicit M2M envelopes in authority profiles
+
+- Extended five existing owners with one optional field and shared bounded codec preflight; no new module/skill/provider. Source supply and direct materializer checks now precede generic traversal. All existing outer authority/ASCII gates remain.
+- 582 connected passes / three existing platform skips. Independent review identified scoring-context predicate bypass and stringified root-key alias; repaired before promotion, with regression coverage. Final signing binds complete packet contents and rejects later action/type mutations.
+- Re-observed WSP15/97 keeps normalized producer/provider handoff at 18/P0. Evidence and exact validation are in `m2m_profile_admission_continuation_20260915` in the existing backlog. No live AmIBot job, runtime update or retained-learning claim. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: Bind generation to the admitted full work order
 
 - Reused the existing full-work-order digest in the resident generation handler. A detached snapshot must match signed admission before model verification/issuance/generation. Missing, changed and unserializable orders reject; injected artifacts retain their prior writer path.

@@ -7,6 +7,8 @@ import re
 
 import pytest
 
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
+
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
     authority_profile_runtime_unknown_field_paths,
 )
@@ -321,3 +323,162 @@ def test_live_canary_reader_rejects_typed_profile_confusion(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="authority_profile_invalid"):
         _runtime_authority_profile(tmp_path)
+
+
+def _m2m_envelope():
+    return {
+        "schema": "0102_m2m_v1", "ROLE": "worker", "ORIGIN": "internal_handoff",
+        "PRINCIPAL_REF": "012", "L": "A", "S": "modules/foundups/paccess_001/**",
+        "M": "exec", "T": "profile-admission-fixture", "A": "Validate the fixture",
+        "R": [15, 97, 99], "I": {"fixture": [True, 1, None, {"ratio": 0.5, "ready": False}]},
+        "O": ["test receipt"], "F": ["scope violation", "missing evidence"],
+    }
+
+
+_PROFILE_READERS = (
+    rehydrate_authority_profile_seed, rehydrate_authority_profile_source,
+    rehydrate_authority_profile_runtime, rehydrate_authority_profile_effect_scope,
+)
+
+
+@pytest.mark.parametrize("read", _PROFILE_READERS)
+@pytest.mark.parametrize("principal", (True, False))
+def test_profile_m2m_preserves_complete_detached_json(read, principal) -> None:
+    packet = _m2m_envelope()
+    if not principal:
+        packet.pop("PRINCIPAL_REF")
+    expected = encode_m2m_envelope(packet)
+    profile = {"bounded_worker_plan": {"operation": "create_foundup", "m2m_envelope": packet}}
+
+    restored = read(profile)
+
+    assert encode_m2m_envelope(restored["bounded_worker_plan"]["m2m_envelope"]) == expected
+    assert restored["bounded_worker_plan"]["operation"] == "create_foundup"
+    packet["I"]["fixture"].append("late caller change")
+    assert encode_m2m_envelope(restored["bounded_worker_plan"]["m2m_envelope"]) == expected
+
+
+def _invalid_m2m(case):
+    packet = _m2m_envelope()
+    if case == "null":
+        return None
+    if case == "wire_string":
+        return encode_m2m_envelope(packet)
+    if case == "partial":
+        packet.pop("A")
+    elif case == "unknown":
+        packet["extra"] = "not admitted"
+    elif case == "refs_bool":
+        packet["R"] = [True]
+    elif case == "tuple":
+        packet["I"]["fixture"] = (1, 2)
+    elif case == "nan":
+        packet["I"]["ratio"] = float("nan")
+    elif case == "cycle":
+        packet["I"]["cycle"] = packet
+    elif case == "depth":
+        nested = packet["I"]
+        for _ in range(1050):
+            nested["child"] = {}
+            nested = nested["child"]
+    elif case == "nodes":
+        packet["I"]["fixture"] = [0] * 4096
+    elif case == "bytes":
+        packet["I"]["text"] = "a" * 65536
+    elif case == "secret":
+        packet["I"]["no_secrets"] = True
+    elif case == "digest":
+        packet["I"]["source_digest"] = "not-a-digest"
+    elif case == "env_value":
+        packet["I"]["secret_env_refs"] = ["not-an-env-reference"]
+    elif case == "false_no_effect":
+        packet["I"]["no_repo_mutation_performed"] = False
+    return packet
+
+
+@pytest.mark.parametrize("read", _PROFILE_READERS)
+@pytest.mark.parametrize("case", (
+    "null", "wire_string", "partial", "unknown", "refs_bool", "tuple", "nan",
+    "cycle", "depth", "nodes", "bytes", "secret", "digest", "env_value", "false_no_effect",
+))
+def test_profile_m2m_rejects_invalid_envelope_before_recursive_checks(read, case) -> None:
+    profile = {"bounded_worker_plan": {"m2m_envelope": _invalid_m2m(case)}}
+    with pytest.raises(ValueError, match=r"authority_profile_invalid:bounded_worker_plan.m2m_envelope"):
+        read(profile)
+
+
+@pytest.mark.parametrize("read", _PROFILE_READERS)
+@pytest.mark.parametrize("dotted", (False, True))
+def test_profile_m2m_does_not_open_other_paths(read, dotted) -> None:
+    profile = (
+        {"bounded_worker_plan.m2m_envelope": _m2m_envelope()} if dotted else
+        {"bounded_worker_plan": {"domain_profile": {"m2m_envelope": _m2m_envelope()}}}
+    )
+    with pytest.raises(ValueError, match="authority_profile_invalid"):
+        read(profile)
+
+
+@pytest.mark.parametrize("case", ("null", "wire_string", "depth", "cycle", "bytes", "secret", "digest"))
+def test_profile_m2m_direct_materializers_reject_before_generic_traversal(case) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
+        _bounded_worker_plan_from_authority_profile, _materialize_work_orders_from_authority_profile,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
+        FAIL_PROFILE_M2M_ENVELOPE, plan_reddog_wre_queue_authority_request_dry_run,
+    )
+    profile = _profile()
+    profile["bounded_worker_plan"] = {"m2m_envelope": _invalid_m2m(case)}
+
+    direct = plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result={}, authority_profile=profile,
+    )
+    assert direct.accepted is False
+    assert FAIL_PROFILE_M2M_ENVELOPE in direct.rejection_reasons
+    assert direct.delegated_authority_request is None
+    orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(), authority_profile=profile,
+        requested_queue_item_id="queue-1", now_iso=NOW,
+    )
+    assert orders is None
+    assert reasons == ("work_order_materializer_authority:FAIL_PROFILE_M2M_ENVELOPE",)
+    plan, reasons = _bounded_worker_plan_from_authority_profile(
+        authority_profile=profile, allowed_paths=(), foundup_id="paccess_001",
+    )
+    assert plan == {}
+    assert reasons == ("work_order_materializer_bounded_worker_plan_invalid:m2m_envelope",)
+
+
+@pytest.mark.parametrize("read", _PROFILE_READERS)
+@pytest.mark.parametrize("base", (str, int))
+def test_profile_m2m_rejects_stringified_root_key_alias(read, base) -> None:
+    class Alias(base):
+        def __str__(self):
+            return "bounded_worker_plan"
+    key = Alias("unrelated") if base is str else Alias(1)
+    with pytest.raises(ValueError, match="authority_profile_invalid"):
+        read({key: {"m2m_envelope": {"arbitrary": None}}})
+
+
+@pytest.mark.parametrize("read", _PROFILE_READERS)
+@pytest.mark.parametrize("field, value, accepted", (
+    ("no_signing_performed", "false", False),
+    ("no_signing_performed", False, False),
+    ("no_signing_performed", True, True),
+    ("secret_env_refs", "not-an-env-list", False),
+    ("secret_env_refs", ["VALID_ENV"], True),
+    ("no_effect_authority", False, True),
+    ("no_signing_performed.scoring_rationale", "false", False),
+    ("no_signing_performed.scoring_rationale", True, True),
+    ("no_any.scoring_rationale.detail", "false", False),
+    ("no_any.scoring_rationale.detail", True, True),
+))
+def test_profile_m2m_nested_policy_has_same_predicates(read, field, value, accepted) -> None:
+    packet = _m2m_envelope()
+    packet["I"]["scoring_rationale"] = {field: value}
+    profile = {"bounded_worker_plan": {"m2m_envelope": packet}}
+    if accepted:
+        restored = read(profile)
+        assert encode_m2m_envelope(restored["bounded_worker_plan"]["m2m_envelope"]) == encode_m2m_envelope(packet)
+    else:
+        with pytest.raises(ValueError, match=r"authority_profile_invalid:bounded_worker_plan.m2m_envelope"):
+            read(profile)

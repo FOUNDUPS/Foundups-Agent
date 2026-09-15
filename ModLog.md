@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI explicit M2M profile admission
+
+- Reused the canonical codec and existing authority-profile/source/materializer owners to carry complete normalized work packets before final signing. Resource bounds precede nested checks; independent review repaired draft policy/alias bypasses.
+- 582 connected local passes / three platform skips; package and independent evidence live in the existing backlog current observation. No new module, skill, test file, provider route or live job. WSP15/97 retains the unblocked shared handoff parent at 18/P0.
+- AmIBot registration is prepared only on draft PR1751 (`04ef322f`); registry-triggered eSingularity CI remains with the protected project owner. Main still has no AmIBot module. Historical evidence bytes and 26 planning packets remain unchanged; earlier “55 observations” wording counted top-level fields, not observations. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: RSI signed work-order generation preflight
 
 - Independent M2M handoff review found a missing use-time full-order check. Extended the existing resident handler with the existing canonical digest and a detached snapshot; no new envelope field/provider/module/skill.

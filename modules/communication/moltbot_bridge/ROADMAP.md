@@ -1,5 +1,18 @@
 # moltbot_bridge Roadmap
 
+## RSI explicit M2M profile checkpoint — 2026-09-15
+
+The existing codec now qualifies one optional bounded-plan field before recursive
+profile traversal. Source publication, direct materialization and final signing
+preserve the packet; post-signature action/type tampering rejects before effects.
+582 connected tests pass with three existing platform skips. Independent review
+caught draft policy/alias bypasses; root-key and nested-policy regressions now cover them.
+
+WSP15/97 retains shared M2M handoff **18/P0**. Explicit producer carriage and
+canonical provider prompt/context binding are next; current model/runtime authority
+remains required. AmIBot registry candidate PR1751 stays draft with an external CI
+dependency. Root roadmap/backlog owns current state; earlier checkpoints below are historical.
+
 ## RSI generation admission checkpoint — 2026-09-15
 
 The existing generation handler now checks the complete resolved work order

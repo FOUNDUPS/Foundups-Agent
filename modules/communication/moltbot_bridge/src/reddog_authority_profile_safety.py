@@ -164,6 +164,7 @@ _SOURCE_AUTHORITY_BASIS_FIELDS = frozenset(
 )
 _BOUNDED_WORKER_PLAN_FIELDS = frozenset(
     {
+        "m2m_envelope",
         "domain_id",
         "domain_profile",
         "env_policy",

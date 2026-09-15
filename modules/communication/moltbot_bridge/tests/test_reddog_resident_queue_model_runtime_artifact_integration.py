@@ -1,9 +1,12 @@
 """Focused resident-queue model runtime artifact integration coverage."""
 
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
+
+from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
     discard_verified_runtime_binding_capability,
@@ -254,17 +257,47 @@ def test_promoted_queue_claim_materialization_reaches_exact_provider(
     )
 
 
-def _promoted_runtime_context(tmp_path, monkeypatch):
+def test_explicit_m2m_envelope_survives_promotion_and_final_signing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    envelope = _pilot_m2m_envelope()
+    expected_wire = encode_m2m_envelope(envelope)
+    context = _promoted_runtime_context(
+        tmp_path, monkeypatch, m2m_envelope=envelope,
+    )
+    for owner in ("source_profile", "authority_profile", "work_order"):
+        admitted = context[owner]["bounded_worker_plan"]["m2m_envelope"]
+        assert encode_m2m_envelope(admitted) == expected_wire
+    published = json.loads(
+        (tmp_path / "publication_runtime" / "authority_profile.json").read_text(encoding="utf-8")
+    )
+    assert encode_m2m_envelope(published["bounded_worker_plan"]["m2m_envelope"]) == expected_wire
+    work_order = context["work_order"]
+    stages = context["chain_store"].load()["stage_results"]
+    authority = stages["authority_runtime"]["authority_result"]["work_authority"]
+    assert authority["signature"]
+    assert authority["work_order_digest"] == canonical_full_work_order_digest(work_order)
+    without_envelope = deepcopy(work_order)
+    del without_envelope["bounded_worker_plan"]["m2m_envelope"]
+    assert (
+        authority["work_order_digest"]
+        != canonical_full_work_order_digest(without_envelope)
+    )
+
+
+def _promoted_runtime_context(tmp_path, monkeypatch, *, m2m_envelope=None):
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material(
         principal_key=PRINCIPAL_PRIVATE_KEY,
         reddog_key=REDDOG_PRIVATE_KEY,
     )
-    binding, snapshot, queue_item, worker_claim, work_order, authority_profile = (
+    binding, snapshot, queue_item, worker_claim, work_order, authority_profile, source_profile = (
         _promote_claimed_work_order(
             monkeypatch,
             tmp_path=tmp_path,
             repo=repo,
+            m2m_envelope=m2m_envelope,
         )
     )
     state = _write_runtime_json(tmp_path, "promoted_work_state.json", snapshot)
@@ -274,17 +307,19 @@ def _promoted_runtime_context(tmp_path, monkeypatch):
     paths = _runtime_paths(tmp_path, repo, work_order, principal_public)
     verifier = model_runtime_binding_test_verifier(binding)
     assert verifier is not None
+    generator = _FakeArtifactGenerator(content="# bootstrap must not generate\n")
     bootstrap = _run_bootstrap(
         repo,
         state,
         profile,
         paths,
         connector,
-        _FakeArtifactGenerator(content="# bootstrap must not generate\n"),
+        generator,
         requested_queue_item_id=queue_item["queue_item_id"],
         model_runtime_binding_verifier=verifier,
     )
     _assert_bootstrap_yielded_at_assurance(bootstrap, paths["chain"])
+    assert generator.calls == []
     chain_store = AtomicJsonResidentQueueChainResultsStore(
         paths["chain"], allowed_root=tmp_path
     )
@@ -294,24 +329,38 @@ def _promoted_runtime_context(tmp_path, monkeypatch):
         "queue_item": queue_item,
         "worker_claim": worker_claim,
         "work_order": work_order,
+        "source_profile": source_profile,
+        "authority_profile": authority_profile,
         "repo": repo,
         "chain_store": chain_store,
     }
 
 
-@pytest.mark.parametrize("changed_field", ["task_summary", "bounded_worker_plan"])
+@pytest.mark.parametrize("changed_field", [
+    "task_summary", "bounded_worker_plan", "m2m_action", "m2m_nested_type",
+])
 def test_signed_final_work_order_rejects_later_generation_changes(
     tmp_path, monkeypatch, changed_field,
 ):
-    context = _promoted_runtime_context(tmp_path, monkeypatch)
+    context = _promoted_runtime_context(
+        tmp_path, monkeypatch,
+        m2m_envelope=_pilot_m2m_envelope() if changed_field.startswith("m2m_") else None,
+    )
     work_order = context["work_order"]
     stages = context["chain_store"].load()["stage_results"]
     authority = stages["authority_runtime"]["authority_result"]["work_authority"]
     assert authority["work_order_digest"] == canonical_full_work_order_digest(work_order)
     if changed_field == "task_summary":
         work_order[changed_field] = "Changed after real test signing"
-    else:
+    elif changed_field == "bounded_worker_plan":
         work_order[changed_field]["unadmitted_metadata"] = {"A": "different action"}
+    elif changed_field == "m2m_action":
+        work_order["bounded_worker_plan"]["m2m_envelope"]["A"] = "Changed after signing"
+    else:
+        checks = work_order["bounded_worker_plan"]["m2m_envelope"]["I"]["context"]["checks"]
+        assert checks[0] is True
+        checks[0] = 1
+    assert authority["work_order_digest"] != canonical_full_work_order_digest(work_order)
     verifier = _RuntimeBindingVerifier()
     generator = _ArtifactGenerator()
 
@@ -374,6 +423,7 @@ def _promote_claimed_work_order(
     *,
     tmp_path: Path,
     repo: Path,
+    m2m_envelope=None,
 ):
     selection, binding = model_selection_and_runtime_binding_receipts(
         runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
@@ -410,14 +460,15 @@ def _promote_claimed_work_order(
         authority_profile_path=publication_runtime / "authority_profile.json",
         work_state_store=store,
     )
+    plan = _promoted_bounded_worker_plan()
+    if m2m_envelope is not None:
+        plan["m2m_envelope"] = m2m_envelope
+    source_profile = _promoted_authority_profile(plan, denied_paths=denied_paths)
     promoted, store = _promote(
         store=store,
         model_selection_receipt=selection,
         model_runtime_binding_receipt=binding,
-        authority_profile=_promoted_authority_profile(
-            _promoted_bounded_worker_plan(),
-            denied_paths=denied_paths,
-        ),
+        authority_profile=source_profile,
         architect_determination=determination,
         authority_profile_publication_publisher=publisher.publish,
     )
@@ -439,7 +490,29 @@ def _promote_claimed_work_order(
         snapshot["worker_claims"][0],
         work_orders[WORK_ORDER_ID],
         promoted.authority_profile,
+        source_profile,
     )
+
+
+def _pilot_m2m_envelope():
+    return decode_m2m_envelope(encode_m2m_envelope({
+        "schema": "0102_m2m_v1",
+        "ROLE": "worker",
+        "ORIGIN": "internal_handoff",
+        "PRINCIPAL_REF": "012",
+        "L": "A",
+        "S": PILOT_ARTIFACT,
+        "M": "exec",
+        "T": "RSI-M2M-PROFILE-ADMISSION-INTEGRATION",
+        "A": "Update only the admitted pilot README artifact.",
+        "R": [15, 50, 97, 99],
+        "I": {
+            "allowed_paths": [PILOT_ARTIFACT],
+            "context": {"checks": [True, 1, 1.0, None, {"note": "Preserve the artifact path."}]},
+        },
+        "O": [PILOT_ARTIFACT],
+        "F": ["scope_violation", "missing_artifact"],
+    }))
 
 
 def _promoted_bounded_worker_plan():

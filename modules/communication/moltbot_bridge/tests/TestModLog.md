@@ -1,5 +1,11 @@
 ## 2026-09-15: Local verdict handoff and policy drift
 
+## 2026-09-15: M2M profile and final-signing coverage
+
+- Initial new profile selection: 15 failures / 57 passes; valid packets failed admission and deep/cyclic inputs raised before bounds. Initial independent integration lane: three failures / seven legacy passes.
+- Added source publication/direct reader checks; independent review caught draft policy/alias bypasses and supplied counterexamples before correction. Final connected run: 582 passed / three platform skips (AF_UNIX unavailable; symlink privileges absent). No new test file or weakened assertion; complete signers are disposable fixtures.
+- External commands, XML, adversarial receipts and source hashes: `m2m_profile_admission_continuation_20260915` in the existing backlog. Resource/ASCII/secret/digest/no-effect rules and the existing 24,000-character generation budget stay unchanged. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: Full-work-order generation admission
 
 - Before: 14 failed/8 deselected. After: 115 connected passes. Eight changed-order variants, four missing/invalid digests and one cyclic order reject before verification or effects; a separate regression prevents nested request aliasing. Two signer-backed cases prove final plan coverage and reject post-signing edits.

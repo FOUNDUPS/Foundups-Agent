@@ -55,17 +55,19 @@ AmIBot is the low-consequence test fixture; the production system is the subject
 of the experiment. 012 supplies ideas and observes meaningful results through
 RedDog. 0102 coordinates research, prioritization, packaging, workers and review.
 Use **principal prose → Prometheus normalization → ORCH → WSP 99 M2M → admitted
-OpenClaw/Hermes workers** through existing WRE/AgentDB owners. This session's two
-read-only Codex audit lanes are coordinator assistance, not admitted build workers.
+OpenClaw/Hermes workers** through existing WRE/AgentDB owners. Local Codex author/test/review lanes are coordinator assistance, not admitted
+OpenClaw/Hermes build workers.
 
-**Current result: G0 controlled failure.** At main `582cbe82`, the 17 AmIBot
-documents are only in open [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751)
-at `c9a33a12435e836c454387b3d6b9199c259ba38c`; [issue #1750](https://github.com/FOUNDUPS/Foundups-Agent/issues/1750)
-is open. `modules/foundups/detect_ai/` is absent from this base. Retrieve that
-exact package and its intake/research/benchmark/safety contracts; do not copy a
-second module or treat the open package as merged authority. The package has
-13 planning orders and an acyclic DAG, but its five G1 writers have ten overlapping
-scope pairs. No AmIBot build order has been admitted or executed.
+**Current result: G0 controlled failure.** Registration is prepared on draft
+[PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
+one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
+manifest and the existing intake package. Main `67db4949` still has 17 registry
+entries and no `detect_ai` module. The candidate has 18; its public projection
+remains four entries. Existing eSingularity ticker assertions fail in its registry-
+triggered CI; keep the PR unmerged and the protected project with its owner.
+The 13 planning orders remain unchanged; five G1 writers still overlap in ten
+scope pairs. Requested `/f/amibot` needs the existing route owner to reconcile
+the canonical `/f/detect_ai` namespace. No build order or public route is activated.
 
 | Readiness gate | Current evidence / prerequisite |
 |---|---|
@@ -73,7 +75,7 @@ scope pairs. No AmIBot build order has been admitted or executed.
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
 | Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
 | WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
-| WSP 99 handoff | Legacy emission rejects lossy invariants. The same module now has a bounded canonical JSON codec for already normalized identity, task ID and nested constraints. Producer/consumer handoff and admission remain unqualified. |
+| WSP 99 handoff | Existing codec and exact optional profile field preserve normalized identity, task/action and nested constraints through local signing fixtures. Prose normalization and provider prompt/context transport remain unqualified. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
@@ -90,20 +92,18 @@ author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedD
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
 This closes unsafe legacy emission, not the canonical envelope or the RSI system.
 
-The canonical JSON codec merged through PR #1757 as `15d653d1`; all ten
-exact-head checks and both merged-main workflows passed. Its 356 local cases
-qualify normalized serialization, not principal-prose compilation or admission.
-Handoff review then exposed a use-time gap: generation did not compare the
-resolved complete work order with the signer's existing digest. The existing
-handler now checks a detached snapshot before model verification or generation.
-Fourteen new cases reproduced the gap; 115 connected local tests pass, including
-two signer-backed final-order changes. Independent evidence is in the backlog's
-`current_observation`; supplied-artifact behavior and provider code stay unchanged.
-Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**.
-Next qualify admitted normalization and provider-bound canonical bytes, including
-redaction and output-contract context. Higher items remain blocked or separately
-owned. The 55-entry dated baseline and 26 packets stay unchanged; Git retains
-observation history. AutoResearcher reporting remains 15/P1. No dispatch is enabled.
+The codec and signed-order generation guard are merged through PRs #1757/#1758.
+The next local layer admits only explicit `bounded_worker_plan.m2m_envelope`
+through existing profile/reader/materializer owners. Codec bounds precede nested
+traversal; secret/digest/ASCII and effect policies remain enforced. Final-order
+signing fixtures cover the entire packet and reject later action/type changes.
+Validation: **582 connected passes / three existing platform skips**. Independent
+review and exact package evidence are recorded in `current_observation` in the backlog.
+Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**:
+next bind canonical prompt/context through the existing capability to provider egress;
+explicit producer carriage remains separate. Higher work remains blocked or separately owned. The historical
+observation file and 26 planning packets are unchanged; its 55 top-level fields
+must not be described as 55 observations. AutoResearcher reporting remains 15/P1.
 
 | Gate | Planned work and advancement rule |
 |---|---|
