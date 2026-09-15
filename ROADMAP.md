@@ -97,22 +97,28 @@ The codec, signing, profile and provider layers are merged through PRs
 both main CI and CodeQL passed. Its local provider qualification remains 692 passes
 /one platform skip, with independent review and two inherited size failures.
 
-The current source layer adds explicit normalized `bounded_worker_plan` input to
-the existing seed supplier/bootstrap. Both detach and validate before receipt
-callbacks or reads; the seed receipt includes the full plan. None retains old
-seed bytes, empty mappings remain explicit, and nonce derivation is unchanged.
-69 focused tests pass; independent 320 includes 52 external cases, with overlapping
-counts. Eight manifest tests, 15 fast groups and registry 1650/269 pass. An initial
-packaging assumption was rejected: these seed owners are outside the current
-1,400-member backend closure, so its manifest/pins remain unchanged.
+PR #1763 merged the explicit seed-plan APIs as `da79e5efa` after ten passing
+exact-head checks. The merged tree matches the independently reviewed files plus
+reconciled main. Its 69 focused/320 independent checks overlap; they qualify the
+seed APIs, not a producer or live build. The backend manifest/pins remain unchanged.
 
-Re-observed WSP15/97 selects **the actual producer/caller contract, 18/P0**.
-`main.py:2844` still omits the normalized plan. Retrieve existing WSP99/Prometheus
-and queue/determination owners before wiring it; do not invent a new input channel
-or infer canonical instructions from task prose. Full context/native-child
-fidelity, live work/model/runtime admission and retained improvement remain open.
-Higher 19-20 work stays blocked or separately owned. The current backlog records
-the decision; historical baseline and all 26 planning packets remain unchanged.
+Two independent source audits now identify the producer gap. The existing
+architect model-output → `_Proposal` → executability receipt has no normalized
+worker-plan field. Determination/candidate identities already bind that receipt;
+the handoff retains its full validated payload. Arbitrary extra JSON is insufficient.
+
+**Next: explicit plan admission at the existing proposal boundary, 18/P0.**
+The current backlog contains the bounded source packet: preserve legacy receipt
+bytes, validate complete typed data and scope, bind the full plan to the receipt,
+and independently test compatibility/tamper behavior before startup forwarding.
+`main.py:2844` stays unwired. No new input channel or runtime authority follows.
+
+The adjacent 17/P0 genesis path also lacks declared typed ingress: actual
+`OpenClawIntent` has metadata, while an old fixture attaches a future payload.
+Its NOT_READY-only assertion can accept commander denial. Strengthen that evidence
+with the actual intent contract and queued job lineage before claiming integration.
+Higher 19-20 work remains blocked or separately owned. All 26 planning packets
+and the dated baseline remain unchanged; detailed audit receipts are in the backlog.
 
 | Gate | Planned work and advancement rule |
 |---|---|

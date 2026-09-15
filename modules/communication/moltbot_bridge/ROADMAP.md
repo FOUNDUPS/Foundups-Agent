@@ -1,5 +1,17 @@
 # moltbot_bridge Roadmap
 
+## RSI producer contract checkpoint — 2026-09-15
+
+PR #1763 merged as `da79e5efa` after ten passing checks. Two independent audits
+found no admitted normalized producer; the seed caller must remain unwired.
+Use the existing parsed architect model-output/proposal admission boundary for
+the next 18/P0 source slice. Preserve old receipt bytes and scope/type policies,
+then bind explicit plan data into the current receipt and downstream identities.
+The root backlog owns its bounded packet, compatibility gates and evidence.
+The 17/P0 genesis alternative also has an undeclared intake attachment and a weak
+fixture assertion; it is not an already wired substitute. No code/runtime change
+or new module/skill was made in this contract-trace checkpoint.
+
 ## RSI seed-input checkpoint — 2026-09-15
 
 Both existing seed APIs now detach explicit normalized plans before receipt work
