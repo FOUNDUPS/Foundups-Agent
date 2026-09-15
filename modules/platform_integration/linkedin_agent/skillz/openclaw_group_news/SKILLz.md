@@ -1,333 +1,83 @@
 ---
 name: openclaw_group_news
-description: Search and post OpenClaw news to LinkedIn OpenClaw Group
-version: 1.0.0
+description: Research and draft The Good, The Bad and The Ugly automation discussion for the OpenClaw LinkedIn group
+version: 1.1.0
 author: 0102
 agents: [qwen, selenium]
 dependencies: [web_search, anti_detection_poster]
 domain: platform_integration
 intent_type: CONTENT_GENERATION
 promotion_state: prototype
-rate_limit: 3_per_day
 linkedin_group: https://www.linkedin.com/groups/6729915/
 category: workflow
 evals: []
 ---
-# OpenClaw Group News Poster
 
-**Purpose**: Autonomous search, rate, and post OpenClaw news to LinkedIn group (1-3 times/day).
+# The Good, The Bad and The Ugly — Automation Discussion
 
-**Position in Flow**: This skill runs BEFORE comment engagement - it's the content seeding step.
+Reuse this existing skill for the group's automation/agent discussion. Research and draft within scope; publish only the exact approved content to the verified group. Invoking this skill never starts a scheduler or authorizes continuous posting.
 
----
+Read [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md). Membership belongs in [linkedin_group_moderation](../linkedin_group_moderation/SKILLz.md), with message-before-approval and separate human decisions. Do not run a welcome-and-approve cycle from this news job.
 
-## Workflow
+## Research
 
-### Automated Search Phase (via DuckDuckGo News API)
+1. Check urgent inbox items and moderation queues before optional content seeding. Read recent group discussions, existing drafts and scheduled/published items to avoid duplicate topics and links.
+2. Choose one concrete automation theme: delegated work, persistent agents, memory, skill reuse, observability, permission boundaries, recovery, reliability or cost. Grok Bot, OpenClaw, Hermes and other systems are candidates, not a fixed mandatory brand list.
+3. Search current sources and read original documentation, release notes, repositories or primary incident reports. Record publication, event and retrieval dates separately. Headlines and search snippets are leads only.
+4. Label each claim as vendor-described, independently tested, personally observed or inferred. Do not repeat vendor claims of unique capability, security or AGI as established fact.
+5. Verify any incident's affected product/version, conditions and remediation. If evidence is missing, explain a hypothetical risk without attributing it to a named vendor.
+6. Retrieve current Foundups work before comparison. Separate tested implementation, prototype, proposed design and authored hypothesis. A skill document does not prove a running agent or learned model weights.
+7. Read assets and project documentation before any image request. Reuse factual project imagery; do not invent a facility or product screenshot. No image is required for a useful discussion.
 
-The executor automatically searches these queries (with 2-4s delays to avoid rate limits):
-```
-News API queries:
-1. "OpenClaw AI agent"
-2. "OpenClaw framework"
-3. "lobster.cash Crossmint"
-4. "OpenClaw OpenAI nonprofit"
-5. "OpenClaw wallet"
-6. "IronClaw OpenClaw"
+## Draft
 
-Web search fallback (if news insufficient):
-7. "OpenClaw"
-8. "OpenClaw AI framework"
-9. "Peeka AI agent"
-```
+Normally 180-300 words, one paragraph break, the group's established language and 2-4 relevant hashtags. Check actual composer constraints rather than treating cached limits as platform guarantees.
 
-**Ecosystem Terms Recognized** (0.95 relevance score):
-- `lobster.cash` - Payment standard for OpenClaw agents
-- `Crossmint` - Infrastructure partner
-- `Peeka` - New AI agent in ecosystem
+- **Hook:** one builder-focused question.
+- **Good:** one or two sourced capabilities and the work they could improve.
+- **Bad:** practical limitations or open questions, explicitly framed as analysis when not measured.
+- **Ugly:** the consequences of unverified broad authority; use verified incidents or clearly hypothetical examples, not sensational accusations.
+- **Hypothesis:** attribute 012's “AGI may depend on schema/orchestration, not only model capability” thesis. Ask what would support or falsify it; do not equate automation, AGI and sentience.
+- **Question:** invite one concrete account. Optional answer scaffold: tool/version; task; result; human interventions; lesson.
+- **Sources:** two or three direct links adjacent to the claims.
+- **Voice:** 0102 proxy voice and `— 0102🦞`, unless 012 explicitly requests direct human voice.
 
-**Search Behavior**:
-- Uses DuckDuckGo news API (timelimit: last month)
-- Rate limit delays: 2-4 seconds between queries
-- Deduplicates URLs across queries
-- Falls back to web search if news insufficient
-- Returns max 10 items for rating
+Keep a Foundups/eSingularity CTA optional and directly relevant. Do not make joining, replying or agreeing contingent on promotion. Resolve intended LinkedIn entity mentions through verified autocomplete, never plain-text handles.
 
-### Manual Research Phase (if automated search insufficient)
+## Review and execution
 
-```
-1. OPEN separate research tab (keep LinkedIn group tab untouched)
-     ↓
-2. GOOGLE SEARCH for topic (e.g., "lobster.cash Crossmint OpenClaw latest news")
-     ↓
-3. SCAN search results for headlines, sources, dates
-     ↓
-4. CLICK best article (prioritize major tech/crypto news sites)
-     ↓
-5. READ full article with get_page_text (not screenshots)
-     ↓
-6. TAKE NOTES on key points:
-   - What happened?
-   - Who's involved?
-   - Why does it matter to OpenClaw users?
-   - What's the date?
-   - Save article URL for link
-     ↓
-7. CHECK second source if needed (don't over-research - one solid article is enough)
-```
+Use `DRAFT -> REVIEW -> APPROVED -> POSTED -> MONITORED`. Show exact draft, destination, APS components, sources and uncertainties. A relevance score is not authority. A request for a skill, research or a topic does not approve publication.
 
-### Posting Phase
+After exact approval: verify account/group, inspect live composer, preserve formatting, check resolved links/mentions and deduplicate again. Submit once. Verify the rendered post and capture its actual permalink. An empty editor or simulated success is not publication evidence.
 
-```
-8. SWITCH to LinkedIn group tab
-     ↓
-9. CLICK "Start a post in this group"
-     ↓
-10. TYPE post in editor:
-    🦞 emoji branding (OpenClaw group style)
-    Clear title/headline
-    Concise summary (main points relevant to group)
-    Link to full article at bottom
-     ↓
-11. SCROLL UP in editor to verify post looks right
-     ↓
-12. CLICK Post button (autonomous posting authorized)
-     ↓
-13. LOG to agents_social_posts (WSP 78)
-```
+## Cadence and follow-up
 
-### LinkedIn Group Membership DAE (Welcome + Approve)
+Propose one substantive weekly discussion as an editorial rhythm, not a quota. Skip or choose a clearly labeled evergreen question when no useful current news exists. Additional urgent posts need separate approval.
 
-This skill now includes a second flow for `https://www.linkedin.com/groups/6729915/manage/membership/requested/`:
+Never assume group posts share article/newsletter scheduling support. Inspect the actual destination; obtain explicit timing/timezone and use only an authorized, verified scheduler. This skill does not create a recurring task by itself.
 
-```
-1. OPEN membership request queue
-     ->
-2. READ first pending member row (name/headline/profile/image)
-     ->
-3. DETECT language from script (ko/ja/zh/sr/ar/en fallback)
-     ->
-4. DRAFT welcome message:
-   - template fallback (localized)
-   - optional Qwen3 via IronClaw gateway (`/v1/chat/completions`)
-   - set `LINKEDIN_GROUP_WELCOME_MODEL=local/qwen3-4b` (or another model id)
-   - disable drafting with `LINKEDIN_GROUP_WELCOME_USE_IRONCLAW=0`
-     ->
-5. CLICK row overflow ("...") -> select Message
-   - keyword match across locales
-   - fallback to second menu item (Message)
-     ->
-6. TYPE welcome message in overlay (`.msg-form__contenteditable`)
-   CLICK Send (`.msg-form__send-button`)
-     ->
-7. CLICK Approve on request row
-     ->
-8. LOG to `agents_social_group_actions` (WSP 78 `agents_*` namespace)
-```
+On a later authorized review, read responses and draft evidence-backed follow-ups. Do not auto-like, DM commenters or repetitively prompt silent members. Save generalized lessons, not private member data, to reusable skills.
 
-**Dry-run watch mode**:
-- No approval clicks.
-- Captures message drafts and optional screenshots so 012 can observe behavior before enabling live mode.
+## Runtime status
 
-**CLI entry**:
-- Social Media DAE -> `LinkedIn Group Membership DAE (Welcome + Approve)`
+Prototype instruction contract only. Legacy executor contains live posting and membership modes and historical daily rate limits; those are not authorization. Do not invoke unattended mutation until exact-action approval, persistent deduplication and verification are enforced and tested. Work browser tasks use the advertised browser skill, not repository anti-detection helpers.
 
-**Live policy toggles**:
-- `welcome + approve`
-- `approve only`
-- `welcome only`
-- `full cycle` (process queue, then post OpenClaw news)
+## Evaluation cases
 
-### Key Tips
-
-- **Do ALL research before touching LinkedIn tab** — switching back and forth is inefficient
-- **Keep posts concise and group-relevant** — summaries, not copy-paste
-- **Always use 🦞 lobster emojis** to match the group's branding
-- **Article link auto-generates preview card** — looks great in LinkedIn
-- **Autonomous posting authorized** — no 012 confirmation required for group posts
-
----
-
-## News Relevance Rating
-
-Simple 4-dimension scoring (lighter than WSP 15 MPS):
-
-| Dimension | Weight | Score Range | Description |
-|-----------|--------|-------------|-------------|
-| **Recency** | 0.3 | 0.0-1.0 | Published < 24h = 1.0, < 7d = 0.5, > 7d = 0.0 |
-| **Source Authority** | 0.2 | 0.0-1.0 | Major tech outlet = 1.0, blog = 0.5, unknown = 0.2 |
-| **OpenClaw Relevance** | 0.4 | 0.0-1.0 | Direct mention = 1.0, related topic = 0.5 |
-| **Engagement Potential** | 0.1 | 0.0-1.0 | Breaking news = 1.0, update = 0.5, routine = 0.2 |
-
-**Formula**: `score = (recency * 0.3) + (authority * 0.2) + (relevance * 0.4) + (engagement * 0.1)`
-
-**Threshold**: Only post if `score >= 0.6`
-
----
-
-## LinkedIn Group DOM Selectors
-
-**Group URL**: `https://www.linkedin.com/groups/6729915/`
-
-### Start Post Button
-```
-Selector: button.share-box-feed-entry__trigger (legacy)
-Fallback: button[class*='hare-box-feed-entry'] (LinkedIn redesign)
-Fallback: button[class*='share-box']
-Position: top=268px, left=72px, width=439px, height=48px
-Note: LinkedIn may use hare-box-v2__modal, hare-creation-.tate for modal
-```
-
-### Post Textarea
-```
-Selector: div.ql-editor[data-placeholder]
-Fallback: div[contenteditable="true"]
-```
-
-### Post Submit Button
-```
-Selector: button.share-actions__primary-action (text="Post")
-Fallback: button[id^="ember"][class*="primary-action"]
-Position: top=349px, left=452px, width=63px, height=32px
-```
-
----
-
-## Post Template
-
-```
-{headline}
-
-{summary}
-
-Source: {url}
-
-#OpenClaw #AI #Agents
-```
-
-**Character Limit**: 3000 (LinkedIn standard)
-
----
-
-## Rate Limiting
-
-| Constraint | Value | Implementation |
-|------------|-------|----------------|
-| Max posts/day | 3 | Check `agents_social_posts` table |
-| Min interval | 4 hours | Time-based cooldown |
-| Duplicate check | 7 days | Hash URL, check history |
-
----
-
-## Database Integration (WSP 78)
-
-All posts logged to unified database:
-
-```sql
--- agents_social_posts table
-INSERT INTO agents_social_posts (
-    id, platform, group_id, content, source_url,
-    relevance_score, posted_at, post_status
-) VALUES (?, 'linkedin', '6729915', ?, ?, ?, datetime('now'), 'pending');
-```
-
----
-
-## Executor Interface
-
-```python
-from modules.platform_integration.linkedin_agent.skillz.openclaw_group_news import (
-    search_openclaw_news,
-    rate_news_relevance,
-    post_to_group
-)
-
-# Search
-news_items = search_openclaw_news(max_results=10)
-
-# Rate and filter
-rated = [(item, rate_news_relevance(item)) for item in news_items]
-filtered = [(item, score) for item, score in rated if score >= 0.6]
-
-# Post top item (if within rate limit)
-if filtered and can_post_today():
-    top_item, score = max(filtered, key=lambda x: x[1])
-    post_to_group(top_item)
-```
-
----
-
-## Timing Strategy
-
-**No LinkedIn scheduling API** - must run on timer:
-
-| Option | Implementation | Pros | Cons |
-|--------|----------------|------|------|
-| **Cron job** | Run at 9am, 1pm, 5pm PST | Simple | Fixed times |
-| **Random window** | Run 1-3x within 8am-6pm | Human-like | More complex |
-| **Event-driven** | Post when major news found | Timely | Unpredictable |
-
-**Recommendation**: Random window with 4-hour minimum spacing.
-
----
-
-## WSP Compliance
-
-- **WSP 78**: All posts logged to unified `agents_*` namespace
-- **WSP 42**: LinkedIn platform integration standards
-- **WSP 50**: Pre-action verification (check rate limits)
-- **WSP 96**: Skill definition per WRE protocol
-
----
+- New Grok Bot claim: verify original source/date, attribute capabilities, no assumed AGI.
+- No fresh news: skip or clearly label evergreen discussion; fabricate nothing.
+- Private conversation as example: abstract it, omit identifiers and private content.
+- Matching draft/post exists: inspect and update only within authority, do not duplicate.
+- Unverified exploit: omit vendor accusation; discuss the general permission boundary.
+- Approved post interrupted after submission: inspect current group before retry.
+- Newsletter schedule exists: do not infer group scheduling availability.
 
 ## Changelog
 
-### v1.0.1 (2026-02-23)
-- Added hare-box fallback selectors (LinkedIn redesign)
-- Added search terms: OpenClaw OpenAI nonprofit, OpenClaw wallet, IronClaw OpenClaw
-- Fixed executor: create_driver → setup_driver (AntiDetectionLinkedIn API)
-- Audit: docs/LINKEDIN_OPENCLAW_GROUP_NEWS_AUDIT_20260223.md
+### 1.1.0 — 2026-09-15
 
-### v1.0.0 (2026-02-19)
-- Initial skill creation
-- News search via web_search MCP
-- 4-dimension relevance rating
-- LinkedIn group DOM selectors captured
-- Rate limiting: 3 posts/day, 4-hour minimum
+Reused existing skill for the Good/Bad/Ugly automation series. Replaced autonomous daily posting and embedded welcome-and-approve flow with evidence-led drafting, exact approval, weekly cadence proposal and separate moderation ownership. Removed stale live queues and fixed DOM coordinates from instructions. No executor change or new background job.
 
----
+### 1.0.0 / 1.0.1 — 2026-02-19 / 2026-02-23
 
-**Skill Status**: PROTOTYPE
-
-## Current Queue
-
-| Topic | Research Status | Post Status | Notes |
-|-------|-----------------|-------------|-------|
-| SecurityWeek OpenClaw | Complete | **POSTED** | Live in group |
-| Lobster.cash/Crossmint | Started | Pending | Crossmint launched lobster.cash as open payment standard for OpenClaw agents (~6 days ago). Need full article read + post composition |
-
-**Next Steps**:
-1. Complete Lobster.cash post (read full article, compose, confirm with 012, post)
-2. Test news search automation with web_search MCP
-3. Validate DOM selectors reliability
-4. Add to LinkedIn automation pre-flow cron
-
----
-
-## CLI Integration
-
-Access via main.py menu:
-```
-Option 4: Social Media DAE (012 Digital Twin)
-  └── Option 2: LinkedIn Group Post (OpenClaw News)
-  └── Option 3: Test Submenu (Full Action Logging)
-```
-
-Test submenu provides:
-- News relevance rating test
-- Rate limiting test
-- Database connection test
-- Full flow dry run
-- Pytest suite execution
-
-All tests generate copy/paste-friendly logs for troubleshooting.
+Original OpenClaw news search, posting and membership prototype. Its standing-authority instructions are superseded by this contract.

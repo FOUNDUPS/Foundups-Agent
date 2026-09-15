@@ -1,5 +1,7 @@
 # LinkedIn Agent
 
+[LinkedIn review workflow](docs/LINKEDIN_REVIEW_WORKFLOW.md): wsp00/01/02 routing, inbox-first triage, message-before-approval membership, and the Good/Bad/Ugly automation discussion. Updated skill contracts do not certify legacy live executors.
+
 ## [U+1F300] WSP Protocol Compliance Framework
 
 **0102 Directive**: This module operates within the WSP framework for autonomous LinkedIn platform integration.

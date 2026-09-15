@@ -1,5 +1,12 @@
 ﻿# LinkedIn Agent - Module Change Log
 
+## 2026-09-15 — Message-first membership and automation discussion skills
+
+- Added `docs/LINKEDIN_REVIEW_WORKFLOW.md` as a compact operating-source and ownership index, linked from README and existing skill entrypoints.
+- Updated existing moderation skill to require prior-thread/profile research, message verification, separate human membership decisions and automatic-approval preflight. Removed photo/title shortcuts, fear-based outreach and automatic connections.
+- Reused `openclaw_group_news` for researched Good/Bad/Ugly automation discussion, sourced vendor claims, a testable AGI/schema hypothesis and exact post approval. Removed standing daily-post authorization and stale embedded queues/selectors.
+- Private member/message content excluded. Documentation only; legacy executors not certified or launched, no scheduler created. Validation covers skill metadata and local links, not live runtime safety.
+
 ## Latest Changes
 
 ### V074 - Qwen3 AI-Powered Profile Evaluation (WSP 77 Phase 2)
