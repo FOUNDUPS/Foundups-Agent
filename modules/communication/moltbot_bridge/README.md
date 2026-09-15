@@ -52,17 +52,17 @@ authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact model routing
 
-Generation compares a detached full order with its signed digest before model admission.
-Explicit `bounded_worker_plan.m2m_envelope` survives profile validation and signing.
-Canonical requests use detached plain JSON before authority consumption; rejection
-consumes the one-use handle. The exact codec prompt and separate artifact context
-share the existing 24,000-character budget. Legacy prompt/context bytes remain.
-
-Sealed `prompt_schema`/`m2m_prompt_digest` bind supplied and redacted instructions
-before Fusion credentials, OpenClaw directory/process creation or Hermes API use.
-Current AI Gateway authority and exact provider/model inventory remain required.
-Producer normalization, complete context and downstream child fidelity remain open.
-This local qualification does not authorize live workers or retain an RSI improvement.
+Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. Both
+snapshot typed/ASCII plan data before receipt reads; `None` preserves legacy seed
+bytes, `{}` remains explicit, and the seed receipt hashes the complete plan.
+Main startup does not yet supply it; principal normalization remains open.
+Generation checks the signed full-order digest before one-use model admission.
+Explicit M2M packets survive profile/signing and detached request preparation;
+rejection consumes the matching handle. Legacy bytes and the 24,000-character
+prompt/context budget remain. Sealed schema/digest reject changed raw/redacted
+instructions before Fusion/OpenClaw/Hermes adapter effects. Current Gateway,
+work/model authority and exact provider inventory remain required. Full context,
+native-child fidelity, live worker admission and retained RSI remain unqualified.
 
 ## RedDog HoloIndex promotion binding
 

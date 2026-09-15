@@ -3,9 +3,18 @@
 from __future__ import annotations
 
 import ast
+from copy import deepcopy
+import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
+from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_exact_schema import (
+    _invalid_m2m,
+    _m2m_envelope,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply import (
     AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT,
     AUTHORITY_PROFILE_SEED_SUPPLY_REJECT,
@@ -58,11 +67,14 @@ def _supply(tmp_path: Path, **overrides):
     return run_reddog_authority_profile_seed_supply(**params)
 
 
-def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp_path: Path) -> None:
+@pytest.mark.parametrize("with_plan", (False, True))
+def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp_path: Path, with_plan: bool) -> None:
+    plan = _seed_plan()
     seed_result = _supply(
         tmp_path,
         consensus_receipt_digest="sha256:" + ("c" * 64),
         sovereign_authorization_digest="sha256:" + ("d" * 64),
+        **({"bounded_worker_plan": plan} if with_plan else {}),
     )
 
     assert seed_result.accepted is True
@@ -91,6 +103,151 @@ def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp
     assert promoted.accepted is True
     assert promoted.authority_profile is not None
     assert promoted.authority_profile["seed_supply_receipt_id"] == seed["seed_supply_receipt_id"]
+    if with_plan:
+        expected = encode_m2m_envelope(plan["m2m_envelope"])
+        for preserved in (seed, profile, promoted.authority_profile):
+            assert preserved["bounded_worker_plan"] == plan
+            assert encode_m2m_envelope(preserved["bounded_worker_plan"]["m2m_envelope"]) == expected
+
+
+def _seed_plan():
+    return {"operation": "feature_slice", "m2m_envelope": _m2m_envelope()}
+
+
+def _supply_with_cosign(tmp_path, **overrides):
+    return _supply(
+        tmp_path, consensus_receipt_digest="sha256:" + "c" * 64,
+        sovereign_authorization_digest="sha256:" + "d" * 64, **overrides,
+    )
+
+
+def _read_seed(result):
+    assert result.accepted is True, result.rejection_reasons
+    return json.loads(Path(result.output_path).read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("explicit_none", (False, True))
+def test_seed_supply_absence_preserves_prechange_seed_bytes(tmp_path, explicit_none):
+    kwargs = {"bounded_worker_plan": None} if explicit_none else {}
+    result = _supply_with_cosign(tmp_path, **kwargs)
+    seed = _read_seed(result)
+    assert "bounded_worker_plan" not in seed
+    # Captured twice from fixed existing fixtures at base 8da0551 before this API.
+    assert hashlib.sha256(Path(result.output_path).read_bytes()).hexdigest() == (
+        "7ae1ec5659c07e6490c38cfb13dae1455b6c285414b5a689ee28a32ad3b3e3b7"
+    )
+
+
+@pytest.mark.parametrize("kind", ("empty", "legacy", "m2m"))
+def test_seed_supply_explicit_plan_is_covered_by_receipt(tmp_path, kind):
+    plan = {} if kind == "empty" else {"operation": "feature_slice"}
+    if kind == "m2m":
+        plan = _seed_plan()
+    seed = _read_seed(_supply_with_cosign(tmp_path, bounded_worker_plan=plan))
+    assert seed["bounded_worker_plan"] == plan
+    receipt = seed.pop("seed_supply_receipt_id")
+    wire = json.dumps(seed, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    assert receipt == "sha256:" + hashlib.sha256(wire.encode()).hexdigest()
+    legacy = _supply_with_cosign(tmp_path / "legacy")
+    assert receipt != legacy.seed_supply_receipt_id
+
+
+@pytest.mark.parametrize("changed", ("action", "nested_type"))
+def test_seed_supply_packet_change_changes_seed_receipt(tmp_path, changed):
+    plan = _seed_plan()
+    first = _supply_with_cosign(tmp_path / "first", bounded_worker_plan=plan)
+    first_seed = _read_seed(first)
+    if changed == "action":
+        plan["m2m_envelope"]["A"] = "Validate the second fixture"
+    else:
+        plan["m2m_envelope"]["I"]["fixture"][0] = 1
+    second = _supply_with_cosign(tmp_path / "second", bounded_worker_plan=plan)
+    second_seed = _read_seed(second)
+    assert first.seed_supply_receipt_id != second.seed_supply_receipt_id
+    assert encode_m2m_envelope(first_seed["bounded_worker_plan"]["m2m_envelope"]) != (
+        encode_m2m_envelope(second_seed["bounded_worker_plan"]["m2m_envelope"])
+    )
+
+
+def test_seed_supply_snapshots_plan_before_receipt_callback(tmp_path):
+    plan = _seed_plan()
+    expected = deepcopy(plan)
+    calls = []
+
+    class Determination:
+        def to_dict(self):
+            calls.append("receipt")
+            plan["m2m_envelope"]["I"]["fixture"].append("late caller change")
+            plan["operation"] = "inspect_repo"
+            plan["unknown_field"] = True
+            return _determination()
+
+    result = _supply_with_cosign(
+        tmp_path, bounded_worker_plan=plan, architect_determination=Determination(),
+    )
+    seed = _read_seed(result)
+    assert calls == ["receipt"]
+    assert seed["bounded_worker_plan"] == expected
+    assert encode_m2m_envelope(seed["bounded_worker_plan"]["m2m_envelope"]) == (
+        encode_m2m_envelope(expected["m2m_envelope"])
+    )
+
+
+def _invalid_seed_plan(case):
+    if case == "plan_list":
+        return []
+    if case == "plan_bool":
+        return False
+    if case == "plan_text":
+        return "{}"
+    if case == "plan_key":
+        return {1: "not a field"}
+    if case == "plan_subclass":
+        class Plan(dict):
+            pass
+        return Plan(_seed_plan())
+    if case == "plan_unknown":
+        return {"unknown_field": True}
+    if case == "plan_type":
+        return {"operation": True}
+    plan = {"m2m_envelope": _invalid_m2m(case)}
+    if case == "non_ascii":
+        plan["m2m_envelope"]["A"] = "validate \u2603"
+    elif case == "plan_non_ascii":
+        plan["operation"] = "feature_\u2603"
+    elif case == "no_effect_type":
+        plan["m2m_envelope"]["I"]["no_repo_mutation_performed"] = 1
+    return plan
+
+
+@pytest.mark.parametrize("case", (
+    "plan_list", "plan_bool", "plan_text", "plan_key", "plan_subclass",
+    "plan_unknown", "plan_type", "null", "wire_string", "partial", "unknown",
+    "refs_bool", "tuple", "nan", "cycle", "depth", "nodes", "bytes",
+    "secret", "digest", "env_value", "false_no_effect", "no_effect_type",
+    "non_ascii", "plan_non_ascii",
+))
+def test_seed_supply_invalid_plan_rejects_before_callbacks_or_writes(tmp_path, monkeypatch, case):
+    from modules.communication.moltbot_bridge.src import reddog_authority_profile_seed_supply as supplier
+
+    class Determination:
+        def to_dict(self):
+            pytest.fail("invalid plan reached a receipt callback")
+
+    def forbidden_write(*args, **kwargs):
+        pytest.fail("invalid plan reached publication")
+
+    monkeypatch.setattr(supplier, "_write_json_atomic", forbidden_write)
+    result = _supply_with_cosign(
+        tmp_path, bounded_worker_plan=_invalid_seed_plan(case),
+        architect_determination=Determination(),
+    )
+    assert result.accepted is False
+    assert result.status == AUTHORITY_PROFILE_SEED_SUPPLY_REJECT
+    assert result.rejection_reasons
+    assert result.seed_supply_receipt_id is None
+    assert result.output_path is None
+    assert not (tmp_path / "runtime").exists()
 
 
 def test_seed_supply_rejects_missing_reddog_public_key(tmp_path: Path) -> None:

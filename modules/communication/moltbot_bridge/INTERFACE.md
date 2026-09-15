@@ -38,20 +38,20 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
-The handler compares a detached full order with signed `work_order_digest` before
-verification/issuance; `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects drift.
-Existing `snapshot_authority_profile_m2m(profile)` retains bounded profile policies.
-`generate_bounded_artifact_contents(...)` accepts explicit normalized `m2m_envelope`.
-Its whole canonical request becomes plain detached JSON before consuming authority.
-Invalid canonical data rejects with `FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE` and burns
-only the matching handle. Missing field preserves legacy prompt/context bytes.
-Exact codec wire and artifact-rule context share the 24,000-character pre-issuance budget.
-`validate_provider_m2m_prompt(binding, prompt, redacted_prompt)` checks the sealed
-`prompt_schema`/`m2m_prompt_digest` pair and exact canonical wire. Missing/changed
-bindings or redacted instructions reject with `FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING`
-before adapter effects. This does not certify full context or downstream child fidelity.
-Existing AI Gateway one-shot topology, provider inventory, credentials, model/work
-authority and output-path rules remain. No producer/prose or runtime admission follows.
+`run_reddog_authority_profile_seed_supply(...)` and its existing bootstrap accept
+`bounded_worker_plan=None`. `snapshot_seed_worker_plan` detaches a plain typed/ASCII
+dict; `None` omits the field and `{}` retains it. Both wrappers reject type/value/
+recursion failures with `authority_seed_bounded_worker_plan_invalid` before receipt
+callbacks or reads. The seed digest includes the plan; nonce derivation is unchanged.
+Normalized API input adds no parser, env option or main wiring. Generation checks the complete signed `work_order_digest`; mismatch
+returns `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` before model admission.
+Explicit `m2m_envelope` becomes detached canonical JSON before one-use authority
+consumption. `FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE` burns only the matching handle.
+Absent input preserves legacy bytes; prompt/context share the 24,000-character cap.
+`validate_provider_m2m_prompt` checks sealed schema/digest and raw/redacted wire;
+changed delivery returns `FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING` before effects.
+Gateway, inventory, credentials, authority and output rules remain. Producer/prose,
+full context/native-child, runtime admission and retained learning remain unqualified.
 
 ## RedDog advisory bridge support
 

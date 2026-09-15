@@ -1,3 +1,9 @@
+## 2026-09-15: Explicit normalized seed input
+
+- Reused the supplier/bootstrap and existing typed profile/ASCII owners. Both entries snapshot before receipt work; the seed hash includes the plan, None preserves legacy bytes, empty mappings remain explicit, and nonce basis is unchanged. No new module, skill, parser, env route or runtime authority. WSP00/15/22/34/50/62/84/97/99.
+- Baseline 47 failures/22 passes; final 69 focused passes; independent 320 includes 52 external cases. Stable hashes, prior byte oracle and rejected-input output preservation verified. Packaging: 8 passes, 15 fast groups, registry 1650/269 current. Initial expected-two-member manifest assertion failed before writing: these two seed owners are outside its 1,400-member closure, so manifest/pins correctly remain unchanged.
+- Prior PR #1761 merged as 8da0551f after 10 exact-head checks; main CI/CodeQL passed. Next 18/P0: retrieve the real normalized-plan producer/caller contract; main startup still omits it. Scope/evidence: `docs/roadmaps/rsi_swarm_backlog.json#current_observation`, artifact ID `m2m_seed_input_continuation_20260915`. No live AmIBot build, promotion or retained-learning claim.
+
 ## 2026-09-15: Canonical request and provider fidelity
 
 - Before: provider 32 failures/91 passes; generation 26 failures/73 passes. Independent follow-ups reproduced 16 directory-order failures, two callback failures and one same-digest tuple/list authority retry. All failures and the separate harness assertion correction are preserved.

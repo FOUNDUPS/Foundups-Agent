@@ -1,5 +1,19 @@
 # moltbot_bridge Roadmap
 
+## RSI seed-input checkpoint — 2026-09-15
+
+Both existing seed APIs now detach explicit normalized plans before receipt work
+and include them before seed receipt hashing. None retains old bytes; empty plans
+remain explicit. Existing typed, ASCII, scope, signing and no-effect gates remain.
+69 focused tests pass; independent 320 includes 52 adversarial cases (overlapping
+counts). Eight manifest tests, 15 fast groups and registry 1650/269 pass. Seed owners
+sit outside the current 1,400-member backend closure; manifest/pins stay unchanged.
+The APIs are qualified locally. `main.py:2844` still supplies no plan. WSP15/97
+selects producer/caller contract retrieval next under the shared 18/P0 handoff item.
+No new module/skill/parser/env route or runtime authority; AmIBot remains at G0.
+PR #1761 provider delivery merged as 8da0551f; exact-head and main CI/CodeQL passed.
+Root roadmap/backlog owns current sequencing; earlier entries are historical.
+
 ## RSI canonical provider checkpoint — 2026-09-15
 
 Canonical signed-plan contents now reach local Fusion/OpenClaw/Hermes adapter egress.

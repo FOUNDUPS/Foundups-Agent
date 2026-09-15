@@ -61,7 +61,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. Main `ffbb751f` still has 17 registry
+manifest and the existing intake package. Main `8da0551f` still has 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -92,26 +92,27 @@ author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedD
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
 This closes unsafe legacy emission, not the canonical envelope or the RSI system.
 
-The codec, signed-order guard and profile carrier are merged through PRs
-#1757/#1758/#1760. Both main workflows on `ffbb751f` passed. The next local layer
-preserves that explicit packet through model preparation and provider-adapter egress.
-Canonical requests are detached before authority consumption; paired schema/digest
-binding rejects changed raw/redacted instructions before adapter effects. Invalid
-canonical requests consume their matching one-use handle. Legacy bytes and the
-combined 24,000-character prompt/context budget remain unchanged.
+The codec, signing, profile and provider layers are merged through PRs
+#1757/#1758/#1760/#1761. PR #1761 merged as `8da0551f` after ten exact-head checks;
+both main CI and CodeQL passed. Its local provider qualification remains 692 passes
+/one platform skip, with independent review and two inherited size failures.
 
-Validation: **692 connected passes / one existing platform skip**. Independent
-source review accepted 309 checks and31 after AST-equivalent Fusion formatting;
-105 generation-lane tests pass. Two inherited WSP62 failures remain documented.
-The review caught directory-before-check, callback mutation and rejected-handle
-reuse; all are repaired. A local evidence filename collision was recovered with
-separate lane artifacts and a fresh full-suite run, not hidden or counted as success.
+The current source layer adds explicit normalized `bounded_worker_plan` input to
+the existing seed supplier/bootstrap. Both detach and validate before receipt
+callbacks or reads; the seed receipt includes the full plan. None retains old
+seed bytes, empty mappings remain explicit, and nonce derivation is unchanged.
+69 focused tests pass; independent 320 includes 52 external cases, with overlapping
+counts. Eight manifest tests, 15 fast groups and registry 1650/269 pass. An initial
+packaging assumption was rejected: these seed owners are outside the current
+1,400-member backend closure, so its manifest/pins remain unchanged.
 
-Re-observed WSP15/97 selects **explicit producer input to the existing seed supplier
-and bootstrap, 18/P0**. Prose normalization, full governed-context fidelity, native
-child delivery and runtime admission remain separate. Higher-ranked work stays
-blocked or separately owned. Detailed current evidence is in the backlog; the
-historical observation file and 26 planning packets remain unchanged.
+Re-observed WSP15/97 selects **the actual producer/caller contract, 18/P0**.
+`main.py:2844` still omits the normalized plan. Retrieve existing WSP99/Prometheus
+and queue/determination owners before wiring it; do not invent a new input channel
+or infer canonical instructions from task prose. Full context/native-child
+fidelity, live work/model/runtime admission and retained improvement remain open.
+Higher 19-20 work stays blocked or separately owned. The current backlog records
+the decision; historical baseline and all 26 planning packets remain unchanged.
 
 | Gate | Planned work and advancement rule |
 |---|---|
