@@ -1,5 +1,10 @@
 ## 2026-09-15: Local verdict handoff and policy drift
 
+## 2026-09-15: Full-work-order generation admission
+
+- Before: 14 failed/8 deselected. After: 115 connected passes. Eight changed-order variants, four missing/invalid digests and one cyclic order reject before verification or effects; a separate regression prevents nested request aliasing. Two signer-backed cases prove final plan coverage and reject post-signing edits.
+- Finalized-order digest setup changes only the existing fixture and its consumers. Supplied-artifact and positive provider-lineage tests remain passing. Tests use external temp/database roots and fake model providers; no live service, worker or grant was used. Independent review and packaging evidence: `m2m_admission_continuation_20260915`.
+
 - Extended the existing scanner test file with six deterministic nested-call cases and 14 availability/policy/control cases. Existing cache expiry/ALWAYS and enforced/non-enforced fixture pairs consolidated without removing their cases; other definitions remain AST-identical. Source 322/test 658 lines; no new test file or size exemption.
 - Before: 18 failed/61 passed/one existing link skip. Connected211 passed/four existing link skips, including 79/one skip here. Manifest: 8 passes; fast: 15 groups; registry 1650/269 current. No scanner/model/provider/FoundUp invocation; reentrance is controlled scheduling, not whole-DAE concurrency proof.
 - Initial proposed layout677/675 was rejected before writing. An invalid fast-runner filename ran no tests; canonical package.json runner then passed. Commands, results and remaining bounds: `workspace_verdict_handoff_continuation_20260915`. WSP15/22/50/62/95/97.

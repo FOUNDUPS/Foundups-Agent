@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI signed work-order generation preflight
+
+- Independent M2M handoff review found a missing use-time full-order check. Extended the existing resident handler with the existing canonical digest and a detached snapshot; no new envelope field/provider/module/skill.
+- Fourteen regressions reproduced the issue; 115 connected local tests pass, including signer-backed final-order changes. Exact local/independent/package evidence is in the backlog's `current_observation`. Prior owned PR1757 and both merged-main workflows are verified.
+- Re-observed WSP15/97 keeps admitted normalization/provider handoff at 18/P0. AmIBot remains G0 controlled failure with no admitted build or public activation; all 55 historical observations and 26 planning packets stay unchanged. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: RSI canonical M2M envelope transport
 
 - Extended the existing compiler with an explicit JSON codec for already normalized WSP99 orders. Role/origin, optional principal, task ID, action and typed constraints survive; ambiguous or oversized inputs reject. Existing compiler/parser/fidelity behavior stays unchanged.

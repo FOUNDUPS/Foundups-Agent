@@ -1,5 +1,11 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-15: Bind generation to the admitted full work order
+
+- Reused the existing full-work-order digest in the resident generation handler. A detached snapshot must match signed admission before model verification/issuance/generation. Missing, changed and unserializable orders reject; injected artifacts retain their prior writer path.
+- Fourteen reproduced regressions are repaired; 115 connected local tests pass, including two additional signer-backed final-order tamper cases. Existing fixtures now bind finalized orders before mutation. Source 576→592 lines; no new module, skill or test file. Provider code and runtime authority are unchanged.
+- Canonical codec PR1757 and both merged-main workflows are verified. WSP15/97 retains shared M2M handoff qualification at 18/P0; admitted normalization and provider prompt/context binding remain open. Evidence: `m2m_admission_continuation_20260915` in the existing backlog's current observation. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: Per-call workspace verdict and observed policy drift
 
 - Existing permission policy returns local verdicts across scan success/failure, unavailable scanner and import failure. Snapshots REQUIRED/ENFORCED/MAX_SEVERITY and rejects observed drift before diagnostics; no new module, lock, cache or runtime grant.

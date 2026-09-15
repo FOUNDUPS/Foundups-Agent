@@ -52,18 +52,18 @@ authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact model routing
 
-The resident bounded-artifact path does not infer models from provider names,
-worker type, prompts, or model-vendor prefixes. It verifies one AI Gateway
-runtime binding at use time, resolves its exact role/provider/model topology,
-and mints a short-lived one-shot model capability. The configured provider must
-publish an explicit available-provider inventory; missing, stale, replayed,
-retargeted, or unavailable routes reject before egress.
+The resident generation path first compares a detached complete work order
+with its signed `work_order_digest`. Missing, changed or unserializable orders
+reject before model verification, capability issuance or generation. Already
+supplied artifact contents retain their existing writer path. This comparison
+does not grant admission or qualify canonical M2M provider transport.
 
-FoundUps Fusion admits only the configured `openrouter` route. OpenClaw passes
-the resolved principal route to its exact `--model` argument. Hermes passes the
-same resolved principal model and provider to its API request. Neither worker
-can replace the topology or use the RedDog evaluation fallback. Provider
-credentials, worker authority, and runtime-model authority remain separate.
+The AI Gateway then verifies current runtime authority and resolves the exact
+role/provider/model topology into a one-shot capability. Explicit provider
+inventory is required. Fusion accepts only the configured `openrouter` route;
+OpenClaw and Hermes preserve the resolved principal model/provider pair.
+No worker may infer a replacement model or use the RedDog evaluation fallback.
+Provider credentials, worker authority and runtime-model authority stay separate.
 
 ## RedDog HoloIndex promotion binding
 

@@ -38,20 +38,20 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
-`build_generation_dependencies(...)` accepts an explicit
-`available_model_providers` sequence and injects it into exactly one configured
-artifact provider. `generate_bounded_artifact_contents(...)` uses the shared AI
-Gateway topology resolver immediately before provider execution. The resulting
-one-shot capability binds the artifact invocation, selection, runtime-binding
-verification, resolution receipt, and exact endpoint sequence.
+The resident handler's generation request compares a detached complete order
+with recorded signed `work_order_digest` using the existing canonical full-order
+digest. `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects missing/mismatched
+or unserializable content before model verification or issuance. This does not
+change the injected-artifact writer path or introduce optional M2M metadata.
 
-`FoundupsFusionArtifactGenerationRunner`,
-`OpenClawGatewayArtifactGenerationRunner`, and
-`HermesApiArtifactGenerationRunner` consume that capability once. Fusion
-requires OpenRouter; OpenClaw and Hermes preserve the resolved provider/model
-pair. All default provider inventories are empty. No consumer may derive an
-alternate model from static fallback, environment model names, or worker
-identity.
+`build_generation_dependencies(...)` injects exactly one provider and an explicit
+`available_model_providers` inventory. `generate_bounded_artifact_contents(...)`
+uses the AI Gateway to bind invocation, selection, current runtime verification,
+resolution receipt and endpoint sequence into one one-shot capability.
+`FoundupsFusionArtifactGenerationRunner`, `OpenClawGatewayArtifactGenerationRunner`
+and `HermesApiArtifactGenerationRunner` consume it once. Fusion requires
+OpenRouter; upstream workers preserve the provider/model pair. Default inventories
+are empty; fallback, environment names and worker identity cannot select models.
 
 ## RedDog advisory bridge support
 

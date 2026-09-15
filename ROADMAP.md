@@ -90,14 +90,19 @@ author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedD
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
 This closes unsafe legacy emission, not the canonical envelope or the RSI system.
 
-The next local layer preserves the full declared envelope through a bounded JSON
-codec in the same module; existing APIs stay unchanged. Its 356 focused tests
-cover identity, nested types, malformed wire and local resource limits. This is
-serialization qualification for normalized orders, not principal-prose compilation.
-Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**
-as the next candidate; higher 19/20-point items remain separately owned or blocked.
-Current evidence is in the existing backlog's `current_observation`. The 55-entry
-dated baseline stays unchanged near its local size budget; Git retains later
+The canonical JSON codec merged through PR #1757 as `15d653d1`; all ten
+exact-head checks and both merged-main workflows passed. Its 356 local cases
+qualify normalized serialization, not principal-prose compilation or admission.
+Handoff review then exposed a use-time gap: generation did not compare the
+resolved complete work order with the signer's existing digest. The existing
+handler now checks a detached snapshot before model verification or generation.
+Fourteen new cases reproduced the gap; 115 connected local tests pass, including
+two signer-backed final-order changes. Independent evidence is in the backlog's
+`current_observation`; supplied-artifact behavior and provider code stay unchanged.
+Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**.
+Next qualify admitted normalization and provider-bound canonical bytes, including
+redaction and output-contract context. Higher items remain blocked or separately
+owned. The 55-entry dated baseline and 26 packets stay unchanged; Git retains
 observation history. AutoResearcher reporting remains 15/P1. No dispatch is enabled.
 
 | Gate | Planned work and advancement rule |
