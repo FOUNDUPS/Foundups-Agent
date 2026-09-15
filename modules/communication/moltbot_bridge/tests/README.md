@@ -1,5 +1,16 @@
 # Tests - OpenClaw Bridge
 
+## Generation admission regressions
+
+Reuse `test_reddog_resident_queue_bounded_worker_model_authority.py` and its
+existing stage fixture. Bind the finalized order before tampering; never update
+the admitted digest afterward. Thirteen negative cases require zero verifier,
+issuer, generator and writer calls; one case protects detached nested contents.
+The existing model-runtime integration adds two final signed-order changes.
+Author connected selection: **115 passed**. Exact commands, independent review
+and environment limits are in `current_observation` in the system backlog.
+These disposable signing/model fixtures do not establish live admission.
+
 ## Current workspace verdict checks
 
 Reuse `test_skill_safety_guard.py`: six nested-call fixtures cover pass/fail and

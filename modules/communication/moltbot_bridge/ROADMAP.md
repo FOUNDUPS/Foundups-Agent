@@ -1,5 +1,18 @@
 # moltbot_bridge Roadmap
 
+## RSI generation admission checkpoint — 2026-09-15
+
+The existing generation handler now checks the complete resolved work order
+against its signed digest and derives from that detached snapshot. Fourteen
+regressions reproduced the missing check/aliasing; 115 connected local tests pass.
+The signer-backed integration confirms the final plan is bound before mutation.
+
+Current WSP15 selection remains shared M2M handoff qualification **18/P0**:
+normalize into already admitted fields, then bind canonical prompt/context through
+provider redaction. This local guard adds no field, provider route or authority.
+The [system observation](../../../docs/roadmaps/rsi_swarm_backlog.json) owns current
+ranking; earlier checkpoint selections below are historical. AmIBot stays at G0.
+
 ## Local RSI scanner checkpoint — 2026-09-15
 
 The existing policy owner now returns each call's local verdict and rejects
@@ -17,7 +30,7 @@ Policy comparison is not an atomic writer lease or change-and-revert detector;
 post-check changes, wardrobe mutation and dispatch-byte binding remain unproved.
 Route explanations still read latest shared messages (12/P2); they are not receipts.
 
-Fresh WSP15 selects **AutoResearcher report completeness 15/P1** before launch
+That checkpoint selected **AutoResearcher report completeness 15/P1** before launch
 report wiring. Qualify attempt/evaluation/failure denominators in the existing owner.
 Caching remains disabled; restoring it requires content/scanner/policy qualification
 and admitted cost measurement. Read the [current selection](../../../docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)

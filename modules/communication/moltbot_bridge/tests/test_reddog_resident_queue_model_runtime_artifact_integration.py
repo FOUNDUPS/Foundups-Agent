@@ -16,6 +16,10 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 from modules.communication.moltbot_bridge.src import (
     reddog_architect_fix_promotion_transaction,
     reddog_bounded_artifact_generation_runtime,
+    reddog_resident_queue_bounded_worker_pilot_handler as pilot_handler_module,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
     authority_profile_unknown_field_paths,
@@ -87,6 +91,11 @@ from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_bound
     _snapshot as _handler_snapshot,
     _valid_bundle,
     _work_order_with_plan,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_bounded_worker_model_authority import (
+    _ArtifactGenerator,
+    _RuntimeBindingVerifier,
+    _dispatch_request,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _authority_profile,
@@ -182,7 +191,7 @@ def test_assigned_worker_reverifies_signed_model_evidence_before_provider(
         selection=work_order["model_selection_receipt"],
     )
     discard_verified_runtime_binding_capability(probe)
-    chain_store = _seeded_store(bundle, **_binding_stage_overrides())
+    chain_store = _seeded_store(bundle, **_binding_stage_overrides(work_order))
     provider_calls: list[dict[str, object]] = []
 
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
@@ -288,6 +297,43 @@ def _promoted_runtime_context(tmp_path, monkeypatch):
         "repo": repo,
         "chain_store": chain_store,
     }
+
+
+@pytest.mark.parametrize("changed_field", ["task_summary", "bounded_worker_plan"])
+def test_signed_final_work_order_rejects_later_generation_changes(
+    tmp_path, monkeypatch, changed_field,
+):
+    context = _promoted_runtime_context(tmp_path, monkeypatch)
+    work_order = context["work_order"]
+    stages = context["chain_store"].load()["stage_results"]
+    authority = stages["authority_runtime"]["authority_result"]["work_authority"]
+    assert authority["work_order_digest"] == canonical_full_work_order_digest(work_order)
+    if changed_field == "task_summary":
+        work_order[changed_field] = "Changed after real test signing"
+    else:
+        work_order[changed_field]["unadmitted_metadata"] = {"A": "different action"}
+    verifier = _RuntimeBindingVerifier()
+    generator = _ArtifactGenerator()
+
+    def forbidden_effect(*args, **kwargs):
+        pytest.fail("generation authority or writer reached")
+
+    monkeypatch.setattr(pilot_handler_module, "_issue_artifact_generation_authority", forbidden_effect)
+    monkeypatch.setattr(
+        pilot_handler_module, "invoke_reddog_wre_queue_authorized_bounded_worker_pilot", forbidden_effect,
+    )
+    handler = build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
+        chain_results_store=context["chain_store"],
+        work_order_resolver=_Resolver(work_order),
+        artifact_contents={},
+        artifact_generation_request_binding_enabled=True,
+        artifact_generator=generator,
+        model_runtime_binding_verifier=verifier,
+        repo_root=context["repo"],
+    )
+    result = dict(handler(_dispatch_request()))
+    assert result["rejection_reasons"] == ["FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING"]
+    assert verifier.calls == generator.calls == []
 
 
 def _invoke_promoted_provider(context, monkeypatch):
