@@ -1,0 +1,122 @@
+name: One-shot security lockfile preparation
+
+on:
+  push:
+    branches: [repair/security-dependencies-20260915]
+    paths: [.github/workflows/security-dependencies-once.yml]
+
+permissions: {}
+
+concurrency:
+  group: security-lock-preparation-20260915
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'FOUNDUPS/Foundups-Agent' && github.ref == 'refs/heads/repair/security-dependencies-20260915' && github.actor == 'Foundup'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      NPM_CONFIG_IGNORE_SCRIPTS: 'true'
+      NPM_CONFIG_AUDIT: 'false'
+      NPM_CONFIG_FUND: 'false'
+      NPM_CONFIG_USERCONFIG: /dev/null
+      GIT_TERMINAL_PROMPT: '0'
+    steps:
+      - name: Checkout exact authorized preparation commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.13.0'
+      - name: Update only the affected dependency families
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const targets = ['clerk-nextjs', 'modules/foundups/esingularity/frontend'];
+          for (const dir of targets) {
+            const path = `${dir}/package.json`;
+            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            if (!pkg.dependencies?.next || !pkg.devDependencies?.['eslint-config-next']) {
+              throw new Error(`Expected Next.js owner missing: ${dir}`);
+            }
+            pkg.dependencies.next = '16.3.4';
+            pkg.devDependencies['eslint-config-next'] = '16.3.4';
+            if (dir === 'modules/foundups/esingularity/frontend') {
+              pkg.devDependencies['@cloudflare/vite-plugin'] = '1.54.7';
+              pkg.devDependencies.wrangler = '4.131.0';
+              pkg.devDependencies['@cloudflare/workers-types'] = '5.20260910.1';
+            }
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          }
+          NODE
+      - name: Regenerate Clerk lock without executing lifecycle scripts
+        working-directory: clerk-nextjs
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Regenerate eSingularity lock without executing lifecycle scripts
+        working-directory: modules/foundups/esingularity/frontend
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Verify manifest alignment and vulnerable-version removal
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          const targets = ['clerk-nextjs', 'modules/foundups/esingularity/frontend'];
+          for (const dir of targets) {
+            const pkg = JSON.parse(fs.readFileSync(`${dir}/package.json`, 'utf8'));
+            const lock = JSON.parse(fs.readFileSync(`${dir}/package-lock.json`, 'utf8'));
+            assert.equal(lock.lockfileVersion, 3);
+            assert.deepEqual(lock.packages[''].dependencies, pkg.dependencies);
+            assert.deepEqual(lock.packages[''].devDependencies, pkg.devDependencies);
+            assert.equal(lock.packages['node_modules/next'].version, '16.3.4');
+            assert.equal(lock.packages['node_modules/eslint-config-next'].version, '16.3.4');
+            for (const [path, item] of Object.entries(lock.packages)) {
+              if (/(^|\/)node_modules\/next$/.test(path)) {
+                assert.equal(item.version, '16.3.4', `Unexpected Next.js copy: ${path}`);
+              }
+              if (/(^|\/)node_modules\/sharp$/.test(path)) {
+                const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(item.version);
+                assert.ok(match, `Unknown sharp version: ${path}`);
+                const [major, minor, patch] = match.slice(1).map(Number);
+                assert.ok(major > 0 || minor > 35 || (minor === 35 && patch >= 4), `Affected sharp remains: ${path}`);
+              }
+            }
+            if (dir === 'modules/foundups/esingularity/frontend') {
+              assert.equal(lock.packages['node_modules/@cloudflare/workers-types'].version, '5.20260910.1');
+              assert.equal(lock.packages['node_modules/wrangler'].version, '4.131.0');
+            }
+            console.log(`${dir}: manifest/lock and targeted version checks passed`);
+          }
+          NODE
+          git diff --check
+      - name: Publish only generated manifests and locks to the isolated branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          BRANCH=repair/security-dependencies-20260915
+          CURRENT=$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)
+          test "$CURRENT" = "$GITHUB_SHA" || { echo 'Branch moved; refusing to overwrite concurrent work'; exit 1; }
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              'clerk-nextjs/package.json', 'clerk-nextjs/package-lock.json',
+              'modules/foundups/esingularity/frontend/package.json',
+              'modules/foundups/esingularity/frontend/package-lock.json',
+          }
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
+          untracked = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], text=True).splitlines()
+          if not changed or not changed <= allowed or untracked:
+              raise SystemExit('Unexpected or empty preparation diff; refusing to publish')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add clerk-nextjs/package.json clerk-nextjs/package-lock.json modules/foundups/esingularity/frontend/package.json modules/foundups/esingularity/frontend/package-lock.json
+          git commit -m 'fix(security): patch Next.js/sharp and align Cloudflare peers'
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer $GH_TOKEN" push origin "HEAD:refs/heads/$BRANCH"
+          echo 'Prepared only; build/test/merge/deployment and Dependabot closure still require verification.'
