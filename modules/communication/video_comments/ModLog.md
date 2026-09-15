@@ -7,6 +7,14 @@
 
 ## Change Log
 
+### 2026-09-15 - Shared 012 Manifest Context
+
+- `commenting_control_plane.load_broadcast()` now resolves the active,
+  unexpired shared 012 manifest context for the `comments` surface before its
+  legacy module-local broadcast file.
+- This preserves the existing reply-generation injection and removes the need
+  for a separate operator update path.
+
 ### 2026-04-19 - YTR1: YouTube Reply Runtime Hardening Phase 1
 
 **By:** 0102 (CW5)
