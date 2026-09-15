@@ -101,6 +101,7 @@ class AutoModeratorDAE:
         self.start_time = time.time()
         self.enable_ai_monitoring = enable_ai_monitoring
         self.heartbeat_service = None
+        self.operator_manifest_task = None
 
         # Comment engagement subprocess tracking (prevent dual-process race condition)
         self._comment_engagement_task = None  # Active async task reference
@@ -1838,6 +1839,14 @@ class AutoModeratorDAE:
         """
         Main entry point - full DAE lifecycle.
         """
+        # The 012 manifest is a local operator control plane, independent of
+        # optional AI-overseer monitoring. It stays active for the entire DAE
+        # lifetime and checks the manifest once per minute.
+        from .operator_command_queue import OperatorCommandQueue
+        self.operator_manifest_queue = OperatorCommandQueue(self)
+        self.operator_manifest_task = asyncio.create_task(self.operator_manifest_queue.watch_forever())
+        logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
+
         logger.info("=" * 60)
         logger.info("[AI] AUTO MODERATOR DAE STARTING")
         logger.info("WSP-Compliant: Using livechat_core architecture")

@@ -30,7 +30,6 @@ from enum import Enum
 from pathlib import Path
 
 from modules.communication.livechat.src.automation_gates import gate_snapshot
-from modules.communication.livechat.src.operator_command_queue import OperatorCommandQueue
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +113,6 @@ class YouTubeDAEHeartbeat:
         self.max_history_size = 100
         self.total_errors_detected = 0
         self.total_fixes_applied = 0
-        self.operator_command_queue = OperatorCommandQueue(dae_instance)
 
         logger.info(f"[HEARTBEAT] YouTube DAE Heartbeat initialized (interval: {heartbeat_interval}s, AI Overseer: {enable_ai_overseer})")
 
@@ -219,10 +217,6 @@ class YouTubeDAEHeartbeat:
 
             # Write telemetry
             await self._write_telemetry(heartbeat)
-
-            operator_commands = await self.operator_command_queue.poll_once()
-            if operator_commands["processed"]:
-                logger.info("[OPERATOR-COMMAND] Processed %s command(s)", operator_commands["processed"])
 
             # Log pulse (reduced frequency)
             if self.pulse_count % 10 == 0:
@@ -366,7 +360,10 @@ class YouTubeDAEHeartbeat:
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             payload["run_id"] = run_id or None
             payload["automation_gates"] = gate_snapshot()
-            payload["operator_commands"] = self.operator_command_queue.last_result
+            operator_manifest = getattr(self.dae, "operator_manifest_queue", None)
+            payload["operator_commands"] = getattr(
+                operator_manifest, "last_result", {"checked_at": None, "processed": 0}
+            )
 
             # Write as JSONL (one JSON object per line)
             with open(telemetry_file, 'a', encoding='utf-8') as f:

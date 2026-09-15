@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import time
+import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, List
@@ -19,10 +20,10 @@ from modules.communication.livechat.src.automation_gates import gate_snapshot
 
 logger = logging.getLogger(__name__)
 
-COMMAND_FILE_ENV = "YT_OPERATOR_COMMAND_FILE"
-ACK_FILE_ENV = "YT_OPERATOR_COMMAND_ACK_FILE"
-DEFAULT_COMMAND_FILE = "memory/youtube_dae_operator_commands.json"
-DEFAULT_ACK_FILE = "memory/youtube_dae_operator_command_acks.json"
+COMMAND_FILE_ENV = "YT_012_MANIFEST_FILE"
+ACK_FILE_ENV = "YT_012_MANIFEST_ACK_FILE"
+DEFAULT_COMMAND_FILE = "memory/012_manifest.json"
+DEFAULT_ACK_FILE = "memory/012_manifest_acknowledgements.json"
 MAX_MESSAGE_LENGTH = 500
 
 
@@ -80,6 +81,7 @@ class OperatorCommandQueue:
         recorded = acknowledgements.setdefault("acknowledgements", [])
         completed_ids = {item.get("id") for item in recorded if isinstance(item, dict) and isinstance(item.get("id"), str)}
         results: List[Dict[str, Any]] = []
+        acknowledgements_changed = False
         for command in commands:
             if not isinstance(command, dict):
                 continue
@@ -87,13 +89,27 @@ class OperatorCommandQueue:
             if not isinstance(command_id, str) or not command_id or command_id in completed_ids:
                 continue
             result = await self._dispatch(command)
+            # A stream may not yet be connected at watcher startup.  Keep that
+            # command in the manifest until it can be actioned rather than
+            # acknowledging it as a permanent failure.
+            if result.get("status") == "deferred":
+                results.append(result)
+                continue
             recorded.append(result)
             completed_ids.add(command_id)
             results.append(result)
-        if results:
+            acknowledgements_changed = True
+        if acknowledgements_changed:
             self._atomic_write(self.acknowledgement_path, acknowledgements)
         self.last_result = {"checked_at": _utc_now(), "processed": len(results), "results": results}
         return self.last_result
+
+    async def watch_forever(self) -> None:
+        """Run the independent 012-manifest watch loop for the DAE lifetime."""
+        logger.info("[012-MANIFEST] Watching %s every %ss", self.command_path, self.poll_interval_seconds)
+        while True:
+            await self.poll_once()
+            await asyncio.sleep(self.poll_interval_seconds)
 
     async def _dispatch(self, command: Dict[str, Any]) -> Dict[str, Any]:
         command_id = command["id"]
@@ -115,7 +131,7 @@ class OperatorCommandQueue:
         livechat = getattr(self.dae, "livechat", None)
         sender: Callable[..., Awaitable[bool]] | None = getattr(livechat, "send_chat_message", None)
         if sender is None:
-            return {**base, "status": "blocked", "reason": "livechat_unavailable", "gates": gates}
+            return {**base, "status": "deferred", "reason": "livechat_unavailable", "gates": gates}
         try:
             sent = await sender(message.strip(), response_type="operator")
         except Exception as exc:

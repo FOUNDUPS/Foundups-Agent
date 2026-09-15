@@ -3,6 +3,8 @@
 ## 2026-09-15 - Operator Command Plane Phase 1
 
 - Added `test_operator_command_queue.py` covering one-time announcement dispatch/acknowledgement and rejection of non-allowlisted actions.
+- Added deferred-delivery coverage for a manifest command received before
+  LiveChat connects.
 
 - Initialize test change log per WSP 34.
 

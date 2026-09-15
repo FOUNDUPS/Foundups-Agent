@@ -8,6 +8,9 @@
 - Heartbeat checks it on its existing cadence and includes the latest result in JSONL telemetry.
 - Initial actions are intentionally narrow: `status` and gated live-chat `announce`. No JSON command can invoke an LLM, shell, browser, or code edit.
 - Added an assumption audit and focused unit tests for dispatch, rejection, and exactly-once acknowledgement behavior.
+- Follow-up: renamed the runtime inbox to the `012 manifest` and moved its
+  watcher outside optional AI-overseer monitoring; unavailable LiveChat now
+  defers an announcement instead of consuming it.
 
 This log tracks changes specific to the **livechat** module in the **communication** enterprise domain.
 

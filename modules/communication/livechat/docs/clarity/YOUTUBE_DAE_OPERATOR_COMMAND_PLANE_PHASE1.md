@@ -30,12 +30,14 @@ checks it no more often than once per minute:
 }
 ```
 
-Default inbox: `memory/youtube_dae_operator_commands.json`.
+Default inbox: `memory/012_manifest.json`.
 Default acknowledgement ledger:
-`memory/youtube_dae_operator_command_acks.json`. Command IDs are immutable and
+`memory/012_manifest_acknowledgements.json`. Command IDs are immutable and
 must be unique. A completed ID is never dispatched again, including after a
 DAE restart. `status` returns the current automation gates; `announce` sends a
 maximum 500-character chat message only when those gates allow it.
+The watcher starts independently of the optional AI Overseer and leaves an
+announcement pending until LiveChat is connected.
 
 ## 3. Failure Modes
 

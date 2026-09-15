@@ -38,3 +38,19 @@ def test_unknown_action_is_rejected_without_touching_livechat(tmp_path):
     result = asyncio.run(OperatorCommandQueue(SimpleNamespace(livechat=chat), command_path, acknowledgement_path).poll_once())
     assert result["results"][0]["status"] == "rejected"
     assert chat.messages == []
+
+
+def test_announce_stays_pending_until_livechat_is_ready(tmp_path, monkeypatch):
+    monkeypatch.setenv("YT_AUTOMATION_ENABLED", "true")
+    monkeypatch.setenv("YT_LIVECHAT_SEND_ENABLED", "true")
+    command_path, acknowledgement_path = tmp_path / "manifest.json", tmp_path / "acks.json"
+    _write_commands(command_path, [{"id": "voice-3", "action": "announce", "payload": {"message": "Wait for chat"}}])
+    queue = OperatorCommandQueue(SimpleNamespace(livechat=None), command_path, acknowledgement_path, poll_interval_seconds=0)
+    result = asyncio.run(queue.poll_once())
+    assert result["results"][0]["status"] == "deferred"
+    assert not acknowledgement_path.exists()
+
+    chat = FakeLiveChat()
+    queue.dae.livechat = chat
+    assert asyncio.run(queue.poll_once())["results"][0]["status"] == "accepted"
+    assert chat.messages == [("Wait for chat", "operator")]
