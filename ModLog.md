@@ -2,6 +2,12 @@
 
 ## 2026-09-15: AmIBot registry prerequisite
 
+- Remote closure is held: candidate `9a89bb74` passed ten checks but triggered
+  two pre-existing eSingularity campaign-ticker failures. Protected source is
+  byte-identical to base; preserve that owner and keep PR1751 draft/unmerged.
+  Public catalog validation passes with its four entries unchanged. Continue
+  the unblocked M2M18/P0 work; no CI bypass or public/runtime activation.
+
 - Continued existing intake PR1751 instead of creating another FoundUp or PR.
   Added one canonical `detect_ai` skeleton candidate, declarative manifest and
   interface; preserved the other 17 entities and all 13 planning orders.

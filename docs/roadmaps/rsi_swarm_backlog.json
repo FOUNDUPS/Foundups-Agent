@@ -1854,7 +1854,7 @@
     "section": "current_observation",
     "base_commit": "67db494961ed92215e054ff8d082fb54f135ec3e",
     "selected_action": "M2M-canonical-envelope-qualification",
-    "status": "registration_prerequisite_locally_verified_m2m_profile_admission_next",
+    "status": "registry_candidate_unmerged_ci_dependency_m2m_profile_admission_next",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation.post_sprint_reobservation"
@@ -2401,7 +2401,17 @@
         "new_failures": 0,
         "source_checks_passed": 9
       },
-      "remote_checks": "Pending this revision; prior PR1751 checks are not evidence for these new changes.",
+      "remote_checks": {
+        "commit": "9a89bb74bb26cfbaf2d02130d29d8bc975f44343",
+        "success": 10,
+        "failure": 1,
+        "failed_workflow": "Validate eSingularity",
+        "failed_run": 34929623555,
+        "failed_tests": 2,
+        "passed_tests": 26,
+        "scope": "Protected static ticker expectations already fail on unchanged base input. Frontend stages not reached.",
+        "pr_state": "DRAFT_UNMERGED_CI_DEPENDENCY"
+      },
       "documentation_links": {
         "checked": 38,
         "missing": 0
@@ -2410,6 +2420,12 @@
         "state": "current",
         "total": 1650,
         "quarantined": 269
+      },
+      "public_projection": {
+        "is_safe": true,
+        "errors": 0,
+        "public_entries": 4,
+        "hidden_amibot_excluded": true
       }
     },
     "experiment": {
@@ -2425,10 +2441,10 @@
       "code_model_cost": null,
       "device_acceptance": "not_run",
       "public_acceptance": "not_run",
-      "status": "G0 controlled failure; registry metadata prerequisite locally validated"
+      "status": "G0 controlled failure; registry candidate locally validated but unmerged due protected-project CI dependency"
     },
     "post_sprint_reobservation": {
-      "observed_at": "2026-09-15T04:31:25.021086+00:00",
+      "observed_at": "2026-09-15T04:43:30.746995+00:00",
       "origin_main": "67db494961ed92215e054ff8d082fb54f135ec3e",
       "open_pr_count": 98,
       "open_pr_snapshot": "open-prs.json",
@@ -2806,13 +2822,13 @@
       "selection": "M2M-canonical-envelope-qualification",
       "score": 18,
       "priority": "P0",
-      "reason": "Existing closed-profile admission is the highest-scored unblocked shared source repair. Higher work remains separately owned or requires independent runtime admission.",
+      "reason": "Registry closure is blocked by protected-project CI. M2M18/P0 remains the highest-scored unblocked shared source repair; no protected FoundUp tests or workflow change is absorbed.",
       "resolved": [
-        "Detect-AI intake ownership transferred by current AmIBot execution request; reuse existing PR1751.",
-        "AmIBot registry/manifest/interface omission closed locally; full G0 and build remain blocked."
+        "Existing intake/registration omission repaired and independently reviewed on PR1751 only; not merged on main."
       ],
       "requires_fresh_reobservation_after_closure": true,
-      "scope_note": "Freshly inspected onboarding/metadata plus source-bound inherited RSI queue; unrelated runtime blockers were not probed or changed in this slice."
+      "scope_note": "Freshly inspected onboarding/metadata plus source-bound inherited RSI queue; unrelated runtime blockers were not probed or changed in this slice.",
+      "closure_state": "PR1751 draft/unmerged; known CI blocker owned by eSingularity lane. Source authoring approval does not permit bypass."
     },
     "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-registry-20260915",
     "artifact_sha256": {
@@ -2824,7 +2840,12 @@
       "independent-registration-review.json": "a96420ed7dcdc31900bb2a8d4c70047ef42cd7ccde2e160b113ec772f58c1aa5",
       "independent-onboarding-assessment.json": "3fac3fc0d25b59f83dfb03a5ea7cd669126a731d5e418259514c6c42afd5cdcc",
       "independent-genesis-input.json": "5d3cb73b82ac9ebc4f305cb41011e37530f97748982eb1bcf838a37227e71c43",
-      "link-validation.json": "86a4bbb5f492a61002e97c97e5212c8729cd8af1487870430f4bbea09b1d8a4b"
+      "link-validation.json": "86a4bbb5f492a61002e97c97e5212c8729cd8af1487870430f4bbea09b1d8a4b",
+      "protected-ci-dependency.json": "1d49776ab5065e1b9a645e3b525ea190cd30e396a6fe8a499fe14fd1704f4195",
+      "remote-esingularity-failure.txt": "9427a5c864b86be94858d892de857169173ac09b290d9af7d9f3cb32c09c834f",
+      "pr1751-checks.json": "7022461e8351e997d457ff9a432434ff834662bb4d8237d28558355c55d6184b",
+      "public-projection-validation.json": "fd9372c0077fd55732226757964e33733cbbb826d01d36449e3e9090e9106014",
+      "independent-final-planning-review.json": "a7867c5c0330507eafc68710b917da7b1bab3f7efadb1bf4c00137e2e2e5d8be"
     }
   }
 }

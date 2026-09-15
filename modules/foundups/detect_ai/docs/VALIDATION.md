@@ -37,6 +37,22 @@ are indexed by `amibot_registry_continuation_20260915` in the existing
 dependency security, provider/model, moderation, real-device and public POC
 acceptance remain unrun. Registry admission completes only this metadata layer.
 
+## Remote dependency - 2026-09-15
+
+At candidate `9a89bb74`, ten checks passed and
+[Validate eSingularity failed](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/34929623555):
+26 tests passed, two failed because the campaign ticker no longer contains the
+literal `href: '/reports/jhr'` expected by its existing tests. Read-only Git
+comparison proves the entire eSingularity tree and failing input are unchanged
+from base `67db49496`; no live FoundUp was run for diagnosis.
+
+The shared registry path triggers that workflow. Its later frontend stages were
+not reached. The separate public catalog validator passes locally with four
+unchanged public entries and no violations; hidden AmIBot remains excluded.
+PR #1751 is held draft/unmerged pending the existing eSingularity owner. No test
+or workflow was weakened. Source registration is not yet registration on main.
+The unblocked shared RSI selection remains M2M profile admission, 18/P0.
+
 ## Earlier research validation
 
 Scope: the 2026-09-15 chat/PWA/safety research continuation, not application functionality.

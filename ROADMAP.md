@@ -58,7 +58,7 @@ Use **principal prose → Prometheus normalization → ORCH → WSP 99 M2M → a
 OpenClaw/Hermes workers** through existing WRE/AgentDB owners. This session's two
 read-only Codex audit lanes are coordinator assistance, not admitted build workers.
 
-**Current result: G0 controlled failure; registry prerequisite completed locally.**
+**Current result: G0 controlled failure; registry candidate locally verified, PR held.**
 This revision continues the 17-document intake from [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751)
 at `c9a33a124` on main `67db49496`, adding the required declarative manifest,
 interface and single `detect_ai` registry entry. Follow [AmIBot's roadmap](modules/foundups/detect_ai/ROADMAP.md)
@@ -67,6 +67,11 @@ AmIBot stays hidden, unbuilt and token-deferred. Registry membership is not WRE
 admission or public readiness. The package has
 13 planning orders and an acyclic DAG, but its five G1 writers have ten overlapping
 scope pairs. No AmIBot build order has been admitted or executed.
+
+At candidate `9a89bb74`, ten remote checks passed but the registry-triggered
+eSingularity workflow failed two existing campaign-ticker assertions. Its source
+tree is identical to base `67db49496`. PR1751 stays draft/unmerged until its owner
+resolves that dependency; no workflow bypass or protected-project repair here.
 
 | Readiness gate | Current evidence / prerequisite |
 |---|---|
