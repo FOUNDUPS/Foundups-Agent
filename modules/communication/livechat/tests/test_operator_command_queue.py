@@ -54,3 +54,15 @@ def test_announce_stays_pending_until_livechat_is_ready(tmp_path, monkeypatch):
     queue.dae.livechat = chat
     assert asyncio.run(queue.poll_once())["results"][0]["status"] == "accepted"
     assert chat.messages == [("Wait for chat", "operator")]
+
+
+def test_context_is_persisted_and_announced_to_selected_surfaces(tmp_path, monkeypatch):
+    monkeypatch.setenv("YT_AUTOMATION_ENABLED", "true")
+    monkeypatch.setenv("YT_LIVECHAT_SEND_ENABLED", "true")
+    command_path, acknowledgement_path, state_path = tmp_path / "manifest.json", tmp_path / "acks.json", tmp_path / "state.json"
+    _write_commands(command_path, [{"id": "voice-4", "action": "set_context", "payload": {"message": "New update", "surfaces": ["livechat", "comments"], "ttl_seconds": 3600}}])
+    chat = FakeLiveChat()
+    queue = OperatorCommandQueue(SimpleNamespace(livechat=chat), command_path, acknowledgement_path, state_path, poll_interval_seconds=0)
+    assert asyncio.run(queue.poll_once())["results"][0]["status"] == "accepted"
+    assert json.loads(state_path.read_text())["active_context"]["message"] == "New update"
+    assert chat.messages == [("New update", "operator")]

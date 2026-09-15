@@ -39,6 +39,11 @@ maximum 500-character chat message only when those gates allow it.
 The watcher starts independently of the optional AI Overseer and leaves an
 announcement pending until LiveChat is connected.
 
+`set_context` is the shared-direction action. It stores a time-bounded message
+in `memory/012_manifest_state.json` for the selected `livechat` and/or
+`comments` surfaces. Selecting `livechat` also posts the update once when chat
+is ready; selecting `comments` exposes it to the existing reply generator.
+
 ## 3. Failure Modes
 
 | ID | Failure Mode | Likelihood | Impact | Mitigation |

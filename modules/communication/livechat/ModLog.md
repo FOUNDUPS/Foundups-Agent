@@ -11,6 +11,8 @@
 - Follow-up: renamed the runtime inbox to the `012 manifest` and moved its
   watcher outside optional AI-overseer monitoring; unavailable LiveChat now
   defers an announcement instead of consuming it.
+- Added `set_context`: a bounded, expiring shared directive for live-chat and
+  stored-video comment output surfaces.
 
 This log tracks changes specific to the **livechat** module in the **communication** enterprise domain.
 

@@ -24,7 +24,9 @@ COMMAND_FILE_ENV = "YT_012_MANIFEST_FILE"
 ACK_FILE_ENV = "YT_012_MANIFEST_ACK_FILE"
 DEFAULT_COMMAND_FILE = "memory/012_manifest.json"
 DEFAULT_ACK_FILE = "memory/012_manifest_acknowledgements.json"
+DEFAULT_STATE_FILE = "memory/012_manifest_state.json"
 MAX_MESSAGE_LENGTH = 500
+ALLOWED_CONTEXT_SURFACES = {"livechat", "comments"}
 
 
 def _utc_now() -> str:
@@ -39,11 +41,13 @@ class OperatorCommandQueue:
         dae: Any,
         command_path: Path | None = None,
         acknowledgement_path: Path | None = None,
+        state_path: Path | None = None,
         poll_interval_seconds: int = 60,
     ) -> None:
         self.dae = dae
         self.command_path = command_path or Path(os.getenv(COMMAND_FILE_ENV, DEFAULT_COMMAND_FILE))
         self.acknowledgement_path = acknowledgement_path or Path(os.getenv(ACK_FILE_ENV, DEFAULT_ACK_FILE))
+        self.state_path = state_path or Path(os.getenv("YT_012_MANIFEST_STATE_FILE", DEFAULT_STATE_FILE))
         self.poll_interval_seconds = poll_interval_seconds
         self._next_poll_at = 0.0
         self.last_result: Dict[str, Any] = {"checked_at": None, "processed": 0}
@@ -120,6 +124,11 @@ class OperatorCommandQueue:
             return {**base, "status": "rejected", "reason": "payload_must_be_an_object"}
         if action == "status":
             return {**base, "status": "accepted", "result": {"gates": gate_snapshot()}}
+        if action == "clear_context":
+            self._atomic_write(self.state_path, {"version": 1, "active_context": None, "updated_at": _utc_now()})
+            return {**base, "status": "accepted", "result": {"context": "cleared"}}
+        if action == "set_context":
+            return await self._set_context(base, payload)
         if action != "announce":
             return {**base, "status": "rejected", "reason": "action_not_allowlisted"}
         message = payload.get("message")
@@ -138,3 +147,29 @@ class OperatorCommandQueue:
             logger.exception("[OPERATOR-COMMAND] announce %s failed", command_id)
             return {**base, "status": "failed", "reason": type(exc).__name__}
         return {**base, "status": "accepted" if sent else "blocked", "result": {"sent": bool(sent)}}
+
+    async def _set_context(self, base: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Persist an operator update for all selected output surfaces."""
+        message = payload.get("message")
+        if not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH:
+            return {**base, "status": "rejected", "reason": "invalid_context_message"}
+        requested_surfaces = payload.get("surfaces", ["livechat", "comments"])
+        if not isinstance(requested_surfaces, list) or not requested_surfaces:
+            return {**base, "status": "rejected", "reason": "invalid_context_surfaces"}
+        surfaces = [surface for surface in requested_surfaces if surface in ALLOWED_CONTEXT_SURFACES]
+        if len(surfaces) != len(requested_surfaces):
+            return {**base, "status": "rejected", "reason": "context_surface_not_allowlisted"}
+        ttl_seconds = payload.get("ttl_seconds", 3600)
+        if not isinstance(ttl_seconds, int) or not 60 <= ttl_seconds <= 86400:
+            return {**base, "status": "rejected", "reason": "invalid_context_ttl"}
+        context = {
+            "message": message.strip(), "surfaces": surfaces, "updated_at": _utc_now(),
+            "expires_at_unix": time.time() + ttl_seconds, "source_command_id": base["id"],
+        }
+        self._atomic_write(self.state_path, {"version": 1, "active_context": context})
+        if "livechat" not in surfaces:
+            return {**base, "status": "accepted", "result": {"context": context, "announced": False}}
+        announce_result = await self._dispatch({"id": base["id"], "action": "announce", "payload": {"message": context["message"]}})
+        if announce_result.get("status") == "deferred":
+            return {**base, "status": "deferred", "reason": "context_saved_livechat_unavailable", "result": {"context": context}}
+        return {**base, "status": announce_result["status"], "result": {"context": context, "announced": announce_result.get("status") == "accepted"}}
