@@ -6,7 +6,6 @@ on:
     paths: [.github/workflows/security-dependencies-once.yml]
 
 permissions: {}
-
 concurrency:
   group: security-lock-preparation-20260915
   cancel-in-progress: false
@@ -34,80 +33,83 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22.13.0'
-      - name: Update only the affected dependency families
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const targets = ['clerk-nextjs', 'modules/foundups/esingularity/frontend'];
-          for (const dir of targets) {
-            const path = `${dir}/package.json`;
-            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
-            if (!pkg.dependencies?.next || !pkg.devDependencies?.['eslint-config-next']) {
-              throw new Error(`Expected Next.js owner missing: ${dir}`);
-            }
-            pkg.dependencies.next = '16.3.4';
-            pkg.devDependencies['eslint-config-next'] = '16.3.4';
-            if (dir === 'modules/foundups/esingularity/frontend') {
-              pkg.devDependencies['@cloudflare/vite-plugin'] = '1.54.7';
-              pkg.devDependencies.wrangler = '4.131.0';
-              pkg.devDependencies['@cloudflare/workers-types'] = '5.20260910.1';
-            }
-            fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
-          }
-          NODE
-      - name: Regenerate Clerk lock without executing lifecycle scripts
+      - name: Patch Clerk YAML dependencies within their existing ranges
         working-directory: clerk-nextjs
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - name: Regenerate eSingularity lock without executing lifecycle scripts
+        run: npm update js-yaml --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Patch eSingularity YAML dependencies within their existing ranges
         working-directory: modules/foundups/esingularity/frontend
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - name: Verify manifest alignment and vulnerable-version removal
+        run: npm update js-yaml --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Apply only the already-reviewed type fixes from PR 1645
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('modules/foundups/esingularity/frontend')
+          path = root / 'components/LanguageSwitcher.tsx'
+          lines = path.read_text().splitlines(keepends=True)
+          keys = ['福井に、', '何が残る？', '8つの地域価値を見る', '計算機だけではない。', '地域に残る価値', '未来を動かすのは、']
+          for key in keys:
+              indices = [i for i, line in enumerate(lines) if line.startswith("  '" + key + "': [")]
+              if len(indices) == 2 and all(lines[i].rstrip().endswith('],') for i in indices):
+                  del lines[indices[0]]
+              elif len(indices) != 1:
+                  raise SystemExit('Unexpected translation duplicate shape; refusing edit')
+          path.write_text(''.join(lines))
+          path = root / 'app/manifest.ts'
+          lines = path.read_text().splitlines(keepends=True)
+          old = [line for line in lines if "purpose: 'any maskable'" in line]
+          if len(old) == 2:
+              lines = [part for line in lines for part in (
+                  [line.replace("purpose: 'any maskable'", "purpose: 'any'"),
+                   line.replace("purpose: 'any maskable'", "purpose: 'maskable'")]
+                  if "purpose: 'any maskable'" in line else [line])]
+              path.write_text(''.join(lines))
+          elif old:
+              raise SystemExit('Unexpected icon shape; refusing edit')
+          print('Preserved effective translation values and both existing icon purposes')
+          PY
+      - name: Verify every targeted lockfile copy
         run: |
           node <<'NODE'
           const fs = require('node:fs');
           const assert = require('node:assert/strict');
-          const targets = ['clerk-nextjs', 'modules/foundups/esingularity/frontend'];
-          for (const dir of targets) {
+          for (const dir of ['clerk-nextjs', 'modules/foundups/esingularity/frontend']) {
             const pkg = JSON.parse(fs.readFileSync(`${dir}/package.json`, 'utf8'));
             const lock = JSON.parse(fs.readFileSync(`${dir}/package-lock.json`, 'utf8'));
-            assert.equal(lock.lockfileVersion, 3);
             assert.deepEqual(lock.packages[''].dependencies, pkg.dependencies);
             assert.deepEqual(lock.packages[''].devDependencies, pkg.devDependencies);
             assert.equal(lock.packages['node_modules/next'].version, '16.3.4');
-            assert.equal(lock.packages['node_modules/eslint-config-next'].version, '16.3.4');
             for (const [path, item] of Object.entries(lock.packages)) {
-              if (/(^|\/)node_modules\/next$/.test(path)) {
-                assert.equal(item.version, '16.3.4', `Unexpected Next.js copy: ${path}`);
-              }
-              if (/(^|\/)node_modules\/sharp$/.test(path)) {
+              if (/(^|\/)node_modules\/next$/.test(path)) assert.equal(item.version, '16.3.4');
+              if (/(^|\/)node_modules\/(sharp|js-yaml)$/.test(path)) {
                 const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(item.version);
-                assert.ok(match, `Unknown sharp version: ${path}`);
+                assert.ok(match, `Unknown version in ${path}`);
                 const [major, minor, patch] = match.slice(1).map(Number);
-                assert.ok(major > 0 || minor > 35 || (minor === 35 && patch >= 4), `Affected sharp remains: ${path}`);
+                const valid = path.endsWith('/sharp')
+                  ? major > 0 || minor > 35 || (minor === 35 && patch >= 4)
+                  : (major === 3 && (minor > 15 || (minor === 15 && patch >= 2))) || (major === 4 && (minor > 3 || (minor === 3 && patch >= 2)));
+                assert.ok(valid, `Affected or unreviewed dependency remains: ${path}@${item.version}`);
               }
             }
-            if (dir === 'modules/foundups/esingularity/frontend') {
-              assert.equal(lock.packages['node_modules/@cloudflare/workers-types'].version, '5.20260910.1');
-              assert.equal(lock.packages['node_modules/wrangler'].version, '4.131.0');
-            }
-            console.log(`${dir}: manifest/lock and targeted version checks passed`);
+            console.log(`${dir}: targeted dependency floors passed`);
           }
           NODE
           git diff --check
-      - name: Publish only generated manifests and locks to the isolated branch
+      - name: Publish only scoped repairs to the isolated branch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -eu
           BRANCH=repair/security-dependencies-20260915
           CURRENT=$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)
-          test "$CURRENT" = "$GITHUB_SHA" || { echo 'Branch moved; refusing to overwrite concurrent work'; exit 1; }
+          test "$CURRENT" = "$GITHUB_SHA" || { echo 'Branch moved; refusing concurrent overwrite'; exit 1; }
           python3 - <<'PY'
           import subprocess
           allowed = {
               'clerk-nextjs/package.json', 'clerk-nextjs/package-lock.json',
               'modules/foundups/esingularity/frontend/package.json',
               'modules/foundups/esingularity/frontend/package-lock.json',
+              'modules/foundups/esingularity/frontend/components/LanguageSwitcher.tsx',
+              'modules/foundups/esingularity/frontend/app/manifest.ts',
           }
           changed = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
           untracked = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], text=True).splitlines()
@@ -116,9 +118,9 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add clerk-nextjs/package.json clerk-nextjs/package-lock.json modules/foundups/esingularity/frontend/package.json modules/foundups/esingularity/frontend/package-lock.json
-          git commit -m 'fix(security): patch Next.js/sharp and align Cloudflare peers'
+          git add clerk-nextjs/package.json clerk-nextjs/package-lock.json modules/foundups/esingularity/frontend/package.json modules/foundups/esingularity/frontend/package-lock.json modules/foundups/esingularity/frontend/components/LanguageSwitcher.tsx modules/foundups/esingularity/frontend/app/manifest.ts
+          git commit -m 'fix(security): patch YAML dependencies and clear existing typecheck blockers'
           GIT_AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
           echo "::add-mask::$GIT_AUTH"
           git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $GIT_AUTH" push origin "HEAD:refs/heads/$BRANCH"
-          echo 'Prepared only; build/test/merge/deployment and Dependabot closure still require verification.'
+          echo 'Prepared only; build/test/merge/deployment and alert closure still require verification.'
