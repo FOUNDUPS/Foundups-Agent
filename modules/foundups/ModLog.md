@@ -2,6 +2,21 @@
 
 ## Chronological Change Log
 
+### 2026-09-15 - AmIBot declarative registry onboarding
+
+- Continued the existing `detect_ai` intake in PR #1751. Added its single canonical
+  registry entry, declarative manifest and missing interface contract; retained
+  the other 17 entities unchanged.
+- Applied the existing genesis-intake guidance and onboarding protocol. AmIBot
+  stays `skeleton_candidate`, `SPECIFIED`, hidden, unbuilt and `TOKEN_DEFERRED`.
+  Its requested `/f/amibot` remains a shell-owner dependency; WSP 104 declares
+  inactive `/f/detect_ai` and `idb_detect_ai` under the permanent identity.
+- Validation and five pre-existing domain contract failures are distinguished in
+  [AmIBot validation](detect_ai/docs/VALIDATION.md). No catalog or runtime changes.
+- WSP 00/15/22/49/50/91/95/97/104/109.
+
+---
+
 ### 2026-08-30 - RedDog Lick cross-domain planning reference
 
 - Linked the RedDog-owned Lick handshake into FoundUps planning without

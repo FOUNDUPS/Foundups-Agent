@@ -1,16 +1,37 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: AmIBot registry prerequisite
+
+- Remote closure is held: candidate `9a89bb74` passed ten checks but triggered
+  two pre-existing eSingularity campaign-ticker failures. Protected source is
+  byte-identical to base; preserve that owner and keep PR1751 draft/unmerged.
+  Public catalog validation passes with its four entries unchanged. Continue
+  the unblocked M2M18/P0 work; no CI bypass or public/runtime activation.
+
+- Continued existing intake PR1751 instead of creating another FoundUp or PR.
+  Added one canonical `detect_ai` skeleton candidate, declarative manifest and
+  interface; preserved the other 17 entities and all 13 planning orders.
+- Applied the existing intake skill guidance and onboarding protocol. AmIBot
+  stays hidden/unbuilt/token-deferred, with inactive canonical namespaces and an
+  unresolved `/f/amibot` shell-owner dependency. No provider or runtime activation.
+- Local domain contracts: 106 pass/five identical baseline failures; pure strict
+  genesis validation and duplicate rejection pass independently. Exact evidence
+  and inherited debt are in backlog observation `amibot_registry_continuation_20260915`.
+- Prior PR1758 and both main workflows verified. Re-scored next shared action is
+  canonical M2M admission, 18/P0; the historical observation file and 26 planning
+  packets retained. WSP00/15/22/49/50/91/95/97/104/109.
+
 ## 2026-09-15: RSI signed work-order generation preflight
 
 - Independent M2M handoff review found a missing use-time full-order check. Extended the existing resident handler with the existing canonical digest and a detached snapshot; no new envelope field/provider/module/skill.
 - Fourteen regressions reproduced the issue; 115 connected local tests pass, including signer-backed final-order changes. Exact local/independent/package evidence is in the backlog's `current_observation`. Prior owned PR1757 and both merged-main workflows are verified.
-- Re-observed WSP15/97 keeps admitted normalization/provider handoff at 18/P0. AmIBot remains G0 controlled failure with no admitted build or public activation; all 55 historical observations and 26 planning packets stay unchanged. WSP00/15/22/50/62/84/97/99.
+- Re-observed WSP15/97 keeps admitted normalization/provider handoff at 18/P0. AmIBot remains G0 controlled failure with no admitted build or public activation; the historical observation file and 26 planning packets stay unchanged. WSP00/15/22/50/62/84/97/99.
 
 ## 2026-09-15: RSI canonical M2M envelope transport
 
 - Extended the existing compiler with an explicit JSON codec for already normalized WSP99 orders. Role/origin, optional principal, task ID, action and typed constraints survive; ambiguous or oversized inputs reject. Existing compiler/parser/fidelity behavior stays unchanged.
 - Prior owned PR1756 merged as e1346709 after all ten exact-head checks; both main workflows passed. This layer's local validation and independent review are bound in the existing backlog's `current_observation`; no AmIBot build, provider invocation, signed retention or public activation.
-- WSP15/97 keeps the remaining producer/consumer handoff at 18/P0. Preserved all 55 dated baseline observations and 26 planning packets; current evidence uses the existing backlog instead of enlarging the near-budget baseline. No new module, skill, test file or document. WSP00/15/22/50/62/84/97/99.
+- WSP15/97 keeps the remaining producer/consumer handoff at 18/P0. Preserved the historical observation file and 26 planning packets; current evidence uses the existing backlog instead of enlarging the near-budget baseline. No new module, skill, test file or document. WSP00/15/22/50/62/84/97/99.
 
 ## 2026-09-15: AmIBot production experiment G0 and shared M2M guard
 
