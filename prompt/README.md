@@ -69,9 +69,16 @@ before using compact output as worker context.
 The legacy serializer rejects nested or lossy `I` fields before emitting a
 packet. It preserves supported scalar text, including empty values and keys with
 internal spaces. `compile_m2m` raises `ValueError` for unsupported invariants;
-do not flatten or remove them to continue. Full `0102_m2m_v1` role/origin/principal,
-stable task-ID and typed-constraint qualification remains open. This helper is
-not ready to compile the AmIBot build package into admitted worker orders.
+do not flatten or remove them to continue.
+
+For an **already normalized** WSP99 section 0 order, the same module now exposes
+`encode_m2m_envelope(order)` and `decode_m2m_envelope(wire)`. This separate JSON
+codec preserves declared identity, stable task ID, action and nested JSON values.
+It never infers missing fields or sends the result to a worker. See the
+[codec profile](../modules/infrastructure/token_efficiency/INTERFACE.md#canonical-envelope-codec--2026-09-15)
+for required fields and local bounds. The legacy APIs keep their existing format.
+Principal-prose normalization, production consumer integration and admitted AmIBot
+work orders remain open; codec acceptance grants no runtime authority.
 
 **012 Compact Format** (4x token reduction):
 ```yaml

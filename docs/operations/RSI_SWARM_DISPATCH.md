@@ -47,8 +47,8 @@ It adds no scheduler, scoring variant, WRE grant, independent verifier or promot
 7. **Immediately re-observe after completion or blockage.** Refresh changed Git,
    ownership, CI and dependency evidence; reapply WSP 15 and WSP 97, remove resolved
    or superseded candidates, rescore and select again. Record the changed decision
-   in the existing baseline observations and point the backlog's current selection
-   to it. Reuse unchanged evidence only with its exact source/environment scope;
+   in the existing backlog's `current_observation`; preserve dated baseline history
+   and point `current_selection` to it. Reuse evidence only at its exact source;
    do not rerun a full audit or unchanged failed probe at every checkpoint. If no
    authorized independent action remains, record the specific blocker and the
    evidence change needed to resume; do not fabricate progress or busy-loop.
@@ -70,10 +70,10 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `amibot_g0_continuation_20260915` in the
-[existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json), linked by the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
-The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) reached controlled G0 failure; the shared legacy guard is locally verified.
-Next: canonical M2M envelope qualification, 18/P0. Planning evidence grants no runtime authority.
+**Current selection evidence:** `current_observation` in the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
+The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) is preserved at 55 entries near its local size budget; Git retains subsequent observation history.
+The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at controlled G0 failure; legacy rejection is merged and canonical JSON serialization is locally qualified.
+Next: normalized producer/consumer handoff qualification, 18/P0. No planning or codec result grants runtime authority.
 
 ## Production-line operating model
 

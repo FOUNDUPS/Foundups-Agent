@@ -73,7 +73,7 @@ scope pairs. No AmIBot build order has been admitted or executed.
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
 | Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
 | WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
-| WSP 99 handoff | Existing legacy compiler now rejects nested/lossy invariants before emission. Canonical identity fields, stable task ID and typed nested constraints still need producer/consumer qualification. |
+| WSP 99 handoff | Legacy emission rejects lossy invariants. The same module now has a bounded canonical JSON codec for already normalized identity, task ID and nested constraints. Producer/consumer handoff and admission remain unqualified. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
@@ -90,13 +90,15 @@ author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedD
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
 This closes unsafe legacy emission, not the canonical envelope or the RSI system.
 
-Re-observation selects **canonical M2M envelope qualification, 18/P0**. Higher
-19/20-point items remain externally owned or blocked on current runtime authority.
-Extend the existing compiler and its consumers; preserve schema, ROLE, ORIGIN,
-PRINCIPAL_REF, stable T, lane/scope/mode/action/WSPs and all nested I/O/F values.
-Prove typed round-trip and existing-reader compatibility before dispatch. Do not
-flatten or omit constraints to make the package pass. AutoResearcher report
-qualification remains 15/P1 and resumes when it is the highest eligible action.
+The next local layer preserves the full declared envelope through a bounded JSON
+codec in the same module; existing APIs stay unchanged. Its 356 focused tests
+cover identity, nested types, malformed wire and local resource limits. This is
+serialization qualification for normalized orders, not principal-prose compilation.
+Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**
+as the next candidate; higher 19/20-point items remain separately owned or blocked.
+Current evidence is in the existing backlog's `current_observation`. The 55-entry
+dated baseline stays unchanged near its local size budget; Git retains later
+observation history. AutoResearcher reporting remains 15/P1. No dispatch is enabled.
 
 | Gate | Planned work and advancement rule |
 |---|---|

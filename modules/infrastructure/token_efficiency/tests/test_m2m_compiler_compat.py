@@ -11,6 +11,10 @@ WSP_97 Truth Labels:
 - SPECIFIED_NOT_IMPLEMENTED: added [audit, review, verify, implement] for CTX.HOLO
 """
 
+import copy
+import json
+import math
+
 import pytest
 import sys
 from pathlib import Path
@@ -19,6 +23,196 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[4] / "prompt" / "swarm"))
 
 from m2m_compiler import M2MCompiler, M2MPrompt, Mode, Lane, compile_m2m, decompile_m2m
+import m2m_compiler as m2m_module
+
+
+@pytest.fixture
+def canonical_envelope():
+    """An already-normalized order; serialization cannot confer admission."""
+    return {
+        "schema": "0102_m2m_v1", "ROLE": "worker", "ORIGIN": "internal_handoff",
+        "PRINCIPAL_REF": "012", "L": "A", "S": "modules/foundups/detect_ai",
+        "M": "plan", "T": "AMI-A01-stable", "A": "Validate the declared package",
+        "R": [0, 15, 97, 99, 109],
+        "I": {"allowed_paths": ["modules/foundups/detect_ai"], "dependencies": [],
+              "wsp15": {"complexity": 4, "importance": 5, "deferability": 5,
+                        "impact": 4, "total": 18, "priority": "P0"},
+              "invariants": ["hold, do not deploy", "{identity}: preserved"],
+              "values": [True, False, None, 1, 1.0, -0.0, "", "  text  ",
+                         "\u65e5\u672c\U0001f916", "two\nlines\t\"quoted\""],
+              " key:with,delimiters{} ": {"": "\u2028\u2029\u0085"}},
+        "O": ["test evidence", "receipt"], "F": ["scope violation", "missing evidence"],
+    }
+
+
+def test_canonical_envelope_roundtrip_preserves_identity_and_typed_tree(canonical_envelope):
+    original = copy.deepcopy(canonical_envelope)
+    wire = m2m_module.encode_m2m_envelope(canonical_envelope)
+    restored = m2m_module.decode_m2m_envelope(wire)
+    assert restored == original == canonical_envelope
+    assert wire == m2m_module.encode_m2m_envelope(dict(reversed(list(original.items()))))
+    assert wire == json.dumps(original, sort_keys=True, ensure_ascii=False,
+                              separators=(",", ":"), allow_nan=False)
+    assert [type(v) for v in restored["I"]["values"]] == [
+        type(v) for v in original["I"]["values"]]
+    assert math.copysign(1, restored["I"]["values"][5]) == -1
+    restored["I"]["dependencies"].append("changed")
+    assert canonical_envelope == original
+
+
+@pytest.mark.parametrize("role", ["architect", "worker", "verifier", "coordinator", "validator"])
+@pytest.mark.parametrize("origin", ["external_principal", "internal_handoff", "autonomous_trigger"])
+def test_canonical_roles_origins_preserved_without_principal_default(canonical_envelope, role, origin):
+    canonical_envelope.update(ROLE=role, ORIGIN=origin)
+    del canonical_envelope["PRINCIPAL_REF"]
+    assert m2m_module.decode_m2m_envelope(
+        m2m_module.encode_m2m_envelope(canonical_envelope)) == canonical_envelope
+
+
+@pytest.mark.parametrize("field", [
+    "schema", "ROLE", "ORIGIN", "L", "S", "M", "T", "A", "R", "I", "O", "F",
+])
+@pytest.mark.parametrize("entry", ["encode", "decode"])
+def test_canonical_missing_fields_fail_closed(canonical_envelope, field, entry):
+    del canonical_envelope[field]
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        if entry == "encode":
+            m2m_module.encode_m2m_envelope(canonical_envelope)
+        else:
+            m2m_module.decode_m2m_envelope(json.dumps(canonical_envelope))
+
+
+@pytest.mark.parametrize("field,value", [
+    ("schema", "legacy"), ("ROLE", "Worker"), ("ORIGIN", "012"), ("M", "audit"),
+    ("L", "D"), ("S", "  "), ("T", None), ("T", ""), ("A", "\n"),
+    ("PRINCIPAL_REF", 12), ("PRINCIPAL_REF", ""), ("R", [True]), ("R", [-1]),
+    ("R", [15.0]), ("R", ["97"]), ("I", []), ("O", [1]), ("F", "stop"),
+    ("authority", "admitted"),
+])
+@pytest.mark.parametrize("entry", ["encode", "decode"])
+def test_canonical_invalid_fields_reject_without_value_leak(canonical_envelope, field, value, entry):
+    canonical_envelope[field] = value
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        if entry == "encode":
+            m2m_module.encode_m2m_envelope(canonical_envelope)
+        else:
+            m2m_module.decode_m2m_envelope(json.dumps(canonical_envelope))
+
+
+@pytest.mark.parametrize("value", [
+    ("tuple",), {"set"}, b"bytes", {1: "key"}, float("nan"), float("inf"),
+    float("-inf"), "\ud800", "\udfff", Mode.PLAN,
+])
+def test_canonical_encoder_rejects_non_json_values(canonical_envelope, value):
+    canonical_envelope["I"]["value"] = value
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        m2m_module.encode_m2m_envelope(canonical_envelope)
+
+
+@pytest.mark.parametrize("fragment", [
+    '"T":"changed",', '"I":{"x":1,"x":2},',
+    '"I":{"nested":[{"x":1,"x":2}]},', '"I":{"x":NaN},',
+    '"I":{"x":Infinity},', '"I":{"x":-Infinity},', '"I":{"x":1e9999},',
+    '"I":{"x":"\\ud800"},',
+])
+def test_canonical_decoder_rejects_ambiguous_wire(canonical_envelope, fragment):
+    # Remove I so nested duplicates/non-finite values cannot fail only on top-level I.
+    if not fragment.startswith('"T"'):
+        del canonical_envelope["I"]
+    wire = "{" + fragment + json.dumps(canonical_envelope)[1:]
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        m2m_module.decode_m2m_envelope(wire)
+
+
+@pytest.mark.parametrize("wire", [
+    None, b"{}", "[]", "null", "{} trailing", "{", "[" * 2000,
+    "L:A S:module M:plan T:legacy R:[50]", "\ud800", " " * 65537,
+], ids=["none", "bytes", "list", "null", "trailing", "truncated", "deep",
+        "legacy", "surrogate", "oversize"])
+def test_canonical_decoder_has_no_legacy_or_malformed_fallback(wire):
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        m2m_module.decode_m2m_envelope(wire)
+
+
+@pytest.mark.parametrize("value", ["x" * 65536, "\u65e5" * 22000, [0] * 4096],
+                         ids=["ascii_bytes", "utf8_bytes", "nodes"])
+@pytest.mark.parametrize("entry", ["encode", "decode"])
+def test_canonical_resource_limits_fail_closed(canonical_envelope, value, entry):
+    canonical_envelope["I"]["value"] = value
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        if entry == "encode":
+            m2m_module.encode_m2m_envelope(canonical_envelope)
+        else:
+            m2m_module.decode_m2m_envelope(json.dumps(canonical_envelope, ensure_ascii=False))
+
+
+def test_canonical_depth_cycles_and_huge_integer_fail_closed(canonical_envelope):
+    nested = []
+    for _ in range(17):
+        nested = [nested]
+    cycle = []
+    cycle.append(cycle)
+    for value in (nested, cycle, 1 << 300000):
+        canonical_envelope["I"]["value"] = value
+        with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+            m2m_module.encode_m2m_envelope(canonical_envelope)
+    canonical_envelope["I"]["value"] = nested
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        m2m_module.decode_m2m_envelope(json.dumps(canonical_envelope))
+
+
+def test_canonical_encoder_never_coerces_custom_containers(canonical_envelope):
+    class TrapDict(dict):
+        def items(self):
+            raise AssertionError("custom accessor must not run")
+
+    class TrapString(str):
+        def __str__(self):
+            raise AssertionError("custom conversion must not run")
+
+    for value in (TrapDict(), TrapString("text")):
+        canonical_envelope["I"]["value"] = value
+        with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+            m2m_module.encode_m2m_envelope(canonical_envelope)
+
+
+@pytest.mark.parametrize("lane", ["A", "B", "C", "QA", "SENTINEL", "ORCH"])
+@pytest.mark.parametrize("mode", ["exec", "plan", "qa"])
+def test_canonical_lane_mode_and_declared_text_preserved(canonical_envelope, lane, mode):
+    canonical_envelope.update(L=lane, M=mode, T="  stable:id,01  ",
+                              A=" Verify scope, hold {delivery}\nthen report ")
+    canonical_envelope["R"] = []
+    canonical_envelope["O"] = []
+    canonical_envelope["F"] = []
+    canonical_envelope["I"]["integer"] = 10 ** 100
+    assert m2m_module.decode_m2m_envelope(
+        m2m_module.encode_m2m_envelope(canonical_envelope)) == canonical_envelope
+
+
+def test_canonical_byte_boundary_accepts_exact_limit(canonical_envelope):
+    canonical_envelope["I"] = {"padding": ""}
+    remaining = 65536 - len(m2m_module.encode_m2m_envelope(canonical_envelope).encode("utf-8"))
+    canonical_envelope["I"]["padding"] = "x" * remaining
+    wire = m2m_module.encode_m2m_envelope(canonical_envelope)
+    assert len(wire.encode("utf-8")) == 65536
+    assert m2m_module.decode_m2m_envelope(wire) == canonical_envelope
+    canonical_envelope["I"]["padding"] += "x"
+    for operation, value in ((m2m_module.encode_m2m_envelope, canonical_envelope),
+                             (m2m_module.decode_m2m_envelope, wire + " ")):
+        with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+            operation(value)
+
+
+def test_canonical_depth_boundary_accepts_sixteen(canonical_envelope):
+    nested = 0
+    for _ in range(14):
+        nested = [nested]
+    canonical_envelope["I"] = {"nested": nested}  # Scalar at depth 16, root at 0.
+    assert m2m_module.decode_m2m_envelope(
+        m2m_module.encode_m2m_envelope(canonical_envelope)) == canonical_envelope
+    canonical_envelope["I"]["nested"] = [nested]
+    with pytest.raises(ValueError, match="^invalid canonical M2M envelope$"):
+        m2m_module.encode_m2m_envelope(canonical_envelope)
 
 
 class TestModeEnumBackwardCompat:
