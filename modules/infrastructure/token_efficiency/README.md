@@ -107,6 +107,14 @@ Five reproduced failures became passes in the 162-case selection. Legacy
 actionless packets render their stops; packets without stops keep their old
 rendering. The compact grammar is unchanged and its lossy-list cases still fail.
 
+The 2026-09-15 AmIBot G0 audit exposed nested-invariant loss in the existing
+legacy serializer. It now rejects unsupported mappings, nested values and
+delimiter/trim/control violations before emitting a packet. Flat scalar text,
+including empty values and internal-space keys, remains compatible. 222 focused
+tests and an independent rerun pass after compatibility review. See the
+[interface](INTERFACE.md#public-api-p2-compact-fidelity-gate) for exact limits;
+the canonical WSP99 envelope and live FoundUp dispatch remain unqualified.
+
 This gate owns compact prompt packets. It is not the AI Overseer reference-YAML
 compiler's acceptance gate. Its existing CTX.HOLO check round-trips the supplied
 context object separately; it does not prove that context traversed the compact

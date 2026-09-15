@@ -141,6 +141,24 @@ No signature or compact-wire change is involved. The gate validates this
 specific rendering; it does not decide whether arbitrary surrounding prose
 contradicts it or establishes authority.
 
+### Legacy invariant emission guard — 2026-09-15
+
+`M2MPrompt.to_compact()` and `compile_m2m(...)` raise `ValueError` before output
+when `invariants` is not a built-in dictionary, a key is empty/non-string, a
+value is not a built-in string/bool/int/finite-float/None, or the flat grammar
+cannot preserve the field. Keys reject commas/colons/braces; values reject
+commas/braces. Both reject trim-boundary whitespace, ASCII controls and
+U+0085/U+2028/U+2029. Internal spaces and empty string values remain supported.
+Errors contain no input values. `compile()` preserves invalid falsey mappings
+until serialization so they cannot silently become an empty constraint set.
+
+Scalar parse results retain legacy strings (`True` becomes `"True"`, for example).
+Nested allowed paths, dependency lists and WSP15 objects cannot use this wire.
+Preserve the structured source and fail closed; do not weaken it to pass.
+This change does not harden `parse_compact`, YAML, other fields or full prose,
+and does not qualify schema/ROLE/ORIGIN/PRINCIPAL_REF/stable task IDs or authority.
+The fidelity gate's separate `HoloInvariants` object is not this wire dictionary.
+
 ## Public API (P3: Telemetry Service)
 
 ### Classes

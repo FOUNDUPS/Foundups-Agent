@@ -142,6 +142,35 @@ class TestCompactFormatBackwardCompat:
         m2m = compiler.parse_compact(compact)
         assert m2m.mode == Mode.PLAN
 
+    @pytest.mark.parametrize("invariants", [
+        {"allowed_paths": ["modules/example"]}, {"wsp15": {"total": 18}},
+        {"dependencies": ("first", "second")}, {"skills": {"one", "two"}},
+        {"stop": "hold, do not deploy"}, {"scope": "owner} S:other"},
+        {"scope": "{owner"}, {" key": "value"}, {"key:part": "value"},
+        {"policy": " leading"}, {"policy": "two\nlines"},
+        {"cost": float("nan")}, {"cost": float("inf")}, {1: "value"},
+        [], "invalid mapping", {"key\x00": "value"}, {"policy": "two\twords"},
+        {"policy": "two\u2028lines"}, {"policy": "two\u2029lines"},
+        {"policy": "two\x85lines"}, {"two\u2028keys": "value"},
+    ])
+    @pytest.mark.parametrize("entry", ["object", "public_wrapper"])
+    def test_lossy_invariants_reject_before_wire(self, invariants, entry):
+        """Legacy compact syntax must not silently damage a structured work order."""
+        with pytest.raises(ValueError, match="invariants"):
+            if entry == "public_wrapper":
+                compile_m2m("Validate package", mode="plan", invariants=invariants)
+            else:
+                M2MPrompt(Lane.ORCH, "module", Mode.PLAN, "AMI-A01",
+                          invariants=invariants).to_compact()
+
+    @pytest.mark.parametrize("key", ["policy", "public status"])
+    @pytest.mark.parametrize("value", ["", "hold delivery", "C:/scratch", "a:b", True, 4, 0.5, None])
+    def test_flat_invariants_keep_legacy_text_semantics(self, key, value):
+        """Existing scalar values remain textual; this is not a typed envelope."""
+        compiler = M2MCompiler()
+        packet = compiler.compile("Validate package", invariants={key: value})
+        assert compiler.parse_compact(packet.to_compact()).invariants == {key: str(value)}
+
 
 class TestDecompileBackwardCompat:
     """Verify decompile unchanged."""

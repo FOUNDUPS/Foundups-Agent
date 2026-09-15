@@ -56,7 +56,7 @@ Use these for parallel 0102 operations:
 ### M2M Prompting (WSP 99)
 
 Machine-to-machine compact format for swarm-internal communication:
-- `swarm/0102_M2M_SCHEMA.yaml` - Canonical K:V schema definition
+- `swarm/0102_M2M_SCHEMA.yaml` - Legacy K:V examples; the current machine envelope is defined by [WSP 99](../WSP_framework/src/WSP_99_M2M_Prompting.md)
 - `swarm/m2m_compiler.py` - Qwen-delegatable 012 prose -> M2M compiler
 
 The compiler now emits an explicit `A:<action>` field, preserving the recognized
@@ -65,6 +65,13 @@ packets without `A` remain readable with mode-only rendering. This helper does
 not preserve an arbitrary full objective or authenticate a work order. See the
 [field-fidelity contract](../modules/infrastructure/token_efficiency/INTERFACE.md#public-api-p2-compact-fidelity-gate)
 before using compact output as worker context.
+
+The legacy serializer rejects nested or lossy `I` fields before emitting a
+packet. It preserves supported scalar text, including empty values and keys with
+internal spaces. `compile_m2m` raises `ValueError` for unsupported invariants;
+do not flatten or remove them to continue. Full `0102_m2m_v1` role/origin/principal,
+stable task-ID and typed-constraint qualification remains open. This helper is
+not ready to compile the AmIBot build package into admitted worker orders.
 
 **012 Compact Format** (4x token reduction):
 ```yaml

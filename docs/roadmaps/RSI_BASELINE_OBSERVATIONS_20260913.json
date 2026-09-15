@@ -18004,5 +18004,1284 @@
       }
     },
     "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\research-input-snapshot-20260915"
+  },
+  "amibot_g0_continuation_20260915": {
+    "observed_at": "2026-09-15T00:32:54.568469+00:00",
+    "origin": "external_principal",
+    "principal_ref": "012",
+    "role": "architect/coordinator",
+    "base_commit": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+    "wsp00_gate": {
+      "gate_passed": true,
+      "attempted_awakening": false,
+      "awakening_success": false,
+      "is_zen_compliant": true,
+      "requires_awakening": false,
+      "last_validation": "2026-09-15T09:23:32.623234",
+      "session_id": 1789307432,
+      "state_file": "O:\\Foundups-Agent-worktrees\\agent-rsi-baseline-context-evidence-20260913\\modules\\infrastructure\\wsp_core\\memory\\wsp_00_zen_state.json",
+      "action": "check"
+    },
+    "ranking_before": {
+      "artifact": "selection.json",
+      "sha256": "e99065fe9bb22a587a58c2c3cb64b3437a836921ac312438d2a59fa66262cd9c",
+      "selected": "AmIBot-G0-M2M-constraint-loss",
+      "dimensions": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 4
+      },
+      "score": 18,
+      "priority": "P0",
+      "scope": "Before-sprint queue retained externally; complete re-scored queue follows in post_sprint_reobservation."
+    },
+    "selected_action": "AmIBot-G0-M2M-constraint-loss",
+    "score": 18,
+    "priority": "P0",
+    "score_scope": "Shared canonical handoff parent; this sprint closes only unsafe legacy invariant emission.",
+    "rationale": "AmIBot G0 exposed a reproducible shared serialization loss before dispatch. Higher current scores are externally owned or require absent signed/runtime admission. Fail-closed constraint handling is local, reversible and reusable across FoundUps; do not build a second compiler or product-specific workaround.",
+    "retrieval": {
+      "holo": {
+        "artifact": "holo-retrieval.json",
+        "sha256": "99a6dd350296511bbc43b53e0a62a69e074b99bce1fdd9aefa7aa3059068df6a",
+        "ok": true,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "owner_attempts": 0,
+        "workspace_repo_head_sha": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "accepted_semantic_evidence": false,
+        "scope": "Read-only lexical owner bundle plus direct tracked source. Full retrieval artifact retained externally; no reindex."
+      },
+      "evaluation": {
+        "noise": "Peripheral lexical hits required source-owner narrowing.",
+        "ordering": "Canonical protocols and owner contracts before source changes; independent route/runtime audits.",
+        "missing": "AmIBot package exists only in PR1751; token-efficiency has no ROADMAP or tests/README, so existing README/TestModLog inventory was used.",
+        "staleness": "Holo freshness UNKNOWN, index_gap_detected=true, semantic owner attempts zero; no CURRENT semantic claim.",
+        "duplication": "Existing compiler, tests, genesis, AgentDB, worker adapters, Skillz and public projector reused; no new repository module/skill/document."
+      },
+      "test_reuse": "Existing compatibility and fidelity suites extended; all prior test functions retained. Runtime/genesis/route audits use existing tests.",
+      "independent_audits": {
+        "runtime": "Current source/docs/tests and PATH/package metadata, stopped WSL inventory; no live service/config/DB/model reads.",
+        "route_genesis": "Current route/projector/registry, typed genesis and Skillz owners; external exact PR package snapshot. No owner writes."
+      },
+      "capacity_note": "Canonical observation is near1MiB; continue bounded archival/consolidation in existing documentation owners before further append growth. Raw Holo/agent traces are hash-bound external evidence."
+    },
+    "alternatives": [
+      "Reject lossy legacy invariant serialization in the existing compiler (selected bounded safety layer).",
+      "Add full canonical JSON codec now (deferred until explicit wire/consumer compatibility review; no duplicate implementation).",
+      "Dispatch overlapping AmIBot workers with flattened strings (rejected: silent policy/scope loss).",
+      "Blindly update global agents or deploy route (rejected: current runtime/provider and route acceptance unverified)."
+    ],
+    "manual_reason": "Existing deterministic compiler/test seam; no paid model needed for reproduction or fix. Two read-only agents gather independent readiness evidence; these are not WRE-admitted build jobs.",
+    "execution_plane": "authorized_local_source_authoring",
+    "prior_closure": {
+      "pr": 1755,
+      "merge_commit": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+      "main_ci": {
+        "conclusion": "success",
+        "databaseId": 34910579364,
+        "headSha": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "status": "completed",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/34910579364"
+      },
+      "main_codeql": {
+        "conclusion": "success",
+        "databaseId": 34910579509,
+        "headSha": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "status": "completed",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/34910579509"
+      }
+    },
+    "experiment": {
+      "decision": "G0_CONTROLLED_FAILURE",
+      "dispatchable": false,
+      "fixture": "AmIBot",
+      "product_under_test": "FoundUps autonomous production system",
+      "package_pr": {
+        "headRefName": "docs/detect-ai-wsp109-intake-20260915",
+        "headRefOid": "c9a33a12435e836c454387b3d6b9199c259ba38c",
+        "number": 1751,
+        "state": "OPEN",
+        "title": "docs(amibot): WSP 109 intake, autonomous build package, PWA and safety roadmap",
+        "updatedAt": "2026-09-14T23:15:34Z",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+      },
+      "issue": {
+        "number": 1750,
+        "state": "OPEN",
+        "title": "[AmIBot] DETECT_AI_PREFLIGHT_AND_POC_CONTRACT_PHASE1",
+        "updatedAt": "2026-09-14T21:04:13Z",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/issues/1750"
+      },
+      "package_probe": {
+        "base_sha": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "package_sha": "c9a33a12435e836c454387b3d6b9199c259ba38c",
+        "package_sha256": "fc9ef8fe9a5d320449c3ff0b51ae620aff59bc04c2fa8ce93a9514eccaeb2de1",
+        "package_work_orders": 13,
+        "scores_valid": true,
+        "dag_acyclic": true,
+        "topological_order": [
+          "AMI-A01",
+          "AMI-A02",
+          "AMI-A03",
+          "AMI-A04",
+          "AMI-A05",
+          "AMI-A06",
+          "AMI-B01",
+          "AMI-B02",
+          "AMI-B03",
+          "AMI-C01",
+          "AMI-C02",
+          "AMI-C03",
+          "AMI-D01"
+        ],
+        "parallel_collisions": {
+          "group": "G1",
+          "writer_ids": [
+            "AMI-A02",
+            "AMI-A03",
+            "AMI-A04",
+            "AMI-A05",
+            "AMI-A06"
+          ],
+          "overlapping_pair_count": 10,
+          "shared_path": "modules/foundups/detect_ai",
+          "artifact": "package-contract-probe.json#parallel_collisions"
+        },
+        "parallelism_qualified": false,
+        "package_dispatchable": false,
+        "legacy_compiler": {
+          "missing_envelope_arguments": [
+            "schema",
+            "role",
+            "origin",
+            "principal_ref",
+            "task_id"
+          ],
+          "nested_invariants_preserved": false,
+          "stable_id_preserved": false
+        },
+        "verdict": "G0_BLOCKED",
+        "live_jobs_dispatched": 0,
+        "scope": "Coordinator diagnostic only, not runtime admission or autonomous product construction"
+      },
+      "package_after_repair": {
+        "base_sha": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "package_sha": "c9a33a12435e836c454387b3d6b9199c259ba38c",
+        "package_sha256": "fc9ef8fe9a5d320449c3ff0b51ae620aff59bc04c2fa8ce93a9514eccaeb2de1",
+        "compiler_sha256": "5318f881852412793e6e78866c7ebe3ccccb6125100bbac409a9611113f5b20b",
+        "probes": [
+          {
+            "entry": "object",
+            "error_type": "ValueError",
+            "error": "legacy compact invariants require lossless scalar fields",
+            "wire_emitted": false
+          },
+          {
+            "entry": "public_wrapper",
+            "error_type": "ValueError",
+            "error": "legacy compact invariants require lossless scalar fields",
+            "wire_emitted": false
+          }
+        ],
+        "dispatchable": false,
+        "canonical_envelope_qualified": false,
+        "scope": "Reject unsafe legacy serialization before emission; full WSP99 identity/types/consumer qualification remain open."
+      },
+      "canonical_module_present_on_base": false,
+      "public_target": "https://foundups.com/f/amibot",
+      "permanent_foundup_id": "detect_ai",
+      "new_domain": false,
+      "readiness": [
+        {
+          "gate": 1,
+          "name": "OpenClaw version/runtime",
+          "state": "CURRENT_WSL_UNVERIFIED",
+          "evidence": "Native npm 2026.5.2; canonical Ubuntu-24.04 stopped. September13 WSL 2026.7.1-2 is historical only."
+        },
+        {
+          "gate": 2,
+          "name": "Hermes version/provider",
+          "state": "CURRENT_BINDING_UNVERIFIED",
+          "evidence": "API contract pins 0.20.4; current WSL installation/service/profile/model binding unknown. Windows PATH absence is not global absence."
+        },
+        {
+          "gate": 3,
+          "name": "FoundUp scaffold support",
+          "state": "PARTIAL",
+          "evidence": "Existing typed dry-run adapter and separate live writer; legacy Hermes route blocked; conversation loses create lineage; existing module cannot be passed blindly to new-scaffold writer."
+        },
+        {
+          "gate": 4,
+          "name": "WSP109 intake consumption",
+          "state": "PARTIAL",
+          "evidence": "Eight Markdown artifacts define preparation. Existing key:value normalizer accepts structured input, not an automatic consumer of these documents."
+        },
+        {
+          "gate": 5,
+          "name": "WSP99 M2M compatibility",
+          "state": "BLOCKED",
+          "evidence": "Legacy helper lacks canonical schema/role/origin/principal/stable-ID inputs. Structured constraints now reject before emission; full typed codec/consumer still unqualified."
+        },
+        {
+          "gate": 6,
+          "name": "Parallel worktrees/jobs",
+          "state": "LOCAL_CONTRACTS_ONLY",
+          "evidence": "AgentDB claim/reservation tests pass; G1 five proposed writers have ten overlapping path pairs. In-memory FoundUp queue is not durable scheduling."
+        },
+        {
+          "gate": 7,
+          "name": "Work-order receipt chain",
+          "state": "LOCAL_CONTRACTS_ONLY",
+          "evidence": "Signed receipt/publication owners exist and tests pass. No actual AmIBot admission, publication, claim or completed receipt chain."
+        },
+        {
+          "gate": 8,
+          "name": "Independent verifier",
+          "state": "LOCAL_CONTRACTS_ONLY",
+          "evidence": "Separate slice verifier contract and reservation tests pass; source review is independent locally. No admitted build verifier or promoter evidence."
+        },
+        {
+          "gate": 9,
+          "name": "Execution valve",
+          "state": "CLOSED",
+          "evidence": "Use-time resolver explicitly returns authoritative_use_lease=None; missing current trust/model/effect inputs cannot be replaced by serialized flags."
+        },
+        {
+          "gate": 10,
+          "name": "Skillz availability/freshness",
+          "state": "PARTIAL",
+          "evidence": "Existing foundup_genesis_intake and strategic_diligence_gate are discoverable; intake registration/wardrobe admission is not established. Presence is not eligibility."
+        },
+        {
+          "gate": 11,
+          "name": "Execution-path validation",
+          "state": "CONTROLLED_FAILURE",
+          "evidence": "174 runtime contracts and 222 repaired compiler tests pass locally. Existing public-route tests 53 pass/11 fail; genesis 27 pass/1 fail. No end-to-end live build validation."
+        },
+        {
+          "gate": 12,
+          "name": "Documentation vs implementation",
+          "state": "DRIFT_IDENTIFIED",
+          "evidence": "Package is open-PR planning only; WSP109, typed genesis, wardrobe, runtime and route gaps remain. Root npm build only echoes Python build complete; it is not frontend acceptance."
+        }
+      ],
+      "runtime_identity": {
+        "native_windows_openclaw": {
+          "package_name": "openclaw",
+          "package_version": "2026.5.2",
+          "package_path": "C:\\Users\\user\\AppData\\Roaming\\npm\\node_modules\\openclaw\\package.json",
+          "entrypoint": "C:/Users/user/AppData/Roaming/npm/openclaw.ps1",
+          "package_bin": {
+            "openclaw": "openclaw.mjs"
+          },
+          "evidence_kind": "Installed package metadata and wrapper inspection; CLI not executed.",
+          "canonical_governed_provider": false
+        },
+        "native_windows_hermes": {
+          "path_command_found": false,
+          "qualified_python_matching_distribution_found": false,
+          "conclusion": "Not discovered in these two Windows surfaces; no global absence claim."
+        },
+        "canonical_wsl": {
+          "distro": "Ubuntu-24.04",
+          "registered_base": "E:/Agents/WSL/Ubuntu-24.04",
+          "wsl_version": 2,
+          "running_inventory_command": "System32/wsl.exe --list --running --quiet",
+          "running_inventory_exit_code": 0,
+          "running_inventory_output_empty": true,
+          "current_installed_openclaw_version": null,
+          "current_installed_hermes_version": null,
+          "current_service_health": null,
+          "current_provider_model_binding": null,
+          "canonical_executables": {
+            "openclaw": "/usr/local/bin/openclaw",
+            "hermes": "/usr/local/bin/hermes"
+          },
+          "historical_2026_09_13": {
+            "openclaw": "2026.7.1-2",
+            "hermes": "0.20.4",
+            "source": "docs/operations/RSI_SWARM_DISPATCH.md:1945"
+          },
+          "no_start_reason": "Preserve cold-start user-service effects during this read-only diagnosis; not a permanent refusal under the principal update/run authorization."
+        },
+        "hermes_api_contract": {
+          "expected_api_version": "0.20.4",
+          "profile": "reddogartifact",
+          "endpoint": "http://127.0.0.1:8642/v1/runs",
+          "binding_rule": "Exact signed principal provider/model route; authenticated preflight, native single leaf, zero child file reads/writes, complete lifecycle evidence."
+        },
+        "current_shell_configuration_presence_only": {
+          "qualified_artifact_provider_model_binding_observed": false,
+          "live_service_probe_performed": false,
+          "details_artifact": "runtime-audit.json"
+        }
+      },
+      "runtime_findings": [
+        {
+          "id": "RUNTIME-01",
+          "evidence": [
+            "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py:15",
+            "modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_command_runner.py:34"
+          ]
+        },
+        {
+          "id": "RUNTIME-02",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py:83",
+            "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py:170"
+          ]
+        },
+        {
+          "id": "RUNTIME-03",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_capability.py:73",
+            "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_capability.py:83"
+          ]
+        },
+        {
+          "id": "RUNTIME-04",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/hermes_job_executor.py:1767",
+            "modules/infrastructure/wre_core/src/hermes_job_executor.py:1843"
+          ]
+        },
+        {
+          "id": "RUNTIME-05",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:39",
+            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:230"
+          ]
+        },
+        {
+          "id": "RUNTIME-06",
+          "evidence": [
+            "modules/infrastructure/database/src/agent_db.py:1808",
+            "modules/infrastructure/database/src/agent_db.py:1844"
+          ]
+        },
+        {
+          "id": "RUNTIME-07",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/wre_autonomous_slice_verifier_runtime.py:408",
+            "modules/infrastructure/wre_core/src/wre_autonomous_slice_verifier_runtime.py:441"
+          ]
+        },
+        {
+          "id": "DOC-01",
+          "evidence": [
+            "modules/infrastructure/wre_core/INTERFACE.md:537",
+            "modules/infrastructure/wre_core/src/hermes_job_executor.py:55"
+          ]
+        },
+        {
+          "id": "DOC-02",
+          "evidence": [
+            "modules/communication/moltbot_bridge/INTERFACE.md:1498",
+            "modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py:172"
+          ]
+        },
+        {
+          "id": "DOC-03",
+          "evidence": [
+            "modules/communication/moltbot_bridge/tests/README.md:505",
+            "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py:20"
+          ]
+        }
+      ],
+      "route_genesis_findings": [
+        {
+          "id": "F01",
+          "title": "WSP 109 intake is preparation; executable owners accept structured inputs",
+          "evidence": [
+            "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md:66",
+            "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md:132"
+          ]
+        },
+        {
+          "id": "F02",
+          "title": "Canonical create_foundup route is distinct and dry-run only",
+          "evidence": [
+            "modules/communication/moltbot_bridge/tests/test_foundup_job_create_lineage.py:11",
+            "modules/infrastructure/wre_core/src/foundup_job_router.py:91"
+          ]
+        },
+        {
+          "id": "F03",
+          "title": "Conversational onboarding does not construct the typed create route",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:211",
+            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:571"
+          ]
+        },
+        {
+          "id": "F04",
+          "title": "Live scaffold and FAM entity creation are separate effect owners",
+          "evidence": [
+            "modules/foundups/agent/src/live_writer_preauth_packet.py:4",
+            "modules/foundups/agent/src/foundup_scaffold_writer_live.py:4"
+          ]
+        },
+        {
+          "id": "F05",
+          "title": "Wardrobe discovery does not supply AmIBot execution authority",
+          "evidence": [
+            "modules/infrastructure/wre_core/skillz/skills_registry_v2.json:3",
+            "modules/infrastructure/wre_core/skillz/skills_registry_v2.json:231"
+          ]
+        },
+        {
+          "id": "F06",
+          "title": "Shared /f/{foundup_id} namespace exists; AmIBot content is absent",
+          "evidence": [
+            "firebase.json:2",
+            "firebase.json:65"
+          ]
+        },
+        {
+          "id": "F07",
+          "title": "Proposed /f/amibot conflicts with retained detect_ai canonical ID",
+          "evidence": [
+            "package_snapshot/modules/foundups/detect_ai/README.md:33",
+            "package_snapshot/modules/foundups/detect_ai/docs/intake/FOUNDUP_MANIFEST_DRAFT.md:7"
+          ]
+        },
+        {
+          "id": "F08",
+          "title": "Registry/projector is the public content owner; frontend build is static",
+          "evidence": [
+            "modules/foundups/public_catalog_projector/README.md:3",
+            "modules/foundups/public_catalog_projector/INTERFACE.md:18"
+          ]
+        },
+        {
+          "id": "F09",
+          "title": "Existing public route contract tests lag the public membership boundary",
+          "evidence": [
+            "public/member/tests/test_route_contract_bridge.py:61",
+            "public/member/tests/test_route_contract_bridge.py:244"
+          ]
+        },
+        {
+          "id": "F10",
+          "title": "Genesis dispatch fixture predates commander authentication",
+          "evidence": [
+            "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py:154",
+            "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py:179"
+          ]
+        },
+        {
+          "id": "F11",
+          "title": "Documentation freshness needs bounded repair",
+          "evidence": [
+            "modules/ai_intelligence/ai_overseer/ROADMAP.md:30",
+            "modules/foundups/public_catalog_projector/README.md:9"
+          ]
+        }
+      ],
+      "runtime_probe_update_route": {
+        "owner": "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py:113; existing probe_wsl_agent_runtime / run_wsl_agent_runtime_advisory",
+        "conditions": [
+          "Current principal scope already permits runtime update/run when ready; coordinator must first separate diagnosis from service startup effects and preserve active lanes.",
+          "Use system-owned WSL resolver and exact Ubuntu-24.04 registration/base E:/Agents/WSL/Ubuntu-24.04.",
+          "A stopped distro requires an intentional qualification window: wsl --exec may wake its user services. Provider preflight explicitly anticipates cold-start service binding.",
+          "Inspect the installed command/update behavior and use qualified fixed executable paths; never blindly update the native global package as a substitute for WSL runtime.",
+          "Version success is advisory availability only. Perform service/profile/auth/confinement preflight plus current artifact-model and signed workload admission separately."
+        ],
+        "fixed_commands": [
+          "System32/wsl.exe --distribution Ubuntu-24.04 --exec /usr/local/bin/openclaw --version",
+          "System32/wsl.exe --distribution Ubuntu-24.04 --exec /usr/local/bin/hermes --version"
+        ],
+        "cold_start_evidence": {
+          "path": "modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_artifact_provider.py",
+          "line": 77
+        },
+        "governed_update_path": "Existing WRE/external-research cycle -> scripts/refresh_openclaw_ecosystem_watchlist.py -> compose_runtime_compatibility_evidence -> off-repository advisory cache. This is observation/proposal, not an installer. Any package/model change remains gated on authenticated source admission, security, canary, rollback and appropriate benchmark/promotion evidence.",
+        "update_evidence": [
+          {
+            "path": "modules/infrastructure/dependency_launcher/README.md",
+            "line": 85
+          },
+          {
+            "path": "modules/infrastructure/dependency_launcher/README.md",
+            "line": 100
+          },
+          {
+            "path": "modules/infrastructure/dependency_launcher/INTERFACE.md",
+            "line": 179
+          },
+          {
+            "path": "modules/infrastructure/dependency_launcher/ROADMAP.md",
+            "line": 75
+          }
+        ],
+        "smallest_safe_workload_after_real_admission": "Reuse the existing R06/R07/R08 one-documentation-artifact canary, exact output byte/time/provider budgets and independent verifier before a writing AmIBot packet. No new scheduler/provider bridge is indicated."
+      },
+      "source_fingerprints": {
+        "base_sha": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "unmodified_runtime_owner_files": 27,
+        "unmodified_route_genesis_owner_files": 27,
+        "source_manifest_artifacts": [
+          "runtime-audit.json#source_fingerprints",
+          "route-genesis-audit.json#source_file_hashes"
+        ],
+        "validation": "All auditor owner fingerprints checked unchanged before canonical documentation updates; primary runtime/genesis/route code remains untouched."
+      },
+      "acceptance_unchanged": [
+        "Clean adult/invite text POC first; mature functionality deferred",
+        "Two-browser human-human path before randomized game",
+        "Hidden server assignment, locked verdict/confidence, reveal/Brier scoring",
+        "Both human and AI output moderated; failure holds delivery",
+        "20 consenting adults and 100 valid focal rounds, at least 40 per arm, under existing benchmark contract",
+        "Real iPhone/Android/browser, reconnect, keyboard/safe area and installability acceptance",
+        "No undisclosed AI fallback, token/wallet activation, new domain, production-account effects or unadmitted merge/deployment"
+      ],
+      "metrics": {
+        "planned_work_orders": 13,
+        "admitted_build_work_orders": 0,
+        "dispatched_build_jobs": 0,
+        "completed_build_work_orders": 0,
+        "build_parallel_lanes_used": 0,
+        "read_only_audit_lanes": 2,
+        "audit_runtime": "Codex collaboration, separate from OpenClaw/Hermes admission",
+        "worker_provider_model_per_build_job": [],
+        "audit_provider_model": "Codex app; exact provider/model billing metadata unavailable",
+        "build_retries": 0,
+        "failed_build_jobs": 0,
+        "scope_violations_observed": 0,
+        "merge_conflicts_observed": 0,
+        "local_review_rejections": 1,
+        "admitted_verifier_rejections": 0,
+        "012_initial_directives": 1,
+        "012_followup_interventions": 0,
+        "0102_architectural_interventions": [
+          "Split G0 into two bounded read-only audits",
+          "Expand reads to verified genesis/database/runtime owners",
+          "Choose shared legacy compiler guard before build",
+          "Restore representable scalar cases after independent rejection",
+          "Retain G0 closed and rescore remaining contracts"
+        ],
+        "tokens": null,
+        "cost": null,
+        "resource_limit": "No OpenClaw/Hermes/model-provider invocation; Codex token/cost metadata unavailable.",
+        "measured_local_validation_seconds": {
+          "m2m_author": 0.456,
+          "m2m_independent": 0.499,
+          "runtime_runs": [
+            9.702999999979511,
+            3.25
+          ],
+          "manifest": 69.76600000000326,
+          "fast": 10.578000000037719
+        },
+        "build_wall_clock_seconds": null,
+        "defects_reaching_integration": null,
+        "defects_reaching_public_poc": null,
+        "unmeasured_reason": "No construction/integration/public trial was admitted; absence of evidence is not zero defects.",
+        "reusable_improvement_candidates": [
+          "Canonical M2M handoff",
+          "Typed genesis conversation lineage",
+          "Intake wardrobe admission",
+          "Public route/identity and test drift",
+          "Current runtime/effect authority composition"
+        ],
+        "shared_repairs_implemented": 1,
+        "locally_independently_accepted_repairs": 1,
+        "wre_retained_improvements": 0,
+        "package_files_modified": 0,
+        "required_package_reconciliations": [
+          "Qualified WSP99 envelope",
+          "Disjoint G1 scopes after scaffold ownership",
+          "Explicit runtime/wardrobe dependencies",
+          "Public alias binding",
+          "Bind final RSI/public metrics to publication outcome or controlled failure"
+        ],
+        "autonomous_build_completion_percent": 0,
+        "autonomous_build_completion_basis": "0 accepted build orders / 13 planned orders; not a whole-system completion percentage."
+      }
+    },
+    "changes": {
+      "owner": "prompt/swarm/m2m_compiler.py",
+      "behavior": [
+        "Legacy invariant emission guard, compatibility repair and local independent review"
+      ],
+      "compatibility": "Preserves flat legacy text, including empty values/internal-space keys. Rejects nested/container values, invalid mappings, nonfinite floats and delimiter/trim/control/line-boundary violations before wire emission.",
+      "limits": [
+        "Scalar parsing remains textual",
+        "No schema/role/origin/principal/stable-ID qualification",
+        "Parser/YAML/general field hardening remain outside this guard",
+        "No runtime authority or production activation"
+      ],
+      "source_validation": {
+        "prompt/swarm/m2m_compiler.py": {
+          "lines": 434,
+          "prior_lines": 412,
+          "sha256": "5318f881852412793e6e78866c7ebe3ccccb6125100bbac409a9611113f5b20b",
+          "added_symbols": [
+            "_encode_legacy_invariants"
+          ],
+          "inherited_oversize_not_grown": true
+        },
+        "modules/infrastructure/token_efficiency/tests/test_m2m_compiler_compat.py": {
+          "lines": 233,
+          "prior_lines": 204,
+          "sha256": "e64c8cc4066d8545530fd734d729d172e5f2a1c874684217249a7ff0eaecce95",
+          "added_symbols": [
+            "test_flat_invariants_keep_legacy_text_semantics",
+            "test_lossy_invariants_reject_before_wire"
+          ],
+          "inherited_oversize_not_grown": true
+        }
+      },
+      "packaging": {
+        "runtime_members": 1400,
+        "membership_unchanged": true,
+        "runtime_hash_changes": [
+          "prompt/swarm/m2m_compiler.py"
+        ],
+        "manifest_digest": "2352e9768379275645eee26ef8534596b7a7afe1171d1b2075faaf05cd1569ae",
+        "digest_pins": [
+          "extensions/reddog/backend_compatibility_constants.js",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "fast": {
+          "command": [
+            "C:/Program Files/nodejs/node.exe",
+            "extensions/reddog/tests/run_reddog_test_tier.js",
+            "fast"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 10.578000000037719,
+          "scope": "local isolated worktree; no live runtime admission"
+        },
+        "manifest": {
+          "command": [
+            "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+            "-B",
+            "-m",
+            "pytest",
+            "scripts/tests/test_generate_reddog_backend_manifest.py",
+            "--import-mode=importlib",
+            "-p",
+            "pytest_asyncio.plugin",
+            "-p",
+            "no:cacheprovider",
+            "--tb=short",
+            "-q",
+            "--basetemp=O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-g0-20260915\\manifest-test-temp",
+            "--junitxml=O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-g0-20260915\\manifest-tests.xml"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 69.76600000000326,
+          "scope": "local isolated worktree; no live runtime admission"
+        },
+        "registry": {
+          "command": [
+            "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+            "-B",
+            "modules/infrastructure/wre_core/scripts/generate_test_registry.py",
+            "--check"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 11.375,
+          "scope": "local isolated worktree; no live runtime admission"
+        }
+      }
+    },
+    "validation": {
+      "local": {
+        "m2m-before": {
+          "tests": 199,
+          "failures": 30,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 0.614
+        },
+        "m2m-closure": {
+          "tests": 207,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 0.407
+        },
+        "m2m-review-repair": {
+          "tests": 222,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 0.456
+        },
+        "m2m-independent-tests-revised": {
+          "tests": 222,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 0.499
+        },
+        "manifest-tests": {
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "elapsed_seconds": 69.082
+        }
+      },
+      "independent_review": {
+        "reviewer": "amibot_route_genesis_audit",
+        "independent_of_author": true,
+        "reviewer_code_edits": false,
+        "initial_decision": "CHANGES_REQUESTED_COMPATIBILITY: empty scalar/internal-space key rejection despite207 passing tests; preserved in raw review artifact.",
+        "final_decision": "No remaining blocking finding within the requested two-file diff.",
+        "source_sha256": {
+          "prompt/swarm/m2m_compiler.py": "5318f881852412793e6e78866c7ebe3ccccb6125100bbac409a9611113f5b20b",
+          "modules/infrastructure/token_efficiency/tests/test_m2m_compiler_compat.py": "e64c8cc4066d8545530fd734d729d172e5f2a1c874684217249a7ff0eaecce95",
+          "modules/infrastructure/token_efficiency/tests/test_m2m_fidelity.py": "9625c2f3679d3a976c74b5a1c3b4e3d23e51b614a6714f88098522ae4ba446bc"
+        },
+        "tests": {
+          "passed": 222,
+          "failed": 0,
+          "skipped": 0,
+          "xml": "m2m-independent-tests-revised.xml",
+          "test_count_used_as_oracle": false,
+          "manual_regression_probes_passed": 9,
+          "manual_probe_scope": "Exact round-trip for empty values, internal-space keys and their combination; stable rejections for Unicode line separators in each of keys and values."
+        },
+        "limitations": [
+          "Legacy scalars remain strings after parsing; no typed/schema round-trip guarantee.",
+          "Only invariant serialization is guarded. Existing scope/action/output/fail-condition fields, parse_compact and to_yaml are not globally hardened by this diff.",
+          "Local independent code/test review is not signed WRE runtime admission, independent promoter authority or retained-learning proof."
+        ],
+        "signed_wre_promotion": false,
+        "retained_learning_claim": false,
+        "artifact": "m2m-independent-review.json"
+      },
+      "runtime": {
+        "total_distinct_tests_passed": 174,
+        "failed_test_calls": 0,
+        "runs": [
+          {
+            "artifact": "O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-g0-20260915\\runtime-tests\\result.json",
+            "exit_code": 0,
+            "passed": 155,
+            "failed": 0,
+            "skipped": 0,
+            "elapsed_seconds": 9.702999999979511
+          },
+          {
+            "artifact": "O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-g0-20260915\\runtime-assurance-tests\\result.json",
+            "exit_code": 0,
+            "passed": 19,
+            "failed": 0,
+            "skipped": 0,
+            "elapsed_seconds": 3.25
+          }
+        ],
+        "scope": "Existing provider/receipt/valve/scaffold/verifier and real disposable SQLite claim/reservation tests. Injected authorities; no live provider/runtime admission. Full commands/source inventory in runtime-audit.json."
+      },
+      "route_genesis": {
+        "python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "flags": [
+          "-B",
+          "PYTHONDONTWRITEBYTECODE=1",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+          "--noconftest",
+          "-p no:cacheprovider",
+          "-o addopts="
+        ],
+        "projector_check": {
+          "command": "python -B -m modules.foundups.public_catalog_projector --check --json",
+          "result": "PASS",
+          "is_safe": true,
+          "error_count": 0,
+          "registry_total": 17,
+          "eligible_and_projected": 4
+        },
+        "projector_validate": {
+          "command": "python -B -m modules.foundups.public_catalog_projector --validate --json",
+          "result": "PASS",
+          "is_safe": true,
+          "error_count": 0
+        },
+        "route_tests": {
+          "files": [
+            "public/member/tests/test_route_contract_bridge.py",
+            "public/member/tests/test_foundup_entry_shell.py"
+          ],
+          "passed": 53,
+          "failed": 11,
+          "xml": "route-contract-results.xml"
+        },
+        "genesis_initial_attempt": {
+          "result": "COLLECTION_ERROR",
+          "exact_error": "ModuleNotFoundError: No module named 'tests.test_foundup_job_create_lineage'",
+          "xml": "genesis-contract-results.xml"
+        },
+        "genesis_importlib_retry": {
+          "files": [
+            "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py",
+            "modules/foundups/agent/tests/test_create_foundup_dryrun.py",
+            "modules/communication/moltbot_bridge/tests/test_foundup_job_create_lineage.py"
+          ],
+          "extra_flag": "--import-mode=importlib",
+          "passed": 27,
+          "failed": 1,
+          "xml": "genesis-contract-results-importlib.xml"
+        },
+        "warnings": "Two unknown asyncio pytest config keys because plugin autoload was disabled; selected tests are synchronous.",
+        "build": "No meaningful frontend build command; echo-only npm build was not run.",
+        "scope_limit": "Local source/static and deterministic fixture evidence only; no screenshot/mobile/PWA/live auth/network/runtime validation."
+      },
+      "source_failures_preserved": [
+        "11 existing public route tests expect removed iframe/launch UI",
+        "One genesis test expects NOT_READY but current commander authentication rejects earlier"
+      ],
+      "harness_observations": [
+        "Genesis initial collection collision fixed by importlib mode",
+        "Runtime reservation recorder setup error retained before19-pass retry",
+        "Initial coordinator scope assertion found PR1680 generated pin overlap; primary source remained disjoint"
+      ],
+      "truth": "Local mocked/fixture tests and independent source review only. Repeated M2M runs overlap; never sum as distinct coverage. No live worker, device, benchmark, security signoff or remote CI evidence for this uncommitted overlay."
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-15T00:55:21.367925+00:00",
+      "origin_main": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+      "ranking_after": [
+        {
+          "task": "RedDog-extension-decomposition",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 20,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent"
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Consolidate broader exact-current owner qualification at peer-audit19/P0; blocked maintenance authority/runtime qualification is unchanged. Previous16/P0 was narrower navigation scope.",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ]
+        },
+        {
+          "task": "RedDog-backend-closure-consolidation",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "RedDog-conversation-durable-adapters",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent"
+        },
+        {
+          "task": "M2M-canonical-envelope-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 4
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "selected_next_partial",
+          "evidence": [
+            "prompt/swarm/m2m_compiler.py",
+            "O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-g0-20260915\\package-contract-probe.json"
+          ],
+          "next_step": "Retrieve canonical WSP99 and all current compiler consumers, then extend the existing compiler/reader seam to preserve schema, ROLE, ORIGIN, PRINCIPAL_REF, stable task ID and nested constraints. First prove exact typed round-trip and legacy compatibility in existing tests; keep runtime dispatch closed.",
+          "closed_scope": [
+            "Legacy invariant serialization rejects structured/lossy inputs before wire emission."
+          ],
+          "remaining_scope": [
+            "Canonical identity/type preservation",
+            "Qualified consumer/producer handoff",
+            "Authenticated work/model/runtime authority"
+          ]
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification"
+        },
+        {
+          "task": "AmIBot-package-admission",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "evidence": [
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+          ],
+          "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1."
+        },
+        {
+          "task": "FoundUp-genesis-conversation-lineage",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "eligible_after_contract_retrieval",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:966",
+            "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py"
+          ],
+          "next_step": "Preserve typed create_foundup/new_scaffold and genesis_envelope through the existing authenticated conversation route; update the stale commander-auth fixture without weakening authorization. Reconcile an already-present module before any new-scaffold writer."
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered"
+        },
+        {
+          "task": "AutoResearcher-report-completeness",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "eligible_later",
+          "next_step": "Input snapshot layer merged in PR1755. Program/proposal, oracle, environment and authenticated reader evidence remain; AmIBot exposed a higher-ranked shared handoff prerequisite.",
+          "effort": "Extend existing WRE producer/report/reader owners after current handoff priority.",
+          "cost": "Existing deterministic fixtures first; live measurement requires admitted provider/runtime.",
+          "verification_burden": "Existing researcher suite and controlled rehearsals; keep evidence scoped to measured claims.",
+          "closed_scope": [
+            "Completed/aborted per-invocation accounting, mode gate and baseline input snapshot (PR1755 source)."
+          ],
+          "remaining_scope": [
+            "Program/proposal, oracle, environment and authenticated reader evidence",
+            "Resource measurement and independently retained benefit"
+          ]
+        },
+        {
+          "task": "OpenClaw-content-bound-cache-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "contract_eligible_live_measurement_blocked",
+          "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution."
+        },
+        {
+          "task": "AmIBot-public-route-contract-drift",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "outstanding",
+          "evidence": [
+            "public/member/tests/test_route_contract_bridge.py"
+          ],
+          "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate."
+        },
+        {
+          "task": "FoundUp-genesis-wardrobe-admission",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "partial_dependency",
+          "evidence": [
+            "modules/ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md",
+            "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
+          ],
+          "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill."
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "External PR1644 YUMORI finance/contacts advanced to faec64ec2520cbe061c923bc9995cdfa9b54c44f; changed file list is disjoint from this sprint. Preserve the separate owner; AutoPost remains with Remote."
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_later",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair."
+        },
+        {
+          "task": "AmIBot-public-route-identity",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "blocked_route_owner",
+          "evidence": [
+            "public/f/index.html:980",
+            "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
+          ],
+          "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible-later",
+          "next_step": "Python-exit restoration closed; actual process/volume failure remains"
+        },
+        {
+          "task": "OpenClaw-invocation-diagnostic-attribution",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "state": "partial_diagnostic_contract",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_process_loop.py:115",
+            "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
+          ],
+          "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence."
+        },
+        {
+          "task": "Detect-AI-WSP109-intake",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 11,
+          "priority": "P2",
+          "state": "external_owner",
+          "evidence": [
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+          ],
+          "next_step": "PR1751 remains separately owned/open at c9a33a12435e836c454387b3d6b9199c259ba38c. Consume its exact package as planning evidence; no copy, merge or source-completion inference."
+        }
+      ],
+      "selected_next": "M2M-canonical-envelope-qualification",
+      "score": 18,
+      "priority": "P0",
+      "reason": "Higher 19/20-point candidates remain separately owned or blocked on current execution/retrieval authority. The 18-point compiler parent is still eligible for a local contract layer and directly precedes safe FoundUp work packets; the guard closed only unsafe legacy emission.",
+      "closed_scope": [
+        "Legacy invariant emission guard, compatibility repair and local independent review"
+      ],
+      "limits": [
+        "G0 controlled failure; no autonomous construction, public POC or retained RSI benefit",
+        "Canonical M2M envelope/consumer still incomplete",
+        "Current effect lease, model/runtime binding and independent job authority absent"
+      ],
+      "ownership": {
+        "observed_at": "2026-09-15T00:50:15.002699+00:00",
+        "origin_main": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+        "open_prs": 97,
+        "primary_source_overlap": [],
+        "derived_manifest_pin_overlap": [
+          {
+            "pr": 1680,
+            "paths": [
+              "extensions/reddog/backend_compatibility_constants.js",
+              "scripts/reddog_backend_manifest.json",
+              "scripts/tests/test_generate_reddog_backend_manifest.py"
+            ]
+          }
+        ],
+        "overlap_disposition": "PR1680 owns unrelated public-session source. Its three generated manifest/pin paths overlap; regenerate at each reconciled final source, never reuse another branch digest. No peer source or branch was changed.",
+        "initial_scope_assertion": "First evidence run stopped on the three generated pin paths; source inventory showed no primary code overlap before classification was narrowed.",
+        "pr1751": {
+          "headRefName": "docs/detect-ai-wsp109-intake-20260915",
+          "headRefOid": "c9a33a12435e836c454387b3d6b9199c259ba38c",
+          "number": 1751,
+          "state": "OPEN",
+          "title": "docs(amibot): WSP 109 intake, autonomous build package, PWA and safety roadmap",
+          "updatedAt": "2026-09-14T23:15:34Z",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+        },
+        "issue1750": {
+          "number": 1750,
+          "state": "OPEN",
+          "title": "[AmIBot] DETECT_AI_PREFLIGHT_AND_POC_CONTRACT_PHASE1",
+          "updatedAt": "2026-09-14T21:04:13Z",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/issues/1750"
+        },
+        "auditor_owner_hashes_unchanged_before_docs": true,
+        "protected_boundaries": [
+          "shared main checkout",
+          "FOUNDUPS/autopost",
+          "YUMORI/eSingularity",
+          "active RedDog runtime"
+        ]
+      },
+      "dispatchable": false
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260909-rsi\\amibot-g0-20260915",
+    "artifact_sha256": {
+      "runtime-audit.json": "ad1a68ee8f6ec587eeba5736e1cd42a53596aa965bfd82ba1fa525f2a842cc1a",
+      "route-genesis-audit.json": "d864d3b58a0e35566b2fbd78b09b1afc3f106eb0cc2d984425cfa614ed79e5ec",
+      "package-contract-probe.json": "1f291415ccd996bade7822d0d039894e413de5ef017e531164b7c11035efbdbc",
+      "package-contract-probe-after.json": "83d079dd92108a1c60d249717524073d7135c0aa36b2bbc9d3e0ff616fac045f",
+      "m2m-independent-review.json": "77ef190b3ecec6ddf72f9b094d5d9b3f4cc1d47e167bf358584a992bfc43156a",
+      "m2m-review-repair.xml": "0ad27efd5445a2015695872af3dd901b72b4717751303bae8508ef42d8551611",
+      "m2m-independent-tests-revised.xml": "df252502a26ed3eb91d436ddc97a6b6756a4b0b9e93ac2bff8122ea7e98a48ef",
+      "route-contract-results.xml": "171a98210a9c9f6fe0a411a29e487df7d375f222c57930ba305ad7da043b71ec",
+      "genesis-contract-results-importlib.xml": "c51235c7cb1f6513f699832f27a06fc8a06f2d03743f3fcd382f9b76316895f0",
+      "manifest-tests.xml": "99ad228f60d9fc5e0a5443f88044da0b6538c255edff5c35507ad3cec43a03b0",
+      "fast-checks.txt": "23ae9ce762a37b56815f1bd95e31fd2dd33e7a57ab45161661b14dddb59bab10",
+      "registry-checks.txt": "af28182d893f69c07c80096e78f45ae3c700aad53be2b2a25a19224bac571bad",
+      "holo-retrieval.json": "99a6dd350296511bbc43b53e0a62a69e074b99bce1fdd9aefa7aa3059068df6a",
+      "source-validation.json": "e4dcfd8f3cdc53b438446adb9937dc5b8ff882bf9fac4e68d238e5e9d95d6638",
+      "selection.json": "e99065fe9bb22a587a58c2c3cb64b3437a836921ac312438d2a59fa66262cd9c"
+    }
   }
 }

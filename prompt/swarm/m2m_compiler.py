@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import math
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -67,6 +68,27 @@ POLITENESS_MARKERS = re.compile(
 )
 
 
+def _encode_legacy_invariants(invariants: dict[str, Any]) -> str:
+    """Reject constraints that the legacy flat-text grammar cannot preserve."""
+    error = "legacy compact invariants require lossless scalar fields"
+    if type(invariants) is not dict:
+        raise ValueError(error)
+    fields = []
+    for key, value in invariants.items():
+        if (type(key) is not str or not key or key != key.strip()
+                or any(c in ",:{}\x85\u2028\u2029" or ord(c) < 32 for c in key)):
+            raise ValueError(error)
+        if type(value) not in (str, bool, int, float, type(None)):
+            raise ValueError(error)
+        if type(value) is float and not math.isfinite(value):
+            raise ValueError(error)
+        text = str(value)
+        if text != text.strip() or any(c in ",{}\x85\u2028\u2029" or ord(c) < 32 for c in text):
+            raise ValueError(error)
+        fields.append(f"{key}:{text}")
+    return ",".join(fields)
+
+
 @dataclass
 class M2MPrompt:
     """Compact M2M prompt structure (WSP 99)."""
@@ -100,8 +122,8 @@ class M2MPrompt:
         if self.wsp_refs:
             parts.append(f"R:{self.wsp_refs}")
 
-        if self.invariants:
-            inv_str = ",".join(f"{k}:{v}" for k, v in self.invariants.items())
+        inv_str = _encode_legacy_invariants(self.invariants)
+        if inv_str:
             parts.append(f"I:{{{inv_str}}}")
 
         if self.outputs:
@@ -206,7 +228,7 @@ class M2MCompiler:
             mode=Mode(mode.lower()),
             task_hash=task_hash,
             wsp_refs=wsp_refs or [50],  # WSP 50 always required
-            invariants=invariants or {},
+            invariants=invariants if invariants is not None else {},
             outputs=outputs or [],
             fail_conditions=fail_conditions or [],
             sender=sender,

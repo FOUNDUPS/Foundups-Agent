@@ -1,5 +1,21 @@
 # Token Efficiency TestModLog
 
+## 2026-09-15 — AmIBot G0 legacy-invariant regression
+
+Reused `test_m2m_compiler_compat.py` and unchanged `test_m2m_fidelity.py`.
+Initial matrix: 30 failed/169 passed. Final selection: 222 passed in 0.46s;
+independent review reran 222 and nine targeted probes. Runs overlap and are not
+additive coverage. The original 162 cases remain; 44 rejection cases cover both
+object/public-wrapper paths, and 16 scalar cases preserve legacy text semantics.
+
+Review first rejected two representable-input regressions despite 207 passing
+tests. Empty values/internal-space keys are now retained; Unicode line separators
+are rejected within invariants. Tests do not qualify the full machine envelope,
+other compact fields, YAML, runtime authority or product acceptance.
+Eight manifest tests pass in 69.08s and 15 RedDog fast groups pass. Registry remains
+1,650/269 quarantined. Exact commands/source/review/failure evidence is recorded
+under `amibot_g0_continuation_20260915`; no new test file or fixture owner.
+
 ## Inventory — 2026-09-14
 
 WSP 22/97 retrieval inventory, recorded before extending the existing tests.

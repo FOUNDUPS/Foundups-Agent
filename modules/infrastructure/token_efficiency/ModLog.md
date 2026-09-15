@@ -1,5 +1,22 @@
 # Token Efficiency ModLog
 
+## 2026-09-15 — Reject unsafe legacy invariant emission
+
+AmIBot G0 at main 582cbe82 exposed nested constraint loss in the existing compiler.
+Added a bounded scalar serializer guard and preserved invalid falsey inputs until
+validation. Existing parser/YAML and canonical envelope qualification are separate.
+No new module, skill, dependency or test file. WSP00/15/22/50/62/84/97/99.
+
+Initial matrix reproduced 30 failures. Independent review rejected overly strict
+empty-value/internal-space-key handling despite 207 passing tests; corrected it
+and added Unicode-line-boundary cases. Final 222 tests pass in both author and
+independent runs:162 existing, 44 rejection and 16 scalar compatibility cases.
+Eight manifest tests and 15 fast groups pass; one runtime hash changes among 1,400
+members, with both existing pins updated. Registry unchanged 1,650/269 quarantined.
+Shared handoff parent 18/P0 remains open for typed identity/consumer qualification.
+Evidence: `amibot_g0_continuation_20260915` in canonical baseline observations.
+Local review accepts this guard only; no signed WRE retention or worker activation.
+
 ## 2026-09-14 — Preserve explicit stop rules through decompilation
 
 At main `3fc74285cb19b681de5219b8288e5307a0ea533a`, the compact compiler kept
