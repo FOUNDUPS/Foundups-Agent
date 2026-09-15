@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: Preserve canonical M2M instructions through local provider delivery
+
+- Extended six existing owners: detached canonical request before authority use; paired schema/prompt digest before model issuance; raw/redacted wire checks before all three adapters' effects. Reused codec, digest, profile, output and one-shot owners; no new module/skill/test file or runtime grant.
+- 692 connected passes/one platform skip; independent 309 checks plus 31 Fusion checks, generation 105. Review repaired directory-before-check, callback mutation and rejected-handle reuse. Fusion 206→200; two unrelated inherited WSP62 checks remain failing. Eight manifest tests/15 fast groups pass; registry 1650/269 unchanged, 1,400 runtime members / six changed hashes.
+- Recorded one local artifact-name collision and regenerated separate author evidence. Existing backlog current observation holds exact commands, hashes and failure receipts. WSP15/97 retains explicit seed-supplier input 18/P0; AmIBot PR1751 remains draft with protected eSingularity CI debt. No live worker, public route or retained learning. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: RSI explicit M2M profile admission
 
 - Reused the canonical codec and existing authority-profile/source/materializer owners to carry complete normalized work packets before final signing. Resource bounds precede nested checks; independent review repaired draft policy/alias bypasses.

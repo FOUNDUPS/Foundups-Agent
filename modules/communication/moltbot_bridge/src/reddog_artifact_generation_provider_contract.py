@@ -5,10 +5,13 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Mapping, Protocol, Sequence
 
+from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
 from .reddog_artifact_generation_admission_capability import (
     ArtifactGenerationModelCapability,
 )
+from .reddog_artifact_generation_model_binding import artifact_generation_digest
 
+FAIL_M2M_PROMPT_BINDING = "FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING"
 MAX_PROVIDER_ARTIFACT_BYTES = 64 * 1024
 MAX_PROVIDER_ARTIFACT_TOTAL_BYTES = 256 * 1024
 _WINDOWS_DEVICE_NAMES = {
@@ -16,6 +19,54 @@ _WINDOWS_DEVICE_NAMES = {
     *(f"com{number}" for number in range(1, 10)),
     *(f"lpt{number}" for number in range(1, 10)),
 }
+
+
+def artifact_generation_output_contract(planned: Sequence[str]) -> dict[str, Any]:
+    """Existing artifact rules, separate from the canonical worker instruction."""
+    return {
+        "planned_artifacts": list(planned),
+        "output_schema": {"artifact_contents": {"path": "text content"}},
+        "hard_rules": [
+            "Return JSON only.",
+            "Keys must exactly match planned_artifacts.",
+            "Do not include secrets, credentials, tokens, or private keys.",
+            "Do not create extra files.",
+        ],
+    }
+
+
+def validate_provider_m2m_prompt(
+    binding: Mapping[str, Any], prompt: str, redacted_prompt: str,
+) -> bool:
+    """Check the sealed canonical prompt before egress; legacy context is unbound.
+
+    Both mode and digest originate in runtime preparation, never caller text.
+    Missing either bound field rejects. An entirely legacy binding cannot carry
+    a complete canonical packet, including one introduced by redaction.
+    """
+    if not isinstance(binding, Mapping):
+        return False
+    if "prompt_schema" not in binding and "m2m_prompt_digest" not in binding:
+        for wire in (prompt, redacted_prompt):
+            try:
+                decode_m2m_envelope(wire)
+            except ValueError:
+                continue
+            return False
+        return True
+    expected = binding.get("m2m_prompt_digest")
+    if binding.get("prompt_schema") != "0102_m2m_v1" or type(expected) is not str:
+        return False
+    try:
+        canonical = encode_m2m_envelope(decode_m2m_envelope(prompt))
+    except ValueError:
+        return False
+    return (
+        canonical == prompt
+        and type(redacted_prompt) is str
+        and artifact_generation_digest(canonical) == expected
+        and artifact_generation_digest(redacted_prompt) == expected
+    )
 
 
 def validate_provider_artifact_contents(value: object) -> Dict[str, str] | None:
@@ -97,5 +148,8 @@ class BoundedArtifactGenerationRunner(Protocol):
 __all__ = [
     "ArtifactGenerationModelResult",
     "BoundedArtifactGenerationRunner",
+    "FAIL_M2M_PROMPT_BINDING",
+    "artifact_generation_output_contract",
+    "validate_provider_m2m_prompt",
     "validate_provider_artifact_contents",
 ]

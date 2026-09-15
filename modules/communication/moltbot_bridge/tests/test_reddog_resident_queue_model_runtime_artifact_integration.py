@@ -100,6 +100,10 @@ from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_bound
     _RuntimeBindingVerifier,
     _dispatch_request,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_bounded_artifact_generation_runtime import (
+    _m2m_envelope,
+    _mapping_digest,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _authority_profile,
     _determination,
@@ -283,6 +287,23 @@ def test_explicit_m2m_envelope_survives_promotion_and_final_signing(
     assert (
         authority["work_order_digest"]
         != canonical_full_work_order_digest(without_envelope)
+    )
+    calls = _invoke_promoted_provider(context, monkeypatch)
+    assert len(calls) == 1
+    call = calls[0]
+    governed_context = call["_redacted_evidence_context"]
+    assert call["provider_prompt"] == expected_wire + "\n\n" + governed_context
+    assert decode_m2m_envelope(call["provider_prompt"].split("\n\n", 1)[0]) == envelope
+    output_contract = json.loads(governed_context)
+    assert output_contract["planned_artifacts"] == [PILOT_ARTIFACT]
+    assert output_contract["output_schema"] == {"artifact_contents": {"path": "text content"}}
+    assert "Keys must exactly match planned_artifacts." in output_contract["hard_rules"]
+    invocation = call["bridge_meta"]["artifact_generation_binding"]
+    assert invocation["prompt_schema"] == "0102_m2m_v1"
+    assert invocation["m2m_prompt_digest"] == _mapping_digest(expected_wire)
+    _assert_continuous_lineage(
+        context["queue_item"], context["worker_claim"], work_order, call,
+        context["chain_store"].load(),
     )
 
 
@@ -495,24 +516,7 @@ def _promote_claimed_work_order(
 
 
 def _pilot_m2m_envelope():
-    return decode_m2m_envelope(encode_m2m_envelope({
-        "schema": "0102_m2m_v1",
-        "ROLE": "worker",
-        "ORIGIN": "internal_handoff",
-        "PRINCIPAL_REF": "012",
-        "L": "A",
-        "S": PILOT_ARTIFACT,
-        "M": "exec",
-        "T": "RSI-M2M-PROFILE-ADMISSION-INTEGRATION",
-        "A": "Update only the admitted pilot README artifact.",
-        "R": [15, 50, 97, 99],
-        "I": {
-            "allowed_paths": [PILOT_ARTIFACT],
-            "context": {"checks": [True, 1, 1.0, None, {"note": "Preserve the artifact path."}]},
-        },
-        "O": [PILOT_ARTIFACT],
-        "F": ["scope_violation", "missing_artifact"],
-    }))
+    return _m2m_envelope(PILOT_ARTIFACT)
 
 
 def _promoted_bounded_worker_plan():
@@ -569,7 +573,7 @@ def _assert_continuous_lineage(queue_item, worker_claim, work_order, call, chain
 
 def _provider_stub(calls, artifact_path=HANDLER_ARTIFACT):
     def run(_api_key, _prompt, _messages, payload):
-        calls.append(dict(payload))
+        calls.append({**dict(payload), "provider_prompt": _prompt})
         return {
             "ok": True,
             "content": json.dumps(

@@ -1,16 +1,18 @@
 # Tests - OpenClaw Bridge
 
-## Explicit M2M profile admission
+## Canonical M2M generation and provider coverage
 
-Reuse the exact-schema, source-supply and model-runtime integration test owners.
-Keep absent-field controls, complete JSON type/identity preservation, resource
-bounds, literal/stringified path aliases and nested policy predicates. Direct
-source/queue/materializer tests reject before recursive traversal/publication.
-Signer fixtures compare the final full-order digest before tampering; do not
-rebind it afterward. 582 connected passes / three existing platform skips;
-exact commands and independent probes are in the backlog current observation.
-These tests qualify normalized mappings, not raw duplicate-key wire fidelity or
-live provider admission.
+Reuse existing runtime/authority/handler/integration and three-provider fixtures.
+Keep absent-field golden bytes, exact typed canonical wire and original I/O/F,
+24,000-character combined boundaries, supplied/redacted drift, sealed-pair errors,
+copied/original/replayed handles and post-signature tamper rejection. Callback
+fixtures require the admitted request snapshot; tuple→list repair cannot reuse a
+handle after canonical rejection. Assert zero preflight/provider effects on denial.
+692 connected passes/one AF_UNIX skip; two unchanged WSP62 failures remain explicit.
+Use distinct author-*, generation-* and provider-* artifact names per lane; a
+collision required evidence reconstruction during this sprint. Commands, hashes,
+rejections and independent review live in the backlog current observation.
+These local fixtures do not qualify live runtime, full context or native child tasks.
 
 ## Generation admission regressions
 

@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 import pytest
+from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
     Availability,
@@ -78,6 +79,35 @@ MODULE_PATH = (
 )
 ARTIFACT = "modules/foundups/paccess_001/README.md"
 TASK_FAMILY = "artifact_generation"
+LEGACY_PROMPT = (
+    '{"hard_rules":["Return JSON only.","Keys must exactly match planned_artifacts.",'
+    '"Do not include secrets, credentials, tokens, or private keys.","Do not create extra files."],'
+    '"mission":"Produce exact text contents for the planned repository artifacts only.",'
+    '"output_schema":{"artifact_contents":{"path":"text content"}},'
+    '"planned_artifacts":["modules/foundups/paccess_001/README.md"],'
+    '"slice_name":"REDDOG_TEST_ARTIFACT_GENERATION_PHASE1",'
+    '"task_summary":"Generate one bounded README artifact.","work_order_id":"work-order-1"}'
+)
+
+
+def _m2m_envelope(artifact=ARTIFACT):
+    return decode_m2m_envelope(encode_m2m_envelope({
+        "schema": "0102_m2m_v1", "ROLE": "worker", "ORIGIN": "internal_handoff",
+        "PRINCIPAL_REF": "012", "L": "A", "S": artifact, "M": "exec",
+        "T": "RSI-M2M-PROVIDER-FIDELITY-TEST",
+        "A": "Update only the admitted README artifact.", "R": [15, 50, 97, 99],
+        "I": {"allowed_paths": [artifact], "context": {
+            "checks": [True, 1, 1.0, None, {"note": "Preserve the artifact path."}],
+        }},
+        "O": [artifact], "F": ["scope_violation", "missing_artifact"],
+    }))
+
+
+def _m2m_context(request):
+    legacy = json.loads(LEGACY_PROMPT)
+    contract = {key: legacy[key] for key in ("planned_artifacts", "output_schema", "hard_rules")}
+    contract["evidence_context"] = request["evidence_context"]
+    return json.dumps(contract, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
 
 class FakeRunner:
@@ -304,6 +334,29 @@ def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     )
     assert runner.calls
     assert runner.calls[0]["binding"]["work_order_id"] == "work-order-1"
+    assert runner.calls[0]["prompt"] == LEGACY_PROMPT
+    assert runner.calls[0]["context"] == request["evidence_context"]
+    assert not {"prompt_schema", "m2m_prompt_digest"} & runner.calls[0]["binding"].keys()
+
+
+def test_m2m_prompt_preserves_complete_envelope_and_governed_context() -> None:
+    envelope = _m2m_envelope()
+    request = _request(m2m_envelope=envelope)
+    runner = FakeRunner()
+    result = _generate(request, runner=runner)
+    assert result.accepted is True, result.rejection_reasons
+    assert len(runner.calls) == 1
+    call = runner.calls[0]
+    wire = encode_m2m_envelope(envelope)
+    assert call["prompt"] == wire
+    assert call["context"] == _m2m_context(request)
+    decoded = decode_m2m_envelope(call["prompt"])
+    assert {key: decoded[key] for key in ("I", "O", "F")} == {
+        key: envelope[key] for key in ("I", "O", "F")
+    }
+    assert call["binding"]["prompt_schema"] == "0102_m2m_v1"
+    assert call["binding"]["m2m_prompt_digest"] == _mapping_digest(wire)
+    assert result.artifact_contents == {ARTIFACT: "# pAccess\n"}
 
 
 def test_raw_model_selection_without_runtime_binding_rejects_before_runner() -> None:

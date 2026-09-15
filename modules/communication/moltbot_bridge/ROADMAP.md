@@ -1,17 +1,22 @@
 # moltbot_bridge Roadmap
 
-## RSI explicit M2M profile checkpoint — 2026-09-15
+## RSI canonical provider checkpoint — 2026-09-15
 
-The existing codec now qualifies one optional bounded-plan field before recursive
-profile traversal. Source publication, direct materialization and final signing
-preserve the packet; post-signature action/type tampering rejects before effects.
-582 connected tests pass with three existing platform skips. Independent review
-caught draft policy/alias bypasses; root-key and nested-policy regressions now cover them.
+Canonical signed-plan contents now reach local Fusion/OpenClaw/Hermes adapter egress.
+Whole request snapshots precede request-authority consumption; schema and prompt
+digest are sealed before model issuance. Changed raw/redacted packets reject before
+credentials, directories or provider calls. Invalid canonical requests consume their
+matching one-use handle. Legacy bytes and the 24,000-character budget remain.
 
-WSP15/97 retains shared M2M handoff **18/P0**. Explicit producer carriage and
-canonical provider prompt/context binding are next; current model/runtime authority
-remains required. AmIBot registry candidate PR1751 stays draft with an external CI
-dependency. Root roadmap/backlog owns current state; earlier checkpoints below are historical.
+692 connected tests pass/one existing platform skip; independent review accepted
+309 checks plus 31 after AST-equivalent Fusion formatting. Two unchanged WSP62
+failures remain documented; Fusion itself is reduced206→200 without an exemption.
+Evidence, failed drafts and artifact-collision recovery are in the backlog current observation.
+
+WSP15/97 selects the existing explicit seed-supplier/bootstrap input boundary next,
+18/P0. Producer normalization, full context/native-child fidelity and live model/work
+authority stay open. AmIBot registry PR1751 remains draft with external CI debt.
+Root roadmap/backlog owns sequencing; earlier checkpoints below are historical.
 
 ## RSI generation admission checkpoint — 2026-09-15
 

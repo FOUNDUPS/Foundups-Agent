@@ -6,6 +6,7 @@ from pathlib import Path
 from copy import deepcopy
 
 import pytest
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
     canonical_model_runtime_binding_digest,
@@ -46,6 +47,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounde
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_test_capability,
     model_selection_and_runtime_binding_receipts,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_bounded_artifact_generation_runtime import (
+    _m2m_envelope,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_bounded_worker_pilot_handler import (
     ARTIFACT,
@@ -401,7 +405,10 @@ def test_caller_supplied_artifact_authority_cannot_replace_durable_stage(
     assert not (bundle["worktree"] / ARTIFACT).exists()
 
 
-def _assert_generation_preflight_rejects(bundle, work_order, stages, monkeypatch):
+def _assert_generation_preflight_rejects(
+    bundle, work_order, stages, monkeypatch, *,
+    expected_reason="FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING", supplied_request=None,
+):
     generator = _ArtifactGenerator()
     verifier = _RuntimeBindingVerifier()
     effects = []
@@ -422,13 +429,17 @@ def _assert_generation_preflight_rejects(bundle, work_order, stages, monkeypatch
         generic_writer_dryrun_result=bundle["generic_writer_dryrun_result"],
         governed_shell_dryrun_result=bundle["governed_shell_dryrun_result"],
         artifact_contents={},
+        artifact_generation_request=supplied_request,
         artifact_generation_request_binding_enabled=True,
         artifact_generator=generator,
         model_runtime_binding_verifier=verifier,
         repo_root=bundle["repo_root"],
     )
     result = dict(handler(_dispatch_request()))
-    assert result["rejection_reasons"] == ["FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING"]
+    assert result["decision"] == QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_REJECT
+    assert result["rejection_reasons"]
+    if expected_reason is not None:
+        assert result["rejection_reasons"] == [expected_reason]
     assert verifier.calls == generator.calls == effects == []
     assert not (bundle["worktree"] / ARTIFACT).exists()
 
@@ -479,11 +490,14 @@ def test_generation_rejects_cyclic_work_order_before_model_verification(tmp_path
     _assert_generation_preflight_rejects(bundle, work_order, stages, monkeypatch)
 
 
-def test_generation_request_preserves_admitted_nested_snapshot(tmp_path):
+@pytest.mark.parametrize("canonical", [False, True])
+def test_generation_request_preserves_admitted_nested_snapshot(tmp_path, canonical):
     bundle = _valid_bundle(tmp_path)
     work_order = _work_order_with_plan(bundle)
     chain = work_order["bounded_worker_plan"]["signed_receipt_chain"]
     chain["test_metadata"] = {"value": "admitted"}
+    if canonical:
+        work_order["bounded_worker_plan"]["m2m_envelope"] = _m2m_envelope(ARTIFACT)
     stages = _seeded_store(bundle, **_binding_stage_overrides(work_order)).load()["stage_results"]
     handler = build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
         chain_results_store=_seeded_store(bundle),
@@ -492,6 +506,46 @@ def test_generation_request_preserves_admitted_nested_snapshot(tmp_path):
         repo_root=bundle["repo_root"],
     )
     request = handler._generation_request(work_order, stages)
+    if canonical:
+        wire = encode_m2m_envelope(work_order["bounded_worker_plan"]["m2m_envelope"])
+        assert encode_m2m_envelope(request["m2m_envelope"]) == wire
+    else:
+        assert "m2m_envelope" not in request
     expected = deepcopy(request)
     chain["test_metadata"]["value"] = "changed after derivation"
+    if canonical:
+        work_order["bounded_worker_plan"]["m2m_envelope"]["I"]["context"]["checks"][0] = 1
+        assert encode_m2m_envelope(request["m2m_envelope"]) == wire
     assert request == expected
+
+
+@pytest.mark.parametrize("envelope", [None, {}, [], False, {"ROLE": "worker"}])
+def test_m2m_malformed_admitted_plan_rejects_before_generation_effects(
+    tmp_path, monkeypatch, envelope,
+):
+    bundle = _valid_bundle(tmp_path)
+    work_order = _work_order_with_plan(bundle)
+    work_order["bounded_worker_plan"]["m2m_envelope"] = envelope
+    # This is a use-time fixture digest, not a real signed profile admission.
+    stages = _binding_stage_overrides(work_order)
+    _assert_generation_preflight_rejects(
+        bundle, work_order, stages, monkeypatch, expected_reason=None,
+    )
+
+
+def test_m2m_caller_request_cannot_replace_the_admitted_envelope(tmp_path, monkeypatch):
+    bundle = _valid_bundle(tmp_path)
+    work_order = _work_order_with_plan(bundle)
+    work_order["bounded_worker_plan"]["m2m_envelope"] = _m2m_envelope(ARTIFACT)
+    stages = _binding_stage_overrides(work_order)
+    request = pilot_handler_module._derive_artifact_generation_request(
+        work_order=deepcopy(work_order),
+        stage_results=_seeded_store(bundle, **stages).load()["stage_results"],
+        repo_root=bundle["repo_root"], holoindex_evidence=None,
+    )
+    assert "m2m_envelope" in request
+    request["m2m_envelope"]["F"].append("caller_replacement")
+    _assert_generation_preflight_rejects(
+        bundle, work_order, stages, monkeypatch,
+        expected_reason=FAIL_ARTIFACT_GENERATION_REQUEST_CONFLICT, supplied_request=request,
+    )

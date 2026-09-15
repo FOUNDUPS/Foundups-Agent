@@ -38,20 +38,20 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
-The generation handler checks a detached full order against signed `work_order_digest`.
-`FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects missing/changed/unserializable
-orders before verification or issuance. Injected artifacts retain their writer path.
-`snapshot_authority_profile_m2m(profile)` bounds and detaches optional `bounded_worker_plan.m2m_envelope` in four readers and
-source/direct materializers. Complete JSON and secret/digest/no-effect/env-reference
-rules survive; null/opaque/partial/oversized packets reject. Direct queue failures use
-`FAIL_PROFILE_M2M_ENVELOPE`; source supply uses its existing typed-schema reason.
-ASCII/path/model/effect/file-budget gates remain; no raw-wire/prose/provider fidelity or authority follows.
-
-`build_generation_dependencies(...)` supplies one provider plus explicit inventory.
-`generate_bounded_artifact_contents(...)` uses AI Gateway one-shot capabilities bound to
-invocation, selection, current runtime verification, resolution receipt and endpoints.
-Fusion requires OpenRouter; OpenClaw/Hermes preserve the resolved principal provider/model.
-Default inventories are empty; fallback, environment names and worker identity cannot select models.
+The handler compares a detached full order with signed `work_order_digest` before
+verification/issuance; `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects drift.
+Existing `snapshot_authority_profile_m2m(profile)` retains bounded profile policies.
+`generate_bounded_artifact_contents(...)` accepts explicit normalized `m2m_envelope`.
+Its whole canonical request becomes plain detached JSON before consuming authority.
+Invalid canonical data rejects with `FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE` and burns
+only the matching handle. Missing field preserves legacy prompt/context bytes.
+Exact codec wire and artifact-rule context share the 24,000-character pre-issuance budget.
+`validate_provider_m2m_prompt(binding, prompt, redacted_prompt)` checks the sealed
+`prompt_schema`/`m2m_prompt_digest` pair and exact canonical wire. Missing/changed
+bindings or redacted instructions reject with `FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING`
+before adapter effects. This does not certify full context or downstream child fidelity.
+Existing AI Gateway one-shot topology, provider inventory, credentials, model/work
+authority and output-path rules remain. No producer/prose or runtime admission follows.
 
 ## RedDog advisory bridge support
 
