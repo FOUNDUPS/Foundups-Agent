@@ -25,6 +25,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_seed,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
     HIGH_AUTHORITY_VALVE_STATES,
@@ -65,6 +68,7 @@ _DEFAULT_REQUIRED_POLICY_GATES = (
 
 
 class AuthorityProfileSeedSupplyReason:
+    BOUNDED_WORKER_PLAN_INVALID = "authority_seed_bounded_worker_plan_invalid"
     DETERMINATION_INVALID = "architect_determination_invalid"
     DETERMINATION_NOT_FIX = "architect_determination_not_fix"
     QUEUE_CANDIDATE_INVALID = "queue_candidate_invalid"
@@ -116,6 +120,18 @@ class AuthorityProfileSeedSupplyResult:
         return asdict(self)
 
 
+def snapshot_seed_worker_plan(value: Any) -> dict[str, Any] | None:
+    """Detach optional plan data under the existing typed and ASCII policies."""
+    if value is None:
+        return None
+    if type(value) is not dict:
+        raise ValueError("bounded_worker_plan_not_plain_mapping")
+    plan = rehydrate_authority_profile_seed({"bounded_worker_plan": value})["bounded_worker_plan"]
+    if not _ascii_deep(plan):
+        raise ValueError("bounded_worker_plan_non_ascii")
+    return plan
+
+
 def run_reddog_authority_profile_seed_supply(
     *,
     repo_root: Path | str,
@@ -140,9 +156,13 @@ def run_reddog_authority_profile_seed_supply(
     sovereign_authorization_digest: str | None = None,
     identity_ttl_seconds: int = 3600,
     work_authority_ttl_seconds: int = 900,
+    bounded_worker_plan: Mapping[str, Any] | None = None,
 ) -> AuthorityProfileSeedSupplyResult:
     """Materialize one authority-profile seed from resident runtime receipts."""
-
+    try:
+        plan = snapshot_seed_worker_plan(bounded_worker_plan)
+    except (TypeError, ValueError, RecursionError):
+        return _reject((AuthorityProfileSeedSupplyReason.BOUNDED_WORKER_PLAN_INVALID,))
     root = Path(repo_root).resolve()
     determination = _mapping(architect_determination)
     model_selection = _mapping(model_selection_receipt)
@@ -150,7 +170,6 @@ def run_reddog_authority_profile_seed_supply(
     principal = _principal(principal_authority_record)
     snapshot = _snapshot(permission_snapshot)
     output, output_reasons = _runtime_output_path(output_path, root)
-
     reasons: list[str] = []
     reasons.extend(output_reasons)
     reasons.extend(_determination_reasons(determination))
@@ -171,7 +190,6 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.PRINCIPAL_INVALID)
     if snapshot is None:
         reasons.append(AuthorityProfileSeedSupplyReason.PERMISSION_SNAPSHOT_INVALID)
-
     rid = str(reddog_id or "").strip()
     rkey = str(reddog_public_key or "").strip()
     if not rid:
@@ -180,7 +198,6 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.MISSING_REDDOG_PUBLIC_KEY)
     if principal is not None and rkey and rkey == principal.principal_public_key:
         reasons.append(AuthorityProfileSeedSupplyReason.PRINCIPAL_REDDOG_KEY_REUSE)
-
     fid = _selected_foundup_id(foundup_id, principal)
     if not fid:
         reasons.append(AuthorityProfileSeedSupplyReason.FOUNDUP_SCOPE_INVALID)
@@ -200,7 +217,6 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.PERMISSION_SNAPSHOT_INVALID)
     if memex_supply and fid and str(memex_supply.get("foundup_id") or "") not in {"", fid}:
         reasons.append(AuthorityProfileSeedSupplyReason.FOUNDUP_SCOPE_INVALID)
-
     allow = _paths_or_default(allowed_paths, fid, denied=False)
     deny = _paths_or_default(denied_paths, fid, denied=True)
     if not fid or not allow or not deny or not all(_path_within_foundup(path, fid) for path in (*allow, *deny)):
@@ -217,7 +233,6 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING)
     if identity_ttl_seconds <= 0 or work_authority_ttl_seconds <= 0:
         reasons.append(AuthorityProfileSeedSupplyReason.TIME_BOUNDS_INVALID)
-
     evidence = _holoindex_evidence(determination, model_selection, memex_supply)
     if not _valid_holoindex_evidence(evidence):
         reasons.append(AuthorityProfileSeedSupplyReason.HOLOINDEX_EVIDENCE_INVALID)
@@ -255,6 +270,7 @@ def run_reddog_authority_profile_seed_supply(
         now_epoch=now_epoch,
         identity_ttl_seconds=identity_ttl_seconds,
         work_authority_ttl_seconds=work_authority_ttl_seconds,
+        bounded_worker_plan=plan,
     )
     if not _ascii_deep(seed):
         return _reject((AuthorityProfileSeedSupplyReason.NON_ASCII_INPUT,))
@@ -417,8 +433,7 @@ def _seed(
     memex_supply: Mapping[str, Any],
     principal: PrincipalAuthorityRecord,
     snapshot: PermissionSnapshot,
-    reddog_id: str,
-    reddog_public_key: str,
+    reddog_id: str, reddog_public_key: str,
     repo_full_name: str,
     foundup_id: str,
     requested_operation: str,
@@ -431,9 +446,8 @@ def _seed(
     consensus_receipt_digest: str | None,
     sovereign_authorization_digest: str | None,
     holoindex_evidence: Mapping[str, Any],
-    now_epoch: int,
-    identity_ttl_seconds: int,
-    work_authority_ttl_seconds: int,
+    now_epoch: int, identity_ttl_seconds: int, work_authority_ttl_seconds: int,
+    bounded_worker_plan: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     basis = {
         "determination_id": str(determination.get("determination_receipt_id") or ""),
@@ -494,6 +508,8 @@ def _seed(
         seed["consensus_receipt_digest"] = str(consensus_receipt_digest)
     if sovereign_authorization_digest:
         seed["sovereign_authorization_digest"] = str(sovereign_authorization_digest)
+    if bounded_worker_plan is not None:
+        seed["bounded_worker_plan"] = bounded_worker_plan
     seed["seed_supply_receipt_id"] = _digest(seed)
     return seed
 
@@ -649,4 +665,5 @@ __all__ = [
     "AuthorityProfileSeedSupplyReason",
     "AuthorityProfileSeedSupplyResult",
     "run_reddog_authority_profile_seed_supply",
+    "snapshot_seed_worker_plan",
 ]

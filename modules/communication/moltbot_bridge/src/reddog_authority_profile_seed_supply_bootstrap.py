@@ -22,7 +22,9 @@ from typing import Any, Mapping, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply import (
     AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT,
+    AuthorityProfileSeedSupplyReason,
     run_reddog_authority_profile_seed_supply,
+    snapshot_seed_worker_plan,
 )
 
 
@@ -63,8 +65,7 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
     principal_authority_record_path: Path | str | None,
     permission_snapshot_path: Path | str | None,
     output_path: Path | str | None,
-    reddog_id: str,
-    reddog_public_key: str,
+    reddog_id: str, reddog_public_key: str,
     now_epoch: int | None = None,
     foundup_id: str | None = None,
     requested_operation: str = "feature_slice",
@@ -76,11 +77,14 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
     required_policy_gates: Sequence[str] = (),
     consensus_receipt_digest: str | None = None,
     sovereign_authorization_digest: str | None = None,
-    identity_ttl_seconds: int = 3600,
-    work_authority_ttl_seconds: int = 900,
+    identity_ttl_seconds: int = 3600, work_authority_ttl_seconds: int = 900,
+    bounded_worker_plan: Mapping[str, Any] | None = None,
 ) -> AuthorityProfileSeedBootstrapResult:
     """Materialize the authority-profile seed from resident runtime files."""
-
+    try:
+        plan = snapshot_seed_worker_plan(bounded_worker_plan)
+    except (TypeError, ValueError, RecursionError):
+        return _not_ready((AuthorityProfileSeedSupplyReason.BOUNDED_WORKER_PLAN_INVALID,))
     root = Path(repo_root).resolve()
     determination, determination_reasons = _read_json_outside_repo(
         root,
@@ -126,7 +130,6 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
     ]
     if reasons:
         return _not_ready(reasons)
-
     assert determination is not None
     assert model_selection is not None
     assert memex_supply is not None
@@ -140,8 +143,7 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
         principal_authority_record=principal,
         permission_snapshot=snapshot,
         output_path=output_path,
-        reddog_id=reddog_id,
-        reddog_public_key=reddog_public_key,
+        reddog_id=reddog_id, reddog_public_key=reddog_public_key,
         now_epoch=int(now_epoch if now_epoch is not None else time.time()),
         foundup_id=foundup_id,
         requested_operation=requested_operation,
@@ -153,8 +155,8 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
         required_policy_gates=required_policy_gates,
         consensus_receipt_digest=consensus_receipt_digest,
         sovereign_authorization_digest=sovereign_authorization_digest,
-        identity_ttl_seconds=identity_ttl_seconds,
-        work_authority_ttl_seconds=work_authority_ttl_seconds,
+        identity_ttl_seconds=identity_ttl_seconds, work_authority_ttl_seconds=work_authority_ttl_seconds,
+        bounded_worker_plan=plan,
     )
     if not supply.accepted or supply.status != AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT:
         return _not_ready(supply.rejection_reasons or ("authority_profile_seed_supply_rejected",))

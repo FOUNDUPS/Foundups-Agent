@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## Explicit seed-plan coverage
+
+Reuse the two existing seed supplier/bootstrap test files and current source/schema
+fixtures. Baseline 47 failed/22 passed; final 69 pass. Independent 320 includes 52
+external cases and overlaps the focused run. The pre-change seed byte oracle,
+typed packet, receipt/nonce rules, both callback snapshots and unchanged existing
+output on rejection are checked. Lane artifacts use separate subdirectories.
+Commands/hashes and the package-closure correction are in the current backlog.
+
 ## Canonical M2M generation and provider coverage
 
 Reuse existing runtime/authority/handler/integration and three-provider fixtures.
