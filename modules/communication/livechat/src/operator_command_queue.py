@@ -97,16 +97,29 @@ class OperatorCommandQueue:
             # command in the manifest until it can be actioned rather than
             # acknowledging it as a permanent failure.
             if result.get("status") == "deferred":
+                self._write_receipt(result)
                 results.append(result)
                 continue
             recorded.append(result)
             completed_ids.add(command_id)
             results.append(result)
             acknowledgements_changed = True
+            self._write_receipt(result)
         if acknowledgements_changed:
             self._atomic_write(self.acknowledgement_path, acknowledgements)
         self.last_result = {"checked_at": _utc_now(), "processed": len(results), "results": results}
         return self.last_result
+
+    def _write_receipt(self, result: Dict[str, Any]) -> None:
+        """Publish the DAE-owned red/amber/green outcome beside manifest state."""
+        status = result.get("status", "failed")
+        health = "green" if status == "accepted" else "amber" if status == "deferred" else "red"
+        state = self._read_json(self.state_path, {"version": 1, "active_context": None})
+        state["last_receipt"] = {
+            "id": result.get("id"), "action": result.get("action"), "status": status,
+            "health": health, "reason": result.get("reason"), "recorded_at": _utc_now(),
+        }
+        self._atomic_write(self.state_path, state)
 
     async def watch_forever(self) -> None:
         """Run the independent 012-manifest watch loop for the DAE lifetime."""

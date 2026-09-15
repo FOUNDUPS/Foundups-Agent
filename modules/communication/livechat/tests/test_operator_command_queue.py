@@ -66,3 +66,13 @@ def test_context_is_persisted_and_announced_to_selected_surfaces(tmp_path, monke
     assert asyncio.run(queue.poll_once())["results"][0]["status"] == "accepted"
     assert json.loads(state_path.read_text())["active_context"]["message"] == "New update"
     assert chat.messages == [("New update", "operator")]
+
+
+def test_rejected_command_writes_red_dae_receipt(tmp_path):
+    command_path, acknowledgement_path, state_path = tmp_path / "manifest.json", tmp_path / "acks.json", tmp_path / "state.json"
+    _write_commands(command_path, [{"id": "voice-5", "action": "run_shell", "payload": {}}])
+    queue = OperatorCommandQueue(SimpleNamespace(livechat=None), command_path, acknowledgement_path, state_path, poll_interval_seconds=0)
+    asyncio.run(queue.poll_once())
+    receipt = json.loads(state_path.read_text())["last_receipt"]
+    assert receipt["health"] == "red"
+    assert receipt["status"] == "rejected"
