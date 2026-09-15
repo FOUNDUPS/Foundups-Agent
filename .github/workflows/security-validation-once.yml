@@ -1,0 +1,48 @@
+name: One-shot security candidate validation
+
+on:
+  push:
+    branches: [repair/security-dependencies-20260915]
+    paths: [.github/workflows/security-validation-once.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.repository == 'FOUNDUPS/Foundups-Agent' && github.ref == 'refs/heads/repair/security-dependencies-20260915' && github.actor == 'Foundup'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [clerk-nextjs, modules/foundups/esingularity/frontend]
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Checkout exact regenerated candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 95bb5cbd04760b6626d99b1e07da610eb6d686cd
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.13.0'
+      - name: Install exact locked dependencies
+        id: install
+        run: npm ci --no-fund
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint
+      - name: Type check
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npx --no-install tsc --noEmit
+      - name: Build without deployment
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build
