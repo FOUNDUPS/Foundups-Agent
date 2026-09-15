@@ -1851,12 +1851,12 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-    "section": "research_input_snapshot_continuation_20260915",
-    "base_commit": "07a465cdbaa1a77acb7210b75503219a438b57a2",
-    "selected_action": "AutoResearcher-report-completeness",
-    "status": "baseline_snapshot_closed_report_qualification_partial",
+    "section": "amibot_g0_continuation_20260915",
+    "base_commit": "582cbe82e3177b10ed8a69741acb6fdd92c4cc86",
+    "selected_action": "M2M-canonical-envelope-qualification",
+    "status": "amibot_g0_controlled_failure_legacy_guard_closed",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "research_input_snapshot_continuation_20260915.post_sprint_reobservation"
+    "observation_path": "amibot_g0_continuation_20260915.post_sprint_reobservation"
   }
 }

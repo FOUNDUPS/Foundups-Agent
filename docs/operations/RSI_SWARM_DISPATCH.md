@@ -70,10 +70,10 @@ closures, reusable execution capability and clearer next actions. Count only the
 scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
-**Current selection evidence:** `research_input_snapshot_continuation_20260915` in
-the [existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json),
-referenced by the [planning backlog](../roadmaps/rsi_swarm_backlog.json). The
-existing continuation is updated to execute this rule; it grants no runtime authority.
+**Current selection evidence:** `amibot_g0_continuation_20260915` in the
+[existing observations](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json), linked by the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
+The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) reached controlled G0 failure; the shared legacy guard is locally verified.
+Next: canonical M2M envelope qualification, 18/P0. Planning evidence grants no runtime authority.
 
 ## Production-line operating model
 

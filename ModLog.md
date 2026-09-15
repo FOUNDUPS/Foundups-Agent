@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: AmIBot production experiment G0 and shared M2M guard
+
+- Added AmIBot to the canonical RSI roadmap with 12 readiness gates, G0–G6 dependencies, meaningful metrics and explicit controlled failure. PR1751 remains open/separate; no build orders, runtime update or public activation. Current lease/model, typed genesis, Skillz, scopes and route alias gaps are recorded from source.
+- Existing M2M compiler now rejects nested/lossy invariants before output; independent review caught and corrected compatibility regressions. 222 focused tests, 174 runtime-contract tests, eight manifest tests and 15 fast groups pass. Preserved 12 existing route/genesis failures; no product acceptance claim.
+- WSP15/97 closes only the local guard and reselects canonical M2M handoff qualification 18/P0; AutoResearcher reporting remains 15/P1. Existing docs/backlog/evidence updated; no new module/skill/document. Prior PR1755/main workflows verified. Evidence: `amibot_g0_continuation_20260915`; WSP00/15/22/48/49/50/62/84/95/97/99/109.
+
 ## 2026-09-15: RSI report baseline consistency
 
 - Existing researcher now uses one invocation baseline for scratch preparation, proposal seed, cleanup and its diagnostic text hash. Ten reproduced drift cases are fixed; 96 local tests and five ten-attempt controls pass.

@@ -21,6 +21,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
 | Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution); packet order is not an automatic assignment |
+| AmIBot autonomous production experiment | [G0 readiness, dependency gates and metrics](#amibot-autonomous-production-experiment--2026-09-15) — controlled failure; no build jobs admitted |
 | RSI at launch and cycle budgets | [Existing WRE launch/evaluation sequence](modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15) — staged plan, not enabled runtime |
 | Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
@@ -48,6 +49,91 @@ The existing backlog points to the current ranked observation; historical packet
 scores below retain their original planning scope. Standing local authorization
 and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
+## AmIBot autonomous production experiment — 2026-09-15
+
+AmIBot is the low-consequence test fixture; the production system is the subject
+of the experiment. 012 supplies ideas and observes meaningful results through
+RedDog. 0102 coordinates research, prioritization, packaging, workers and review.
+Use **principal prose → Prometheus normalization → ORCH → WSP 99 M2M → admitted
+OpenClaw/Hermes workers** through existing WRE/AgentDB owners. This session's two
+read-only Codex audit lanes are coordinator assistance, not admitted build workers.
+
+**Current result: G0 controlled failure.** At main `582cbe82`, the 17 AmIBot
+documents are only in open [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751)
+at `c9a33a12435e836c454387b3d6b9199c259ba38c`; [issue #1750](https://github.com/FOUNDUPS/Foundups-Agent/issues/1750)
+is open. `modules/foundups/detect_ai/` is absent from this base. Retrieve that
+exact package and its intake/research/benchmark/safety contracts; do not copy a
+second module or treat the open package as merged authority. The package has
+13 planning orders and an acyclic DAG, but its five G1 writers have ten overlapping
+scope pairs. No AmIBot build order has been admitted or executed.
+
+| Readiness gate | Current evidence / prerequisite |
+|---|---|
+| OpenClaw | Native Windows npm metadata: 2026.5.2. Governed WSL installation/service unverified today; September13 WSL 2026.7.1-2 is historical. |
+| Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
+| Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
+| WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
+| WSP 99 handoff | Existing legacy compiler now rejects nested/lossy invariants before emission. Canonical identity fields, stable task ID and typed nested constraints still need producer/consumer qualification. |
+| Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
+| Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
+| Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
+| Execution valve | Current resolver explicitly returns `authoritative_use_lease=None`. Current trust/effect/model authority remains required. |
+| Skillz | Reuse existing intake and diligence skills. Intake registry/wardrobe eligibility and freshness remain unqualified. |
+| Validation | 174 runtime-contract tests pass. Route suites: 53 pass/11 fail; genesis: 27 pass/1 fail. Existing failures concern removed UI expectations and earlier commander authentication; preserve the gates. |
+| Documentation | Static Firebase `/f/**` owner exists; package claims do not establish the game. Root npm build merely echoes a message and is not frontend acceptance. |
+
+The smallest selected reusable repair was the legacy invariant guard in
+`prompt/swarm/m2m_compiler.py`, under the shared handoff parent **4+5+5+4=18/P0**.
+222 focused tests pass, including 44 rejection cases and 16 scalar compatibility
+cases. Independent review caught two representable-input regressions; after the
+author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedDog fast groups pass.
+Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
+This closes unsafe legacy emission, not the canonical envelope or the RSI system.
+
+Re-observation selects **canonical M2M envelope qualification, 18/P0**. Higher
+19/20-point items remain externally owned or blocked on current runtime authority.
+Extend the existing compiler and its consumers; preserve schema, ROLE, ORIGIN,
+PRINCIPAL_REF, stable T, lane/scope/mode/action/WSPs and all nested I/O/F values.
+Prove typed round-trip and existing-reader compatibility before dispatch. Do not
+flatten or omit constraints to make the package pass. AutoResearcher report
+qualification remains 15/P1 and resumes when it is the highest eligible action.
+
+| Gate | Planned work and advancement rule |
+|---|---|
+| G0 serial | Reconcile PR/package, registry identity, typed genesis/Skillz, current runtime/update evidence, signed admission and route owner; validate complete M2M packets and disjoint scopes. |
+| G1 parallel | Transport/session, moderation, scoring/state, PWA and AI adapter lanes; separate test-fixture lane only where ownership is disjoint. Each depends on accepted G0 and has its own worktree, claim and verifier. |
+| G2 integration | Prove clean two-browser human↔human chat, authorization, disconnect/reconnect and moderation before game assignment. |
+| G3 game | Hidden randomized human↔AI/human↔human assignment, server-held truth, locked verdict/confidence, reveal and benchmark scoring. |
+| G4 PWA | Real iPhone/Android/browser acceptance, keyboard/safe areas, disconnect/reconnect and installability; simulated tests do not close device acceptance. |
+| G5 independent verification | Separate security, privacy, moderation, scope, scoring, benchmark integrity and regression review; retain rejection and repair receipts. |
+| G6 public POC / RSI | Authorized FoundUps.com owner activates `/f/amibot` only after accepted verification, or records controlled failure. Bind final metrics to the actual publication outcome. |
+
+Permanent FoundUp ID is `detect_ai`, whereas current `/f/` lookup requires exact
+`foundup_id` equality and has no alias. Resolve `/f/amibot` with the existing
+registry/projector/route owner; do not silently substitute another route, rename
+the entity or configure a new domain. Public deployment and runtime upgrades
+require their existing current admission/rollback paths. WSL was not started
+during this diagnosis because a cold probe can start user services; this does
+not remove 012's update/run direction. Qualify versions and compatible providers
+at the admitted runtime window rather than blindly updating shared installations.
+
+The existing clean POC and benchmark criteria remain unchanged: consenting adult
+participants, 20-person/100-valid-focal-round minimum with at least 40 per arm,
+locked confidence/scoring and disclosed AI participation policy. Mature features,
+tokens/wallets and production-account effects stay deferred. Active RedDog,
+YUMORI/eSingularity and Remote's `FOUNDUPS/autopost` remain separate owners.
+
+Record per-order provider/model, retries, failures, scopes, conflicts, independent
+rejections, 012/0102 interventions, tokens/cost when available, elapsed time, tests,
+integration/public defects, package changes and reusable repairs/accepted retention.
+Current counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
+lanes; 1 locally independently accepted shared repair; 0 WRE-retained improvements.
+No OpenClaw/Hermes provider invocation occurred; Codex token/cost metadata is unavailable.
+Unrun device/public tests and integration defects are unknown, not zero. Detailed
+evidence and the re-scored queue are in `amibot_g0_continuation_20260915` in the
+[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+After every accepted or blocked layer, reapply WSP15/97 before the next assignment.
+
 ## Current delivery checkpoint — 2026-09-15
 
 The [researcher checkpoint](modules/infrastructure/wre_core/ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
@@ -59,8 +145,9 @@ WSP15/97 closed the input consistency layer and re-scored remaining report
 qualification at **15/P1**. Program/proposal, oracle, environment and authenticated
 reader evidence remain incomplete, as do resource measurement and independently
 retained benefit. Active FoundUps and peer ownership stay separate.
-Mode PR [#1754](https://github.com/FOUNDUPS/Foundups-Agent/pull/1754) merged at
-`07a465cdbaa1a77acb7210b75503219a438b57a2`; both main workflows passed.
+Input-snapshot PR [#1755](https://github.com/FOUNDUPS/Foundups-Agent/pull/1755) merged at
+`582cbe82e3177b10ed8a69741acb6fdd92c4cc86`; main CI and CodeQL both passed.
+The AmIBot handoff prerequisite above is the current 18/P0 selection.
 The current change enables no startup campaign, live mode or automatic budget growth.
 
 TTL PR [#1748](https://github.com/FOUNDUPS/Foundups-Agent/pull/1748) merged as
