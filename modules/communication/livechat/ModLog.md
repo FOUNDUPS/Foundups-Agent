@@ -1,5 +1,14 @@
 # Livechat Module - ModLog
 
+## 2026-09-15 - Operator Command Plane Phase 1
+
+**WSP:** 22, 50, 77, 91, 97
+
+- Added a local, atomic JSON operator-command inbox plus acknowledgement ledger.
+- Heartbeat checks it on its existing cadence and includes the latest result in JSONL telemetry.
+- Initial actions are intentionally narrow: `status` and gated live-chat `announce`. No JSON command can invoke an LLM, shell, browser, or code edit.
+- Added an assumption audit and focused unit tests for dispatch, rejection, and exactly-once acknowledgement behavior.
+
 This log tracks changes specific to the **livechat** module in the **communication** enterprise domain.
 
 ## WSP 22 ModLog Protocol

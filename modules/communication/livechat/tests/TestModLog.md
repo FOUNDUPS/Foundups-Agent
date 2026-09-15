@@ -1,5 +1,9 @@
 # TestModLog
 
+## 2026-09-15 - Operator Command Plane Phase 1
+
+- Added `test_operator_command_queue.py` covering one-time announcement dispatch/acknowledgement and rejection of non-allowlisted actions.
+
 - Initialize test change log per WSP 34.
 
 ## 2025-08-24 - Comprehensive Test Fixes Following WSP

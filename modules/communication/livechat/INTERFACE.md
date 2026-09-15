@@ -11,6 +11,10 @@ This module exports:
 
 ## Classes
 
+## Operator command inbox (Phase 1)
+
+`OperatorCommandQueue` polls `memory/youtube_dae_operator_commands.json` on each heartbeat and records completed command IDs in `memory/youtube_dae_operator_command_acks.json`. The current allowlist is `status` and gate-respecting `announce`; it deliberately does not execute model prompts, shell commands, browser actions, or code changes from JSON.
+
 ### `QwenYouTubeIntegration`
 QWEN intelligence layer providing smart decision-making for YouTube DAE channel rotation.
 
