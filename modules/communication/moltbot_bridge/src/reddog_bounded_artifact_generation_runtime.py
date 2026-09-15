@@ -12,11 +12,12 @@ HoloIndex.
 from __future__ import annotations
 
 import fnmatch
-import hashlib
 import json
 from dataclasses import asdict, dataclass
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
 
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
+from .reddog_artifact_generation_model_binding import artifact_generation_digest as _digest
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_admission_capability import (
     ArtifactGenerationAuthorityCapability,
     _issue_artifact_generation_model,
@@ -29,6 +30,7 @@ from modules.communication.moltbot_bridge.src.reddog_artifact_generation_authori
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_contract import (
     ArtifactGenerationModelResult,
     BoundedArtifactGenerationRunner,
+    artifact_generation_output_contract,
 )
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_result import (
     ARTIFACT_GENERATION_ACCEPT,
@@ -63,6 +65,7 @@ FAIL_EXPLICIT_REQUEST = "FAIL_EXPLICIT_ARTIFACT_GENERATION_REQUEST_MISSING"
 FAIL_RUNNER_MISSING = "FAIL_ARTIFACT_GENERATION_RUNNER_MISSING"
 FAIL_RUNNER_REJECTED = "FAIL_ARTIFACT_GENERATION_RUNNER_REJECTED"
 FAIL_REQUEST_BINDING = "FAIL_ARTIFACT_GENERATION_REQUEST_BINDING"
+FAIL_M2M_ENVELOPE = "FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE"
 FAIL_PLANNED_ARTIFACTS = "FAIL_ARTIFACT_GENERATION_PLANNED_ARTIFACTS"
 FAIL_ARTIFACTS_MISMATCH = "FAIL_ARTIFACT_GENERATION_ARTIFACTS_MISMATCH"
 FAIL_CONTENT_INVALID = "FAIL_ARTIFACT_GENERATION_CONTENT_INVALID"
@@ -109,6 +112,20 @@ def generate_bounded_artifact_contents(
     trusted_now_epoch: Optional[Callable[[], int]] = None,
 ) -> BoundedArtifactGenerationResult:
     req = request if isinstance(request, Mapping) else {}
+    if "m2m_envelope" in req:
+        try:
+            # Bound the packet before generic traversal; consume authority only
+            # against detached plain data used by every later preparation read.
+            encode_m2m_envelope(req["m2m_envelope"])
+            req = _json_compatible_mapping(dict(req), strict=True)
+            if not req:
+                raise ValueError(FAIL_M2M_ENVELOPE)
+        except ValueError:
+            consume_artifact_generation_authority(authority_capability, {})
+            return build_generation_result(
+                {}, planned=[], model_selection={}, model_result=None,
+                artifacts={}, reasons=[FAIL_M2M_ENVELOPE],
+            )
     reasons, planned, model_selection, admission = _validate_generation_request(
         req,
         runner=runner,
@@ -198,19 +215,15 @@ def _run_bounded_artifact_model(
 ) -> tuple[ArtifactGenerationModelResult | None, Dict[str, str]]:
     model_result: ArtifactGenerationModelResult | None = None
     artifacts: Dict[str, str] = {}
-    if not reasons and runner is not None:
-        prompt = _artifact_prompt(req, planned)
-        context = str(req.get("evidence_context") or "")
-        if len(prompt) + len(context) > MAX_PROMPT_CHARS:
-            reasons.append(FAIL_MODEL_OUTPUT)
-        elif admission is None:
-            reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
-        elif not callable(trusted_now_epoch):
+    prepared = _artifact_model_input(req, planned, reasons)
+    if prepared is not None and runner is not None:
+        prompt, context = prepared
+        if admission is None or not callable(trusted_now_epoch):
             reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
         else:
             available_providers = getattr(runner, "available_model_providers", ())
             model_capability = _issue_artifact_generation_model(
-                invocation_binding=_binding(req, planned, model_selection),
+                invocation_binding=_binding(req, planned, model_selection, prompt),
                 runtime_binding=admission.runtime_binding,
                 selection=admission.selection,
                 verification=admission.verification,
@@ -238,21 +251,38 @@ def _run_bounded_artifact_model(
     return model_result, artifacts
 
 
+def _artifact_model_input(
+    req: Mapping[str, Any], planned: Sequence[str], reasons: List[str],
+) -> tuple[str, str] | None:
+    if reasons:
+        return None
+    try:
+        prompt = _artifact_prompt(req, planned)
+    except ValueError:
+        reasons.append(FAIL_M2M_ENVELOPE)
+        return None
+    context = str(req.get("evidence_context") or "")
+    if "m2m_envelope" in req:
+        context = json.dumps(
+            {**artifact_generation_output_contract(planned), "evidence_context": context},
+            sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        )
+    if len(prompt) + len(context) > MAX_PROMPT_CHARS:
+        reasons.append(FAIL_MODEL_OUTPUT)
+        return None
+    return prompt, context
+
+
 def _artifact_prompt(req: Mapping[str, Any], planned: Sequence[str]) -> str:
+    if "m2m_envelope" in req:
+        return encode_m2m_envelope(req["m2m_envelope"])
     return json.dumps(
         {
             "mission": "Produce exact text contents for the planned repository artifacts only.",
             "work_order_id": str(req.get("work_order_id") or ""),
             "slice_name": str(req.get("slice_name") or ""),
             "task_summary": str(req.get("task_summary") or ""),
-            "planned_artifacts": list(planned),
-            "output_schema": {"artifact_contents": {"path": "text content"}},
-            "hard_rules": [
-                "Return JSON only.",
-                "Keys must exactly match planned_artifacts.",
-                "Do not include secrets, credentials, tokens, or private keys.",
-                "Do not create extra files.",
-            ],
+            **artifact_generation_output_contract(planned),
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -264,8 +294,11 @@ def _binding(
     req: Mapping[str, Any],
     planned: Sequence[str],
     model_selection: Mapping[str, Any],
+    prompt: str,
 ) -> Dict[str, Any]:
     return {
+        **({"prompt_schema": "0102_m2m_v1", "m2m_prompt_digest": _digest(prompt)}
+           if "m2m_envelope" in req else {}),
         "work_order_id": str(req.get("work_order_id") or ""),
         "slice_name": str(req.get("slice_name") or ""),
         "planned_artifacts_digest": _digest(list(planned)),
@@ -352,11 +385,14 @@ def _model_selection_payload(
     }
 
 
-def _json_compatible_mapping(value: Mapping[str, Any]) -> Dict[str, Any]:
+def _json_compatible_mapping(
+    value: Mapping[str, Any], *, strict: bool = False,
+) -> Dict[str, Any]:
     if not value:
         return {}
     try:
-        normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+        normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"),
+                                           ensure_ascii=True, allow_nan=not strict))
     except (TypeError, ValueError):
         return {}
     return normalized if isinstance(normalized, dict) else {}
@@ -428,11 +464,6 @@ def _timeout(value: Any) -> int:
     except Exception:
         parsed = 120
     return max(1, min(parsed, 600))
-
-
-def _digest(payload: Any) -> str:
-    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
-    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def _dedupe(values: Sequence[str]) -> List[str]:

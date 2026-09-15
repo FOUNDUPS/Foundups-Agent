@@ -21,7 +21,11 @@ from .reddog_artifact_generation_model_binding import (
     artifact_generation_digest,
     resolved_model_topology,
 )
-from .reddog_artifact_generation_provider_contract import ArtifactGenerationModelResult
+from .reddog_artifact_generation_provider_contract import (
+    ArtifactGenerationModelResult,
+    FAIL_M2M_PROMPT_BINDING,
+    validate_provider_m2m_prompt,
+)
 
 ENV_ARTIFACT_GENERATOR_RUNTIME_MODE = "REDDOG_ARTIFACT_GENERATOR_RUNTIME_MODE"
 RUNTIME_MODE_FOUNDUPS_FUSION = "foundups_fusion"
@@ -34,7 +38,6 @@ FAIL_MODEL_RUNTIME_BINDING_RECEIPT = "FAIL_ARTIFACT_GENERATION_MODEL_RUNTIME_BIN
 @dataclass(frozen=True)
 class FoundupsFusionArtifactGenerationRunner:
     """Explicit-mode FoundUps Fusion runner for bounded artifact generation."""
-
     runtime_mode: str = ""
     max_tokens: int = 1800
     temperature: float = 0.0
@@ -54,9 +57,6 @@ class FoundupsFusionArtifactGenerationRunner:
         mode = (self.runtime_mode or os.getenv(ENV_ARTIFACT_GENERATOR_RUNTIME_MODE, "")).strip()
         if mode != RUNTIME_MODE_FOUNDUPS_FUSION:
             return _reject(FAIL_RUNTIME_MODE, started)
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            return _reject("missing_openrouter_api_key", started)
         gate = evaluate_redaction_gate(prompt, context, audit_mode=True)
         if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
             return _reject(FAIL_REDACTION_BLOCKED, started)
@@ -64,25 +64,19 @@ class FoundupsFusionArtifactGenerationRunner:
         topology = _topology(verified or {})
         if not topology:
             return _reject(FAIL_MODEL_RUNTIME_BINDING_RECEIPT, started)
+        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt):
+            return _reject(FAIL_M2M_PROMPT_BINDING, started)
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            return _reject("missing_openrouter_api_key", started)
         return _invoke(
-            self,
-            api_key,
-            gate.redacted_prompt,
-            gate.redacted_context or "",
-            verified or {},
-            topology,
-            timeout_seconds,
-            started,
+            self, api_key, gate.redacted_prompt, gate.redacted_context or "",
+            verified or {}, topology, timeout_seconds, started,
         )
 def _invoke(
-    runner: FoundupsFusionArtifactGenerationRunner,
-    api_key: str,
-    prompt: str,
-    context: str,
-    verified: Mapping[str, Any],
-    topology: Mapping[str, Any],
-    timeout: int,
-    started: float,
+    runner: FoundupsFusionArtifactGenerationRunner, api_key: str,
+    prompt: str, context: str, verified: Mapping[str, Any],
+    topology: Mapping[str, Any], timeout: int, started: float,
 ) -> ArtifactGenerationModelResult:
     payload = {
         "mode": RUNTIME_MODE_FOUNDUPS_FUSION,

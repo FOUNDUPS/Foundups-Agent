@@ -18,7 +18,9 @@ from .reddog_artifact_generation_model_binding import (
 )
 from .reddog_artifact_generation_provider_contract import (
     ArtifactGenerationModelResult,
+    FAIL_M2M_PROMPT_BINDING,
     validate_provider_artifact_contents,
+    validate_provider_m2m_prompt,
 )
 from .reddog_openclaw_gateway_command_runner import (
     OpenClawCommandResult,
@@ -55,13 +57,15 @@ class OpenClawGatewayArtifactGenerationRunner:
         gate = evaluate_redaction_gate(prompt, context, audit_mode=True)
         if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
             return _reject("FAIL_OPENCLAW_REDACTION_BLOCKED")
-        runtime = _runtime_root(self.runtime_root, self.repo_root)
-        if runtime is None:
-            return _reject("FAIL_OPENCLAW_RUNTIME_ROOT")
         verified = consume_artifact_generation_model(binding)
         model, session_key = _signed_invocation(verified)
         if not model or not session_key:
             return _reject("FAIL_OPENCLAW_MODEL_BINDING")
+        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt):
+            return _reject(FAIL_M2M_PROMPT_BINDING)
+        runtime = _runtime_root(self.runtime_root, self.repo_root)
+        if runtime is None:
+            return _reject("FAIL_OPENCLAW_RUNTIME_ROOT")
         preflight = _preflight(self.command_runner, self.agent_id, session_key, timeout_seconds)
         if not preflight.version:
             return _reject(FAIL_GATEWAY, spawn_count=preflight.spawn_count,

@@ -10,6 +10,10 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from prompt.swarm.m2m_compiler import decode_m2m_envelope
+from modules.communication.moltbot_bridge.tests.test_reddog_openclaw_gateway_artifact_provider import (
+    _M2M_PROVIDER_CASES, _m2m_provider_case,
+)
 
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import REDACTION_GATE_PASSED
 from modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider import (
@@ -28,9 +32,10 @@ from modules.communication.moltbot_bridge.src.reddog_hermes_api_transport import
 
 class FakeKeyProvider:
     def __init__(self, value="k" * 48):
-        self.value = value
+        self.value, self.reads = value, 0
 
     def read_key(self):
+        self.reads += 1
         if isinstance(self.value, Exception):
             raise self.value
         return self.value
@@ -450,3 +455,25 @@ def test_provider_has_no_shell_subprocess_or_repository_write():
             and node.func.attr in {"write_text", "write_bytes", "mkdir", "Popen", "system"}
             for node in ast.walk(tree)
         )
+
+
+@pytest.mark.parametrize("case", _M2M_PROVIDER_CASES)
+def test_m2m_prompt_integrity_precedes_hermes_key_and_network(case):
+    transport, key = FakeTransport(), FakeKeyProvider()
+    metadata, supplied, redacted = _m2m_provider_case(case)
+    context = '{"output_schema":"artifact_contents","planned_artifacts":["src/example.py"]}'
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=redacted, redacted_context=context)
+    with patch("modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(transport, binding={**_binding(), **metadata}, key_provider=key,
+                           prompt=supplied, context=context)
+    if case not in ("canonical", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert key.reads == 0 and transport.calls == []
+        assert result.made_network_call is False and result.hermes_dispatch_performed is False
+        return
+    assert result.ok and key.reads == 1
+    submit = next(call for call in transport.calls if call[:2] == ("POST", "/v1/runs"))
+    task = submit[3]["input"].split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)[0]
+    assert task == supplied and submit[3]["input"].endswith(context)
+    if case == "canonical":
+        assert [type(value) for value in decode_m2m_envelope(task)["I"]["values"][:4]] == [bool, int, float, type(None)]

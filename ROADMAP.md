@@ -61,7 +61,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. Main `67db4949` still has 17 registry
+manifest and the existing intake package. Main `ffbb751f` still has 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -75,7 +75,7 @@ the canonical `/f/detect_ai` namespace. No build order or public route is activa
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
 | Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
 | WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
-| WSP 99 handoff | Existing codec and exact optional profile field preserve normalized identity, task/action and nested constraints through local signing fixtures. Prose normalization and provider prompt/context transport remain unqualified. |
+| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Producer normalization, full context and downstream/native-child fidelity remain open. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
@@ -92,18 +92,26 @@ author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedD
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
 This closes unsafe legacy emission, not the canonical envelope or the RSI system.
 
-The codec and signed-order generation guard are merged through PRs #1757/#1758.
-The next local layer admits only explicit `bounded_worker_plan.m2m_envelope`
-through existing profile/reader/materializer owners. Codec bounds precede nested
-traversal; secret/digest/ASCII and effect policies remain enforced. Final-order
-signing fixtures cover the entire packet and reject later action/type changes.
-Validation: **582 connected passes / three existing platform skips**. Independent
-review and exact package evidence are recorded in `current_observation` in the backlog.
-Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**:
-next bind canonical prompt/context through the existing capability to provider egress;
-explicit producer carriage remains separate. Higher work remains blocked or separately owned. The historical
-observation file and 26 planning packets are unchanged; its 55 top-level fields
-must not be described as 55 observations. AutoResearcher reporting remains 15/P1.
+The codec, signed-order guard and profile carrier are merged through PRs
+#1757/#1758/#1760. Both main workflows on `ffbb751f` passed. The next local layer
+preserves that explicit packet through model preparation and provider-adapter egress.
+Canonical requests are detached before authority consumption; paired schema/digest
+binding rejects changed raw/redacted instructions before adapter effects. Invalid
+canonical requests consume their matching one-use handle. Legacy bytes and the
+combined 24,000-character prompt/context budget remain unchanged.
+
+Validation: **692 connected passes / one existing platform skip**. Independent
+source review accepted 309 checks and31 after AST-equivalent Fusion formatting;
+105 generation-lane tests pass. Two inherited WSP62 failures remain documented.
+The review caught directory-before-check, callback mutation and rejected-handle
+reuse; all are repaired. A local evidence filename collision was recovered with
+separate lane artifacts and a fresh full-suite run, not hidden or counted as success.
+
+Re-observed WSP15/97 selects **explicit producer input to the existing seed supplier
+and bootstrap, 18/P0**. Prose normalization, full governed-context fidelity, native
+child delivery and runtime admission remain separate. Higher-ranked work stays
+blocked or separately owned. Detailed current evidence is in the backlog; the
+historical observation file and 26 planning packets remain unchanged.
 
 | Gate | Planned work and advancement rule |
 |---|---|
@@ -133,7 +141,7 @@ YUMORI/eSingularity and Remote's `FOUNDUPS/autopost` remain separate owners.
 Record per-order provider/model, retries, failures, scopes, conflicts, independent
 rejections, 012/0102 interventions, tokens/cost when available, elapsed time, tests,
 integration/public defects, package changes and reusable repairs/accepted retention.
-Current counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
+Initial G0 observation counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
 lanes; 1 locally independently accepted shared repair; 0 WRE-retained improvements.
 No OpenClaw/Hermes provider invocation occurred; Codex token/cost metadata is unavailable.
 Unrun device/public tests and integration defects are unknown, not zero. Detailed

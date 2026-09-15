@@ -11,7 +11,11 @@ from .reddog_artifact_generation_admission_capability import (
     ArtifactGenerationModelCapability,
     consume_artifact_generation_model,
 )
-from .reddog_artifact_generation_provider_contract import ArtifactGenerationModelResult
+from .reddog_artifact_generation_provider_contract import (
+    ArtifactGenerationModelResult,
+    FAIL_M2M_PROMPT_BINDING,
+    validate_provider_m2m_prompt,
+)
 from .reddog_hermes_api_confinement import (
     strict_json_mapping,
     verify_hermes_api_preflight,
@@ -51,6 +55,8 @@ class HermesApiArtifactGenerationRunner:
         route = signed_hermes_route(verified)
         if route is None:
             return reject_hermes("FAIL_HERMES_MODEL_BINDING")
+        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt):
+            return reject_hermes(FAIL_M2M_PROMPT_BINDING)
         try:
             api_key = self.api_key_provider.read_key()
         except Exception:

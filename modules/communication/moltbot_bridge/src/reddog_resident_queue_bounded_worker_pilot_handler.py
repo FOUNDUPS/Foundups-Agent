@@ -51,6 +51,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounde
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
 )
+from .reddog_authority_profile_rehydration import snapshot_authority_profile_m2m
 
 
 BOUNDED_WORKER_PILOT_STAGE_KEY = "bounded_worker_pilot"
@@ -297,7 +298,7 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
         work_authority = _mapping(authority.get("work_authority"))
         try:
             # Derive from the same detached contents compared to signed admission.
-            admitted_order = deepcopy(dict(work_order))
+            admitted_order = snapshot_authority_profile_m2m(deepcopy(dict(work_order)))
             work_order_digest = canonical_full_work_order_digest(admitted_order)
         except (TypeError, ValueError, RecursionError):
             return _reject(FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING)
@@ -481,6 +482,7 @@ def _artifact_generation_request_payload(
     model_selection_receipt: Mapping[str, Any],
 ) -> dict[str, Any]:
     return {
+        **({"m2m_envelope": plan["m2m_envelope"]} if "m2m_envelope" in plan else {}),
         "explicit_artifact_generation_requested": True,
         "work_order_id": str(work_order.get("work_order_id") or ""),
         "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
@@ -488,7 +490,7 @@ def _artifact_generation_request_payload(
         "planned_artifacts": planned_artifacts,
         "evidence_context": json.dumps(
             {
-                "task_summary": task_summary,
+                **({} if "m2m_envelope" in plan else {"task_summary": task_summary}),
                 "holoindex_evidence": dict(evidence),
                 "holoindex_evidence_refs": _list(work_order.get("holoindex_evidence_refs")),
             },

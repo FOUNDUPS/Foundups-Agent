@@ -1,3 +1,9 @@
+## 2026-09-15: Canonical request and provider fidelity
+
+- Before: provider 32 failures/91 passes; generation 26 failures/73 passes. Independent follow-ups reproduced 16 directory-order failures, two callback failures and one same-digest tuple/list authority retry. All failures and the separate harness assertion correction are preserved.
+- Final author-accepted: 692 passes/one AF_UNIX skip with stable hashes; independent 309 plus 31 Fusion checks; generation 105. Two unchanged WSP62 failures remain advisory. Fusion now meets 200 lines; no acceptance criterion or size exemption changed.
+- A shared artifact basename collision invalidated overlapping XML/log attribution. Final evidence uses distinct author-accepted, generation-accepted and provider-* names, receipts and hashes. Eight manifest tests, 15 fast groups and registry 1650/269 pass; actual commands and inherited failures are in `m2m_provider_fidelity_continuation_20260915`. All models/signers are disposable local fixtures; no live provider or retention claim. WSP00/15/22/34/50/62/97/99.
+
 ## 2026-09-15: Local verdict handoff and policy drift
 
 ## 2026-09-15: M2M profile and final-signing coverage
