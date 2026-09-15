@@ -1,5 +1,20 @@
 # Token Efficiency TestModLog
 
+## 2026-09-15 — Canonical JSON envelope qualification
+
+Extended only the existing compatibility file; the fidelity file is unchanged.
+Before implementation: 114 new failures and 222 existing passes. Added 20 positive
+lane/mode and boundary cases; the final author run passes all 356 in 0.65s.
+The first harness run hit Windows' environment-variable limit because generated
+parameter IDs contained oversized inputs; bounded IDs corrected the harness.
+No acceptance criterion was relaxed. Nested types/Unicode, identity, omission,
+malformed/duplicate keys, wrong fields/types, finite numbers and resource bounds
+are covered. Existing test classes and functions remain AST-identical.
+
+Independent rerun/probes and package checks are recorded with source hashes in
+the backlog's `current_observation`; repeated runs are not additive test coverage.
+No live model, dispatch, product or retained-learning result follows from these tests.
+
 ## 2026-09-15 — AmIBot G0 legacy-invariant regression
 
 Reused `test_m2m_compiler_compat.py` and unchanged `test_m2m_fidelity.py`.

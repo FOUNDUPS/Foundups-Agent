@@ -159,6 +159,54 @@ This change does not harden `parse_compact`, YAML, other fields or full prose,
 and does not qualify schema/ROLE/ORIGIN/PRINCIPAL_REF/stable task IDs or authority.
 The fidelity gate's separate `HoloInvariants` object is not this wire dictionary.
 
+### Canonical envelope codec — 2026-09-15
+
+The existing `prompt/swarm/m2m_compiler.py` owns two additional pure functions:
+
+```python
+from prompt.swarm.m2m_compiler import encode_m2m_envelope, decode_m2m_envelope
+
+wire = encode_m2m_envelope(normalized_order)  # Caller supplies the complete order.
+restored_order = decode_m2m_envelope(wire)
+```
+
+`encode_m2m_envelope(envelope: dict[str, Any]) -> str` validates a plain JSON
+snapshot, then emits sorted-key compact UTF-8-compatible JSON. The decoder takes
+a built-in `str`, rejects duplicate keys at every depth, validates the same
+profile and returns a new dictionary. Neither mutates the input or uses providers,
+storage, the heuristic prose compiler or the legacy parser.
+
+Required fields follow current WSP99 section 0: `schema=0102_m2m_v1`, `ROLE`,
+`ORIGIN`, `L`, `S`, `M`, `T`, `A`, `R`, `I`, `O`, `F`. `PRINCIPAL_REF` is optional
+context; omission remains omission. Unknown fields reject. Roles/origins use the
+canonical enumerations; lanes are A/B/C/QA/SENTINEL/ORCH and modes exec/plan/qa.
+Legacy D/audit/review/verify/implement remain available only through legacy APIs.
+S/T/A and present PRINCIPAL_REF must be nonblank strings, preserved without
+trimming. R is a list of nonnegative built-in integers (not bool); I is a
+dictionary; O/F are string lists. These lists may be empty. The codec does not
+resolve WSP existence, paths, task identity uniqueness or action meaning.
+
+Nested I accepts exact built-in dict/list/string/bool/int/finite-float/None values
+and string keys. Delimiters, whitespace, Unicode and list order are preserved.
+Unsupported/custom types, cycles, invalid Unicode and non-finite numbers reject
+without coercion. All public validation errors are
+`ValueError("invalid canonical M2M envelope")`, without input values.
+
+Local defensive limits are **65,536 UTF-8 bytes**, **depth 16** (root at zero),
+and **4,096 nodes including dictionary keys**. They are codec-profile choices,
+not WSP-mandated quotas. Encoding bounds traversal and compact output; decoding
+bounds the entire input wire before parsing, including whitespace. Python's
+integer-conversion limits also apply. Round-trip fidelity is for accepted Python
+JSON values, including integer/float distinction and negative floating zero;
+original wire whitespace or number spellings are not preserved. Determinism is
+not RFC8785/signature canonicalization or cross-language numeric qualification.
+
+The existing compact fidelity gate is unchanged and is not a validator for this
+codec. Passing codec tests does not prove principal prose was normalized correctly,
+that any downstream consumer preserves the envelope, or that execution, independent
+verification, reward or retained-learning authority exists. Keep those gates closed
+until separately qualified; do not convert signed receipts into this format.
+
 ## Public API (P3: Telemetry Service)
 
 ### Classes

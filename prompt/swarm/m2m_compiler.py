@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import re
 from dataclasses import dataclass, field
@@ -66,6 +67,129 @@ POLITENESS_MARKERS = re.compile(
     r'ensure that|be careful to|remember to|don\'t forget to)\b',
     re.IGNORECASE
 )
+
+
+# Local JSON transport profile, not WSP admission or a signing canonicalization.
+M2M_ENVELOPE_MAX_BYTES = 65536
+M2M_ENVELOPE_MAX_DEPTH = 16
+M2M_ENVELOPE_MAX_NODES = 4096
+_ENVELOPE_ERROR = "invalid canonical M2M envelope"
+_ENVELOPE_REQUIRED = frozenset("schema ROLE ORIGIN L S M T A R I O F".split())
+_ENVELOPE_ENUMS = {
+    "schema": {"0102_m2m_v1"},
+    "ROLE": {"architect", "worker", "verifier", "coordinator", "validator"},
+    "ORIGIN": {"external_principal", "internal_handoff", "autonomous_trigger"},
+    "L": {"A", "B", "C", "QA", "SENTINEL", "ORCH"},
+    "M": {"exec", "plan", "qa"},
+}
+
+
+def _snapshot_m2m_json(value: Any, budget: list[int], depth: int = 0) -> Any:
+    """Copy exact JSON types with bounded traversal and compact UTF-8 accounting."""
+    budget[0] -= 1
+    kind = type(value)
+    if depth > M2M_ENVELOPE_MAX_DEPTH or budget[0] < 0:
+        raise ValueError(_ENVELOPE_ERROR)
+    if kind not in (dict, list, str, bool, int, float, type(None)):
+        raise ValueError(_ENVELOPE_ERROR)
+    if kind in (dict, list):
+        count = len(value)
+        multiplier = 2 if kind is dict else 1  # Dict keys count as nodes too.
+        budget[1] -= 2 + max(0, multiplier * count - 1)
+        if multiplier * count > budget[0] or budget[1] < 0:
+            raise ValueError(_ENVELOPE_ERROR)
+        if kind is list:
+            return [_snapshot_m2m_json(v, budget, depth + 1) for v in value]
+        snapshot = {}
+        for key, item in value.items():
+            if type(key) is not str:
+                raise ValueError(_ENVELOPE_ERROR)
+            copied_key = _snapshot_m2m_json(key, budget, depth + 1)
+            snapshot[copied_key] = _snapshot_m2m_json(item, budget, depth + 1)
+        return snapshot
+    if kind is str and len(value) > M2M_ENVELOPE_MAX_BYTES:
+        raise ValueError(_ENVELOPE_ERROR)
+    if kind is int and value.bit_length() > M2M_ENVELOPE_MAX_BYTES * 4:
+        raise ValueError(_ENVELOPE_ERROR)
+    if kind is float and not math.isfinite(value):
+        raise ValueError(_ENVELOPE_ERROR)
+    scalar = json.dumps(value, ensure_ascii=False, allow_nan=False)
+    budget[1] -= len(scalar.encode("utf-8"))
+    if budget[1] < 0:
+        raise ValueError(_ENVELOPE_ERROR)
+    return value
+
+
+def _validate_m2m_envelope(envelope: dict[str, Any]) -> None:
+    """Check WSP 99 section 0 shape after copying to plain JSON types."""
+    if type(envelope) is not dict:
+        raise ValueError(_ENVELOPE_ERROR)
+    fields = set(envelope)
+    if not _ENVELOPE_REQUIRED <= fields or fields - _ENVELOPE_REQUIRED - {"PRINCIPAL_REF"}:
+        raise ValueError(_ENVELOPE_ERROR)
+    for name, choices in _ENVELOPE_ENUMS.items():
+        if type(envelope[name]) is not str or envelope[name] not in choices:
+            raise ValueError(_ENVELOPE_ERROR)
+    for name in ("S", "T", "A", "PRINCIPAL_REF"):
+        if name in envelope and (type(envelope[name]) is not str or not envelope[name].strip()):
+            raise ValueError(_ENVELOPE_ERROR)
+    if type(envelope["I"]) is not dict or type(envelope["R"]) is not list:
+        raise ValueError(_ENVELOPE_ERROR)
+    if any(type(ref) is not int or ref < 0 for ref in envelope["R"]):
+        raise ValueError(_ENVELOPE_ERROR)
+    for name in ("O", "F"):
+        if type(envelope[name]) is not list or any(type(v) is not str for v in envelope[name]):
+            raise ValueError(_ENVELOPE_ERROR)
+
+
+def _unique_m2m_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate wire keys at every depth instead of accepting last-wins."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(_ENVELOPE_ERROR)
+        result[key] = value
+    return result
+
+
+def encode_m2m_envelope(envelope: dict[str, Any]) -> str:
+    """Encode normalized WSP 99 fields without inference, coercion or admission.
+
+    Produces deterministic compact JSON for this Python codec, not signing bytes.
+    PRINCIPAL_REF remains optional. Local limits: 64 KiB UTF-8, depth 16 (root 0),
+    4096 nodes including dictionary keys; Python integer conversion limits apply.
+    """
+    try:
+        snapshot = _snapshot_m2m_json(
+            envelope, [M2M_ENVELOPE_MAX_NODES, M2M_ENVELOPE_MAX_BYTES])
+        _validate_m2m_envelope(snapshot)
+        wire = json.dumps(snapshot, sort_keys=True, separators=(",", ":"),
+                          ensure_ascii=False, allow_nan=False)
+        if len(wire.encode("utf-8")) > M2M_ENVELOPE_MAX_BYTES:
+            raise ValueError(_ENVELOPE_ERROR)
+        return wire
+    except (ValueError, TypeError, OverflowError, RecursionError):
+        raise ValueError(_ENVELOPE_ERROR) from None
+
+
+def decode_m2m_envelope(wire: str) -> dict[str, Any]:
+    """Decode only the bounded canonical JSON envelope; never fall back to legacy.
+
+    Preserves Python JSON value types, not original whitespace/number spellings.
+    Does not qualify other consumers, paths, WSP references or execution authority.
+    """
+    try:
+        if type(wire) is not str or len(wire) > M2M_ENVELOPE_MAX_BYTES:
+            raise ValueError(_ENVELOPE_ERROR)
+        if len(wire.encode("utf-8")) > M2M_ENVELOPE_MAX_BYTES:
+            raise ValueError(_ENVELOPE_ERROR)
+        parsed = json.loads(wire, object_pairs_hook=_unique_m2m_json_object)
+        snapshot = _snapshot_m2m_json(
+            parsed, [M2M_ENVELOPE_MAX_NODES, M2M_ENVELOPE_MAX_BYTES])
+        _validate_m2m_envelope(snapshot)
+        return snapshot
+    except (ValueError, TypeError, OverflowError, RecursionError):
+        raise ValueError(_ENVELOPE_ERROR) from None
 
 
 def _encode_legacy_invariants(invariants: dict[str, Any]) -> str:

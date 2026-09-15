@@ -1,5 +1,19 @@
 # Token Efficiency ModLog
 
+## 2026-09-15 — Preserve normalized canonical envelopes
+
+Added `encode_m2m_envelope` / `decode_m2m_envelope` to the existing compiler.
+The codec copies plain JSON values, preserves declared identity/task/action and
+nested constraints, rejects duplicate keys/coercion and applies documented local
+byte/depth/node limits. It grants no admission and does not infer prose intent.
+Legacy definitions are AST-identical; no new dependency, module or test file.
+WSP00/15/22/50/62/84/97/99; parent qualification remains 18/P0 for producers/consumers.
+
+The author run passes 356 tests (222 existing plus 134 canonical cases).
+Independent review, packaging evidence, exact hashes and remaining gaps are in
+`docs/roadmaps/rsi_swarm_backlog.json` → `current_observation`. The previous dated
+baseline is preserved. No existing caller is silently switched to the new codec.
+
 ## 2026-09-15 — Reject unsafe legacy invariant emission
 
 AmIBot G0 at main 582cbe82 exposed nested constraint loss in the existing compiler.

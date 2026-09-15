@@ -113,7 +113,13 @@ delimiter/trim/control violations before emitting a packet. Flat scalar text,
 including empty values and internal-space keys, remains compatible. 222 focused
 tests and an independent rerun pass after compatibility review. See the
 [interface](INTERFACE.md#public-api-p2-compact-fidelity-gate) for exact limits;
-the canonical WSP99 envelope and live FoundUp dispatch remain unqualified.
+the historical guard does not qualify a canonical envelope or live dispatch.
+
+The next layer adds a bounded JSON codec in that same compiler for already
+normalized WSP99 orders. `encode_m2m_envelope` / `decode_m2m_envelope` preserve
+schema, role/origin, optional principal, stable task ID, full declared action and
+nested typed constraints. See the [codec profile](INTERFACE.md#canonical-envelope-codec--2026-09-15).
+Normalization and downstream consumer/admission qualification remain open.
 
 This gate owns compact prompt packets. It is not the AI Overseer reference-YAML
 compiler's acceptance gate. Its existing CTX.HOLO check round-trips the supplied

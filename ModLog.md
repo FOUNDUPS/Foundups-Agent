@@ -1,5 +1,11 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-15: RSI canonical M2M envelope transport
+
+- Extended the existing compiler with an explicit JSON codec for already normalized WSP99 orders. Role/origin, optional principal, task ID, action and typed constraints survive; ambiguous or oversized inputs reject. Existing compiler/parser/fidelity behavior stays unchanged.
+- Prior owned PR1756 merged as e1346709 after all ten exact-head checks; both main workflows passed. This layer's local validation and independent review are bound in the existing backlog's `current_observation`; no AmIBot build, provider invocation, signed retention or public activation.
+- WSP15/97 keeps the remaining producer/consumer handoff at 18/P0. Preserved all 55 dated baseline observations and 26 planning packets; current evidence uses the existing backlog instead of enlarging the near-budget baseline. No new module, skill, test file or document. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-15: AmIBot production experiment G0 and shared M2M guard
 
 - Added AmIBot to the canonical RSI roadmap with 12 readiness gates, G0–G6 dependencies, meaningful metrics and explicit controlled failure. PR1751 remains open/separate; no build orders, runtime update or public activation. Current lease/model, typed genesis, Skillz, scopes and route alias gaps are recorded from source.
