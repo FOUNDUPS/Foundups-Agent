@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]  # modules/communication/video_comments
 DEFAULT_PATH = MODULE_ROOT / "memory" / "commenting_broadcast.json"
+SHARED_MANIFEST_STATE_PATH = Path(__file__).resolve().parents[4] / "memory" / "012_manifest_state.json"
 
 
 @dataclass
@@ -50,6 +51,10 @@ def _normalize_handle(handle: str) -> str:
 
 
 def load_broadcast(path: Path = DEFAULT_PATH) -> CommentingBroadcast:
+    """Resolve the shared 012 manifest first, then retain legacy local config."""
+    shared = _load_shared_manifest_context()
+    if shared is not None:
+        return shared
     if not path.exists():
         return CommentingBroadcast()
     try:
@@ -74,6 +79,22 @@ def load_broadcast(path: Path = DEFAULT_PATH) -> CommentingBroadcast:
         )
     except Exception:
         return CommentingBroadcast()
+
+
+def _load_shared_manifest_context() -> Optional[CommentingBroadcast]:
+    try:
+        raw = json.loads(SHARED_MANIFEST_STATE_PATH.read_text(encoding="utf-8"))
+        context = raw.get("active_context") if isinstance(raw, dict) else None
+        if not isinstance(context, dict) or "comments" not in context.get("surfaces", []):
+            return None
+        if float(context.get("expires_at_unix", 0)) <= time.time():
+            return None
+        message = str(context.get("message") or "").strip()
+        if not message:
+            return None
+        return CommentingBroadcast(enabled=True, promo_message=message, updated_by="012_manifest")
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return None
 
 
 def save_broadcast(broadcast: CommentingBroadcast, path: Path = DEFAULT_PATH) -> Path:

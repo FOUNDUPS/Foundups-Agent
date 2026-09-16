@@ -1,0 +1,188 @@
+"""Bounded local operator-command inbox for the YouTube Live DAE.
+
+The inbox lets a local supervising agent place explicit, auditable commands in
+JSON while the DAE is running. It is not a generic prompt or shell channel:
+only the small allowlist below can be dispatched.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import time
+import asyncio
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Awaitable, Callable, Dict, List
+
+from modules.communication.livechat.src.automation_gates import gate_snapshot
+
+logger = logging.getLogger(__name__)
+
+COMMAND_FILE_ENV = "YT_012_MANIFEST_FILE"
+ACK_FILE_ENV = "YT_012_MANIFEST_ACK_FILE"
+DEFAULT_COMMAND_FILE = "memory/012_manifest.json"
+DEFAULT_ACK_FILE = "memory/012_manifest_acknowledgements.json"
+DEFAULT_STATE_FILE = "memory/012_manifest_state.json"
+MAX_MESSAGE_LENGTH = 500
+ALLOWED_CONTEXT_SURFACES = {"livechat", "comments"}
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+class OperatorCommandQueue:
+    """Poll a local JSON command inbox and persist exactly-once acknowledgements."""
+
+    def __init__(
+        self,
+        dae: Any,
+        command_path: Path | None = None,
+        acknowledgement_path: Path | None = None,
+        state_path: Path | None = None,
+        poll_interval_seconds: int = 60,
+    ) -> None:
+        self.dae = dae
+        self.command_path = command_path or Path(os.getenv(COMMAND_FILE_ENV, DEFAULT_COMMAND_FILE))
+        self.acknowledgement_path = acknowledgement_path or Path(os.getenv(ACK_FILE_ENV, DEFAULT_ACK_FILE))
+        self.state_path = state_path or Path(os.getenv("YT_012_MANIFEST_STATE_FILE", DEFAULT_STATE_FILE))
+        self.poll_interval_seconds = poll_interval_seconds
+        self._next_poll_at = 0.0
+        self.last_result: Dict[str, Any] = {"checked_at": None, "processed": 0}
+
+    @staticmethod
+    def _read_json(path: Path, default: Dict[str, Any]) -> Dict[str, Any]:
+        if not path.exists():
+            return default
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("[OPERATOR-COMMAND] Cannot read %s: %s", path, exc)
+            return default
+        return loaded if isinstance(loaded, dict) else default
+
+    @staticmethod
+    def _atomic_write(path: Path, value: Dict[str, Any]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path = path.with_suffix(f"{path.suffix}.tmp")
+        temporary_path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        temporary_path.replace(path)
+
+    async def poll_once(self) -> Dict[str, Any]:
+        """Process commands not already present in the acknowledgement ledger."""
+        now = time.monotonic()
+        if now < self._next_poll_at:
+            self.last_result = {"checked_at": _utc_now(), "processed": 0, "status": "not_due"}
+            return self.last_result
+        self._next_poll_at = now + self.poll_interval_seconds
+        inbox = self._read_json(self.command_path, {"version": 1, "commands": []})
+        commands = inbox.get("commands", [])
+        if not isinstance(commands, list):
+            commands = []
+        acknowledgements = self._read_json(self.acknowledgement_path, {"version": 1, "acknowledgements": []})
+        recorded = acknowledgements.setdefault("acknowledgements", [])
+        completed_ids = {item.get("id") for item in recorded if isinstance(item, dict) and isinstance(item.get("id"), str)}
+        results: List[Dict[str, Any]] = []
+        acknowledgements_changed = False
+        for command in commands:
+            if not isinstance(command, dict):
+                continue
+            command_id = command.get("id")
+            if not isinstance(command_id, str) or not command_id or command_id in completed_ids:
+                continue
+            result = await self._dispatch(command)
+            # A stream may not yet be connected at watcher startup.  Keep that
+            # command in the manifest until it can be actioned rather than
+            # acknowledging it as a permanent failure.
+            if result.get("status") == "deferred":
+                self._write_receipt(result)
+                results.append(result)
+                continue
+            recorded.append(result)
+            completed_ids.add(command_id)
+            results.append(result)
+            acknowledgements_changed = True
+            self._write_receipt(result)
+        if acknowledgements_changed:
+            self._atomic_write(self.acknowledgement_path, acknowledgements)
+        self.last_result = {"checked_at": _utc_now(), "processed": len(results), "results": results}
+        return self.last_result
+
+    def _write_receipt(self, result: Dict[str, Any]) -> None:
+        """Publish the DAE-owned red/amber/green outcome beside manifest state."""
+        status = result.get("status", "failed")
+        health = "green" if status == "accepted" else "amber" if status == "deferred" else "red"
+        state = self._read_json(self.state_path, {"version": 1, "active_context": None})
+        state["last_receipt"] = {
+            "id": result.get("id"), "action": result.get("action"), "status": status,
+            "health": health, "reason": result.get("reason"), "recorded_at": _utc_now(),
+        }
+        self._atomic_write(self.state_path, state)
+
+    async def watch_forever(self) -> None:
+        """Run the independent 012-manifest watch loop for the DAE lifetime."""
+        logger.info("[012-MANIFEST] Watching %s every %ss", self.command_path, self.poll_interval_seconds)
+        while True:
+            await self.poll_once()
+            await asyncio.sleep(self.poll_interval_seconds)
+
+    async def _dispatch(self, command: Dict[str, Any]) -> Dict[str, Any]:
+        command_id = command["id"]
+        action = command.get("action")
+        payload = command.get("payload", {})
+        base = {"id": command_id, "action": action, "completed_at": _utc_now()}
+        if not isinstance(payload, dict):
+            return {**base, "status": "rejected", "reason": "payload_must_be_an_object"}
+        if action == "status":
+            return {**base, "status": "accepted", "result": {"gates": gate_snapshot()}}
+        if action == "clear_context":
+            self._atomic_write(self.state_path, {"version": 1, "active_context": None, "updated_at": _utc_now()})
+            return {**base, "status": "accepted", "result": {"context": "cleared"}}
+        if action == "set_context":
+            return await self._set_context(base, payload)
+        if action != "announce":
+            return {**base, "status": "rejected", "reason": "action_not_allowlisted"}
+        message = payload.get("message")
+        if not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH:
+            return {**base, "status": "rejected", "reason": "invalid_announce_message"}
+        gates = gate_snapshot()
+        if gates["stop_active"] or not gates["yt_automation"] or not gates["livechat_send"]:
+            return {**base, "status": "blocked", "reason": "automation_gate_closed", "gates": gates}
+        livechat = getattr(self.dae, "livechat", None)
+        sender: Callable[..., Awaitable[bool]] | None = getattr(livechat, "send_chat_message", None)
+        if sender is None:
+            return {**base, "status": "deferred", "reason": "livechat_unavailable", "gates": gates}
+        try:
+            sent = await sender(message.strip(), response_type="operator")
+        except Exception as exc:
+            logger.exception("[OPERATOR-COMMAND] announce %s failed", command_id)
+            return {**base, "status": "failed", "reason": type(exc).__name__}
+        return {**base, "status": "accepted" if sent else "blocked", "result": {"sent": bool(sent)}}
+
+    async def _set_context(self, base: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Persist an operator update for all selected output surfaces."""
+        message = payload.get("message")
+        if not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH:
+            return {**base, "status": "rejected", "reason": "invalid_context_message"}
+        requested_surfaces = payload.get("surfaces", ["livechat", "comments"])
+        if not isinstance(requested_surfaces, list) or not requested_surfaces:
+            return {**base, "status": "rejected", "reason": "invalid_context_surfaces"}
+        surfaces = [surface for surface in requested_surfaces if surface in ALLOWED_CONTEXT_SURFACES]
+        if len(surfaces) != len(requested_surfaces):
+            return {**base, "status": "rejected", "reason": "context_surface_not_allowlisted"}
+        ttl_seconds = payload.get("ttl_seconds", 3600)
+        if not isinstance(ttl_seconds, int) or not 60 <= ttl_seconds <= 86400:
+            return {**base, "status": "rejected", "reason": "invalid_context_ttl"}
+        context = {
+            "message": message.strip(), "surfaces": surfaces, "updated_at": _utc_now(),
+            "expires_at_unix": time.time() + ttl_seconds, "source_command_id": base["id"],
+        }
+        self._atomic_write(self.state_path, {"version": 1, "active_context": context})
+        if "livechat" not in surfaces:
+            return {**base, "status": "accepted", "result": {"context": context, "announced": False}}
+        announce_result = await self._dispatch({"id": base["id"], "action": "announce", "payload": {"message": context["message"]}})
+        if announce_result.get("status") == "deferred":
+            return {**base, "status": "deferred", "reason": "context_saved_livechat_unavailable", "result": {"context": context}}
+        return {**base, "status": announce_result["status"], "result": {"context": context, "announced": announce_result.get("status") == "accepted"}}

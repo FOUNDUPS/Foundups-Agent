@@ -360,6 +360,10 @@ class YouTubeDAEHeartbeat:
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             payload["run_id"] = run_id or None
             payload["automation_gates"] = gate_snapshot()
+            operator_manifest = getattr(self.dae, "operator_manifest_queue", None)
+            payload["operator_commands"] = getattr(
+                operator_manifest, "last_result", {"checked_at": None, "processed": 0}
+            )
 
             # Write as JSONL (one JSON object per line)
             with open(telemetry_file, 'a', encoding='utf-8') as f:
