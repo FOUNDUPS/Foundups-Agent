@@ -138,6 +138,7 @@ export default function JapanHyperscalerReportPage() {
         <img
           src="https://www.re-port.net/picture_l/report/0000074457_09.png"
           alt="千葉県印西市の大規模データセンター開発地を上空から見た写真"
+          referrerPolicy="no-referrer"
           style={{ width: "100%", height: "auto", borderRadius: 12 }}
         />
         <figcaption style={{ fontSize: ".9rem", opacity: 0.8 }}>
