@@ -124,7 +124,7 @@ def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> 
     assert "SWIPE_DISTANCE = 55" in component
     assert "AUTOPLAY_MS = 9000" in component
     assert "https://yumori.me" in component
-    assert "href: '/reports/jhr'" in read("components/CampaignTicker.tsx")
+    assert "href: '/reports/jhr#jhr-002'" in read("components/CampaignTicker.tsx")
 
 
 def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
