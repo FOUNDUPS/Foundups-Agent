@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${base}/reports/jhr`,
-      lastModified: new Date("2026-09-11"),
+      lastModified: new Date("2026-09-17"),
       changeFrequency: "daily",
       priority: 1,
     },
