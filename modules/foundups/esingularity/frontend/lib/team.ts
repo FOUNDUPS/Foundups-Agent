@@ -1,12 +1,12 @@
 export type TeamProfile = {
   isPublished?: boolean;
   slug: string;
-  group: 'core' | 'endorsers' | 'community' | 'network';
+  group: 'core' | 'collaborators' | 'endorsers' | 'community' | 'network';
   role: string;
   name: string;
   secondary: string;
-  image: string;
-  imageAlt: string;
+  image?: string;
+  imageAlt?: string;
   imagePosition?: string;
   introduction: string;
   statement: string;
@@ -21,28 +21,36 @@ export const teamProfiles: TeamProfile[] = [
     isPublished: true,
     slug: '012',
     group: 'core',
-    role: 'FOUNDER · CAMPAIGN DIRECTOR',
-    name: '012 · Monk UnDaoDu',
-    secondary: 'Michael J Trout · The Atheist Monk',
+    role: 'FOUNDER · PROJECT ORCHESTRATOR',
+    name: '012 · 九頭龍 泰澄',
+    secondary: 'Michael J. Trout · UnDaoDu · The Atheist Monk',
     image: '/team/012-landowners-private.png',
-    imageAlt: 'Michael J Trout with local community members at the historic Ryukoji site',
+    imageAlt: 'Michael J. Trout with local community members at the historic Ryukoji site',
     imagePosition: '50% 48%',
-    introduction: 'EDUITとeSingularityの創設者。重度のディスレクシアを持つ学習者としての経験から、誰もが自律して学べる未来を追い続けています。',
-    statement: '2007年に「Educational Singularity」という言葉と三段階の未来像を提唱。いま、その第3段階に必要な地域の計算力を、福井の教育・農業・産業のためにつくろうとしています。',
+    introduction: '米国出身の起業家・映像制作者。EDUIT、eSingularity、FoundUpsの創設者として、教育技術、資本形成、分散型組織、AIを横断し、構想を実行可能な案件へ組み立ててきました。',
+    statement: '2007年に始めたEducational Singularityの長期構想は、AIが学習を個別化する段階から、AIが学習と実行を自律的に支える段階へ進むというものです。AI交番は、その第3段階に必要な地域のComputeを、学校・大学・研究・産業・地域へ届ける物理インフラとして提案しています。',
     facts: [
-      { label: 'IDENTITY', value: '012 / Monk UnDaoDu' },
-      { label: 'MISSION', value: '教育と地域革新のための計算基盤' },
-      { label: 'PROJECT ROLE', value: '創設者・キャンペーンディレクター' },
+      { label: '1994', value: 'Southern Shakespeare Festival 創設' },
+      { label: 'EDUCATION', value: 'Florida State University BA／保存経歴資料に University of Alabama MFA/MBA' },
+      { label: 'CAPITAL FORMATION', value: 'NCDS系フィージビリティ・資本キャンペーン実務／保存CVで$7M+調達' },
+      { label: '2007–', value: 'Educational Singularity / EDUIT' },
+      { label: 'FILM', value: 'Animal Planet・Smithsonian Channel・National Geographic・Silverback Films関連の日本制作' },
+      { label: '2023', value: 'Education 2.0 Conference Dubai — Outstanding Leadership Award部門 Honoree' },
+      { label: '2026', value: 'Secrets of the Bees — National Geographic / Disney+' },
+      { label: 'PROJECT ROLE', value: 'YUMORI案件形成・地域調整・需要形成・資本キャンペーン' },
     ],
     gallery: [
       { src: '/team/community-hillside-private.png', alt: 'Michael J Trout with a community work group on the hillside', caption: '地域の現場で。建物だけでなく、土地と人の関係から始める。' },
-      { src: '/team/sigef-circle-private.png', alt: 'Michael J Trout with participants at SIGEF 2019 Tokyo', caption: 'SIGEF 2019 Tokyo。AIと社会的利益をめぐる国際的な対話の記録。' },
+      { src: '/team/sigef-circle-private.png', alt: 'Michael J Trout with participants at SIGEF 2019 Tokyo', caption: 'SIGEF 2019 Tokyo。保存チケットでは「SIGEF VIP Executive」として参加。' },
       { src: '/team/sigef-2019.jpg', alt: 'Attended SIGEF 2019 Tokyo event record', caption: 'SIGEF 2019 Tokyo attendee record.' },
     ],
     links: [
       { label: 'LinkedIn 公開プロフィール', href: 'https://jp.linkedin.com/in/openstartup' },
-      { label: 'eSingularity の公開記録', href: 'https://www.linkedin.com/company/esingularity' },
+      { label: 'eSingularity', href: 'https://esingularity.ai/' },
+      { label: 'Southern Shakespeare Company', href: 'https://southernshakespearefestival.org/' },
+      { label: 'FoundUps Agent — open source', href: 'https://github.com/FOUNDUPS/Foundups-Agent' },
     ],
+    disclosure: '人物経歴は、公開資料・保存CV・契約・主催者記録など確認できる証拠と本人の回想を区別しています。過去の経歴は、YUMORIの技術性・採算性・行政上の妥当性を自動的に証明するものではありません。',
   },
   {
     isPublished: true,
@@ -64,6 +72,25 @@ export const teamProfiles: TeamProfile[] = [
       { src: '/team/0102-mayan.jpg', alt: 'Mayan-inspired 0102 artwork worn by 012', caption: '012が身につけてきた、もう一つの0102の象徴。' },
     ],
     disclosure: '0102はAIです。法的責任、土地の合意、行政判断、技術認証は、それぞれ資格と権限を持つ人間・組織が担います。',
+  },
+  {
+    isPublished: true,
+    slug: 'jorge-sabastian',
+    group: 'collaborators',
+    role: 'TECHNICAL ADVISOR · AI INFRASTRUCTURE',
+    name: 'Jorge Sabastian',
+    secondary: 'Data-center architecture · feasibility · technical translation',
+    introduction: 'AI交番／COGDCの需要を、実際の容量、アーキテクチャ、冗長性、設備選定、運用方式へ落とし込むための技術アドバイザー／協働パートナー。',
+    statement: 'YUMORIでは、地域需要から初期DC規模を決め、電力・通信・セキュリティ・設備・運用の成立条件をフィージビリティとして検証する役割を想定しています。DeCenterの公開プロフィールではMD of Technology、元Huawei Technologies CTO、30年以上の技術・イノベーション経験、12か国での技術リーダーシップが紹介されています。',
+    facts: [
+      { label: 'PROJECT ROLE', value: '技術アドバイザー／協働パートナー' },
+      { label: 'FOCUS', value: '初期容量・DCアーキテクチャ・冗長性・設備・運用方式' },
+      { label: 'PUBLIC PROFILE', value: 'DeCenter — MD of Technology / former Huawei Technologies CTO' },
+      { label: 'EXPERIENCE', value: '公開プロフィール：30+ years / 12 countries' },
+    ],
+    gallery: [],
+    links: [{ label: 'DeCenter 公開プロフィール', href: 'https://aidc.gitbook.io/decenter-en/about-us/quickstart' }],
+    disclosure: '本人との直接資料では姓を「Sabastian」と表記する一方、DeCenter公開プロフィールは「Sebastian」と表記しています。本サイトでは直接資料に合わせSabastianを基本表記とします。掲載はDeCenterによる投資、融資、建設受注、運営責任の確約を意味しません。契約範囲・責任・報酬は別途文書化します。',
   },
   {
     slug: 'hasegawa',
@@ -147,6 +174,7 @@ export const teamProfiles: TeamProfile[] = [
 
 export const teamGroups = [
   { id: 'core', eyebrow: 'CORE TEAM', title: '012 ↔ 0102', description: '人間の経験とAIのパターン知性を、一つの責任ある実行チームへ。' },
+  { id: 'collaborators', eyebrow: 'TECHNICAL COLLABORATORS', title: '専門性をつなぐ', description: '技術・金融・法務など、案件形成に必要な専門家を確認できた役割から公開します。' },
   { id: 'endorsers', eyebrow: 'ENDORSERS', title: '声を重ねる人', description: '本人が確認した氏名、役割、言葉だけを掲載する支持者の場所。' },
   { id: 'community', eyebrow: 'LANDOWNERS & COMMUNITY', title: '場所に最も近い人', description: '土地所有者、周辺地域、施設の記憶を持つ人が意思決定の中心です。' },
   { id: 'network', eyebrow: 'GLOBAL NETWORK', title: '世界との接点', description: '012の活動履歴と対話の記録。写真は支持や提携を自動的に意味しません。' },
