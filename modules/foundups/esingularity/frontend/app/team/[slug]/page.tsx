@@ -23,9 +23,32 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: `${profile.name} | eSingularity.ai`,
       description: profile.introduction,
       url: `https://esingularity.ai/team/${profile.slug}`,
-      images: [{ url: profile.image, alt: profile.imageAlt }],
+      ...(profile.image ? { images: [{ url: profile.image, alt: profile.imageAlt ?? profile.name }] } : {}),
     },
   };
+}
+
+function ProfileVisual({ name, role }: { name: string; role: string }) {
+  return (
+    <div
+      aria-label={`${name} — ${role}`}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'grid',
+        placeItems: 'center',
+        alignContent: 'center',
+        gap: '12px',
+        padding: '28px',
+        textAlign: 'center',
+        background: 'radial-gradient(circle at 50% 35%, #164d9b 0, #071b37 45%, #020813 100%)',
+      }}
+    >
+      <small style={{ fontFamily: 'var(--font-mono), monospace', letterSpacing: '.16em', color: 'var(--cyan)' }}>AI KOBAN · COGDC</small>
+      <strong style={{ maxWidth: '460px', color: 'var(--white)', fontSize: 'clamp(26px, 4vw, 52px)', lineHeight: 1.05 }}>{name}</strong>
+      <span style={{ maxWidth: '430px', color: 'rgba(248,251,255,.65)', fontSize: '11px', lineHeight: 1.7 }}>{role}</span>
+    </div>
+  );
 }
 
 export default async function TeamProfilePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -43,7 +66,14 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
 
       <main className="profile-page">
         <section className="profile-hero">
-          <div className="profile-photo"><Image src={profile.image} alt={profile.imageAlt} fill priority sizes="(max-width: 900px) 100vw, 50vw" style={{ objectPosition: profile.imagePosition ?? '50% 50%' }} /><span>{profile.role}</span></div>
+          <div className="profile-photo">
+            {profile.image ? (
+              <Image src={profile.image} alt={profile.imageAlt ?? profile.name} fill priority sizes="(max-width: 900px) 100vw, 50vw" style={{ objectPosition: profile.imagePosition ?? '50% 50%' }} />
+            ) : (
+              <ProfileVisual name={profile.name} role={profile.role} />
+            )}
+            <span>{profile.role}</span>
+          </div>
           <div className="profile-title">
             <Link href="/team">← TEAM DIRECTORY</Link>
             <p>{profile.role}</p>
@@ -65,14 +95,36 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
         {profile.slug === '012' && (
           <section className="profile-memory" id="onsen-memory">
             <div><p className="eyebrow light"><span /> A MEMORY FROM THE ONSEN</p><h2>温泉は、建物ではなく、<br />思い出も残す。</h2></div>
-            <blockquote><p>長男トミーを初めて温泉に抱いて入った日のことを覚えています。見上げて笑い、声を上げて喜んでいました。次の瞬間、小さな「うんち」が湯にぷかり。驚いたけれど、いま振り返ると家族で笑える、昨日のことのような思い出です。</p><footer>— 012 · Monk UnDaoDu</footer></blockquote>
+            <blockquote><p>長男トミーを初めて温泉に抱いて入った日のことを覚えています。見上げて笑い、声を上げて喜んでいました。次の瞬間、小さな「うんち」が湯にぷかり。驚いたけれど、いま振り返ると家族で笑える、昨日のことのような思い出です。</p><footer>— 012 · 九頭龍 泰澄</footer></blockquote>
           </section>
         )}
 
         {profile.slug === '012' && (
           <section className="profile-special">
-            <div><p className="eyebrow light"><span /> THE EDUCATIONAL SINGULARITY</p><h2>2007年に名づけた未来が、<br />第3段階へ向かう。</h2></div>
-            <ol><li><span>01 · 2019–</span><strong>基礎教育へ到達できる</strong><p>数学、科学、言語科目のおよそ8年生相当まで、自律して学べる入口。</p></li><li><span>02 · NOW</span><strong>ほとんど何でも学べる</strong><p>生成AIが専門知識、言語、創作、技術を対話によって教える。</p></li><li><span>03 · NEXT</span><strong>AIが地域革新の基盤になる</strong><p>学校、大学、農業、企業、地域が自分たちの計算力を使う。</p></li></ol>
+            <div><p className="eyebrow light"><span /> THE EDUCATIONAL SINGULARITY</p><h2>2007年に始めた未来が、<br />第3段階へ向かう。</h2></div>
+            <ol><li><span>01 · FOUNDATION</span><strong>デジタルで学びへ到達する</strong><p>教材とネットワークが、場所や所得によるアクセスの壁を下げる。</p></li><li><span>02 · AI</span><strong>AIが個別に教える</strong><p>生成AIが専門知識、言語、創作、技術を対話によって個別最適化する。</p></li><li><span>03 · COMPUTE</span><strong>AIが地域革新の基盤になる</strong><p>学校、大学、農業、企業、地域が、自分たちが利用できる計算力を持つ。AI交番はこの層を検証する。</p></li></ol>
+          </section>
+        )}
+
+        {profile.slug === '012' && (
+          <section className="profile-special ai-principles">
+            <div><p className="eyebrow light"><span /> FOUNDUPS · BEFORE ETHEREUM</p><h2>分散型組織を、<br />長く試してきた。</h2></div>
+            <ol>
+              <li><span>01 · 2010–2011</span><strong>O!F · Open Corps · Foundup$</strong><p>保存されたFoundUps資料には、crowdfunding・crowdsourcing・team-sourcingを一体化したOpen !ncubator Framework、Open Corps、仮想報酬Foundup$の構想が残る。</p></li>
+              <li><span>02 · 2011–2012</span><strong>Mihai Alisieとの記録</strong><p>後のEthereum共同創設者Mihai Alisieと、Open Corporations、bottom-up型の組織・資金形成、BitcoinをOpen Startup !ncubatorで使う可能性についてSkypeで直接議論した記録が残る。</p></li>
+              <li><span>03 · TRANSPARENCY</span><strong>交流の記録 ≠ Ethereumの発明</strong><p>Alisieは2014年、EthereumがTroutの仕事から生まれたという主張を明確に否定した。本サイトは、Ethereum以前の実質的な対話を記録するが、Ethereumの発明・著作者であるとは主張しない。</p></li>
+            </ol>
+          </section>
+        )}
+
+        {profile.slug === 'jorge-sabastian' && (
+          <section className="profile-special">
+            <div><p className="eyebrow light"><span /> FROM DEMAND TO INFRASTRUCTURE</p><h2>構想を、<br />設備仕様へ落とす。</h2></div>
+            <ol>
+              <li><span>01 · SIZE</span><strong>需要から初期容量を決める</strong><p>100kW、300kW、600kW、1MWなどを固定観念で選ばず、地域ワークロードと同時利用率から比較する。</p></li>
+              <li><span>02 · ARCHITECTURE</span><strong>電力・通信・冗長性を設計条件へ</strong><p>GPUだけでなく、受電、ネットワーク、冷却、セキュリティ、保守、更新まで含めて成立条件を整理する。</p></li>
+              <li><span>03 · FEASIBILITY</span><strong>成立しない条件も先に見つける</strong><p>AI交番は実証仮説。技術・価格・需要・工程に重大な障害があれば、それもフィージビリティの成果として明示する。</p></li>
+            </ol>
           </section>
         )}
 
