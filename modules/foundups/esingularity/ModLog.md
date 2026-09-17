@@ -1,5 +1,12 @@
 # Project eSingularity ModLog
 
+## 2026-09-18 — Fukui City procedure skill
+
+- Added a FoundUp-owned `fukui-city-procedure` skill so 0102/Red Dog no longer relearns Fukui City procedure from scratch each session. It separates durable procedure from private/live case state and covers Council 請願/陳情, PPP/PFI, the property-use private-proposal program, information disclosure, procurement milestones, meetings/site access, routing consent, and resident-audit/legal handoff.
+- Added a non-negotiable official-form fidelity guard: the authority's exact current Word/PDF/template is the submission master; no regenerated look-alikes. Missing official binary templates produce `BLOCKED_ON_OFFICIAL_TEMPLATE` plus a field map, not a substitute filing.
+- Added current-source verification, deadline-clock separation, budget-to-physical-work procurement state transitions, Gmail/CRM reconciliation, stop conditions and eight regression scenarios. Dated FY2026 Sukatto eligibility is explicitly re-verification-gated.
+- Added identical Claude/Codex entrypoints and README discovery. Documentation-only; no City filing, website deployment, email send, legal conclusion, or new credential/authority is implied.
+
 ## 2026-09-13 — Public council/mayor messages and responsive action ticker
 
 - Added the canonical YUMORI.me `/vote-no` civic-action page with the September 10 council/mayor VOTE NO message, the September 7 mayor-focused historical request, a prominent supersession note, official contact routes, and no BCC/private distribution details.
