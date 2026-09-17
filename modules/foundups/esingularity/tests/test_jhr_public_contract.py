@@ -56,6 +56,19 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
 
 
+def test_runtime_field_status_feed_is_bounded_and_has_safe_fallback() -> None:
+    ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
+
+    assert "refs/heads/live/yumori-field-status" in ticker
+    assert "LIVE_FIELD_STATUS_POLL_MS = 60_000" in ticker
+    assert "cache: 'no-store'" in ticker
+    assert "expiresAt" in ticker
+    assert "Date.now() >= expiresAt" in ticker
+    assert "parsed ?? fallbackFieldStatus" in ticker
+    assert "setFieldStatus(fallbackFieldStatus)" in ticker
+    assert "startsWith('https://')" in ticker
+
+
 def test_vote_no_public_record_is_reachable_and_privacy_bounded() -> None:
     page = read(FRONTEND_ROOT / "app" / "vote-no" / "page.tsx")
     messages = read(FRONTEND_ROOT / "content" / "civic-messages.ts")
