@@ -1,9 +1,9 @@
 name: Verify clerk-nextjs current main
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-clerk-nextjs-main-20260917.yml'
+  push:
+    branches:
+      - 'verify/clerk-nextjs-main-20260917'
 
 permissions:
   contents: read
