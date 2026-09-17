@@ -1,10 +1,10 @@
-// Canonical campaign status for both homepages. Do not renew an expired appearance without confirmation.
+// Canonical compiled fallback for both homepages. Runtime ticker updates may override this from the bounded live-status feed.
 export const currentFieldStatus = {
-  updatedAt: '2026-09-16T05:58:00+09:00',
-  updatedLabelJa: '9/16更新｜本日の現地活動予定',
-  locationJa: '旧すかっとランド九頭竜・福井市役所',
-  tickerJa: '9/16現地予定｜06:30〜08:00 旧すかっとランド九頭竜周辺、08:30〜10:00 福井市役所前。昼頃の福井新聞社前での活動は検討中です。',
-  detailJa: '2026年9月16日（JST）の予定です。06:30〜08:00頃は旧すかっとランド九頭竜周辺、08:30〜10:00頃は福井市役所前で活動予定です。昼頃の福井新聞社前での活動は現地判断で、実施時刻・実施有無は未確定です。',
-  detailEn: 'Planned field activity for September 16, 2026 (Japan time): approximately 6:30–8:00 a.m. around the former Sukatto Land Kuzuryu, then approximately 8:30–10:00 a.m. outside Fukui City Hall. A lunchtime appearance outside Fukui Shimbun is under consideration and is not yet confirmed.',
-  href: 'https://yumori.me/',
+  updatedAt: '2026-09-17T09:57:00+09:00',
+  updatedLabelJa: '9/17更新｜本日の現地活動',
+  locationJa: '福井市役所前',
+  tickerJa: '9/17現地活動｜06:00〜07:00頃 旧すかっとランド九頭竜周辺。08:30〜08:45頃から福井市役所前で活動中。午前の委員会時間帯から昼頃まで継続予定。',
+  detailJa: '2026年9月17日（JST）の現地活動記録。06:00〜07:00頃は旧すかっとランド九頭竜周辺、08:30〜08:45頃から福井市役所前で活動。昼頃まで継続する予定として記録し、終了時刻は未確定です。',
+  detailEn: 'Field activity for September 17, 2026 (JST): approximately 6:00–7:00 a.m. around the former Sukatto Land Kuzuryu, then from about 8:30–8:45 a.m. outside Fukui City Hall. Activity is planned to continue through the morning and around lunchtime; end time is not yet confirmed.',
+  href: 'https://yumori.me/vote-no',
 } as const;
