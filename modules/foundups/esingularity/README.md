@@ -17,6 +17,10 @@ For “apply the website skill” or “eSingularity skill”, use [esingularity
 
 The WSP 97 workflow also covers bounded history/research, distinct homepage ownership, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the existing FoundUp registry expose it to agent and Red Dog discovery. Skill updates alone do not publish website or form changes.
 
+## Fukui City procedure skill
+
+For City Hall, Council, official-form, 請願/陳情, PPP/PFI, information-disclosure, procurement, site-access, routing-consent or resident-audit procedure questions, use [fukui-city-procedure](skills/fukui-city-procedure/SKILL.md). The skill separates durable procedure from live case state, requires current primary-source verification, preserves exact official forms instead of regenerating them, and keeps Council, executive PPP/PFI, disclosure, procurement and legal/audit lanes distinct. Thin Codex/Claude entrypoints live at `.agents/skills/fukui-city-procedure/` and `.claude/skills/fukui-city-procedure/`.
+
 ## Public architecture — one project, two focused sites
 
 YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. Its current council request is **VOTE NO** on demolition preparation; the fixed review-period proposal has been withdrawn. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) for local checkout locations, QR provenance, and the supporting Google Doc.
