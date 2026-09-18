@@ -1,17 +1,25 @@
 {
   "schema_version": "yumori.finance.catalog.v1",
   "foundup_id": "esingularity_001",
-  "as_of": "2026-09-12",
-  "truth_boundary": "Repository evidence catalog. Public market/grant facts may be VERIFIED, while YUMORI prices and project economics remain MODEL ONLY until contracted or otherwise validated.",
+  "as_of": "2026-09-19",
+  "truth_boundary": "Repository evidence catalog. Public market/grant facts may be VERIFIED, while YUMORI.me prices and project economics remain MODEL ONLY until contracted, awarded, or otherwise validated.",
   "products": [
     {
       "id": "gpu_burst",
       "name_en": "GPU burst / on-demand compute",
       "name_ja": "GPU従量・バースト計算",
       "category": "compute",
-      "billing_units": ["GPU-hour", "8-GPU-node-hour"],
+      "billing_units": [
+        "GPU-hour",
+        "8-GPU-node-hour"
+      ],
       "capacity_accounting": "EXCLUSIVE_GPU_POOL",
-      "customer_types": ["startup", "SME", "research", "enterprise"],
+      "customer_types": [
+        "startup",
+        "SME",
+        "research",
+        "enterprise"
+      ],
       "description": "Short-duration training, inference, experimentation, rendering, and batch workloads using the shared physical GPU pool."
     },
     {
@@ -19,9 +27,17 @@
       "name_en": "Reserved enterprise GPU capacity",
       "name_ja": "企業向け予約GPU容量",
       "category": "compute",
-      "billing_units": ["GPU-hour", "GPU-month", "8-GPU-node-month"],
+      "billing_units": [
+        "GPU-hour",
+        "GPU-month",
+        "8-GPU-node-month"
+      ],
       "capacity_accounting": "EXCLUSIVE_GPU_POOL",
-      "customer_types": ["enterprise", "public-sector", "research"],
+      "customer_types": [
+        "enterprise",
+        "public-sector",
+        "research"
+      ],
       "description": "Reserved or take-or-pay compute capacity with defined availability, service level, networking, and support terms."
     },
     {
@@ -29,9 +45,17 @@
       "name_en": "Academic / university research compute",
       "name_ja": "大学・研究向け計算資源",
       "category": "compute",
-      "billing_units": ["GPU-hour", "GPU-month", "consortium-allocation"],
+      "billing_units": [
+        "GPU-hour",
+        "GPU-month",
+        "consortium-allocation"
+      ],
       "capacity_accounting": "EXCLUSIVE_GPU_POOL",
-      "customer_types": ["university", "research-institute", "school"],
+      "customer_types": [
+        "university",
+        "research-institute",
+        "school"
+      ],
       "description": "Research and educational GPU allocation. Any discount must be explicitly funded or cross-subsidized rather than treated as ordinary market pricing."
     },
     {
@@ -39,9 +63,18 @@
       "name_en": "Dedicated private / sovereign cluster",
       "name_ja": "専有・ソブリンクラスタ",
       "category": "compute",
-      "billing_units": ["8-GPU-node-month", "cluster-month"],
+      "billing_units": [
+        "8-GPU-node-month",
+        "cluster-month"
+      ],
       "capacity_accounting": "EXCLUSIVE_GPU_POOL",
-      "customer_types": ["enterprise", "finance", "healthcare", "public-sector", "research"],
+      "customer_types": [
+        "enterprise",
+        "finance",
+        "healthcare",
+        "public-sector",
+        "research"
+      ],
       "description": "Dedicated nodes or clusters with tenant isolation, local data residency, private networking, and customer-specific controls."
     },
     {
@@ -49,9 +82,19 @@
       "name_en": "Managed open-source model inference",
       "name_ja": "オープンソースAI推論運用",
       "category": "ai-service",
-      "billing_units": ["GPU-hour", "endpoint-month", "request", "token"],
+      "billing_units": [
+        "GPU-hour",
+        "endpoint-month",
+        "request",
+        "token"
+      ],
       "capacity_accounting": "EXCLUSIVE_GPU_POOL_PLUS_SERVICE",
-      "customer_types": ["startup", "SME", "enterprise", "public-sector"],
+      "customer_types": [
+        "startup",
+        "SME",
+        "enterprise",
+        "public-sector"
+      ],
       "description": "Hosted inference endpoints for open-source models. GPU usage and managed-service labor must remain separately traceable."
     },
     {
@@ -59,9 +102,17 @@
       "name_en": "Managed training / fine-tuning",
       "name_ja": "学習・ファインチューニング支援",
       "category": "ai-service",
-      "billing_units": ["GPU-hour", "project"],
+      "billing_units": [
+        "GPU-hour",
+        "project"
+      ],
       "capacity_accounting": "EXCLUSIVE_GPU_POOL_PLUS_SERVICE",
-      "customer_types": ["startup", "SME", "enterprise", "university"],
+      "customer_types": [
+        "startup",
+        "SME",
+        "enterprise",
+        "university"
+      ],
       "description": "Training or fine-tuning compute combined with optional engineering, data preparation, and operations support."
     },
     {
@@ -69,9 +120,17 @@
       "name_en": "CPU / container compute",
       "name_ja": "CPU・コンテナ計算",
       "category": "compute",
-      "billing_units": ["vCPU-hour", "instance-month"],
+      "billing_units": [
+        "vCPU-hour",
+        "instance-month"
+      ],
       "capacity_accounting": "CPU_POOL",
-      "customer_types": ["startup", "SME", "enterprise", "research"],
+      "customer_types": [
+        "startup",
+        "SME",
+        "enterprise",
+        "research"
+      ],
       "description": "General-purpose CPU workloads, orchestration, preprocessing, web backends, and non-GPU jobs."
     },
     {
@@ -79,9 +138,14 @@
       "name_en": "Object storage / dataset storage",
       "name_ja": "オブジェクト・データセット保管",
       "category": "storage",
-      "billing_units": ["GB-month", "TiB-month"],
+      "billing_units": [
+        "GB-month",
+        "TiB-month"
+      ],
       "capacity_accounting": "STORAGE_POOL",
-      "customer_types": ["all"],
+      "customer_types": [
+        "all"
+      ],
       "description": "S3-compatible or equivalent object storage for datasets, checkpoints, artifacts, backups, and model outputs."
     },
     {
@@ -89,9 +153,16 @@
       "name_en": "High-performance file / block storage",
       "name_ja": "高性能ファイル・ブロックストレージ",
       "category": "storage",
-      "billing_units": ["GB-month", "TB-month"],
+      "billing_units": [
+        "GB-month",
+        "TB-month"
+      ],
       "capacity_accounting": "STORAGE_POOL",
-      "customer_types": ["enterprise", "research", "ai-service"],
+      "customer_types": [
+        "enterprise",
+        "research",
+        "ai-service"
+      ],
       "description": "Low-latency persistent storage for active training, inference, databases, and shared research data."
     },
     {
@@ -99,9 +170,17 @@
       "name_en": "Private networking / fiber / cross-connect",
       "name_ja": "専用ネットワーク・光回線・クロスコネクト",
       "category": "network",
-      "billing_units": ["port-month", "circuit-month", "Gbps-month"],
+      "billing_units": [
+        "port-month",
+        "circuit-month",
+        "Gbps-month"
+      ],
       "capacity_accounting": "NETWORK_POOL",
-      "customer_types": ["enterprise", "university", "public-sector"],
+      "customer_types": [
+        "enterprise",
+        "university",
+        "public-sector"
+      ],
       "description": "Private connectivity, VLAN/VPC-style isolation, dedicated circuits, peering, and cross-connect services."
     },
     {
@@ -109,9 +188,15 @@
       "name_en": "Internet bandwidth / egress",
       "name_ja": "インターネット帯域・外向き転送",
       "category": "network",
-      "billing_units": ["GB", "TB", "Gbps-month"],
+      "billing_units": [
+        "GB",
+        "TB",
+        "Gbps-month"
+      ],
       "capacity_accounting": "NETWORK_POOL",
-      "customer_types": ["all"],
+      "customer_types": [
+        "all"
+      ],
       "description": "Internet transit and external data transfer. Provider charging models differ materially, so transfer pricing must be benchmarked separately from storage."
     },
     {
@@ -119,9 +204,18 @@
       "name_en": "Managed operations / SLA / security support",
       "name_ja": "運用・SLA・セキュリティ支援",
       "category": "managed-service",
-      "billing_units": ["month", "project", "support-tier"],
+      "billing_units": [
+        "month",
+        "project",
+        "support-tier"
+      ],
       "capacity_accounting": "ADDITIVE_SERVICE",
-      "customer_types": ["enterprise", "SME", "public-sector", "university"],
+      "customer_types": [
+        "enterprise",
+        "SME",
+        "public-sector",
+        "university"
+      ],
       "description": "Monitoring, incident response, managed deployment, security operations, backups, compliance support, and customer success."
     },
     {
@@ -129,9 +223,17 @@
       "name_en": "Rack / colocation / customer-owned hardware hosting",
       "name_ja": "ラック・コロケーション・持込機器収容",
       "category": "facility",
-      "billing_units": ["rack-month", "kW-month"],
+      "billing_units": [
+        "rack-month",
+        "kW-month"
+      ],
       "capacity_accounting": "FACILITY_POWER_SPACE",
-      "customer_types": ["enterprise", "telecom", "research", "public-sector"],
+      "customer_types": [
+        "enterprise",
+        "telecom",
+        "research",
+        "public-sector"
+      ],
       "description": "Customer-owned equipment hosting where facility design, security, power density, and network access permit it."
     },
     {
@@ -139,9 +241,18 @@
       "name_en": "Recovered heat / thermal offtake",
       "name_ja": "排熱回収・熱供給",
       "category": "thermal",
-      "billing_units": ["kWh-thermal", "MWh-thermal", "annual-contract"],
+      "billing_units": [
+        "kWh-thermal",
+        "MWh-thermal",
+        "annual-contract"
+      ],
       "capacity_accounting": "THERMAL_COPRODUCT",
-      "customer_types": ["onsen", "agriculture", "public-facility", "district-energy"],
+      "customer_types": [
+        "onsen",
+        "agriculture",
+        "public-facility",
+        "district-energy"
+      ],
       "description": "Recovered server heat used for hot water, space heating, de-icing, agriculture, or other local thermal loads. It is a coproduct, not additional GPU capacity."
     }
   ],
@@ -149,7 +260,7 @@
     {
       "id": "yumori_enterprise_reserved_legacy",
       "product_id": "gpu_reserved",
-      "price": 420.0,
+      "price": 420,
       "currency": "JPY",
       "unit": "GPU-hour",
       "evidence_status": "MODEL ONLY",
@@ -159,7 +270,7 @@
     {
       "id": "yumori_burst_legacy",
       "product_id": "gpu_burst",
-      "price": 380.0,
+      "price": 380,
       "currency": "JPY",
       "unit": "GPU-hour",
       "evidence_status": "MODEL ONLY",
@@ -169,7 +280,7 @@
     {
       "id": "yumori_academic_legacy",
       "product_id": "gpu_academic",
-      "price": 220.0,
+      "price": 220,
       "currency": "JPY",
       "unit": "GPU-hour",
       "evidence_status": "MODEL ONLY",
@@ -185,10 +296,10 @@
       "product_id": "gpu_burst",
       "description": "Koukaryoku DOK NVIDIA H100 single-GPU container plan",
       "hardware": "NVIDIA H100 80GB x1",
-      "price": 1008.0,
+      "price": 1008,
       "currency": "JPY",
       "unit": "GPU-hour",
-      "normalized_gpu_hour": 1008.0,
+      "normalized_gpu_hour": 1008,
       "tax_included": true,
       "effective_or_checked_date": "2026-09-12",
       "evidence_status": "VERIFIED",
@@ -202,7 +313,7 @@
       "product_id": "gpu_reserved",
       "description": "Koukaryoku DOK NVIDIA H100 8-GPU dedicated beta plan",
       "hardware": "NVIDIA H100 80GB x8",
-      "price": 2988.0,
+      "price": 2988,
       "currency": "JPY",
       "unit": "8-GPU-node-hour",
       "normalized_gpu_hour": 373.5,
@@ -253,7 +364,7 @@
       "product_id": "object_storage",
       "description": "Sakura Cloud object storage 1 TiB package",
       "hardware": "Object storage",
-      "price": 3960.0,
+      "price": 3960,
       "currency": "JPY",
       "unit": "TiB-month",
       "normalized_gpu_hour": null,
@@ -270,7 +381,7 @@
       "product_id": "file_block_storage",
       "description": "Sakura Cloud NFS SSD 1 TB plan",
       "hardware": "Managed NFS SSD",
-      "price": 38500.0,
+      "price": 38500,
       "currency": "JPY",
       "unit": "TB-month",
       "normalized_gpu_hour": null,
@@ -287,7 +398,7 @@
       "product_id": "cpu_container",
       "description": "Sakura Cloud general-purpose server reference: 2 vCPU / 4 GB",
       "hardware": "2 vCPU / 4 GB RAM",
-      "price": 4620.0,
+      "price": 4620,
       "currency": "JPY",
       "unit": "instance-month",
       "normalized_gpu_hour": null,
@@ -307,7 +418,10 @@
       "jurisdiction": "Japan national",
       "lifecycle": "OPEN",
       "open_date": "2026-09-11",
-      "deadlines": ["2026-10-01T12:00:00+09:00", "2026-10-15T12:00:00+09:00"],
+      "deadlines": [
+        "2026-10-01T12:00:00+09:00",
+        "2026-10-15T12:00:00+09:00"
+      ],
       "subsidy_rate_text": "省CO2型システム改修: 1/3以内; DX型: 3/4以内",
       "cap_text": "改修: 原則1億円、4,000t-CO2/年以上削減の場合5億円; DX型: 200万円",
       "eligibility_summary": "Private operators undertaking qualifying CO2-reducing system retrofit or DX-based operational improvement. Exact applicant, equipment-owner, site, and emissions-baseline requirements must be checked against the call documents.",
@@ -367,7 +481,10 @@
       "jurisdiction": "Japan national / GX strategy areas",
       "lifecycle": "WATCH_SECOND_CALL",
       "open_date": "2026-07-17",
-      "deadlines": ["2026-09-01T12:00:00+09:00", "2026-11 (planned second-call close)"],
+      "deadlines": [
+        "2026-09-01T12:00:00+09:00",
+        "2026-11 (planned second-call close)"
+      ],
       "subsidy_rate_text": "Up to 1/2, with support intensity determined by location, power sourcing linkage, and power-source type; large-enterprise rates may be lower under the detailed table.",
       "cap_text": "Up to 250億円 for qualifying patterns; lower caps apply to other support-intensity patterns.",
       "eligibility_summary": "Data-center investment contributing to Japan's compute competitiveness, using decarbonized power and contributing to the power-source region. First call closed; second call is planned for mid-October through late November 2026.",
@@ -378,6 +495,75 @@
       "checked_date": "2026-09-12",
       "source_url": "https://www.meti.go.jp/policy/energy_environment/global_warming/gx_strategy_area/subsidy/subsidy.html",
       "detail_url": "https://gx-area-hojo.jp/"
+    },
+    {
+      "id": "moe_dc_zero_emission_r8_second_call",
+      "kind": "capex-subsidy",
+      "program_name": "令和8年度 データセンターのゼロエミッション化・地域共生加速化事業（二次公募）",
+      "agency": "環境省 / 一般社団法人 地域循環共生社会連携協会（RCESPA）",
+      "jurisdiction": "Japan national",
+      "lifecycle": "OPEN",
+      "open_date": "2026-09-17",
+      "deadlines": [
+        "2026-10-07T17:00:00+09:00 inquiry window",
+        "2026-10-16T12:00:00+09:00 application deadline"
+      ],
+      "subsidy_rate_text": "1/3",
+      "cap_text": "New-build up to ¥1B per project; existing-DC retrofit up to ¥300M; container/modular DC up to ¥300M, subject to official guide and annual caps.",
+      "eligibility_summary": "Second call explicitly includes new DCs using regional renewable energy, existing-DC retrofit, and container/modular DCs. Applicant, lawful site/use rights, ownership/operation, renewable-energy supply, CO2 methodology, financing, procurement timing, non-duplication and JC-STAR requirements must be verified.",
+      "yumori_relevance": "HIGH for YUMORI.me Phase 1 modular/container COGDC. Live program existence does not establish YUMORI.me/SPC/project eligibility.",
+      "blockers_or_gates": "Former Sukatto Land Kuzuryu is closed and no YUMORI.me PPP/use-right structure has been approved. Verify applicant/SPC/operator, land/building rights, equipment ownership, renewable-energy and CO2 conditions before assigning any scenario award.",
+      "funding_treatment": "POTENTIAL_UNTIL_AWARDED",
+      "evidence_status": "VERIFIED",
+      "checked_date": "2026-09-19",
+      "source_url": "https://www.env.go.jp/press/press_05570.html",
+      "detail_url": "https://rcespa.jp/r08-datacenter/r08-datacenter-no2"
+    },
+    {
+      "id": "mlit_ppp_infrastructure_study_r8_round3",
+      "kind": "ppp-feasibility-support",
+      "program_name": "令和8年度 官民連携基盤整備推進調査費 第3回案件募集",
+      "agency": "国土交通省 国土政策局 地方政策課 調整室",
+      "jurisdiction": "Japan national / local-government applicant",
+      "lifecycle": "OPEN",
+      "open_date": "2026-09-17",
+      "deadlines": [
+        "2026-10-08"
+      ],
+      "subsidy_rate_text": "Up to 1/2 of eligible study costs",
+      "cap_text": "Study support, not YUMORI.me construction CAPEX; exact eligible study-cost ceiling follows the official call.",
+      "eligibility_summary": "Applicant is a prefecture, municipality or specified public body. Supports study of public infrastructure coordinated with private investment, including feasibility, scheme design and public/private responsibility allocation.",
+      "yumori_relevance": "HIGH procedural relevance if Fukui City chooses to study Sukatto Land Kuzuryu / COGDC-linked public infrastructure. YUMORI.me cannot apply directly.",
+      "blockers_or_gates": "Requires Fukui City or another eligible public applicant and confirmation that the proposed infrastructure/study scope fits the call.",
+      "funding_treatment": "PUBLIC_STUDY_SUPPORT_NOT_PROJECT_REVENUE",
+      "evidence_status": "VERIFIED",
+      "checked_date": "2026-09-19",
+      "source_url": "https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000191.html",
+      "detail_url": "https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html"
+    },
+    {
+      "id": "fukui_city_asset_reuse_private_proposal_r8",
+      "kind": "public-asset-private-proposal",
+      "program_name": "福井市 令和8年度 財産有効活用民間提案制度",
+      "agency": "福井市 財政部 施設活用推進課",
+      "jurisdiction": "Fukui City",
+      "lifecycle": "OPEN_LISTED_ASSETS_ONLY",
+      "open_date": "2026-09-15",
+      "deadlines": [
+        "2026-11-30 mandatory pre-consultation/site-survey deadline",
+        "2026-12-15 proposal deadline"
+      ],
+      "subsidy_rate_text": "Not a subsidy. Qualifying regional-development use may receive reduced/free rent on City-owned portions.",
+      "cap_text": "N/A as direct CAPEX grant.",
+      "eligibility_summary": "Corporations and other entities implementing their own proposal may apply; joint/JV proposals are permitted. Current FY2026 listed assets are former Shimousaka Elementary School and former Hanyu Elementary School only.",
+      "yumori_relevance": "HIGH strategic relevance to YUMORI.me because the same City mechanism previously listed Sukatto Land Kuzuryu, but the FY2026 call does not currently list Sukatto.",
+      "blockers_or_gates": "Do not treat this FY2026 call as a current Sukatto application route unless Fukui City formally adds Sukatto or confirms acceptance. Ask why Sukatto was omitted and which formal PPP/PFI/private-proposal route will accept YUMORI.me.",
+      "funding_treatment": "CONTRACTING_ROUTE_NOT_PROJECT_REVENUE",
+      "evidence_status": "VERIFIED",
+      "checked_date": "2026-09-19",
+      "source_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html",
+      "detail_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p073299.html",
+      "notes": "FY2025 explicitly listed Sukatto and received two proposals, both rejected. FY2021 results show a partial-use Sukatto proposal selected as preferred negotiator and contracted. The FY2026 page does not state why Sukatto was omitted."
     }
   ]
 }
