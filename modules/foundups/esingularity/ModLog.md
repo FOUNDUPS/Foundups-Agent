@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-18 — Fail-closed PR lifecycle gate after #1782 merge incident
+
+- Audited the temporary PR-finisher behavior after #1782 squash-merged while its eSingularity workflow was red from the inherited Cloudflare peer mismatch. The prior wording relied too heavily on GitHub's “required checks” concept and did not force inspection/classification of every workflow triggered for the exact PR head.
+- Hardened `yumori_moshpit` Skillz: branch-protection required status is not sufficient; every exact-head workflow must be classified as RELEVANT_BLOCKING, EXPLICIT_REPORT_ONLY, or PROVEN_BASELINE_UNRELATED. Relevant pending/cancelled/failed workflows prohibit merge.
+- Unrelated failures require concrete diff/validation-surface evidence plus independent base reproduction/record and a separate owner. The currently observed RedDog backend-compatibility failure is now owned by issue #1784 rather than being silently ignored.
+- The eSingularity dependency blocker itself was repaired separately through clean-main PR #1783; its eSingularity install/lint/build gate passed without force or legacy-peer-deps.
+- WSP 00/15/22/50/95/97: no merge-gate weakening and no test deletion/generalization.
+
 ## 2026-09-18 — YUMORI operational skill registry self-audit
 
 - Audited the live YUMORI scheduled correspondence, Contacts / Correspondence Routing structure, WRE registry, Red Dog recipient-preflight implementation, funding/PPP skill, Moshpit skill and Fukui procedure draft.

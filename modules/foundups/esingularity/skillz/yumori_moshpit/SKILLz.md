@@ -116,10 +116,12 @@ When 0102/Red Dog creates a bounded repository change for this Skillz or its pro
 
 - Keep the change on a dedicated branch and PR; do not write directly to protected main.
 - 0102 owns the PR to a terminal state.
-- Inspect exact-head required checks, review threads, and mergeability.
-- If a failure is a narrow deterministic consequence of the PR or a stale contract directly exposed by it, repair it on the same branch and re-verify exact-head CI.
-- Do not bypass, weaken, remove, or falsify required gates.
-- When all required checks pass and no blocking review remains, squash-merge to main and verify main contains the resulting commit.
+- Inspect the exact PR head, every workflow triggered for that head, review threads, mergeability, and repository-required checks. Branch-protection “required” status alone is never sufficient evidence.
+- Classify each workflow as RELEVANT_BLOCKING, EXPLICIT_REPORT_ONLY, or PROVEN_BASELINE_UNRELATED. A workflow touching or validating changed paths is RELEVANT_BLOCKING by default.
+- If a relevant failure is a narrow deterministic consequence of the PR or a stale contract directly exposed by it, repair it on the same branch and re-verify the new exact head.
+- Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed. Do not bypass, weaken, remove, relabel, or falsify a gate.
+- An unrelated failure may be excluded only from concrete evidence: the failing path is outside the diff/validation surface and the same failure is independently reproduced or already recorded on the base. Record its existing owner or create a bounded owner; “not required by branch protection” is not evidence of irrelevance.
+- When every relevant workflow is successful, report-only observations are complete, proven baseline failures are separately owned, the exact head is unchanged, and no blocking review remains, squash-merge to main and verify main contains the resulting commit.
 - Retire any temporary PR-finisher watcher after verified merge.
 - Do not ask 012 to manage routine GitHub mechanics. Escalate only a genuine product, policy, permission, security, or conflicting-human-intent decision.
 

@@ -69,6 +69,8 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     assert "YUMORI Moshpit" in skill
     assert "0102 Moshpit" in skill
     assert "reverse chronological within each day" in skill
+    assert "Branch-protection “required” status alone is never sufficient evidence." in skill
+    assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
 
     for projection in (
         REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
@@ -78,6 +80,7 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
         assert "modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md" in projected
 
     assert not (MODULE_ROOT / "skills" / "yumori-moshpit" / "SKILL.md").exists()
+
 
 def test_yumori_operational_skills_are_registered_and_projected() -> None:
     registry = load_json(WRE_SKILLS_REGISTRY_PATH)
@@ -142,6 +145,7 @@ def test_existing_ticker_receives_one_deck_notification() -> None:
     assert "https://yumori.me/vote-no#contact" in ticker
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
     assert "href: 'https://yumori.me/'" in status
+
 
 def test_fullscreen_vision_has_ten_japanese_first_slides_and_derived_languages() -> None:
     content = read("content/yumori-vision.ts")
@@ -222,6 +226,7 @@ def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
     assert "再利用の事業性、資金調達、工事費は検証中です。" in vision
     assert "5年売上 約53.7億円" not in vision
     assert "5年累計FCFE 約19.4億円" not in vision
+
 
 def test_existing_public_assets_and_local_sources_remain_present() -> None:
     for asset in (
