@@ -1,8 +1,8 @@
-# YUMORI Live Financial Model Architecture
+# YUMORI.me Live Financial Model Architecture
 
 ## Authority
 
-The eSingularity FoundUp repository is the canonical implementation/history layer for the YUMORI financial model.
+The eSingularity FoundUp repository is the canonical implementation/history layer for the YUMORI.me financial model.
 
 - Python owns assumptions, equations, reconciliation and validation.
 - Tests own repeatable mathematical acceptance checks.
@@ -23,13 +23,13 @@ Prototype RedDog/WRE discovery contract:
 
 ## WSP 97 placement result
 
-The model belongs inside `modules/foundups/esingularity/` because it exists to operate and explain the economics of this FoundUp. It is not a generic finance subsystem and not a parallel YUMORI repository.
+The model belongs inside `modules/foundups/esingularity/` because it exists to operate and explain the economics of this FoundUp. It is not a generic finance subsystem and not a parallel YUMORI.me repository.
 
 The implementation follows:
 
 `retrieve WSP -> retrieve evidence -> research -> micro pass -> macro pass -> hard think -> dialectic sweep -> first principles -> execute`
 
-The legacy workbook was inspected before equations were written. Existing RedDog/WRE Rolodex precedent was recovered from the YUMORI contact-ledger Skillz before adding a finance Skillz.
+The legacy workbook was inspected before equations were written. Existing RedDog/WRE Rolodex precedent was recovered from the YUMORI.me contact-ledger Skillz before adding a finance Skillz.
 
 ## Ledger separation
 
@@ -71,7 +71,7 @@ Each customer record can distinguish:
 - product;
 - requested GPUs/nodes and hours/month or reserved capacity;
 - start date and contract term;
-- current provider/current price and proposed YUMORI price;
+- current provider/current price and proposed YUMORI.me price;
 - annual contracted value;
 - nominal multi-year contract value;
 - take-or-pay/minimum commitment;
@@ -169,4 +169,4 @@ This progressive-disclosure rule prevents retrieval failures while preserving WS
 
 ## History
 
-Material changes use a bounded PR. Review history remains in the PR. Finance work was audit-first consolidated into the existing eSingularity/YUMORI branch rather than maintained as a parallel source of truth. Once exact-head validation passes, the completed slice should be squash-merged so the FoundUp has one discoverable change on its main lineage.
+Material changes use a bounded PR. Review history remains in the PR. Finance work was audit-first consolidated into the existing eSingularity/YUMORI.me branch rather than maintained as a parallel source of truth. Once exact-head validation passes, the completed slice should be squash-merged so the FoundUp has one discoverable change on its main lineage.
