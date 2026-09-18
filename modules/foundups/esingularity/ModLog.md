@@ -1,5 +1,15 @@
 # Project eSingularity ModLog
 
+## 2026-09-18 — YUMORI Moshpit promoted into the WRE Skillz/Rolodex path
+
+- Reclassified the Moshpit workflow under WSP 95 after a WSP 97 micro/macro pass: the reusable authority now lives at `skillz/yumori_moshpit/SKILLz.md`, not as a module-local legacy `skills/.../SKILL.md`.
+- Registered `yumori_moshpit` in `modules/infrastructure/wre_core/skillz/skills_registry_v2.json` as a truthful `prototype` DECISION workflow for 0102/Qwen/Gemma. No production admission, executor authority, or autonomous effect claim is made.
+- Kept `.agents/skills/yumori-moshpit/SKILL.md` and `.claude/skills/yumori-moshpit/SKILL.md` as thin projections to the canonical Skillz source. README and ROADMAP now expose the registered capability.
+- Encoded the durable split: YUMORI Moshpit = campaign/monk history; 0102 Moshpit = agent errors, repairs, learning, and RED DOG candidates. YUMORI entries are reverse chronological per JST day; interval events sort by completion/end time.
+- Added PR-lifecycle ownership: 0102 owns bounded skill PRs through exact-head checks, squash merge, main verification, and watcher retirement; routine GitHub mechanics are not delegated to 012.
+- WSP 97 test-reuse gate: reused `tests/test_contracts.py` rather than creating a new test file, after reading `tests/TestModLog.md` and `tests/README.md`. Added registry/projection/duplicate-authority assertions.
+- CI exposed two stale ticker route assertions already inconsistent with current main. Updated them to the exact current routes (`https://yumori.me/` and `/reports/jhr#jhr-002`) rather than weakening or bypassing the checks.
+
 ## 2026-09-13 — Public council/mayor messages and responsive action ticker
 
 - Added the canonical YUMORI.me `/vote-no` civic-action page with the September 10 council/mayor VOTE NO message, the September 7 mayor-focused historical request, a prominent supersession note, official contact routes, and no BCC/private distribution details.
