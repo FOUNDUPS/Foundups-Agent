@@ -1,3 +1,9 @@
+## 2026-09-18: Fail closed on sent-only recipient evidence
+
+- Hardened the existing RedDog recipient preflight rather than creating a YUMORI-specific duplicate. Route evidence now carries an explicit verification bit; current but unverified address history returns `UNVERIFIED_ROUTE` and blocks the whole transaction.
+- Documented that prior Sent mail, no-bounce state and old BCC lists are not recipient authority. Past BCC inclusion is purpose-specific unless a current routing policy explicitly grants standing BCC status.
+- Added focused regressions for sent-only Contacts evidence and independently verified public-directory recovery. Routing-policy closures remain independently enforced even when address evidence changes. WSP15/22/95/97.
+
 ## 2026-09-15: Resolve the RSI producer contract boundary
 
 - Closed PR #1763 at `da79e5efa` after ten exact-head checks; reviewed merge tree verified. A concurrent fetch ref update was reconciled by read-back without deleting locks or retrying the merge.
