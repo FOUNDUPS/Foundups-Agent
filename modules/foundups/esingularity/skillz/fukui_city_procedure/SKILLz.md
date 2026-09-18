@@ -182,6 +182,19 @@ Rules:
 When asked "how much time do we have?", answer from the latest verified irreversible
 milestone, not from the budget date alone.
 
+## Canonical contact-store integrity
+
+- `Contacts` and `Correspondence Routing` are the canonical recipient state.
+- Projection tabs such as Media, Government & Council, Universities & Research,
+  Business & Investors, Community & NGOs, Technical & Infrastructure,
+  Hospitality & Tourism, and Arts & Culture are **read-only generated views**.
+- Never create or edit a contact directly in a projection spill range.
+- If a projection reports `#REF!` because curated rows block an ARRAYFORMULA/QUERY,
+  first migrate any unique data into canonical Contacts with unique Contact IDs,
+  then clear only the projection blocker and verify both source and projection.
+- A projection row must never reuse a Contact ID that belongs to a different
+  canonical Contacts identity.
+
 ## Routing and outbound correspondence dependency
 
 All Fukui City / Council email or addressed-document actions must also apply the
