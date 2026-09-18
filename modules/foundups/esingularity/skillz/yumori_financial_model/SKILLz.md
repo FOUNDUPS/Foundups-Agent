@@ -5,9 +5,12 @@ version: 0.2.0
 intent_type: ANALYSIS
 promotion_state: prototype
 category: workflow
+author: 0102
 agents:
+  - 0102
   - qwen
   - gemma
+primary_agent: 0102
 wsp_chain:
   - WSP 00
   - WSP 15
@@ -57,6 +60,36 @@ Route feasibility-funding and customer/offtake evidence work to:
 `modules/foundups/esingularity/src/yumori_feasibility_finance.py`
 
 The repository owns assumptions, equations, reconciliation rules, and tests. Excel/PDF/Drive/web outputs are generated or publication surfaces. The feasibility module is an adjacent evidence/capital gate; it does not replace the canonical Phase-1 P&L engine.
+
+## Discovery / invocation contract
+
+Red Dog, 0102, qwen and gemma should route directly to this Skillz whenever 012 asks about YUMORI.me money, project economics, financial feasibility, financing vehicles, grant impact, capital stack, debt capacity, customer/offtake economics, PPP/VFM financial consequences, or the financial workbook. Do not begin by reconstructing the model from chat history.
+
+Fast recovery path:
+
+1. Load this Skillz.
+2. Load `modules/foundups/esingularity/docs/GRANTS_AND_SUBSIDIES.md` when grants/public support affect the question.
+3. Load `modules/foundups/esingularity/src/yumori_financial_model.py` for operating-model calculations.
+4. Load `modules/foundups/esingularity/src/yumori_feasibility_finance.py` for pre-debt funding, committed-vs-potential support, customer upfront cash, and remaining funding-gap work.
+5. Use the current Drive `FIN — YUMORI Phase 1 Financial Model & Grant Audit` only as the working/collaboration surface and reconciliation target, not as an independent formula authority.
+6. If a requested fact is a live grant/PPP eligibility or deadline fact, invoke the YUMORI.me funding / PPP intelligence Skillz and reconcile the canonical registry before changing a scenario.
+
+### Financial-vehicle routing
+
+Use the existing model concepts rather than inventing a new funding structure:
+
+- **Equity / sponsor capital:** explicit committed equity only; uncommitted interest is not cash.
+- **Project / infrastructure debt:** calculate debt service and DSCR from stated principal, rate and term; no lender commitment without a term sheet.
+- **Equipment finance / vendor finance:** separate from general project debt when evidence exists; do not double-count financed equipment in other sources.
+- **National / prefectural / City grants:** potential until the canonical grant registry reaches `AWARDED`; caps are not expected awards.
+- **PPP/PFI / City support:** distinguish City cash, City in-kind/property/use rights, City-paid public infrastructure, and advisory/study support. Do not convert all public support into project cash.
+- **Customer deposits / prepayments:** only explicit upfront cash on verified/committed customer records can reduce the construction funding gap.
+- **Take-or-pay / contracted revenue:** underwriting evidence, not construction cash unless prepaid.
+- **SPC/SPV structure:** financing/legal vehicle; creating an SPC does not itself create funding.
+- **VFM / PSC:** City-side comparison tools; do not mix avoided demolition/public value into project-company revenue.
+- **Scenario grants:** may reduce a scenario funding gap only in a clearly separated sensitivity case; base-case committed grants remain zero until awarded.
+
+When 012 says “calculate it,” “run the numbers,” “what can we finance,” “how much grant money,” “what is the gap,” “what is the IRR/DSCR,” or similar, use these governed equations and evidence boundaries first.
 
 ## Positive triggers
 
