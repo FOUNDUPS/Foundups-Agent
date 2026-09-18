@@ -96,3 +96,17 @@ If the write reveals a structural weakness, append one concise entry to the priv
 ## Red Dog boundary
 
 This skill is the reusable classification and ordering contract for Red Dog/0102. It does not itself grant Gmail, Drive, GitHub, or publishing authority. Execution remains bounded by the active work order, connector permissions, correspondence preflight, and WSP 00/15/97 controls.
+
+
+## PR lifecycle ownership
+
+When 0102/Red Dog creates a bounded repository change for this skill or its projections, the work is not complete when the PR opens.
+
+- Keep the change on a dedicated branch and PR; do not write directly to protected main.
+- 0102 owns the PR to a terminal state.
+- Inspect exact-head required checks, review threads, and mergeability.
+- If a failure is a narrow deterministic consequence of the PR or a stale contract exposed by it, repair it on the same branch and re-verify exact-head CI.
+- Do not bypass, weaken, remove, or falsify required gates.
+- When all required checks pass and no blocking review remains, **squash-merge to main** and verify main contains the resulting commit.
+- Retire any temporary PR-finisher watcher after verified merge.
+- Do not ask 012 to manage routine GitHub mechanics. Notify/escalate only when a genuine product, policy, permission, security, or conflicting-human-intent decision is required.
