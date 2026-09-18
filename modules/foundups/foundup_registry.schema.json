@@ -4,11 +4,7 @@
   "title": "FoundUp Canonical Registry Schema",
   "description": "Typed registry for FoundUps and related entities. Hermes/OpenClaw build contract.",
   "type": "object",
-  "required": [
-    "schema_version",
-    "last_updated",
-    "entities"
-  ],
+  "required": ["schema_version", "last_updated", "entities"],
   "properties": {
     "schema_version": {
       "type": "string",
@@ -22,9 +18,7 @@
     },
     "entities": {
       "type": "array",
-      "items": {
-        "$ref": "#/$defs/RegistryEntry"
-      },
+      "items": { "$ref": "#/$defs/RegistryEntry" },
       "description": "Array of registry entries"
     }
   },
@@ -179,31 +173,20 @@
           "$ref": "#/$defs/EntityType"
         },
         "module_path": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Path relative to repo root, or null for external"
         },
         "stage": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/LifecycleStage"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/LifecycleStage" },
+            { "type": "null" }
           ],
           "description": "Manifest lifecycle stage (null for non-FoundUp entity types)"
         },
         "tier": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/Tier"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Tier" },
+            { "type": "null" }
           ],
           "description": "Tier classification (null if not applicable)"
         },
@@ -220,12 +203,7 @@
         },
         "prototype_gate_status": {
           "type": "string",
-          "enum": [
-            "pending",
-            "passed",
-            "failed",
-            "not_applicable"
-          ],
+          "enum": ["pending", "passed", "failed", "not_applicable"],
           "default": "not_applicable",
           "description": "Prototype gate verification status"
         },
@@ -234,10 +212,7 @@
           "default": "not_applicable"
         },
         "manifest_path": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Path to foundup_manifest.json if exists"
         },
         "hermes_openclaw_build_status": {
@@ -248,18 +223,17 @@
           "$ref": "#/$defs/TokenStatus"
         },
         "token_symbol": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "pattern": "^[A-Z]+$",
           "description": "Token symbol if EXISTS, null otherwise"
         },
+        "brand_context_path": {
+          "type": ["string", "null"],
+          "description": "Optional repo-relative path to the FoundUp brand context. Branding/identity only; no execution authority."
+        },
         "evidence_docs": {
           "type": "array",
-          "items": {
-            "type": "string"
-          },
+          "items": { "type": "string" },
           "description": "List of audit/spec documents supporting this entry"
         },
         "portfolio_status": {
@@ -271,66 +245,42 @@
           "default": "none"
         },
         "website_url": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uri",
           "description": "Public website URL if applicable"
         },
         "poc_url": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uri",
           "description": "PoC/demo URL if applicable"
         },
         "app_url": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uri",
           "description": "Production app URL (e.g., /f/{id}/app or external)"
         },
         "github_url": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uri",
           "description": "Public GitHub repository URL if applicable"
         },
         "docs_url": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uri",
           "description": "Public documentation URL if applicable"
         },
         "screenshot_url": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uri",
           "description": "Screenshot/hero image URL for portfolio display"
         },
         "public_summary": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 280,
           "description": "Public-facing summary for portfolio display (280 char max)"
         },
         "portfolio_priority": {
-          "type": [
-            "integer",
-            "null"
-          ],
+          "type": ["integer", "null"],
           "minimum": 1,
           "maximum": 100,
           "description": "Display priority in portfolio (1=highest, null=unranked)"
@@ -342,49 +292,30 @@
         },
         "portfolio_evidence_docs": {
           "type": "array",
-          "items": {
-            "type": "string"
-          },
+          "items": { "type": "string" },
           "default": [],
           "description": "Evidence docs supporting portfolio readiness"
         },
         "next_slice": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Recommended next implementation slice"
         },
         "public_url_or_route": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Public URL or pfMALL route if applicable"
         },
         "owner_dae": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Owning DAE identifier"
         },
         "mall_entry_status": {
           "type": "string",
-          "enum": [
-            "listed",
-            "discoverable_only",
-            "not_listed",
-            "not_applicable"
-          ],
+          "enum": ["listed", "discoverable_only", "not_listed", "not_applicable"],
           "default": "not_applicable",
           "description": "pfMALL catalog entry status"
         },
         "auth_provider": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Authentication provider if applicable"
         },
         "invite_required": {
@@ -393,24 +324,15 @@
           "description": "Whether invite is required for access"
         },
         "subscription_tier_required": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "Required subscription tier for access"
         },
         "notes": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "012 notes or audit findings"
         },
         "related_external_repo": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "description": "External repository URL if applicable"
         },
         "audit_date": {
@@ -421,63 +343,34 @@
         "auditor": {
           "type": "string",
           "description": "Worker ID who performed audit"
-        },
-        "brand_context_path": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Optional repo-relative path to the FoundUp brand context. Branding/identity only; no execution authority."
         }
       },
       "allOf": [
         {
           "if": {
-            "properties": {
-              "token_status": {
-                "const": "EXISTS"
-              }
-            }
+            "properties": { "token_status": { "const": "EXISTS" } }
           },
           "then": {
-            "required": [
-              "token_symbol"
-            ],
+            "required": ["token_symbol"],
             "properties": {
-              "token_symbol": {
-                "type": "string",
-                "minLength": 1
-              }
+              "token_symbol": { "type": "string", "minLength": 1 }
             }
           }
         },
         {
           "if": {
-            "properties": {
-              "entity_type": {
-                "const": "foundup"
-              }
-            }
+            "properties": { "entity_type": { "const": "foundup" } }
           },
           "then": {
-            "required": [
-              "tier",
-              "stage"
-            ]
+            "required": ["tier", "stage"]
           }
         },
         {
           "if": {
-            "properties": {
-              "entity_type": {
-                "const": "external_foundup"
-              }
-            }
+            "properties": { "entity_type": { "const": "external_foundup" } }
           },
           "then": {
-            "required": [
-              "related_external_repo"
-            ]
+            "required": ["related_external_repo"]
           }
         }
       ]
