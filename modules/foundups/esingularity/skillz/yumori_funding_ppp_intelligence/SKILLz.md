@@ -8,6 +8,9 @@ primary_agent: 0102
 intent_type: RESEARCH
 promotion_state: candidate
 category: workflow
+domain: foundup_campaign_operations
+pattern_fidelity_threshold: 0.95
+wsp_chain: [WSP_00, WSP_15, WSP_22, WSP_50, WSP_95, WSP_97]
 evals:
   - official_primary_source_required
   - canonical_registry_updated_before_drive
