@@ -1,3 +1,10 @@
+## 2026-09-19 — Centralize eSingularity / YUMORI.me brand context
+
+- Added one FoundUp-owned `brand_context.json`: `eSingularity.ai` is the parent project identity and `YUMORI.me` is the movement/preparatory-committee child brand.
+- Moved canonical spelling, aliases, domains, Japanese-default behavior, JOIN copy and guardian lockup out of individual Skillz.
+- eSingularity operational Skillz and thin agent/Claude projections now consume the registry-grounded brand context instead of defining independent branding.
+- Internal identifiers such as `yumori_*`, lowercase URL hosts and historical quotations remain unchanged. WSP 22/95/97/102.
+
 # Project eSingularity ModLog
 
 ## 2026-09-18 — Fail-closed PR lifecycle gate after #1782 merge incident
