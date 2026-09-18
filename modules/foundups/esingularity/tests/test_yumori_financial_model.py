@@ -68,3 +68,32 @@ def test_legacy_power_cost_implies_840_kw_not_850_kw():
     audit = audit_legacy_model()
     assert all(abs(value - 840.0) < 0.02 for value in audit["implied_power_kw_by_year"])
     assert audit["stated_it_power_kw"] == 850.0
+
+
+def test_finance_skill_is_discoverable_by_0102_and_reddog():
+    import json
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[4]
+    skill_path = repo_root / "modules/foundups/esingularity/skillz/yumori_financial_model/SKILLz.md"
+    agents_path = repo_root / ".agents/skills/yumori-financial-model/SKILL.md"
+    claude_path = repo_root / ".claude/skills/yumori-financial-model/SKILL.md"
+    registry_path = repo_root / "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
+
+    skill = skill_path.read_text(encoding="utf-8")
+    assert "primary_agent: 0102" in skill
+    assert "Red Dog, 0102" in skill
+    assert "yumori_financial_model.py" in skill
+    assert "yumori_feasibility_finance.py" in skill
+    assert "GRANTS_AND_SUBSIDIES.md" in skill
+
+    for projection in (agents_path, claude_path):
+        assert projection.exists()
+        projected = projection.read_text(encoding="utf-8")
+        assert "modules/foundups/esingularity/skillz/yumori_financial_model/SKILLz.md" in projected
+
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    entry = registry["skills"]["yumori_financial_model"]
+    assert entry["primary_agent"] == "0102"
+    assert "0102" in entry["agents"]
+    assert entry["version"] == "0.2.0"
