@@ -1,7 +1,7 @@
 {
   "$schema": "./foundup_registry.schema.json",
   "schema_version": "1.0.0",
-  "last_updated": "2026-08-30T05:23:20Z",
+  "last_updated": "2026-09-19T00:00:00Z",
   "entities": [
     {
       "foundup_id": "gotjunk_001",
@@ -649,7 +649,8 @@
       "portfolio_ready": true,
       "portfolio_evidence_docs": [
         "modules/foundups/esingularity/frontend/audit/AUDIT.md"
-      ]
+      ],
+      "brand_context_path": "modules/foundups/esingularity/brand_context.json"
     },
     {
       "foundup_id": "shield",
