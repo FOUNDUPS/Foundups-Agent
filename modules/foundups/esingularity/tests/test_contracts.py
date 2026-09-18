@@ -11,6 +11,9 @@ MODULE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MANIFEST_PATH = MODULE_ROOT / "foundup_manifest.json"
 REGISTRY_PATH = REPO_ROOT / "foundups" / "foundup_registry.json"
+WRE_SKILLS_REGISTRY_PATH = REPO_ROOT / "infrastructure" / "wre_core" / "skillz" / "skills_registry_v2.json"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
+MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -46,6 +49,35 @@ def test_no_token_is_invented_for_the_campaign() -> None:
     assert entry["token_symbol"] is None
 
 
+
+
+def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
+    registry = load_json(WRE_SKILLS_REGISTRY_PATH)
+    assert registry["total_skills"] == len(registry["skills"])
+
+    entry = registry["skills"]["yumori_moshpit"]
+    assert entry["location"] == "modules/foundups/esingularity/skillz/yumori_moshpit"
+    assert entry["promotion_state"] == "prototype"
+    assert entry["intent_type"] == "DECISION"
+    assert entry["primary_agent"] == "0102"
+
+    skill = MOSHPIT_SKILL_PATH.read_text(encoding="utf-8")
+    assert "name: yumori_moshpit" in skill
+    assert "promotion_state: prototype" in skill
+    assert "YUMORI Moshpit" in skill
+    assert "0102 Moshpit" in skill
+    assert "reverse chronological within each day" in skill
+
+    for projection in (
+        REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
+        REPOSITORY_ROOT / ".claude" / "skills" / "yumori-moshpit" / "SKILL.md",
+    ):
+        projected = projection.read_text(encoding="utf-8")
+        assert "modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md" in projected
+
+    assert not (MODULE_ROOT / "skills" / "yumori-moshpit" / "SKILL.md").exists()
+
+
 def test_sites_configuration_and_primary_routes_are_present() -> None:
     hosting = load_json(FRONTEND_ROOT / ".openai" / "hosting.json")
     package = load_json(FRONTEND_ROOT / "package.json")
@@ -72,7 +104,7 @@ def test_existing_ticker_receives_one_deck_notification() -> None:
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "https://yumori.me/vote-no#contact" in ticker
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
-    assert "href: 'https://yumori.me/" in status
+    assert "href: 'https://yumori.me/'" in status
 
 def test_fullscreen_vision_has_ten_japanese_first_slides_and_derived_languages() -> None:
     content = read("content/yumori-vision.ts")
@@ -124,7 +156,7 @@ def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> 
     assert "SWIPE_DISTANCE = 55" in component
     assert "AUTOPLAY_MS = 9000" in component
     assert "https://yumori.me" in component
-    assert "href: '/reports/jhr" in read("components/CampaignTicker.tsx")
+    assert "href: '/reports/jhr#jhr-002'" in read("components/CampaignTicker.tsx")
 
 
 def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
