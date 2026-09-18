@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 RECEIPT_SCHEMA = "registered_foundup_target_receipt.v1"
 REGISTRY_PATH = "modules/foundups/foundup_registry.json"
 SCHEMA_PATH = "modules/foundups/foundup_registry.schema.json"
+BRAND_SCHEMA_PATH = "modules/foundups/brand_context.schema.json"
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 
 def _digest(value: Any) -> str:
@@ -138,6 +139,8 @@ def _verify_evidence(root: Path, target: Mapping[str, Any], reasons: list[str]) 
     required = {REGISTRY_PATH, SCHEMA_PATH}
     if target.get("manifest_path"):
         required.add(str(target["manifest_path"]))
+    if target.get("brand_context_path"):
+        required.update({str(target["brand_context_path"]), BRAND_SCHEMA_PATH})
     if not required.issubset(paths):
         reasons.append("registered_foundup_target_evidence_incomplete")
     for record in evidence:
@@ -146,6 +149,42 @@ def _verify_evidence(root: Path, target: Mapping[str, Any], reasons: list[str]) 
         if not evidence_file or item.get("content_digest") != _digest(evidence_file.read_bytes()):
             reasons.append("registered_foundup_target_evidence_changed")
             return
+
+
+def _verify_brand_context(
+    root: Path,
+    target: Mapping[str, Any],
+    registry: Mapping[str, Any],
+    reasons: list[str],
+) -> None:
+    entities = [item for item in registry.get("entities", []) if item.get("foundup_id") == target.get("foundup_id")]
+    entity = entities[0] if len(entities) == 1 else {}
+    declared = str(entity.get("brand_context_path") or "")
+    receipt_path = str(target.get("brand_context_path") or "")
+    if declared != receipt_path:
+        reasons.append("registered_foundup_target_brand_path_mismatch")
+        return
+    if not declared:
+        return
+    context_file, schema_file = _path(root, declared), _path(root, BRAND_SCHEMA_PATH)
+    try:
+        context = json.loads(context_file.read_bytes()) if context_file else {}
+        schema = json.loads(schema_file.read_bytes()) if schema_file else {}
+        Draft202012Validator(schema).validate(context)
+    except Exception:
+        reasons.append("registered_foundup_target_brand_context_invalid")
+        return
+    if context.get("foundup_id") != target.get("foundup_id"):
+        reasons.append("registered_foundup_target_brand_identity_mismatch")
+        return
+    brand_id = str(target.get("brand_foundup_id") or "")
+    canonical = str(target.get("canonical_brand") or "")
+    expected = {str(context.get("foundup_id")): str(context.get("canonical_brand") or "")}
+    for child in context.get("child_foundups", []):
+        if isinstance(child, Mapping):
+            expected[str(child.get("foundup_id") or "")] = str(child.get("canonical_brand") or "")
+    if brand_id not in expected or expected.get(brand_id) != canonical:
+        reasons.append("registered_foundup_target_brand_selection_mismatch")
 
 
 def _verify_manifest(root: Path, target: Mapping[str, Any], reasons: list[str]) -> None:
@@ -192,6 +231,7 @@ def verify_registered_foundup_target(
     if target.get("repo_head_sha") != _git_head(root):
         reasons.append("registered_foundup_target_repo_head_mismatch")
     _verify_evidence(root, target, reasons)
+    _verify_brand_context(root, target, registry, reasons)
     _verify_manifest(root, target, reasons)
     if target.get("repo_root_digest") != _digest(str(root)):
         reasons.append("registered_foundup_target_repo_root_mismatch")
