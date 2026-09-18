@@ -1,5 +1,10 @@
 # RedDog ModLog
 
+## 2026-09-19 - Reconcile WRE Skillz registry backend hash
+
+- Reproduced issue #1784 on exact current main: the authenticated backend manifest itself remained canonical, but runtime integrity failed closed only for `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.
+- The registry changed after the prior backend pin as new governed Skillz were registered. Regenerated the existing 1,400-file backend inventory and refreshed the canonical manifest digest; no runtime membership, compatibility assertion, authority boundary, or gate was weakened. WSP 00, 95, 97.
+
 ## 2026-09-14 - Reconcile 0.4.141 release identity contract
 
 - Replaced the exhaustive release contract's stale architect-product identity

@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-19 - Backend inventory after Skillz registry registration
+
+- `runBackendCompatibilityPreflight(repoRoot)` reproduced the exact fail-closed reason from issue #1784: `required_runtime_file_integrity_mismatch:modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.
+- Regenerated the canonical 1,400-file inventory after the WRE Skillz registry changes, refreshed the manifest pin, and kept `test_backend_compatibility_contract.js` unchanged. The focused backend compatibility test and generator `--check` must pass before this repair can commit.
+
 ## 2026-09-14 - 0.4.141 release identity reconciliation
 
 - Reproduced the exhaustive core failure against exact current main: the
