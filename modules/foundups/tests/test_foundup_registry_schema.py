@@ -39,6 +39,8 @@ except ImportError:
 SCHEMA_PATH = Path(__file__).parent.parent / "foundup_registry.schema.json"
 EXAMPLE_PATH = Path(__file__).parent.parent / "foundup_registry.example.json"
 REGISTRY_PATH = Path(__file__).parent.parent / "foundup_registry.json"
+BRAND_SCHEMA_PATH = Path(__file__).parent.parent / "brand_context.schema.json"
+ESINGULARITY_BRAND_PATH = Path(__file__).parent.parent / "esingularity" / "brand_context.json"
 
 
 @pytest.fixture
@@ -624,3 +626,25 @@ class TestRegistryPortfolioConsistency:
             if entity.get("portfolio_status") == "portfolio_candidate":
                 has_url = entity.get("poc_url") or entity.get("app_url")
                 assert has_url, f"{entity['foundup_id']} is portfolio_candidate but has no poc_url or app_url"
+
+
+@pytest.mark.skipif(not JSONSCHEMA_AVAILABLE, reason="jsonschema not installed")
+class TestFoundUpBrandContext:
+    """Brand identity is one FoundUp-owned data contract, not duplicated Skillz state."""
+
+    def test_brand_context_schema_and_esingularity_context_validate(self):
+        brand_schema = json.loads(BRAND_SCHEMA_PATH.read_text(encoding="utf-8"))
+        brand_context = json.loads(ESINGULARITY_BRAND_PATH.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(brand_schema)
+        Draft202012Validator(brand_schema).validate(brand_context)
+        assert brand_context["foundup_id"] == "esingularity_001"
+        assert brand_context["canonical_brand"] == "eSingularity.ai"
+        assert brand_context["authority_boundary"] == "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+
+        child = next(item for item in brand_context["child_foundups"] if item["foundup_id"] == "yumori_me")
+        assert child["canonical_brand"] == "YUMORI.me"
+        assert "YUMORI.me" in child["aliases"]
+
+    def test_registry_points_to_single_esingularity_brand_context(self, production_registry):
+        entry = next(item for item in production_registry["entities"] if item["foundup_id"] == "esingularity_001")
+        assert entry["brand_context_path"] == "modules/foundups/esingularity/brand_context.json"
