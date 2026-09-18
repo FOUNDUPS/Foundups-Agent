@@ -16,6 +16,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
+BRAND_CONTEXT_PATH = MODULE_ROOT / "brand_context.json"
+WEBSITE_SKILL_PATH = MODULE_ROOT / "skills" / "website-update" / "SKILL.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -53,6 +55,29 @@ def test_no_token_is_invented_for_the_campaign() -> None:
 
 
 
+def test_esingularity_brand_context_is_single_skill_brand_authority() -> None:
+    registry = load_json(REGISTRY_PATH)
+    entry = next(item for item in registry["entities"] if item["foundup_id"] == "esingularity_001")
+    assert entry["brand_context_path"] == "modules/foundups/esingularity/brand_context.json"
+
+    brand = load_json(BRAND_CONTEXT_PATH)
+    assert brand["canonical_brand"] == "eSingularity.ai"
+    child = next(item for item in brand["child_foundups"] if item["foundup_id"] == "yumori_me")
+    assert child["canonical_brand"] == "YUMORI.me"
+    assert brand["authority_boundary"] == "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+
+    for skill_path in (
+        MOSHPIT_SKILL_PATH,
+        FUKUI_PROCEDURE_SKILL_PATH,
+        FUNDING_PPP_SKILL_PATH,
+        WEBSITE_SKILL_PATH,
+    ):
+        skill_text = skill_path.read_text(encoding="utf-8")
+        assert "brand_context" in skill_text
+        assert "uppercase YUMORI and lowercase" not in skill_text
+        assert "Movement/site brand" not in skill_text
+
+
 def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     registry = load_json(WRE_SKILLS_REGISTRY_PATH)
     assert registry["total_skills"] == len(registry["skills"])
@@ -66,7 +91,7 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     skill = MOSHPIT_SKILL_PATH.read_text(encoding="utf-8")
     assert "name: yumori_moshpit" in skill
     assert "promotion_state: prototype" in skill
-    assert "YUMORI Moshpit" in skill
+    assert "YUMORI.me Moshpit" in skill
     assert "0102 Moshpit" in skill
     assert "reverse chronological within each day" in skill
     assert "Branch-protection “required” status alone is never sufficient evidence." in skill
