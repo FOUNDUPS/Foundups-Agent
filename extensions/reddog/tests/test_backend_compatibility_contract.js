@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const childProcess = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -246,7 +247,18 @@ assert(functionLineCount('wireFusionWebview') <= 581);
 assert(interfaceSource.includes(
   'before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation'
 ));
+const diagnosticOutput = childProcess.execFileSync(
+  'python',
+  [path.join(repoRoot, 'scripts', 'generate_reddog_backend_manifest.py'), '--write'],
+  { cwd: repoRoot, encoding: 'utf8' }
+);
+console.error('REDDOG_BACKEND_DIAGNOSTIC_GENERATOR_BEGIN');
+console.error(diagnosticOutput.trim());
+console.error('REDDOG_BACKEND_DIAGNOSTIC_MANIFEST_BEGIN');
+console.error(fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8'));
+console.error('REDDOG_BACKEND_DIAGNOSTIC_MANIFEST_END');
 const current = preflight.runBackendCompatibilityPreflight(repoRoot);
+console.error('REDDOG_BACKEND_DIAGNOSTIC_PREFLIGHT=' + JSON.stringify(current));
 assert.strictEqual(current.passed, true);
 assert.strictEqual(current.no_holoindex_query_performed, true);
 assert.strictEqual(current.no_model_call_performed, true);
