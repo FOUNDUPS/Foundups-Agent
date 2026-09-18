@@ -119,7 +119,7 @@ export default function Jhr003() {
             <p>On September 14, 2026, European Central Bank President Christine Lagarde noted that the United States hosts roughly three-quarters of global AI computing capacity while Europe hosts about 5%. She argued that dependence on foreign AI infrastructure raises questions involving data, jurisdiction, access conditions and continuity of critical services. The point is not that societies should reject foreign technology. It is that they should retain meaningful computing capability of their own.</p>
 
             <h3>Japan faces the same structural problem</h3>
-            <p>Japan's Energy White Paper 2025 states that approximately 90% of Japanese data-center floor area was concentrated in the Tokyo and Osaka regions in 2023. It explicitly argues for regional dispersion to support disaster resilience and make better use of regional land, water and grid capacity.</p>
+            <p>Japan&apos;s Energy White Paper 2025 states that approximately 90% of Japanese data-center floor area was concentrated in the Tokyo and Osaka regions in 2023. It explicitly argues for regional dispersion to support disaster resilience and make better use of regional land, water and grid capacity.</p>
             <p>Japan is also pursuing “Watt-Bit collaboration”: planning electricity and digital infrastructure together, locating compute where power infrastructure is advantageous and connecting that compute to demand centers through communications networks.</p>
 
             <h3>Fukui City is already on this policy map</h3>
