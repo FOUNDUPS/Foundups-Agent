@@ -50,6 +50,7 @@ class RouteEvidence:
     policy: RoutePolicy | None = None
     entity_kind: str = "organization"
     current: bool = True
+    verified: bool = True
 
 
 @dataclass(frozen=True)
@@ -97,9 +98,15 @@ def _resolve_address(
     identity_id: str,
     evidence: Sequence[RouteEvidence],
 ) -> tuple[RouteEvidence | None, tuple[str, ...]]:
-    candidates = [e for e in evidence if e.identity_id == identity_id and e.current]
-    if not candidates:
+    current_candidates = [
+        e for e in evidence if e.identity_id == identity_id and e.current
+    ]
+    if not current_candidates:
         return None, ("UNKNOWN_ROUTE",)
+
+    candidates = [e for e in current_candidates if e.verified]
+    if not candidates:
+        return None, ("UNVERIFIED_ROUTE",)
 
     top_level = max(e.level for e in candidates)
     top = [e for e in candidates if e.level == top_level]
