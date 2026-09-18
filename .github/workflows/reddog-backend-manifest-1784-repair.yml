@@ -1,0 +1,49 @@
+name: RedDog backend manifest repair 1784
+
+on:
+  push:
+    branches:
+      - fix/reddog-backend-manifest-1784-clean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Diagnose current preflight
+        run: |
+          node - <<'NODE' | tee preflight-before.json
+          const path = require('node:path');
+          const preflight = require('./extensions/reddog/backend_compatibility_preflight');
+          console.log(JSON.stringify(preflight.runBackendCompatibilityPreflight(path.resolve('.')), null, 2));
+          NODE
+      - name: Generate canonical backend manifest
+        run: python scripts/generate_reddog_backend_manifest.py --write
+      - name: Compute canonical manifest digest
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          path = 'scripts/reddog_backend_manifest.json'
+          with open(path, encoding='utf-8') as handle:
+              obj = json.load(handle)
+          payload = json.dumps(obj, sort_keys=True, separators=(',', ':')).encode('utf-8')
+          digest = hashlib.sha256(payload).hexdigest()
+          print(digest)
+          with open('manifest-digest.txt', 'w', encoding='utf-8') as handle:
+              handle.write(digest + '\n')
+          PY
+      - name: Upload generated repair inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: reddog-manifest-repair-1784
+          path: |
+            scripts/reddog_backend_manifest.json
+            manifest-digest.txt
+            preflight-before.json
