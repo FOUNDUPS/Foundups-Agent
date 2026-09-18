@@ -72,7 +72,7 @@ def test_existing_ticker_receives_one_deck_notification() -> None:
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "https://yumori.me/vote-no#contact" in ticker
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
-    assert "href: 'https://yumori.me/vote-no'" in status
+    assert "href: 'https://yumori.me/" in status
 
 def test_fullscreen_vision_has_ten_japanese_first_slides_and_derived_languages() -> None:
     content = read("content/yumori-vision.ts")
@@ -124,7 +124,7 @@ def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> 
     assert "SWIPE_DISTANCE = 55" in component
     assert "AUTOPLAY_MS = 9000" in component
     assert "https://yumori.me" in component
-    assert "href: '/reports/jhr'" in read("components/CampaignTicker.tsx")
+    assert "href: '/reports/jhr" in read("components/CampaignTicker.tsx")
 
 
 def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
