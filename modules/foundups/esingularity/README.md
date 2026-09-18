@@ -13,7 +13,7 @@ Project eSingularity is a Japanese-first community campaign and public-informati
 
 ## Website operations skill
 
-For “apply the website skill” or “eSingularity skill”, use [esingularity-website](skills/website-update/SKILL.md). For “YUMORI.me skill”, use the [yumori-website entrypoint](../../../.agents/skills/yumori-website/SKILL.md); both read the same FoundUp-owned workflow. Its [shared branding and language rules](skills/website-update/SKILL.md#shared-branding-and-language--both-sites) preserve the `.me` brand, JOIN label, Japanese-first guardian lockup and katakana JHR name across both sites. Context supports those brands instead of replacing them.
+For “apply the website skill” or “eSingularity skill”, use [esingularity-website](skills/website-update/SKILL.md). For “YUMORI.me skill”, use the [yumori-website entrypoint](../../../.agents/skills/yumori-website/SKILL.md); both read the same FoundUp-owned workflow. FoundUp identity and child-brand rules come from [brand_context.json](brand_context.json); the website workflow applies that identity to the two sites and separately preserves JHR presentation rules. Context supports those brands instead of replacing them.
 
 The WSP 97 workflow also covers bounded history/research, distinct homepage ownership, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the existing FoundUp registry expose it to agent and Red Dog discovery. Skill updates alone do not publish website or form changes.
 
