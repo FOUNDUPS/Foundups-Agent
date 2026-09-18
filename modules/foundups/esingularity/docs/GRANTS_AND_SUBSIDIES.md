@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-09-13 JST
+Last verified: 2026-09-18 JST
 
 ## Purpose and truth boundary
 
@@ -65,6 +65,26 @@ Relevant official scope includes data-center decarbonization, high-efficiency co
 
 Do not state that Fukui City is participating in the project, that the project qualifies, or that ¥1B is available to YUMORI until the administering body answers and the applicant/equipment/use-right structure is confirmed.
 
+## F-02 — データセンターのゼロエミッション化・地域共生加速化事業
+
+- Agency: 環境省 / 一般社団法人 地域循環共生社会連携協会 (RCESPA)
+- Status: **VERIFIED LIVE PROGRAM / SECOND CALL OPENED 2026-09-17**
+- Second-call deadline: 2026-10-16 12:00 JST
+- Inquiry window: 2026-09-18 through 2026-10-07 17:00 JST
+- Primary source: https://www.env.go.jp/press/press_05570.html
+- Program desk / second-call guide: https://rcespa.jp/r08-datacenter/r08-datacenter-no2
+
+The second call explicitly covers: (1) new data centers using regional renewable energy, (2) retrofit of existing data centers, and (3) container/modular data centers.
+
+Current published subsidy structure:
+- New-build: 1/3, up to ¥1,000,000,000 per project over up to three fiscal years, with a ¥500,000,000 annual cap.
+- Existing-DC retrofit: 1/3, up to ¥300,000,000 per project over up to two fiscal years, with a ¥200,000,000 annual cap.
+- Container/modular DC: 1/3, up to ¥300,000,000, single fiscal year.
+
+Potential eligible infrastructure includes renewable-energy equipment, storage/thermal storage, high-efficiency cooling, power-supply equipment and, depending on the track, temperature-difference heat utilization including onsen heat. The current YUMORI hypothesis is most naturally compared against the container/modular track for an initial small node, while the new-build track may matter for later expansion.
+
+**Critical boundary:** this live program does not establish that former Sukatto Land Kuzuryu, YUMORI, a future SPC, or any specific equipment package is eligible. Applicant identity, lawful site/use rights, DC ownership/operation, renewable-energy supply, CO2 methodology, financing, construction timing, and non-duplication with other national subsidies must be verified. Do not describe the maximum cap as expected funding.
+
 ## F-07A — SHIFT: 省CO2型システムへの改修支援事業
 
 - Agency: 環境省 / 温室効果ガス審査協会 (GAJ)
@@ -77,9 +97,35 @@ Do not state that Fukui City is participating in the project, that the project q
 
 Potential YUMORI uses: heat recovery, heat exchangers, heat pumps, hot-water/HVAC electrification, fuel switching, pumps, circulation and related thermal retrofit. However SHIFT relies on qualifying existing-facility/baseline emissions and operating conditions. Because Sukatto Land is closed, this must not be presented as a current eligible funding line until the baseline/closure rules are resolved.
 
+## F-08 — 令和8年度 官民連携基盤整備推進調査費 第3回案件募集
+
+- Agency: 国土交通省 国土政策局 地方政策課 調整室
+- Status: **VERIFIED LIVE PROGRAM / LOCAL-GOVERNMENT APPLICANT**
+- Application window: 2026-09-17 through 2026-10-08
+- Subsidy rate: up to 1/2 of eligible study costs
+- Applicant: prefectures, special wards, municipalities and specified inter-municipal bodies
+- Primary source: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000191.html
+- Program page: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
+
+This is not YUMORI construction CAPEX. It supports local-government study of public infrastructure developed in coordination with private investment. Potential study content can include demand/feasibility work, project-scheme examination, public/private responsibility allocation and other work needed to move a PPP concept toward implementation.
+
+**YUMORI relevance:** YUMORI cannot apply directly. Fukui City would need to determine whether a Sukatto reuse/COGDC proposal, or associated public infrastructure such as power, roads, water, communications or other qualifying infrastructure, fits the program. The current action is to show the live national program to Fukui City and request a written determination or referral to the responsible department. Do not claim eligibility until MLIT/Fukui City confirms the scope.
+
+## F-09 — 福井市 令和8年度 財産有効活用民間提案制度
+
+- Agency: 福井市 財政部 施設活用推進課
+- Status: **VERIFIED LIVE CITY REUSE MECHANISM / SUKATTO NOT LISTED IN CURRENT CALL**
+- Call opened: 2026-09-15
+- Mandatory pre-consultation / site-survey request deadline: 2026-11-30
+- Proposal deadline: 2026-12-15
+- Primary source: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
+
+The FY2026 call seeks private proposals that reduce City fiscal burden, improve citizen services, or revitalize the region, and states that an adopted proposal may proceed to direct contracting with the proposer if subsequent coordination succeeds.
+
+**Critical boundary:** the current call lists only former Shimousaka Elementary School and former Hanyu Elementary School. Former Sukatto Land Kuzuryu is not a listed eligible asset in this round. Therefore this is evidence of an active Fukui City public-asset reuse mechanism and contracting model, not a current application route for Sukatto. YUMORI should ask the Facility Utilization Promotion Division whether Sukatto can be handled through a separate PPP/PFI/private-proposal route or a future/special asset-reuse call.
+
 ## Other tracked programs
 
-- MOE zero-emission / regional-coexistence data-center rounds: monitor for new rounds; potentially relevant to modular/container DC phases.
 - METI GX regional-co-creation / decarbonized-power-region investment programs: monitor for scale, regional and applicant fit; potentially relevant to later DC expansion, not assumed for Phase 1.
 - Fukui Prefecture 成長産業立地促進補助金 AI型データセンター区分: policy-relevant but current Phase 1 does not meet the presently identified ¥10B-scale / facility-form conditions; do not book.
 - Cabinet Office PPP/PFI support: procedural rather than project CAPEX. Fukui City can potentially use national PPP/PFI expert/one-stop support to evaluate public-asset reuse and private proposals.
