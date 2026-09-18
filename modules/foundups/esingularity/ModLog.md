@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-18 — YUMORI operational skill registry self-audit
+
+- Audited the live YUMORI scheduled correspondence, Contacts / Correspondence Routing structure, WRE registry, Red Dog recipient-preflight implementation, funding/PPP skill, Moshpit skill and Fukui procedure draft.
+- Promoted the Fukui procedure work into the FoundUp `skillz/` + WRE registry path and added Claude/Codex projections. The skill requires current official sources, exact government-form fidelity, independent procedural lanes, procurement state separation and the shared Red Dog recipient-preflight gate.
+- Registered the previously unregistered `yumori_funding_ppp_intelligence` Skillz and added discovery projections so the active grant watch can invoke repository-owned rules rather than prompt-only copies.
+- Reused the merged `reddog_recipient_preflight` as the single recipient-safety authority instead of maintaining a competing YUMORI implementation. Exact live Contacts + Correspondence Routing resolution remains mandatory for every To/CC/BCC recipient, including media BCC, followed by exact Gmail Sent read-back.
+- Added existing-contract coverage for registry entries, projections, official-template blocking, procurement-state separation and recipient-preflight dependency. No email, City filing or external message is sent by this repository change.
+
 ## 2026-09-18 — YUMORI Moshpit promoted into the WRE Skillz/Rolodex path
 
 - Reclassified the Moshpit workflow under WSP 95 after a WSP 97 micro/macro pass: the reusable authority now lives at `skillz/yumori_moshpit/SKILLz.md`, not as a module-local legacy `skills/.../SKILL.md`.
