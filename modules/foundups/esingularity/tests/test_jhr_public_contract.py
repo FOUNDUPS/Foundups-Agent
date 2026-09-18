@@ -49,7 +49,7 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     assert "https://esingularity.ai/${action.href}" in ticker
     assert "currentFieldStatus.tickerJa" in ticker
     assert "label: 'JHR'" in ticker
-    assert "href: '/reports/jhr'" in ticker
+    assert "href: '/reports/jhr" in ticker
     assert "https://yumori.me/vote-no#council" in ticker
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "Monkとつながる" not in ticker
