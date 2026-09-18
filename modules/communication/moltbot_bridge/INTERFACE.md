@@ -1515,3 +1515,32 @@ runtime invocation dry-run, executor plan dry-run, execution valve, then isolate
 worktree create. Requires accepted signed work authority and `VALVE_OPEN_WORKTREE_CREATE`
 for acceptance. The result keeps WSP 97 truth fields explicit: no task execution,
 no file edits, no PR, no OpenClaw enqueue, no Hermes dispatch, no push, and no merge.
+
+
+### RedDog Recipient Transaction Preflight
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_recipient_preflight import (
+    EvidenceLevel,
+    ProposedRecipient,
+    RecipientRole,
+    RouteEvidence,
+    RoutePolicy,
+    preflight_recipients,
+    verify_sent_readback,
+)
+```
+
+`reddog_recipient_preflight.py` is a provider-agnostic, fail-closed sender-boundary
+guard. It does not send correspondence. It resolves each intended recipient from
+authoritative evidence, gives newer explicit provider instructions precedence over
+stale Contacts/history, enforces closed/BCC-only/organization-only route policy,
+requires exact normalized address equality, blocks duplicate sent coverage, and
+returns a deterministic SEND/BLOCK receipt.
+
+HIGH/CRITICAL correspondence should run this as an independent second pass after
+composition and before provider transmission. After a successful provider send,
+`verify_sent_readback(...)` compares actual To/CC/BCC against the approved receipt.
+Search snippets, memory, autocomplete, and visually similar addresses are not exact
+routing evidence. A one-character or punctuation difference blocks rather than being
+silently corrected.
