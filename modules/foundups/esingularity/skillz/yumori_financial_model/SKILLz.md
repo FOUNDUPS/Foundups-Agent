@@ -1,6 +1,6 @@
 ---
 name: yumori_financial_model
-description: Audit, recalculate, scenario-test, feasibility-test, and export the YUMORI/eSingularity financial model from repository-owned equations without treating generated spreadsheets or legacy outputs as calculation authority.
+description: Audit, recalculate, scenario-test, feasibility-test, and export the YUMORI.me/eSingularity financial model from repository-owned equations without treating generated spreadsheets or legacy outputs as calculation authority.
 version: 0.2.0
 intent_type: ANALYSIS
 promotion_state: prototype
@@ -36,7 +36,7 @@ evals:
     expected: reddog_discovers_and_routes_but_does_not_invent_financial_results
 retirement_date: null
 ---
-# YUMORI / eSingularity Financial Model
+# YUMORI.me / eSingularity Financial Model
 
 ## Three Skill Questions
 
@@ -61,7 +61,7 @@ The repository owns assumptions, equations, reconciliation rules, and tests. Exc
 ## Positive triggers
 
 Use this Skillz when asked to:
-- audit the YUMORI / eSingularity financial workbook;
+- audit the YUMORI.me / eSingularity financial workbook;
 - compare a legacy/static financial model with a new model;
 - change capacity, utilization, pricing, power, PUE, CapEx, debt, tax, staffing, or other financial assumptions;
 - calculate or reconcile revenue, EBITDA, FCFE, NPV, IRR, DSCR, debt schedules, depreciation, or power expense;
@@ -69,13 +69,13 @@ Use this Skillz when asked to:
 - distinguish customer annual revenue, nominal multi-year contract value, take-or-pay evidence, and actual upfront construction cash;
 - size debt from CFADS / DSCR / rate / term and cap deployed debt at the remaining funding requirement;
 - evaluate 1–5 MW planning capacity and customer/offtake evidence without double-counting the same physical GPU pool;
-- regenerate or export the YUMORI financial workbook;
+- regenerate or export the YUMORI.me financial workbook;
 - explain why a financial output changed;
-- reconcile numbers shown on eSingularity/YUMORI public surfaces with the code model.
+- reconcile numbers shown on eSingularity/YUMORI.me public surfaces with the code model.
 
 ## Non-triggers
 
-Do not use this for unrelated personal finance, generic accounting education, or one-off arithmetic with no YUMORI/eSingularity model relationship.
+Do not use this for unrelated personal finance, generic accounting education, or one-off arithmetic with no YUMORI.me/eSingularity model relationship.
 
 ## Truth hierarchy
 
@@ -183,6 +183,6 @@ The preset workbook is evidence of the intended structure and assumptions, not c
 
 ## RedDog / Rolodex behavior
 
-RedDog should discover this Skillz for YUMORI/eSingularity finance, feasibility-funding, customer/offtake, and workbook requests and hand the work to the governed calculation path. RedDog may summarize a validated result returned by the model; it must not infer, interpolate, or invent missing financial values.
+RedDog should discover this Skillz for YUMORI.me/eSingularity finance, feasibility-funding, customer/offtake, and workbook requests and hand the work to the governed calculation path. RedDog may summarize a validated result returned by the model; it must not infer, interpolate, or invent missing financial values.
 
 This prototype grants no authority to publish new financial claims, commit financing, represent grants as awarded, treat demand leads as customer commitments, or treat nominal contracts as received construction cash.
