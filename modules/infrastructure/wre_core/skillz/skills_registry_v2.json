@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-18T00:00:00+00:00",
-  "total_skills": 29,
+  "last_updated": "2026-09-18T14:00:00+00:00",
+  "total_skills": 30,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -464,6 +464,28 @@
         "WSP 97"
       ],
       "description": "Fail-closed two-pass recipient authorization and provider read-back verification for outbound correspondence"
+    },
+    "yumori_moshpit": {
+      "location": "modules/foundups/esingularity/skillz/yumori_moshpit",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Route YUMORI campaign history versus 0102 learning events and preserve reverse-chronological JST Moshpit integrity"
     }
   }
 }

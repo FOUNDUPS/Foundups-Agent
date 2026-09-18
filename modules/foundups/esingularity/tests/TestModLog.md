@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-18 — YUMORI Moshpit Skillz / Rolodex contract
+
+- Reused `test_contracts.py` after reviewing this TestModLog and the tests README; no duplicate test file was created.
+- Added a regression that requires the canonical `skillz/yumori_moshpit/SKILLz.md`, its `prototype` WRE registry entry, 0102 ownership metadata, both thin operator projections, and absence of the duplicate legacy module `SKILL.md`.
+- Corrected two stale exact-route assertions exposed by CI to current main truth: the shared field-status destination is `https://yumori.me/`, and the JHR ticker action is `/reports/jhr#jhr-002`. The assertions remain exact and were not weakened to generic pass-through checks.
+
 ## 2026-09-13 — Civic-message route and ticker action coverage
 
 - Extended the existing public-contract suite for the YUMORI.me council/mayor route, supersession notice, privacy boundary, official council contact, removal of the obsolete Monk action, the 10/20/32 px/s responsive ticker ladder, and the phone bottom-dock/swipe contract.
