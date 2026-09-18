@@ -5,7 +5,7 @@ description: Apply the eSingularity website skill for eSingularity.ai or the nam
 
 # Apply the website skill
 
-Read `modules/foundups/esingularity/skills/website-update/SKILL.md` from the repository root before website edits or reviews, including its shared branding and language section. It owns the YUMORI.me name, JOIN label, Japanese-first `me GUARDIAN!` lockup and katakana JHR title for both sites, alongside research, ticker checks, validation, publication and Red Dog execution boundaries. `yumori-website` is a movement-site entrypoint to that same source, not a separate copy of the rules.
+Read `modules/foundups/esingularity/skills/website-update/SKILL.md` from the repository root before website edits or reviews, and the registry-grounded FoundUp brand context. It applies website behavior around the active FoundUp identity; canonical brand spelling, aliases, domains and child-brand copy come from the registry-grounded brand context. `yumori-website` is a movement-site entrypoint to that same source, not a separate copy of the rules.
 
 For a ticker-only request, also read `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Do not duplicate the website workflow here.
 
