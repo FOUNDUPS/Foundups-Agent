@@ -321,7 +321,7 @@
       "effective_or_checked_date": "2026-09-12",
       "evidence_status": "VERIFIED",
       "source_url": "https://ai.sakura.ad.jp/gpu/koukaryoku-dok/",
-      "notes": "Public beta-plan listed price; normalized GPU-hour is arithmetic 2,988 / 8 and should not be treated as identical service scope to YUMORI."
+      "notes": "Public beta-plan listed price; normalized GPU-hour is arithmetic 2,988 / 8 and should not be treated as identical service scope to YUMORI.me."
     },
     {
       "id": "aws_capacity_blocks_h100_tokyo_2026-09-12",
@@ -389,7 +389,7 @@
       "effective_or_checked_date": "2026-09-12",
       "evidence_status": "VERIFIED",
       "source_url": "https://cloud.sakura.ad.jp/products/nfs/",
-      "notes": "Public list price used as a Japan managed-file-storage reference, not a direct YUMORI cost estimate."
+      "notes": "Public list price used as a Japan managed-file-storage reference, not a direct YUMORI.me cost estimate."
     },
     {
       "id": "sakura_cloud_2vcpu_4gb_2026-09-12",
@@ -488,7 +488,7 @@
       "subsidy_rate_text": "Up to 1/2, with support intensity determined by location, power sourcing linkage, and power-source type; large-enterprise rates may be lower under the detailed table.",
       "cap_text": "Up to 250億円 for qualifying patterns; lower caps apply to other support-intensity patterns.",
       "eligibility_summary": "Data-center investment contributing to Japan's compute competitiveness, using decarbonized power and contributing to the power-source region. First call closed; second call is planned for mid-October through late November 2026.",
-      "yumori_relevance": "STRATEGIC. Fukui City appears in the GX strategy-area decarbonized-power utilization list, but YUMORI scale, new-site/investment requirements, power sourcing, and minimum investment thresholds require formal eligibility confirmation.",
+      "yumori_relevance": "STRATEGIC. Fukui City appears in the GX strategy-area decarbonized-power utilization list, but YUMORI.me scale, new-site/investment requirements, power sourcing, and minimum investment thresholds require formal eligibility confirmation.",
       "blockers_or_gates": "Large CAPEX and decarbonized-power conditions; first call already closed. Treat the planned second call as a watch item until final application dates/guidelines are published.",
       "funding_treatment": "POTENTIAL_UNTIL_AWARDED",
       "evidence_status": "VERIFIED",
