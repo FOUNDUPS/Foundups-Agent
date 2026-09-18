@@ -123,6 +123,44 @@ def test_unknown_route_blocks():
     assert "missing:UNKNOWN_ROUTE" in receipt.reasons
 
 
+def test_sent_only_or_unverified_contact_route_blocks():
+    receipt = preflight_recipients(
+        [ProposedRecipient("org-1", RecipientRole.TO, "route@example.org")],
+        [
+            ev(
+                "org-1",
+                "route@example.org",
+                EvidenceLevel.CONTACTS,
+                verified=False,
+            )
+        ],
+    )
+    assert receipt.decision is PreflightDecision.BLOCK
+    assert "org-1:UNVERIFIED_ROUTE" in receipt.reasons
+
+
+def test_verified_public_directory_can_authorize_when_contact_history_is_unverified():
+    receipt = preflight_recipients(
+        [ProposedRecipient("org-1", RecipientRole.TO, "route@example.org")],
+        [
+            ev(
+                "org-1",
+                "route@example.org",
+                EvidenceLevel.CONTACTS,
+                verified=False,
+            ),
+            ev(
+                "org-1",
+                "route@example.org",
+                EvidenceLevel.PUBLIC_DIRECTORY,
+                verified=True,
+            ),
+        ],
+    )
+    assert receipt.decision is PreflightDecision.SEND
+    assert receipt.checks[0].authoritative_source == "test"
+
+
 def test_display_name_and_case_normalize_without_character_rewrite():
     assert normalize_address("Example Person <User.Name+tag@Example.Org>") == (
         "user.name+tag@example.org"
