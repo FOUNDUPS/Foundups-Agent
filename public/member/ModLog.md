@@ -1,5 +1,14 @@
 # Member Area Module Change Log
 
+## [2026-09-09] Public Red Dog Q&A candidate
+
+- Preserved existing topics and added explicit-consent public questions through
+  `/js/reddog-public-client.js`, shared with the Foundups landing and eSingularity.
+- Calls the bounded eSingularity public API without member auth, transcript
+  persistence or private resident access. Handles lost responses without replay.
+- Existing concierge checks and Node transport regressions pass. Firebase deploy
+  and live provider replies remain pending; see the eSingularity runtime contract.
+
 ## [2026-08-26] REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1
 
 - Aligned the member Red Dog contract with RedDog as the continuous

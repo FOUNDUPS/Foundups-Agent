@@ -1,5 +1,9 @@
 # AI Gateway Module Change Log
 
+## 2026-09-09 — OpenRouter credential consumer audit
+
+OpenRouter transport now disables/rejects redirects and replaces raw request exceptions with content-free failures while preserving timeout classification. ProviderConfig representations omit API keys. Model selection/budget policy and non-OpenRouter routes are unchanged. WSP 15, 50, 71, 97.
+
 ## [2026-08-22] - Nemotron Exact Model Lifecycle Evidence
 
 - Replaced the assumed already-loaded proposer boundary with an explicit exact

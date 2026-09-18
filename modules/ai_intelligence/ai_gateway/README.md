@@ -1,5 +1,7 @@
 # AI Gateway Module
 
+OpenRouter uses `OPENROUTER_API_KEY` from its process environment at gateway construction. See [credential consumers and rotation](../../../extensions/reddog/docs/OPENROUTER_CREDENTIAL_CONSUMERS.md) before updating a running owner.
+
 **Module Purpose**: Unified AI service access with intelligent routing, fallback, and load balancing across multiple AI providers.
 
 **WSP Compliance Status**: [OK] WSP 49 (Module Structure), WSP 3 (Enterprise Domain), WSP 27 (DAE Architecture)

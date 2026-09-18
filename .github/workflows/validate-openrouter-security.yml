@@ -1,0 +1,44 @@
+name: Validate OpenRouter credential boundaries
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/advisory_model_once.py'
+      - 'scripts/tests/test_*openrouter*.py'
+      - 'scripts/tests/test_advisory_model_once_hardening.py'
+      - 'scripts/tests/test_reddog_fusion_progress_bridge.py'
+      - 'modules/ai_intelligence/ai_gateway/src/ai_gateway.py'
+      - 'modules/ai_intelligence/ai_gateway/tests/test_kimi_k3_request_truth.py'
+      - 'modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_configured_gateway_runner.py'
+      - 'modules/communication/moltbot_bridge/src/fusion_alias_live.py'
+      - 'modules/communication/moltbot_bridge/tests/test_fusion_alias_live.py'
+      - 'extensions/reddog/start_operations_environment.js'
+      - '.github/workflows/validate-openrouter-security.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pytest requests cryptography
+      - name: Verify all shared Python OpenRouter transports without credentials
+        run: >-
+          python -m pytest
+          scripts/tests/test_openrouter_credential_boundaries.py
+          scripts/tests/test_advisory_model_once_hardening.py
+          scripts/tests/test_reddog_fusion_progress_bridge.py
+          modules/communication/moltbot_bridge/tests/test_fusion_alias_live.py
+          modules/ai_intelligence/ai_gateway/tests/test_kimi_k3_request_truth.py
+          modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_configured_gateway_runner.py -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+      - name: Verify least-privilege extension environment profiles
+        run: node extensions/reddog/tests/test_bridge_python_environment.js

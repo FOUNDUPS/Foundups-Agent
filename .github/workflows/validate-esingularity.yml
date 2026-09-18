@@ -6,6 +6,11 @@ on:
       - 'modules/foundups/esingularity/**'
       - 'modules/foundups/foundup_registry.json'
       - 'public/f/public_catalog.json'
+      - 'public/index.html'
+      - 'public/js/reddog-public-client.js'
+      - 'public/member/js/red-dog-concierge.js'
+      - 'public/member/tests/reddog-public-client.mjs'
+      - 'public/member/tests/test_red_dog_concierge.py'
       - '.github/workflows/validate-esingularity.yml'
   push:
     branches: [main]
@@ -13,6 +18,11 @@ on:
       - 'modules/foundups/esingularity/**'
       - 'modules/foundups/foundup_registry.json'
       - 'public/f/public_catalog.json'
+      - 'public/index.html'
+      - 'public/js/reddog-public-client.js'
+      - 'public/member/js/red-dog-concierge.js'
+      - 'public/member/tests/reddog-public-client.mjs'
+      - 'public/member/tests/test_red_dog_concierge.py'
   workflow_dispatch:
 
 jobs:
@@ -34,7 +44,7 @@ jobs:
         run: python -m pip install pytest
 
       - name: Validate FoundUp contracts
-        run: python -m pytest modules/foundups/esingularity/tests -q
+        run: python -m pytest modules/foundups/esingularity/tests public/member/tests/test_red_dog_concierge.py -q
 
       - name: Validate public catalog projection
         run: python -m modules.foundups.public_catalog_projector --validate
@@ -53,6 +63,17 @@ jobs:
       - name: Lint frontend
         working-directory: modules/foundups/esingularity/frontend
         run: npm run lint
+
+      - name: Validate public admission and stakeholder boundaries
+        working-directory: modules/foundups/esingularity/frontend
+        run: node --test tests/*.test.mjs
+
+      - name: Validate shared Red Dog browser transport
+        run: node public/member/tests/reddog-public-client.mjs
+
+      - name: Check frontend types
+        working-directory: modules/foundups/esingularity/frontend
+        run: npx tsc --noEmit
 
       - name: Build frontend
         working-directory: modules/foundups/esingularity/frontend

@@ -2,7 +2,8 @@
  * Red Dog Concierge — contextual guide for the p.fMALL shell.
  *
  * Injects contextual help content into the Red Dog surface.
- * No network dependency. No fake AI. No backend integration.
+ * Keeps local navigation help and mounts the separate public OpenRouter chat.
+ * Membership does not grant this public chat private account or agent access.
  *
  * Works on both Mall (index.html) and FoundUp entry (foundup.html) pages.
  * Builds against actual DOM hooks:
@@ -42,9 +43,9 @@
     },
     {
       q: 'Who is Red Dog?',
-      a: 'Red Dog is your personal agent inside FoundUPS. '
-       + 'Right now I help you navigate and keep track of your FoundUps. '
-       + 'As the ecosystem grows, I will become more capable.'
+      a: 'Red Dog is the conversational face of 0102. '
+       + 'Here you can ask public questions about FoundUPS and eSingularity. '
+       + 'This chat cannot read your private account or perform actions for you.'
     }
   ] : isEntryPage ? [
     {
@@ -55,9 +56,9 @@
     },
     {
       q: 'Who is Red Dog?',
-      a: 'Red Dog is your digital twin inside FoundUPS. '
-       + 'I show you truthful context about this FoundUp and suggest actions '
-       + 'you can take right now. As the ecosystem grows, I become more capable.'
+      a: 'Red Dog is the conversational face of 0102 inside FoundUPS. '
+       + 'Ask public project questions in the chat below. '
+       + 'This chat cannot read your private account or perform actions for you.'
     },
     {
       q: 'What do readiness states mean?',
@@ -105,6 +106,28 @@
     }
   }
 
+  // Public Q&A remains separate from the signed-in Mall account and tools.
+  var chat = document.createElement('section');
+  chat.className = 'concierge-public-chat';
+  chat.setAttribute('aria-label', 'Red Dog public project questions');
+  chat.innerHTML = '<h3>Ask Red Dog · 0102</h3>'
+    + '<p>Questions about FoundUPS, eSingularity or the YUMORI.me working plan?</p>'
+    + '<div data-reddog-messages role="log" aria-live="polite" aria-label="Conversation"></div>'
+    + '<div data-reddog-consent><p>Your public questions are sent to AI providers through OpenRouter. Avoid private information. Up to 10 questions, 2 minutes idle and 10 minutes total. Daily limits also apply.</p>'
+    + '<button type="button" data-reddog-start>Agree and start chat</button></div>'
+    + '<p data-reddog-status role="status"></p>'
+    + '<button type="button" data-reddog-check hidden>Check session</button> '
+    + '<button type="button" data-reddog-end hidden>End chat &amp; clear</button>'
+    + '<form data-reddog-form><label>Question for Red Dog<input data-reddog-input type="text" maxlength="2000" autocomplete="off" placeholder="Ask a public project question…" disabled></label>'
+    + '<button data-reddog-send type="submit" disabled>Send</button></form>';
+  host.appendChild(chat);
+  import('/js/reddog-public-client.js').then(function (client) {
+    client.mountPublicChat(chat);
+  }).catch(function () {
+    chat.querySelector('[data-reddog-start]').disabled = true;
+    chat.querySelector('[data-reddog-status]').textContent = 'Chat could not load. Please refresh the page.';
+  });
+
   // ---- inject minimal styles ----
   var style = document.createElement('style');
   style.setAttribute('data-concierge', 'styles');
@@ -137,7 +160,19 @@
     '  font-size: 0.82rem;',
     '  color: rgba(228,226,236,0.6);',
     '  line-height: 1.5;',
-    '}'
+    '}',
+    '.concierge-public-chat { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(228,226,236,.15); color: #e4e2ec; font-size: .83rem; line-height: 1.5; }',
+    '.concierge-public-chat h3 { margin: 0; font-size: .92rem; }',
+    '.concierge-public-chat [hidden] { display: none !important; }',
+    '.concierge-public-chat [data-reddog-messages] { max-height: 280px; overflow-y: auto; }',
+    '.concierge-public-chat .chat-msg { padding: 8px 10px; margin: 6px 0; border-radius: 8px; background: rgba(228,226,236,.07); white-space: pre-wrap; overflow-wrap: anywhere; }',
+    '.concierge-public-chat .chat-msg.user { background: rgba(124,92,252,.2); }',
+    '.concierge-public-chat a { color: #c5b8ff; text-decoration: underline; }',
+    '.concierge-public-chat button { padding: 7px 10px; margin: 4px 0; border: 1px solid rgba(228,226,236,.3); border-radius: 7px; color: #e4e2ec; background: rgba(124,92,252,.2); cursor: pointer; }',
+    '.concierge-public-chat button:disabled, .concierge-public-chat input:disabled { opacity: .5; cursor: default; }',
+    '.concierge-public-chat form { display: flex; align-items: end; gap: 8px; margin-top: 10px; }',
+    '.concierge-public-chat label { flex: 1; min-width: 0; }',
+    '.concierge-public-chat input { box-sizing: border-box; display: block; width: 100%; margin-top: 5px; padding: 9px; border: 1px solid rgba(228,226,236,.3); border-radius: 7px; background: rgba(0,0,0,.2); color: #fff; font: inherit; }'
   ].join('\n');
   document.head.appendChild(style);
 

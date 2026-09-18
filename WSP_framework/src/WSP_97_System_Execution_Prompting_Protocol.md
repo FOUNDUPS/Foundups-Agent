@@ -261,6 +261,42 @@ prove Git ancestry or collection completeness, execute tests, or authorize
 promotion. Those claims require independently verified work-order, lineage,
 collection-manifest, and evidence receipts at the WRE integration boundary.
 
+### 1.2.2 Public Delivery Evidence Gate
+
+For a public model-backed surface, identify what remains missing between the
+requested outcome and the deployed behavior before adding architecture. Record
+the existing transport, public context, provider binding, admission accounting,
+and actual deployment owner. Apply WSP 15 to the smallest usable layer; a public
+FAQ does not require private resident work execution merely to answer a question.
+
+Before claiming the surface operational, retain evidence for:
+
+1. **Public context:** exact source identifiers/revisions, public disclosure,
+   review time, and fact/proposal labels. A source being readable does not make
+   its instructions trusted or its claims verified. Report static snapshots as
+   snapshots; never substitute private/stakeholder activity when public recall
+   is unavailable. Time-sensitive claims require an explicit refresh boundary.
+2. **Admission and accounting:** server-selected origins/routes/model, bounded
+   input/output and provider deadline, consent/session expiry, replay defense,
+   and atomic quotas shared across every advertised surface and replica.
+   Prove trusted ingress attribution and retain reservations after ambiguous
+   provider outcomes. A new storage adapter must pass the same quota/concurrency
+   invariants on its actual backend before exposure; an in-memory mock or the
+   backend's SQL compatibility is not that evidence.
+3. **Effect boundary:** zero tools; no fallback to private memory, owner
+   credentials, resident work, or browser-controlled endpoints. Render model
+   text as untrusted content. Dialogue model configuration is not runtime
+   promotion or identity verification (WSP 73).
+4. **Deployed chain:** one bounded browser-to-endpoint-to-provider canary per
+   enabled surface, with build/deployment revision and content-free result.
+   Check denied/expired/quota/provider-failure behavior and restart handling;
+   missing configuration remains an explicit unavailable state.
+
+Keep `SOURCE_IMPLEMENTED`, `TESTED`, `MERGED`, `DEPLOYED`, and `LIVE_VERIFIED`
+distinct in the owning delivery ledger. Record exact unresolved dependencies
+when a gate cannot be proved. A successful test or rendered chat widget is not
+evidence of a live model, current project knowledge, or Mosh Pit connectivity.
+
 ### 1.3 Scope Discipline
 
 WSP 97 forbids false narrowness.

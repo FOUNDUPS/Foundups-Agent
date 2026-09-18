@@ -83,8 +83,8 @@ class Recorder:
         self.resp = resp if resp is not None else FakeResp()
         self.exc = exc
 
-    def __call__(self, url, headers=None, json=None, timeout=None):
-        self.calls.append({"url": url, "headers": headers or {}, "json": json or {}, "timeout": timeout})
+    def __call__(self, url, headers=None, json=None, timeout=None, allow_redirects=True):
+        self.calls.append({"url": url, "headers": headers or {}, "json": json or {}, "timeout": timeout, "allow_redirects": allow_redirects})
         if self.exc is not None:
             raise self.exc
         return self.resp

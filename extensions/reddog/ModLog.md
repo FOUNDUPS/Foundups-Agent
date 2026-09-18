@@ -1,5 +1,9 @@
 # RedDog ModLog
 
+## 2026-09-09 — OpenRouter credential consumer audit
+
+Audited all tracked OpenRouter credential readers and added a shared owner/refresh inventory. The advisory transport rejects redirects and withholds upstream error bodies; mock tests use the explicit transport seam. Existing provider authorization and least-privilege environment profiles remain intact. WSP 15, 50, 71, 97.
+
 ## 2026-09-09 - Mosh Pit Wave-style MVP and local candidate
 
 - Recorded primary-source comparison of Apache Wave, Yjs, Tiptap/Hocuspocus

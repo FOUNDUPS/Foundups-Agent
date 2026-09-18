@@ -1,5 +1,14 @@
 # Member Area Interface
 
+## Public project Q&A candidate
+
+`js/red-dog-concierge.js` retains local help topics and mounts an explicit-consent
+question form. Shared `/js/reddog-public-client.js` calls
+`https://esingularity.ai/api/reddog/public/foundups/{operation}`. The public session
+has independent quotas and carries no Clerk token or member/private context.
+Ending it discards browser state. This is implemented source, not a deployed
+resident connection. Contract: `modules/foundups/esingularity/docs/REDDOG_PUBLIC_RUNTIME.md`.
+
 **Module**: `public/member/`
 **Version**: 2.1.0
 

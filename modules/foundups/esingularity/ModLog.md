@@ -1,5 +1,33 @@
 # Project eSingularity ModLog
 
+## 2026-09-09 — Resumed security and CI verification
+
+- Recovered the intact WSP 10 checkpoint and verified saved Site version 27.
+  The reported Work UI error has no request ID or internal trace available;
+  the earlier publication denial is separate evidence, not a proven UI cause.
+- Fixed post-admission read failures retaining unused provider slots, and a
+  detached stream-cancel rejection on abort. Two regressions reproduce them.
+- Fixed React client initialization and the stakeholder page's internal link to
+  pass existing lint. Added admission, transport and type checks to project CI,
+  including triggers for the shared Foundups client and concierge.
+- 18 frontend tests, 41 Python checks, shared transport, lint and TypeScript pass.
+  Offline release screening and remaining credential/rotation gates are recorded
+  in the website delivery audit. No OpenRouter values were retrieved or printed.
+
+## 2026-09-09 — Public Red Dog OpenRouter delivery candidate
+
+- Added the shared public Worker API, reviewed Japanese-first project knowledge,
+  bounded OpenRouter responder and consent-based JA/EN/PT chat controls.
+- Added atomic D1 admission accounting with shared Foundups/eSingularity budgets,
+  replay checks, shutdown handling and no private-memory or transcript storage.
+- Added generated migration and focused real-SQLite/transport regression checks.
+  16 frontend checks, 41 Python checks, type checking and production build pass. Live activation
+  awaits key/model, verified ingress and host canaries; no live reply is claimed.
+- Saved native Site version 27 from source `8f2d5283687c8f4f053f2ee3a25db77b99498349`;
+  not deployed. GitHub publication was blocked by automatic approval review.
+- See `docs/REDDOG_PUBLIC_RUNTIME.md` for configuration, snapshot freshness,
+  current limitations, source disclosure and recovery. WSP 00/10/15/22/50/73/97.
+
 ## 2026-09-09 — Gated Mosh Pit reader, second local layer
 
 - Added a dynamic activity-first reader and GET API with official Sites sign-in,

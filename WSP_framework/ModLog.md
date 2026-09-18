@@ -1,3 +1,14 @@
+- **2026-09-09**: **RedDog public website delivery sweep** — Added focused WSP 15
+  same-outcome complexity/dependency comparison, WSP 73 bounded public CHAT/NONE
+  distinction, WSP 97 source/configuration/live delivery evidence, and WSP 106
+  protected-gateway authentication scope. Principal requested these operational
+  improvements. Existing limits and execution authority remain intact. All four
+  existing WSP_knowledge mirrors are byte-identical. WSP 00 torch-free fallback
+  passed without a detector witness; Holo owner retrieval remained unavailable.
+  Base `c3666c02c1a819f8906e56f31fdc67d6ad46111d`, owned branch
+  `feat/reddog-public-openrouter`; recovery is a reviewed Git revert. See
+  `extensions/reddog/docs/REDDOG_WEBSITE_DELIVERY_AUDIT_20260909.md`.
+
 - **2026-08-30**: **WSP 71 RedDog Lick Security Reference** - Added a narrow
   security boundary for the external RedDog Lick product handshake. The Lick
   remains outside WSP and grants no credential or authority; WSP 71 now

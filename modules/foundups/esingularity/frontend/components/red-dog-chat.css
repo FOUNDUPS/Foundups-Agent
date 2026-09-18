@@ -1,0 +1,33 @@
+.red-dog-chat { --rd-ink: #203b31; --rd-green: #1c634b; font-family: var(--font-noto), sans-serif; color: var(--rd-ink); }
+.red-dog-trigger { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 120; display: flex; align-items: center; gap: 9px; padding: 13px 19px; border: 1px solid #f4e6d1; border-radius: 999px; color: #fffdf7; background: var(--rd-green); font: 700 14px var(--font-noto), sans-serif; box-shadow: 0 5px 24px #15372b33; cursor: pointer; }
+.red-dog-trigger span { color: #ed997d; }
+.red-dog-panel { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 120; width: min(390px, calc(100vw - 32px)); max-height: min(720px, calc(100dvh - 112px - env(safe-area-inset-bottom))); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #d9ded4; border-radius: 18px; background: #fffdf7; box-shadow: 0 14px 60px #183e3238; font-size: 13px; line-height: 1.6; }
+.red-dog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px 14px; background: #edf2e9; border-bottom: 1px solid #dbe2d5; }
+.red-dog-header h2 { font-size: 17px; margin: 0; line-height: 1.4; color: var(--rd-ink); }
+.red-dog-header p { margin: 4px 0 0; font-size: 11px; color: #4b6256; }
+.red-dog-chat button { cursor: pointer; }
+.red-dog-header button { padding: 3px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--rd-ink); font-size: 26px; }
+.red-dog-conversation { min-height: 60px; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px; flex: 1 1 auto; }
+.red-dog-intro { margin: 0 0 10px; }
+.red-dog-message { border-radius: 12px; padding: 9px 11px; margin: 10px 0; background: #eef2e9; white-space: pre-wrap; overflow-wrap: anywhere; }
+.red-dog-message.user { background: #f5eadc; margin-left: 18px; }
+.red-dog-message.bot { margin-right: 10px; }
+.red-dog-message p { margin: 0; }
+.red-dog-message a { display: block; margin-top: 6px; }
+.red-dog-chat a { color: #1c634b; text-decoration: underline; text-underline-offset: 3px; }
+.red-dog-controls { padding: 0 16px 12px; flex: 0 0 auto; }
+.red-dog-consent p { font-size: 11px; margin: 0 0 9px; color: #526459; }
+.red-dog-controls button { padding: 8px 11px; border: 1px solid #c5d1c3; border-radius: 8px; color: var(--rd-ink); background: #edf2e9; font: inherit; }
+.red-dog-controls button:disabled { opacity: .5; cursor: default; }
+.red-dog-notice { margin: 8px 0; font-size: 11px; color: #526459; }
+.red-dog-notice:empty { margin: 0; }
+.red-dog-session-actions { display: flex; gap: 8px; margin: 8px 0; }
+.red-dog-session-actions button { padding: 4px 8px; font-size: 11px; }
+.red-dog-controls label { display: block; margin: 8px 0 4px; font-size: 11px; font-weight: 700; }
+.red-dog-input-row { display: flex; gap: 7px; }
+.red-dog-input-row input { flex: 1; min-width: 0; width: 0; border: 1px solid #c5d1c3; border-radius: 8px; padding: 9px 10px; background: #fff; color: var(--rd-ink); font: inherit; font-size: 16px; }
+.red-dog-input-row input:disabled { background: #f1f1eb; }
+.red-dog-input-row button, .red-dog-consent button { background: var(--rd-green); border-color: var(--rd-green); color: #fff; }
+.red-dog-links { display: flex; flex-direction: column; gap: 7px; padding: 12px 16px; margin: 0; background: #f5f2e9; border-top: 1px solid #e4e4d9; font-size: 11px; }
+.red-dog-chat :focus-visible { outline: 3px solid #d47f57; outline-offset: 2px; }
+@media (max-height: 600px) { .red-dog-panel { overflow-y: auto; } .red-dog-conversation { flex-shrink: 0; max-height: 160px; } }

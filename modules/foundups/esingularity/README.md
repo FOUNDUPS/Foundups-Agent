@@ -1,5 +1,9 @@
 # Project eSingularity FoundUp
 
+Public Red Dog delivery is implemented as a shared OpenRouter-backed website
+candidate. Runtime credentials and live verification remain pending. See
+[the runtime contract](docs/REDDOG_PUBLIC_RUNTIME.md) for configuration and status.
+
 Project eSingularity is a Japanese-first community campaign and public-information PWA for preserving Sukatto Land Kuzuryu and testing a community-owned green data center (COG DC) alternative for Fukui.
 
 **FoundUp ID**: `esingularity_001`

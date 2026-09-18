@@ -1,5 +1,24 @@
 # eSingularity TestModLog
 
+## 2026-09-09 — Resumption failure regressions and CI registration
+
+- Added a four-failure admission-read case proving provider calls remain zero,
+  durable in-flight slots return to zero, and daily quota stays consumed before
+  the next healthy request succeeds. Added an errored-stream/abort case whose
+  detached rejection previously escaped the request's sanitized failure path.
+- 18 frontend tests, shared-client recovery checks and 41 Python tests pass;
+  lint and TypeScript pass. Existing eSingularity CI now runs these frontend
+  boundaries and the member concierge/transport checks with narrow read access.
+
+## 2026-09-09 — Public Red Dog delivery checks
+
+- Nine new frontend cases verify real SQLite atomic admission, cross-site quotas,
+  replay/concurrency/restart, removed-row races, withdrawal, strict JSON and
+  bounded OpenRouter requests with a synthetic responder. Seven Mosh Pit tests pass.
+- Existing module and member-concierge Python checks: 41 pass. Shared browser
+  transport regression script passes; TypeScript passes. Production D1, real
+  provider and browser canaries remain separate deployment gates.
+
 ## 2026-09-06 — YUMORI presentation contract coverage
 
 - Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.

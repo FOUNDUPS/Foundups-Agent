@@ -19,6 +19,8 @@ not mean RedDog has 376 canonical specifications.
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
 | Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
+| Public website OpenRouter implementation | `modules/foundups/esingularity/docs/REDDOG_PUBLIC_RUNTIME.md` | Shared Site Worker + Foundups client; locally verified, activation pending |
+| Website WSP sweep and delivery evidence | `extensions/reddog/docs/REDDOG_WEBSITE_DELIVERY_AUDIT_20260909.md` | Current scoped audit and release gates |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
 | Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
 | Mosh Pit activity projection | `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |

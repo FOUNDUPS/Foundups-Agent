@@ -234,7 +234,10 @@ def run_alias_live(
 
     # 7. One bounded POST. No retry storm. Every error path is fail-closed advisory.
     try:
-        resp = requests.post(OPENROUTER_URL, headers=headers, json=body, timeout=bounded_timeout)
+        resp = requests.post(
+            OPENROUTER_URL, headers=headers, json=body,
+            timeout=bounded_timeout, allow_redirects=False,
+        )
     except requests.exceptions.Timeout:
         return _blocked(REASON_TIMEOUT, made_network_call=True)
     except Exception:

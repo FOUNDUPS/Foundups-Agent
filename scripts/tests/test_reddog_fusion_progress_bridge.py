@@ -96,7 +96,7 @@ def test_openrouter_response_metadata_and_usage_are_retained_without_content() -
         seen_request = request
         return _Response(response)
 
-    with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+    with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
         data, meta = bridge._post_openrouter("key", {"model": "requested/model", "messages": []}, 30)
 
     assert data["choices"][0]["message"]["content"] == "model output"
