@@ -1,0 +1,63 @@
+name: RedDog PR1780 bounded manifest reconcile
+
+on:
+  push:
+    branches:
+      - fix/reddog-recipient-preflight-20260918
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 4
+          ref: fix/reddog-recipient-preflight-20260918
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate and bind RedDog backend manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(python scripts/generate_reddog_backend_manifest.py --write)"
+          printf '%s\n' "$output"
+          digest="$(printf '%s\n' "$output" | head -n 1)"
+          python - "$digest" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          digest = sys.argv[1]
+          if not re.fullmatch(r"[0-9a-f]{64}", digest):
+              raise SystemExit("invalid generated manifest digest")
+          path = Path("extensions/reddog/backend_compatibility_constants.js")
+          text = path.read_text(encoding="utf-8")
+          updated, count = re.subn(
+              r"const EXPECTED_MANIFEST_SHA256 = '[0-9a-f]{64}';",
+              f"const EXPECTED_MANIFEST_SHA256 = '{digest}';",
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("manifest digest constant not uniquely replaceable")
+          path.write_text(updated, encoding="utf-8", newline="\n")
+          PY
+
+      - name: Self-remove reconciliation workflow and commit bounded outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/reddog-pr1780-reconcile.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/reddog_backend_manifest.json extensions/reddog/backend_compatibility_constants.js .github/workflows/reddog-pr1780-reconcile.yml
+          git diff --cached --check
+          git diff --cached --exit-code >/dev/null && exit 0
+          git commit -m "chore(reddog): reconcile backend manifest"
+          git push origin HEAD:fix/reddog-recipient-preflight-20260918
