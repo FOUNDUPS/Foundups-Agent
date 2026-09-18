@@ -69,6 +69,29 @@ def test_bcc_only_policy_blocks_cc():
     assert "observer-1:ROLE_POLICY_VIOLATION_BCC_ONLY" in receipt.reasons
 
 
+def test_newer_address_evidence_does_not_silently_reopen_closed_route():
+    receipt = preflight_recipients(
+        [ProposedRecipient("person-1", RecipientRole.TO, "person@example.org")],
+        [
+            ev(
+                "person-1",
+                "person@example.org",
+                EvidenceLevel.ROUTING_POLICY,
+                policy=RoutePolicy.PERSONAL_ROUTE_CLOSED,
+                entity_kind="person",
+            ),
+            ev(
+                "person-1",
+                "person@example.org",
+                EvidenceLevel.EXPLICIT_PROVIDER,
+                entity_kind="person",
+            ),
+        ],
+    )
+    assert receipt.decision is PreflightDecision.BLOCK
+    assert "person-1:PERSONAL_ROUTE_CLOSED" in receipt.reasons
+
+
 def test_duplicate_sent_coverage_blocks_by_default():
     receipt = preflight_recipients(
         [ProposedRecipient("org-1", RecipientRole.TO, "route@example.org")],
