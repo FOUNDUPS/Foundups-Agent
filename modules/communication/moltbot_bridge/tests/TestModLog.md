@@ -2950,9 +2950,10 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 
 - Command: `PYTHONPATH=<isolated temp repo> pytest -q modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py`
 - Status: PASS
-- Result: `11 passed`
+- Result: `12 passed`
 - Coverage:
   - newer explicit provider route overrides stale Contacts evidence;
+  - newer address evidence cannot silently reopen an existing closed routing policy;
   - one-character/hyphen near-match blocks;
   - closed personal route blocks even on exact address;
   - BCC-only route policy enforcement;
