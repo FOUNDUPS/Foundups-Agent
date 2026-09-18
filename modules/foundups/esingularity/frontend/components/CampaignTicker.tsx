@@ -8,7 +8,7 @@ const actions = [
   { label: '市議会', text: '設立準備委員会から福井市議会へのメッセージを読む', href: 'https://yumori.me/vote-no#council' },
   { label: '市長', text: '設立準備委員会から福井市長へのメッセージを読む', href: 'https://yumori.me/vote-no#mayor' },
   { label: '声を届ける', text: '福井市議会・福井市へ連絡する', href: 'https://yumori.me/vote-no#contact' },
-  { label: 'JHR', text: 'UPDATE 9/14｜なぜ福井に「AI交番」が必要なのか｜日本語＋English', href: '/reports/jhr#jhr-002' },
+  { label: 'JHR', text: 'UPDATE 9/17｜JHR #003 計算主権とAI交番｜日本語＋English', href: '/reports/jhr' },
   { label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' },
   { label: 'VISIT', text: '写真で現地を見る', href: 'https://pics.yumori.info' },
   { label: 'LISTEN', text: '九頭竜の音楽を聴く', href: 'https://music.yumori.me' },
