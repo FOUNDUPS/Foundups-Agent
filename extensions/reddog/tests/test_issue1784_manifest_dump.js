@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = path.resolve(__dirname, '..', '..', '..');
 const manifestPath = path.join(repoRoot, 'scripts', 'reddog_backend_manifest.json');
 const registryRelative = 'modules/infrastructure/wre_core/skillz/skills_registry_v2.json';
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
