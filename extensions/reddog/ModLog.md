@@ -1,3 +1,10 @@
+## 2026-09-19 - Concatenate FoundUp brand context during grounding
+
+- Extended the existing registry-driven FoundUp grounding receipt with optional validated brand context.
+- A child brand can resolve conversational aliases while retaining the registered parent FoundUp authority and safe-mutation scope.
+- Added an unrelated synthetic child-brand regression to prove the resolver is generic rather than hard-coded for eSingularity/YUMORI.me.
+- Backend use-time verification rechecks the registry pointer, brand schema, root identity, child identity and canonical brand before accepting the receipt. No new execution authority is introduced. WSP 50/62/95/97/102.
+
 # RedDog ModLog
 
 ## 2026-09-19 - Reconcile WRE Skillz registry backend hash
