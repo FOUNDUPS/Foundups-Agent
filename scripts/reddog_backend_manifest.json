@@ -2630,7 +2630,7 @@
     "modules/infrastructure/wre_core/recursive_improvement/src/wre_integration.py": "f213c65a2c01356efc3b557a82b83e8cc0fe16adf83eaa289d79fefe9fd788ea",
     "modules/infrastructure/wre_core/scripts/generate_test_registry.py": "316dbd5ba3c88c2590759638cf3e6effc6905d75dbc2492f9444a40602b45eb1",
     "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md": "64855a943eea31224ff47c9f3a1bcd0d4365f0aaf8d56f8998430bbe728e2094",
-    "modules/infrastructure/wre_core/skillz/skills_registry_v2.json": "8a696de49bf6b8174476da7aa3afc2983ebca3a4048b6f3889035880159f159c",
+    "modules/infrastructure/wre_core/skillz/skills_registry_v2.json": "8231662cf1b58396acef6acd1836f6cdd6a7d6116321a7072f1fff45b7830980",
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.py": "d55dd9a4ca3156ae1ba6e86bda4b4c2d368c20532ff9d854071f0862aaa944b3",
     "modules/infrastructure/wre_core/skillz/wre_role_skill_loader.py": "2b8e1b8331f2a1af43f7c21a9fa68bec07de337444bb3a0cdfc79685de14882a",
     "modules/infrastructure/wre_core/skillz/wre_skills_loader.py": "f9fc069ac24d298453f8b08c52d0b9c9ffe56215776d119ebb71f96ba880acd0",

@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "last_updated": "2026-09-18T14:00:00+00:00",
-  "total_skills": 30,
+  "total_skills": 32,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -486,6 +486,50 @@
         "WSP 97"
       ],
       "description": "Route YUMORI campaign history versus 0102 learning events and preserve reverse-chronological JST Moshpit integrity"
+    },
+    "fukui_city_procedure": {
+      "location": "modules/foundups/esingularity/skillz/fukui_city_procedure",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.2.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Verify Fukui City and Council procedure, official forms, PPP/PFI, disclosure, procurement, routing and legal handoff"
+    },
+    "yumori_funding_ppp_intelligence": {
+      "location": "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "RESEARCH",
+      "version": "0.1",
+      "promotion_state": "candidate",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Verify live YUMORI grants, subsidies, GX and PPP/PFI opportunities without overstating funding status"
     }
   }
 }

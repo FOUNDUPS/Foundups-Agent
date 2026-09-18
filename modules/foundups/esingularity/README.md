@@ -17,6 +17,17 @@ For “apply the website skill” or “eSingularity skill”, use [esingularity
 
 The WSP 97 workflow also covers bounded history/research, distinct homepage ownership, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the existing FoundUp registry expose it to agent and Red Dog discovery. Skill updates alone do not publish website or form changes.
 
+## Government and correspondence operations skills
+
+YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
+
+- [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.
+- `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.
+- [YUMORI funding / PPP intelligence](skillz/yumori_funding_ppp_intelligence/SKILLz.md): current grant/subsidy/PPP status with primary-source and no-false-funding boundaries.
+- [YUMORI Moshpit](skillz/yumori_moshpit/SKILLz.md): campaign-history versus 0102-learning routing and JST ordering.
+
+The live YUMORI Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
+
 ## Public architecture — one project, two focused sites
 
 YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. Its current council request is **VOTE NO** on demolition preparation; the fixed review-period proposal has been withdrawn. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) for local checkout locations, QR provenance, and the supporting Google Doc.
