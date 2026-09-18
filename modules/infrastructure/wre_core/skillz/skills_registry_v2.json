@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-08-26T00:00:00+00:00",
-  "total_skills": 28,
+  "last_updated": "2026-09-18T00:00:00+00:00",
+  "total_skills": 29,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -9,7 +9,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -19,7 +19,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -29,7 +29,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -39,7 +39,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 77"
@@ -51,7 +51,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 3",
@@ -88,7 +88,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15"
@@ -100,7 +100,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": []
     },
@@ -110,7 +110,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15",
@@ -125,7 +125,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 83",
@@ -141,7 +141,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15",
@@ -157,7 +157,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 80",
@@ -177,7 +177,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 5",
@@ -196,7 +196,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -445,6 +445,25 @@
       ],
       "invocation": "/migrate-imports",
       "description": "Deterministic bulk-import migration prototype; Qwen/Gemma adapters are not bound"
+    },
+    "reddog_recipient_preflight": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_recipient_preflight",
+      "agents": [
+        "qwen",
+        "gemma"
+      ],
+      "intent_type": "DECISION",
+      "version": "1.0.0",
+      "promotion_state": "prototype",
+      "wsp_chain": [
+        "WSP 50",
+        "WSP 73",
+        "WSP 77",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Fail-closed two-pass recipient authorization and provider read-back verification for outbound correspondence"
     }
   }
 }
