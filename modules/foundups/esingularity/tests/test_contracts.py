@@ -98,6 +98,7 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "BLOCKED_ON_OFFICIAL_TEMPLATE" in fukui_text
     assert "BUDGET_PROPOSED -> BUDGET_APPROVED" in fukui_text
     assert "Copy the same media BCC list from last time." in fukui_text
+    assert "Projection tabs such as Media" in fukui_text
 
     funding_text = FUNDING_PPP_SKILL_PATH.read_text(encoding="utf-8")
     assert "name: yumori_funding_ppp_intelligence" in funding_text
