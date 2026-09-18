@@ -247,6 +247,21 @@ assert(interfaceSource.includes(
   'before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation'
 ));
 const current = preflight.runBackendCompatibilityPreflight(repoRoot);
+const registryRelative = 'modules/infrastructure/wre_core/skillz/skills_registry_v2.json';
+const registryBytes = fs.readFileSync(path.join(repoRoot, registryRelative));
+const registryDigest = crypto.createHash('sha256')
+  .update(Buffer.from(registryBytes.toString('utf8').replace(/\r\n/g, '\n'), 'utf8'))
+  .digest('hex');
+const regeneratedManifest = JSON.parse(JSON.stringify(manifest));
+regeneratedManifest.required_runtime_sha256[registryRelative] = registryDigest;
+const regeneratedManifestDigest = crypto.createHash('sha256')
+  .update(JSON.stringify(canonicalize(regeneratedManifest)))
+  .digest('hex');
+console.log(
+  '[issue-1784-diagnostic] reasons=' + JSON.stringify(current.rejection_reasons)
+  + ' registry_sha256=' + registryDigest
+  + ' regenerated_manifest_sha256=' + regeneratedManifestDigest
+);
 assert.strictEqual(current.passed, true);
 assert.strictEqual(current.no_holoindex_query_performed, true);
 assert.strictEqual(current.no_model_call_performed, true);
