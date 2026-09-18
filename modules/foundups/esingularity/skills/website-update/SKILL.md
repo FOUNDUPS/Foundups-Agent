@@ -52,13 +52,13 @@ Apply the WSP 97 loop: research → inspect the exact change → inspect adjacen
 
 | Target | Purpose | Visitor goal | Edit boundary |
 | --- | --- | --- | --- |
-| eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI | `frontend/app/page.tsx` and its necessary dependencies |
-| YUMORI.me / www | Build the wider YUMORI movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
+| eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI.me | `frontend/app/page.tsx` and its necessary dependencies |
+| YUMORI.me / www | Build the wider YUMORI.me movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI.me, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
 | Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and `current-field-status.ts`; verify both consumers |
 
 “Apply the website skill” applies the workflow to the site named in the request or established by the active task. It does not mean redesign both sites. State the target, requested outcome and bounded edit scope briefly before editing. If the target truly cannot be resolved from the request and visible context, ask one short question before a page-specific mutation.
 
-An eSingularity redesign must leave YUMORI.me's content, order and join funnel intact. A YUMORI edit must preserve the project page. Shared CSS, language handling, navigation helpers and hosting can affect both: inspect their consumers, scope page-specific styling and regression-check the other site. Checking the other page does not authorize redesigning it. A shared ticker update intentionally reaches both.
+An eSingularity redesign must leave YUMORI.me's content, order and join funnel intact. A YUMORI.me edit must preserve the project page. Shared CSS, language handling, navigation helpers and hosting can affect both: inspect their consumers, scope page-specific styling and regression-check the other site. Checking the other page does not authorize redesigning it. A shared ticker update intentionally reaches both.
 
 ### Current eSingularity redesign direction — specified, not yet implemented by this skill change
 
@@ -98,7 +98,7 @@ The first test file includes the single-source/both-homepage ticker contract. Fo
 
 If pytest is unavailable, its dependency-free test functions can be invoked directly with `runpy`; label that accurately. Existing suite failures must be compared with the base revision and recorded. Do not remove a ticker assertion merely to make a redesign pass, treat all red CI as harmless, or bypass required merge gates.
 
-For YUMORI landing or shared ticker layout changes, check phone widths (320–390 CSS pixels) and an 11-inch iPad in portrait and landscape (for example 834×1194 and 1194×834), plus desktop. Distinguish viewport simulation from testing actual Safari hardware. Verify the document does not overflow horizontally, the full wordmark and JOIN actions fit, and language controls have their own header slot rather than floating across the ticker. Inspect loaded images and captions; distinguish concept imagery from photographs of completed facilities. Do not infer a broken image merely from an empty hero.
+For YUMORI.me landing or shared ticker layout changes, check phone widths (320–390 CSS pixels) and an 11-inch iPad in portrait and landscape (for example 834×1194 and 1194×834), plus desktop. Distinguish viewport simulation from testing actual Safari hardware. Verify the document does not overflow horizontally, the full wordmark and JOIN actions fit, and language controls have their own header slot rather than floating across the ticker. Inspect loaded images and captions; distinguish concept imagery from photographs of completed facilities. Do not infer a broken image merely from an empty hero.
 
 Ticker speed should be measured in pixels per second, with slower phone/tablet values; a fixed loop duration makes longer announcements race across the screen. Verify a touch-accessible way to stop and read every item, resume behavior, keyboard access, and reduced motion. Check both rendered consumers, including expanded reading mode. If preview is unavailable, record that visual validation remains incomplete; a build is not a visual audit.
 
