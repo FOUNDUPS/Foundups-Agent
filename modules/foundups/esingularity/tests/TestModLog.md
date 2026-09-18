@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-18 — PR lifecycle merge-gate regression
+
+- Extended the existing Moshpit Skillz registry test in `test_contracts.py`; no new test file.
+- The contract now requires explicit rejection of branch-protection-only evidence and forbids merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed.
+- Baseline-unrelated red workflows require independent evidence and a separate owner rather than silent exclusion.
+
 ## 2026-09-18 — YUMORI Moshpit Skillz / Rolodex contract
 
 - Reused `test_contracts.py` after reviewing this TestModLog and the tests README; no duplicate test file was created.
