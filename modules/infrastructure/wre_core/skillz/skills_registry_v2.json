@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-15",
+  "last_updated": "2026-09-19",
   "total_skills": 30,
   "skills": {
     "gemma_pqn_data_processor": {
@@ -9,7 +9,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -19,7 +19,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -29,7 +29,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -39,7 +39,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 77"
@@ -51,7 +51,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 3",
@@ -88,7 +88,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15"
@@ -100,7 +100,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": []
     },
@@ -110,7 +110,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15",
@@ -125,7 +125,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 83",
@@ -141,7 +141,7 @@
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15",
@@ -157,7 +157,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 80",
@@ -177,7 +177,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 5",
@@ -196,7 +196,7 @@
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
@@ -478,11 +478,12 @@
     "yumori_financial_model": {
       "location": "modules/foundups/esingularity/skillz/yumori_financial_model",
       "agents": [
+        "0102",
         "qwen",
         "gemma"
       ],
       "intent_type": "ANALYSIS",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "promotion_state": "prototype",
       "domain": "foundup_operations",
       "wsp_chain": [
@@ -494,7 +495,14 @@
         "WSP 95",
         "WSP 97"
       ],
-      "description": "Audit, recalculate, scenario-test, and export the YUMORI/eSingularity financial model from repository-owned equations without treating generated spreadsheets as calculation authority."
+      "description": "Route Red Dog/0102 to the repository-owned YUMORI.me financial engine for audit, financial-vehicle selection, recalculation, scenario/feasibility funding, debt/DSCR/IRR/NPV, grants-as-scenarios, customer/offtake cash boundaries, and workbook export.",
+      "primary_agent": "0102",
+      "logical_roles": [
+        "REDDOG_INTAKE",
+        "0102_FINANCE_PROXY",
+        "FINANCIAL_MODELER",
+        "FINANCIAL_VERIFIER"
+      ]
     }
   }
 }
