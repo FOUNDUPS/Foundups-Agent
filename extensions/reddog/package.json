@@ -31,6 +31,7 @@
   "scripts": {
     "generate:contract-shards": "node tests/generate_extension_contract_shard_manifest.js --write",
     "check:contract-shards": "node tests/generate_extension_contract_shard_manifest.js --check",
+    "pretest": "python ../../scripts/generate_reddog_backend_manifest.py --write && git -C ../.. diff -- scripts/reddog_backend_manifest.json && false",
     "test": "node tests/run_reddog_test_tier.js fast",
     "test:conversation": "node tests/run_conversation_test_tier.js",
     "test:contract": "node tests/run_reddog_test_tier.js contract",
@@ -66,7 +67,7 @@
       },
       {
         "command": "reddog.clearPrincipalMemexDisclosure",
-        "title": "Clear Principal Memex Disclosure",
+        "title": "Clear One-Use Principal Memex Disclosure",
         "category": "RedDog"
       }
     ],
