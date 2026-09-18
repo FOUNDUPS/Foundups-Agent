@@ -13,3 +13,8 @@ Apply that file as the source of truth. Preserve the strict split:
 - 0102 Moshpit = agent mistakes, repairs, learning and RED DOG candidates.
 
 For interval events, sort by completion/end time. Never let internal agent bookkeeping outrank the latest monk/campaign activity.
+
+
+## PR lifecycle
+
+0102 owns bounded skill PRs through exact-head checks and review, then squash-merges to main and verifies the merge. Routine GitHub mechanics are not handed to 012; escalate only genuine human decisions or permission blockers.
