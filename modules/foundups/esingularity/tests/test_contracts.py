@@ -14,6 +14,8 @@ REGISTRY_PATH = REPO_ROOT / "foundups" / "foundup_registry.json"
 WRE_SKILLS_REGISTRY_PATH = REPO_ROOT / "infrastructure" / "wre_core" / "skillz" / "skills_registry_v2.json"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
+FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
+FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -80,6 +82,42 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     assert not (MODULE_ROOT / "skills" / "yumori-moshpit" / "SKILL.md").exists()
 
 
+def test_yumori_operational_skills_are_registered_and_projected() -> None:
+    registry = load_json(WRE_SKILLS_REGISTRY_PATH)
+    assert registry["total_skills"] == len(registry["skills"])
+
+    fukui = registry["skills"]["fukui_city_procedure"]
+    assert fukui["location"] == "modules/foundups/esingularity/skillz/fukui_city_procedure"
+    assert fukui["primary_agent"] == "0102"
+    assert fukui["intent_type"] == "DECISION"
+
+    funding = registry["skills"]["yumori_funding_ppp_intelligence"]
+    assert funding["location"] == "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence"
+    assert funding["primary_agent"] == "0102"
+    assert funding["intent_type"] == "RESEARCH"
+
+    fukui_text = FUKUI_PROCEDURE_SKILL_PATH.read_text(encoding="utf-8")
+    assert "reddog_recipient_preflight/SKILLz.md" in fukui_text
+    assert "BLOCKED_ON_OFFICIAL_TEMPLATE" in fukui_text
+    assert "BUDGET_PROPOSED -> BUDGET_APPROVED" in fukui_text
+    assert "Copy the same media BCC list from last time." in fukui_text
+    assert "Projection tabs such as Media" in fukui_text
+
+    funding_text = FUNDING_PPP_SKILL_PATH.read_text(encoding="utf-8")
+    assert "name: yumori_funding_ppp_intelligence" in funding_text
+    assert "VERIFIED PROGRAM" in funding_text
+    assert "AWARDED" in funding_text
+
+    for slug, canonical in (
+        ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),
+        ("yumori-funding-ppp-intelligence", "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence/SKILLz.md"),
+    ):
+        for root in (".agents", ".claude"):
+            projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
+            assert canonical in projected
+
+
+
 def test_sites_configuration_and_primary_routes_are_present() -> None:
     hosting = load_json(FRONTEND_ROOT / ".openai" / "hosting.json")
     package = load_json(FRONTEND_ROOT / "package.json")
@@ -107,6 +145,7 @@ def test_existing_ticker_receives_one_deck_notification() -> None:
     assert "https://yumori.me/vote-no#contact" in ticker
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
     assert "href: 'https://yumori.me/'" in status
+
 
 def test_fullscreen_vision_has_ten_japanese_first_slides_and_derived_languages() -> None:
     content = read("content/yumori-vision.ts")
@@ -187,6 +226,7 @@ def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
     assert "再利用の事業性、資金調達、工事費は検証中です。" in vision
     assert "5年売上 約53.7億円" not in vision
     assert "5年累計FCFE 約19.4億円" not in vision
+
 
 def test_existing_public_assets_and_local_sources_remain_present() -> None:
     for asset in (
