@@ -47,6 +47,7 @@ function writeFixture(entities) {
     entities
   }), 'utf8');
   fs.copyFileSync(path.join(root, grounding.REGISTRY_SCHEMA_PATH), path.join(repo, grounding.REGISTRY_SCHEMA_PATH));
+  fs.copyFileSync(path.join(root, grounding.BRAND_CONTEXT_SCHEMA_PATH), path.join(repo, grounding.BRAND_CONTEXT_SCHEMA_PATH));
   for (const entity of entities) {
     if (!entity.module_path || entity.module_path.includes('..')) continue;
     const directory = path.join(repo, entity.module_path);
@@ -158,6 +159,48 @@ for (const prompt of [
   'Review no FoundUp workflow.'
 ]) assert.strictEqual(grounding.resolveFoundupWorkGrounding(root, prompt, rootAuthority).applied, false,
   'generic FoundUp work must not become an unknown identity target: ' + prompt);
+
+const yumoriBrand = grounding.resolveFoundupWorkGrounding(
+  root, 'work on YUMORI.me FoundUp', rootAuthority
+);
+assert.strictEqual(yumoriBrand.passed, true);
+assert.strictEqual(yumoriBrand.foundup_id, 'esingularity_001');
+assert.strictEqual(yumoriBrand.brand_foundup_id, 'yumori_me');
+assert.strictEqual(yumoriBrand.canonical_brand, 'YUMORI.me');
+assert.strictEqual(yumoriBrand.brand_context_path, 'modules/foundups/esingularity/brand_context.json');
+assert(yumoriBrand.evidence_targets.includes('modules/foundups/brand_context.schema.json'));
+assert(yumoriBrand.evidence_targets.includes('modules/foundups/esingularity/brand_context.json'));
+
+const brandedEntity = fixtureEntity('alpha_brand', 'Alpha Project', 'ALPHA', 'alpha_brand');
+brandedEntity.brand_context_path = 'modules/foundups/alpha_brand/brand_context.json';
+const brandedRepo = writeFixture([brandedEntity]);
+fs.writeFileSync(path.join(brandedRepo, brandedEntity.brand_context_path), JSON.stringify({
+  schema_version: '1.0.0',
+  foundup_id: 'alpha_brand',
+  canonical_brand: 'Alpha.example',
+  aliases: ['Alpha'],
+  public_urls: ['https://alpha.example/'],
+  default_locale: 'en',
+  rules: ['Parent brand rule.'],
+  child_foundups: [{
+    foundup_id: 'harbor_me',
+    canonical_brand: 'HARBOR.me',
+    relationship: 'movement',
+    aliases: ['Harbor', 'HARBOR.me'],
+    public_urls: ['https://harbor.example/'],
+    rules: ['Render child brand as HARBOR.me.']
+  }],
+  authority_boundary: 'BRANDING_ONLY_NO_EXECUTION_AUTHORITY'
+}) + '\n', 'utf8');
+const harbor = grounding.resolveFoundupWorkGrounding(
+  brandedRepo, 'work on HARBOR.me FoundUp', authority(brandedRepo)
+);
+assert.strictEqual(harbor.passed, true);
+assert.strictEqual(harbor.foundup_id, 'alpha_brand');
+assert.strictEqual(harbor.brand_foundup_id, 'harbor_me');
+assert.strictEqual(harbor.canonical_brand, 'HARBOR.me');
+assert(harbor.safe_mutation_surfaces.includes('modules/foundups/alpha_brand/**'),
+  'child brand identity must not create a second authority scope');
 
 const gotJunk = grounding.resolveFoundupWorkGrounding(root, 'continue work on GotJunk FoundUp', rootAuthority);
 assert.strictEqual(gotJunk.passed, true);
