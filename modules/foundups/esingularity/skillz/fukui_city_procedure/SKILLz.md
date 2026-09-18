@@ -1,6 +1,6 @@
 ---
 name: fukui_city_procedure
-description: Verify and execute Fukui City / Fukui City Council procedures for YUMORI and Sukatto Land without relearning or guessing forms, routes, deadlines, or procurement state.
+description: Verify and execute Fukui City / Fukui City Council procedures for YUMORI.me and Sukatto Land without relearning or guessing forms, routes, deadlines, or procurement state.
 version: 0.2.0
 author: 0102
 agents: [0102, qwen, gemma]
@@ -21,7 +21,16 @@ evals:
   - routing_consent_enforced
 ---
 
-# Fukui City procedure — YUMORI / Sukatto Land
+# Fukui City procedure — YUMORI.me / Sukatto Land
+
+## FoundUp brand context
+
+Brand identity is not owned by this Skillz. Before applying it, use the
+registry-grounded `brand_context_path`; for this module that is
+`modules/foundups/esingularity/brand_context.json`. Use the active parent/child
+brand supplied by grounding. Do not redefine canonical spelling, aliases,
+domains, or brand copy here. Brand inheritance is identity-only and grants no
+execution, token, routing, financial, credential, or governance authority.
 
 ## Purpose
 
@@ -34,7 +43,7 @@ This skill prevents two opposite failures:
 2. treating remembered procedure as current after the City, Council, form, deadline,
    office, or case state has changed.
 
-Durable procedure lives here. Live case state remains in Gmail, Drive, the YUMORI
+Durable procedure lives here. Live case state remains in Gmail, Drive, the YUMORI.me
 Contacts / Correspondence Routing sheet, Email Log, Action Queue, Moshpit, and current
 official websites.
 
@@ -46,7 +55,7 @@ For consequential current procedure, verify in this order:
 2. applicable ordinance, rule, law, council rule, or e-Gov source;
 3. current written direction from the responsible organizational office;
 4. current Cabinet Office / national PPP-PFI guidance when relevant;
-5. verified YUMORI Gmail / Drive case history;
+5. verified YUMORI.me Gmail / Drive case history;
 6. secondary reporting only as context.
 
 If authoritative sources conflict, stop and surface the conflict. Do not choose the
@@ -123,7 +132,7 @@ Discovery anchors:
 - https://www.city.fukui.lg.jp/sisei/plan/reform/p015778_d/fil/PFIgaiyou.pdf
 
 The published framework may recognize private proposals, simplified review, detailed
-review, VFM, or other PPP/PFI steps. That does not prove that a specific YUMORI package
+review, VFM, or other PPP/PFI steps. That does not prove that a specific YUMORI.me package
 has been formally accepted.
 
 For Sukatto Land, obtain in writing:
@@ -205,7 +214,7 @@ repository-owned recipient guard:
 The procedure skill never authorizes a recipient by itself.
 
 Before finalizing To/CC/BCC:
-1. resolve every intended identity against the live YUMORI Contacts sheet;
+1. resolve every intended identity against the live YUMORI.me Contacts sheet;
 2. read the current Correspondence Routing row for the same Contact ID;
 3. distinguish person vs organization route;
 4. enforce route closure / BCC-only / organization-only policy;
@@ -253,7 +262,7 @@ litigation posture -> `ESCALATE_TO_COUNSEL`.
 8. If correspondence is involved, run `reddog_recipient_preflight`.
 9. Execute only within granted authority; expose required physical/signature human steps.
 10. Verify receipt / docket / MID-TID / appointment / provider read-back.
-11. Reconcile Gmail -> Email Log -> Contacts -> Action Queue -> YUMORI Moshpit where applicable.
+11. Reconcile Gmail -> Email Log -> Contacts -> Action Queue -> YUMORI.me Moshpit where applicable.
 12. Promote a genuinely reusable new procedure rule back into this skill.
 
 ## Required analysis output
