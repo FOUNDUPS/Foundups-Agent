@@ -1,5 +1,5 @@
 {
-  "$schema": "../../brand_context.schema.json",
+  "$schema": "../brand_context.schema.json",
   "schema_version": "1.0.0",
   "foundup_id": "esingularity_001",
   "canonical_brand": "eSingularity.ai",
