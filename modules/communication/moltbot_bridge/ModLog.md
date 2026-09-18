@@ -1,3 +1,9 @@
+## 2026-09-19: FoundUp branding becomes grounded identity data
+
+- Updated RedDog Operations so named-FoundUp work loads optional registry `brand_context_path` before Skillz selection.
+- Child brand inheritance is explicitly identity-only and cannot widen token, routing, credential, finance, safe-mutation, or governance authority.
+- The existing registered-FoundUp target verifier now fails closed on stale, forged, schema-invalid, wrong-parent, or invented-child brand context. WSP 00/15/22/50/95/97.
+
 ## 2026-09-18: Fail closed on sent-only recipient evidence
 
 - Hardened the existing RedDog recipient preflight rather than creating a YUMORI-specific duplicate. Route evidence now carries an explicit verification bit; current but unverified address history returns `UNVERIFIED_ROUTE` and blocks the whole transaction.
