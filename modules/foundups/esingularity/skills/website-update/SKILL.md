@@ -9,28 +9,36 @@ Owner: `esingularity_001` in `FOUNDUPS/Foundups-Agent`.
 Canonical instructions: `modules/foundups/esingularity/skills/website-update/SKILL.md`.
 All paths below are repository-relative unless explicitly module-relative.
 
-## Shared branding and language — both sites
+## Shared brand context and language — both sites
 
-012's September 13 branding decisions apply to eSingularity.ai and YUMORI.me, including shared ticker items, participation actions, report links and language variants. Context supports the brand; it does not replace it. Read this section when applying either the eSingularity or YUMORI.me skill, including copy-only reviews.
+Do not define or rename FoundUp branding in this Skill. Load the current
+`brand_context_path` from the canonical `foundup_registry.json`, then apply
+`modules/foundups/esingularity/brand_context.json`. The registry-grounded
+context currently resolves the project identity and its child movement identity,
+including canonical spelling, aliases, public domains, default locale, JOIN copy,
+and the bilingual guardian lockup.
 
-| Use | Canonical wording |
-| --- | --- |
-| Movement/site brand | `YUMORI.me` — preserve uppercase YUMORI and lowercase `.me` |
-| Participation button | `JOIN YUMORI.me / 湯守になる` |
-| Separate participation explanation | `準備委員会への参加はこちら` |
-| Bilingual identity lockup | `私は湯守！ / me GUARDIAN! = YUMORI.me` |
-| Japanese report link | `ジャパン・ハイパースケーラー・レポート（JHR）を読む →` |
-| Separate report explanation | `日本の大規模データセンター開発と、地域の選択肢を知る` |
-| English report name | `Japan Hyperscaler Report (JHR)` |
+This Skill owns website behavior around that identity, not the identity itself:
 
-- Keep `.me` in branded wordmarks, headings, link labels, participation buttons and campaign-name references on both sites. Natural references to people as `湯守` need no domain suffix. Lowercase URL hosts, existing code identifiers, and historical quotations are not branding errors; do not mass-rename them.
-- `me GUARDIAN!` is intentional brand language. Preserve lowercase `me`, uppercase `GUARDIAN!`, and Japanese first in the bilingual lockup. Do not silently replace it with `I am a guardian.` as an English grammar correction. Ordinary explanatory prose should still use natural English. The lockup and participation button are different uses; do not cram both into every button.
-- In Japanese explanatory copy, write hyperscaler as `ハイパースケーラー`. Introduce unfamiliar terms in supporting text without replacing the report name with a generic data-center label. Keep `JHR` visible; retain the English series name in English.
-- Japanese remains the default. The approved `JOIN YUMORI.me` and `me GUARDIAN!` brand phrases are deliberate bilingual exceptions, not untranslated UI. Translate all other affected headings, body copy, buttons, captions and current announcements completely when English is selected; changing `html.lang` alone is insufficient.
-- Preserve `eSingularity.ai` as the project identity and `YUMORI.info` as its information alias. Shared branding does not merge the two homepages or make every action a link to the movement homepage. Keep the verified signup destination for JOIN, `/reports/jhr` for JHR, and an absolute `https://esingularity.ai/` URL for project links from YUMORI.me.
-- On narrow screens, wrap or stack the brand and its supporting line without clipping `.me`, `GUARDIAN!` or the report name. Do not concatenate replacement suggestions into duplicated text such as `湯守になる湯守になる`.
+- preserve the separate eSingularity project homepage and child movement homepage;
+- use the active grounded child brand for movement headings, buttons, ticker copy,
+  and participation copy instead of hard-coding a second spelling here;
+- natural references to a human role may follow the exception declared in the
+  brand context;
+- lowercase URL hosts, internal code identifiers, and historical quotations are
+  not automatically branding errors;
+- Japanese remains the default unless the active brand context changes it;
+- translate all non-brand UI completely when another locale is selected;
+- on narrow screens, do not clip the active brand, guardian lockup, or report name.
 
-For future copy changes, compare the affected rendered brand labels in Japanese and English on the requested site and any shared consumers. This is a maintained specification, not evidence that all live labels or translations already comply. A request to update this skill alone does not authorize a site, form, DNS or hosting change.
+JHR remains a website/report label rather than a FoundUp brand. Preserve:
+`ジャパン・ハイパースケーラー・レポート（JHR）を読む →`,
+`日本の大規模データセンター開発と、地域の選択肢を知る`, and
+`Japan Hyperscaler Report (JHR)` where their current surfaces require them.
+
+For future branding changes, edit the FoundUp brand-context file once and run the
+brand-context regressions. Do not sweep every Skillz file for replacement text.
+A brand-context edit alone does not authorize a site, form, DNS, or hosting change.
 
 ## Research before editing — WSP 97
 
