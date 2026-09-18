@@ -37,6 +37,9 @@
       ],
       "rules": [
         "Render the project-facing movement brand as YUMORI.me: uppercase YUMORI and lowercase .me.",
+        "Use JOIN YUMORI.me / 湯守になる for the canonical participation button when that button is appropriate.",
+        "Use 私は湯守！ / me GUARDIAN! = YUMORI.me for the bilingual identity lockup.",
+        "Japanese remains the default locale; approved YUMORI.me and me GUARDIAN! phrases are deliberate bilingual brand exceptions.",
         "Natural references to a person serving as a 湯守 may omit the .me suffix.",
         "Do not mass-rename lowercase URL hosts, historical quotations, or internal code identifiers such as yumori_*."
       ]
