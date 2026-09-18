@@ -43,7 +43,8 @@
       "invite_required": true,
       "notes": "Cloud Run deployment via GitHub Actions. Launch readiness: conditional.",
       "audit_date": "2026-05-18",
-      "auditor": "W9"
+      "auditor": "W9",
+      "brand_context_path": "modules/foundups/gotjunk/brand_context.json"
     },
     {
       "foundup_id": "voteballots",

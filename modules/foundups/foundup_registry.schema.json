@@ -227,6 +227,10 @@
           "pattern": "^[A-Z]+$",
           "description": "Token symbol if EXISTS, null otherwise"
         },
+        "brand_context_path": {
+          "type": ["string", "null"],
+          "description": "Optional repo-relative path to the FoundUp brand context. Branding/identity only; no execution authority."
+        },
         "evidence_docs": {
           "type": "array",
           "items": { "type": "string" },

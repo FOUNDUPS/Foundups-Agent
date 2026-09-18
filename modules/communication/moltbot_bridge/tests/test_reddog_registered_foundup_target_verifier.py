@@ -14,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_registered_foundup_target_v
 ROOT = Path(__file__).resolve().parents[4]
 REGISTRY = ROOT / "modules/foundups/foundup_registry.json"
 SCHEMA = ROOT / "modules/foundups/foundup_registry.schema.json"
+BRAND_SCHEMA = ROOT / "modules/foundups/brand_context.schema.json"
 
 
 def _digest(value):
@@ -44,6 +45,46 @@ def _receipt() -> dict:
         "registry_schema_digest": _digest(schema_bytes),
         "registry_entity_digest": _digest(entity),
         "manifest_path": entity["manifest_path"],
+        "evidence_digests": evidence,
+        "safe_mutation_surfaces": manifest_data["build_contract"]["safe_mutation_surface"],
+        "repo_root_digest": _digest(str(ROOT.resolve())),
+        "repo_head_sha": __import__("subprocess").check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
+        "grants_authority": False,
+    }
+    return {**payload, "receipt_id": _digest(payload)}
+
+
+def _brand_receipt() -> dict:
+    registry_bytes, schema_bytes = REGISTRY.read_bytes(), SCHEMA.read_bytes()
+    registry = json.loads(registry_bytes)
+    entity = next(item for item in registry["entities"] if item["foundup_id"] == "esingularity_001")
+    manifest = ROOT / entity["manifest_path"]
+    manifest_data = json.loads(manifest.read_bytes())
+    brand_path = ROOT / entity["brand_context_path"]
+    brand = json.loads(brand_path.read_bytes())
+    evidence = [
+        {"path": "modules/foundups/foundup_registry.json", "content_digest": _digest(registry_bytes)},
+        {"path": "modules/foundups/foundup_registry.schema.json", "content_digest": _digest(schema_bytes)},
+        {"path": entity["manifest_path"], "content_digest": _digest(manifest.read_bytes())},
+        {"path": "modules/foundups/brand_context.schema.json", "content_digest": _digest(BRAND_SCHEMA.read_bytes())},
+        {"path": entity["brand_context_path"], "content_digest": _digest(brand_path.read_bytes())},
+    ]
+    child = next(item for item in brand["child_foundups"] if item["foundup_id"] == "yumori_me")
+    payload = {
+        "schema_version": "registered_foundup_target_receipt.v1",
+        "applied": True,
+        "passed": True,
+        "rejection_reasons": [],
+        "foundup_id": "esingularity_001",
+        "registry_digest": _digest(registry_bytes),
+        "registry_schema_digest": _digest(schema_bytes),
+        "registry_entity_digest": _digest(entity),
+        "manifest_path": entity["manifest_path"],
+        "brand_context_path": entity["brand_context_path"],
+        "brand_foundup_id": child["foundup_id"],
+        "canonical_brand": child["canonical_brand"],
         "evidence_digests": evidence,
         "safe_mutation_surfaces": manifest_data["build_contract"]["safe_mutation_surface"],
         "repo_root_digest": _digest(str(ROOT.resolve())),
@@ -125,3 +166,17 @@ def test_claim_without_receipt_fails() -> None:
     assert verify_registered_foundup_target(
         ROOT, None, selection_receipt={"foundup_id": "trade"}
     ) == ("registered_foundup_target_receipt_missing",)
+
+
+def test_brand_context_binding_passes_and_child_brand_cannot_forge_authority() -> None:
+    receipt = _brand_receipt()
+    assert verify_registered_foundup_target(
+        ROOT, receipt, selection_receipt=_selection(receipt), work_order=_work_order(receipt)
+    ) == ()
+
+    forged = deepcopy(receipt)
+    forged["brand_foundup_id"] = "invented_child"
+    forged["canonical_brand"] = "INVENTED.me"
+    forged = _rehash(forged)
+    reasons = verify_registered_foundup_target(ROOT, forged)
+    assert "registered_foundup_target_brand_selection_mismatch" in reasons

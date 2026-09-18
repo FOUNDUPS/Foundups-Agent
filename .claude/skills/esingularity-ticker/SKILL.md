@@ -1,6 +1,6 @@
 ---
 name: esingularity-ticker
-description: Update the eSingularity campaign ticker and the monk's public field status, including location, attendance window, invitations and YUMORI links. Use for requests to update the ticker; excludes broadcast and exchange-price tickers.
+description: Update the eSingularity campaign ticker and the monk's public field status, including location, attendance window, invitations and YUMORI.me links. Use for requests to update the ticker; excludes broadcast and exchange-price tickers.
 ---
 
 # eSingularity ticker
@@ -10,7 +10,7 @@ Module: `modules/foundups/esingularity`.
 
 For wider website edits or redesigns, apply `modules/foundups/esingularity/skills/website-update/SKILL.md`; it requires preserving both ticker consumers.
 
-For every ticker copy update, read that workflow's **Shared branding and language — both sites** section. Keep YUMORI.me and JHR brand labels intact, put context alongside them, and preserve Japanese-first and complete English copy across both consumers. Do not maintain separate branding rules in this ticker skill.
+For every ticker copy update, load the resolved FoundUp `brand_context_path` and apply the active parent/child identity. Keep JHR labels intact and preserve Japanese-first and complete English copy across both consumers. Do not maintain separate FoundUp branding rules in this ticker skill.
 
 ## Locate and update
 
@@ -19,7 +19,7 @@ Read repository instructions and the module README, INTERFACE and recent ModLog 
 - Edit `frontend/content/current-field-status.ts`: this is the single source for `currentFieldStatus`.
 - `frontend/components/CampaignTicker.tsx` renders it as the existing LIVE action, twice for the scrolling loop. Preserve its other actions and links. Verify both `frontend/app/page.tsx` (`<CampaignTicker />`) and `frontend/app/yumori/page.tsx` (`<CampaignTicker movement />`) mount this same component. Both sites must update from the same status object, never copied ticker text. The movement option keeps the ticker in normal flow and resolves project-section links to eSingularity.ai.
 - Keep updatedAt, updatedLabelJa, locationJa, tickerJa, detailJa, detailEn and href consistent. Use an explicit calendar date and Japan time (`+09:00`), including the stated end time in visible copy. Never infer a recurring appearance from one visit. The present implementation does not automatically expire the LIVE entry; do not claim otherwise.
-- Japanese is primary. Refer to the monk in third person. Normalize obvious speech-recognition errors such as “Morty” or “youMorty” to YUMORI when campaign context establishes that meaning.
+- Japanese is primary. Refer to the monk in third person. Normalize obvious speech-recognition errors such as “Morty” or “youMorty” to YUMORI.me when campaign context establishes that meaning.
 - Use the location and giveaways confirmed by 012. Do not identify an unknown building across the street, invent stock counts or carry old City Hall/flyer details into a new event.
 - Follow the requested destination: YUMORI.info is the project-information redirect to eSingularity.ai; YUMORI.me is the separate movement/join page. Verify an unfamiliar domain such as eSingularity.org before assigning it a new role.
 

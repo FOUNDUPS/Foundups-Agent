@@ -47,6 +47,7 @@ function writeFixture(entities) {
     entities
   }), 'utf8');
   fs.copyFileSync(path.join(root, grounding.REGISTRY_SCHEMA_PATH), path.join(repo, grounding.REGISTRY_SCHEMA_PATH));
+  fs.copyFileSync(path.join(root, grounding.BRAND_CONTEXT_SCHEMA_PATH), path.join(repo, grounding.BRAND_CONTEXT_SCHEMA_PATH));
   for (const entity of entities) {
     if (!entity.module_path || entity.module_path.includes('..')) continue;
     const directory = path.join(repo, entity.module_path);
@@ -108,6 +109,9 @@ assert.strictEqual(trade.applied, true);
 assert.strictEqual(trade.passed, true);
 assert.strictEqual(trade.foundup_id, 'trade');
 assert.strictEqual(trade.module_path, 'modules/foundups/trade');
+assert.strictEqual(trade.brand_foundup_id, 'trade');
+assert.strictEqual(trade.canonical_brand, 'Trade');
+assert.strictEqual(trade.brand_context_path, null);
 assert(trade.evidence_targets.includes('modules/foundups/foundup_registry.json'));
 assert(trade.evidence_targets.includes('modules/foundups/foundup_registry.schema.json'));
 assert(trade.evidence_targets.includes('modules/foundups/trade/foundup_manifest.json'));
@@ -158,6 +162,48 @@ for (const prompt of [
   'Review no FoundUp workflow.'
 ]) assert.strictEqual(grounding.resolveFoundupWorkGrounding(root, prompt, rootAuthority).applied, false,
   'generic FoundUp work must not become an unknown identity target: ' + prompt);
+
+const yumoriBrand = grounding.resolveFoundupWorkGrounding(
+  root, 'work on YUMORI.me FoundUp', rootAuthority
+);
+assert.strictEqual(yumoriBrand.passed, true);
+assert.strictEqual(yumoriBrand.foundup_id, 'esingularity_001');
+assert.strictEqual(yumoriBrand.brand_foundup_id, 'yumori_me');
+assert.strictEqual(yumoriBrand.canonical_brand, 'YUMORI.me');
+assert.strictEqual(yumoriBrand.brand_context_path, 'modules/foundups/esingularity/brand_context.json');
+assert(yumoriBrand.evidence_targets.includes('modules/foundups/brand_context.schema.json'));
+assert(yumoriBrand.evidence_targets.includes('modules/foundups/esingularity/brand_context.json'));
+
+const brandedEntity = fixtureEntity('alpha_brand', 'Alpha Project', 'ALPHA', 'alpha_brand');
+brandedEntity.brand_context_path = 'modules/foundups/alpha_brand/brand_context.json';
+const brandedRepo = writeFixture([brandedEntity]);
+fs.writeFileSync(path.join(brandedRepo, brandedEntity.brand_context_path), JSON.stringify({
+  schema_version: '1.0.0',
+  foundup_id: 'alpha_brand',
+  canonical_brand: 'Alpha.example',
+  aliases: ['Alpha'],
+  public_urls: ['https://alpha.example/'],
+  default_locale: 'en',
+  rules: ['Parent brand rule.'],
+  child_foundups: [{
+    foundup_id: 'harbor_me',
+    canonical_brand: 'HARBOR.me',
+    relationship: 'movement',
+    aliases: ['Harbor', 'HARBOR.me'],
+    public_urls: ['https://harbor.example/'],
+    rules: ['Render child brand as HARBOR.me.']
+  }],
+  authority_boundary: 'BRANDING_ONLY_NO_EXECUTION_AUTHORITY'
+}) + '\n', 'utf8');
+const harbor = grounding.resolveFoundupWorkGrounding(
+  brandedRepo, 'work on HARBOR.me FoundUp', authority(brandedRepo)
+);
+assert.strictEqual(harbor.passed, true);
+assert.strictEqual(harbor.foundup_id, 'alpha_brand');
+assert.strictEqual(harbor.brand_foundup_id, 'harbor_me');
+assert.strictEqual(harbor.canonical_brand, 'HARBOR.me');
+assert(harbor.safe_mutation_surfaces.includes('modules/foundups/alpha_brand/**'),
+  'child brand identity must not create a second authority scope');
 
 const gotJunk = grounding.resolveFoundupWorkGrounding(root, 'continue work on GotJunk FoundUp', rootAuthority);
 assert.strictEqual(gotJunk.passed, true);
@@ -303,9 +349,11 @@ assert(!sensitive.evidence_targets.some((item) => item === '.env' || item.includ
   'sensitive paths must never become grounding evidence');
 
 const source = fs.readFileSync(modulePath, 'utf8');
+const brandSource = fs.readFileSync(path.join(root, 'extensions', 'reddog', 'foundup_brand_context.js'), 'utf8');
 const runtimeSource = fs.readFileSync(runtimePath, 'utf8');
 const phraseSource = fs.readFileSync(path.join(root, 'extensions', 'reddog', 'foundup_target_phrase.js'), 'utf8');
 assert(source.split(/\r?\n/).length <= 200, 'resolver exceeds WSP_62 file limit');
+assert(brandSource.split(/\r?\n/).length <= 200, 'brand-context helper exceeds WSP_62 file limit');
 assert(runtimeSource.split(/\r?\n/).length <= 200, 'runtime binding exceeds WSP_62 file limit');
 assert(phraseSource.split(/\r?\n/).length <= 200, 'target phrase parser exceeds WSP_62 file limit');
 assert(fs.readFileSync(path.join(root, 'extensions', 'reddog', 'json_schema_subset_validator.js'), 'utf8')
@@ -313,6 +361,7 @@ assert(fs.readFileSync(path.join(root, 'extensions', 'reddog', 'json_schema_subs
 assert(!/\b(?:trade|gotjunk)\b/i.test(source), 'production resolver must not hard-code FoundUp names');
 assert(!/\b(?:trade|gotjunk)\b/i.test(phraseSource), 'target parser must not hard-code FoundUp names');
 assert(!/child_process|\bexec(?:File|Sync)?\b|\bspawn(?:Sync)?\b|\bsubprocess\b/.test(source));
+assert(!/child_process|\bexec(?:File|Sync)?\b|\bspawn(?:Sync)?\b|\bsubprocess\b/.test(brandSource));
 assert(!/child_process|\bexec(?:File|Sync)?\b|\bspawn(?:Sync)?\b|\bsubprocess\b/.test(runtimeSource));
 
 console.log('PASS: registered FoundUp work grounding is generic, deterministic, and fail-closed');

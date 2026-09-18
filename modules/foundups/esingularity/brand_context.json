@@ -1,0 +1,49 @@
+{
+  "$schema": "../brand_context.schema.json",
+  "schema_version": "1.0.0",
+  "foundup_id": "esingularity_001",
+  "canonical_brand": "eSingularity.ai",
+  "aliases": [
+    "eSingularity",
+    "eSingularity.ai",
+    "Project eSingularity",
+    "Sukatto Land Kuzuryu",
+    "旧すかっとランド九頭竜"
+  ],
+  "public_urls": [
+    "https://esingularity.ai/",
+    "https://yumori.info/"
+  ],
+  "default_locale": "ja",
+  "rules": [
+    "eSingularity.ai is the project and vision identity.",
+    "YUMORI.info remains an information alias for eSingularity.ai.",
+    "Brand context supplies identity and copy rules only; it never grants execution, token, routing, financial, or governance authority."
+  ],
+  "child_foundups": [
+    {
+      "foundup_id": "yumori_me",
+      "canonical_brand": "YUMORI.me",
+      "relationship": "movement_and_preparatory_committee",
+      "aliases": [
+        "YUMORI",
+        "YUMORI.me",
+        "Yumori",
+        "湯守"
+      ],
+      "public_urls": [
+        "https://yumori.me/",
+        "https://www.yumori.me/"
+      ],
+      "rules": [
+        "Render the project-facing movement brand as YUMORI.me: uppercase YUMORI and lowercase .me.",
+        "Use JOIN YUMORI.me / 湯守になる for the canonical participation button when that button is appropriate.",
+        "Use 私は湯守！ / me GUARDIAN! = YUMORI.me for the bilingual identity lockup.",
+        "Japanese remains the default locale; approved YUMORI.me and me GUARDIAN! phrases are deliberate bilingual brand exceptions.",
+        "Natural references to a person serving as a 湯守 may omit the .me suffix.",
+        "Do not mass-rename lowercase URL hosts, historical quotations, or internal code identifiers such as yumori_*."
+      ]
+    }
+  ],
+  "authority_boundary": "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+}

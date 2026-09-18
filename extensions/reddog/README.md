@@ -628,7 +628,10 @@ query-time repair and editor-side indexing remain forbidden.
 
 Version 0.4.46 resolves named FoundUp work through the canonical registry and
 requires current registry, manifest, module, Skillz, and status evidence before
-Fusion. Identity and safe mutation scope remain bound through continuity,
+Fusion. When a registry entry declares `brand_context_path`, the current brand
+schema/context also become mandatory grounding evidence. Parent and child brand
+identity can be concatenated into the receipt, but branding never widens the
+registered FoundUp's execution or safe-mutation authority. Identity and safe mutation scope remain bound through continuity,
 wardrobe, work-order, WRE, OpenClaw, and resident-intent handoffs. The generic
 grounding receipt grants no execution authority. The checked-in JSON schema is
 evaluated directly, dirty evidence is labeled as workspace-current, and every

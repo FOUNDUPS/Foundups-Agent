@@ -8,7 +8,7 @@ Canonical module: `modules/foundups/esingularity/jhr`
 Primary public surface: `eSingularity.ai`
 Canonical movement links: `https://yumori.me/` and `https://yumori.info/`
 
-For public series names, website report links and movement calls to action, read **Shared branding and language — both sites** in `modules/foundups/esingularity/skills/website-update/SKILL.md`. That section owns the Japanese katakana JHR title and YUMORI.me branding; explanatory context must not replace either brand. This reference does not change the research or publication gate below.
+For movement calls to action, load the resolved FoundUp `brand_context_path`; canonical eSingularity/YUMORI.me identity comes from that context. JHR series naming remains owned by this report workflow and its website/report contract; explanatory context must not replace either identity. This reference does not change the research or publication gate below.
 
 ## Objective
 

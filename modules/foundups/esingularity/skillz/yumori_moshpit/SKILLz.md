@@ -1,6 +1,6 @@
 ---
 name: yumori_moshpit
-description: Route YUMORI campaign events and 0102 learning events to the correct Moshpit, preserve reverse-chronological JST campaign history, and verify ledger structure after writes.
+description: Route YUMORI.me campaign events and 0102 learning events to the correct Moshpit, preserve reverse-chronological JST campaign history, and verify ledger structure after writes.
 version: 0.1.0
 author: 0102
 agents: [0102, qwen, gemma]
@@ -19,20 +19,29 @@ evals:
   - privacy_bounded_campaign_logging
 ---
 
-# YUMORI Moshpit
+# YUMORI.me Moshpit
+
+## FoundUp brand context
+
+Brand identity is not owned by this Skillz. Before applying it, use the
+registry-grounded `brand_context_path`; for this module that is
+`modules/foundups/esingularity/brand_context.json`. Use the active parent/child
+brand supplied by grounding. Do not redefine canonical spelling, aliases,
+domains, or brand copy here. Brand inheritance is identity-only and grants no
+execution, token, routing, financial, credential, or governance authority.
 
 ## Purpose
 
 Maintain two distinct logs without relying on chat memory:
 
-- **YUMORI Moshpit** = campaign history and monk activity.
+- **YUMORI.me Moshpit** = campaign history and monk activity.
 - **0102 Moshpit** = agent operations, errors, repairs, confidence failures, reusable rules, and RED DOG CANDIDATE lessons.
 
 Do not duplicate an event into both logs unless the same campaign event also produced a meaningful agent-learning incident.
 
 ## Event classification
 
-Write to **YUMORI Moshpit** when the event materially answers “what happened in the campaign?” Examples:
+Write to **YUMORI.me Moshpit** when the event materially answers “what happened in the campaign?” Examples:
 
 - monk field activity, protest, meeting, banner/flyer work;
 - substantive stakeholder reply;
@@ -55,7 +64,7 @@ Routine successful checks and ordinary bookkeeping do not belong in 0102 Moshpit
 
 ## Ordering rule
 
-YUMORI Moshpit is grouped by Asia/Tokyo calendar date and is **reverse chronological within each day**.
+YUMORI.me Moshpit is grouped by Asia/Tokyo calendar date and is **reverse chronological within each day**.
 
 1. Ensure exactly one date anchor: `YYYY-MM-DD — DAY START`.
 2. Insert accepted campaign events below that anchor.
@@ -67,18 +76,18 @@ YUMORI Moshpit is grouped by Asia/Tokyo calendar date and is **reverse chronolog
 
 ## Campaign-vs-agent boundary
 
-A verified outbound email can belong in YUMORI Moshpit when it materially advances the campaign, even though the transaction also lives in Email Log.
+A verified outbound email can belong in YUMORI.me Moshpit when it materially advances the campaign, even though the transaction also lives in Email Log.
 
 Pure no-send escalation, queue reconciliation, formula repair, integrity checks, or operator telemetry belong in 0102 Moshpit, not the campaign timeline, unless 012 explicitly asks to promote the event into campaign history.
 
-Material external replies and procedural outcomes stay in YUMORI Moshpit because they change the campaign path.
+Material external replies and procedural outcomes stay in YUMORI.me Moshpit because they change the campaign path.
 
 ## Evidence and privacy
 
 - Use Asia/Tokyo event times.
 - For Gmail actions, only claim SENT after provider Sent verification.
 - Keep stable message/thread IDs when useful internally.
-- Do not expose private addresses, BCC, full email bodies, account-security details, or unrelated technical alerts in YUMORI Moshpit/public Git.
+- Do not expose private addresses, BCC, full email bodies, account-security details, or unrelated technical alerts in YUMORI.me Moshpit/public Git.
 - Mark monk-reported activity as `REPORTED_BY_012` unless independently verified.
 - Distinguish verified facts from pending/unknown details.
 
@@ -86,7 +95,7 @@ Material external replies and procedural outcomes stay in YUMORI Moshpit because
 
 Before editing:
 
-1. Read the current top of YUMORI Moshpit.
+1. Read the current top of YUMORI.me Moshpit.
 2. Locate today’s date anchor.
 3. Classify the event as CAMPAIGN, AGENT_INTERNAL, or BOTH.
 4. Compute effective event time.
@@ -108,7 +117,7 @@ If the write reveals a structural weakness, append one concise entry to the priv
 
 ## Scheduled correspondence integration
 
-The live YUMORI correspondence operator should invoke this classification contract after any material campaign correspondence event. Its scheduled prompt may embed the core boundary as a fail-safe, but this Skillz document is the repository-owned reusable contract.
+The live YUMORI.me correspondence operator should invoke this classification contract after any material campaign correspondence event. Its scheduled prompt may embed the core boundary as a fail-safe, but this Skillz document is the repository-owned reusable contract.
 
 ## PR lifecycle ownership
 

@@ -29,21 +29,21 @@ const second = surface.runVsceList();
 assert.deepStrictEqual(second, first, 'two vsce listings must be byte-order stable');
 assert.strictEqual(new Set(first).size, first.length, 'package surface must not contain duplicates');
 assert.deepStrictEqual([...first].sort(), surface.EXPECTED_PACKAGE_FILES);
-assert.strictEqual(first.length, 67);
+assert.strictEqual(first.length, 68);
 const receipt = surface.packageSurfaceReceipt(first);
 const eol = surface.packageLineEndingPolicy(first);
-assert.strictEqual(receipt.file_count, 67);
+assert.strictEqual(receipt.file_count, 68);
 assert.strictEqual(receipt.raw_byte_cap, 1024 * 1024);
 assert.strictEqual(receipt.within_cap, true);
 assert.strictEqual(eol.schema_version, 'reddog_package_eol_policy.v1');
 assert.strictEqual(eol.text_eol, 'lf');
-assert.strictEqual(eol.text_file_count, 66);
+assert.strictEqual(eol.text_file_count, 67);
 assert.strictEqual(eol.binary_file_count, 1);
 assert.match(eol.policy_digest, /^sha256:[0-9a-f]{64}$/);
 assert.strictEqual(receipt.schema_version, 'reddog_package_surface_receipt.v2');
 assert.strictEqual(receipt.text_eol_policy, eol.schema_version);
 assert.strictEqual(receipt.text_eol, 'lf');
-assert.strictEqual(receipt.text_file_count, 66);
+assert.strictEqual(receipt.text_file_count, 67);
 assert.strictEqual(receipt.binary_file_count, 1);
 assert.strictEqual(receipt.eol_policy_digest, eol.policy_digest);
 assert.match(receipt.content_digest, /^sha256:[0-9a-f]{64}$/);
@@ -62,7 +62,7 @@ assert.strictEqual(surface.validatePackageMemberBytes(
 ), 'binary');
 
 const effective = surface.readEffectiveAttributes(first);
-assert.strictEqual(surface.validateEffectiveAttributes(first, effective).length, 67);
+assert.strictEqual(surface.validateEffectiveAttributes(first, effective).length, 68);
 const missing = new Map(effective);
 missing.delete('extensions/reddog/extension.js');
 assert.throws(() => surface.validateEffectiveAttributes(first, missing),
@@ -101,4 +101,4 @@ try {
   fs.rmSync(tempRoot, { recursive: true, force: true });
 }
 
-console.log('RedDog deterministic 67-file package surface: PASS ' + JSON.stringify(receipt));
+console.log('RedDog deterministic 68-file package surface: PASS ' + JSON.stringify(receipt));

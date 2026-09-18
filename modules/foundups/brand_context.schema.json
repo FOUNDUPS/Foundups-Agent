@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.org/schemas/foundup-brand-context/v1.0.0",
+  "title": "FoundUp Brand Context",
+  "description": "FoundUp identity and child-brand context. Branding only; grants no execution, token, routing, or governance authority.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "foundup_id",
+    "canonical_brand",
+    "aliases",
+    "public_urls",
+    "default_locale",
+    "rules",
+    "child_foundups",
+    "authority_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "foundup_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "canonical_brand": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "public_urls": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "uniqueItems": true
+    },
+    "default_locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 16
+    },
+    "rules": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "child_foundups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ChildFoundUpBrand" }
+    },
+    "authority_boundary": {
+      "type": "string",
+      "const": "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+    }
+  },
+  "$defs": {
+    "ChildFoundUpBrand": {
+      "type": "object",
+      "required": [
+        "foundup_id",
+        "canonical_brand",
+        "relationship",
+        "aliases",
+        "public_urls",
+        "rules"
+      ],
+      "properties": {
+        "foundup_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "canonical_brand": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "relationship": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "public_urls": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "uniqueItems": true
+        },
+        "rules": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

@@ -1,3 +1,10 @@
+## 2026-09-19 - Registry-driven FoundUp brand context
+
+- Added an optional `brand_context_path` to the canonical FoundUp registry and a shared `brand_context.schema.json`.
+- Brand context is identity/copy data only. Parent/child brand inheritance never grants token, routing, credential, safe-mutation, financial, or governance authority.
+- eSingularity is the first concrete instance: parent `eSingularity.ai`, child `yumori_me -> YUMORI.me`.
+- Red Dog consumes this through the existing generic FoundUp grounding path rather than per-FoundUp conditionals. WSP 00/15/22/50/95/97/102/109.
+
 # FoundUps Domain - ModLog
 
 ## Chronological Change Log

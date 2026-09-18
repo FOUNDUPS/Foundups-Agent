@@ -105,18 +105,28 @@ For a request to work on a named FoundUp:
 1. Resolve the name, ID, token symbol, and module alias through the canonical
    `foundup_registry.json`; do not use a model-specific or FoundUp-specific
    conditional.
-2. Bind the registry entry, schema, manifest, module docs, and available test
-   history into one non-authoritative current-checkout grounding receipt.
-   Treat registry `evidence_docs` as optional HoloIndex research inputs; they
-   cannot displace mandatory direct reads or exhaust the bounded read budget.
-3. Reject ambiguous registered names before Fusion. Do not guess whether
+2. If the registry entry declares `brand_context_path`, load and validate that
+   single FoundUp-owned brand context and concatenate it into grounding before
+   Skillz selection. Parent identity is loaded first; a matched child FoundUp
+   brand may override branding fields only. Child branding never inherits or
+   creates token, route, safe-mutation, financial, credential, or governance
+   authority.
+3. Bind the registry entry, registry schema, brand context/schema when present,
+   manifest, module docs, and available test history into one non-authoritative
+   current-checkout grounding receipt. Treat registry `evidence_docs` as
+   optional HoloIndex research inputs; they cannot displace mandatory direct
+   reads or exhaust the bounded read budget.
+4. Skillz consume the grounded brand context. Do not copy canonical brand
+   spelling, aliases, domains, or child-brand rules into each Skillz. A brand
+   change belongs in the FoundUp's brand-context file plus its regression tests.
+5. Reject ambiguous registered names before Fusion. Do not guess whether
    unmatched language is a name or category: attach registry evidence, expose
    `requires_wsp109_resolution`, and grant no mutation scope until resolved.
-4. Reconcile roadmap claims against current code, tests, ledger, PR, and
+6. Reconcile roadmap claims against current code, tests, ledger, PR, and
    receipt evidence. A stale roadmap cannot define current truth.
-5. Apply WSP 15 and select exactly one bounded REUSE or EXTEND slice. CREATE is
+7. Apply WSP 15 and select exactly one bounded REUSE or EXTEND slice. CREATE is
    valid only after registry and module searches prove no reusable surface.
-6. Execution still requires the normal signed work order, allowed paths,
+8. Execution still requires the normal signed work order, allowed paths,
    independent verifier, and promotion gates. The grounding receipt grants no
    shell, worktree, PR, merge, signer, or re-index authority.
 

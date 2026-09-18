@@ -43,6 +43,20 @@ For active execution, use these first:
 
 ---
 
+## FoundUp brand context
+
+A FoundUp may declare an optional `brand_context_path` in the canonical
+`foundup_registry.json`. That file is validated against
+`modules/foundups/brand_context.schema.json` and is the single source for the
+FoundUp's canonical brand, aliases, public URLs, locale and optional child
+FoundUp/brand identities.
+
+Red Dog loads this context through generic registered-FoundUp grounding before
+Skillz selection. Child entries inherit **identity/copy context only**; they do
+not inherit or create execution, token, routing, credential, financial,
+safe-mutation or governance authority. Operational Skillz should consume the
+grounded brand context instead of copying brand rules into each Skillz.
+
 ## Historical Context
 
 > **Note**: The content below is legacy platform framing from earlier architecture iterations.
