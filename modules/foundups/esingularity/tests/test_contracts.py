@@ -14,6 +14,8 @@ REGISTRY_PATH = REPO_ROOT / "foundups" / "foundup_registry.json"
 WRE_SKILLS_REGISTRY_PATH = REPO_ROOT / "infrastructure" / "wre_core" / "skillz" / "skills_registry_v2.json"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
+FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
+FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -76,6 +78,40 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
         assert "modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md" in projected
 
     assert not (MODULE_ROOT / "skills" / "yumori-moshpit" / "SKILL.md").exists()
+
+def test_yumori_operational_skills_are_registered_and_projected() -> None:
+    registry = load_json(WRE_SKILLS_REGISTRY_PATH)
+    assert registry["total_skills"] == len(registry["skills"])
+
+    fukui = registry["skills"]["fukui_city_procedure"]
+    assert fukui["location"] == "modules/foundups/esingularity/skillz/fukui_city_procedure"
+    assert fukui["primary_agent"] == "0102"
+    assert fukui["intent_type"] == "DECISION"
+
+    funding = registry["skills"]["yumori_funding_ppp_intelligence"]
+    assert funding["location"] == "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence"
+    assert funding["primary_agent"] == "0102"
+    assert funding["intent_type"] == "RESEARCH"
+
+    fukui_text = FUKUI_PROCEDURE_SKILL_PATH.read_text(encoding="utf-8")
+    assert "reddog_recipient_preflight/SKILLz.md" in fukui_text
+    assert "BLOCKED_ON_OFFICIAL_TEMPLATE" in fukui_text
+    assert "BUDGET_PROPOSED -> BUDGET_APPROVED" in fukui_text
+    assert "Copy the same media BCC list from last time." in fukui_text
+
+    funding_text = FUNDING_PPP_SKILL_PATH.read_text(encoding="utf-8")
+    assert "name: yumori_funding_ppp_intelligence" in funding_text
+    assert "VERIFIED PROGRAM" in funding_text
+    assert "AWARDED" in funding_text
+
+    for slug, canonical in (
+        ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),
+        ("yumori-funding-ppp-intelligence", "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence/SKILLz.md"),
+    ):
+        for root in (".agents", ".claude"):
+            projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
+            assert canonical in projected
+
 
 
 def test_sites_configuration_and_primary_routes_are_present() -> None:
