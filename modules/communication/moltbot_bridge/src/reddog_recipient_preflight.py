@@ -47,7 +47,7 @@ class RouteEvidence:
     address: str
     source: str
     level: EvidenceLevel
-    policy: RoutePolicy = RoutePolicy.ALLOW
+    policy: RoutePolicy | None = None
     entity_kind: str = "organization"
     current: bool = True
 
@@ -66,7 +66,7 @@ class RecipientCheck:
     proposed_address: str
     authoritative_address: str | None
     authoritative_source: str | None
-    policy: RoutePolicy | None
+    policy: RoutePolicy
     exact_match: bool
     duplicate_coverage: bool
     allowed: bool
@@ -93,7 +93,7 @@ def normalize_address(value: str) -> str:
     return address.strip().lower()
 
 
-def _authoritative_route(
+def _resolve_address(
     identity_id: str,
     evidence: Sequence[RouteEvidence],
 ) -> tuple[RouteEvidence | None, tuple[str, ...]]:
@@ -104,16 +104,29 @@ def _authoritative_route(
     top_level = max(e.level for e in candidates)
     top = [e for e in candidates if e.level == top_level]
     addresses = {normalize_address(e.address) for e in top}
-    policies = {e.policy for e in top}
-
-    reasons: list[str] = []
     if len(addresses) != 1:
-        reasons.append("CONFLICTING_AUTHORITATIVE_ADDRESSES")
-    if len(policies) != 1:
-        reasons.append("CONFLICTING_AUTHORITATIVE_POLICIES")
-    if reasons:
-        return None, tuple(reasons)
+        return None, ("CONFLICTING_AUTHORITATIVE_ADDRESSES",)
     return top[0], ()
+
+
+def _resolve_policy(
+    identity_id: str,
+    evidence: Sequence[RouteEvidence],
+) -> tuple[RoutePolicy, tuple[str, ...]]:
+    candidates = [
+        e
+        for e in evidence
+        if e.identity_id == identity_id and e.current and e.policy is not None
+    ]
+    if not candidates:
+        return RoutePolicy.ALLOW, ()
+
+    top_level = max(e.level for e in candidates)
+    top = [e for e in candidates if e.level == top_level]
+    policies = {e.policy for e in top}
+    if len(policies) != 1:
+        return RoutePolicy.ALLOW, ("CONFLICTING_AUTHORITATIVE_POLICIES",)
+    return next(iter(policies)), ()
 
 
 def preflight_recipients(
@@ -125,9 +138,10 @@ def preflight_recipients(
 ) -> PreflightReceipt:
     """Validate a concrete To/CC/BCC transaction.
 
-    Every proposed recipient is independently resolved from routing evidence.
-    Any unknown, conflicting, closed, near-match, or duplicate recipient fails
-    the entire transaction closed.
+    Address authority and consent/routing policy are resolved independently.
+    This prevents a newer address observation from silently reopening an older
+    binding route closure. Any unknown, conflicting, closed, near-match, or
+    duplicate recipient fails the entire transaction closed.
     """
     sent = {normalize_address(x) for x in already_sent_addresses}
     checks: list[RecipientCheck] = []
@@ -143,32 +157,32 @@ def preflight_recipients(
             reasons.append("DUPLICATE_RECIPIENT_IN_TRANSACTION")
         seen.add(key)
 
-        route, route_reasons = _authoritative_route(recipient.identity_id, evidence)
+        route, route_reasons = _resolve_address(recipient.identity_id, evidence)
+        policy, policy_reasons = _resolve_policy(recipient.identity_id, evidence)
         reasons.extend(route_reasons)
+        reasons.extend(policy_reasons)
 
         authoritative_address = None
         source = None
-        policy = None
         exact_match = False
 
         if route is not None:
             authoritative_address = normalize_address(route.address)
             source = route.source
-            policy = route.policy
             exact_match = proposed_address == authoritative_address
-
-            if policy in {
-                RoutePolicy.DO_NOT_ADDRESS_OR_CC,
-                RoutePolicy.PERSONAL_ROUTE_CLOSED,
-            }:
-                reasons.append(policy.value)
-            elif policy is RoutePolicy.BCC_ONLY and recipient.role is not RecipientRole.BCC:
-                reasons.append("ROLE_POLICY_VIOLATION_BCC_ONLY")
-            elif policy is RoutePolicy.ORGANIZATION_ONLY and route.entity_kind != "organization":
-                reasons.append("ROLE_POLICY_VIOLATION_ORGANIZATION_ONLY")
-
             if not exact_match:
                 reasons.append("EXACT_ADDRESS_MISMATCH")
+
+            if policy is RoutePolicy.ORGANIZATION_ONLY and route.entity_kind != "organization":
+                reasons.append("ROLE_POLICY_VIOLATION_ORGANIZATION_ONLY")
+
+        if policy in {
+            RoutePolicy.DO_NOT_ADDRESS_OR_CC,
+            RoutePolicy.PERSONAL_ROUTE_CLOSED,
+        }:
+            reasons.append(policy.value)
+        elif policy is RoutePolicy.BCC_ONLY and recipient.role is not RecipientRole.BCC:
+            reasons.append("ROLE_POLICY_VIOLATION_BCC_ONLY")
 
         duplicate_coverage = proposed_address in sent
         if duplicate_coverage and not allow_duplicate_coverage:
