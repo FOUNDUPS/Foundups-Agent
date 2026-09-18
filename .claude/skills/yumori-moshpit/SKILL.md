@@ -5,7 +5,7 @@ description: Route and order YUMORI campaign activity versus 0102 agent-learning
 
 # YUMORI Moshpit
 
-Canonical instructions: `modules/foundups/esingularity/skills/yumori-moshpit/SKILL.md`.
+Canonical Skillz: `modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md`.
 
 Apply that file as the source of truth. Preserve the strict split:
 
@@ -14,7 +14,4 @@ Apply that file as the source of truth. Preserve the strict split:
 
 For interval events, sort by completion/end time. Never let internal agent bookkeeping outrank the latest monk/campaign activity.
 
-
-## PR lifecycle
-
-0102 owns bounded skill PRs through exact-head checks and review, then squash-merges to main and verifies the merge. Routine GitHub mechanics are not handed to 012; escalate only genuine human decisions or permission blockers.
+0102 owns bounded PR lifecycle mechanics through exact-head checks, squash merge, main verification, and watcher retirement. Routine GitHub mechanics are not handed to 012.
