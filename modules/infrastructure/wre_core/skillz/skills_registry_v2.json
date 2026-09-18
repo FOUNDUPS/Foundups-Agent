@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-18T14:00:00+00:00",
+  "last_updated": "2026-09-19",
   "total_skills": 32,
   "skills": {
     "gemma_pqn_data_processor": {
@@ -485,7 +485,7 @@
         "WSP 95",
         "WSP 97"
       ],
-      "description": "Route YUMORI campaign history versus 0102 learning events and preserve reverse-chronological JST Moshpit integrity"
+      "description": "Route active child-FoundUp campaign history versus 0102 learning events; brand identity is supplied by the registered FoundUp brand context."
     },
     "fukui_city_procedure": {
       "location": "modules/foundups/esingularity/skillz/fukui_city_procedure",
@@ -507,7 +507,7 @@
         "WSP 95",
         "WSP 97"
       ],
-      "description": "Verify Fukui City and Council procedure, official forms, PPP/PFI, disclosure, procurement, routing and legal handoff"
+      "description": "Verify Fukui City/Council procedure for the active eSingularity child FoundUp; brand identity is supplied by the registered FoundUp brand context."
     },
     "yumori_funding_ppp_intelligence": {
       "location": "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence",
@@ -529,7 +529,7 @@
         "WSP 95",
         "WSP 97"
       ],
-      "description": "Verify live YUMORI grants, subsidies, GX and PPP/PFI opportunities without overstating funding status"
+      "description": "Verify grants, subsidies, GX and PPP/PFI opportunities for the active child FoundUp without overstating funding; branding comes from FoundUp brand context."
     }
   }
 }
