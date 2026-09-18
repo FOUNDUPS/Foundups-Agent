@@ -1,3 +1,8 @@
+## 2026-09-18: Recipient verification-quality regressions
+
+- Added two focused cases to the existing recipient-preflight suite: sent-only/unverified Contacts evidence must block with `UNVERIFIED_ROUTE`; a separately verified current public-directory route may authorize the same exact address.
+- Existing closed-route, exact-character, duplicate-coverage, BCC-only and provider read-back contracts remain in the same suite. CI owns exact-head execution; no send-capable provider is invoked by these unit tests.
+
 ## 2026-09-15: Explicit normalized seed input
 
 - Reused the supplier/bootstrap and existing typed profile/ASCII owners. Both entries snapshot before receipt work; the seed hash includes the plan, None preserves legacy bytes, empty mappings remain explicit, and nonce basis is unchanged. No new module, skill, parser, env route or runtime authority. WSP00/15/22/34/50/62/84/97/99.

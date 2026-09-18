@@ -35,6 +35,20 @@ Freshest authoritative routing evidence wins:
 
 A newer explicit instruction always overrides older contact history.
 
+**Sent is not verification.** Prior outbound mail, autocomplete history, an old
+BCC list, or `NO BOUNCE DETECTED` does not independently prove that a route is
+current or correct. Address evidence used to authorize HIGH/CRITICAL mail must
+be independently verified (for example by current provider instruction,
+authoritative public organization directory, verified business card/direct
+source, or an already-binding route record whose underlying evidence is
+verified). Represent sent-only evidence as `RouteEvidence(..., verified=False)`;
+it must fail closed until independent evidence exists.
+
+**BCC is purpose-scoped.** Past inclusion in BCC does not create standing BCC
+authority. Only a current routing policy may define a default BCC. Otherwise,
+the caller must establish a message-specific purpose and rerun full preflight
+for that recipient.
+
 ## Two-pass contract
 
 ### Pass A — identity and policy
@@ -59,6 +73,7 @@ A newer explicit instruction always overrides older contact history.
 HIGH/CRITICAL correspondence must fail closed when a recipient is:
 
 - UNKNOWN
+- UNVERIFIED
 - CONFLICTING
 - STALE
 - NEAR_MATCH
