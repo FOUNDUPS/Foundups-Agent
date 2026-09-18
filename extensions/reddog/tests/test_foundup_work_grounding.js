@@ -346,9 +346,11 @@ assert(!sensitive.evidence_targets.some((item) => item === '.env' || item.includ
   'sensitive paths must never become grounding evidence');
 
 const source = fs.readFileSync(modulePath, 'utf8');
+const brandSource = fs.readFileSync(path.join(root, 'extensions', 'reddog', 'foundup_brand_context.js'), 'utf8');
 const runtimeSource = fs.readFileSync(runtimePath, 'utf8');
 const phraseSource = fs.readFileSync(path.join(root, 'extensions', 'reddog', 'foundup_target_phrase.js'), 'utf8');
 assert(source.split(/\r?\n/).length <= 200, 'resolver exceeds WSP_62 file limit');
+assert(brandSource.split(/\r?\n/).length <= 200, 'brand-context helper exceeds WSP_62 file limit');
 assert(runtimeSource.split(/\r?\n/).length <= 200, 'runtime binding exceeds WSP_62 file limit');
 assert(phraseSource.split(/\r?\n/).length <= 200, 'target phrase parser exceeds WSP_62 file limit');
 assert(fs.readFileSync(path.join(root, 'extensions', 'reddog', 'json_schema_subset_validator.js'), 'utf8')
@@ -356,6 +358,7 @@ assert(fs.readFileSync(path.join(root, 'extensions', 'reddog', 'json_schema_subs
 assert(!/\b(?:trade|gotjunk)\b/i.test(source), 'production resolver must not hard-code FoundUp names');
 assert(!/\b(?:trade|gotjunk)\b/i.test(phraseSource), 'target parser must not hard-code FoundUp names');
 assert(!/child_process|\bexec(?:File|Sync)?\b|\bspawn(?:Sync)?\b|\bsubprocess\b/.test(source));
+assert(!/child_process|\bexec(?:File|Sync)?\b|\bspawn(?:Sync)?\b|\bsubprocess\b/.test(brandSource));
 assert(!/child_process|\bexec(?:File|Sync)?\b|\bspawn(?:Sync)?\b|\bsubprocess\b/.test(runtimeSource));
 
 console.log('PASS: registered FoundUp work grounding is generic, deterministic, and fail-closed');
