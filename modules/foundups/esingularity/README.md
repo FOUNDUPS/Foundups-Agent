@@ -31,8 +31,9 @@ modules/foundups/esingularity/
 │   ├── content/            # Canonical Japanese deck and derived language states
 │   └── audit/              # Public-claim evidence ledger
 ├── skillz/                 # WSP 95 module-owned operational Skillz
-│   └── yumori_contact_ledger/
-├── src/                    # Stable FoundUp identity contract
+│   ├── yumori_contact_ledger/
+│   └── yumori_financial_model/
+├── src/                    # FoundUp identity + governed finance/feasibility engines
 ├── tests/                  # Manifest, registry, route, hosting, and Skillz checks
 ├── docs/                   # Migration, architecture, and external-context contracts
 ├── memory/                 # WSP 60 module memory documentation
@@ -58,6 +59,17 @@ The repo stores the reconciliation contract and RedDog/WRE discovery hook at
 `skillz/yumori_contact_ledger/SKILLz.md`, with source/schema context in
 `docs/YUMORI_CONTACT_LEDGER_CONTEXT.md`. The Skillz uses Gmail `message_id` and
 `thread_id` rather than inventing a second tracking signature.
+
+## YUMORI.me financial model
+
+For any YUMORI.me project-finance question, Red Dog/0102 should enter through
+`skillz/yumori_financial_model/SKILLz.md` instead of reconstructing formulas from chat.
+The calculation authority is `src/yumori_financial_model.py`; feasibility funding,
+customer/offtake cash and pre-debt funding-gap logic live in
+`src/yumori_feasibility_finance.py`. Live grants, subsidies and PPP support are
+reconciled through `docs/GRANTS_AND_SUBSIDIES.md` before they affect a scenario.
+Generated Excel/Drive/web outputs are collaboration or publication surfaces, not
+independent calculation engines.
 
 ## Local workflow
 
