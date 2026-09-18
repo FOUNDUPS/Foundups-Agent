@@ -2944,3 +2944,22 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   Every new security module is at most 200 lines with functions at most 50.
 - Added owner-policy v4 tier/requester regressions and a real signer-socket check
   proving only the signed provider principal reaches grant signing.
+
+
+## 2026-09-18: RedDog recipient transaction preflight
+
+- Command: `PYTHONPATH=<isolated temp repo> pytest -q modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py`
+- Status: PASS
+- Result: `12 passed`
+- Coverage:
+  - newer explicit provider route overrides stale Contacts evidence;
+  - newer address evidence cannot silently reopen an existing closed routing policy;
+  - one-character/hyphen near-match blocks;
+  - closed personal route blocks even on exact address;
+  - BCC-only route policy enforcement;
+  - duplicate Sent coverage blocks by default;
+  - conflicting top-precedence routes and unknown routes block;
+  - display-name/case normalization does not rewrite address characters;
+  - one bad recipient blocks a mixed multi-recipient transaction;
+  - provider Sent read-back detects missing/extra recipients.
+- Scope: deterministic provider-agnostic guard only; no Gmail send or external side effect.
