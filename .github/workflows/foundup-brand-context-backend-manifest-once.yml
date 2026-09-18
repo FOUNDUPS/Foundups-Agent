@@ -1,0 +1,76 @@
+name: FoundUp brand context backend manifest once
+
+on:
+  push:
+    branches:
+      - feat/foundup-brand-context-20260919
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message != 'chore(reddog): regenerate backend manifest for FoundUp brand context'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/foundup-brand-context-20260919
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Generate and pin manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(python scripts/generate_reddog_backend_manifest.py --write)"
+          digest="$(printf '%s\n' "$output" | head -n 1)"
+          printf 'manifest=%s\n' "$digest"
+          python - "$digest" <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          digest = sys.argv[1]
+          test_path = Path("scripts/tests/test_generate_reddog_backend_manifest.py")
+          test_text = test_path.read_text(encoding="utf-8")
+          test_text, count = re.subn(
+              r'assert digest == "[a-f0-9]{64}"',
+              f'assert digest == "{digest}"',
+              test_text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("manifest test pin not found exactly once")
+          test_path.write_text(test_text, encoding="utf-8", newline="\n")
+
+          constants_path = Path("extensions/reddog/backend_compatibility_constants.js")
+          constants = constants_path.read_text(encoding="utf-8")
+          constants, count = re.subn(
+              r"EXPECTED_MANIFEST_SHA256 = '[a-f0-9]{64}'",
+              f"EXPECTED_MANIFEST_SHA256 = '{digest}'",
+              constants,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("backend manifest constant not found exactly once")
+          constants_path.write_text(constants, encoding="utf-8", newline="\n")
+          PY
+          python scripts/generate_reddog_backend_manifest.py --check
+          python -m pytest scripts/tests/test_generate_reddog_backend_manifest.py -q
+      - name: Commit generated integrity state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- scripts/reddog_backend_manifest.json scripts/tests/test_generate_reddog_backend_manifest.py extensions/reddog/backend_compatibility_constants.js; then
+            echo "No manifest changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/reddog_backend_manifest.json scripts/tests/test_generate_reddog_backend_manifest.py extensions/reddog/backend_compatibility_constants.js
+          git commit -m "chore(reddog): regenerate backend manifest for FoundUp brand context"
+          git push origin HEAD:feat/foundup-brand-context-20260919
