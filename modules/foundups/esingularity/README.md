@@ -63,6 +63,12 @@ Use [docs/DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md) before creating
 
 Repository state is canonical for project status and source-of-truth labels. Drive is the working drafting/evidence layer. If repo, Drive and a primary government source disagree, re-verify the primary source first, update the repo authority, then reconcile Drive. Do not create another Drive file merely because an existing file is hard to find.
 
+## YUMORI Moshpit logging
+
+Use the module-owned [YUMORI Moshpit Skillz](skillz/yumori_moshpit/SKILLz.md) for campaign activity, stakeholder/procedural milestones, monk field activity, and 0102 learning-log routing. It is registered in the WRE Skillz/Rolodex registry at `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`; the `.agents` and `.claude` files are thin operator projections, not separate authorities.
+
+The campaign Moshpit is reverse chronological within each JST day. Agent-internal repairs and learning belong in the private 0102 Moshpit unless the same event materially changes campaign history.
+
 ## Campaign ticker updates
 
 Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it on both eSingularity.ai and YUMORI.me. Date and time-limit each invitation in Japan time.
