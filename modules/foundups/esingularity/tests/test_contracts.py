@@ -67,6 +67,8 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     assert "YUMORI Moshpit" in skill
     assert "0102 Moshpit" in skill
     assert "reverse chronological within each day" in skill
+    assert "Branch-protection “required” status alone is never sufficient evidence." in skill
+    assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
 
     for projection in (
         REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
