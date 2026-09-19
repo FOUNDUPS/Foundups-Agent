@@ -52,9 +52,10 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`daae91db04088bc49ddde97ee972299165e1d35d`, including PR1797/1798/1799. PR1799's ten
-checks and both observed main workflows passed; its reviewed/merged trees match.
-Refreshed September 9 UTC onward accounting found 110 merged PRs and 15
+`9e8979794ad43dc647899221518890c7f8b5487a`, including PR1797/1798/1799/1800. PR1800's ten
+checks passed and its reviewed/merged trees match. Its new main workflows remain
+queued/in progress at closeout; PR1799's two main workflows passed.
+Refreshed September 9 UTC onward accounting found 111 merged PRs and 15
 closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
 reported checks. The earlier detailed inventory marked 26 as conflicting; the
