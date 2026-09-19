@@ -1,5 +1,15 @@
 # Tests - OpenClaw Bridge
 
+## Actual determination serialization coverage
+
+The existing exact-schema suite reuses the backend fake-model and in-memory-store
+fixtures to exercise real producer, top-level result and persisted receipt output.
+An absent/None proposal plan must remain omitted and validate; empty/full plans
+remain explicit and detached. Explicit wire null still rejects. Compare proposal,
+determination and candidate lineage before/after with identical fixture inputs;
+keep checkout-bound byte oracles external rather than freezing a local path in CI.
+No provider, real sandbox, stored-record migration or automatic forwarding is tested.
+
 ## Direct profile/proposal ingress coverage
 
 Use the existing exact-schema and model-runtime bootstrap suites. Matching plans

@@ -1,3 +1,17 @@
+## 2026-09-20: Actual producer serialization locally verified
+
+- Reused canonical child proposal/queue serializers: result and persistence preserve omitted legacy plans, explicit empty/full plans and all three linked IDs. Invalid wire null still rejects. Source remains1532lines; no new owner, skill, exemption, migration or startup wiring.
+- Connected617 tests pass. Independent review accepts86 overlapping tests+72boundary assertions;8manifest tests and15fast groups pass; registry1651/269 is current. Exactly one existing runtime-member hash changes; both digest pins updated. Author/reviewer failed iterations remain in evidence.
+- WSP15/97 reapplied to26 current candidates; the closed serialization defect leaves the queue. Existing18/P0 handoff parent now needs omission-aware bootstrap contract qualification after owned exact-head CI/closure. Other102PRheads, main and protected shared checkout remain unchanged at fresh precommit review.
+
+## 2026-09-20: Fresh repository, PC runtime and daily-work accounting
+
+- WSP00 strict gate passed; reread canonical WSP15/97/99/109 and existing onboarding skill. Fresh Holo query rejects stale authority HEAD; direct owner retrieval is explicitly degraded. No reindex or semantic-freshness claim.
+- Main15f is unchanged and both CI workflows pass. Accounted for all102 open PRs (13drafts;20failing;81pass/skip;1without checks;26conflicting),107merges since September9UTC and15closed-unmerged. Preserved heads/checks/merge identities in existing observations, with full file inventory hash-bound externally. No source/test PR overlaps the selected repair.
+- Daily conversation memory is not independent RSI retention. Reuse R25 consented proposal/admission and existing verified-outcome owners; prototype onboarding Skillz presence is not registry admission. AmIBot remains existing draft1751/detect_ai, absent from main registry and blocked on validation/conflicts/dispatch gates.
+- PC has native OpenClaw2026.5.2; registered WSL is stopped, current Hermes/provider/sandbox state unqualified. Fresh deterministic readiness suites pass175 with2subprocess cases deliberately deselected. No runtime start, install, provider call or activation occurred.
+- Selected the existing18/P0 shared handoff gate; bounded serializer repair16/P0. Source scope is limited to existing producer/tests plus required docs/manifest qualification. WSP15/22/50/62/84/97; protected FoundUps and Remote AutoPost remain separate.
+
 ## 2026-09-20: Profile consistency merged; producer serialization selected
 
 - PR #1796 merged as `15f203ee3` after ten exact-head checks passed; its tree matches the reviewed candidate. Other 102 open PR heads and the protected shared checkout remain unchanged. Main CI/CodeQL are tracked independently.

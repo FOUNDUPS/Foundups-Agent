@@ -29,6 +29,17 @@ from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_se
 from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_test_helpers import (
     build_proposal_runtime_inputs,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_admission_contract import (
+    validate_architect_proposal_executability_receipt,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_backend_architect_determination_runtime import (
+    FakeArchitectRunner, InMemoryArchitectDeterminationStore, NOW,
+    _build_inputs, _model_output, _runtime_kwargs,
+    run_reddog_backend_architect_determination_runtime,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_exact_schema import (
+    _m2m_envelope,
+)
 
 
 def _publisher_probe(store: InMemoryAuthoritativeWorkStateStore):
@@ -305,3 +316,96 @@ def test_authority_profile_type_confusion_rejects_before_publication() -> None:
     ) in result.rejection_reasons
     assert calls == []
     assert store.load() == before
+
+
+def _produced_determination(plan_kind="absent", *, include_reports=True):
+    inputs = _build_inputs(include_reports=include_reports)
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0] if include_reports else "unused"
+    output = _model_output(inputs["allocation"], evidence_ref)
+    if plan_kind == "full":
+        packet = _m2m_envelope()
+        packet["S"] = output["allowed_paths"][0]
+        packet["I"].update({key: deepcopy(output[key]) for key in (
+            "allowed_paths", "denied_paths", "required_tests", "required_policy_gates",
+            "expected_evidence", "stop_conditions",
+        )})
+        output["bounded_worker_plan"] = {
+            "operation": output["requested_operation"],
+            "requested_allowed_paths": list(output["allowed_paths"]),
+            "planned_artifacts": list(output["allowed_paths"]), "m2m_envelope": packet,
+        }
+    elif plan_kind != "absent":
+        output["bounded_worker_plan"] = None if plan_kind == "none" else {}
+    runner, store = FakeArchitectRunner(output), InMemoryArchitectDeterminationStore()
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=runner, now_iso=NOW,
+    )
+    return result, store, runner
+
+
+@pytest.mark.parametrize("kind", ("absent", "none", "empty", "full"))
+def test_actual_producer_preserves_proposal_wire_through_result_and_persistence(kind):
+    result, store, runner = _produced_determination(kind)
+    assert result.accepted is True, result.rejection_reasons
+    assert result.persist_result.stored is True and len(runner.calls) == 1
+    receipt = result.receipt
+    child = receipt.proposal_admission.to_dict()
+    assert ("bounded_worker_plan" in child) is (kind in {"empty", "full"})
+    expected = validate_architect_proposal_executability_receipt(child).to_dict()
+    payloads = (receipt.to_dict(), result.to_dict()["receipt"],
+                store.records[0].determination,
+                store.load_architect_determination_by_cycle(receipt.cycle_id)["determination"])
+    for payload in payloads:
+        assert payload["proposal_admission"] == expected
+        assert validate_architect_proposal_executability_receipt(payload["proposal_admission"]).to_dict() == expected
+        assert payload["queue_candidate"] == receipt.queue_candidate.to_dict()
+
+
+def test_producer_plan_presence_binds_all_three_lineage_identities():
+    lineages = {}
+    for kind in ("absent", "none", "empty", "full"):
+        result, _, _ = _produced_determination(kind)
+        assert result.accepted is True, result.rejection_reasons
+        receipt = result.receipt
+        lineages[kind] = (receipt.proposal_admission.receipt_id,
+                          receipt.determination_receipt_id,
+                          receipt.queue_candidate.queue_candidate_id)
+    assert lineages["absent"] == lineages["none"]
+    for index in range(3):
+        assert len({lineages[kind][index] for kind in ("absent", "empty", "full")}) == 3
+
+
+@pytest.mark.parametrize("kind", ("absent", "empty", "full"))
+def test_serialized_producer_child_explicit_null_remains_invalid(kind):
+    result, store, _ = _produced_determination(kind)
+    assert result.accepted is True, result.rejection_reasons
+    before = deepcopy(store.records[0].determination)
+    child = result.to_dict()["receipt"]["proposal_admission"]
+    child["bounded_worker_plan"] = None
+    with pytest.raises(ValueError, match="proposal_admission_worker_plan_invalid"):
+        validate_architect_proposal_executability_receipt(child)
+    assert store.records[0].determination == before
+
+
+def test_producer_serializers_return_detached_nested_plan_and_queue():
+    result, store, runner = _produced_determination("full")
+    assert result.accepted is True, result.rejection_reasons
+    expected = deepcopy(result.receipt.to_dict())
+    payloads = (result.receipt.to_dict(), result.to_dict()["receipt"],
+                store.records[0].to_dict()["determination"])
+    runner.output["bounded_worker_plan"]["m2m_envelope"]["I"]["fixture"][0] = "input mutation"
+    for payload in payloads:
+        payload["proposal_admission"]["bounded_worker_plan"]["m2m_envelope"]["I"]["fixture"][0] = "output mutation"
+        payload["queue_candidate"]["slice_id"] = "output mutation"
+    assert result.receipt.to_dict() == expected
+    assert store.records[0].determination == expected
+
+
+def test_rejected_actual_producer_preserves_no_proposal_and_no_candidate():
+    result, store, runner = _produced_determination(include_reports=False)
+    assert result.accepted is False
+    assert runner.calls == [] and store.records == []
+    for payload in (result.receipt.to_dict(), result.to_dict()["receipt"]):
+        assert payload["proposal_admission"] is None
+        assert payload["queue_candidate"] is None
