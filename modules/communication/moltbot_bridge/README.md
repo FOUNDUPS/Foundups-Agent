@@ -52,6 +52,14 @@ authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact model routing
 
+Architect model-output proposals accept optional `bounded_worker_plan`. The existing
+producer and v3 receipt reader detach/validate it and bind its complete contents to
+the receipt digest. Missing/None input preserves legacy wire bytes; explicit `{}`
+is retained. For example, add `"bounded_worker_plan": {"m2m_envelope": packet}` to
+the existing proposal only when `packet` is already complete, normalized WSP 99 data.
+Supplied operation, tests, path scope and recognized receipt mirrors must agree.
+Prose is not converted or inferred here. Partial plans are data, not work admission.
+
 Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. Both
 snapshot typed/ASCII plan data before receipt reads; `None` preserves legacy seed
 bytes, `{}` remains explicit, and the seed receipt hashes the complete plan.

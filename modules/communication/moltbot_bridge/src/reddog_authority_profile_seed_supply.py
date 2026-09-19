@@ -27,6 +27,7 @@ from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
     rehydrate_authority_profile_seed,
+    snapshot_seed_worker_plan,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
@@ -118,18 +119,6 @@ class AuthorityProfileSeedSupplyResult:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
-
-
-def snapshot_seed_worker_plan(value: Any) -> dict[str, Any] | None:
-    """Detach optional plan data under the existing typed and ASCII policies."""
-    if value is None:
-        return None
-    if type(value) is not dict:
-        raise ValueError("bounded_worker_plan_not_plain_mapping")
-    plan = rehydrate_authority_profile_seed({"bounded_worker_plan": value})["bounded_worker_plan"]
-    if not _ascii_deep(plan):
-        raise ValueError("bounded_worker_plan_non_ascii")
-    return plan
 
 
 def run_reddog_authority_profile_seed_supply(

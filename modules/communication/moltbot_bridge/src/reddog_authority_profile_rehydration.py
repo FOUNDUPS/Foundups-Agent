@@ -179,6 +179,10 @@ _NUMBER_FIELDS = frozenset(
     }
 )
 _ENV_REFERENCE = re.compile(r"^[A-Z][A-Z0-9_]{1,127}$")
+_WORKER_PLAN_PARENTS = ((), ("proposal_admission",),
+                        ("operational_context_binding", "proposal_admission"))
+_M2M_PATHS = frozenset(".".join((*parent, "bounded_worker_plan", "m2m_envelope"))
+                       for parent in _WORKER_PLAN_PARENTS)
 _NO_EFFECT_FIELDS = frozenset(
     {
         "no_hermes_dispatch_performed",
@@ -213,6 +217,21 @@ def rehydrate_authority_profile_seed(value: Any) -> dict[str, Any]:
     """Return one canonical seed profile or reject without coercion."""
 
     return _rehydrate(value, mode="seed")
+
+
+def snapshot_seed_worker_plan(value: Any) -> dict[str, Any] | None:
+    """Detach optional plan data under the existing typed and ASCII policies."""
+    if value is None:
+        return None
+    if type(value) is not dict:
+        raise ValueError("bounded_worker_plan_not_plain_mapping")
+    try:
+        plan = rehydrate_authority_profile_seed({"bounded_worker_plan": value})["bounded_worker_plan"]
+    except (TypeError, RecursionError, OverflowError) as exc:
+        raise ValueError("bounded_worker_plan_invalid") from exc
+    if not json.dumps(plan, ensure_ascii=False, allow_nan=False).isascii():
+        raise ValueError("bounded_worker_plan_non_ascii")
+    return plan
 
 
 def rehydrate_authority_profile_source(value: Any) -> dict[str, Any]:
@@ -302,7 +321,7 @@ def _invalid_type_paths(value: Any) -> tuple[str, ...]:
 
 
 def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> None:
-    if field == "m2m_envelope" and path == "bounded_worker_plan.m2m_envelope":
+    if field == "m2m_envelope" and path in _M2M_PATHS:
         return  # Complete JSON and nested policies checked before generic traversal.
     if item is None:
         if not any(path.endswith(suffix) for suffix in _NULLABLE_RUNTIME_SUFFIXES):
@@ -381,16 +400,43 @@ def _is_mapping_list(value: Any) -> bool:
 
 
 def snapshot_authority_profile_m2m(value: Mapping[str, Any]) -> Mapping[str, Any]:
-    """Bound the one optional normalized packet before any profile traversal.
+    """Bound normalized packets at the three declared plan locations.
 
     This is profile data validation, not prompt or execution admission. An absent
     field retains legacy behavior; a present packet is detached without coercion.
     Callers must still apply their complete profile, ASCII and authority gates.
     """
+    for parent_path in _WORKER_PLAN_PARENTS:
+        parent, ancestors = value, []
+        for index, field in enumerate(parent_path):
+            if not isinstance(parent, Mapping):
+                break
+            if type(parent) is not dict:
+                path = ".".join(parent_path[:index]) or "$"
+                raise ValueError(f"authority_profile_invalid:{path}")
+            ancestors.append((parent, field))
+            parent = parent.get(field)
+        else:
+            if isinstance(parent, Mapping):
+                if type(parent) is not dict:
+                    path = ".".join(parent_path) or "$"
+                    raise ValueError(f"authority_profile_invalid:{path}")
+                updated = _snapshot_profile_plan(parent, parent_path)
+                if updated is parent:
+                    continue
+                for ancestor, field in reversed(ancestors):
+                    updated = {**ancestor, field: updated}
+                value = updated
+    return value
+
+
+def _snapshot_profile_plan(
+    value: Mapping[str, Any], parent_path: tuple[str, ...],
+) -> Mapping[str, Any]:
     plan = value.get("bounded_worker_plan")
     if not isinstance(plan, Mapping) or "m2m_envelope" not in plan:
         return value
-    path = "bounded_worker_plan.m2m_envelope"
+    path = ".".join((*parent_path, "bounded_worker_plan", "m2m_envelope"))
     try:
         if type(plan) is not dict:
             raise ValueError("plan_not_plain_mapping")
@@ -427,4 +473,5 @@ __all__ = [
     "rehydrate_authority_profile_seed",
     "rehydrate_authority_profile_source",
     "snapshot_authority_profile_m2m",
+    "snapshot_seed_worker_plan",
 ]

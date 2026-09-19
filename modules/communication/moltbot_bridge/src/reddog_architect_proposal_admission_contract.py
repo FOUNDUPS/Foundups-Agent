@@ -6,8 +6,12 @@ import hashlib
 import json
 import sys
 from dataclasses import asdict, dataclass
+from fnmatch import fnmatchcase
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_seed_worker_plan,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     INCOMPLETE_TRUST_ANCHOR_REASONS,
 )
@@ -197,9 +201,13 @@ class ArchitectProposalExecutabilityReceipt:
     no_execution_performed: bool = True
     no_repo_mutation_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    bounded_worker_plan: Mapping[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        if self.bounded_worker_plan is None:
+            data.pop("bounded_worker_plan")
+        return data
 
 
 def current_architect_proposal_admission_policy(
@@ -261,16 +269,83 @@ def validate_architect_proposal_executability_receipt(
 ) -> ArchitectProposalExecutabilityReceipt:
     if not isinstance(value, Mapping):
         raise ValueError("proposal_admission_receipt_missing")
-    expected = set(ArchitectProposalExecutabilityReceipt.__dataclass_fields__)
-    if set(value) != expected:
+    expected = set(ArchitectProposalExecutabilityReceipt.__dataclass_fields__) - {"bounded_worker_plan"}
+    has_plan = "bounded_worker_plan" in value
+    plan = snapshot_seed_worker_plan(value.get("bounded_worker_plan"))
+    if set(value) != expected | ({"bounded_worker_plan"} if has_plan else set()):
         raise ValueError("proposal_admission_field_set_invalid")
+    if has_plan and plan is None:
+        raise ValueError("proposal_admission_worker_plan_invalid")
     data = dict(value)
+    if has_plan:
+        data["bounded_worker_plan"] = plan
     receipt_id = _text(data.pop("receipt_id"))
-    if not _valid_receipt_body(data, receipt_id):
+    if not _valid_receipt_body(data, receipt_id) or not _valid_worker_plan_binding(data):
         raise ValueError("proposal_admission_receipt_invalid")
     for field in _TUPLE_FIELDS:
         data[field] = tuple(str(item) for item in data.get(field) or ())
     return ArchitectProposalExecutabilityReceipt(receipt_id=receipt_id, **data)
+
+
+def _valid_worker_plan_binding(data: Mapping[str, Any]) -> bool:
+    plan = data.get("bounded_worker_plan")
+    if plan is None:
+        return True
+    for owner, mirrors in (
+        (plan, {"operation": "requested_operation"}),
+        (plan.get("domain_profile", {}),
+         {"operation": "requested_operation", "required_tests": "required_tests"}),
+    ):
+        if any(key in owner and _digest(owner[key]) != _digest(data[target])
+               for key, target in mirrors.items()):
+            return False
+    allowed, denied = data["allowed_paths"], data["denied_paths"]
+    if any(type(rules) not in (list, tuple) or any(type(rule) is not str for rule in rules)
+           for rules in (allowed, denied)):
+        return False
+    for path in plan.get("requested_allowed_paths", ()):
+        if not _plan_path_allowed(path, allowed, denied, pattern=True):
+            return False
+    for path in plan.get("planned_artifacts", ()):
+        if not _plan_path_allowed(path, allowed, denied, pattern=False):
+            return False
+    packet = plan.get("m2m_envelope")
+    if packet is None:
+        return True
+    # Only explicitly supplied receipt-field mirrors are compared. WSP 99's
+    # task hash and scope/action prose are preserved, never inferred or rewritten.
+    invariants = packet["I"]
+    if any(_digest(value) != _digest(data[key]) for key, value in invariants.items()
+           if key in data and key not in {"schema_version", "bounded_worker_plan"}):
+        return False
+    score = invariants.get("wsp15", {})
+    return type(score) is dict and not (
+        "complexity" in score
+        and _digest(score["complexity"]) != _digest(data["wsp15_complexity"])
+    )
+
+
+def _plan_path_allowed(path: str, allowed: Any, denied: Any, *, pattern: bool) -> bool:
+    if (not path or path.startswith("/") or "\\" in path or any(ord(char) < 32 for char in path)
+            or ":" in path or any(part in {"", ".", ".."} or part.rstrip(" .") != part
+                                   for part in path.split("/"))):
+        return False
+    if not pattern and any(char in path for char in "*?["):
+        return False
+    if pattern and any(char in path for char in "*?["):
+        # Literal prefixes can prove disjointness, not general glob inclusion.
+        # Reject uncertain deny overlap; materialization still checks each file.
+        prefix = path[:min(path.find(char) for char in "*?[" if char in path)].casefold()
+        for rule in denied:
+            boundary = min((rule.find(char) for char in "*?[" if char in rule), default=len(rule))
+            denied_prefix = rule[:boundary].casefold()
+            if prefix.startswith(denied_prefix) or denied_prefix.startswith(prefix):
+                return False
+    # Denials cover case aliases on supported Windows hosts as well.
+    return not any(fnmatchcase(path.casefold(), rule.casefold()) for rule in denied) and any(
+        (path == rule or (rule.endswith("/**") and path.startswith(rule[:-3] + "/")))
+        if pattern else fnmatchcase(path, rule) for rule in allowed
+    )
 
 
 def reevaluate_architect_proposal_execution_readiness(

@@ -43,6 +43,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_admissio
     required_capabilities_for_effect,
     validate_architect_proposal_executability_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_seed_worker_plan,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     OperationalContextSnapshot,
 )
@@ -73,6 +76,7 @@ class _Proposal:
     stop_conditions: tuple[str, ...]
     declared_reasons: tuple[str, ...]
     invalid_path_tokens: bool
+    bounded_worker_plan: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -130,6 +134,7 @@ def evaluate_architect_proposal_executability(
 
 
 def _proposal(value: Mapping[str, Any]) -> _Proposal:
+    plan = snapshot_seed_worker_plan(value.get("bounded_worker_plan"))
     return _Proposal(
         action=_text(value.get("action")).upper(),
         slice_id=_text(value.get("next_slice_name")) or None,
@@ -151,6 +156,7 @@ def _proposal(value: Mapping[str, Any]) -> _Proposal:
             _has_invalid_paths(value.get("allowed_paths"))
             or _has_invalid_paths(value.get("denied_paths"))
         ),
+        bounded_worker_plan=plan,
     )
 
 
@@ -413,6 +419,8 @@ def _receipt_contract(proposal: _Proposal) -> dict[str, Any]:
         "produced_capabilities": list(proposal.produced_capabilities),
         "expected_evidence": list(proposal.expected_evidence),
         "stop_conditions": list(proposal.stop_conditions),
+        **({"bounded_worker_plan": proposal.bounded_worker_plan}
+           if proposal.bounded_worker_plan is not None else {}),
     }
 
 

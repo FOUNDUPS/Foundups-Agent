@@ -1,5 +1,22 @@
 # Tests - OpenClaw Bridge
 
+## Explicit proposal-plan coverage
+
+Reuse the existing proposal admission and exact profile-schema tests plus the seed
+supplier/bootstrap fixtures. Check all three legacy golden wires, explicit empty
+plans, typed canonical packets, digest tampering, mutation detachment, known receipt
+mirrors, wildcard/denied paths and non-plain ancestors at both embedded locations.
+Independent 395-case runs overlap; do not sum them as distinct coverage. Existing
+backend fixtures additionally prove persistence binds the full proposal digest.
+
+Keep generated manifest writes and staging complete before starting dependent
+packaging tests. Use a short, unique external pytest temp root for the resident-loop
+suite: the long audit-directory root produced five FileNotFoundError rejections;
+all 64 cases pass with one platform skip at the short root. Preserve both receipts.
+Commands, exact-source hashes, independent findings and limits are recorded in
+`docs/roadmaps/rsi_swarm_backlog.json#current_observation`. These fixtures do not
+establish live OpenClaw/Hermes admission or runtime RSI retention.
+
 ## Explicit seed-plan coverage
 
 Reuse the two existing seed supplier/bootstrap test files and current source/schema
