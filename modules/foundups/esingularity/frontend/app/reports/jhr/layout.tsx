@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import Jhr003 from "./Jhr003";
 
 const YUMORI_ME = "https://yumori.me/";
 const YUMORI_INFO = "https://yumori.info/";
@@ -7,10 +8,10 @@ const EVIDENCE_03 = "https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVC
 
 export const metadata: Metadata = {
   title: "Japan Hyperscaler Report | eSingularity",
-  description: "JHRの最新号と過去号を1本の継続アーカイブとして掲載。福井のAI交番、COGDC、ハイパースケーラー政策を日本語・英語で追跡。",
+  description: "JHRの最新号と過去号を1本の継続アーカイブとして掲載。計算主権、福井のAI交番、COGDC、ハイパースケーラー政策を日本語・英語で追跡。",
   openGraph: {
-    title: "Japan Hyperscaler Report — JHR #002: なぜ福井にAI交番が必要なのか",
-    description: "巨大ハイパースケーラーだけに依存しない、地域所有のAIインフラという第三の選択肢。",
+    title: "Japan Hyperscaler Report — JHR #003: 『計算主権』の時代へ",
+    description: "ECBのAI主権論、日本のワット・ビット連携、福井市のGX戦略地域候補から、地域分散型AI交番の必要性を考える。",
     images: [{ url: "/yumori-inzai-fukui-comparison.webp", width: 1600, height: 1200, alt: "千葉・印西クラスの大型データセンター用地を福井の田園に重ねた概念比較" }],
   },
   twitter: { card: "summary_large_image", images: ["/yumori-inzai-fukui-comparison.webp"] },
@@ -22,6 +23,8 @@ const tag = { display: "inline-block", padding: "3px 8px", border: "1px solid cu
 export default function JhrLayout({ children }: { children: ReactNode }) {
   return (
     <>
+      <Jhr003 />
+
       <section id="jhr-002" style={{ maxWidth: 960, margin: "0 auto", padding: "48px 24px 8px", lineHeight: 1.78, scrollMarginTop: 96 }}>
         <article style={{ border: "1px solid #173b67", borderRadius: 20, overflow: "hidden", background: "#f8fbff", boxShadow: "0 24px 70px rgba(3,18,38,.14)" }}>
           <div style={{ padding: "36px clamp(22px,5vw,52px) 28px", background: "linear-gradient(145deg,#07172d,#0d2c54)", color: "#f6fbff" }}>
