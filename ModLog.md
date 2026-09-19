@@ -1,3 +1,15 @@
+## 2026-09-20: Qualify feedback compatibility without inventing permission
+
+- WSP00/15/22/50/62/97/99: completed the13/P1 R25 compatibility review in the existing packet. Preserve v1 bytes/IDs; conditionally extend explicit versions in existing owners after exact-summary permission, source/type and logical retry/version contracts are qualified.
+- Two source-bound static reviews found no current R25 approval assertion/issuer/consumer contract. Architect disclosure and older automatic consent records cannot substitute. Safe contract authoring needs no live permission; no exact source patch was admitted. No tests or inspected R25/consent functions were executed; repository bootstrap and governed retrieval ran.
+- PR1801 main workflows now pass. Reconciled28candidate histories; next qualified action is existing AutoResearcher proposal-text identity12/P2. No source/test/module/skill/runtime change; exact static evidence, current ownership and next packet are in the existing backlog.
+
+## 2026-09-20: FoundUp fixture repair merged; R25 contract qualification selected
+
+- PR1801 merged as `745dc8355f31c0663b2358dc5ddac59c35b45bb3` after ten exact-head checks passed. All13 independently reviewed candidate blobs and merged tree match;102peer heads and protected shared checkout are unchanged.
+- Reconciled all28candidate histories: closed the14/P1 fixture action; next is existing R25-A consent/target/type/version contract qualification13/P1, planning only. Proposal-text provenance stays12/P2; broader15/P1 parents do not confer an executable score.
+- Independent document review caught a noncanonical lane and premature closure wording; corrected both and retained original evidence. Local677tests and independent205overlap. Main workflows are separately recorded; no runtime admission, live worker or retained-learning claim.
+
 ## 2026-09-20: Reconcile four FoundUp validation fixture failures
 
 - WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.

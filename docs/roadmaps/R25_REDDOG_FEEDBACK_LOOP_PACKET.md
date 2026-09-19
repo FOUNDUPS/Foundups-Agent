@@ -84,7 +84,7 @@ a second proposal queue, personal memory or generic authorization framework.
 The follow-on contract qualification scores **3 + 4 + 3 + 3 = 13/P1** under WSP 15;
 the broader 15/P1 parent estimate does not transfer automatically to this step.
 
-The next contract review must fix these choices before source implementation:
+The compatibility decision below fixes representation choices; its permission-owner prerequisite remains open before source implementation:
 
 - Bind principal/conversation/record digest/revision and destination FoundUp to
   a specific permitted summary and source reference. Define feedback purpose,
@@ -114,6 +114,101 @@ and its archived observations. Independent review checked 22 source/test/doc
 blobs and the replay predicates/hashes; it did not rerun the replay or authorize
 source implementation. Source/test ownership has no inspected peer overlap;
 shared bridge `INTERFACE.md` overlaps PR1751/1645 and remains untouched here.
+
+## R25-A compatibility decision — 2026-09-20
+
+**Result: representation choices qualified; permission issuance/consumption remains
+unqualified.** This is a planning result, not a new wire schema or an accepted
+feedback proposal. No source, test, consent store or runtime changed. The 13/P1
+qualification is complete; it does not assign that score to an implementation.
+
+### Preserve the existing contract
+
+Keep every v1 field set, enum, serialized byte and identity algorithm unchanged.
+The current evidence validator requires string values and three exact source
+classes; evidence and proposal IDs hash their full payload, including timestamps.
+Adding optional or null feedback fields to v1 would change legacy identity.
+Do not label human feedback as `breadcrumbs`, `verified_outcome` or
+`governed_research` to get through the existing gate.
+
+If the permission contract below is qualified, use an explicit feedback-capable
+version in the existing contract, validation and builder owners. Keep the v1
+path separate and make old readers reject the new version. This is a design
+choice; no v2 name, class, registry entry or runtime capability is implemented.
+
+| Binding | Proposed placement in existing owners | Compatibility requirement |
+|---|---|---|
+| Principal, conversation, source item and original source kind | Feedback-capable evidence alongside the existing source receipt/revision and FoundUp/snapshot fields | Preserve source record digest/revision and distinguish source class from evidence type; do not overload an existing ID. |
+| Permitted summary | Evidence statement plus its existing content digest; retain the original source reference | Canonicalize and minimize before permission is obtained. Permission must bind exactly those bytes; later normalization, redaction or model rewriting requires a new binding. |
+| Feedback purpose, permission reference, target and validity | Typed evidence binding, consumed through the existing authenticated conversation/record authority | Verify the exact principal, source, canonical summary, destination FoundUp, proposal version, purpose, expiry and current revocation state. A reference or digest alone is not permission. |
+| Evidence type | Separate feedback evidence field | Keep reported preference, observed behavior and model inference distinct. Verified fact requires its verification reference; formal authorization requires its own admitted authority reference and cannot open an execution valve through feedback. |
+| Logical proposal version and consultation-window correlation | Feedback-capable proposal, separate from its content-addressed ID and creation time | Same logical retry links to the same version/window without counting another participant; new material content/target/purpose/version needs a new permission binding. |
+| Contradiction and supersession | Existing supporting/contradicting references; explicit version linkage in the proposal | Preserve dissent. `supersedes_memory_ids` remains memory-target metadata, not proof of proposal supersession or deduplication. |
+| Candidate and reconstruction | Existing proposal ID and exact evidence-manifest closure | Bind every new semantic field into evidence/proposal identity, reconstruction and gate receipt. Copy only routing fields needed by a consumer; retain all non-authorizing/read-only flags. |
+
+The learning-candidate normalizer is NFKC plus trim. Consent to arbitrary raw text followed
+by silent canonicalization is insufficient. Keep a trace to the original source
+and have any eventual permission cover the exact canonical disclosed summary.
+A model summary remains a derived artifact, not a new principal statement.
+
+Current builder/contract test budgets are 500 lines and 60 lines per function;
+observed sizes are builder436/max58, contract175, validation489/max57. The
+existing 851-line test owner includes inherited64/92-line helpers. Qualify any
+growth against current tests/WSP62 before editing; add no exemption or duplicate
+owner. The existing assembler emits no learning candidates, and no production
+gate caller was found in the inspected module search. Shape support alone would
+not connect the feedback lifecycle.
+
+### Missing permission contract and reuse decision
+
+Authenticated conversation scope supplies identity, destination/session binding
+and expiry; its closed record contract does not contain an R25 feedback-permission
+assertion. Personal Memex disclosure is explicitly `resident_architect_context`
+from principal scope and must remain so. A signed record proves its authenticated
+origin under its existing contract, not permission for a new purpose.
+
+The older communication and infrastructure consent engines were also inspected.
+Their automatic grants and unkeyed digest/UUID identifiers do not bind an
+authenticated principal's approval of this exact summary, FoundUp and proposal
+version. They are not an R25 authority adapter. No import connecting them to
+the inspected bridge/digital-twin/FAM owners was found; this is a reuse decision,
+not a claim of an exposed production vulnerability or an instruction to delete them.
+
+The smallest prerequisite is to choose and specify an explicit approval assertion
+and its issuer/consumer under the **existing authenticated conversation/record
+owners**, including source-record signing/revision, permitted summary bytes,
+purpose/target/version, expiry, revocation and retry semantics. Verify this before
+the read projection copies permissioned content. Preserve existing read,
+one-use promotion and CAS persistence boundaries. Do not add a second generic
+consent engine, widen the architect disclosure purpose or introduce an unused
+verifier to make the proposal appear accepted.
+
+Missing live permission does not prevent safe contract development. The current
+source-edit blocker is narrower: the assertion/issuance/consumption contract and
+its exact compatible owner extension have not been selected and independently
+qualified. Resolving that design does not itself require a new 012 approval.
+A synthetic structural envelope may be designed separately, explicitly unverified
+and non-authorizing; it cannot satisfy the consented-feedback acceptance gate.
+
+### Required compatibility matrix for the eventual implementation
+
+| Case | Required result |
+|---|---|
+| Unchanged legacy v1 inputs | Identical wire bytes, evidence/proposal/candidate IDs and gate receipts. |
+| Explicit synthetic feedback with a qualified permission input | Preserve every source/type/scope/version binding; structural candidate only, with no work, persistence, verification or reward authority. **This positive path does not exist yet.** |
+| Exact retry or timestamp-only repeat | Preserve the logical version/window linkage; never inflate participant or contribution counts. Keep legacy content IDs unchanged in meaning. |
+| Dissent or a correction | Keep contrary evidence and explicit version linkage visible; no forced agreement or silent type conversion. |
+| Missing, expired or revoked permission | Reject before projecting the permitted content; no candidate or side effect. |
+| Wrong principal, conversation, FoundUp, source revision or digest | Reject even when a caller recomputes unsigned hashes. |
+| Changed summary, purpose, destination or proposal version | Require a new exact permission binding; stale permission rejects. |
+| Preference/inference relabeled as fact or authorization | Reject unsupported type/authority references; no execution-valve effect. |
+| Principal-only disclosure or legacy automatic consent record | Reject as feedback permission; preserve the existing architect-only behavior. |
+| Missing activity qualification, recipient policy or delivery-time recheck | No R25-B outreach. A synthetic activity assertion is fixture input, not implemented engagement policy. |
+
+Source-bound independent reviews, searched owners, exact file/function budgets and
+the post-qualification WSP15 decision are in the existing backlog observation.
+No tests were rerun for this documentation-only qualification; unchanged earlier
+component results remain scoped to their recorded source and do not prove R25.
 
 | Slice | Deliverable | Required positive and negative evidence |
 |---|---|---|

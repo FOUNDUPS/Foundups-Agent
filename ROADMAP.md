@@ -52,10 +52,10 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`9e8979794ad43dc647899221518890c7f8b5487a`, including PR1797/1798/1799/1800. PR1800's ten
-checks passed and its reviewed/merged trees match. Both subsequent main workflows
-are now verified successful; PR1799's two main workflows also passed.
-Refreshed September 9 UTC onward accounting found 111 merged PRs and 15
+`745dc8355f31c0663b2358dc5ddac59c35b45bb3`, including PR1797/1798/1799/1800/1801. PR1801's ten
+exact-head checks passed; reviewed/merged trees match. PR1800's two main workflows
+passed; PR1801's subsequent main workflows are now also verified successful.
+Refreshed September 9 UTC onward accounting found 112 merged PRs and 15
 closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
 reported checks. The earlier detailed inventory marked 26 as conflicting; the
@@ -72,9 +72,9 @@ under `repository_pr_accounting_20260920`; full file/check evidence is hash-boun
 |---|---|
 | Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796/#1797/#1798 are merged. Omitted-plan bootstrap selection is closed with638 connected tests and independent review. Its14/P1 step advanced the historical18/P0 parent; the remaining local context/child fidelity contract is now15/P1. |
 | Typed FoundUp intake | PR1799 merged the commander data handoff15/P1 within17/P0 parent; metadata survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
-| FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; remote closure is recorded separately in the backlog. |
-| Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its next contract qualification is selected at 13/P1 after the fixture repair. Source implementation remains unqualified. No live feedback path or retained RSI improvement is claimed. |
-| AutoResearcher evidence | The proposal-text identity substep is independently12/P2, below the selected fixture repair14/P1. Parent15/P1 is aggregate context, not inherited execution priority. Program/oracle/environment/reader contracts remain distinct; no researcher code changed. Re-score after closure. |
+| FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; PR1801 is merged with ten exact-head checks passed and both main workflows now successful. |
+| Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is complete. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
+| AutoResearcher evidence | Next independently qualified action: proposal-text identity12/P2, after closing the fixture14 and R25 compatibility13 steps. Parent15/P1 remains aggregate context. Program/oracle/environment/reader contracts stay separate; no researcher code changed in this qualification. |
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
