@@ -7,6 +7,10 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 SKILL = ESINGULARITY / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
 CITY = ESINGULARITY / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 REGISTRY = REPO_ROOT / "modules" / "infrastructure" / "wre_core" / "skillz" / "skills_registry_v2.json"
+PROJECTIONS = [
+    REPO_ROOT / ".agents" / "skills" / "yumori-contact-ledger" / "SKILL.md",
+    REPO_ROOT / ".claude" / "skills" / "yumori-contact-ledger" / "SKILL.md",
+]
 
 
 def _text(path: Path) -> str:
@@ -48,3 +52,10 @@ def test_registry_points_to_canonical_parent():
     assert item["location"] == "modules/foundups/esingularity/skillz/yumori_contact_ledger"
     assert item["primary_agent"] == "0102"
     assert item["version"] == "0.6.0"
+
+
+def test_correspondence_skill_is_projected_to_agent_surfaces():
+    for projection in PROJECTIONS:
+        text = _text(projection)
+        assert "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md" in text
+        assert "0102 writes as proxy; the monk remains third person." in text
