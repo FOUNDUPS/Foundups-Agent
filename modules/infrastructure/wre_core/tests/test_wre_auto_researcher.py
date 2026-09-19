@@ -795,3 +795,102 @@ def test_terminal_reports_preserve_prior_invocations(temp_research_env, tmp_path
             assert failed["failure"] == {"type": "OSError", "phase": "baseline_preparation"}
             assert failed["baseline_evaluations"] == failed["attempts_started"] == 0
     _assert_reports_preserved(researcher, first, first_bytes, fault)
+
+
+@pytest.mark.parametrize("newline", ["\n", "\r\n"])
+def test_proposal_inputs_distinguish_equal_outcomes(temp_research_env, tmp_path, monkeypatch, newline):
+    target, program = temp_research_env
+    researcher = WREAutoResearcher(target, program, max_iterations=3, results_dir=tmp_path / "runs")
+    original = target.read_text(encoding="utf-8")
+    first_bytes = None
+    for label in ("first", "second"):
+        proposals = [original + f"# {label} café\n", None, original + f"# {label} 東京\n"]
+        proposals = [p.replace("\n", newline) if p else p for p in proposals]
+        pending = iter(proposals)
+        monkeypatch.setattr(researcher, "_propose_change", lambda code, metrics, history: next(pending))
+        result = researcher.run()
+        assert result["proposal_inputs"] == [
+            {"iteration": i, "proposal_input_sha256": hashlib.sha256(p.encode("utf-8")).hexdigest()}
+            for i, p in enumerate(proposals, 1) if p
+        ]
+        assert [row["status"] for row in result["history"]] == ["rejected", "no_proposal", "rejected"]
+        assert result["candidate_evaluations"] == 2 and result["attempts_started"] == 3
+        assert json.loads(Path(result["report_path"]).read_text()) == result
+        assert researcher.working_target_path.read_text(encoding="utf-8") == original
+        assert target.read_text(encoding="utf-8") == original
+        if first_bytes is None:
+            first_path, first_inputs = Path(result["report_path"]), result["proposal_inputs"]
+            first_bytes = first_path.read_bytes()
+        else:
+            assert result["proposal_inputs"] != first_inputs
+            assert first_path.read_bytes() == first_bytes
+
+
+@pytest.mark.parametrize("fault", ["write", "diff", "evaluation"])
+def test_aborted_proposal_keeps_input_identity(temp_research_env, tmp_path, monkeypatch, fault):
+    target, program = temp_research_env
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    original = target.read_text(encoding="utf-8")
+    proposed = original + "# interrupted proposal\n"
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: proposed)
+    write_text, evaluator = Path.write_text, researcher_module.evaluate_target
+    evaluated = []
+    def write(path, data, *args, **kwargs):
+        if fault == "write" and path == researcher.working_target_path and data is proposed:
+            raise OSError("candidate write failed")
+        return write_text(path, data, *args, **kwargs)
+    def diff(*args):
+        if fault == "diff":
+            raise RuntimeError("diff failed")
+        return ""
+    def evaluate(path):
+        evaluated.append(path)
+        if fault == "evaluation" and len(evaluated) == 2:
+            raise KeyboardInterrupt()
+        return evaluator(path)
+    monkeypatch.setattr(Path, "write_text", write)
+    monkeypatch.setattr(researcher.runner, "diff", diff)
+    monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
+    with pytest.raises({"write": OSError, "diff": RuntimeError, "evaluation": KeyboardInterrupt}[fault]):
+        researcher.run()
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    assert report["proposal_inputs"] == [{"iteration": 1, "proposal_input_sha256": hashlib.sha256(proposed.encode("utf-8")).hexdigest()}]
+    assert report["status"] == "aborted" and report["cleanup"] == "restored"
+    assert report["attempts_started"] == 1 and report["attempts_finished"] == 0
+    assert report["candidate_evaluations"] == int(fault == "evaluation")
+    assert researcher.working_target_path.read_text(encoding="utf-8") == original
+    assert target.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize("proposal", [None, "", {}, False, {"code": "bad"}, b"bad", 1])
+def test_missing_or_nontext_proposal_has_no_text_identity(temp_research_env, tmp_path, monkeypatch, proposal):
+    target, program = temp_research_env
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: proposal)
+    diff_calls = []
+    monkeypatch.setattr(researcher.runner, "diff", lambda *args: diff_calls.append(args))
+    if proposal:
+        with pytest.raises(TypeError):
+            researcher.run()
+    else:
+        researcher.run()
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    assert report["proposal_inputs"] == [] and not diff_calls
+    assert report["candidate_evaluations"] == 0 and report["cleanup"] == "restored"
+    if proposal:
+        assert report["failure"] == {"type": "TypeError", "phase": "candidate_preparation"}
+    else:
+        assert report["status"] == "completed" and report["outcome_counts"]["no_proposal"] == 1
+
+
+def test_proposal_text_subclass_uses_underlying_unicode(temp_research_env, tmp_path, monkeypatch):
+    class EncodedOverride(str):
+        def encode(self, *args, **kwargs):
+            raise AssertionError("override must not define text identity")
+    target, program = temp_research_env
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    plain = target.read_text(encoding="utf-8") + "# subclass café\n"
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: EncodedOverride(plain))
+    result = researcher.run()
+    assert result["proposal_inputs"] == [{"iteration": 1, "proposal_input_sha256": hashlib.sha256(plain.encode("utf-8")).hexdigest()}]
+    assert result["history"][0]["status"] == "rejected"

@@ -222,7 +222,7 @@ class WREAutoResearcher:
                 continue
 
             report["phase"] = "candidate_preparation"
-            self.working_target_path.write_text(proposed_code, encoding="utf-8")
+            _prepare_proposal(self, report, iteration, proposed_code)
 
             # Calculate and display diff using injected runner
             diff_text = self.runner.diff(best_code, proposed_code, self.target_path.name)
@@ -401,6 +401,15 @@ AGENT_PREMIUM_MULTIPLIERS = {repr(multipliers)}
         return "\n".join(parsed_lines)
 
 
+def _prepare_proposal(researcher: WREAutoResearcher, report: Dict, iteration: int, proposed_code: str):
+    """Record returned text before preparation can fail; this is not authority."""
+    if not isinstance(proposed_code, str):
+        raise TypeError("proposal must be str")
+    digest = hashlib.sha256(str.encode(proposed_code, "utf-8")).hexdigest()
+    report["proposal_inputs"].append({"iteration": iteration, "proposal_input_sha256": digest})
+    researcher.working_target_path.write_text(proposed_code, encoding="utf-8")
+
+
 def _require_dry_run(researcher: WREAutoResearcher):
     """A mutable flag cannot supply the unimplemented live-mode authority."""
     if researcher.dry_run is not True:
@@ -425,7 +434,7 @@ def _new_run_report(researcher: WREAutoResearcher, baseline_code: str) -> Dict:
         "dry_run": researcher.dry_run is True, "phase": "preflight", "stop_reason": None,
         "attempts_requested": requested if type(requested) is int and requested >= 0 else None,
         "attempts_started": 0, "baseline_evaluations": 0, "candidate_evaluations": 0,
-        "baseline": None, "optimized": None, "history": [],
+        "baseline": None, "optimized": None, "history": [], "proposal_inputs": [],
         "baseline_input_sha256": hashlib.sha256(baseline_code.encode("utf-8")).hexdigest(),
         "failure": None, "cleanup_failure": None, "cleanup": "not_performed",
         "independently_verified": None, "retained_improvements": None, "resource_usage": None,

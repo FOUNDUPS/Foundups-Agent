@@ -1,3 +1,9 @@
+## 2026-09-20: Reconcile RSI work and preserve failed proposal identity
+
+- Refreshed repository accounting at main4ce762a4:113 merged and15 closed unmerged since September9 UTC;102 open (13drafts),20 failing/81 pass-or-skip/one unchecked,76 mergeable/26 conflicting. AmIBot registration remains draft1751-only, with issue1750 open. Existing onboarding skill/protocol read; no duplicate scaffold or public launch.
+- Locally closed the qualified12/P2 AutoResearcher proposal-input repair in existing source/tests; remote closure pending. Initial13 failed/96 passed; repaired109 pass, independent109 overlap plus five probes. Canonical registry1651/269 current. Evaluator and pre-existing tests unchanged; raw conversations, runtime authority and retained learning remain outside this diagnostic slice.
+- Native OpenClaw metadata present; WSL distributions stopped, current Hermes/provider/sandbox unverified. Fresh WSP15 selection is13/P1 existing WSL advisory lifecycle qualification, including cold-start/race behavior. No upgrade or launch performed. WSP00/15/22/48/50/62/84/97/99; evidence and packets in existing backlog.
+
 ## 2026-09-20: R25 compatibility qualification merged; proposal evidence selected
 
 - PR1802 merged as `4ce762a4ce1b54f22546c4f9ce784f1209f08489` after ten exact-head checks passed. All five independently reviewed documentation blobs and the merged tree match;102peer heads and the protected shared checkout remain unchanged.

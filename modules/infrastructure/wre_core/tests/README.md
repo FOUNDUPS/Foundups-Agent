@@ -1,5 +1,17 @@
 # wre_core Test Suite
 
+## Proposal input identity
+
+`test_wre_auto_researcher.py` now covers returned UTF-8 proposal identity without
+changing the evaluator or pre-construction model-disable fixture. Thirteen new
+cases reproduce the missing field on unchanged source; final109 pass. Independent
+109-case execution overlaps. Tests cover equal-outcome/distinct-text diagnostics,
+LF/CRLF and non-ASCII input, sequential report preservation, preparation/diff/
+evaluation aborts, missing/non-text returns and overridden string encoders.
+All new functions remain≤50 lines. Retain this cohesive suite's800-line guideline
+review; no new exemption. Use the isolated execution instructions below.
+Hashes are local diagnostics, not authenticated provenance or runtime admission.
+
 ## Researcher baseline snapshot
 
 Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
