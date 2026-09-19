@@ -197,12 +197,21 @@ milestone, not from the budget date alone.
 
 ## Routing and outbound correspondence dependency
 
-All Fukui City / Council email or addressed-document actions must also apply the
-repository-owned recipient guard:
+All Fukui City / Council email or addressed-document actions must first apply the
+repository-owned YUMORI correspondence parent:
+
+`modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md`
+
+That parent owns the canonical 0102 proxy voice, third-person monk reference,
+Sent-first reconciliation, routing consent, receipt reconciliation, and recursive
+learning contract.
+
+Consequential outbound actions must also apply the repository-owned recipient guard:
 
 `modules/communication/moltbot_bridge/skillz/reddog_recipient_preflight/SKILLz.md`
 
-The procedure skill never authorizes a recipient by itself.
+The procedure skill never authorizes a recipient or overrides the parent voice/routing
+contract by itself.
 
 Before finalizing To/CC/BCC:
 1. resolve every intended identity against the live YUMORI Contacts sheet;
