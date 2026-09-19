@@ -221,11 +221,20 @@ has moved away from its operator-approved storage location.
 | `FOUNDUPS_AGENT_WSL_DISTRO` | `Ubuntu-24.04` | Exact WSL distribution name |
 | `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` | empty | Optional expected Windows distro base path |
 
-The advisory does not install, update, onboard, start, stop, or dispatch either
-agent. It is disabled by default because invoking a version command executes the
-installed program. Its receipt is explicitly unauthenticated availability
-evidence, never authority. When enabled, each component has a ten-second
-timeout. A failed probe is `NOT_READY` evidence and never denies menu access.
+The advisory has no install, update, onboarding, service-management or job-dispatch
+command. It is disabled by default and that path makes no host calls. When enabled,
+it executes installed programs and may start a stopped WSL distribution and its
+configured services. It therefore does not guarantee absence of lifecycle effects.
+Its receipt is explicitly unauthenticated availability evidence, never authority.
+Each component has a ten-second timeout. A failed probe is `NOT_READY` evidence
+and never denies menu access.
+
+The [qualified next contract](ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20)
+adds a separate default-off command opt-in. It is planned, not implemented. A
+running-state precheck cannot establish strict no-start behavior across a later
+`--exec` call. Existing source/test no-lifecycle wording is a known mismatch to
+correct in that source slice; current injected tests do not prove OS lifecycle
+absence.
 
 ### `resolve_trusted_wsl_executable() -> Path | None`
 

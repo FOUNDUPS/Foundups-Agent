@@ -52,21 +52,23 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`4ce762a4ce1b54f22546c4f9ce784f1209f08489`, including PR1797–1802. PR1802's ten
-exact-head checks passed; reviewed/merged trees match. PR1800/1801 main workflows
-passed; PR1802 main workflows are reported separately in the backlog.
-Refreshed September 9 UTC onward accounting found 113 merged PRs and 15
-closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
-20 have failing checks, 81 have passing/skipped reported checks and one has no
-reported checks. Fresh bulk mergeability resolves to 76 MERGEABLE and 26 CONFLICTING;
-PR1751 remains separately confirmed CONFLICTING. These categories overlap;
+`e56feb4cc7426d294bc787145e1bb136d1692beb`, including PR1797–1804. PR1803's ten
+exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
+passed, as did both PR1803 main workflows. PR1804's protected eSingularity ticker
+change is preserved; its subsequent main workflows are separate observations.
+Refreshed September 9 UTC onward accounting found 115 merged PRs and 15
+closed without merge; the 102 open peer heads were rechecked unchanged. The
+preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
+passing/skipped checks and one with no reported checks; bulk mergeability was
+76 MERGEABLE and 26 CONFLICTING, including PR1751. Check/mergeability summaries
+were not refreshed in this contract sprint. These categories overlap;
 reported green checks alone do not establish current merge or runtime authority.
 Post-merge R19 evidence also found42 passing red-team observations in logs but
 zero uploaded artifacts; qualify existing report delivery without activating its gate.
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; the current backlog observation binds the
-complete 113-merge/15-closed refresh and all 102 current open heads/checks.
+complete 113-merge/15-closed refresh plus PR1803/1804 closures and all 102 peer heads/checks.
 
 | Work observed | Reconciliation and next action |
 |---|---|
@@ -74,11 +76,12 @@ complete 113-merge/15-closed refresh and all 102 current open heads/checks.
 | Typed FoundUp intake | PR1799 merged the commander data handoff15/P1 within17/P0 parent; metadata survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
 | FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; PR1801 is merged with ten exact-head checks passed and both main workflows now successful. |
 | Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is merged in PR1802. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
-| AutoResearcher evidence | Proposal-text identity12/P2 is locally repaired and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
+| AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
+| WSL advisory lifecycle | Contract qualification13/P1 is locally complete:25 unchanged tests and seven injected witnesses, independent caller/contract review, zero actual WSL calls. Next12/P2 is a separate default-off command opt-in in the existing probe; source behavior is not yet changed. |
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 638 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 639 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -92,17 +95,21 @@ and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not inges
 raw conversations automatically or claim that merged Codex work was autonomously
 executed and retained by WRE.
 
-**PC execution:** this session can run local Windows commands. Native OpenClaw
-2026.5.2 is present; no registered WSL distro is currently running. Current Hermes,
+**PC execution:** this session can run local Windows commands. The September19
+22:21 UTC metadata snapshot found native OpenClaw2026.5.2 and stopped WSL distros;
+this contract audit did not refresh or activate those runtimes. Current Hermes,
 WSL OpenClaw/provider bindings and a real admitted sandbox remain unverified.
 The existing resolver still supplies no authoritative effect-use lease. A cold
 WSL launch can start user services, so a disposable sandbox must first be bound
 through the existing launcher/admission/rollback path. There is no evidence yet
-that blindly upgrading either runtime is the required repair. The refreshed audit found
-a specific next 13/P1 action: qualify the existing WSL advisory lifecycle contract.
-Its fixed `--exec ... --version` commands can cold-start a stopped distro; a
-running-distro precheck alone cannot exclude a stop-before-exec race. Use injected
-fixtures and existing launcher owners before changing or running that probe.
+that blindly upgrading either runtime is the required repair. The existing WSL
+advisory contract is now qualified13/P1: enabled `--exec ... --version` calls
+may cold-start a stopped distro, and a running-state precheck cannot exclude a
+stop-before-exec race. Independent review selects the smaller12/P2 repair:
+separate metadata-only inspection from an explicit command opt-in inside the
+[existing owner](modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20).
+The repair is planned, not implemented. Command opt-in will still be diagnostic
+configuration, not runtime or effect-use authority.
 
 ## AmIBot autonomous production experiment — 2026-09-15
 
