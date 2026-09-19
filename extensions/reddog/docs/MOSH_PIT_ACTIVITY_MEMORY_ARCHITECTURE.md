@@ -2,21 +2,24 @@
 
 Status: `PARTIALLY_SUPPORTED` / `UNIFIED_RENDERER_NOT_IMPLEMENTED`
 
-Existing Breadcrumb and Brain/Memex query components are reusable inputs. The
-unified Mosh Pit projection and reverse-chronological renderer are not wired.
+Canonical behavior authority: `MOSH_PIT_PROTOCOL.md`.
+
+This document defines the architecture and composition of the Mosh Pit projection. If any wording here could be read more broadly than the protocol, the protocol wins. In particular, the Mosh Pit is an **012-centered principal-continuity projection**, not a general 0102 activity log.
+
+Existing Breadcrumb and Brain/Memex query components are reusable inputs. The unified Mosh Pit projection and reverse-chronological renderer are not wired.
 
 ## Purpose
 
 The **Mosh Pit is not a new memory subsystem**. It is a governed, reverse-chronological project/FoundUp projection assembled from the memory architecture already present in FoundUps Agent:
 
-- **Breadcrumbs** record the evidence-backed activity/discovery trail.
+- **Breadcrumbs** record the broad evidence-backed activity/discovery trail, including technical 0102/agent continuity.
 - **Brain** is the durable consolidation component that interprets current state, active work, queued work, roadmap state, verified outcomes, and breadcrumb position.
 - **Memex** is the canonical broader FoundUp memory/current-state surface; Brain is one component inside it.
 - **RedDog** is the low-latency human-facing proxy/attention boundary that retrieves and presents the useful projection.
-- **0102** performs the deeper normalization, retrieval, reasoning, evidence reconciliation, and prioritization behind RedDog.
-- **Mosh Pit** is a view: what we did, what happened, what is complete, what remains open, and what should be resumed next.
+- **0102** performs deeper normalization, retrieval, reasoning, evidence reconciliation, and prioritization behind RedDog.
+- **Mosh Pit** is the principal-significance view: what 012 did/decided, what materially changed through joint 012+0102 work or consequential delegated 0102 work, what happened next, what is complete, what remains open, and what should be resumed.
 
-The founding YUMORI workflow is the alpha pattern: 012 acts in the physical world while 0102 simultaneously performs research, documentation, architecture, coding, analysis, and artifact work. Both streams must be recoverable as **our** single operational history.
+The founding YUMORI workflow is the alpha pattern: 012 acts in the physical world while 0102 performs supporting research, documentation, architecture, coding, analysis, and artifact work. Both streams remain recoverable in Breadcrumb/Brain/Memex, but **only principal-significant events pass into the Mosh Pit projection**.
 
 ## Canonical Flow
 
@@ -37,7 +40,7 @@ RedDog surface
         |
         v
 Breadcrumbs
-  - chronological activity/discovery trail
+  - broad chronological activity/discovery trail
   - provenance-bearing event records
         |
         v
@@ -48,6 +51,14 @@ FoundUp Brain / Memex
   - roadmap state
   - verified outcomes
   - breadcrumb high-water mark / history position
+        |
+        v
+Mosh Pit inclusion gate (`MOSH_PIT_PROTOCOL.md`)
+  - 012 action/decision
+  - 012+0102 material state change
+  - consequential 0102-delegated result
+  - material external response
+  - milestone/state transition
         |
         +--> Mosh Pit reverse chronology
         +--> accomplishments / milestones
@@ -60,11 +71,11 @@ No duplicate Mosh Pit database should be created. The same underlying event/evid
 
 ## Breadcrumb Contract
 
-Breadcrumbs are the event trail. A meaningful operational breadcrumb should be capable of carrying or resolving to:
+Breadcrumbs are the broad event trail. A meaningful operational breadcrumb should be capable of carrying or resolving to:
 
 - event/timestamp or bounded approximate time;
-- canonical actor: `012`, `0102`, `012 + 0102`, `PC`, or relevant external party;
-- FoundUp/project scope;
+- canonical actor;
+- principal/project/FoundUp scope;
 - concise factual action;
 - observed result/outcome when known;
 - evidence/provenance references;
@@ -74,6 +85,8 @@ Breadcrumbs are the event trail. A meaningful operational breadcrumb should be c
 - correction/supersession linkage where needed.
 
 Breadcrumb history should remain source-preserving. Correcting a normalized fact must not destroy the original transcript, image, capture, or receipt.
+
+Breadcrumb inclusion is broader than Mosh Pit inclusion. A technical 0102 breadcrumb may be valid without belonging in the Mosh Pit.
 
 ## Brain / Memex Contract
 
@@ -95,22 +108,22 @@ This is the layer that handles 012 moving rapidly between topics. A diversion do
 
 ## Mosh Pit Projection
 
-Mosh Pit is the human-readable activity/history projection over selected Breadcrumbs plus current-state interpretation from Brain/Memex.
+Mosh Pit is the human-readable **012-continuity** projection over selected Breadcrumbs plus current-state interpretation from Brain/Memex.
+
+The canonical inclusion/exclusion tests live in `MOSH_PIT_PROTOCOL.md`; this architecture must not introduce a competing event policy.
 
 Its default YUMORI-style rendering is reverse chronological and grows upward:
 
 ```text
 [space for next event]
-2026-09-05
-- 012: ...
-- 0102: ...
-- PC: ...
+2026-09-08
+- 012: field action / decision ...
+- 012+0102: material project-state change ...
+- 0102-delegated: consequential authorized result ...
+- PC: formal committee action ...
 
-2026-09-04
-- 012: ...
-- 0102: ...
-
-...
+2026-09-07
+- ...
 
 RESEARCH / PRE-LAUNCH FOUNDATION
 ```
@@ -127,7 +140,7 @@ RedDog must be able to answer compactly when 012 asks variants of:
 - "Show me the YUMORI timeline."
 - "What is still left over?"
 - "What do we need to go back to?"
-- "What did 0102 build?"
+- "What consequential thing did 0102 complete for me?"
 - "What did 012 do in the field?"
 
 Retrieval should combine existing memory lanes rather than depend on a single prose document:
@@ -136,11 +149,12 @@ Retrieval should combine existing memory lanes rather than depend on a single pr
 2. retrieve matching/recent Breadcrumbs;
 3. retrieve Brain/Memex current state and open/queued work;
 4. retrieve verified Git/PR/artifact evidence where relevant;
-5. deduplicate multiple receipts representing one event;
-6. normalize aliases while preserving source evidence;
-7. sort events by event time for the requested view;
-8. return a concise projection with explicit actor attribution and provenance class;
-9. separately identify **completed**, **open**, and **next-highest-leverage** work when requested.
+5. apply the canonical Mosh Pit inclusion gate;
+6. deduplicate multiple receipts representing one event;
+7. normalize aliases while preserving source evidence;
+8. sort events by event time for the requested view;
+9. return a concise projection with explicit actor attribution and provenance class;
+10. separately identify **completed**, **open**, and **next-highest-leverage** work when requested.
 
 For a general "what are we doing?" request, the target RedDog output is:
 
@@ -152,7 +166,7 @@ OPEN LOOPS
 - items Brain/Memex says remain active/queued/unresolved
 
 RECENT ACCOMPLISHMENTS
-- reverse-chronological selected Breadcrumbs
+- reverse-chronological Mosh-Pit-qualified events
 
 HISTORY
 - available on request as the full Mosh Pit projection
@@ -166,30 +180,31 @@ The repository already contains reusable runtime pieces for this retrieval path:
 - `query_unresolved_work()` retrieves unresolved/queued work;
 - FoundUp Brain/Memex assembly already consumes Breadcrumb state plus active/queued work and verified outcomes.
 
-This PR **does not claim that a unified Mosh Pit runtime renderer is already wired into RedDog**. It defines the canonical composition so the next runtime slice extends those existing query surfaces rather than creating a parallel memory/query stack.
+The unified Mosh Pit runtime renderer and principal-significance gate are not yet claimed wired into RedDog. The implementation work order is `docs/prompts/WSP97_REDDOG_MOSH_PIT_PROTOCOL_IMPLEMENTATION_PROMPT.md`.
 
 ## What Belongs in a Project Mosh Pit
 
 The operational spine is:
 
 ```text
-012/0102 found out
--> researched
--> decided
--> acted / built
--> response observed
--> outcome recorded
--> next/open action retained
+012 acts/decides or delegates
+-> 0102/RedDog captures and binds evidence
+-> project state materially changes
+-> response/outcome is observed
+-> open/next action retained
 ```
 
-External events enter only when they caused, constrained, validated, or materially changed our work. The Mosh Pit is not a history of the City, NVIDIA, an investor, or another organization.
+An event belongs when the canonical protocol says it has principal significance. Routine 0102 search/reasoning/formatting/retries/tool plumbing/code iterations stay in technical Breadcrumbs unless their **delegated result materially changes project state**.
+
+External events enter only when they caused, constrained, validated, rejected, or materially changed our work. The Mosh Pit is not a history of the City, NVIDIA, an investor, or another organization.
 
 Examples:
 
 - `012: met Sano; presented reuse concept.`
-- `0102: eSingularity PWA moved into canonical FoundUps module; PR #1608.`
-- `012 + 0102: Japan/NVIDIA compute-infrastructure research changed viability assessment; active collateral work began.`
+- `012+0102: strengthened Document 03 with investment, financing and 60-day FS logic; it became the primary economic support document.`
+- `0102-delegated: sent approved technical-review outreach; a reply closed one expert lead.`
 - `PC: quorum established; second meeting scheduled.`
+- **Excluded:** `0102 searched 14 sites, retried Gmail, reformatted paragraphs.`
 
 ## Event / Truth Classification
 
@@ -197,6 +212,7 @@ Useful projections must preserve the distinction between:
 
 - **OBSERVED** — directly evidenced event/result;
 - **REPORTED_BY_012** — 012's contemporaneous account;
+- **EVIDENCED** — supported by durable external/artifact evidence;
 - **INFERRED** — derived relationship/significance;
 - **PROPOSED** — future action or strategy, not accomplished fact.
 
@@ -204,15 +220,17 @@ Example: `zazen protest occurred` and `decision was postponed` can coexist as hi
 
 ## Actor Attribution
 
-Actor labels are provenance, not ownership partitions:
+Actor labels are provenance, not ownership partitions. Canonical actor semantics are defined by `MOSH_PIT_PROTOCOL.md`:
 
-- **012** — principal's physical-world execution;
-- **0102** — digital-twin research, documentation, architecture, coding, analysis, artifacts;
-- **012 + 0102** — genuinely joint decision/discovery/work product;
-- **PC** — formal committee action after organizational authority exists;
+- **012** — principal physically acted, spoke, decided, approved, witnessed, or directly executed.
+- **012+0102** — genuine joint work where 012 directed/shaped the result and project state materially changed.
+- **0102-delegated** — authorized 0102 result that materially changed principal/project state; log the result, not internal computation.
+- **PC** — formal committee action after organizational authority exists.
 - **External** — included only when its action materially changed ours.
 
-The founding-operation convention remains **our work**.
+A generic `0102` technical actor remains valid in Breadcrumbs but does **not** automatically qualify for Mosh Pit projection.
+
+The founding-operation convention remains **our work** while preserving actor provenance.
 
 ## STT / Alias Normalization
 
@@ -232,33 +250,34 @@ The original transcript remains attached as provenance. The same rule applies to
 Contact memory and Mosh Pit are different projections over overlapping event evidence:
 
 - **Contact memory**: who is this person, what is our relationship, what happened between us, what commitments remain?
-- **Mosh Pit**: what did our operation do, what happened next, and how did the FoundUp advance?
+- **Mosh Pit**: what did 012/our operation do, what happened next, and how did the FoundUp advance?
 
 A meeting should exist once as an event/breadcrumb and be projected into both contexts.
 
 ## Git / Engineering Integration
 
-Git history is high-value evidence for 0102 activity. Include technical work in a project Mosh Pit when it:
+Git history is high-value evidence for 0102 activity, but engineering activity enters a project Mosh Pit only when the canonical principal-significance gate passes. Typical qualifying cases:
 
-1. directly builds that FoundUp/project;
-2. emerges directly from field use of that FoundUp/project; or
-3. materially improves the 012/0102 system being used to execute it.
+1. 012 directed/approved a change that materially changed the FoundUp/project;
+2. the engineering change emerged directly from field use and changed the principal's operating capability; or
+3. consequential delegated 0102 implementation completed an authorized project milestone.
 
-Do not turn the Mosh Pit into a complete repository changelog.
+Routine commits, retries, CI noise, refactors, formatting and internal implementation detail remain in technical Breadcrumbs/ModLogs, not Mosh Pit.
 
 ## Daily Reconciliation
 
 A bounded curator/logging worker can reconcile candidate Breadcrumbs asynchronously and at a daily boundary. It should ask:
 
-1. What materially happened?
-2. Is it already represented by another receipt?
-3. What evidence supports it?
-4. Which actor owns execution provenance?
-5. Which FoundUp/project does it belong to?
-6. Is the time exact, approximate, or unknown?
-7. Is the item completed, open, blocked, or proposed?
-8. Does Brain/Memex already retain the associated open loop?
-9. Is human resolution required for identity, causation, or disclosure ambiguity?
+1. What did 012 materially do or decide?
+2. What joint 012+0102 work changed project state?
+3. What delegated 0102 results became consequential?
+4. What external responses changed next action?
+5. What milestones/open loops changed state?
+6. Which candidate items are merely machine activity and should stay out?
+7. Is it already represented by another receipt?
+8. What evidence supports it?
+9. Is the time exact, approximate, or unknown?
+10. Is human resolution required for identity, causation, or disclosure ambiguity?
 
 The worker creates/curates Breadcrumb evidence and Brain/Memex candidates; it does not maintain a second historical database.
 
@@ -275,12 +294,13 @@ Redaction is a projection policy, not a mutation of canonical evidence.
 
 ## Google Doc Projection
 
-A living Google Doc is appropriate as a convenient stakeholder/human Mosh Pit view for YUMORI. It should be generated from approved Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
+A living Google Doc is appropriate as a convenient stakeholder/human Mosh Pit view for YUMORI. It should be generated from approved Mosh-Pit-qualified Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
 
 Target:
 
 ```text
 Breadcrumbs + Brain/Memex
+-> canonical Mosh Pit inclusion gate
 -> Mosh Pit projection
 -> disclosure filter
 -> prepend/sync living Google Doc
@@ -303,16 +323,21 @@ This machinery normally stays beneath the RedDog attention boundary. Surface it 
 
 ## Implementation Direction
 
-Do not build a separate Mosh Pit store. Extend existing surfaces in this order:
+Do not build a separate Mosh Pit store. Follow the canonical work order:
 
-1. define a project/FoundUp-aware Breadcrumb event contract;
-2. ensure relevant 012/0102/PC events can enter that trail with provenance;
-3. ensure Brain/Memex can consolidate completion/open-loop state from those receipts;
-4. extend existing `query_past_work()` + `query_unresolved_work()` retrieval to emit a unified project activity projection;
-5. add Git/PR/artifact receipt matching;
-6. add the reverse-chronological Mosh Pit renderer;
-7. add optional governed Google Doc synchronization;
-8. keep RedDog output concise by default and expand full history only on request.
+`docs/prompts/WSP97_REDDOG_MOSH_PIT_PROTOCOL_IMPLEMENTATION_PROMPT.md`
+
+The implementation direction remains:
+
+1. reuse/extend the existing project/FoundUp-aware Breadcrumb event contract;
+2. ensure relevant 012/012+0102/0102-delegated/PC events can enter with provenance;
+3. implement the canonical inclusion gate;
+4. ensure Brain/Memex consolidates completion/open-loop state from those receipts;
+5. extend existing `query_past_work()` + `query_unresolved_work()` retrieval;
+6. add Git/PR/artifact receipt matching;
+7. add the reverse-chronological renderer;
+8. add optional governed Google Doc synchronization;
+9. keep RedDog output concise by default and expand full history only on request.
 
 ## Non-Goals / Safety
 
@@ -324,10 +349,11 @@ Do not build a separate Mosh Pit store. Extend existing surfaces in this order:
 - no causal claim without evidence;
 - no principal-boundary leakage;
 - no external mutation authority implied by memory retrieval;
-- no requirement that 012 manually maintain the log.
+- no requirement that 012 manually maintain the log;
+- no generic 0102 background activity in Mosh Pit merely because it happened.
 
 ## Founding Alpha
 
-YUMORI makes the architecture visible. 012 moves through City Hall, police, community, investors, and prefectural offices while 0102 simultaneously builds websites, research, models, documentation, RedDog architecture, and code. Breadcrumbs preserve those events. Brain/Memex keeps their current meaning and open loops. RedDog should be able to retrieve the relevant projection on demand and answer:
+YUMORI makes the architecture visible. 012 moves through City Hall, community, stakeholders and field activity while 0102 simultaneously supports research, models, documents, outreach, RedDog architecture and code. Breadcrumbs preserve the broad evidence trail. Brain/Memex keeps current meaning and open loops. The Mosh Pit inclusion gate extracts the principal-significant continuity view. RedDog should then be able to answer:
 
-> **What have we done? What changed? What is complete? What remains open? What do we return to next?**
+> **What did 012 do? What materially changed through our work? What is complete? What remains open? What do we return to next?**
