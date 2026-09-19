@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — Live Tsurugi-Otani field ticker
+
+- Replaced the expired September 16 field plan with 012-confirmed live activity as of 08:12 JST at an intersection in 福井市剣大谷町（つるぎおおたにちょう）, near the former Sukatto Land Kuzuryu.
+- The shared status states that the monk is speaking with local residents about the reuse proposal and handing out YUMORI.me T-shirts and tickets. The end time is explicitly left unconfirmed rather than invented.
+- Preserved the single `current-field-status.ts` source, Japanese-first wording, third-person monk reference, YUMORI.me destination, and both homepage consumers. No CampaignTicker component, routing, DNS, or hosting configuration changed.
+- WSP 97 / ticker-skill bounded pass: retrieved current source, website/ticker skills, WSP 97, module docs, recent ModLog, and overlapping open PR surfaces before editing. Source publication and live Sites deployment remain separate gates.
+
+
 ## 2026-09-18 — Fail-closed PR lifecycle gate after #1782 merge incident
 
 - Audited the temporary PR-finisher behavior after #1782 squash-merged while its eSingularity workflow was red from the inherited Cloudflare peer mismatch. The prior wording relied too heavily on GitHub's “required checks” concept and did not force inspection/classification of every workflow triggered for the exact PR head.
