@@ -1,3 +1,17 @@
+## 2026-09-20: Daily-work RSI boundary qualified; current PR accounting refreshed
+
+- Applied WSP 00/15/22/50/97/99 to the existing R25 packet. Mapped conversation, Principal Memex, disclosure, learning-candidate and work-promotion owners. No new source module, skill or runtime authority.
+- Five existing suites: 89 passed. Disposable reuse replay: 20 checks passed, zero R25 proposals. Initial pytest package-collection errors remain in evidence; the documented importlib mode resolves them. Independent review checked source hashes and replay predicates, without an independent rerun.
+- R25-specific consent/purpose/FoundUp/type/version binding remains unimplemented. Preserve the resident architect disclosure purpose and the persistence boundary. The narrow follow-on contract is 13/P1; re-scored all 28 candidates and selected existing AutoResearcher report completeness at 15/P1 for next source-scope qualification.
+- Fresh accounting: 110 merged since September 9 UTC, 15 closed without merge, 102 open (13 drafts; 20 failing, 81 reported pass/skip, one without checks). Search omitted eight closed PRs; the unfiltered list and explicit date/state filtering retained them. Peer heads and protected checkout are unchanged. Bulk mergeability is UNKNOWN for 101; AmIBot PR1751 remains draft/conflicting with failed validation.
+- Exact evidence and next packet: docs/roadmaps/rsi_swarm_backlog.json. Rotated the prior genesis observation into the existing historical observations file without changing its contents. Local source verification is distinct from WRE/OpenClaw/Hermes admission, deployment and verified retention.
+
+## 2026-09-20: Genesis handoff merged; daily-work contract selected
+
+- PR1799 merged asdaae91db04088bc49ddde97ee972299165e1d35d after10exact-head checks passed; reviewed/merged trees match. Other102peer heads and protected shared checkout remained unchanged. Main-workflow status is explicit in the backlog.
+- Re-scored28candidates: independent review corrected fixture repair from tentative15to14/P1. Selected existing R25-A15/P1 contract mapping for consented daily-work proposals; four reproduced baseline failures remain visible. No second source sprint or runtime activity.
+- Existing packet now carries synthetic consent/activity/provenance/type/dedup requirements and fail conditions. Preference, conversation preview and model inference cannot self-promote to verified RSI retention. Exact closure and next packet: docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+
 ## 2026-09-20: Commander genesis envelope handoff; baseline validation debt retained
 
 - WSP00/15/22/50/62/84/95/97/99/109: repaired the existing metadata-to-job owner; explicit commander authority precedes draft validation, and detached envelope/tenant/session/FoundUp lineage reaches the dry-run queue. No new module/skill, action, public entitlement or worker activation.
