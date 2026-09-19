@@ -1,3 +1,25 @@
+## RSI explicit proposal-plan checkpoint — 2026-09-19
+
+The existing architect proposal admission now accepts optional normalized
+`bounded_worker_plan`, detaches it before callbacks, validates supplied receipt
+mirrors and conservative lexical scope, and binds the full plan into the v3 receipt.
+None/absence preserves all three legacy golden wires; `{}` stays explicit. Reused
+profile/codec owners cover both nested receipt locations. No new module or input route.
+Partial plans remain representable; this does not establish executable completeness.
+
+Independent local reviews accepted the exact seven source/test files after repairing
+wildcard deny overlap and non-plain ancestor coercion. Reconciliation onto main
+`123d86263` preserves their normalized hashes. Current-main run: 524 passed, five
+filesystem failures, one platform skip; the complete affected serial suite passes
+64/one skip with a short external temp root. Across those runs, all 529 applicable
+test IDs pass. Eight manifest tests/15 fast groups pass; registry is 1,651/269.
+
+Next under the shared 18/P0 handoff item: trace receipt-to-seed provenance and
+consistency before forwarding. The seed supplier still accepts a separate explicit
+plan, and `main.py:2844` omits it. Principal normalization, current runtime admission,
+native-child fidelity and retained RSI remain open. The root backlog owns sequencing,
+exact evidence and preserved failures. AmIBot remains at G0 with draft PR #1751.
+
 # moltbot_bridge Roadmap
 
 ## RSI producer contract checkpoint — 2026-09-15

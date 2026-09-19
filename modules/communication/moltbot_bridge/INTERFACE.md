@@ -38,6 +38,24 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
+`ArchitectProposalExecutabilityReceipt.bounded_worker_plan` is an optional
+mapping in the existing v3 schema. Its omitted default preserves the 60-field legacy
+wire; a supplied empty mapping is a distinct 61st field. Serialized explicit null,
+unknown fields, invalid typed/ASCII data and changed full receipt digest reject.
+The producer snapshots before other proposal callbacks. The reader validates supplied
+operation/domain tests, requested paths/artifacts and recognized packet `I` mirrors;
+it does not infer missing mirrors or interpret `S`/`A`/`T` prose as authority.
+Conservative lexical path checks reject uncertain wildcard/deny overlap, case aliases,
+trailing dots/spaces and controls; filesystem/use-time guards still apply.
+
+`snapshot_seed_worker_plan` now lives in the existing profile rehydration owner and
+is re-exported under its unchanged seed-supplier import name. Closed profile readers
+admit the plan only at the root and the two declared proposal receipt locations,
+including `operational_context_binding.proposal_admission`. Non-plain ancestors reject
+before reconstruction. Existing M2M codec bounds are unchanged. Whole-plan completeness,
+receipt-to-seed provenance, current authenticity/admission and startup forwarding are
+separate requirements; no provider, signer, worker or promotion authority is added.
+
 `run_reddog_authority_profile_seed_supply(...)` and its existing bootstrap accept
 `bounded_worker_plan=None`. `snapshot_seed_worker_plan` detaches a plain typed/ASCII
 dict; `None` omits the field and `{}` retains it. Both wrappers reject type/value/

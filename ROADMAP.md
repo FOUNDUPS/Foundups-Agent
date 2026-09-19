@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-15. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-19. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -61,7 +61,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. Main `8da0551f` still has 17 registry
+manifest and the existing intake package. Main `123d86263` still has 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -75,7 +75,7 @@ the canonical `/f/detect_ai` namespace. No build order or public route is activa
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
 | Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
 | WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
-| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Producer normalization, full context and downstream/native-child fidelity remain open. |
+| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Principal normalization, receipt-to-seed forwarding, full context and downstream/native-child fidelity remain open. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
@@ -102,16 +102,26 @@ exact-head checks. The merged tree matches the independently reviewed files plus
 reconciled main. Its 69 focused/320 independent checks overlap; they qualify the
 seed APIs, not a producer or live build. The backend manifest/pins remain unchanged.
 
-Two independent source audits now identify the producer gap. The existing
-architect model-output → `_Proposal` → executability receipt has no normalized
-worker-plan field. Determination/candidate identities already bind that receipt;
-the handoff retains its full validated payload. Arbitrary extra JSON is insufficient.
+The existing architect model-output → proposal → v3 receipt now preserves an
+explicit normalized worker plan and binds its complete contents to receipt identity.
+Existing determination/candidate persistence already binds that full receipt.
+Independent local reviews accepted the seven changed source/test files after
+repairing wildcard-deny overlap and non-plain ancestor coercion. All three legacy
+receipt wires remain unchanged. Partial data does not establish an executable plan.
 
-**Next: explicit plan admission at the existing proposal boundary, 18/P0.**
-The current backlog contains the bounded source packet: preserve legacy receipt
-bytes, validate complete typed data and scope, bind the full plan to the receipt,
-and independently test compatibility/tamper behavior before startup forwarding.
-`main.py:2844` stays unwired. No new input channel or runtime authority follows.
+Reconciliation onto main `123d86263` preserves the reviewed normalized hashes.
+Current-main validation: 524 passed/five filesystem failures/one platform skip;
+the affected serial suite passes 64/one skip with a short external temp root.
+All 529 applicable IDs therefore have passing local evidence. Eight manifest tests
+and 15 fast groups pass; registry is 1,651/269. Four of 1,400 runtime hashes change.
+Earlier failures and review corrections remain in the backlog evidence chain.
+
+**Next: receipt-to-seed provenance and consistency, 18/P0.** The seed supplier still
+accepts a separate explicit plan while `main.py:2844` supplies none. Trace the existing
+determination/claim/handoff and profile consistency owners, then define the smallest
+validated forwarding change. Do not infer packets from prose or task summaries.
+Principal normalization, full context/native-child fidelity, current signed admission
+and live RSI retention remain open; this local source qualification does not close G0.
 
 The adjacent 17/P0 genesis path also lacks declared typed ingress: actual
 `OpenClawIntent` has metadata, while an old fixture attaches a future payload.
