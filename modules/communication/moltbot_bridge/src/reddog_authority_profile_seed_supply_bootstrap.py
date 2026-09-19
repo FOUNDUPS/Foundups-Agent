@@ -1,25 +1,19 @@
-"""Main-startup bootstrap for RedDog authority-profile seed supply.
-
-Slice: REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_MAIN_PREFLIGHT_PHASE1
-
-This adapter reads resident runtime receipts from outside-repo JSON files and
-materializes the authority-profile seed consumed by the existing
-authority-profile source supplier.
-
-It does not sign, verify signatures, mutate signer state, mutate work state,
-spawn workers, create worktrees, execute shell commands, enqueue OpenClaw,
-dispatch Hermes, create PRs, settle rewards, write PatternMemory, or re-index
-HoloIndex.
+"""Select a declared plan from one raw receipt read; materialize a local seed.
+Existing supplier/authority gates remain; no signing, workers or runtime effects.
 """
 
 from __future__ import annotations
 
 import json
 import time
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gate import (
+    snapshot_architect_fix_plan_lineage,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply import (
     AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT,
     AuthorityProfileSeedSupplyReason,
@@ -30,6 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supp
 
 AUTHORITY_PROFILE_SEED_BOOTSTRAP_APPLIED = "AUTHORITY_PROFILE_SEED_BOOTSTRAP_APPLIED"
 AUTHORITY_PROFILE_SEED_BOOTSTRAP_NOT_READY = "AUTHORITY_PROFILE_SEED_BOOTSTRAP_NOT_READY"
+_PLAN_OMITTED = object()
 
 
 @dataclass(frozen=True)
@@ -78,45 +73,53 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
     consensus_receipt_digest: str | None = None,
     sovereign_authorization_digest: str | None = None,
     identity_ttl_seconds: int = 3600, work_authority_ttl_seconds: int = 900,
-    bounded_worker_plan: Mapping[str, Any] | None = None,
+    bounded_worker_plan: Mapping[str, Any] | None | object = _PLAN_OMITTED,
 ) -> AuthorityProfileSeedBootstrapResult:
     """Materialize the authority-profile seed from resident runtime files."""
     try:
-        plan = snapshot_seed_worker_plan(bounded_worker_plan)
+        plan = snapshot_seed_worker_plan(None if bounded_worker_plan is _PLAN_OMITTED else bounded_worker_plan)
     except (TypeError, ValueError, RecursionError):
         return _not_ready((AuthorityProfileSeedSupplyReason.BOUNDED_WORKER_PLAN_INVALID,))
     root = Path(repo_root).resolve()
     determination, determination_reasons = _read_json_outside_repo(
-        root,
-        architect_determination_path,
+        root, architect_determination_path,
         missing_reason="missing_architect_determination_path",
         inside_reason="architect_determination_path_inside_repo",
         malformed_reason="malformed_architect_determination",
     )
+    if bounded_worker_plan is _PLAN_OMITTED and not determination_reasons:
+        try:
+            if type(determination) is not dict:
+                raise ValueError("determination_not_plain_mapping")
+            admission = determination.get("proposal_admission")
+            if admission is not None and type(admission) is not dict:
+                raise ValueError("plan_lineage_not_plain_mapping")
+            if type(admission) is dict and "bounded_worker_plan" in admission:
+                plan = snapshot_seed_worker_plan(admission["bounded_worker_plan"])
+                determination, _ = snapshot_architect_fix_plan_lineage(determination, plan)
+            determination = deepcopy(determination)
+        except (TypeError, ValueError, RecursionError, OverflowError):
+            return _not_ready((AuthorityProfileSeedSupplyReason.PROPOSAL_PLAN_INVALID,))
     model_selection, model_reasons = _read_json_outside_repo(
-        root,
-        model_selection_receipt_path,
+        root, model_selection_receipt_path,
         missing_reason="missing_model_selection_receipt_path",
         inside_reason="model_selection_receipt_path_inside_repo",
         malformed_reason="malformed_model_selection_receipt",
     )
     memex_supply, memex_reasons = _read_json_outside_repo(
-        root,
-        memex_supply_receipt_path,
+        root, memex_supply_receipt_path,
         missing_reason="missing_memex_supply_receipt_path",
         inside_reason="memex_supply_receipt_path_inside_repo",
         malformed_reason="malformed_memex_supply_receipt",
     )
     principal, principal_reasons = _read_json_outside_repo(
-        root,
-        principal_authority_record_path,
+        root, principal_authority_record_path,
         missing_reason="missing_principal_authority_record_path",
         inside_reason="principal_authority_record_path_inside_repo",
         malformed_reason="malformed_principal_authority_record",
     )
     snapshot, snapshot_reasons = _read_json_outside_repo(
-        root,
-        permission_snapshot_path,
+        root, permission_snapshot_path,
         missing_reason="missing_permission_snapshot_path",
         inside_reason="permission_snapshot_path_inside_repo",
         malformed_reason="malformed_permission_snapshot",
@@ -136,23 +139,17 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
     assert principal is not None
     assert snapshot is not None
     supply = run_reddog_authority_profile_seed_supply(
-        repo_root=root,
-        architect_determination=determination,
-        model_selection_receipt=model_selection,
-        memex_supply_receipt=memex_supply,
-        principal_authority_record=principal,
-        permission_snapshot=snapshot,
+        repo_root=root, architect_determination=determination,
+        model_selection_receipt=model_selection, memex_supply_receipt=memex_supply,
+        principal_authority_record=principal, permission_snapshot=snapshot,
         output_path=output_path,
         reddog_id=reddog_id, reddog_public_key=reddog_public_key,
         now_epoch=int(now_epoch if now_epoch is not None else time.time()),
-        foundup_id=foundup_id,
-        requested_operation=requested_operation,
-        allowed_paths=allowed_paths,
-        denied_paths=denied_paths,
+        foundup_id=foundup_id, requested_operation=requested_operation,
+        allowed_paths=allowed_paths, denied_paths=denied_paths,
         valve_state_required=valve_state_required or "VALVE_OPEN_WORKTREE_CREATE",
         key_epoch=key_epoch,
-        required_tests=required_tests,
-        required_policy_gates=required_policy_gates,
+        required_tests=required_tests, required_policy_gates=required_policy_gates,
         consensus_receipt_digest=consensus_receipt_digest,
         sovereign_authorization_digest=sovereign_authorization_digest,
         identity_ttl_seconds=identity_ttl_seconds, work_authority_ttl_seconds=work_authority_ttl_seconds,
@@ -161,10 +158,8 @@ def run_reddog_authority_profile_seed_supply_bootstrap(
     if not supply.accepted or supply.status != AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT:
         return _not_ready(supply.rejection_reasons or ("authority_profile_seed_supply_rejected",))
     return AuthorityProfileSeedBootstrapResult(
-        accepted=True,
-        status=AUTHORITY_PROFILE_SEED_BOOTSTRAP_APPLIED,
-        seed_supply_receipt_id=supply.seed_supply_receipt_id,
-        output_path=supply.output_path,
+        accepted=True, status=AUTHORITY_PROFILE_SEED_BOOTSTRAP_APPLIED,
+        seed_supply_receipt_id=supply.seed_supply_receipt_id, output_path=supply.output_path,
         rejection_reasons=(),
     )
 

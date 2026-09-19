@@ -1,3 +1,10 @@
+## 2026-09-20: Serializer merged; caller contract and CI evidence debt re-observed
+
+- PR1797 merged as6556a0d1427651baef518de799ccb7df19e16c35 after10 exact-head checks passed. Merged tree equals reviewed5620candidate; other102 open heads and protected shared checkout were unchanged at merge preflight. Main CI/CodeQL statuses remain explicit in backlog.
+- Nine disposable bootstrap controls confirm the omitted argument drops a valid receipt plan; explicit exact input works, invalid/null/wrapped inputs reject with output intact, each reads determination once. Next source scope is the existing bootstrap/test owner, preserving220/111 budgets and lower supplier semantics. The substep is14/P1 within the broader18/P0 handoff parent; no new source change in this closure checkpoint.
+- Re-scored27 current candidates. Existing R19 gains13/P1 artifact-delivery debt: main's report-only red-team summary says42pass but the run has0uploaded artifacts. Passing job status is not retained artifact evidence; inspect existing upload configuration without silently activating a blocking gate.
+- All107 prior merges/102open PRs are accounted in existing observations; this repair adds one verified merge. Daily-work intake remains existing R25-A15/P1, AmIBot registration stays draft1751/detect_ai, and live sandbox/retention authority remains unqualified. WSP00/15/22/50/97/99.
+
 ## 2026-09-20: Actual producer serialization locally verified
 
 - Reused canonical child proposal/queue serializers: result and persistence preserve omitted legacy plans, explicit empty/full plans and all three linked IDs. Invalid wire null still rejects. Source remains1532lines; no new owner, skill, exemption, migration or startup wiring.
@@ -59187,3 +59194,9 @@ if cooldown_sets:
 - Added `stop_git_push_dae()` to `modules/infrastructure/git_push_dae/scripts/launch.py`.
 - Added `stop_social_media_dae()` to `modules/platform_integration/social_media_orchestrator/scripts/launch.py`.
 - Registered both runtimes with real `stop_callable` hooks in `main.py`.
+## 2026-09-20: Select omitted seed plans at the existing bootstrap
+
+- Fresh WSP00/15/97 reconciliation retains the18/P0 M2M handoff parent; this bounded step is14/P1. PR1797 main CI/CodeQL now pass;102 other open heads and the protected checkout were unchanged at preflight.
+- The existing bootstrap distinguishes omission from explicit None/empty, selects only the declared plan from one raw receipt read, freezes before later reads and reuses existing lineage/scope checks. No main.py, lower supplier, module, skill or runtime authority change.
+- Initial7fail/34pass, then41pass. Independent review caught nonplain-ancestor copy coercion; two new regressions failed before repair. Final638 connected pass; independent43 overlap plus69 boundary cases/191assertions. Source215/function111; interface1592 unchanged;8 manifest tests,15 fast groups and registry1651/269 pass.
+- Bootstrap remains outside the unchanged1400-member runtime manifest. Exact source, failed iterations, review and remote closure are recorded in docs/roadmaps/rsi_swarm_backlog.json#current_observation. Live workers, AmIBot registration/build and governed retention remain incomplete.

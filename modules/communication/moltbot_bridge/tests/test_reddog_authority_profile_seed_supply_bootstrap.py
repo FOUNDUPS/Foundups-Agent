@@ -6,7 +6,7 @@ import ast
 from copy import deepcopy
 import hashlib
 import json
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import pytest
@@ -82,24 +82,125 @@ def _bootstrap(files, **overrides):
     return run_reddog_authority_profile_seed_supply_bootstrap(**params)
 
 
-@pytest.mark.parametrize("kind", ("matching", "omitted", "conflicting"))
-def test_bootstrap_enforces_receipt_plan_consistency(tmp_path, kind):
+@pytest.mark.parametrize("kind", ("matching", "omitted", "none", "empty", "conflicting"))
+@pytest.mark.parametrize("receipt_plan", ("full", "empty"))
+def test_bootstrap_enforces_receipt_plan_consistency(tmp_path, kind, receipt_plan):
     files = _inputs(tmp_path)
-    determination = _plan_bound_determination()
+    determination = _plan_bound_determination({} if receipt_plan == "empty" else None)
     files["determination"].write_text(json.dumps(determination), encoding="utf-8")
-    plan = deepcopy(determination["proposal_admission"]["bounded_worker_plan"])
+    expected = deepcopy(determination["proposal_admission"]["bounded_worker_plan"])
+    plan = None if kind == "none" else {} if kind == "empty" else deepcopy(expected)
     if kind == "conflicting":
+        plan = _seed_plan()
         plan["m2m_envelope"]["A"] = "Different work"
     files["output"].write_bytes(b"previous seed")
     result = _bootstrap(
         files, requested_operation=determination["proposal_admission"]["requested_operation"],
         **({} if kind == "omitted" else {"bounded_worker_plan": plan}),
     )
-    assert result.accepted is (kind == "matching")
-    if kind == "matching":
-        assert json.loads(files["output"].read_text())["bounded_worker_plan"] == plan
+    accepted = kind in {"matching", "omitted"} or (kind == "empty" and receipt_plan == "empty")
+    assert result.accepted is accepted, result.rejection_reasons
+    if accepted:
+        assert json.loads(files["output"].read_text())["bounded_worker_plan"] == expected
     else:
         assert files["output"].read_bytes() == b"previous seed"
+
+
+@pytest.mark.parametrize("kind", ("absent", "empty", "full"))
+def test_bootstrap_selects_plan_from_actual_producer(tmp_path, monkeypatch, kind):
+    from modules.communication.moltbot_bridge.tests import test_reddog_architect_fix_promotion_exact_schema as producer
+    # Supply valid FoundUp-local deny scope to the model fixture BEFORE admission.
+    model_output = producer._model_output
+
+    def scoped_output(*args, **kwargs):
+        output = model_output(*args, **kwargs)
+        output["denied_paths"] = ["modules/foundups/demo/secrets/**"]
+        return output
+
+    monkeypatch.setattr(producer, "_model_output", scoped_output)
+    produced, store, runner = producer._produced_determination(kind)
+    assert produced.accepted is True and produced.persist_result.stored is True
+    assert len(runner.calls) == 1
+    determination = produced.receipt.to_dict()
+    assert store.records[0].determination == determination
+    admission = determination["proposal_admission"]
+    files = _inputs(tmp_path)
+    _write_json(files["determination"].parent, files["determination"].name, determination)
+    _write_json(files["principal"].parent, files["principal"].name,
+                replace(_principal(), foundup_scope=("demo",)).to_dict())
+    _write_json(files["memex"].parent, files["memex"].name, _memex_supply(
+        foundup_id="demo", snapshot_receipt_id=determination["snapshot_receipt_id"],
+        snapshot_content_digest=determination["snapshot_content_digest"],
+        holoindex_generation_id=admission["holoindex_generation_id"],
+        source_revision=admission["work_state_revision"],
+    ))
+    result = _bootstrap(files, **{key: admission[key] for key in (
+        "requested_operation", "allowed_paths", "denied_paths", "required_tests", "required_policy_gates",
+    )})
+    assert result.accepted is True, result.rejection_reasons
+    seed = json.loads(files["output"].read_text(encoding="utf-8"))
+    assert ("bounded_worker_plan" in seed) is (kind != "absent")
+    if kind != "absent":
+        assert seed["bounded_worker_plan"] == admission["bounded_worker_plan"]
+    assert seed["source_determination_receipt_id"] == determination["determination_receipt_id"]
+    assert seed["queue_candidate_id"] == determination["queue_candidate"]["queue_candidate_id"]
+
+
+@pytest.mark.parametrize("part", ("null", "malformed", "receipt", "candidate", "wrapper", "scope"))
+def test_bootstrap_omission_does_not_launder_invalid_receipts(tmp_path, part):
+    files = _inputs(tmp_path)
+    determination = _plan_bound_determination()
+    admission = determination["proposal_admission"]
+    if part in {"null", "malformed"}:
+        admission["bounded_worker_plan"] = None if part == "null" else []
+    elif part == "receipt":
+        admission["receipt_id"] = "sha256:" + "0" * 64
+    elif part == "candidate":
+        determination["queue_candidate"]["source_determination_receipt_id"] = "sha256:" + "0" * 64
+    elif part == "wrapper":
+        determination = {"receipt": determination}
+    _write_json(files["determination"].parent, files["determination"].name, determination)
+    files["output"].write_bytes(b"previous seed")
+    result = _bootstrap(files, requested_operation=(
+        "feature_slice" if part == "scope" else admission["requested_operation"]
+    ))
+    assert result.accepted is False
+    assert result.status == AUTHORITY_PROFILE_SEED_BOOTSTRAP_NOT_READY
+    assert files["output"].read_bytes() == b"previous seed"
+
+
+@pytest.mark.parametrize("kind", ("absent", "empty", "full"))
+def test_bootstrap_freezes_single_raw_read_before_later_callbacks(tmp_path, monkeypatch, kind):
+    from modules.communication.moltbot_bridge.src import reddog_authority_profile_seed_supply_bootstrap as bootstrap
+    files = _inputs(tmp_path)
+    determination = _determination() if kind == "absent" else _plan_bound_determination(
+        {} if kind == "empty" else None,
+    )
+    expected = deepcopy(determination)
+    _write_json(files["determination"].parent, files["determination"].name, determination)
+    read = bootstrap._read_json_outside_repo
+    reads, aliases = [], []
+
+    def mutate_after_read(*args, **kwargs):
+        reads.append(args[1])
+        if aliases:
+            aliases[0]["proposal_admission"]["bounded_worker_plan"] = {"unexpected": True}
+            aliases[0]["determination_receipt_id"] = "changed by later callback"
+            files["determination"].write_text("{}", encoding="utf-8")
+        value, reasons = read(*args, **kwargs)
+        if args[1] == files["determination"]:
+            aliases.append(value)
+        return value, reasons
+
+    monkeypatch.setattr(bootstrap, "_read_json_outside_repo", mutate_after_read)
+    result = _bootstrap(files, requested_operation=expected["proposal_admission"]["requested_operation"])
+    assert result.accepted is True, result.rejection_reasons
+    assert reads.count(files["determination"]) == 1 and len(reads) == 5
+    seed = json.loads(files["output"].read_text(encoding="utf-8"))
+    assert seed["source_determination_receipt_id"] == expected["determination_receipt_id"]
+    assert ("bounded_worker_plan" in seed) is (kind != "absent")
+    if kind != "absent":
+        assert seed["bounded_worker_plan"] == expected["proposal_admission"]["bounded_worker_plan"]
 
 
 @pytest.mark.parametrize("explicit_none", (False, True))
@@ -110,6 +211,36 @@ def test_bootstrap_absence_preserves_prechange_seed_bytes(tmp_path, explicit_non
     assert hashlib.sha256(files["output"].read_bytes()).hexdigest() == (
         "7ae1ec5659c07e6490c38cfb13dae1455b6c285414b5a689ee28a32ad3b3e3b7"
     )
+
+
+@pytest.mark.parametrize("ancestor", ("determination", "admission"))
+def test_bootstrap_omission_rejects_ancestor_before_copy_coercion(tmp_path, monkeypatch, ancestor):
+    from modules.communication.moltbot_bridge.src import reddog_authority_profile_seed_supply_bootstrap as bootstrap
+    files = _inputs(tmp_path)
+    calls = []
+
+    class LaunderedMapping(dict):
+        def __deepcopy__(self, memo):
+            calls.append("coerced")
+            return dict(self)
+
+    determination = _determination()
+    if ancestor == "determination":
+        determination = LaunderedMapping(determination)
+    else:
+        determination["proposal_admission"] = LaunderedMapping(determination["proposal_admission"])
+    read = bootstrap._read_json_outside_repo
+
+    def supplied_mapping(*args, **kwargs):
+        return (determination, ()) if args[1] == files["determination"] else read(*args, **kwargs)
+
+    monkeypatch.setattr(bootstrap, "_read_json_outside_repo", supplied_mapping)
+    files["output"].write_bytes(b"previous seed")
+    result = _bootstrap(files)
+    assert result.accepted is False
+    assert result.rejection_reasons == ("authority_seed_proposal_plan_invalid",)
+    assert calls == []
+    assert files["output"].read_bytes() == b"previous seed"
 
 
 def test_bootstrap_detaches_explicit_packet_before_reading_receipts(tmp_path, monkeypatch):

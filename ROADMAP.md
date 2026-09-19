@@ -51,19 +51,22 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Repository accounting and resumed RSI — 2026-09-20
 
-Fresh main is `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; its CI and CodeQL workflows
-both pass. The September 9 UTC onward accounting finds 107 merged PRs and 15
+The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
+`6556a0d1427651baef518de799ccb7df19e16c35`, including PR1797 with passing CI/CodeQL.
+The baseline September 9 UTC onward accounting found 107 merged PRs and 15
 closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
 reported checks. GitHub marks 26 as conflicting. These categories overlap;
 reported green checks alone do not establish current merge or runtime authority.
+Post-merge R19 evidence also found42 passing red-team observations in logs but
+zero uploaded artifacts; qualify existing report delivery without activating its gate.
 All 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; full file/check evidence is hash-bound there.
 
 | Work observed | Reconciliation and next action |
 |---|---|
-| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796 are merged. Preserve their qualified layers; repair the actual producer serializer next under the existing 18/P0 handoff parent. The small repair itself scores 2+5+5+4=16/P0. |
+| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796/#1797 are merged. The existing bootstrap now selects an omitted declared plan from its single raw receipt read; local validation/independent review/closure remain explicit in the backlog. This step scores3+4+4+3=14/P1 within the18/P0 handoff parent. |
 | AmIBot | PR #1751 is still draft at `04ef322f`, with `validate` failing and merge conflicts. Main registry has 17 entries and no `detect_ai`. Reconcile this existing package and registration; do not create another venture or intake. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
@@ -173,14 +176,16 @@ must agree with a declared proposal plan. Local 571 +32 publication tests pass;
 independent 318 +177 asserted probes, eight manifest tests and 15 fast groups pass.
 Post-merge main CI and CodeQL both passed (35451972360 / 35451972324).
 
-**Producer serialization prerequisite, locally qualified:** the existing determination
+**Producer serialization prerequisite, merged in [PR #1797](https://github.com/FOUNDUPS/Foundups-Agent/pull/1797):** the existing determination
 serializer now composes canonical proposal output, removing the invalid nested null
 for legacy absent plans. Result/persistence, empty/full plans and all linked IDs are
 covered by 617 connected tests. Independent review accepts86 overlapping tests plus
 72 boundary assertions;8 manifest tests/15 fast groups pass, registry1651/269 remains
 current. Source1532 and interface1592 lines do not grow; no new module or exemption.
-Exact-head CI/closure is tracked in the current backlog. Reapply WSP15/97 afterward:
-later selection belongs in the existing seed bootstrap's single read, preserving
+All10 exact-head checks passed; squash `6556a0d14` matches the reviewed tree.
+Post-merge main workflows are tracked separately in the backlog. WSP15/97 re-scored
+27 current candidates. The next bootstrap substep scores14/P1 within the18/P0
+handoff parent; explicit lower APIs already work. Omission-aware selection belongs in the existing seed bootstrap's single read, preserving
 explicit None/empty semantics. `main.py:2844` remains unwired; no prose inference.
 Principal normalization, full context/native-child fidelity, current signed admission
 and live RSI retention remain open; this local source qualification does not close G0.

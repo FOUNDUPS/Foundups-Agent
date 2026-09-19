@@ -1,14 +1,14 @@
-## RSI producer serialization checkpoint — 2026-09-20
+## RSI producer-to-bootstrap checkpoint — 2026-09-20
 
-The actual determination producer now composes the existing child proposal
-serializer, preserving legacy plan omission through result and persistence.
-Explicit empty/full plans and all identity algorithms are unchanged. The 16/P0
-bounded repair advances the 18/P0 shared handoff gate; 617 connected tests pass.
-Independent acceptance and exact-head closure are recorded in the root backlog.
-No new module, skill, stored-record migration, startup wiring or runtime authority.
-After closure, re-observe the existing seed bootstrap's single-read/omission
-contract before automatic forwarding. Daily-work R25-A remains 15/P1; prototype
-intake registry admission and AmIBot's existing draft/G0 are still incomplete.
+PR1797 merged canonical child serialization; its main CI and CodeQL passed.
+The existing seed bootstrap now selects a declared plan only when its argument
+is omitted, freezing the single raw determination read before later callbacks.
+Explicit None/empty semantics and lower supplier scope/authority checks remain.
+The bounded step scores14/P1 within the18/P0 shared handoff parent; existing
+bootstrap regressions first fail7/pass34; review adds2red cases, then43pass. Source215/function111.
+Independent acceptance, connected tests and exact-head closure live in the root
+backlog. Re-observe after closure; daily-work R25-A15/P1, typed genesis ingress,
+AmIBot's existing draft/G0 and live runtime admission remain separate gaps.
 
 ## RSI direct-profile consistency checkpoint — 2026-09-20
 

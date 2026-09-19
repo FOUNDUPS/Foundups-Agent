@@ -72,14 +72,14 @@ a plan still permit a separately supplied plan. Current authenticity, revision,
 HEAD/Holo, model and worker authority remain downstream. Direct calls to internal
 post-verification transaction/projection helpers are outside this ingress contract.
 
-`run_reddog_authority_profile_seed_supply(...)` and its existing bootstrap accept
-`bounded_worker_plan=None`. `snapshot_seed_worker_plan` detaches a plain typed/ASCII
-dict; for legacy receipts without a plan, `None` omits it and `{}` retains it. Both wrappers reject type/value/
-recursion failures with `authority_seed_bounded_worker_plan_invalid` before receipt
-callbacks or reads. For a plan-bearing proposal receipt, the supplier requires an
-explicit canonically equal plan and validates detached proposal/determination/candidate
-lineage before subsequent callbacks. Non-plain ancestors reject before presence tests;
-malformed callback output fails closed. Failure is `authority_seed_proposal_plan_invalid`.
+`run_reddog_authority_profile_seed_supply(...)` retains `bounded_worker_plan=None`.
+Its bootstrap distinguishes an omitted argument: select only a declared plan from
+the single raw determination read and freeze that determination before later reads.
+Explicit `None`/`{}` remain explicit; legacy absence retains identical seed bytes.
+`snapshot_seed_worker_plan` detaches explicit typed/ASCII input before receipt reads; invalid
+explicit input returns `authority_seed_bounded_worker_plan_invalid`. Selected plans
+reuse proposal/determination/candidate validation; malformed/null or tampered lineage
+returns `authority_seed_proposal_plan_invalid`. Wrappers are not unwrapped.
 `snapshot_architect_fix_plan_lineage` and the pure lineage comparator live in the
 existing candidate gate; current work-state/HEAD/Holo and authenticity checks remain
 in promotion. Reused `worker_plan_matches_execution_scope` lives in typed rehydration
@@ -88,8 +88,8 @@ requested paths/artifacts, and explicit `I` mirrors of requested_operation, allo
 denied_paths, required_tests and required_policy_gates against effective seed values.
 Contradictions return `authority_seed_worker_plan_scope_invalid`; no S/A/T inference or
 other packet identity mapping is added. Rejection preserves existing output. Seed
-digest coverage and nonce derivation remain unchanged. There is no automatic extraction.
-Normalized API input adds no parser, env option or main wiring. Generation checks the complete signed `work_order_digest`; mismatch
+digest coverage and nonce derivation remain unchanged; the lower supplier still requires explicit plan agreement.
+No scope inference, parser, env option or main.py read is added. Generation checks the complete signed `work_order_digest`; mismatch
 returns `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` before model admission.
 Explicit `m2m_envelope` becomes detached canonical JSON before one-use authority
 consumption. `FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE` burns only the matching handle.
