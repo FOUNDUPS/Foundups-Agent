@@ -57,6 +57,64 @@ Map these requirements to the existing contracts and enumerate only genuinely mi
 
 ## Incremental slices and acceptance
 
+### R25-A source qualification — 2026-09-20
+
+At main `daae91db04088bc49ddde97ee972299165e1d35d`, the existing components pass
+89 focused tests. A separate disposable replay passes 20 boundary checks and
+creates **zero R25 feedback proposals**. R25 remains `SPECIFIED_NOT_IMPLEMENTED`:
+the contract mapping is complete; a permissioned feedback-to-proposal path is
+not implemented. The replay uses synthetic records and fixture databases only.
+It is neither a live OpenClaw/Hermes run nor retained RSI improvement.
+
+| Requirement | Existing owner and reusable behavior | Missing R25 connection |
+|---|---|---|
+| Principal, conversation and FoundUp | [Conversation scope](../../modules/communication/moltbot_bridge/src/reddog_conversation_scope_contract.py) binds authenticated identity, authorized FoundUp, revision and record digest. [Work context](../../modules/communication/moltbot_bridge/src/reddog_conversation_work_promotion.py) checks exact principal/FoundUp, current revision, expiry and grounded resident intent. | A principal-only scope cannot become FoundUp scope. Identify one explicit feedback item and its permitted destination; an authenticated conversation is not blanket feedback/disclosure consent. |
+| Personal evidence | [Principal Memex contract](../../modules/ai_intelligence/digital_twin/src/principal_memex_contract.py) preserves source kind, receipt/revision, sensitivity and supersession. Its [projection](../../modules/ai_intelligence/digital_twin/src/principal_memex_projection.py) is structural and performs no FoundUp projection. | No destination FoundUp, feedback-purpose permission or work authority. Preserve source kind separately from R25 evidence type. |
+| Purpose, expiry and revocation | [Signed disclosure](../../modules/communication/moltbot_bridge/src/reddog_principal_memex_disclosure.py) and [resident admission](../../modules/communication/moltbot_bridge/src/reddog_principal_memex_resident_admission.py) bind exact source decisions/revision, session, runtime, expiry, revocation and one-use consumption. | Purpose is exactly `resident_architect_context`; only public accepted `operator_statement` decisions from principal scope are admitted. This permission does not authorize FoundUp feedback. Do not broaden that purpose or reinterpret its receipt. |
+| Evidence type | Conversation kinds are `operator_statement`, `repository_fact`, `model_inference`, `unresolved`. Principal Memex source kinds are `accepted_decision`, `governed_import`, `principal_statement`, `verified_observation`. | Neither enum is R25's five-type contract. A source label is not evidence of correctness. An operator statement may report a preference, observation or instruction; retain that distinction without inferring authorization. |
+| Proposal and contradiction | [Learning-candidate builder](../../modules/communication/moltbot_bridge/src/foundup_memex_learning_candidate.py) and [contract](../../modules/communication/moltbot_bridge/src/foundup_memex_learning_candidate_contract.py) already supply content-bound proposal/candidate IDs, supporting/contradicting references and supersession. [Validation](../../modules/communication/moltbot_bridge/src/foundup_memex_learning_candidate_validation.py) checks FoundUp/snapshot/receipt/revision consistency. | Its source classes are `breadcrumbs`, `verified_outcome`, `governed_research`; none represents permissioned human feedback. It has no principal, consent, activity or R25 evidence-type binding. Never relabel feedback as a verified outcome or breadcrumb to obtain acceptance. |
+| Deduplication and version | Exact repeated proposal payloads have identical IDs; source revision and content digest remain bound. | Changing creation time changes the proposal ID. That is not principal/proposal-version/consultation-window deduplication. Define the correlation key and revision/supersession rule before adding a persistent mapping. |
+| Ticket preview and promotion | Existing conversation work promotion separates current authenticated context, pending preview and one-use promotion capability. | `commit_pending_conversation_work_proposal` performs a CAS persistence write. It is not a read-only projector and cannot run under R25-A's no-memory-write label. Normal work admission remains separate. |
+
+**Smallest follow-on: qualify one explicit, same-FoundUp synthetic feedback input
+at the existing learning-candidate contract/validation/builder boundary.** Exact
+production field placement and compatibility remain unqualified. Reuse the
+current source record/revision, proposal identity and scope owners; do not create
+a second proposal queue, personal memory or generic authorization framework.
+The follow-on contract qualification scores **3 + 4 + 3 + 3 = 13/P1** under WSP 15;
+the broader 15/P1 parent estimate does not transfer automatically to this step.
+
+The next contract review must fix these choices before source implementation:
+
+- Bind principal/conversation/record digest/revision and destination FoundUp to
+  a specific permitted summary and source reference. Define feedback purpose,
+  permission source, expiry and revocation under the existing authority owner;
+  caller-supplied booleans or rehashed records cannot establish consent.
+- Keep evidence type separate from source class and verification. Preserve
+  reported preference, observed behavior and model inference; a verified fact
+  needs its verification reference. Formal authorization is a distinct admitted
+  authority reference, never feedback content that opens an execution valve.
+- Specify proposal version/correlation, duplicate linkage, contradiction and
+  supersession without inflating participants or contributions. Preserve the
+  original source identity when a model summarizes it.
+- For the local synthetic slice, declare current same-FoundUp interaction as a
+  fixture input. Activity-event qualification, pause/expiry, attention budgets
+  and delivery-time rechecks remain required before R25-B outreach. Do not call
+  authenticated conversation expiry an implemented engagement policy.
+
+Acceptance must include a permitted explicit-feedback positive case retaining
+all bindings; exact retry linkage; visible dissent; and rejection of absent,
+expired or revoked permission, source revision changes, wrong principal/FoundUp,
+type laundering and feedback-as-authority. A changed summary, purpose, target or
+proposal version must not inherit a stale permission. Existing component tests
+are useful controls, not an end-to-end R25 acceptance result.
+
+Evidence is bound in [the current backlog observation](rsi_swarm_backlog.json)
+and its archived observations. Independent review checked 22 source/test/doc
+blobs and the replay predicates/hashes; it did not rerun the replay or authorize
+source implementation. Source/test ownership has no inspected peer overlap;
+shared bridge `INTERFACE.md` overlaps PR1751/1645 and remains untouched here.
+
 | Slice | Deliverable | Required positive and negative evidence |
 |---|---|---|
 | R25-A: local proposal | One synthetic or explicitly supplied feedback item becomes a scoped, versioned proposal through existing read-only projections. | Source/disclosure/type retained; duplicate linked; contradiction visible; wrong FoundUp, absent permission, changed revision and feedback-as-authorization rejected. No external message or memory write implied. |

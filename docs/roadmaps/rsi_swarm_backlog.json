@@ -1851,43 +1851,63 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "section": "current_observation",
+    "section": "current_observation.post_sprint_reobservation",
     "base_commit": "daae91db04088bc49ddde97ee972299165e1d35d",
-    "selected_action": "R25-A consented local daily-work proposal",
-    "status": "contract_qualification_selected",
+    "selected_action": "AutoResearcher-report-completeness",
+    "status": "next_source_scope_qualification_selected",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation"
   },
   "current_observation": {
-    "observation_id": "genesis_commander_envelope_handoff_20260920",
-    "base_commit": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
-    "authoring_head": "11da44fc1a567f49718e1ff3522a89eaa8446d16",
-    "observed_at": "2026-09-19T18:37:54.080449+00:00",
+    "observation_id": "r25_daily_work_contract_qualification_20260920",
+    "base_commit": "daae91db04088bc49ddde97ee972299165e1d35d",
+    "authoring_head": "c951250092a3b5d5090a2085241978cd26d46632",
+    "observed_at": "2026-09-19T20:04:20.157724+00:00",
     "role": "architect/coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "truth_boundary": "Local source and deterministic disposable queue fixtures only; not admitted OpenClaw/Hermes work or public intake entitlement.",
-    "previous_observation": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#bootstrap_selection_closed_20260920",
-    "selected_task": "FoundUp-genesis-conversation-lineage",
-    "selected_score": {
+    "previous_observation": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#genesis_handoff_closed_20260920",
+    "selected_task": "R25-A consented local daily-work proposal",
+    "selected_subtask": "RSI-R25-DAILY-WORK-INTAKE-CONTRACT-20260920",
+    "selected_parent_score": {
       "complexity": 4,
-      "importance": 5,
-      "deferability": 4,
-      "impact": 4,
-      "total": 17,
-      "priority": "P0"
-    },
-    "selected_subtask": "RSI-GENESIS-COMMANDER-ENVELOPE-HANDOFF-20260920",
-    "bounded_repair_score": {
-      "complexity": 3,
       "importance": 4,
-      "deferability": 4,
+      "deferability": 3,
       "impact": 4,
       "total": 15,
       "priority": "P1"
     },
-    "why_selected": "Fresh unchanged main/ownership plus reproduced stale integration fixture retain17/P0 typed genesis as highest eligible owned parent. Execute only its15/P1 commander data-handoff component; draft authentication-to-commander entitlement is not inferred. Residual M2M/R25 remain15/P1 alternatives; dependency17 retains existing remediation ownership.",
+    "status": "contract_mapping_complete_runtime_unimplemented",
+    "truth_boundary": "Local source reading, synthetic component replay and documentation only. Zero R25 feedback proposals; no production data, live provider/worker/model/runtime admission, outreach, durable memory retention or deployment.",
+    "retrieval": {
+      "wsp00": "awakening.log then strict gate.json PASS",
+      "governing": [
+        "WSP_00",
+        "WSP_15",
+        "WSP_22",
+        "WSP_50",
+        "WSP_97",
+        "WSP_99"
+      ],
+      "holo": {
+        "mode": "governed_lexical",
+        "ok": true,
+        "bundle_ok": true,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "stale_reasons": [
+          "semantic_query_not_requested"
+        ]
+      },
+      "evaluation": {
+        "noise": "Task-bound bridge and Digital Twin bundles plus selected direct source/docs/tests reads; no raw personal conversations. Broad navigation results were insufficient for exact ownership.",
+        "ordering": "Actual protocols/continuity then module README/interface/roadmap/tests/modlogs, source/contracts, existing fixtures and independent review.",
+        "missing_artifacts": "Bridge memory/README.md absent; optional spec/prd/prompts/runbook entries absent. Direct source and existing module/test docs supplied the qualified local context.",
+        "staleness_risk": "No fresh semantic index proof. Lexical workspace evidence binds c951 and source files unchanged from main daae. No query-time reindex or unchanged failed semantic probe repeated.",
+        "duplication": "Existing projection, disclosure, learning-candidate and conversation-promotion owners retained; no new source/skill/document. Searched available SKILL/SKILLz structure without finding a dedicated applicable R25 feedback skill."
+      }
+    },
     "ranking_before": [
       {
         "task": "RedDog-extension-decomposition",
@@ -2041,7 +2061,7 @@
         },
         "score": 17,
         "priority": "P0",
-        "state": "commander_metadata_handoff_local_authoring_selected",
+        "state": "commander_data_handoff_closed_remaining_public_entitlement_unqualified",
         "evidence": [
           "modules/communication/moltbot_bridge/src/openclaw_dae.py:195",
           "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:962",
@@ -2049,7 +2069,7 @@
           "next-contract-independent-review.json",
           "genesis-next-source-overlap.json"
         ],
-        "next_step": "Preserve a validated, detached envelope from existing intent metadata into the existing job. Public intake only grants draft rights; commander entitlement remains separate.",
+        "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
         "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
         "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill."
       },
@@ -2115,7 +2135,7 @@
         "evidence": [
           "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
         ],
-        "next_step": "Wait for protected route/project owner CI reconciliation; rebase/revalidate existing declarative candidate before merge. Main registry still17; candidate18, four public entries unchanged.",
+        "next_step": "Fresh1751 head04ef322f remains draft, CONFLICTING and validateFAILURE. Preserve permanent detect_ai lineage and route/project owner; no main registration or build dispatch claimed.",
         "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
       },
       {
@@ -2237,8 +2257,8 @@
         },
         "score": 15,
         "priority": "P1",
-        "state": "specified; local mapping/synthetic proof authorable",
-        "next_step": "Reuse existing typed conversation/disclosure and learning-candidate owners; map consent/activity/provenance/dedup/type before ticket forwarding.",
+        "state": "selected_existing_contract_mapping_only",
+        "next_step": "Qualify existing consent/activity/provenance/type/dedup contracts for one synthetic daily-work proposal before scoping source changes.",
         "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
         "evidence": [
           "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
@@ -2296,6 +2316,30 @@
         ],
         "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
         "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+      },
+      {
+        "task": "FoundUp-validation-fixture-reconciliation",
+        "dimensions": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3
+        },
+        "score": 14,
+        "priority": "P1",
+        "state": "independently_qualified_test_only_candidate_not_selected",
+        "evidence": [
+          "baseline-debt.xml",
+          "connected-v2.xml"
+        ],
+        "paths": [
+          "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
+          "modules/communication/moltbot_bridge/tests/test_e2e_foundup_job_seam.py"
+        ],
+        "rationale": "Independent review corrected tentativeImpact4to3: meaningful internal regression coverage, with no evidence of major/highly visible Impact4. R25 and other eligible15/P1 contracts precede this14/P1 candidate.",
+        "next_step": "Reuse exact current error-category mapping and isolated valid manifest/identity fixtures; preserve production resolver/gates. No source edits currently indicated.",
+        "review": "next-fixture-contract-review.json",
+        "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca"
       },
       {
         "task": "auto-researcher-process-durability",
@@ -2367,433 +2411,181 @@
         "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
       }
     ],
-    "execution_packet": {
-      "schema": "0102_m2m_v1",
-      "ROLE": "coordinator",
-      "ORIGIN": "internal_handoff",
-      "PRINCIPAL_REF": "012",
-      "L": "ORCH",
-      "S": "Existing OpenClaw FoundUp orchestrator, intake integration test and required existing documentation/derived manifest only.",
-      "M": "exec",
-      "T": "RSI-GENESIS-COMMANDER-ENVELOPE-HANDOFF-20260920",
-      "A": "Repair commander-only envelope handoff in the existing orchestrator and strengthen its existing intake integration fixture.",
-      "R": [
-        0,
-        15,
-        22,
-        50,
-        62,
-        84,
-        95,
-        97,
-        99,
-        109
-      ],
-      "I": {
-        "planning_only": false,
-        "local_source_authoring_only": true,
-        "runtime_dispatchable": false,
-        "allowed_paths": [
-          "ROADMAP.md",
-          "ModLog.md",
-          "docs/roadmaps/rsi_swarm_backlog.json",
-          "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-          "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
-          "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py",
-          "modules/communication/moltbot_bridge/INTERFACE.md",
-          "modules/communication/moltbot_bridge/ROADMAP.md",
-          "modules/communication/moltbot_bridge/ModLog.md",
-          "modules/ai_intelligence/ai_overseer/INTERFACE.md",
-          "modules/ai_intelligence/ai_overseer/ROADMAP.md",
-          "modules/ai_intelligence/ai_overseer/tests/README.md",
-          "modules/ai_intelligence/ai_overseer/tests/TestModLog.md",
-          "scripts/reddog_backend_manifest.json",
-          "scripts/tests/test_generate_reddog_backend_manifest.py",
-          "extensions/reddog/backend_compatibility_constants.js",
-          "modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py",
-          "modules/communication/moltbot_bridge/tests/test_openclaw_wsp109_onboarding_dryrun.py",
-          "modules/ai_intelligence/ai_overseer/ModLog.md",
-          "WSP_knowledge/WSP_Test_Registry.json"
-        ],
-        "read_source_paths": [
-          "modules/communication/moltbot_bridge/src/openclaw_dae.py",
-          "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
-          "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py",
-          "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py",
-          "modules/ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md"
-        ],
-        "denied_paths": [
-          "main.py",
-          "modules/foundups/detect_ai/",
-          "modules/foundups/esingularity/",
-          "FOUNDUPS/autopost",
-          "modules/communication/moltbot_bridge/src/openclaw_dae.py",
-          "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py",
-          "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py"
-        ],
-        "dependencies": [
-          "PR1798 merged exact tree; main CI and CodeQL both success.102 peer PR heads and shared checkout unchanged.",
-          "Twenty exact source/doc blobs match prior independent contract recommendation; four verified source/test owners have no open-PR overlap.",
-          "Canonical structured workspace bundle is current; semantic owner proof remains stale/gapped. No reindex.",
-          "Routine local authoring only. Public draft authentication is not commander/scaffold entitlement; no current live WRE/model/runtime admission."
-        ],
-        "invariants": [
-          "Use declared OpenClawIntent.metadata; do not invent a payload field or copy arbitrary metadata authority.",
-          "Existing commander check precedes structured validation and queue effects; public IntakeResult is only a draft artifact.",
-          "Preserve frozen validated envelope and tenant/session/FoundUp identity. Reject malformed/conflicting structured presence and explicit target conflict.",
-          "Reuse existing canonical serialization/digest owners; no new algorithm/module/skill.",
-          "Keep legacy bare-build queue behavior; do not convert to create_foundup or grant scaffold/worker authority.",
-          "Existing source1016/function85+90 are inherited debt; shrink/reuse the same owner rather than expand oversized DAE1580.",
-          "Only conditional derived digest metadata may change under extensions/reddog; all other extension product paths denied.",
-          "Metadata must be absent only on legacy intent or a plain dict; explicit metadata None is malformed. Legacy payload None remains absence. Fix mocks to declare truthful fields rather than add a permissive runtime exception."
-        ],
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 4,
-          "impact": 4,
-          "total": 15,
-          "priority": "P1"
-        },
-        "parent_wsp15": {
-          "complexity": 4,
-          "importance": 5,
-          "deferability": 4,
-          "impact": 4,
-          "total": 17,
-          "priority": "P0"
-        }
-      },
-      "O": [
-        "Real declared-intent fixture proving commander authorization plus exact queue/envelope lineage.",
-        "Rejected/missing/conflicting input and callback detachment controls; no effectful consumer/provider.",
-        "Independent source-bound review, focused/connected tests and derived closure verification."
-      ],
-      "F": [
-        "Authority-denial false positive",
-        "Envelope/scope loss",
-        "Duplicate module/skill",
-        "Unresolved source ownership",
-        "Runtime/provider effect",
-        "Missing validation"
-      ]
-    },
-    "retrieval": {
-      "noise": "NAVIGATION has no exact intake owner match; module ModLog contains pre-existing NUL and long historical table rows. Use exact source, canonical interfaces and bounded sections.",
-      "ordering": "Actual WSP00 gate,15/97,task-bound governed Holo,ordered historical memory,root backlog,module docs/skill/implementation/tests,existing transport/job contracts.",
-      "missing_artifacts": "All required structured-memory artifacts present; live entitlement/runtime binding absent. No public owner_principal_id/request authority exists in IntakeResult.",
-      "staleness": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; UNKNOWN/index gap.11da workspace structured bundle current; no fresh semantic claim or retry/reindex.",
-      "duplication": "Existing metadata, validator, canonical JSON helpers and FoundUpJob fields; no new intent field, module, registry or skill."
-    },
-    "pr_accounting": {
-      "evidence": "preflight.json",
-      "open_prs": 102,
-      "changed_heads": 0,
-      "worktrees": 157,
-      "local_branches": 634,
-      "inventory_is_not_activity": true
-    },
-    "ownership": {
-      "branch": "agent/rsi-genesis-intake-contract-20260920",
-      "shared_preserved": true,
-      "protected": [
-        "YUMORI",
-        "eSingularity",
-        "RedDog product/services",
-        "FOUNDUPS/autopost"
-      ]
-    },
-    "validation": {
-      "baseline_default": {
-        "failed": 1,
-        "passed": 7,
-        "skipped": 32,
-        "evidence": "baseline.xml"
-      },
-      "baseline_unskipped": {
-        "failed": 1,
-        "passed": 39,
-        "evidence": "baseline-unskipped.xml"
-      },
-      "status": "local_candidate_accepted_with_four_reproduced_baseline_failures",
-      "red_qualified": {
-        "failed": 15,
-        "passed": 16,
-        "evidence": "red-qualified.xml"
-      },
-      "author_oracle_correction": "Initial red16fail15pass included an incorrect new dry_run=False assertion; unchanged PolicyFlags defaults True. Corrected oracle before source edit.",
-      "focused": {
-        "passed": 111,
-        "failed": 0,
-        "skipped": 0,
-        "evidence": "focused-v2.xml"
-      },
-      "connected_v1": {
-        "passed": 1035,
-        "failed": 4,
-        "skipped": 0,
-        "evidence": "connected.xml"
-      },
-      "baseline_debt": {
-        "failed": 4,
-        "passed": 0,
-        "source": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
-        "worktree": "O:/Foundups-Agent-worktrees/rsi-genesis-baseline-20260920",
-        "evidence": "baseline-debt.xml",
-        "causes": [
-          "launch-request test expects old authority error category",
-          "three legacy E2E fixtures lack required FoundUp manifests"
-        ],
-        "separate_from_candidate": true
-      },
-      "independent_v1": {
-        "decision": "REJECT",
-        "evidence": "independent-initial-counterexamples.json",
-        "findings": [
-          "command word inside identity regressed explicit-build precedence/ID",
-          "malformed JSON field types escaped response boundary",
-          "string-subclass root key invoked equality hook"
-        ],
-        "remedy": "13 added cases; V2 source freeze; no source/test artifact overwritten"
-      },
-      "connected": {
-        "passed": 1048,
-        "failed": 4,
-        "skipped": 0,
-        "evidence": "connected-v2.xml",
-        "not_fully_green": true
-      },
-      "independent": {
-        "decision": "ACCEPT",
-        "existing_tests_passed": 99,
-        "adversarial_cases_passed": 31,
-        "test_counts_overlap": true,
-        "evidence": "independent-candidate-review.json",
-        "sha256": "e5848404adb108abf548de46cc91454bf44d6c8ba9c9a6571c95487851aa5b13",
-        "rejected_v1_preserved": true
-      },
-      "manifest": {
-        "passed": 8,
-        "evidence": "manifest-tests.xml"
-      },
-      "fast": {
-        "groups_passed": 15,
-        "evidence": "fast-tests.log"
-      },
-      "registry": {
-        "total": 1651,
-        "quarantined": 269,
-        "status": "current",
-        "only_description_changed": true,
-        "evidence": "registry-regenerated.json"
-      },
-      "wsp97": {
-        "is_compliant": true,
-        "structural_only": true,
-        "evidence": "wsp97-validation.json",
-        "does_not_prove_reasoning_or_runtime": true
-      }
-    },
-    "effort_cost": {
-      "effort": "One existing handoff owner and existing integration fixture.",
-      "provider_calls": 0,
-      "cost": "Model token/cost not measured; no live provider invocation.",
-      "verification_burden": "Actor/data separation, exact frozen lineage, conflict/malformed/callback controls and independent review.",
-      "manual_reason": "Existing Qwen/Gemma routing has no admitted current model/job/runtime. Codex author/reviewer aid is local source work, not runtime dispatch."
-    },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260920-rsi-genesis-0327",
-    "next_step": "Fresh R25-A contract mapping/qualification at15/P1; source execution only after scoped evidence. Four baseline fixture failures remain14/P1.",
-    "requires_fresh_reobservation_after_closure": true,
-    "fixture_scope_extension": {
-      "basis": "102 unchanged exact heads from current preflight against complete prior path inventory",
-      "paths": [
-        "modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py",
-        "modules/communication/moltbot_bridge/tests/test_openclaw_wsp109_onboarding_dryrun.py"
-      ],
-      "overlap": [],
-      "reason": "Declare real optional input fields on existing MagicMock fixtures; preserve assertions."
-    },
-    "documentation_scope_note": "Update the existing AI module ModLog with a bounded new entry while preserving its pre-existing NUL; no unrelated file repair.",
-    "source_boundary": {
-      "source_lines": 990,
-      "dispatch_lines": 40,
-      "handler_lines": 78,
-      "new_modules": 0,
-      "new_skills": 0,
-      "typed_genesis_digest": "unset; planner normalization owns its different digest recipe",
-      "public_entitlement": "unresolved; authenticated intake grants draft rights only",
-      "worker_activation": false
-    },
-    "registry_scope_note": "Canonical generator changes only the existing intake test description; classification, IDs,1651entries/269quarantines unchanged.",
     "changes": [
-      "Reused OpenClawIntent.metadata and existing genesis validator/canonical JSON snapshot owner; queue one detached envelope with tenant/session/foundup identity.",
-      "Malformed declared roots/envelopes, dual-copy type conflicts and explicit target contradictions fail closed. Commander authority precedes all intake work.",
-      "Preserved bare explicit-build precedence, dry-run defaults, existing actions and unset creation-mode/planner digests; no runtime or public entitlement granted.",
-      "Replaced a false-positive integration oracle and source-text wiring assertion with actual queue and gate behavior. Independent review caught3defects, repaired with13 regressions.",
-      "Source shrank1016to990lines, dispatcher85to40, handler90to78. No new module/skill. Existing registry description and1400-member manifest/pins regenerated only."
+      "Added exact owner/field/purpose/type/revision/dedup mapping and acceptance frontier to existing R25 packet.",
+      "Distinguished signed architect-only disclosure, structural candidate projection and CAS-persisted work preview; none supplies the missing R25 permissioned feedback path.",
+      "Preserved previous current observation exactly in existing historical observations file; refreshed current queue and repository accounting."
     ],
     "alternatives": [
-      "Public draft-to-commander entitlement is a separate unresolved authority contract, not implicit in intake authentication.",
-      "Existing strict receipt JSON normalizer permits arbitrary Mapping hooks; used a12-line plain-container precheck before the existing route canonicalizer, without a new serialization/digest recipe.",
-      "Did not fix four unrelated inherited failing fixtures inside this handoff source sprint; retained exact d00 reproduction for fresh WSP15 selection."
+      "Extending resident architect disclosure purpose would incorrectly transfer cognition consent to FoundUp feedback; retain the existing purpose.",
+      "Relabeling feedback as a breadcrumb/verified outcome would lose source type and permission. Learning-candidate reuse requires a qualified lossless contract first.",
+      "Calling commit_pending_conversation_work_proposal is persistence, not read-only proof. No production conversation/AgentDB writes were attempted.",
+      "No new generic consent engine, proposal queue or skill; current owners already provide substantial reusable boundaries."
     ],
-    "evidence_binding": {
-      "candidate": "candidate-freeze-v2.json",
-      "source_test_sha256_lf": {
-        "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py": "c2b508f6b4b92c5a5b0813ff9c28e5e4f3ca25dae2719f5d6f0855b3db3593f3",
-        "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py": "7d33637e071a0b44786923319be80237ca5d2fc4fcaa7dd77d12754bc881aae2",
-        "modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py": "3783e9b3efa00a89981dd76e454e6beee56f74459e84f1e3cb47ffb0b51992d7",
-        "modules/communication/moltbot_bridge/tests/test_openclaw_wsp109_onboarding_dryrun.py": "eb645c812eedf5929b91a0c2e64f85c614af371e0afd3935b963731f7cd32a9b"
+    "validation": {
+      "existing_contract_suites": {
+        "passed": 89,
+        "failed": 0,
+        "skipped": 0,
+        "seconds": 10.68,
+        "evidence": "contract-tests-v2.xml",
+        "import_mode": "importlib",
+        "plugin_autoload": false,
+        "warnings": "2 asyncio configuration warnings from disabled plugin autoload; all89 tests executed."
       },
-      "manifest": {
-        "old": "e4e76c817cc940c2ee09629777c2ce2c08e1149d22571c872a5256ec378ef143",
-        "new": "1d1aaf7fe8c3916c5f7b26bc5d19ed782765a345a5203b3231a33b0b998f30fe",
-        "members": 1400,
-        "membership_unchanged": true,
-        "changed_source": [
-          "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py"
+      "initial_collection": {
+        "errors": 4,
+        "evidence": "contract-tests.xml",
+        "cause": "pytest default package import mode collides across tests packages",
+        "resolution": "Used existing documented --import-mode=importlib; no source changes."
+      },
+      "disposable_replay": {
+        "passed": 20,
+        "failed": 0,
+        "feedback_proposals_created": 0,
+        "evidence": "r25-contract-replay.json",
+        "status": "NOT_IMPLEMENTED_CONTRACT_GAP_CONFIRMED"
+      },
+      "independent_review": {
+        "evidence": "r25-disclosure-contract-review.json",
+        "sha256": "745e219bb346402feaf7fe6f5bdfb266f4e7d9109a13b93ec90e9bf70cc2125c",
+        "bound_files": 22,
+        "predicates_and_hashes_checked": true,
+        "independent_rerun": false,
+        "source_implementation_admitted": false
+      },
+      "inherited_failures": "Four unrelated baseline failures from the previous source sprint remain14/P1; this focused89-test result does not make the whole system green.",
+      "documentation_checks": {
+        "json_and_scores": "PASS;28 candidates; canonical priorities",
+        "archive_exact_equality": "PASS; prior observation and unrelated archive/backlog values preserved",
+        "local_file_links": "PASS;75 checked",
+        "wsp97": "PASS; repository-bound structural receipt only, not reasoning quality or runtime authorization",
+        "evidence": [
+          "candidate-validation.json",
+          "wsp97-validation.json"
         ]
       }
     },
-    "remote_closure": {
-      "status": "MERGED",
-      "pr": 1799,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1799",
-      "head": "4ba846c0106ba221216454d7878617e02e09c498",
-      "merge_commit": "daae91db04088bc49ddde97ee972299165e1d35d",
-      "merged_at": "2026-09-19T19:08:39Z",
-      "push_verified": true,
-      "pr_verified": true,
-      "merge_verified": true,
-      "ci_verified": true,
-      "checks_scope": "ten exact PR-head checks; broader local matrix retains four main-baseline failures",
-      "tree_binding": {
-        "merged_commit": "daae91db04088bc49ddde97ee972299165e1d35d",
-        "reviewed_head": "4ba846c0106ba221216454d7878617e02e09c498",
-        "reviewed_tree": "7fc643324ee0c3fbd2664339a710d77addce5745",
-        "merged_tree": "7fc643324ee0c3fbd2664339a710d77addce5745",
-        "equal_tree": true,
-        "all10_pr_checks_success": true,
-        "peer102_heads_unchanged": true,
-        "shared_unchanged": true,
-        "main_workflows": [
-          {
-            "conclusion": "",
-            "databaseId": 35463413967,
-            "headSha": "daae91db04088bc49ddde97ee972299165e1d35d",
-            "name": "Push on main",
-            "status": "in_progress",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35463413967"
-          },
-          {
-            "conclusion": "success",
-            "databaseId": 35463414226,
-            "headSha": "daae91db04088bc49ddde97ee972299165e1d35d",
-            "name": "CI",
-            "status": "completed",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35463414226"
-          }
+    "effort_cost": {
+      "worker_or_provider_calls": 0,
+      "tokens_cost": "not measured",
+      "manual_reason": "No current admitted Qwen/Gemma job/model/runtime; local Codex coordinator and independent source reviewer only.",
+      "verification_burden": "Purpose/consent and evidence-type separation, scope/revision/replay/expiry controls, explicit zero-proposal outcome."
+    },
+    "ownership": {
+      "source_test_changes": 0,
+      "new_modules": 0,
+      "new_skills": 0,
+      "new_repo_documents": 0,
+      "allowed_paths": [
+        "ROADMAP.md",
+        "ModLog.md",
+        "docs/roadmaps/rsi_swarm_backlog.json",
+        "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+        "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json"
+      ],
+      "peer_document_overlap": [
+        {
+          "number": 1751,
+          "paths": [
+            "ModLog.md",
+            "ROADMAP.md",
+            "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+            "docs/roadmaps/rsi_swarm_backlog.json"
+          ]
+        },
+        {
+          "number": 1648,
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "number": 802,
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "number": 782,
+          "paths": [
+            "ModLog.md"
+          ]
+        }
+      ],
+      "resolution": "Shared root roadmap/log/backlog histories overlap older peer PRs; changed only owned current accounting/selection and appended exact prior observation. Did not edit those PRs or bridge INTERFACE/WSP15 source. No blanket no-overlap claim.",
+      "archive_scope_extension": "Rotate the exact prior current_observation into the existing historical observations file; no new document or source change."
+    },
+    "repository_accounting_refresh": {
+      "observed_at": "2026-09-19T20:04:20.157724+00:00",
+      "open_count": 102,
+      "draft_count": 13,
+      "by_check_state": {
+        "failing": 20,
+        "all_reported_pass_or_skip": 81,
+        "no_reported_checks": 1
+      },
+      "mergeability_at_bulk_refresh": {
+        "UNKNOWN": 101,
+        "MERGEABLE": 1
+      },
+      "merged_since_20260909_utc": 110,
+      "closed_unmerged_since_20260909_utc": 15,
+      "date_window_evidence": "Latest300 closed-list records filtered locally; merged identities agree with independent search query. Open inventory102 is below limit300.",
+      "search_query_limit_observed": {
+        "closed_search_count": 7,
+        "omitted_closed_numbers": [
+          1649,
+          1669,
+          1671,
+          1775,
+          1776,
+          1778,
+          1788,
+          1789
         ],
-        "observed_at": "2026-09-19T19:12:51.909971+00:00"
+        "disposition": "Search result is incomplete; use current unfiltered list plus explicit local date/state filtering."
       },
-      "receipt": "merge-binding.json",
-      "receipt_sha256": "d66a4f64539dd31a683e256bfc5187db09ffa51451d43fe432f47d139735be1d"
-    },
-    "experiment_metrics": {
-      "local_source_sprints": 1,
-      "repository_runtime_work_orders": 0,
-      "local_codex_reviewer_lanes": 1,
-      "admitted_openclaw_hermes_workers": 0,
-      "independent_rejections": 1,
-      "review_defects_repaired": 3,
-      "human_interventions": 0,
-      "live_provider_calls": 0,
-      "tokens_cost": "unavailable",
-      "autonomous_lifecycle_completion_percentage": "not established",
-      "retained_verified_improvement": "Exact independently reviewed source merged asPR1799; no live/runtime RSI promotion claimed."
-    },
-    "potential_next_candidate": {
-      "task": "FoundUp-validation-fixture-reconciliation",
-      "dimensions": {
-        "complexity": 3,
-        "importance": 4,
-        "deferability": 4,
-        "impact": 3
-      },
-      "score": 14,
-      "priority": "P1",
-      "state": "independently_qualified_test_only_candidate_not_selected",
-      "evidence": [
-        "baseline-debt.xml",
-        "connected-v2.xml"
-      ],
-      "paths": [
-        "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
-        "modules/communication/moltbot_bridge/tests/test_e2e_foundup_job_seam.py"
-      ],
-      "rationale": "Independent review corrected tentativeImpact4to3: meaningful internal regression coverage, with no evidence of major/highly visible Impact4. R25 and other eligible15/P1 contracts precede this14/P1 candidate.",
-      "next_step": "Reuse exact current error-category mapping and isolated valid manifest/identity fixtures; preserve production resolver/gates. No source edits currently indicated.",
-      "review": "next-fixture-contract-review.json",
-      "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca"
-    },
-    "publish_preflight": {
-      "observed_at": "2026-09-19T19:02:51.146227+00:00",
-      "main": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
-      "head": "11da44fc1a567f49718e1ff3522a89eaa8446d16",
-      "branch": "agent/rsi-genesis-intake-contract-20260920",
-      "peer_prs": 102,
-      "changed_open_heads": {},
-      "shared_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "changed_peer_heads": {},
       "shared_unchanged": true,
-      "current_source_paths": [
-        "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
-        "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py",
-        "modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py",
-        "modules/communication/moltbot_bridge/tests/test_openclaw_wsp109_onboarding_dryrun.py"
-      ],
-      "next_fixture_paths": [
-        "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
-        "modules/communication/moltbot_bridge/tests/test_e2e_foundup_job_seam.py"
-      ],
-      "overlap": [],
-      "path_inventory_basis": "complete102 exact-head prior audit; all unchanged",
-      "derived_registry_change": "one existing test description only"
+      "worktree_count": 157,
+      "local_branch_count": 635
     },
-    "local_receipt_sha256": {
-      "candidate-freeze-v2.json": "b032c9809ca67a59e8af101596032df7d9d6f66679e98ea7fcc55ea0fd32d514",
-      "independent-candidate-review.json": "e5848404adb108abf548de46cc91454bf44d6c8ba9c9a6571c95487851aa5b13",
-      "execution-receipt.json": "ea8f3991d834770e82c2688e79d5047862acc53d0b43f85b89d3863723c5ac2e",
-      "wsp97-validation.json": "72aa067744dad379efadd2ef572003b626cde3c750667bce6a035cb65d93dd4f",
-      "connected-v2.xml": "a22042d93403c5509b52c509fd9d892a314261d4a13651247e9d64f6e42defc8",
-      "baseline-debt.xml": "1f6143320924c713c957556c624de56f0f16b0db2596c27a1e87174a57a77581",
-      "manifest-tests.xml": "a851e57568009ead88eae68fb911061a72f51bb05060c053ded6cfd34d2242ed",
-      "registry-regenerated.json": "5d4dcc60c237b3ea0876cc040f9814a19e2101553b1f21cc7f90b96fb6dab633",
-      "publish-preflight.json": "b0749463940c14862320ed69e4cf04f21de799ab854f0ae9436a5b3370b7de3f"
+    "previous_merge_verification": {
+      "pr": 1799,
+      "merge": "daae91db04088bc49ddde97ee972299165e1d35d",
+      "exact_head_checks": 10,
+      "main_workflows": {
+        "35463414226": "SUCCESS",
+        "35463413967": "SUCCESS"
+      }
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260920-rsi-dailywork-0445",
+    "evidence_sha256": {
+      "preflight.json": "18de884d6ffc3481c9eeb2b6b2fa9f21a6154efcdd57be1e8ec1ca3489f9659f",
+      "holo-query.json": "96ff1ee0c043525ece6ccc38a6cf7a4fa04edc7eee02e2c584777015bb5c6c50",
+      "holo-digital-twin-query.json": "1dca79ebcb004a9fea33b6b9cfce0c70bbe65c527fd34e92718c8d790c5084ee",
+      "contract-tests.log": "22828302202f880357ea24c4ac35d114167f8a4dcd95e09488c85bf7c9b53403",
+      "contract-tests.xml": "232c4fb6d271ae53d9d944cc8c0dcdee98c9a286e67e0df6cbfdef764b561371",
+      "contract-tests-v2.log": "d18e0da0dbddb44681005e4533d6d792dbd0fa1d55f287fe51ba153b844e7aae",
+      "contract-tests-v2.xml": "97bfb2be0f03cde7db2d25f95a37c711308381facdd00b8c12194cf44954fda4",
+      "r25-contract-replay.py": "7553e29212ec9de64b72479ba1f7a23eb8be550f77ea7a5fc9469d0e574a4808",
+      "r25-contract-replay.json": "ceb8b33c9d0feed649beec9429fb94373939ec02cd4f181cd094857908386f0b",
+      "r25-contract-replay.log": "f49292c0166fea224c7ad82d0af4d78a7836b0f7920497d8fbe024217354ea13",
+      "r25-disclosure-contract-review.json": "745e219bb346402feaf7fe6f5bdfb266f4e7d9109a13b93ec90e9bf70cc2125c",
+      "reobservation.json": "4d79ea37d553beb862999d1fe4c76473be314397825748137039abac7aca580a",
+      "prs-open-refresh.json": "d9c628c81dfe87bd19508191e9302e081f91066c63042498bd18dbd877d808fb",
+      "prs-merged-refresh.json": "58a058e34ae6a1b80c4267697011939bac1a6fd5c18241bdbe4e0de93e6d8e25",
+      "prs-closed-refresh.json": "de830a804c2c1180de71101896c7738ddf2c37bbb5c552b7f845c9e34ebaa22e",
+      "prs-closed-unfiltered-refresh.json": "10a05dd6441220d4433a1a646b5ed176f301cd94a1194c022ce2a45e35228f64",
+      "pr1751-refresh.json": "d9d9bddefe4686e4582c2baaa857e2aa736a7678393092076726a5d9bd316a18"
     },
     "post_sprint_reobservation": {
       "base_commit": "daae91db04088bc49ddde97ee972299165e1d35d",
-      "observed_at": "2026-09-19T19:12:51.909971+00:00",
+      "observed_at": "2026-09-19T20:04:20.157724+00:00",
       "open_prs": 102,
-      "peer_heads_changed": 0,
+      "peer_heads_changed": false,
       "shared_unchanged": true,
-      "main_workflows": [
-        {
-          "conclusion": "",
-          "databaseId": 35463413967,
-          "headSha": "daae91db04088bc49ddde97ee972299165e1d35d",
-          "name": "Push on main",
-          "status": "in_progress",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35463413967"
-        },
-        {
-          "conclusion": "success",
-          "databaseId": 35463414226,
-          "headSha": "daae91db04088bc49ddde97ee972299165e1d35d",
-          "name": "CI",
-          "status": "completed",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35463414226"
-        }
-      ],
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
@@ -2810,7 +2602,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "independent-execution-verification-promotion",
@@ -2824,7 +2616,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Independent runtime admission absent",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "current-semantic-retrieval",
@@ -2841,7 +2633,7 @@
           "evidence": [
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "RedDog-backend-closure-consolidation",
@@ -2858,7 +2650,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "RedDog-conversation-durable-adapters",
@@ -2875,7 +2667,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "integrated-mcp-qualification",
@@ -2889,7 +2681,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "wre-openclaw-hermes-worker",
@@ -2903,7 +2695,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current signed job/model/runtime admission absent",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "chroma-deployment",
@@ -2917,7 +2709,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current deployment owner and runtime qualification",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d",
           "security_dependency": "Current Dependabot alerts322/286 for direct chromadb in holo_index/requirements.txt; first_patched_version is null. Exposure/mitigation needs existing owner evidence; no blind runtime change."
         },
         {
@@ -2935,7 +2727,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "FoundUp-genesis-conversation-lineage",
@@ -2956,7 +2748,7 @@
             "genesis-next-source-overlap.json"
           ],
           "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d",
           "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill."
         },
         {
@@ -2977,7 +2769,7 @@
           ],
           "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding.",
           "why_score": "Existing security/dependency owners remain; no new exposure proof changes scope. The equally17/P0 typed genesis gap has a concrete local static witness and existing fixtures; continue security owner triage separately.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -2991,7 +2783,7 @@
           "priority": "P0",
           "state": "partial_transaction_dependency",
           "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "authenticated-response-read",
@@ -3005,7 +2797,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "012 reader-policy question remains unanswered",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "AmIBot-registry-prerequisite",
@@ -3022,7 +2814,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Fresh1751 head04ef322f remains draft, CONFLICTING and validateFAILURE. Preserve permanent detect_ai lineage and route/project owner; no main registration or build dispatch claimed.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "M2M-canonical-envelope-qualification",
@@ -3057,7 +2849,7 @@
           "effort": "One existing producer/consumer seam after contract retrieval.",
           "cost": "Deterministic fixtures first; provider cost remains unmeasured.",
           "verification_burden": "Independent exact-field/semantic preservation and scope failures before admission.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d",
           "score_reconciliation": "Historical18/P0 covered now-closed concrete serialization/seed handoff prerequisites. Residual local contract is15/P1; do not inherit18 automatically."
         },
         {
@@ -3070,8 +2862,8 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "eligible_later",
-          "next_step": "Input snapshot layer merged in PR1755. Program/proposal, oracle, environment and authenticated reader evidence remain; AmIBot exposed a higher-ranked shared handoff prerequisite.",
+          "state": "selected_next_source_scope_qualification",
+          "next_step": "Qualify the smallest program/proposal provenance step in the existing dry-run report owner and test suite. Current report binds baseline input only; score the exact step before source changes. Do not bundle oracle/environment/reader implementation.",
           "effort": "Extend existing WRE producer/report/reader owners after current handoff priority.",
           "cost": "Existing deterministic fixtures first; live measurement requires admitted provider/runtime.",
           "verification_burden": "Existing researcher suite and controlled rehearsals; keep evidence scoped to measured claims.",
@@ -3082,7 +2874,11 @@
             "Program/proposal, oracle, environment and authenticated reader evidence",
             "Resource measurement and independently retained benefit"
           ],
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/wre_auto_researcher.py:419",
+            "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py:526"
+          ]
         },
         {
           "task": "OpenClaw-content-bound-cache-qualification",
@@ -3096,7 +2892,7 @@
           "priority": "P1",
           "state": "contract_eligible_live_measurement_blocked",
           "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "AmIBot-public-route-contract-drift",
@@ -3108,12 +2904,12 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "outstanding",
+          "state": "outstanding_route_owner_reconciliation_required",
           "evidence": [
             "public/member/tests/test_route_contract_bridge.py"
           ],
           "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "FoundUp-genesis-wardrobe-admission",
@@ -3131,27 +2927,7 @@
             "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
           ],
           "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
-        },
-        {
-          "task": "R25-A consented local daily-work proposal",
-          "dimensions": {
-            "complexity": 4,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "selected_existing_contract_mapping_only",
-          "next_step": "Qualify existing consent/activity/provenance/type/dedup contracts for one synthetic daily-work proposal before scoping source changes.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198",
-          "evidence": [
-            "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-            "modules/communication/moltbot_bridge/src/openclaw_result_memory.py",
-            "daily-work-amibot-audit.json"
-          ],
-          "wsp97_action": "Extend existing typed, consented proposal path; separate nonempty-response telemetry from independent outcome evidence and permission to retain."
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "protected-foundup-work",
@@ -3165,7 +2941,7 @@
           "priority": "P1",
           "state": "external",
           "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. Registry PR1751 triggers existing eSingularity assertions; treat this as an external owner dependency.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "PatternMemory-worker-lifecycle-integration",
@@ -3183,7 +2959,7 @@
             "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
           ],
           "next_step": "Reconcile cached handles across worker restart/handoff and disposal; construct/use/close on one thread. Same-thread multi-call transactions and failed-initialization cleanup remain outside the current ownership repair.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "AmIBot-public-route-identity",
@@ -3201,7 +2977,7 @@
             "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
           ],
           "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "FoundUp-validation-fixture-reconciliation",
@@ -3222,10 +2998,32 @@
             "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
             "modules/communication/moltbot_bridge/tests/test_e2e_foundup_job_seam.py"
           ],
-          "rationale": "Independent review corrected tentativeImpact4to3: meaningful internal regression coverage, with no evidence of major/highly visible Impact4. R25 and other eligible15/P1 contracts precede this14/P1 candidate.",
+          "rationale": "Independent review corrected tentative Impact4 to3: meaningful internal regression coverage, without evidence of major Impact4. Eligible15/P1 report/M2M/cache contracts precede this14/P1 candidate; the now-qualified narrow R25 follow-on is13/P1.",
           "next_step": "Reuse exact current error-category mapping and isolated valid manifest/identity fixtures; preserve production resolver/gates. No source edits currently indicated.",
           "review": "next-fixture-contract-review.json",
-          "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca"
+          "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca",
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
+        },
+        {
+          "task": "R25-A consented local daily-work proposal",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "owner_mapping_complete_next_contract_unqualified",
+          "next_step": "Qualify explicit same-FoundUp synthetic feedback at the existing learning-candidate contract/validation/builder boundary. Fix consent-purpose/target/evidence-type/version compatibility before any source edit.",
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d",
+          "evidence": [
+            "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20",
+            "r25-disclosure-contract-review.json",
+            "r25-contract-replay.json"
+          ],
+          "wsp97_action": "Close the owner/field mapping only. Keep R25 runtime unimplemented; do not treat architect disclosure, structural candidate or CAS preview as feedback authority.",
+          "score_reconciliation": "Independent follow-on assessment: moderate contract mapping3, critical consent separation4, moderate urgency3, significant internal benefit3. Historical parent15/P1 is not inherited."
         },
         {
           "task": "auto-researcher-process-durability",
@@ -3239,7 +3037,7 @@
           "priority": "P1",
           "state": "eligible-later",
           "next_step": "Python-exit restoration closed; actual process/volume failure remains",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "R19-redteam-artifact-delivery",
@@ -3259,7 +3057,7 @@
           ],
           "next_step": "Existing R19/CI owner: qualify why report-only42passing results have no uploaded artifact before changing upload configuration; preserve report-only policy and independently validate artifact delivery.",
           "wsp97_action": "Extend existing observation workflow/test-evidence owner, no second workflow or automatic gate activation.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "OpenClaw-invocation-diagnostic-attribution",
@@ -3277,7 +3075,7 @@
             "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
           ],
           "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         },
         {
           "task": "Detect-AI-WSP109-intake",
@@ -3294,20 +3092,19 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module.",
-          "reconciled_against": "d00b156f1cfe39c7aaf5366fc5db12e03de4a198"
+          "reconciled_against": "daae91db04088bc49ddde97ee972299165e1d35d"
         }
       ],
-      "selected": "R25-A consented local daily-work proposal",
+      "selected": "AutoResearcher-report-completeness",
       "score": {
-        "complexity": 4,
+        "complexity": 3,
         "importance": 4,
-        "deferability": 3,
+        "deferability": 4,
         "impact": 4,
         "total": 15,
         "priority": "P1"
       },
-      "why_selected": "Higher20/19/18/17/16 candidates remain independently owned or lack current policy/runtime admission. At15/P1, choose the existing R25 local contract mapping explicitly requested by012 for daily activities; it is synthetic/local and does not need outreach or memory-write authority. Remaining M2M/cache/researcher contracts stay visible. The new fixture-debt candidate is14/P1 after independent correction, not automatically next.",
-      "correction": "Initial coordinator expectation that fixture debt would be next was provisional; independent WSP15 impact assessment changed ordering.",
+      "why_selected": "All higher-ranked items still require external owners, unresolved authority or runtime qualification. At15/P1, the existing dry-run researcher report owner is locally testable and still lacks program/proposal provenance. M2M full-context semantics and whole-wardrobe cache contracts need separate broader qualification; public-route and wardrobe work retain owner/admission dependencies. R25's newly qualified narrow follow-on is13/P1, not its former parent15. Select the report parent for next smallest-source-scope qualification; score that step before execution.",
       "amibot": {
         "pr": 1751,
         "head": "04ef322f172bed2504583a058ee8210674d98eeb",
@@ -3315,8 +3112,7 @@
         "draft": true,
         "mergeable": "CONFLICTING",
         "validate": "FAILURE",
-        "issue": "OPEN",
-        "main_registry": "17entries;detect_ai absent (main registry unchanged by1799)"
+        "main_registry": "17 entries; detect_ai absent; prepared registration remains in existing draft"
       }
     },
     "next_packet": {
@@ -3325,10 +3121,10 @@
       "ORIGIN": "internal_handoff",
       "PRINCIPAL_REF": "012",
       "L": "ORCH",
-      "S": "Existing R25 packet and current RSI backlog; source read-only until exact owner/contract qualification.",
+      "S": "Existing WRE auto-researcher report producer and tests; qualify one program/proposal provenance step before editing.",
       "M": "plan",
-      "T": "RSI-R25-DAILY-WORK-INTAKE-CONTRACT-20260920",
-      "A": "Map one synthetic daily-work observation into the existing consented same-FoundUp proposal path; identify only missing contract seams before proposing the smallest testable source scope.",
+      "T": "RSI-AUTORESEARCH-REPORT-PROVENANCE-20260920",
+      "A": "Retrieve current report producer/reader contracts and demonstrate the smallest missing program/proposal provenance binding with deterministic disposable fixtures. Independently qualify and score exact source scope, then execute only the minimal admitted local change.",
       "R": [
         0,
         15,
@@ -3338,62 +3134,70 @@
         77,
         95,
         97,
-        99,
-        103,
-        104
+        99
       ],
       "I": {
         "planning_only": true,
         "runtime_dispatchable": false,
+        "read_scope": [
+          "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+          "modules/infrastructure/wre_core/src/wre_research_evaluator.py",
+          "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py",
+          "modules/infrastructure/wre_core/README.md",
+          "modules/infrastructure/wre_core/INTERFACE.md",
+          "modules/infrastructure/wre_core/ROADMAP.md",
+          "modules/infrastructure/wre_core/ModLog.md",
+          "modules/infrastructure/wre_core/tests/README.md",
+          "modules/infrastructure/wre_core/tests/TestModLog.md"
+        ],
         "allowed_paths": [
           "ROADMAP.md",
           "ModLog.md",
           "docs/roadmaps/rsi_swarm_backlog.json",
-          "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
+          "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json"
         ],
         "denied_paths": [
           "main.py",
+          "extensions/reddog/",
           "modules/foundups/detect_ai/",
           "modules/foundups/esingularity/",
-          "FOUNDUPS/autopost",
-          "extensions/reddog/"
+          "FOUNDUPS/autopost"
         ],
         "dependencies": [
-          "Fresh WSP00/15/97 and task-bound retrieval.",
-          "Reuse current conversation/disclosure/FoundUp Memex/learning-candidate/ticket owners; inspect exact source and independent ownership before authoring.",
-          "R25-A design and synthetic proof are explicitly eligible before later admission/outreach/retention."
+          "Fresh WSP00/15/97, governed retrieval and exact ownership",
+          "Review existing researcher mode/report/input-snapshot tests and source; no assumed live runner",
+          "Score the exact bounded change rather than inheriting parent15"
         ],
         "invariants": [
-          "No new module, skill, proposal identity or ticket scheduler before reuse check.",
-          "Preserve consent/activity, authenticated scope, provenance, evidence type, source revision, purpose/expiry and deduplication.",
-          "Preference/inference are not verified fact, authorization, payout or retained improvement.",
-          "No real conversation scraping, cross-FoundUp disclosure, participant outreach, memory write, provider call or worker activation.",
-          "Use synthetic isolated participants/FoundUp; keep YUMORI/eSingularity and peer lanes protected."
+          "No live provider, model download/upgrade, WSL service launch, deployment or retention claim",
+          "Target/instructions/proposals remain disposable; preserve dry-run fail-closed mode and immutable oracle",
+          "No new module, report scheduler or skill when an existing owner suffices",
+          "Do not bundle environmental measurement, oracle, reader authentication and program/proposal provenance into one repair"
         ],
         "wsp15": {
-          "complexity": 4,
+          "complexity": 3,
           "importance": 4,
-          "deferability": 3,
+          "deferability": 4,
           "impact": 4,
           "total": 15,
           "priority": "P1"
         }
       },
       "O": [
-        "Owner/field/reuse map in existing R25/current-observation location.",
-        "Positive and negative oracle plan including missing/revoked permission, stale revision, wrong FoundUp, duplicates and feedback-as-authority.",
-        "Smallest concrete next source scope or evidence-bound blocker; independent review before execution."
+        "Exact source/consumer and ownership map",
+        "One reproduced report provenance gap with positive and negative oracle",
+        "Independently reviewed minimal implementation scope or precise blocker; subsequent WSP15 rescore"
       ],
       "F": [
-        "Owner collision",
-        "Duplicate implementation",
-        "Missing consent or provenance",
-        "Type/authority promotion",
-        "Scope leakage",
-        "Unqualified runtime action"
+        "Scope/owner collision",
+        "Fabricated program/proposal or environment evidence",
+        "Evaluation criteria changed to create success",
+        "Live runtime or protected FoundUp effect",
+        "Validation failure"
       ]
     },
-    "execution_packet_status": "closed_by_verified_PR1799; current selection is next_packet planning only",
+    "next_step": "Fresh qualification of the AutoResearcher report provenance step, not automatic runtime dispatch.",
+    "requires_fresh_reobservation_after_closure": true,
     "checkpoint_branch": "agent/rsi-daily-work-intake-contract-20260920"
   }
 }
