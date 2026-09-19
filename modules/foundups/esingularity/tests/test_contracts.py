@@ -16,6 +16,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
+CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -96,6 +97,11 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert funding["primary_agent"] == "0102"
     assert funding["intent_type"] == "RESEARCH"
 
+    correspondence = registry["skills"]["yumori_contact_ledger"]
+    assert correspondence["location"] == "modules/foundups/esingularity/skillz/yumori_contact_ledger"
+    assert correspondence["primary_agent"] == "0102"
+    assert correspondence["intent_type"] == "MAINTENANCE"
+
     fukui_text = FUKUI_PROCEDURE_SKILL_PATH.read_text(encoding="utf-8")
     assert "reddog_recipient_preflight/SKILLz.md" in fukui_text
     assert "BLOCKED_ON_OFFICIAL_TEMPLATE" in fukui_text
@@ -108,9 +114,18 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "VERIFIED PROGRAM" in funding_text
     assert "AWARDED" in funding_text
 
+    correspondence_text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    assert "Canonical 0102 proxy voice" in correspondence_text
+    assert "do not open with" in correspondence_text
+    assert "0102です" in correspondence_text
+    assert "Default sign-off" in correspondence_text
+    assert "Never imply that 0102 personally performed a field action completed by the monk." in correspondence_text
+    assert "RED DOG CANDIDATE" in correspondence_text
+
     for slug, canonical in (
         ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),
         ("yumori-funding-ppp-intelligence", "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence/SKILLz.md"),
+        ("yumori-contact-ledger", "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md"),
     ):
         for root in (".agents", ".claude"):
             projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
