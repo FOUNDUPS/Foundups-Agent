@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-19. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-20. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -61,7 +61,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. Main `b2e9e3db2` still has 17 registry
+manifest and the existing intake package. Main `7de1d9ca9` still has 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -120,12 +120,20 @@ All 529 applicable IDs therefore have passing local evidence. Eight manifest tes
 and 15 fast groups pass; registry is 1,651/269. Four of 1,400 runtime hashes change.
 Earlier failures and review corrections remain in the backlog evidence chain.
 
-**Receipt-to-seed prerequisite, 18/P0:** locally verified in four existing owners.
+**Receipt-to-seed prerequisite, 18/P0:** PR #1795 merged as `7de1d9ca9` after ten
+passing exact-head checks; the merged tree matches the reviewed candidate.
 A declared plan requires matching explicit seed input; missing/tampered/conflicting
 lineage rejects before later callbacks. Declared execution constraints must agree
 with effective seed scope. Legacy bytes remain. Author 553 tests and independent 471
-plus 139 probes pass; eight manifest tests/15 fast groups pass. After owned closure,
-reobserve direct profile/promotion ingress before automatic selection. `main.py:2844`
+plus 139 probes pass; eight manifest tests/15 fast groups pass. Post-merge main CI
+and CodeQL both passed (runs 35448028771 / 35448028395).
+
+**Direct-profile prerequisite, 18/P0:** the existing promotion/bootstrap path now
+snapshots both inputs and checks explicit profile/proposal plan agreement before
+capability or storage effects. Canonical types, empty/absent distinctions, declared
+scope and existing lineage checks remain; the controller shrinks from 690 to 624 lines.
+Local connected/publication tests pass 571/32. Independent318 plus 177 asserted probes,
+eight manifest tests and 15 fast groups pass. Finish owned CI closure, then re-observe before qualifying automatic forwarding. `main.py:2844`
 remains unwired; do not infer packets from prose or task summaries.
 Principal normalization, full context/native-child fidelity, current signed admission
 and live RSI retention remain open; this local source qualification does not close G0.

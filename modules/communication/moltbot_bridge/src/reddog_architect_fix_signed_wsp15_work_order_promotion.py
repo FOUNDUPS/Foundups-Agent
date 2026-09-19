@@ -71,14 +71,11 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_pub
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
     verify_architect_proposal_promotion_authority,
 )
-from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
-    rehydrate_authority_profile_source,
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_profile import (
+    prepare_architect_fix_promotion_inputs,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
-    authority_profile_malformed_digest_paths,
     authority_profile_runtime_unknown_field_paths,
-    authority_profile_secret_field_paths,
-    authority_profile_unknown_field_paths,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     SignerSocketServiceRuntimeWiringConfig,
@@ -108,32 +105,6 @@ ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION = (
 ARTIFACT_GENERATION_RUNTIME_SURFACE = "reddog_artifact_generation"
 
 
-_AUTHORITY_PROFILE_REQUIRED = (
-    "principal_id",
-    "principal_provider",
-    "principal_public_key",
-    "reddog_id",
-    "reddog_public_key",
-    "repo_full_name",
-    "foundup_id",
-    "allowed_paths",
-    "denied_paths",
-    "requested_operation",
-    "permission_snapshot_digest",
-    "identity_nonce",
-    "work_authority_nonce",
-    "issued_at",
-    "identity_expires_at",
-    "work_authority_expires_at",
-    "valve_state_required",
-    "key_epoch",
-    "consensus_receipt_digest",
-    "authority_profile_source_receipt_id",
-    "required_tests",
-    "required_policy_gates",
-)
-
-
 def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     *,
     architect_determination: Mapping[str, Any],
@@ -161,8 +132,13 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     ) = None,
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
+    architect_determination, authority_profile, reasons = prepare_architect_fix_promotion_inputs(
+        architect_determination, authority_profile,
+    )
+    if reasons:
+        return _reject(reasons)
+    reasons = list(reasons)
     current = work_state_store.load()
-    reasons: list[str] = []
     if current.get("schema_version") != WORK_STATE_SCHEMA_VERSION:
         reasons.append(ArchitectFixPromotionReason.WORK_STATE_SCHEMA)
     freshness_id = _freshness_receipt_id(current)
@@ -238,17 +214,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         model_runtime_binding_verification_capability,
         reasons,
     )
-    reasons.extend(_validate_authority_profile(authority_profile))
-    try:
-        authority_profile = rehydrate_authority_profile_source(
-            authority_profile
-        )
-    except (TypeError, ValueError):
-        reasons.append(
-            ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
-            + ":typed_rehydration"
-        )
-        authority_profile = {}
     memex_verified = _rehydrate_memex_supply(
         memex_supply_receipt, determination, authority_profile,
         current_holoindex_receipt, now_iso, reasons,
@@ -630,37 +595,6 @@ def _rehydrate_memex_supply(
     except (TypeError, ValueError):
         reasons.append(ArchitectFixPromotionReason.MEMEX_SUPPLY_INVALID)
         return None
-def _validate_authority_profile(profile: Mapping[str, Any]) -> list[str]:
-    if not isinstance(profile, Mapping) or not profile:
-        return [ArchitectFixPromotionReason.AUTHORITY_PROFILE_MISSING]
-    missing = [
-        field
-        for field in _AUTHORITY_PROFILE_REQUIRED
-        if field not in profile or profile.get(field) in (None, "", (), [], {})
-    ]
-    reasons = [
-        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE + ":" + field
-        for field in missing
-    ]
-    reasons.extend(
-        ArchitectFixPromotionReason.AUTHORITY_PROFILE_SECRET_FIELD + ":" + path
-        for path in authority_profile_secret_field_paths(profile)
-    )
-    reasons.extend(
-        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
-        + ":unknown_field:"
-        + path
-        for path in authority_profile_unknown_field_paths(profile, seed=False)
-    )
-    reasons.extend(
-        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
-        + ":digest_format:"
-        + path
-        for path in authority_profile_malformed_digest_paths(profile)
-    )
-    return reasons
-
-
 def _duplicate_queue(snapshot: Mapping[str, Any], *, selected_slice: str, determination_id: str) -> bool:
     for item in snapshot.get("wre_queue_items") or ():
         if not isinstance(item, Mapping):

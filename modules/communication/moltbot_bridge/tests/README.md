@@ -1,5 +1,18 @@
 # Tests - OpenClaw Bridge
 
+## Direct profile/proposal ingress coverage
+
+Use the existing exact-schema and model-runtime bootstrap suites. Matching plans
+must remain identical at root and both projected proposal locations. Rejection must
+precede direct store reads and bootstrap capability/probe/lock/recovery; check file
+bytes and file inventory. Cover receipt-wrapper selection, absent-plan callback
+mutation, canonical scalar distinctions, explicit empty plans and declared scope.
+Run existing bounded packet preflight before generic profile traversal; malformed
+plan/packet/invariant mappings must reject without invoking their methods.
+Sign the final selected determination bytes before wrapping it, and use the existing
+verified model-runtime fixture. These are disposable integration fixtures, not live
+worker admission. Local connected/publication coverage is 571 + 32 distinct tests.
+
 ## Receipt-to-seed lineage coverage
 
 Reuse the existing seed/bootstrap suites and determination rebind fixture. Cover

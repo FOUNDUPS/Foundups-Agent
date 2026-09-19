@@ -1,3 +1,17 @@
+## 2026-09-20: Direct profile/proposal plan agreement before promotion effects
+
+- Reused the existing profile, promotion controller and bootstrap preparation owners. A declared proposal plan requires an explicit canonically equal profile plan and matching declared execution constraints. Typed snapshots precede direct store reads and bootstrap capability/probe/lock/recovery; legacy absence is frozen too. WSP00/15/22/50/62/84/97/99.
+- Independent review passes 318 overlapping tests plus 177 asserted probes; it caught generic traversal before packet validation, repaired with four regressions. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Runtime closure and pins are unchanged.
+- Kept one receipt-wrapper selection and all downstream current-state, Holo, signature and admission checks. Moved existing profile validation into its existing owner: controller 690 to 624 lines; no new module, skill, exemption or startup wiring.
+- Local connected tests: 571; publication tests: 32. New regressions first failed 28/46 against the unchanged source. Exact evidence, independent review and subsequent remote closure are tracked in docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+- This qualifies local ingress consistency. It does not admit live OpenClaw/Hermes jobs or retain learned runtime capabilities. Finish owned validation/closure, then re-observe WSP15/97 before automatic plan forwarding.
+
+## 2026-09-19: Seed-lineage sprint merged and queue re-observed
+
+- PR #1795 merged as 7de1d9ca9 after ten exact-head checks; tree matches the independent review. Other 102 open PR heads and the shared protected checkout are unchanged. Post-merge main CI/CodeQL are tracked separately in the backlog.
+- Re-scored 25 candidates under WSP15/97. The 18/P0 handoff item remains highest executable: existing in-memory promotion fixtures accept matching, omitted and conflicting root plans. This is direct-ingress contract evidence, not a production authority bypass. Qualify existing profile/promotion owners before forwarding; no new source work began in this checkpoint.
+- Reconciled 221 open dependency alerts (9 critical) with existing security/MCP PRs and the blocked Chroma owner. Separate 17/P0 exposure/owner triage remains; no runtime/package update or external work absorbed. AmIBot detect_ai registration remains draft PR1751 with failing protected validation. All original 26 planning packets remain unchanged.
+
 ## 2026-09-19: RSI seed-plan lineage and scope consistency
 
 - Reused four existing owners to reject missing/conflicting declared plans, validate detached receipt/candidate lineage before callbacks, and check effective seed execution scope. Legacy bytes remain. WSP00/15/22/50/62/84/97/99.

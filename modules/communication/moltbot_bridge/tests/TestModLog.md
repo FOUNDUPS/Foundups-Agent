@@ -1,3 +1,9 @@
+## 2026-09-20: Profile/proposal ingress regressions
+
+- Extended the existing exact-schema and model-runtime bootstrap test owners. Check absent/null/empty/conflicting plans, bool/int/float distinctions, declared scope, stale lineage, raw/wrapped inputs, nested wrapper selection, callback mutation, non-plain mappings and unchanged bootstrap files on rejection.
+- Reused current determination, signing and runtime capability fixtures. Initial fixture failures were corrected before the qualified baseline: sign the final selected receipt bytes, and use the existing verified model-runtime fixture. Preserve those preliminary failures as fixture evidence, not product defects.
+- Qualified baseline: 28 failed/18 passed. Independent review then exposed generic traversal before bounded packet validation; four additional regressions failed before repair and the final focused suite passes 50. Connected suites: 571 passed; publication: 32 passed at the existing Windows path precondition. Independent and packaging results are bound in the root backlog; overlapping runs are not added together.
+
 ## 2026-09-19: Seed-plan provenance regression closure
 
 - Extended existing seed/bootstrap tests for missing/None/empty/matching/conflicting plans, canonical scalar distinctions, receipt/candidate/stage tampering, stale rehashed outer lineage, scope mirrors, detached aliases, malformed callback returns and overridden presence methods.
