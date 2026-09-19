@@ -3209,7 +3209,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for the WSP 109 intake packet builder (dry-run only).\n\nSlice: WSP109_INTAKE_PACKET_BUILDER_PHASE1\nWSP:   50, 97, 109\n\nProves:\n    - Valid structured idea -> populated envelope -> GATE_PASSED\n    - Empty idea -> NO_ENVELOPE / NOT_READY\n    - Invalid foundup_id -> gate rejects (not GATE_PASSED)\n    - Builder module imports no FAM/Hermes writer (AST guard)\n    - Result is dry-run only; no filesystem side effect\n    - OpenClaw dispatch: envelope in payload -> gate passes; without -> NOT_READY"
+      "description": "Tests for the WSP 109 intake packet builder (dry-run only).\n\nSlice: WSP109_INTAKE_PACKET_BUILDER_PHASE1\nWSP:   50, 97, 109\n\nProves:\n    - Valid structured idea -> populated envelope -> GATE_PASSED\n    - Empty idea -> NO_ENVELOPE / NOT_READY\n    - Invalid foundup_id -> gate rejects (not GATE_PASSED)\n    - Builder module imports no FAM/Hermes writer (AST guard)\n    - Result is dry-run only; no filesystem side effect\n    - Commander dispatch: declared metadata -> detached gated queue; no live execu"
     },
     {
       "id": "test::modules::ai_intelligence::ai_overseer::tests::test_intake_transport",

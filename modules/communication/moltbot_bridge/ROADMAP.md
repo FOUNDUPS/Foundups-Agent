@@ -1,3 +1,13 @@
+## RSI commander genesis handoff — 2026-09-20
+
+Existing intent metadata now reaches the validated, detached dry-run job payload;
+legacy bare-build precedence and current action/mode remain. Source990lines,
+dispatcher40/handler78; independent review accepted after3defects were repaired.
+Focused111pass; connected1048pass with4unchanged-main failures retained. Exact
+hashes, packaging checks and remote closure live in the root RSI backlog.
+Next selection must reconcile those fixtures, public draft-to-commander authority,
+AmIBot's existing draft/registry/G0 gates and current worker admission separately.
+
 ## RSI producer-to-bootstrap checkpoint — 2026-09-20
 
 PR1797 merged canonical child serialization; its main CI and CodeQL passed.

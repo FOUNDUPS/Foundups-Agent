@@ -508,9 +508,9 @@ generic receipt as an optional all-or-none extension of
 fields remain valid. Legacy OpenRouter data remains compatibility telemetry,
 not a second authoritative provider-call identity.
 
-### FoundUpJob create_foundup Lineage
+### FoundUpJob intake and create_foundup lineage
 
-`FoundUpJob` exposes typed top-level `creation_mode`, `genesis_envelope_digest`, and `scaffold_contract_digest` fields through `create_job()` and `to_dict()` / `from_dict()`. For `create_foundup`, use `creation_mode="new_scaffold"`, explicit `PolicyFlags(dry_run_mode=True)`, canonical SHA-256 digests, and `payload.genesis_envelope`; WRE validates the route and never aliases it to build/extract.
+`dispatch_foundup()` requires existing commander authority before mutation intake. It accepts a plain `metadata.genesis_envelope` (compatible legacy `payload.genesis_envelope` only if unambiguous), revalidates a detached copy and queues the frozen envelope with tenant/session/FoundUp identity. Malformed declared data and conflicting parsed targets return `NOT_READY`; bare explicit builds retain their queue behavior. Draft public authentication and `requested_by` are not commander authority. Jobs remain dry-run with no fabricated execution evidence, creation mode or typed digest. Separately, `FoundUpJob` exposes `creation_mode`, `genesis_envelope_digest`, and `scaffold_contract_digest` through `create_job()` and round-trip serialization. The admitted `create_foundup` route requires `new_scaffold`, explicit dry-run policy, planner-compatible digests and `payload.genesis_envelope`; WRE never aliases that route to build/extract. This handoff does not grant scaffold or worker admission.
 
 ### Durable Resident Architect Cycle
 

@@ -24,14 +24,21 @@ scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
 - OpenClaw genesis gate wired into `dispatch_foundup` and characterization-tested (#740).
 - Hermes builder **dry-run by default** + double opt-in for real writes (#919).
 - **WSP109_INTAKE_PACKET_BUILDER_PHASE1** (this slice): chat idea -> `FoundUpGenesisEnvelope` ->
-  genesis gate, dry-run only. Proves the WSP 109 handoff artifact reaches the gate; makes the
-  valid-envelope launch branch reachable end-to-end.
+  genesis gate, draft evaluation only. It does not grant public launch/commander authority.
+- Commander handoff candidate (2026-09-20): existing `OpenClawIntent.metadata` -> revalidated,
+  detached queued-job payload. Independent acceptance and exact closure are tracked in the
+  root RSI backlog; no new action, scaffold admission, registry entry, or live worker.
 
 ## Next
 
-- **FOUNDUP_SCAFFOLD_CONTRACT_PHASE1** (P2): define the `create_foundup` action + typed creation
-  fields, and the mapping intake packet -> WSP-49 module + `foundup_manifest.json` + registry seed,
-  with a valve-gated write owner. Decision/contract only (no scaffold write).
+- **FOUNDUP_SCAFFOLD_CONTRACT_PHASE1**: typed creation fields, route snapshots and the dry-run
+  planner already exist in `foundup_job_contract.py`, WRE's `foundup_scaffold_route_contract.py`
+  and `modules/foundups/agent/src/create_foundup_dryrun.py`. Extend these owners; do not redefine them.
+  Remaining: public draft -> authenticated owner/commander admission, planner lineage and an
+  independently verified valve-gated execution path. Draft intake is not that authorization.
+- Reconcile four baseline validation failures: launch-request category expectation and three
+  legacy E2E fixtures lacking manifests. Reproduced on untouched main `d00b156f`; root backlog
+  retains failures and selection evidence. No whole-system green claim.
 - **WSP_109_FRESH_WORKER_EXECUTION_VALIDATION_PHASE1**: prove a fresh worker executes WSP 109 from
   protocol text alone.
 - **HOLOINDEX_FOUNDUP_CREATION_AUDIT_DISCOVERABILITY_PHASE1**: re-index the new audit docs so they

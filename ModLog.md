@@ -1,3 +1,10 @@
+## 2026-09-20: Commander genesis envelope handoff; baseline validation debt retained
+
+- WSP00/15/22/50/62/84/95/97/99/109: repaired the existing metadata-to-job owner; explicit commander authority precedes draft validation, and detached envelope/tenant/session/FoundUp lineage reaches the dry-run queue. No new module/skill, action, public entitlement or worker activation.
+- Local focused111pass; connected1048pass/4fail. All4failures reproduce on untouched main d00b156f (stale launch error category;3legacy Hermes fixtures missing manifests). They remain separate visible validation debt.
+- Independent review rejected3defects, then accepted the corrected source with99overlapping tests and31adversarial cases. Kept rejection/red evidence. Source1016to990; dispatcher85to40/handler90to78. Eight manifest tests and15fast groups pass; registry1651/269 has one description update.
+- Exact hashes, complete prior PR accounting, the existing onboarding skill, authority limits and subsequent remote closure are recorded in docs/roadmaps/rsi_swarm_backlog.json#current_observation. Daily work becomes an RSI candidate through R25 consent/admission and independently verified outcomes; conversation activity alone is not retained learning.
+
 ## 2026-09-20: Serializer merged; caller contract and CI evidence debt re-observed
 
 - PR1797 merged as6556a0d1427651baef518de799ccb7df19e16c35 after10 exact-head checks passed. Merged tree equals reviewed5620candidate; other102 open heads and protected shared checkout were unchanged at merge preflight. Main CI/CodeQL statuses remain explicit in backlog.
