@@ -128,13 +128,20 @@ with effective seed scope. Legacy bytes remain. Author 553 tests and independent
 plus 139 probes pass; eight manifest tests/15 fast groups pass. Post-merge main CI
 and CodeQL both passed (runs 35448028771 / 35448028395).
 
-**Direct-profile prerequisite, 18/P0:** the existing promotion/bootstrap path now
-snapshots both inputs and checks explicit profile/proposal plan agreement before
-capability or storage effects. Canonical types, empty/absent distinctions, declared
-scope and existing lineage checks remain; the controller shrinks from 690 to 624 lines.
-Local connected/publication tests pass 571/32. Independent318 plus 177 asserted probes,
-eight manifest tests and 15 fast groups pass. Finish owned CI closure, then re-observe before qualifying automatic forwarding. `main.py:2844`
-remains unwired; do not infer packets from prose or task summaries.
+**Direct-profile prerequisite, 18/P0:** PR #1796 merged as `15f203ee3` after all ten
+checks passed on exact `f7c74fa00`. The merged tree equals the independently reviewed
+tree. Both promotion inputs are detached before capability/storage effects and
+must agree with a declared proposal plan. Local 571 +32 publication tests pass;
+independent 318 +177 asserted probes, eight manifest tests and 15 fast groups pass.
+Post-merge main CI/CodeQL remain separately tracked in the backlog.
+
+**Next after fresh WSP15/97 reconciliation:** actual determination serialization
+uses `asdict`, converting an absent proposal plan into invalid `null`. The canonical
+proposal serializer omits that field and validates; empty/full controls preserve it.
+Repair this existing producer seam and test real output/persistence with unchanged
+IDs before automatic selection. Do not weaken consumers to accept null as absence.
+Later selection belongs in the existing seed bootstrap's single read, preserving
+explicit None/empty semantics. `main.py:2844` remains unwired; no prose inference.
 Principal normalization, full context/native-child fidelity, current signed admission
 and live RSI retention remain open; this local source qualification does not close G0.
 

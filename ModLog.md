@@ -1,3 +1,10 @@
+## 2026-09-20: Profile consistency merged; producer serialization selected
+
+- PR #1796 merged as `15f203ee3` after ten exact-head checks passed; its tree matches the reviewed candidate. Other 102 open PR heads and the protected shared checkout remain unchanged. Main CI/CodeQL are tracked independently.
+- Re-scored 25 current candidates under WSP15/97. The 18/P0 M2M item remains highest eligible, but real producer evidence changes the next action: determination.asdict inserts invalid null for an absent proposal plan. Compose the existing canonical proposal serializer and preserve identity/persistence before automatic forwarding; no source edit in this checkpoint.
+- Three independent serialization controls establish the missing prerequisite. The existing bootstrap already owns one determination read; any later omission-aware selection belongs there, preserving explicit None/empty and current supplier checks. No new module, skill or runtime authority.
+- Main registry still has no detect_ai/AmIBot; registration remains draft PR1751 at unchanged 04ef322f with failing Validate eSingularity/validate. Retain its existing onboarding skill/registry change rather than duplicate it. All original 26 planning packets remain unchanged.
+
 ## 2026-09-20: Direct profile/proposal plan agreement before promotion effects
 
 - Reused the existing profile, promotion controller and bootstrap preparation owners. A declared proposal plan requires an explicit canonically equal profile plan and matching declared execution constraints. Typed snapshots precede direct store reads and bootstrap capability/probe/lock/recovery; legacy absence is frozen too. WSP00/15/22/50/62/84/97/99.
