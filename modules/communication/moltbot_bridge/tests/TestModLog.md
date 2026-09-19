@@ -1,3 +1,9 @@
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 ## 2026-09-20: Actual producer optional-plan serialization
 
 - Existing exact-schema tests now drive backend FakeArchitectRunner and InMemoryArchitectDeterminationStore through the actual producer. Cover result/persisted receipt, absent/None versus empty/full plans, explicit-null rejection, detached nested output, three linked identities and rejected/no-proposal output.

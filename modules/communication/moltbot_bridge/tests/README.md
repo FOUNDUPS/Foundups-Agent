@@ -1,5 +1,17 @@
 # Tests - OpenClaw Bridge
 
+## FoundUp job seam fixtures
+
+`test_e2e_foundup_job_seam.py` reuses the canonical synthetic manifest factory in
+`modules/foundups/agent/tests/test_foundup_manifest_validator.py`. Its fixture
+temporarily changes cwd to an external temporary repository and supplies
+`Path(".")`: the real validator rejects absolute roots outside its checkout.
+Only the Hermes builder is mocked. Assert its exact canonical path calls;
+missing manifests and mismatched FoundUp IDs must reject before construction.
+Non-dry-run status simulation is not live execution or completed verification.
+For mixed AI Overseer runs set `AI_OVERSEER_HEAVY_TESTS=1` and use importlib mode
+so the sibling suites execute rather than inheriting collection skips.
+
 ## Omitted seed-plan selection
 
 Use the existing bootstrap suite: omitted/None/empty/matching/conflicting inputs,
