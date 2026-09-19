@@ -8,6 +8,7 @@ Structure:
 - `test_analysis.py` lightweight mission analysis helpers.
 - `test_planning.py` coordination planning helpers.
 - `test_execution.py` execution routing helpers.
+- `test_foundup_launch_request.py` preserves ordered error-category expectations and the source AST guard; only the exact current command error maps to authority rejection, with an unknown near-message control.
 - `test_intake_packet_builder.py` proves actual commander-authorized metadata handoff, frozen
   job lineage, malformed/conflicting input rejection and preservation of dry-run queue behavior.
 - `test_mcp.py` MCP enum smoke checks.

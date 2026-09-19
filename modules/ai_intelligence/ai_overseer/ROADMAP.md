@@ -20,6 +20,10 @@ scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
 
 ## Landed
 
+- Four baseline fixture failures repaired locally (2026-09-20): exact test error taxonomy and
+  canonical disposable manifests/IDs; production guards unchanged. Focused205/connected677
+  pass without skips. Independent review and remote closure are in the root RSI backlog.
+
 - `FoundUpGenesisEnvelope` schema + strict validator (WSP 97 truth markers, WSP 104 id format).
 - OpenClaw genesis gate wired into `dispatch_foundup` and characterization-tested (#740).
 - Hermes builder **dry-run by default** + double opt-in for real writes (#919).
@@ -36,9 +40,6 @@ scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
   and `modules/foundups/agent/src/create_foundup_dryrun.py`. Extend these owners; do not redefine them.
   Remaining: public draft -> authenticated owner/commander admission, planner lineage and an
   independently verified valve-gated execution path. Draft intake is not that authorization.
-- Reconcile four baseline validation failures: launch-request category expectation and three
-  legacy E2E fixtures lacking manifests. Reproduced on untouched main `d00b156f`; root backlog
-  retains failures and selection evidence. No whole-system green claim.
 - **WSP_109_FRESH_WORKER_EXECUTION_VALIDATION_PHASE1**: prove a fresh worker executes WSP 109 from
   protocol text alone.
 - **HOLOINDEX_FOUNDUP_CREATION_AUDIT_DISCOVERABILITY_PHASE1**: re-index the new audit docs so they
