@@ -13,7 +13,7 @@ scipy==1.11.3
 soundfile==0.12.1
 
 # Image Processing (for map visualization)
-Pillow==10.1.0
+Pillow==12.3.0
 
 # HTTP Requests and APIs
 requests==2.31.0
