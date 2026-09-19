@@ -67,6 +67,11 @@ lineage before other receipt callbacks, then checks declared execution constrain
 against effective seed scope. Legacy plain-dict receipts without a plan retain their
 previous bytes and separate-plan behavior; `{}` is explicit. Main startup still
 supplies no plan; automatic extraction and principal normalization remain open.
+Direct promotion and bootstrap now enforce profile/proposal agreement using the
+existing profile owner. Both input snapshots are detached before downstream effects,
+including the legacy absent-plan branch. A declared proposal plan must equal the
+explicit profile plan and its declared scope; missing, conflicting or tampered
+lineage rejects. This does not automatically extract a plan or authorize execution.
 Generation checks the signed full-order digest before one-use model admission.
 Explicit M2M packets survive profile/signing and detached request preparation;
 rejection consumes the matching handle. Legacy bytes and the 24,000-character

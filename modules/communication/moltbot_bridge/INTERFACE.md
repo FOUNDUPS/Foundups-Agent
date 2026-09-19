@@ -53,8 +53,24 @@ is re-exported under its unchanged seed-supplier import name. Closed profile rea
 admit the plan only at the root and the two declared proposal receipt locations,
 including `operational_context_binding.proposal_admission`. Non-plain ancestors reject
 before reconstruction. Existing M2M codec bounds are unchanged. Whole-plan completeness,
-current authenticity/admission, direct profile ingress and startup forwarding are
-separate requirements; no provider, signer, worker or promotion authority is added.
+current authenticity/admission and startup forwarding remain separate requirements;
+direct profile agreement is checked by the preparation contract below; no provider, signer, worker or promotion authority is added.
+
+`prepare_architect_fix_promotion_inputs(determination, profile)` lives in the
+existing promotion profile owner and returns detached raw/wrapped input, a typed
+source profile and rejection reasons. Public promotion calls it before store.load;
+bootstrap calls it after artifact reads and before runtime capability verification,
+output probing, locks, store construction or publication recovery. One nonempty
+plain-dict receipt wrapper is selected; ordinary empty/None fallback is retained.
+Absence is detached too, preventing a callback from introducing a new plan.
+
+A declared proposal plan requires explicit canonical root-plan equality, existing
+receipt/candidate lineage and declared effective profile scope. Failure uses
+`REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_INCOMPLETE:proposal_plan_binding`;
+generic profile diagnostics retain their existing codes. Legacy receipts without
+a plan still permit a separately supplied plan. Current authenticity, revision,
+HEAD/Holo, model and worker authority remain downstream. Direct calls to internal
+post-verification transaction/projection helpers are outside this ingress contract.
 
 `run_reddog_authority_profile_seed_supply(...)` and its existing bootstrap accept
 `bounded_worker_plan=None`. `snapshot_seed_worker_plan` detaches a plain typed/ASCII

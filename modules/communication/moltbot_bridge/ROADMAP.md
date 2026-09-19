@@ -1,3 +1,14 @@
+## RSI direct-profile consistency checkpoint — 2026-09-20
+
+The existing direct promotion and bootstrap ingress now require explicit profile
+agreement with a declared proposal plan, and freeze legacy absence before callbacks.
+Existing typed, receipt/candidate lineage and declared-scope checks are reused.
+Local connected/publication tests pass 571/32; exact review and closure evidence
+are in the root backlog. No new owner, module, skill, startup wiring or exemption.
+Close the owned candidate, then re-observe before selecting automatic forwarding.
+Whole-plan completeness, current admission and retained RSI remain open; AmIBot G0
+is not complete. Earlier checkpoint entries below are historical.
+
 ## RSI seed-plan lineage checkpoint — 2026-09-19
 
 The explicit receipt-to-seed consistency prerequisite is locally verified.

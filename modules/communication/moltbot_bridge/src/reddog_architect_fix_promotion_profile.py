@@ -2,15 +2,56 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
     rehydrate_authority_profile_runtime,
+    rehydrate_authority_profile_source,
+    snapshot_authority_profile_m2m,
+    worker_plan_matches_execution_scope,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
     authority_profile_runtime_unknown_field_paths,
+    authority_profile_malformed_digest_paths,
+    authority_profile_secret_field_paths,
+    authority_profile_unknown_field_paths,
 )
+
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gate import (
+    snapshot_architect_fix_plan_lineage,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    ArchitectFixPromotionReason,
+)
+
+
+_AUTHORITY_PROFILE_REQUIRED = (
+    "principal_id",
+    "principal_provider",
+    "principal_public_key",
+    "reddog_id",
+    "reddog_public_key",
+    "repo_full_name",
+    "foundup_id",
+    "allowed_paths",
+    "denied_paths",
+    "requested_operation",
+    "permission_snapshot_digest",
+    "identity_nonce",
+    "work_authority_nonce",
+    "issued_at",
+    "identity_expires_at",
+    "work_authority_expires_at",
+    "valve_state_required",
+    "key_epoch",
+    "consensus_receipt_digest",
+    "authority_profile_source_receipt_id",
+    "required_tests",
+    "required_policy_gates",
+)
+
 
 
 @dataclass(frozen=True)
@@ -38,6 +79,86 @@ class ArchitectFixPromotionProfileInputs:
     queue_item_id: str
     claim_id: str
     holoindex_evidence: Mapping[str, Any]
+
+
+def prepare_architect_fix_promotion_inputs(
+    determination: Mapping[str, Any], profile: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], Mapping[str, Any], tuple[str, ...]]:
+    """Freeze one raw/wrapped determination and source profile before effects.
+
+    A declared proposal plan must match the explicit profile plan and scope.
+    This is consistency validation, not signing or current execution authority.
+    The outer receipt shape is preserved so repeated preflight selects once.
+    """
+    reasons = []
+    try:
+        if (type(profile) is dict and "bounded_worker_plan" in profile
+                and type(profile["bounded_worker_plan"]) is not dict):
+            raise ValueError("bounded_worker_plan_not_plain_mapping")
+        profile = snapshot_authority_profile_m2m(profile)
+        reasons.extend(_validate_authority_profile(profile))
+        profile = rehydrate_authority_profile_source(profile)
+    except (TypeError, ValueError, RecursionError, OverflowError):
+        reasons.append(ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+                       + ":typed_rehydration")
+    if reasons:
+        return {}, {}, tuple(dict.fromkeys(reasons))
+    try:
+        determination = _snapshot_promotion_determination(determination, profile)
+    except (TypeError, ValueError, RecursionError, OverflowError):
+        return {}, {}, (ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+                        + ":proposal_plan_binding",)
+    return determination, profile, ()
+
+
+def _snapshot_promotion_determination(value, profile):
+    if type(value) is not dict:
+        raise ValueError("determination_not_plain_mapping")
+    receipt = value.get("receipt")
+    if receipt is not None and type(receipt) is not dict:
+        raise ValueError("determination_receipt_not_plain_mapping")
+    determination, bound = snapshot_architect_fix_plan_lineage(
+        receipt if receipt else value, profile.get("bounded_worker_plan"),
+    )
+    if bound and not worker_plan_matches_execution_scope(
+        profile["bounded_worker_plan"], profile,
+    ):
+        raise ValueError("profile_proposal_plan_scope_mismatch")
+    # Freeze absence too: a later callback cannot add a previously absent plan.
+    detached = json.loads(json.dumps(determination, allow_nan=False))
+    return {"receipt": detached} if receipt else detached
+
+
+def _validate_authority_profile(profile: Mapping[str, Any]) -> list[str]:
+    if type(profile) is not dict or not profile:
+        return [ArchitectFixPromotionReason.AUTHORITY_PROFILE_MISSING]
+    missing = [
+        field
+        for field in _AUTHORITY_PROFILE_REQUIRED
+        if field not in profile or profile.get(field) in (None, "", (), [], {})
+    ]
+    reasons = [
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE + ":" + field
+        for field in missing
+    ]
+    reasons.extend(
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_SECRET_FIELD + ":" + path
+        for path in authority_profile_secret_field_paths(profile)
+    )
+    reasons.extend(
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+        + ":unknown_field:"
+        + path
+        for path in authority_profile_unknown_field_paths(profile, seed=False)
+    )
+    reasons.extend(
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+        + ":digest_format:"
+        + path
+        for path in authority_profile_malformed_digest_paths(profile)
+    )
+    return reasons
+
 
 
 def promoted_authority_profile(
@@ -188,4 +309,5 @@ def _runtime_binding_fields(
 __all__ = [
     "ArchitectFixPromotionProfileInputs",
     "promoted_authority_profile",
+    "prepare_architect_fix_promotion_inputs",
 ]

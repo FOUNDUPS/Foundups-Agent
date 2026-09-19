@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-19. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-20. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -125,8 +125,15 @@ passing exact-head checks; the merged tree matches the reviewed candidate.
 A declared plan requires matching explicit seed input; missing/tampered/conflicting
 lineage rejects before later callbacks. Declared execution constraints must agree
 with effective seed scope. Legacy bytes remain. Author 553 tests and independent 471
-plus 139 probes pass; eight manifest tests/15 fast groups pass. Re-observation confirms the next gap in existing local fixtures: direct promotion
-accepts omitted/conflicting root plans. Qualify that existing ingress before automatic selection. `main.py:2844`
+plus 139 probes pass; eight manifest tests/15 fast groups pass. Post-merge main CI
+and CodeQL both passed (runs 35448028771 / 35448028395).
+
+**Direct-profile prerequisite, 18/P0:** the existing promotion/bootstrap path now
+snapshots both inputs and checks explicit profile/proposal plan agreement before
+capability or storage effects. Canonical types, empty/absent distinctions, declared
+scope and existing lineage checks remain; the controller shrinks from 690 to 624 lines.
+Local connected/publication tests pass 571/32. Independent318 plus 177 asserted probes,
+eight manifest tests and 15 fast groups pass. Finish owned CI closure, then re-observe before qualifying automatic forwarding. `main.py:2844`
 remains unwired; do not infer packets from prose or task summaries.
 Principal normalization, full context/native-child fidelity, current signed admission
 and live RSI retention remain open; this local source qualification does not close G0.

@@ -9,6 +9,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_profile import (
+    prepare_architect_fix_promotion_inputs,
+)
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
     VerifiedRuntimeBindingCapability,
 )
@@ -85,6 +88,12 @@ def _load_artifacts(root: Path, runtime_root: Path, args: Mapping[str, Any]):
             args,
         )
     )
+    if not reasons:
+        determination, profile, found = prepare_architect_fix_promotion_inputs(
+            artifacts["determination"], artifacts["authority_profile"],
+        )
+        artifacts.update(determination=determination, authority_profile=profile)
+        reasons.extend(found)
     return artifacts, list(dict.fromkeys(reasons))
 
 
