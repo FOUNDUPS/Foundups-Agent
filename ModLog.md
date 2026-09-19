@@ -1,3 +1,9 @@
+## 2026-09-19: Seed-lineage sprint merged and queue re-observed
+
+- PR #1795 merged as 7de1d9ca9 after ten exact-head checks; tree matches the independent review. Other 102 open PR heads and the shared protected checkout are unchanged. Post-merge main CI/CodeQL are tracked separately in the backlog.
+- Re-scored 25 candidates under WSP15/97. The 18/P0 handoff item remains highest executable: existing in-memory promotion fixtures accept matching, omitted and conflicting root plans. This is direct-ingress contract evidence, not a production authority bypass. Qualify existing profile/promotion owners before forwarding; no new source work began in this checkpoint.
+- Reconciled 221 open dependency alerts (9 critical) with existing security/MCP PRs and the blocked Chroma owner. Separate 17/P0 exposure/owner triage remains; no runtime/package update or external work absorbed. AmIBot detect_ai registration remains draft PR1751 with failing protected validation. All original 26 planning packets remain unchanged.
+
 ## 2026-09-19: RSI seed-plan lineage and scope consistency
 
 - Reused four existing owners to reject missing/conflicting declared plans, validate detached receipt/candidate lineage before callbacks, and check effective seed execution scope. Legacy bytes remain. WSP00/15/22/50/62/84/97/99.
