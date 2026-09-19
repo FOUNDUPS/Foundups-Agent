@@ -1,3 +1,9 @@
+## 2026-09-20: FoundUp fixture repair merged; R25 contract qualification selected
+
+- PR1801 merged as `745dc8355f31c0663b2358dc5ddac59c35b45bb3` after ten exact-head checks passed. All13 independently reviewed candidate blobs and merged tree match;102peer heads and protected shared checkout are unchanged.
+- Reconciled all28candidate histories: closed the14/P1 fixture action; next is existing R25-A consent/target/type/version contract qualification13/P1, planning only. Proposal-text provenance stays12/P2; broader15/P1 parents do not confer an executable score.
+- Independent document review caught a noncanonical lane and premature closure wording; corrected both and retained original evidence. Local677tests and independent205overlap. Main workflows are separately recorded; no runtime admission, live worker or retained-learning claim.
+
 ## 2026-09-20: Reconcile four FoundUp validation fixture failures
 
 - WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
