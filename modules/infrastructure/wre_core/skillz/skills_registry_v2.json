@@ -530,6 +530,28 @@
         "WSP 97"
       ],
       "description": "Verify live YUMORI grants, subsidies, GX and PPP/PFI opportunities without overstating funding status"
+    },
+    "yumori_contact_ledger": {
+      "location": "modules/foundups/esingularity/skillz/yumori_contact_ledger",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "MAINTENANCE",
+      "version": "0.6.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Ground YUMORI correspondence in live Gmail/CRM state, canonical 0102 proxy voice, routing consent, receipt reconciliation, and recursive learning"
     }
   }
 }
