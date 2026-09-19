@@ -1,5 +1,10 @@
 # AI Overseer Test ModLog
 
+## 2026-09-20: Commander metadata-to-job regression
+
+Existing intake fixture now uses the actual intent dataclass, explicit fixture authority and exact queue assertions. Covers malformed/root/field types, JSON coercions/cycles/depth, conflicting copies/targets, callback detachment, unchanged dry-run/action/digest semantics and authority-before-intake. Thirteen cases preserve independent review's three discoveries. Qualified RED15fail/16pass; focused111pass; independent99overlap plus31adversarial cases. Connected1048pass/4fail; all4failures reproduce on clean main d00b156f and remain separately tracked. No live worker/provider and no fabricated all-green result. Evidence: root RSI backlog current_observation (WSP22/49/97).
+
+
 | Date       | Author | Description | Notes |
 |------------|--------|-------------|-------|
 | 2026-08-27 | 0102 | Runtime-bound Holo A-grade evidence gate | Added a synthetic signature-verifier seam, explicit no-promotion truth, weak/leaky corpus, evaluator separation, fixed policy-floor, metric, signature, public-failure, graded-relevance, semantic-mode, owner-emitted ranker/runtime-digest mismatch, resident-within-run reuse, and unverified dependency-byte closure regressions. No deployed signing trust, live sealed evaluation, or non-test caller is claimed. |

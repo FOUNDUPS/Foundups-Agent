@@ -1851,7 +1851,7 @@
     "modules/communication/moltbot_bridge/src/openclaw_dae.py": "9b083ff92405ef20d6a7fba4088dd376baac607c34502d4a41c3be6266822388",
     "modules/communication/moltbot_bridge/src/openclaw_execution_bundle.py": "868d4c437fffa56bc6350f1b2203c071f34cf4b433f2e091f90231b4b70702ca",
     "modules/communication/moltbot_bridge/src/openclaw_execution_routes.py": "7a021f92a53b8ac2564e5166b06fb399798c0a722bb06eb019559301a11d92ee",
-    "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py": "d8b27c6930c08263d67fb04eb8d14529914e5ebe90a93e9d116f4cca7d8fa0de",
+    "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py": "c2b508f6b4b92c5a5b0813ff9c28e5e4f3ca25dae2719f5d6f0855b3db3593f3",
     "modules/communication/moltbot_bridge/src/openclaw_identity_context.py": "d80a20eb777177ff3e751ba09dfb6ad46c4c1370af3d1b12f9c1fe9af7789b1b",
     "modules/communication/moltbot_bridge/src/openclaw_intent_planner.py": "624b9d85b1df2ee7478b064a1330bbf4a35f9ca813432c35aff46233e633c533",
     "modules/communication/moltbot_bridge/src/openclaw_maintenance_selector.py": "91681fe1a1f4adade391c259cbdf5aa85319a83f695fcb6d3abb21a0998a25ea",

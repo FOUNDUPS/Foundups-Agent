@@ -1,5 +1,13 @@
 # AI Intelligence Overseer - ModLog
 
+## 2026-09-20: Prove commander draft handoff with the declared intent
+
+- Corrected the intake integration fixture that mistook an authority-denial response for success. Actual OpenClawIntent metadata now proves a queued, detached envelope only with explicit commander authority; the dry-run builder itself still does not queue.
+- Focused111pass and independent99overlap/31adversarial cases. Connected1048pass/4fail; all4 reproduced on clean d00b156f. Existing tests retain the13review-discovered regression cases.
+- Reconciled the scaffold roadmap against existing typed job/route/planner owners. Public intake grants draft rights only; planner digest, admission, registry and runtime execution remain separate.
+- WSP00/15/22/50/62/84/95/97/99/109. Exact evidence and PR closure: docs/roadmaps/rsi_swarm_backlog.json#current_observation. Preserved pre-existing ModLog NUL bytes; no unrelated cleanup.
+
+
 ## 2026-09-13 - RSI context preservation evidence
 
 - Ran the existing deterministic M2M compiler and compile shim in a disposable replica of source bcc877829. The runbook shrank 186 to 14 lines but lost all eight declared boundary passages and failed YAML parsing.

@@ -8,6 +8,8 @@ Structure:
 - `test_analysis.py` lightweight mission analysis helpers.
 - `test_planning.py` coordination planning helpers.
 - `test_execution.py` execution routing helpers.
+- `test_intake_packet_builder.py` proves actual commander-authorized metadata handoff, frozen
+  job lineage, malformed/conflicting input rejection and preservation of dry-run queue behavior.
 - `test_mcp.py` MCP enum smoke checks.
 - `test_mixins_extended.py` extended coverage for mixin fallbacks.
 - `test_monitor_flow.py` witness loop coverage (gated).
@@ -36,7 +38,9 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/ai_intelligence/ai_ove
 ## Opt-in Flags
 
 - `AI_OVERSEER_WITNESS_LOOP=1` enables witness loop scenarios.
-- `AI_OVERSEER_HEAVY_TESTS=1` re-enables heavy regression files.
+- `AI_OVERSEER_HEAVY_TESTS=1` re-enables otherwise skipped files. Set it when explicitly selecting
+  the deterministic intake/bridge/WRE matrix: this conftest's default allowlist otherwise also
+  skips selected sibling-module tests. It does not itself select or start live workers.
 
 The Holo retrieval benchmark tests are explicitly allowlisted in the default
 lane; broader legacy AI Overseer suites remain opt-in.

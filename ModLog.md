@@ -1,3 +1,10 @@
+## 2026-09-20: Commander genesis envelope handoff; baseline validation debt retained
+
+- WSP00/15/22/50/62/84/95/97/99/109: repaired the existing metadata-to-job owner; explicit commander authority precedes draft validation, and detached envelope/tenant/session/FoundUp lineage reaches the dry-run queue. No new module/skill, action, public entitlement or worker activation.
+- Local focused111pass; connected1048pass/4fail. All4failures reproduce on untouched main d00b156f (stale launch error category;3legacy Hermes fixtures missing manifests). They remain separate visible validation debt.
+- Independent review rejected3defects, then accepted the corrected source with99overlapping tests and31adversarial cases. Kept rejection/red evidence. Source1016to990; dispatcher85to40/handler90to78. Eight manifest tests and15fast groups pass; registry1651/269 has one description update.
+- Exact hashes, complete prior PR accounting, the existing onboarding skill, authority limits and subsequent remote closure are recorded in docs/roadmaps/rsi_swarm_backlog.json#current_observation. Daily work becomes an RSI candidate through R25 consent/admission and independently verified outcomes; conversation activity alone is not retained learning.
+
 ## 2026-09-20: Serializer merged; caller contract and CI evidence debt re-observed
 
 - PR1797 merged as6556a0d1427651baef518de799ccb7df19e16c35 after10 exact-head checks passed. Merged tree equals reviewed5620candidate; other102 open heads and protected shared checkout were unchanged at merge preflight. Main CI/CodeQL statuses remain explicit in backlog.
@@ -59200,3 +59207,9 @@ if cooldown_sets:
 - The existing bootstrap distinguishes omission from explicit None/empty, selects only the declared plan from one raw receipt read, freezes before later reads and reuses existing lineage/scope checks. No main.py, lower supplier, module, skill or runtime authority change.
 - Initial7fail/34pass, then41pass. Independent review caught nonplain-ancestor copy coercion; two new regressions failed before repair. Final638 connected pass; independent43 overlap plus69 boundary cases/191assertions. Source215/function111; interface1592 unchanged;8 manifest tests,15 fast groups and registry1651/269 pass.
 - Bootstrap remains outside the unchanged1400-member runtime manifest. Exact source, failed iterations, review and remote closure are recorded in docs/roadmaps/rsi_swarm_backlog.json#current_observation. Live workers, AmIBot registration/build and governed retention remain incomplete.
+## 2026-09-20: Close bootstrap selection and reprioritize typed genesis
+
+- PR1798 merged at d00b156f1cfe39c7aaf5366fc5db12e03de4a198 after ten exact-head checks passed; tree993211c7 matches reviewed a99b55b50. Main CI passed; the separate CodeQL status remains explicit in the backlog. Other102 heads/protected checkout were preserved.
+- Reapplied WSP15/97 to27 candidates. The closed bootstrap handoff leaves the queue; residual local M2M context/child fidelity is15/P1, without inheriting the old18/P0. No principal writer/seed reader incompatibility was established, so no speculative normalization repair.
+- Next17/P0: existing typed genesis intake-to-job lineage. Declared intent lacks the expected payload; build job drops envelope data; the existing positive fixture can accept commander denial. Independent source-bound review and four verified owner paths show the next bounded contract. No second source sprint or live dispatch in this checkpoint.
+- AmIBot remains existing draft1751 with failing validate and issue1750 open. Current source/evidence/next planning packet: docs/roadmaps/rsi_swarm_backlog.json#current_observation.post_sprint_reobservation. WSP00/15/22/50/62/84/97/99/109.
