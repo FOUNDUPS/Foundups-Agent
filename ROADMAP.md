@@ -52,8 +52,8 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`d00b156f1cfe39c7aaf5366fc5db12e03de4a198`, including PR1797/1798. PR1798's ten
-checks passed and its reviewed/merged trees match; main CI and CodeQL both passed.
+`daae91db04088bc49ddde97ee972299165e1d35d`, including PR1797/1798/1799. PR1799's ten
+checks passed and its reviewed/merged trees match; main workflow status is tracked in the backlog.
 The baseline September 9 UTC onward accounting found 107 merged PRs and 15
 closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
@@ -68,9 +68,10 @@ under `repository_pr_accounting_20260920`; full file/check evidence is hash-boun
 | Work observed | Reconciliation and next action |
 |---|---|
 | Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796/#1797/#1798 are merged. Omitted-plan bootstrap selection is closed with638 connected tests and independent review. Its14/P1 step advanced the historical18/P0 parent; the remaining local context/child fidelity contract is now15/P1. |
-| Typed FoundUp intake | Commander data handoff15/P1 within17/P0 parent: existing metadata now survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
-| FoundUp validation debt | Four failures reproduce on untouched main d00b156f: one stale launch-error expectation and three E2E fixtures lacking manifests. Connected candidate1048pass/4fail; do not report whole-system green. Rescore the bounded fixture repair15/P1 after current closure. |
-| AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; latest mergeability is UNKNOWN after earlier observed conflicts. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
+| Typed FoundUp intake | PR1799 merged the commander data handoff15/P1 within17/P0 parent; metadata survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
+| FoundUp validation debt | Four failures reproduce on untouched main d00b156f: one stale launch-error expectation and three E2E fixtures lacking manifests. Connected candidate1048pass/4fail; do not report whole-system green. Independent review scores this test-only repair14/P1; preserve production checks. |
+| Next: daily-work RSI input | Existing R25-A15/P1 (4+4+3+4): map one synthetic daily-work observation through consent, active same-FoundUp scope, provenance/type and duplicate handling. No outreach, memory write or runtime activation; qualify existing owners before source scope. |
+| AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
 | Local branches/worktrees | 634 branch refs and 157 registered worktrees at the opening inventory are inventory, not proof of active work. No branch was deleted or peer checkout changed. |

@@ -1,3 +1,9 @@
+## 2026-09-20: Genesis handoff merged; daily-work contract selected
+
+- PR1799 merged asdaae91db04088bc49ddde97ee972299165e1d35d after10exact-head checks passed; reviewed/merged trees match. Other102peer heads and protected shared checkout remained unchanged. Main-workflow status is explicit in the backlog.
+- Re-scored28candidates: independent review corrected fixture repair from tentative15to14/P1. Selected existing R25-A15/P1 contract mapping for consented daily-work proposals; four reproduced baseline failures remain visible. No second source sprint or runtime activity.
+- Existing packet now carries synthetic consent/activity/provenance/type/dedup requirements and fail conditions. Preference, conversation preview and model inference cannot self-promote to verified RSI retention. Exact closure and next packet: docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+
 ## 2026-09-20: Commander genesis envelope handoff; baseline validation debt retained
 
 - WSP00/15/22/50/62/84/95/97/99/109: repaired the existing metadata-to-job owner; explicit commander authority precedes draft validation, and detached envelope/tenant/session/FoundUp lineage reaches the dry-run queue. No new module/skill, action, public entitlement or worker activation.
