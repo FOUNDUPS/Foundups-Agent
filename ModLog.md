@@ -1,3 +1,9 @@
+## 2026-09-20: R25 compatibility qualification merged; proposal evidence selected
+
+- PR1802 merged as `4ce762a4ce1b54f22546c4f9ce784f1209f08489` after ten exact-head checks passed. All five independently reviewed documentation blobs and the merged tree match;102peer heads and the protected shared checkout remain unchanged.
+- Reconciled28candidate histories. R25 compatibility planning13/P1 is closed; source approval assertion/issuer/consumer remains unqualified. Next is the independently qualified AutoResearcher proposal-text identity12/P2 action, subject to fresh source/ownership checks.
+- Separate subsequent main-workflow status is retained in the existing backlog. No source/test/runtime changes or retained-learning claim in this closure. WSP15/22/97.
+
 ## 2026-09-20: Qualify feedback compatibility without inventing permission
 
 - WSP00/15/22/50/62/97/99: completed the13/P1 R25 compatibility review in the existing packet. Preserve v1 bytes/IDs; conditionally extend explicit versions in existing owners after exact-summary permission, source/type and logical retry/version contracts are qualified.
