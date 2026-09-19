@@ -52,10 +52,10 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`4ce762a4ce1b54f22546c4f9ce784f1209f08489`, including PR1797–1802. PR1802's ten
-exact-head checks passed; reviewed/merged trees match. PR1800/1801 main workflows
-passed; PR1802 main workflows are reported separately in the backlog.
-Refreshed September 9 UTC onward accounting found 113 merged PRs and 15
+`3881e857fd787fc9aa440e1950745100debc032f`, including PR1797–1803. PR1803's ten
+exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
+passed; PR1803 main workflows are reported separately in the backlog.
+Refreshed September 9 UTC onward accounting found 114 merged PRs and 15
 closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
 reported checks. Fresh bulk mergeability resolves to 76 MERGEABLE and 26 CONFLICTING;
@@ -66,7 +66,7 @@ zero uploaded artifacts; qualify existing report delivery without activating its
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; the current backlog observation binds the
-complete 113-merge/15-closed refresh and all 102 current open heads/checks.
+complete 113-merge/15-closed refresh plus owned PR1803 closure and all 102 peer heads/checks.
 
 | Work observed | Reconciliation and next action |
 |---|---|
@@ -74,7 +74,7 @@ complete 113-merge/15-closed refresh and all 102 current open heads/checks.
 | Typed FoundUp intake | PR1799 merged the commander data handoff15/P1 within17/P0 parent; metadata survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
 | FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; PR1801 is merged with ten exact-head checks passed and both main workflows now successful. |
 | Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is merged in PR1802. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
-| AutoResearcher evidence | Proposal-text identity12/P2 is locally repaired and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
+| AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |

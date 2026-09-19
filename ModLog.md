@@ -1,3 +1,9 @@
+## 2026-09-20: Proposal identity repair merged; WSL advisory qualification next
+
+- PR1803 merged as `3881e857fd787fc9aa440e1950745100debc032f` after all ten exact-head checks passed. The merged tree and13 independently reviewed blobs match. Protected shared checkout and102 peer heads remain unchanged.
+- Re-observed all29 candidate histories: proposal input identity12/P2 is closed; next13/P1 is existing WSL advisory lifecycle contract qualification with injected fixtures. Its stop-before-exec race remains explicit; no WSL start, runtime admission, upgrade or live FoundUp work.
+- Prior PR1802 main workflows both passed. PR1803 subsequent main status is separate in the backlog. Local109 tests and independent109 plus five probes overlap; no autonomous build or retained RSI claim. WSP15/22/97.
+
 ## 2026-09-20: Reconcile RSI work and preserve failed proposal identity
 
 - Refreshed repository accounting at main4ce762a4:113 merged and15 closed unmerged since September9 UTC;102 open (13drafts),20 failing/81 pass-or-skip/one unchecked,76 mergeable/26 conflicting. AmIBot registration remains draft1751-only, with issue1750 open. Existing onboarding skill/protocol read; no duplicate scaffold or public launch.
