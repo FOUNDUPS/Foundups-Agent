@@ -1,3 +1,8 @@
+## 2026-09-19: Close proposal-plan admission and rescore seed lineage
+
+- PR #1794 merged as `b2e9e3db2` after all ten checks on `15c565d30` passed. Merged tree equals the reviewed tree; shared checkout and other PR heads remain unchanged. Post-merge main CI passed; main CodeQL remains in_progress at the closure check. Exact run IDs/statuses remain in the backlog.
+- Re-observed all 24 remaining candidates under WSP15/97. The highest eligible parent remains M2M 4/5/5/4=18/P0; its proposal-admission subtask is now closed. Existing seed supplier/bootstrap accepts a separate plan and main omits it. Recorded ten source hashes, the provenance/consistency prerequisite and a bounded planning packet in the existing backlog; no next-slice source edit or runtime effect.
+
 ## 2026-09-19: Bind explicit worker plans to existing proposal receipts
 
 - Extended five existing admission/profile owners and two existing test files. Optional normalized plans are detached before callbacks, validated with existing codec/closed schemas and included in the v3 receipt digest. None retains legacy bytes; empty plans remain explicit. No new module, skill, parser or startup wiring. WSP00/15/22/50/62/84/97/99.

@@ -102,6 +102,10 @@ exact-head checks. The merged tree matches the independently reviewed files plus
 reconciled main. Its 69 focused/320 independent checks overlap; they qualify the
 seed APIs, not a producer or live build. The backend manifest/pins remain unchanged.
 
+PR #1794 merged as `b2e9e3db2` after ten passing exact-head checks; its tree
+matches the reviewed candidate. Post-merge main CI passed; main CodeQL remains in_progress
+at the recorded closure check. Exact run IDs/statuses are in the backlog.
+
 The existing architect model-output → proposal → v3 receipt now preserves an
 explicit normalized worker plan and binds its complete contents to receipt identity.
 Existing determination/candidate persistence already binds that full receipt.
