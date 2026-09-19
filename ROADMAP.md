@@ -49,6 +49,44 @@ The existing backlog points to the current ranked observation; historical packet
 scores below retain their original planning scope. Standing local authorization
 and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
+## Repository accounting and resumed RSI — 2026-09-20
+
+Fresh main is `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; its CI and CodeQL workflows
+both pass. The September 9 UTC onward accounting finds 107 merged PRs and 15
+closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
+20 have failing checks, 81 have passing/skipped reported checks and one has no
+reported checks. GitHub marks 26 as conflicting. These categories overlap;
+reported green checks alone do not establish current merge or runtime authority.
+All 102 heads, check summaries and 107 merge identities are retained in the
+[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+under `repository_pr_accounting_20260920`; full file/check evidence is hash-bound there.
+
+| Work observed | Reconciliation and next action |
+|---|---|
+| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796 are merged. Preserve their qualified layers; repair the actual producer serializer next under the existing 18/P0 handoff parent. The small repair itself scores 2+5+5+4=16/P0. |
+| AmIBot | PR #1751 is still draft at `04ef322f`, with `validate` failing and merge conflicts. Main registry has 17 entries and no `detect_ai`. Reconcile this existing package and registration; do not create another venture or intake. |
+| Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
+| Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
+| Local branches/worktrees | 632 branch refs and 157 registered worktrees are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+
+**Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
+same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
+Store a task summary, source lineage, test/review outcome and accepted repair;
+a conversational reply or nonempty model response is not a verified improvement.
+Current OpenClaw conversation memory records previews under its own weaker outcome
+criterion. The governed retention sink still requires an activation capability,
+and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not ingest
+raw conversations automatically or claim that merged Codex work was autonomously
+executed and retained by WRE.
+
+**PC execution:** this session can run local Windows commands. Native OpenClaw
+2026.5.2 is present; no registered WSL distro is currently running. Current Hermes,
+WSL OpenClaw/provider bindings and a real admitted sandbox remain unverified.
+The existing resolver still supplies no authoritative effect-use lease. A cold
+WSL launch can start user services, so a disposable sandbox must first be bound
+through the existing launcher/admission/rollback path. There is no evidence yet
+that blindly upgrading either runtime is the required repair.
+
 ## AmIBot autonomous production experiment — 2026-09-15
 
 AmIBot is the low-consequence test fixture; the production system is the subject
@@ -61,7 +99,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. Main `7de1d9ca9` still has 17 registry
+manifest and the existing intake package. Main `15f203ee3` still has 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -80,8 +118,8 @@ the canonical `/f/detect_ai` namespace. No build order or public route is activa
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
 | Execution valve | Current resolver explicitly returns `authoritative_use_lease=None`. Current trust/effect/model authority remains required. |
-| Skillz | Reuse existing intake and diligence skills. Intake registry/wardrobe eligibility and freshness remain unqualified. |
-| Validation | 174 runtime-contract tests pass. Route suites: 53 pass/11 fail; genesis: 27 pass/1 fail. Existing failures concern removed UI expectations and earlier commander authentication; preserve the gates. |
+| Skillz | Reuse existing intake and diligence skills. The intake skill exists as a prototype but is absent from the standard WRE skill registries; wardrobe admission/freshness remains unqualified. |
+| Validation | Fresh PC readiness audit: 175 runtime-contract tests pass; two real-subprocess fixtures are deliberately deselected. Historical route suites: 53 pass/11 fail; genesis: 27 pass/1 fail. Existing failures concern removed UI expectations and earlier commander authentication; preserve the gates. |
 | Documentation | Static Firebase `/f/**` owner exists; package claims do not establish the game. Root npm build merely echoes a message and is not frontend acceptance. |
 
 The smallest selected reusable repair was the legacy invariant guard in
@@ -128,13 +166,22 @@ with effective seed scope. Legacy bytes remain. Author 553 tests and independent
 plus 139 probes pass; eight manifest tests/15 fast groups pass. Post-merge main CI
 and CodeQL both passed (runs 35448028771 / 35448028395).
 
-**Direct-profile prerequisite, 18/P0:** the existing promotion/bootstrap path now
-snapshots both inputs and checks explicit profile/proposal plan agreement before
-capability or storage effects. Canonical types, empty/absent distinctions, declared
-scope and existing lineage checks remain; the controller shrinks from 690 to 624 lines.
-Local connected/publication tests pass 571/32. Independent318 plus 177 asserted probes,
-eight manifest tests and 15 fast groups pass. Finish owned CI closure, then re-observe before qualifying automatic forwarding. `main.py:2844`
-remains unwired; do not infer packets from prose or task summaries.
+**Direct-profile prerequisite, 18/P0:** PR #1796 merged as `15f203ee3` after all ten
+checks passed on exact `f7c74fa00`. The merged tree equals the independently reviewed
+tree. Both promotion inputs are detached before capability/storage effects and
+must agree with a declared proposal plan. Local 571 +32 publication tests pass;
+independent 318 +177 asserted probes, eight manifest tests and 15 fast groups pass.
+Post-merge main CI and CodeQL both passed (35451972360 / 35451972324).
+
+**Producer serialization prerequisite, locally qualified:** the existing determination
+serializer now composes canonical proposal output, removing the invalid nested null
+for legacy absent plans. Result/persistence, empty/full plans and all linked IDs are
+covered by 617 connected tests. Independent review accepts86 overlapping tests plus
+72 boundary assertions;8 manifest tests/15 fast groups pass, registry1651/269 remains
+current. Source1532 and interface1592 lines do not grow; no new module or exemption.
+Exact-head CI/closure is tracked in the current backlog. Reapply WSP15/97 afterward:
+later selection belongs in the existing seed bootstrap's single read, preserving
+explicit None/empty semantics. `main.py:2844` remains unwired; no prose inference.
 Principal normalization, full context/native-child fidelity, current signed admission
 and live RSI retention remain open; this local source qualification does not close G0.
 

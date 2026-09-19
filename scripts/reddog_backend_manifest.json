@@ -1904,7 +1904,7 @@
     "modules/communication/moltbot_bridge/src/reddog_authority_runtime_store_posix.py": "58c3d066b44029e0a0180a21a7cfc69e5e804826e229542bdcfa770a9089c7ea",
     "modules/communication/moltbot_bridge/src/reddog_authority_runtime_store_windows.py": "67a6f12bc992eefee52a9f306bc009d438fe826f7373a1cd6a5b4d072f870a52",
     "modules/communication/moltbot_bridge/src/reddog_backend_architect_context_projection.py": "c1029a4c022799f9d979260666327ead03c9c55e388d209df8b1aec328f9a4df",
-    "modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py": "494c37a1b14d6a181bb31379298dca805ac154b1506fe0d867552cb76f5d3daf",
+    "modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py": "ae83b4f18bdd1a52b7f7f41cbe0c6333e9d9208826334fef7ff9e726a6f31d2d",
     "modules/communication/moltbot_bridge/src/reddog_backend_architect_queue_candidate.py": "96780b145c17f89cd888b9022a27414b748f5dee4ea3efbc5f4f53641c51e00d",
     "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py": "077a06c4a5a68ae5475a184ed22d9425a9d45444ddfe4b0130f11611c1acc364",
     "modules/communication/moltbot_bridge/src/reddog_bounded_iterative_retrieval.py": "fc8a885d7fef4177e83bdbc4780dac15683d94cb9df9f6b864db9007f3c11a56",

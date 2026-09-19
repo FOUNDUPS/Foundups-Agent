@@ -1,3 +1,9 @@
+## 2026-09-20: Actual producer optional-plan serialization
+
+- Existing exact-schema tests now drive backend FakeArchitectRunner and InMemoryArchitectDeterminationStore through the actual producer. Cover result/persisted receipt, absent/None versus empty/full plans, explicit-null rejection, detached nested output, three linked identities and rejected/no-proposal output.
+- Portable red2failed/84passed; green86passed. The connected suite passes617 including those86. Identical-input before/after oracle preserves IDs, canonical child/queue bytes and provider binding; only absent/None nested null disappears. Checkout-bound golden bytes remain external.
+- Packaging and independent source-bound review are retained in current root backlog; no provider, sandbox, live storage or automatic startup execution tested. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-20: Profile/proposal ingress regressions
 
 - Extended the existing exact-schema and model-runtime bootstrap test owners. Check absent/null/empty/conflicting plans, bool/int/float distinctions, declared scope, stale lineage, raw/wrapped inputs, nested wrapper selection, callback mutation, non-plain mappings and unchanged bootstrap files on rejection.

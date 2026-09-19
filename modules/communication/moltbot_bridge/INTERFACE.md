@@ -38,15 +38,15 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
-`ArchitectProposalExecutabilityReceipt.bounded_worker_plan` is an optional
-mapping in the existing v3 schema. Its omitted default preserves the 60-field legacy
-wire; a supplied empty mapping is a distinct 61st field. Serialized explicit null,
-unknown fields, invalid typed/ASCII data and changed full receipt digest reject.
-The producer snapshots before other proposal callbacks. The reader validates supplied
-operation/domain tests, requested paths/artifacts and recognized packet `I` mirrors;
-it does not infer missing mirrors or interpret `S`/`A`/`T` prose as authority.
-Conservative lexical path checks reject uncertain wildcard/deny overlap, case aliases,
-trailing dots/spaces and controls; filesystem/use-time guards still apply.
+`ArchitectProposalExecutabilityReceipt.bounded_worker_plan` is optional in v3.
+Omission preserves the 60-field legacy wire; `{}` adds a distinct 61st field.
+`ArchitectDeterminationReceipt.to_dict()` uses canonical child serializers for result
+and persistence; absent plans stay omitted. Null, unknown fields, invalid typed/ASCII
+data and changed receipt digests reject; no stored-wire migration is performed.
+Proposal snapshots precede callbacks. Declared operation/domain/tests, paths/artifacts
+and recognized packet `I` mirrors are checked without inferring mirrors or `S`/`A`/`T`
+prose authority. Conservative lexical checks reject uncertain wildcard/deny overlap,
+case aliases, trailing dots/spaces and controls; filesystem/use-time guards remain.
 
 `snapshot_seed_worker_plan` now lives in the existing profile rehydration owner and
 is re-exported under its unchanged seed-supplier import name. Closed profile readers

@@ -1,3 +1,15 @@
+## RSI producer serialization checkpoint — 2026-09-20
+
+The actual determination producer now composes the existing child proposal
+serializer, preserving legacy plan omission through result and persistence.
+Explicit empty/full plans and all identity algorithms are unchanged. The 16/P0
+bounded repair advances the 18/P0 shared handoff gate; 617 connected tests pass.
+Independent acceptance and exact-head closure are recorded in the root backlog.
+No new module, skill, stored-record migration, startup wiring or runtime authority.
+After closure, re-observe the existing seed bootstrap's single-read/omission
+contract before automatic forwarding. Daily-work R25-A remains 15/P1; prototype
+intake registry admission and AmIBot's existing draft/G0 are still incomplete.
+
 ## RSI direct-profile consistency checkpoint — 2026-09-20
 
 The existing direct promotion and bootstrap ingress now require explicit profile

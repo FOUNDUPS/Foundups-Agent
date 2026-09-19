@@ -1,3 +1,10 @@
+## 2026-09-20: Preserve canonical proposal bytes in actual determinations
+
+- Composed the existing proposal and queue serializers in ArchitectDeterminationReceipt.to_dict; result and persistence reuse this seam. Absent/None plans stay omitted, empty/full plans remain explicit, and invalid wire null still rejects. No migration or authority change. WSP15/22/50/62/84/97/99.
+- Actual fake-model producer/store regressions reproduced2 failures/84passes, then86passes. External identical-input oracles retain all proposal/determination/candidate IDs and child/queue bytes. Connected617 pass; focus86 overlap. Source1532/serializer4 unchanged, tests411; no new module or exemption.
+- Canonical1400member closure retains every member; only this source hash and existing derived pins change. Exact packaging, independent review and remote closure are in docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+- Fresh audit distinguishes conversation previews from verified RSI retention; existing R25 proposal/consent/admission is the reuse path. Native OpenClaw exists but live WSL/Hermes/sandbox and effect admission remain unqualified. Existing AmIBot draft1751 and protected product owners remain separate.
+
 ## 2026-09-20: Direct profile/proposal plan agreement before promotion effects
 
 - Reused the existing profile, promotion controller and bootstrap preparation owners. A declared proposal plan requires an explicit canonically equal profile plan and matching declared execution constraints. Typed snapshots precede direct store reads and bootstrap capability/probe/lock/recovery; legacy absence is frozen too. WSP00/15/22/50/62/84/97/99.
