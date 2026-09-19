@@ -53,14 +53,26 @@ is re-exported under its unchanged seed-supplier import name. Closed profile rea
 admit the plan only at the root and the two declared proposal receipt locations,
 including `operational_context_binding.proposal_admission`. Non-plain ancestors reject
 before reconstruction. Existing M2M codec bounds are unchanged. Whole-plan completeness,
-receipt-to-seed provenance, current authenticity/admission and startup forwarding are
+current authenticity/admission, direct profile ingress and startup forwarding are
 separate requirements; no provider, signer, worker or promotion authority is added.
 
 `run_reddog_authority_profile_seed_supply(...)` and its existing bootstrap accept
 `bounded_worker_plan=None`. `snapshot_seed_worker_plan` detaches a plain typed/ASCII
-dict; `None` omits the field and `{}` retains it. Both wrappers reject type/value/
+dict; for legacy receipts without a plan, `None` omits it and `{}` retains it. Both wrappers reject type/value/
 recursion failures with `authority_seed_bounded_worker_plan_invalid` before receipt
-callbacks or reads. The seed digest includes the plan; nonce derivation is unchanged.
+callbacks or reads. For a plan-bearing proposal receipt, the supplier requires an
+explicit canonically equal plan and validates detached proposal/determination/candidate
+lineage before subsequent callbacks. Non-plain ancestors reject before presence tests;
+malformed callback output fails closed. Failure is `authority_seed_proposal_plan_invalid`.
+`snapshot_architect_fix_plan_lineage` and the pure lineage comparator live in the
+existing candidate gate; current work-state/HEAD/Holo and authenticity checks remain
+in promotion. Reused `worker_plan_matches_execution_scope` lives in typed rehydration
+and remains importable from the proposal contract. It checks operation/domain tests,
+requested paths/artifacts, and explicit `I` mirrors of requested_operation, allowed_paths,
+denied_paths, required_tests and required_policy_gates against effective seed values.
+Contradictions return `authority_seed_worker_plan_scope_invalid`; no S/A/T inference or
+other packet identity mapping is added. Rejection preserves existing output. Seed
+digest coverage and nonce derivation remain unchanged. There is no automatic extraction.
 Normalized API input adds no parser, env option or main wiring. Generation checks the complete signed `work_order_digest`; mismatch
 returns `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` before model admission.
 Explicit `m2m_envelope` becomes detached canonical JSON before one-use authority

@@ -1,3 +1,13 @@
+## RSI seed-plan lineage checkpoint — 2026-09-19
+
+The explicit receipt-to-seed consistency prerequisite is locally verified.
+Plan-bearing receipts require matching explicit input, detached structural lineage
+and agreement with effective seed constraints. Legacy no-plan bytes remain.
+Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass.
+Close the owned candidate through CI, then reobserve under WSP15+97. Direct profile/
+promotion ingress, automatic selection and current runtime admission remain open.
+No automatic extraction, main wiring, live worker admission or retained-learning claim. AmIBot registry remains draft PR1751 under detect_ai with an external protected validation failure.
+
 ## RSI explicit proposal-plan checkpoint — 2026-09-19
 
 The existing architect proposal admission now accepts optional normalized

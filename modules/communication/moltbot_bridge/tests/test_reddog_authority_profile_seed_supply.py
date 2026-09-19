@@ -31,6 +31,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
     _memex_supply,
     _model_selection,
     _promote,
+    _rebind_determination_admission,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_source_artifact_supply import (
     _principal,
@@ -124,6 +125,216 @@ def _supply_with_cosign(tmp_path, **overrides):
 def _read_seed(result):
     assert result.accepted is True, result.rejection_reasons
     return json.loads(Path(result.output_path).read_text(encoding="utf-8"))
+
+
+def _plan_bound_determination(plan=None):
+    determination = _determination()
+    if plan is None:
+        plan = _seed_plan()
+        plan["operation"] = determination["proposal_admission"]["requested_operation"]
+    return _rebind_determination_admission(determination, {"bounded_worker_plan": plan})
+
+
+def _supply_bound_plan(tmp_path, determination, **overrides):
+    params = {
+        "architect_determination": determination,
+        "requested_operation": determination["proposal_admission"]["requested_operation"],
+        "bounded_worker_plan": determination["proposal_admission"]["bounded_worker_plan"],
+    }
+    params.update(overrides)
+    return _supply_with_cosign(tmp_path, **params)
+
+
+@pytest.mark.parametrize("kind", ("empty", "m2m"))
+def test_seed_supply_accepts_matching_receipt_plan(tmp_path, kind):
+    determination = _plan_bound_determination({} if kind == "empty" else None)
+    seed = _read_seed(_supply_bound_plan(tmp_path, determination))
+    assert seed["bounded_worker_plan"] == determination["proposal_admission"]["bounded_worker_plan"]
+    assert seed["source_determination_receipt_id"] == determination["determination_receipt_id"]
+    assert seed["queue_candidate_id"] == determination["queue_candidate"]["queue_candidate_id"]
+
+
+@pytest.mark.parametrize("kind", ("omitted", "none", "empty", "action", "bool_int", "int_float"))
+def test_seed_supply_rejects_missing_or_conflicting_receipt_plan(tmp_path, kind):
+    determination = _plan_bound_determination()
+    plan = deepcopy(determination["proposal_admission"]["bounded_worker_plan"])
+    if kind in {"omitted", "none"}:
+        plan = None
+    elif kind == "empty":
+        plan = {}
+    elif kind == "action":
+        plan["m2m_envelope"]["A"] = "Different task"
+    elif kind == "bool_int":
+        plan["m2m_envelope"]["I"]["fixture"][0] = 1
+    else:
+        plan["m2m_envelope"]["I"]["fixture"][1] = 1.0
+    output = tmp_path / "preserved.json"
+    output.write_bytes(b"prior seed")
+    kwargs = {} if kind == "omitted" else {"bounded_worker_plan": plan}
+    result = _supply_with_cosign(
+        tmp_path, architect_determination=determination,
+        requested_operation=determination["proposal_admission"]["requested_operation"],
+        output_path=output, **kwargs,
+    )
+    assert result.accepted is False
+    assert output.read_bytes() == b"prior seed"
+
+
+@pytest.mark.parametrize("part", (
+    "receipt_plan", "receipt_id", "determination_id", "candidate_id", "candidate_digest",
+    "candidate_source", "stage_digest", "stage_body", "candidate_status", "rehashed_proposal",
+    "null_plan", "cycle", "non_json",
+))
+def test_seed_supply_rejects_receipt_plan_lineage_tampering(tmp_path, part):
+    determination = _plan_bound_determination()
+    explicit = deepcopy(determination["proposal_admission"]["bounded_worker_plan"])
+    admission, candidate = determination["proposal_admission"], determination["queue_candidate"]
+    if part == "receipt_plan":
+        admission["bounded_worker_plan"]["m2m_envelope"]["A"] = "Unhashed change"
+    elif part == "receipt_id":
+        admission["receipt_id"] = "sha256:" + "0" * 64
+    elif part == "determination_id":
+        determination["determination_receipt_id"] = "sha256:" + "0" * 64
+    elif part == "rehashed_proposal":
+        changed = deepcopy(explicit)
+        changed["m2m_envelope"]["A"] = "New receipt with stale outer lineage"
+        admission.update(_plan_bound_determination(changed)["proposal_admission"])
+        explicit = changed
+    elif part == "null_plan":
+        admission["bounded_worker_plan"] = None
+    elif part == "cycle":
+        determination["cycle"] = determination
+    elif part == "non_json":
+        determination["non_json"] = object()
+    elif part == "stage_body":
+        candidate["progressive_policy_stage_receipt"]["independent_verifier_required"] = False
+    else:
+        key = {"candidate_id": "queue_candidate_id", "candidate_digest": "proposal_admission_digest",
+               "candidate_source": "source_determination_receipt_id", "stage_digest": "progressive_policy_stage_digest",
+               "candidate_status": "status"}[part]
+        candidate[key] = "BLOCKED_CANDIDATE" if part == "candidate_status" else "sha256:" + "0" * 64
+    result = _supply_bound_plan(tmp_path, determination, bounded_worker_plan=explicit)
+    assert result.accepted is False
+    assert not (tmp_path / "runtime" / "authority_profile_seed.json").exists()
+
+
+@pytest.mark.parametrize("mirror", (
+    "operation", "artifact", "requested_paths", "I.requested_operation", "I.allowed_paths",
+    "I.denied_paths", "I.required_tests", "I.required_policy_gates",
+))
+def test_seed_supply_checks_declared_plan_against_effective_seed_scope(tmp_path, mirror):
+    determination = _determination()
+    admission = determination["proposal_admission"]
+    plan = {"m2m_envelope": _m2m_envelope()}
+    overrides = {}
+    if mirror == "operation":
+        plan["operation"] = admission["requested_operation"]
+        overrides["requested_operation"] = "feature_slice"
+    elif mirror in {"artifact", "requested_paths"}:
+        plan["planned_artifacts" if mirror == "artifact" else "requested_allowed_paths"] = admission["allowed_paths"]
+        overrides["allowed_paths"] = ["modules/foundups/paccess_001/docs/**"]
+    else:
+        key = mirror.removeprefix("I.")
+        plan["m2m_envelope"]["I"][key] = admission[key]
+        if key == "requested_operation":
+            overrides[key] = "feature_slice"
+    determination = _plan_bound_determination(plan)
+    result = _supply_bound_plan(tmp_path, determination, **overrides)
+    assert result.accepted is False
+    assert not (tmp_path / "runtime" / "authority_profile_seed.json").exists()
+
+
+def test_seed_supply_freezes_bound_lineage_before_later_callbacks(tmp_path):
+    determination = _plan_bound_determination()
+    expected = deepcopy(determination)
+    explicit = determination["proposal_admission"]["bounded_worker_plan"]
+
+    class ModelSelection:
+        def to_dict(self):
+            explicit["m2m_envelope"]["A"] = "Late caller mutation"
+            determination["determination_receipt_id"] = "sha256:" + "0" * 64
+            determination["queue_candidate"]["queue_candidate_id"] = "sha256:" + "1" * 64
+            return _model_selection()
+
+    result = _supply_bound_plan(tmp_path, determination, model_selection_receipt=ModelSelection())
+    seed = _read_seed(result)
+    assert seed["bounded_worker_plan"] == expected["proposal_admission"]["bounded_worker_plan"]
+    assert seed["source_determination_receipt_id"] == expected["determination_receipt_id"]
+    assert seed["queue_candidate_id"] == expected["queue_candidate"]["queue_candidate_id"]
+
+
+@pytest.mark.parametrize("empty", (False, True))
+def test_seed_supply_missing_bound_plan_stops_before_other_receipts(tmp_path, empty):
+    determination = _plan_bound_determination({} if empty else None)
+
+    class ForbiddenReceipt:
+        def to_dict(self):
+            pytest.fail("invalid bound plan reached unrelated receipt callback")
+
+    result = _supply_bound_plan(
+        tmp_path, determination, bounded_worker_plan=None,
+        model_selection_receipt=ForbiddenReceipt(),
+    )
+    assert result.rejection_reasons == (AuthorityProfileSeedSupplyReason.PROPOSAL_PLAN_INVALID,)
+
+
+@pytest.mark.parametrize("scope_field", ("required_tests", "required_policy_gates", "allowed_paths"))
+def test_seed_supply_matching_explicit_execution_mirrors_pass(tmp_path, scope_field):
+    admission = _determination()["proposal_admission"]
+    plan = {"m2m_envelope": _m2m_envelope()}
+    plan["m2m_envelope"]["I"][scope_field] = admission[scope_field]
+    determination = _plan_bound_determination(plan)
+    seed = _read_seed(_supply_bound_plan(tmp_path, determination, **{scope_field: admission[scope_field]}))
+    assert seed[scope_field] == admission[scope_field]
+
+
+@pytest.mark.parametrize("ancestor", ("determination", "admission", "plan"))
+def test_seed_supply_rejects_nonplain_plan_lineage_ancestors(tmp_path, ancestor):
+    class NonPlain(dict):
+        pass
+
+    determination = _plan_bound_determination()
+    plan = deepcopy(determination["proposal_admission"]["bounded_worker_plan"])
+    if ancestor == "determination":
+        determination = NonPlain(determination)
+    elif ancestor == "admission":
+        determination["proposal_admission"] = NonPlain(determination["proposal_admission"])
+    else:
+        determination["proposal_admission"]["bounded_worker_plan"] = NonPlain(plan)
+    result = _supply_bound_plan(tmp_path, determination, bounded_worker_plan=plan)
+    assert result.rejection_reasons == (AuthorityProfileSeedSupplyReason.PROPOSAL_PLAN_INVALID,)
+
+
+@pytest.mark.parametrize("returned", (None, [], [1], True, "receipt"))
+def test_seed_supply_malformed_determination_callback_fails_closed(tmp_path, returned):
+    class MalformedDetermination:
+        def to_dict(self):
+            return returned
+
+    result = _supply_with_cosign(tmp_path, architect_determination=MalformedDetermination())
+    assert result.accepted is False
+    assert result.seed_supply_receipt_id is None
+    assert not (tmp_path / "runtime" / "authority_profile_seed.json").exists()
+
+
+@pytest.mark.parametrize("ancestor", ("determination", "admission"))
+def test_seed_supply_cannot_hide_receipt_plan_with_overridden_presence(tmp_path, ancestor):
+    class HiddenDetermination(dict):
+        def get(self, key, default=None):
+            return None if key == "proposal_admission" else super().get(key, default)
+
+    class HiddenAdmission(dict):
+        def __contains__(self, key):
+            return False if key == "bounded_worker_plan" else super().__contains__(key)
+
+    determination = _plan_bound_determination()
+    if ancestor == "determination":
+        determination = HiddenDetermination(determination)
+    else:
+        determination["proposal_admission"] = HiddenAdmission(determination["proposal_admission"])
+    result = _supply_bound_plan(tmp_path, determination, bounded_worker_plan={})
+    assert result.rejection_reasons == (AuthorityProfileSeedSupplyReason.PROPOSAL_PLAN_INVALID,)
+    assert not (tmp_path / "runtime" / "authority_profile_seed.json").exists()
 
 
 @pytest.mark.parametrize("explicit_none", (False, True))

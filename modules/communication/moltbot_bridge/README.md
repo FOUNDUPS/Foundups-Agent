@@ -60,10 +60,13 @@ the existing proposal only when `packet` is already complete, normalized WSP 99 
 Supplied operation, tests, path scope and recognized receipt mirrors must agree.
 Prose is not converted or inferred here. Partial plans are data, not work admission.
 
-Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. Both
-snapshot typed/ASCII plan data before receipt reads; `None` preserves legacy seed
-bytes, `{}` remains explicit, and the seed receipt hashes the complete plan.
-Main startup does not yet supply it; principal normalization remains open.
+Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. When the
+proposal receipt contains a plan, supply the same explicit plan: omission/None and
+conflicting content reject. The supplier detaches and validates receipt/candidate
+lineage before other receipt callbacks, then checks declared execution constraints
+against effective seed scope. Legacy plain-dict receipts without a plan retain their
+previous bytes and separate-plan behavior; `{}` is explicit. Main startup still
+supplies no plan; automatic extraction and principal normalization remain open.
 Generation checks the signed full-order digest before one-use model admission.
 Explicit M2M packets survive profile/signing and detached request preparation;
 rejection consumes the matching handle. Legacy bytes and the 24,000-character

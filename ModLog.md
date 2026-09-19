@@ -1,3 +1,9 @@
+## 2026-09-19: RSI seed-plan lineage and scope consistency
+
+- Reused four existing owners to reject missing/conflicting declared plans, validate detached receipt/candidate lineage before callbacks, and check effective seed execution scope. Legacy bytes remain. WSP00/15/22/50/62/84/97/99.
+- Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Review caught file growth, malformed callback denial and hidden-presence bypass; each repaired with evidence retained. All source owners meet 675 lines without exemptions; no function growth debt.
+- Prior PR1794 main CI/CodeQL both passed. No automatic extraction, main wiring, live worker admission or retained-learning claim. AmIBot registry remains draft PR1751 under detect_ai with an external protected validation failure. Finish owned closure, then reobserve direct profile/promotion consistency. Exact evidence: docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+
 ## 2026-09-19: Close proposal-plan admission and rescore seed lineage
 
 - PR #1794 merged as `b2e9e3db2` after all ten checks on `15c565d30` passed. Merged tree equals the reviewed tree; shared checkout and other PR heads remain unchanged. Post-merge main CI passed; main CodeQL remains in_progress at the closure check. Exact run IDs/statuses remain in the backlog.

@@ -1,17 +1,7 @@
-"""Authority-profile seed supplier for resident RedDog FIX promotion.
-
-Slice: REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_PHASE1
-
-This module materializes the authority seed consumed by
-``reddog_authority_profile_source_artifact_supply`` from already-supplied
-runtime receipts. It removes the last hand-placed seed file from the resident
-FIX-promotion path while preserving the existing authority-profile source
-validator as the enforcement point.
-
-It does not sign, verify signatures, mutate signer state, mutate work state,
-spawn workers, create worktrees, execute shell commands, enqueue OpenClaw,
-dispatch Hermes, create PRs, settle rewards, write PatternMemory, or re-index
-HoloIndex.
+"""Materialize a RedDog FIX seed from supplied receipts.
+Check plan-bearing lineage and explicit plan/scope agreement; legacy receipts
+remain compatible. Source supply and use-time gates still enforce authority.
+No signing, execution, queue/provider effects or PatternMemory writes occur here.
 """
 
 from __future__ import annotations
@@ -25,9 +15,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gate import (
+    snapshot_architect_fix_plan_lineage,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
     rehydrate_authority_profile_seed,
     snapshot_seed_worker_plan,
+    worker_plan_matches_execution_scope,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
@@ -70,6 +64,8 @@ _DEFAULT_REQUIRED_POLICY_GATES = (
 
 class AuthorityProfileSeedSupplyReason:
     BOUNDED_WORKER_PLAN_INVALID = "authority_seed_bounded_worker_plan_invalid"
+    PROPOSAL_PLAN_INVALID = "authority_seed_proposal_plan_invalid"
+    WORKER_PLAN_SCOPE_INVALID = "authority_seed_worker_plan_scope_invalid"
     DETERMINATION_INVALID = "architect_determination_invalid"
     DETERMINATION_NOT_FIX = "architect_determination_not_fix"
     QUEUE_CANDIDATE_INVALID = "queue_candidate_invalid"
@@ -148,12 +144,12 @@ def run_reddog_authority_profile_seed_supply(
     bounded_worker_plan: Mapping[str, Any] | None = None,
 ) -> AuthorityProfileSeedSupplyResult:
     """Materialize one authority-profile seed from resident runtime receipts."""
-    try:
-        plan = snapshot_seed_worker_plan(bounded_worker_plan)
-    except (TypeError, ValueError, RecursionError):
-        return _reject((AuthorityProfileSeedSupplyReason.BOUNDED_WORKER_PLAN_INVALID,))
+    plan, determination, has_bound_plan, input_error = _seed_plan_inputs(
+        architect_determination, bounded_worker_plan,
+    )
+    if input_error:
+        return _reject((input_error,))
     root = Path(repo_root).resolve()
-    determination = _mapping(architect_determination)
     model_selection = _mapping(model_selection_receipt)
     memex_supply = _mapping(memex_supply_receipt)
     principal = _principal(principal_authority_record)
@@ -261,8 +257,8 @@ def run_reddog_authority_profile_seed_supply(
         work_authority_ttl_seconds=work_authority_ttl_seconds,
         bounded_worker_plan=plan,
     )
-    if not _ascii_deep(seed):
-        return _reject((AuthorityProfileSeedSupplyReason.NON_ASCII_INPUT,))
+    if content_reasons := _seed_content_reasons(seed, has_bound_plan):
+        return _reject(content_reasons)
     try:
         _write_json_atomic(output, seed, repo_root=root)
     except Exception:
@@ -278,6 +274,27 @@ def run_reddog_authority_profile_seed_supply(
         requested_operation=operation,
         rejection_reasons=(),
     )
+
+
+def _seed_content_reasons(seed: Mapping[str, Any], has_bound_plan: bool) -> tuple[str, ...]:
+    if not _ascii_deep(seed):
+        return (AuthorityProfileSeedSupplyReason.NON_ASCII_INPUT,)
+    if has_bound_plan and not worker_plan_matches_execution_scope(seed["bounded_worker_plan"], seed):
+        return (AuthorityProfileSeedSupplyReason.WORKER_PLAN_SCOPE_INVALID,)
+    return ()
+
+
+def _seed_plan_inputs(value: Any, worker_plan: Any) -> tuple:
+    """Capture plan-bearing inputs before unrelated receipt callbacks."""
+    try:
+        plan = snapshot_seed_worker_plan(worker_plan)
+    except (TypeError, ValueError, RecursionError, OverflowError):
+        return None, {}, False, AuthorityProfileSeedSupplyReason.BOUNDED_WORKER_PLAN_INVALID
+    try:
+        determination, bound = snapshot_architect_fix_plan_lineage(_mapping(value), plan)
+    except (TypeError, ValueError, RecursionError, OverflowError):
+        return None, {}, False, AuthorityProfileSeedSupplyReason.PROPOSAL_PLAN_INVALID
+    return plan, determination, bound, None
 
 
 def _determination_reasons(determination: Mapping[str, Any]) -> list[str]:
