@@ -36,7 +36,7 @@ Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionarie
 without executing target code. It now rejects negative/out-of-range allocations,
 non-finite values, booleans and unknown catalog agents before simulation;
 allocation totals must equal one within `1e-9`. An invalid negative allocation
-previously outscored the baseline. The [96 focused tests](tests/test_wre_auto_researcher.py)
+previously outscored the baseline. The [109 focused tests](tests/test_wre_auto_researcher.py)
 include invalid-input rejection, cancellation/failure cleanup and the invalid
 baseline gate. The producer restores its scratch baseline on Python exception
 exits and surfaces cleanup errors; process termination and storage failure are
@@ -55,6 +55,13 @@ and uses that snapshot for the initial proposal and terminal cleanup. The report
 `baseline_input_sha256` hashes the captured text encoded as UTF-8. Constructor
 reads normalize newlines; this is not a raw-file or authenticated source identity.
 Program, oracle, environment and reader qualification remain outstanding.
+
+Reports also record `proposal_inputs`: the iteration and SHA-256 of each nonempty
+proposal text reaching candidate preparation after the existing mode gate. The
+digest uses the returned Unicode text encoded as UTF-8, before scratch write or
+diff, so rejected and interrupted attempts remain distinguishable. Missing or
+non-text proposals receive no invented identity. This is local diagnostic lineage,
+not raw model output, evaluated-file identity, authentication or retained learning.
 
 Completed and aborted invocations now publish their own
 `invocation-*/report.json` under the existing run directory. The returned

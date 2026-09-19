@@ -1,3 +1,9 @@
+## 2026-09-20: Proposal input identity regressions
+
+- Reused the existing model-disable fixture and real evaluator. New thirteen-case coverage checks distinct proposal text with equal outcomes, UTF-8/newlines, repeated invocations, write/diff/evaluation interruption, missing/non-text returns and a string encoder override.
+- Before source repair:13 failed/96 passed. After:109 passed; independent109 rerun overlaps. External temporary/database paths isolate all work; no provider construction, live Git runner or target execution.
+- Existing class/loop spans remain285/82; all new tests≤50 lines. Cohesive test file crosses800-line review guideline, remains below1000; module roadmap records the review. Canonical registry check remains1651/269. WSP15/22/48/50/62/84/97; exact receipts in the current RSI backlog observation.
+
 ## 2026-09-15: Baseline snapshot and preparation regressions
 
 - Reused the unchanged pre-construction model-disable fixture. Ten new LF/CRLF cases cover live source changes during construction, dirty scratch between calls, and baseline/proposal/interruption callbacks changing original_code. Assertions bind evaluated text, proposal seed, restored scratch and saved report digest while preserving source bytes.

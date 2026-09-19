@@ -1,5 +1,11 @@
 # WRE Core - ModLog
 
+## 2026-09-20: Preserve proposal-text identity before preparation
+
+- Added one diagnostic report list in the existing AutoResearcher. Nonempty text that passes the mode gate is hashed as UTF-8 before scratch write/diff; later failed/rejected attempts retain their input identity. No raw text is added to the field.
+- Preserved three-argument proposal callbacks, outcome history, evaluator/acceptance rules, cleanup, missing proposals, non-text TypeError and string-subclass acceptance. Bounded helper avoids growth in inherited class285/loop82; no new module, skill, runtime route or exemption.
+- Initial13 new failures with96 existing passes; repaired109 pass, independent109 overlap. Canonical registry1651/269 remains current. Input hashes are unsigned diagnostics, not an evaluated-byte guarantee or retained RSI improvement. WSP15/22/48/50/62/84/97.
+
 ## 2026-09-15: Invocation baseline snapshot for report qualification
 
 - Reused the existing researcher to remove constructor target rereads and freeze invocation baseline text for preparation, first proposal and cleanup. Reports include a UTF-8 text hash; source/program/oracle/environment authentication is still pending.

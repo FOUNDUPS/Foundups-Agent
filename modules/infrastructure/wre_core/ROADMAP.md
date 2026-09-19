@@ -1,5 +1,24 @@
 # WRE Core Roadmap
 
+## Proposal diagnostic lineage — 2026-09-20
+
+The independently qualified **12/P2** proposal-text step extends the existing
+report with per-attempt `proposal_inputs`. Text identity is captured before
+scratch write/diff after mode admission, including later rejected/interrupted
+attempts. Existing outcomes, evaluator, callback, cleanup and live-mode rejection
+remain unchanged. This advances the aggregate report qualification work; it does
+not complete its program/oracle/environment/reader or retained-learning contracts.
+
+Thirteen new regressions failed against unchanged source while96 existing cases
+passed. The repaired suite passes109; independent review reruns the same109
+cases separately. Counts overlap. Tests share the existing model-disable fixture,
+use external state and cover Unicode/newlines, sequential invocations, write/diff/
+evaluation interruptions, missing/non-text returns and string subclasses.
+The existing test file crosses the800-line review guideline but remains a cohesive
+report-lifecycle suite below1000; no new fixture owner, module or exemption is added.
+All new functions stay within50 lines, while inherited class285/loop82 do not grow.
+Exact evidence and fresh selection are in the canonical backlog's current observation.
+
 ## Current local RSI checkpoint — 2026-09-15
 
 Report input consistency is locally closed within **15/P1** qualification work.
