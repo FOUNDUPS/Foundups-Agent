@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## Omitted seed-plan selection
+
+Use the existing bootstrap suite: omitted/None/empty/matching/conflicting inputs,
+legacy byte oracle, raw-only receipt, single-read mutation and output preservation.
+The actual fake-model producer feeds fresh canonical receipts to this bootstrap;
+give its input FoundUp-local scope before admission and matching disposable Memex/
+principal evidence. Do not rewrite receipt identities to make fixtures pass.
+Explicit-input snapshots and downstream scope failures must remain covered.
+
 ## Actual determination serialization coverage
 
 The existing exact-schema suite reuses the backend fake-model and in-memory-store

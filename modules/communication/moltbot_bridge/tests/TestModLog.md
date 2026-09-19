@@ -2993,3 +2993,8 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   - one bad recipient blocks a mixed multi-recipient transaction;
   - provider Sent read-back detects missing/extra recipients.
 - Scope: deterministic provider-agnostic guard only; no Gmail send or external side effect.
+## 2026-09-20: Bootstrap selection and callback snapshot regressions
+
+- Extended the existing bootstrap suite for omitted/None/empty/matching/conflicting plans, raw wrappers, tampered receipt/candidate, scope contradiction, one-read callback mutation and actual producer→seed handoff. Scope enters the fake model before admission; fresh receipt IDs remain untouched.
+- Baseline7failed/34passed; first repair41passed. Independent review reproduced invalid ancestor copy coercion; two additional cases failed, then final43passed. Connected638pass; independent43 overlap plus69 probe cases/191assertions, with exact pre/post hashes. Do not add overlapping counts together.
+- Existing legacy seed-byte oracle and explicit pre-read snapshot remain unchanged. Source215/public function111; manifest8pass, fast15groups, registry1651/269 current. No live provider, sandbox, signing authority or retained-improvement claim. Evidence: root backlog current_observation.

@@ -51,8 +51,9 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 
 ## Repository accounting and resumed RSI — 2026-09-20
 
-Fresh main is `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; its CI and CodeQL workflows
-both pass. The September 9 UTC onward accounting finds 107 merged PRs and 15
+The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
+`6556a0d1427651baef518de799ccb7df19e16c35`, including PR1797 with passing CI/CodeQL.
+The baseline September 9 UTC onward accounting found 107 merged PRs and 15
 closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
 reported checks. GitHub marks 26 as conflicting. These categories overlap;
@@ -65,7 +66,7 @@ under `repository_pr_accounting_20260920`; full file/check evidence is hash-boun
 
 | Work observed | Reconciliation and next action |
 |---|---|
-| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796 are merged. Preserve their qualified layers; repair the actual producer serializer next under the existing 18/P0 handoff parent. The small repair itself scores 2+5+5+4=16/P0. |
+| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796/#1797 are merged. The existing bootstrap now selects an omitted declared plan from its single raw receipt read; local validation/independent review/closure remain explicit in the backlog. This step scores3+4+4+3=14/P1 within the18/P0 handoff parent. |
 | AmIBot | PR #1751 is still draft at `04ef322f`, with `validate` failing and merge conflicts. Main registry has 17 entries and no `detect_ai`. Reconcile this existing package and registration; do not create another venture or intake. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
