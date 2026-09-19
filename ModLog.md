@@ -1,3 +1,15 @@
+## 2026-09-20: WSL advisory contract merged; bounded source repair selected
+
+- PR1805 merged as `0d21c8cbcf771bee7f0dbc8640b5e34ce753bf93` after all ten exact-head checks passed; merged tree
+  and all nine independently reviewed documentation blobs match.
+- Re-observed30 candidate histories: contract13/P1 is closed; the next existing
+  probe repair is C2/I4/D3/Impact3=12/P2. Its source is unchanged, and no WSL,
+  provider, model, admission, update or public FoundUp action occurred.
+- Shared checkout and102 peer heads remain unchanged. Prior PR1804 main
+  workflows passed; PR1805 subsequent main state is separate in the backlog.
+  Existing25 tests and seven injected witnesses remain bounded evidence.
+  WSP15/22/97. Next packet is locally scoped and not runtime-dispatchable.
+
 ## 2026-09-20: Qualify WSL advisory command execution before runtime use
 
 - Reconciled main `e56feb4c` and preserved concurrent eSingularity PR1804; the
