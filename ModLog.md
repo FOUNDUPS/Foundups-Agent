@@ -1,3 +1,10 @@
+## 2026-09-20: Serializer merged; caller contract and CI evidence debt re-observed
+
+- PR1797 merged as6556a0d1427651baef518de799ccb7df19e16c35 after10 exact-head checks passed. Merged tree equals reviewed5620candidate; other102 open heads and protected shared checkout were unchanged at merge preflight. Main CI/CodeQL statuses remain explicit in backlog.
+- Nine disposable bootstrap controls confirm the omitted argument drops a valid receipt plan; explicit exact input works, invalid/null/wrapped inputs reject with output intact, each reads determination once. Next source scope is the existing bootstrap/test owner, preserving220/111 budgets and lower supplier semantics. The substep is14/P1 within the broader18/P0 handoff parent; no new source change in this closure checkpoint.
+- Re-scored27 current candidates. Existing R19 gains13/P1 artifact-delivery debt: main's report-only red-team summary says42pass but the run has0uploaded artifacts. Passing job status is not retained artifact evidence; inspect existing upload configuration without silently activating a blocking gate.
+- All107 prior merges/102open PRs are accounted in existing observations; this repair adds one verified merge. Daily-work intake remains existing R25-A15/P1, AmIBot registration stays draft1751/detect_ai, and live sandbox/retention authority remains unqualified. WSP00/15/22/50/97/99.
+
 ## 2026-09-20: Actual producer serialization locally verified
 
 - Reused canonical child proposal/queue serializers: result and persistence preserve omitted legacy plans, explicit empty/full plans and all three linked IDs. Invalid wire null still rejects. Source remains1532lines; no new owner, skill, exemption, migration or startup wiring.

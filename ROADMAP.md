@@ -57,6 +57,8 @@ closed without merge; 102 PRs remain open, including 13 drafts. Of the open PRs,
 20 have failing checks, 81 have passing/skipped reported checks and one has no
 reported checks. GitHub marks 26 as conflicting. These categories overlap;
 reported green checks alone do not establish current merge or runtime authority.
+Post-merge R19 evidence also found42 passing red-team observations in logs but
+zero uploaded artifacts; qualify existing report delivery without activating its gate.
 All 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; full file/check evidence is hash-bound there.
@@ -173,14 +175,16 @@ must agree with a declared proposal plan. Local 571 +32 publication tests pass;
 independent 318 +177 asserted probes, eight manifest tests and 15 fast groups pass.
 Post-merge main CI and CodeQL both passed (35451972360 / 35451972324).
 
-**Producer serialization prerequisite, locally qualified:** the existing determination
+**Producer serialization prerequisite, merged in [PR #1797](https://github.com/FOUNDUPS/Foundups-Agent/pull/1797):** the existing determination
 serializer now composes canonical proposal output, removing the invalid nested null
 for legacy absent plans. Result/persistence, empty/full plans and all linked IDs are
 covered by 617 connected tests. Independent review accepts86 overlapping tests plus
 72 boundary assertions;8 manifest tests/15 fast groups pass, registry1651/269 remains
 current. Source1532 and interface1592 lines do not grow; no new module or exemption.
-Exact-head CI/closure is tracked in the current backlog. Reapply WSP15/97 afterward:
-later selection belongs in the existing seed bootstrap's single read, preserving
+All10 exact-head checks passed; squash `6556a0d14` matches the reviewed tree.
+Post-merge main workflows are tracked separately in the backlog. WSP15/97 re-scored
+27 current candidates. The next bootstrap substep scores14/P1 within the18/P0
+handoff parent; explicit lower APIs already work. Omission-aware selection belongs in the existing seed bootstrap's single read, preserving
 explicit None/empty semantics. `main.py:2844` remains unwired; no prose inference.
 Principal normalization, full context/native-child fidelity, current signed admission
 and live RSI retention remain open; this local source qualification does not close G0.
