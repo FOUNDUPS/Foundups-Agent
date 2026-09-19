@@ -15,6 +15,7 @@ from prompt.swarm.m2m_compiler import encode_m2m_envelope
 from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_seed_supply import (
     _invalid_seed_plan,
     _seed_plan,
+    _plan_bound_determination,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply_bootstrap import (
     AUTHORITY_PROFILE_SEED_BOOTSTRAP_APPLIED,
@@ -79,6 +80,26 @@ def _bootstrap(files, **overrides):
     }
     params.update(overrides)
     return run_reddog_authority_profile_seed_supply_bootstrap(**params)
+
+
+@pytest.mark.parametrize("kind", ("matching", "omitted", "conflicting"))
+def test_bootstrap_enforces_receipt_plan_consistency(tmp_path, kind):
+    files = _inputs(tmp_path)
+    determination = _plan_bound_determination()
+    files["determination"].write_text(json.dumps(determination), encoding="utf-8")
+    plan = deepcopy(determination["proposal_admission"]["bounded_worker_plan"])
+    if kind == "conflicting":
+        plan["m2m_envelope"]["A"] = "Different work"
+    files["output"].write_bytes(b"previous seed")
+    result = _bootstrap(
+        files, requested_operation=determination["proposal_admission"]["requested_operation"],
+        **({} if kind == "omitted" else {"bounded_worker_plan": plan}),
+    )
+    assert result.accepted is (kind == "matching")
+    if kind == "matching":
+        assert json.loads(files["output"].read_text())["bounded_worker_plan"] == plan
+    else:
+        assert files["output"].read_bytes() == b"previous seed"
 
 
 @pytest.mark.parametrize("explicit_none", (False, True))

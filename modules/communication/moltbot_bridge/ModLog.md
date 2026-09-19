@@ -1,3 +1,9 @@
+## 2026-09-19: Plan-bearing seed lineage prerequisite
+
+- Seed supply requires explicit agreement with the declared proposal plan, snapshots lineage before later callbacks, validates existing candidate/receipt identities and checks effective operation/tests/path constraints. Rejection preserves output; plain-dict legacy receipt bytes remain.
+- Reused candidate gate and typed rehydration for lineage/scope. Proposal 708 -> 670; seed 675/candidate 341/rehydration 537. No exemption, new module or main.py change. Three runtime member hashes change, no new closure member.
+- Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Rejected iterations and repairs remain in the current backlog evidence. No automatic extraction, main wiring, live worker admission or retained-learning claim. AmIBot registry remains draft PR1751 under detect_ai with an external protected validation failure. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-19: Bind explicit worker plans to existing proposal receipts
 
 - Extended five existing admission/profile owners and two existing test files. Optional normalized plans are detached before callbacks, validated with existing codec/closed schemas and included in the v3 receipt digest. None retains legacy bytes; empty plans remain explicit. No new module, skill, parser or startup wiring. WSP00/15/22/50/62/84/97/99.

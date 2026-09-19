@@ -6,6 +6,7 @@ import json
 import math
 import re
 from collections.abc import Mapping, Sequence
+from fnmatch import fnmatchcase
 from typing import Any
 
 from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
@@ -232,6 +233,64 @@ def snapshot_seed_worker_plan(value: Any) -> dict[str, Any] | None:
     if not json.dumps(plan, ensure_ascii=False, allow_nan=False).isascii():
         raise ValueError("bounded_worker_plan_non_ascii")
     return plan
+
+
+def worker_plan_matches_execution_scope(
+    plan: Mapping[str, Any], data: Mapping[str, Any],
+) -> bool:
+    """Compare a typed, snapshotted plan with declared execution constraints.
+
+    This proves data consistency, not current scope or execution authority.
+    Only explicit packet mirrors are compared; S/A/T prose is not interpreted.
+    """
+    for owner, mirrors in (
+        (plan, {"operation": "requested_operation"}),
+        (plan.get("domain_profile", {}),
+         {"operation": "requested_operation", "required_tests": "required_tests"}),
+    ):
+        if any(key in owner and json.dumps(owner[key], sort_keys=True) != json.dumps(data[target], sort_keys=True)
+               for key, target in mirrors.items()):
+            return False
+    allowed, denied = data["allowed_paths"], data["denied_paths"]
+    if any(type(rules) not in (list, tuple) or any(type(rule) is not str for rule in rules)
+           for rules in (allowed, denied)):
+        return False
+    for path in plan.get("requested_allowed_paths", ()):
+        if not _plan_path_allowed(path, allowed, denied, pattern=True):
+            return False
+    for path in plan.get("planned_artifacts", ()):
+        if not _plan_path_allowed(path, allowed, denied, pattern=False):
+            return False
+    invariants = plan.get("m2m_envelope", {}).get("I", {})
+    fields = ("requested_operation", "allowed_paths", "denied_paths",
+              "required_tests", "required_policy_gates")
+    return all(json.dumps(invariants[key], sort_keys=True) == json.dumps(data[key], sort_keys=True)
+               for key in fields if key in invariants)
+
+
+
+def _plan_path_allowed(path: str, allowed: Any, denied: Any, *, pattern: bool) -> bool:
+    if (not path or path.startswith("/") or "\\" in path or any(ord(char) < 32 for char in path)
+            or ":" in path or any(part in {"", ".", ".."} or part.rstrip(" .") != part
+                                   for part in path.split("/"))):
+        return False
+    if not pattern and any(char in path for char in "*?["):
+        return False
+    if pattern and any(char in path for char in "*?["):
+        # Literal prefixes can prove disjointness, not general glob inclusion.
+        # Reject uncertain deny overlap; materialization still checks each file.
+        prefix = path[:min(path.find(char) for char in "*?[" if char in path)].casefold()
+        for rule in denied:
+            boundary = min((rule.find(char) for char in "*?[" if char in rule), default=len(rule))
+            denied_prefix = rule[:boundary].casefold()
+            if prefix.startswith(denied_prefix) or denied_prefix.startswith(prefix):
+                return False
+    # Denials cover case aliases on supported Windows hosts as well.
+    return not any(fnmatchcase(path.casefold(), rule.casefold()) for rule in denied) and any(
+        (path == rule or (rule.endswith("/**") and path.startswith(rule[:-3] + "/")))
+        if pattern else fnmatchcase(path, rule) for rule in allowed
+    )
+
 
 
 def rehydrate_authority_profile_source(value: Any) -> dict[str, Any]:
@@ -474,4 +533,5 @@ __all__ = [
     "rehydrate_authority_profile_source",
     "snapshot_authority_profile_m2m",
     "snapshot_seed_worker_plan",
+    "worker_plan_matches_execution_scope",
 ]

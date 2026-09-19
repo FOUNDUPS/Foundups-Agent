@@ -1,5 +1,15 @@
 # Tests - OpenClaw Bridge
 
+## Receipt-to-seed lineage coverage
+
+Reuse the existing seed/bootstrap suites and determination rebind fixture. Cover
+canonical equality, lineage tampering, explicit scope mirrors, snapshots, malformed
+callbacks and overridden presence methods. Ensure the fixture receipt's operation
+matches its own plan before testing downstream seed scope. Author 553 passes;
+independent 471 plus 139 probes overlap. The publication long-path regression requires
+a root satisfying its unchanged <260 final-file and >260 temporary-file conditions;
+other suites can use short roots. Preserve failed evidence and existing golden bytes.
+
 ## Explicit proposal-plan coverage
 
 Reuse the existing proposal admission and exact profile-schema tests plus the seed

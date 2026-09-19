@@ -1,3 +1,9 @@
+## 2026-09-19: Seed-plan provenance regression closure
+
+- Extended existing seed/bootstrap tests for missing/None/empty/matching/conflicting plans, canonical scalar distinctions, receipt/candidate/stage tampering, stale rehashed outer lineage, scope mirrors, detached aliases, malformed callback returns and overridden presence methods.
+- Baseline 30 failed/72 passed. Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Preserve failed review probes and fixture evidence. The short-root publication precondition failure was resolved by rerunning the unchanged whole suite at qualifying path geometry; no test criterion changed.
+- No runtime claims follow from these fixtures. Exact source hashes, commands, review and closure evidence live in docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+
 ## 2026-09-19: Bind explicit worker plans to existing proposal receipts
 
 - Extended five existing admission/profile owners and two existing test files. Optional normalized plans are detached before callbacks, validated with existing codec/closed schemas and included in the v3 receipt digest. None retains legacy bytes; empty plans remain explicit. No new module, skill, parser or startup wiring. WSP00/15/22/50/62/84/97/99.
