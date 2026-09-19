@@ -3,6 +3,19 @@
 The suite covers browser dependency recovery and the read-only runtime
 compatibility advisory.
 
+The separate WSL version advisory is executable when enabled. On 2026-09-20,
+the unchanged `test_wsl_agent_runtime.py` passed all 25 tests in an isolated
+temporary environment. Seven external injected witnesses also passed, covering
+disabled, stopped, running, stop-before-exec, invalid distro, base mismatch and
+an as-yet unsupported command-mode flag. These establish current command
+reachability and modeled state transitions; they do not prove real WSL startup,
+service health or no-start behavior. No WSL or provider was invoked.
+
+The source/test lifecycle wording remains a qualified repair item in the
+[module roadmap](../ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20).
+Extend this existing suite for that change; preserve its structural limits and
+adjacent Gateway/main contracts. No new test owner is required.
+
 `test_wsl_agent_runtime.py` covers plain and numeric-suffixed OpenClaw releases,
 optional build IDs, exact version preservation and rejection of unrecognized
 suffix content. The probe remains advisory even when both components pass.

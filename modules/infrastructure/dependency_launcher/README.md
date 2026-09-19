@@ -72,12 +72,20 @@ Environment variables:
 
 ## WSL agent availability advisory
 
-The existing opt-in `probe_wsl_agent_runtime()` reads exact OpenClaw/Hermes
+The existing opt-in `probe_wsl_agent_runtime()` executes exact OpenClaw/Hermes
 version commands in the configured WSL distribution. OpenClaw numeric release
 suffixes such as `2026.7.1-2` are supported alongside the optional hexadecimal
 build ID. A successful probe is `advisory_unverified_runtime_report`: it does
 not prove API health, model binding, confinement or permission to dispatch.
 Windows PATH discovery is separate from this WSL runtime.
+
+The default disabled path makes no host calls. Enabling
+`FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED` currently executes installed programs via
+`wsl.exe --exec`; this can start a stopped distribution and its configured
+services. It is not a passive or no-start probe. The qualified
+[next repair](ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20) separates
+metadata inspection from explicit command execution. That repair is not yet
+implemented; no second command-probe flag currently changes this behavior.
 
 ## Runtime Compatibility Advisory
 

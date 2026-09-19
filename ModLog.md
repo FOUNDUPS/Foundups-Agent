@@ -1,3 +1,17 @@
+## 2026-09-20: Qualify WSL advisory command execution before runtime use
+
+- Reconciled main `e56feb4c` and preserved concurrent eSingularity PR1804; the
+  previous RSI PR1803 now has both main workflows successful. Existing102 peer
+  heads and protected shared checkout are unchanged; accounting is115 merged
+  and15 closed unmerged since September9 UTC.
+- Closed local13/P1 advisory contract qualification with25 unchanged tests,
+  seven injected witnesses and independent source/caller review. Corrected
+  existing documentation; no source/test implementation, WSL or provider calls.
+- Fresh WSP15 selection separates the qualified12/P2 command opt-in repair from
+  completed planning. Current single-flag behavior still executes installed
+  programs; the future metadata mode is not implemented. AmIBot admission and
+  registration remain blocked on existing owners. WSP00/15/22/97/99.
+
 ## 2026-09-20: Proposal identity repair merged; WSL advisory qualification next
 
 - PR1803 merged as `3881e857fd787fc9aa440e1950745100debc032f` after all ten exact-head checks passed. The merged tree and13 independently reviewed blobs match. Protected shared checkout and102 peer heads remain unchanged.
