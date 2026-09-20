@@ -32,12 +32,47 @@ https://www.testmybrain.org/using-tmb/tmb-toolkits.html
 
 TestMyBrain provides self-administered browser/mobile cognitive tests, raw/summary data, alternate forms, ultra-brief forms and support for longitudinal/high-frequency/measurement-burst designs. This supports feasibility of repeated browser measurement while also showing that Memory Horizon must differentiate itself by the event-grounded adaptive-retention-game architecture.
 
+## Research constructs versus product UX
+
+TestMyBrain is useful to us primarily as a **research construct and measurement reference**, not as a product-experience template.
+
+Current TestMyBrain materials expose browser/mobile measures spanning:
+- processing speed and visual short-term memory (Digit Symbol Matching);
+- simple psychomotor reaction time;
+- choice reaction time, attention and response inhibition;
+- sustained attention/cognitive control (GradCPT);
+- working memory (N-back and related tasks);
+- visual/verbal episodic paired-associate memory;
+- task switching/cognitive flexibility (Trail Making B).
+
+It also explicitly supports alternate forms, ultra-brief forms and repeated/high-frequency longitudinal or measurement-burst designs. Those design properties are more important to Memory Horizon than reproducing its test UI.
+
+NIH Toolbox contributes a separate useful pattern: the Picture Sequence Memory Test measures episodic sequence reconstruction, and multiple forms are available for repeated-measures designs to reduce practice effects.
+
+SCAT6 remains a clinical/sports-concussion reference containing cognitive/concentration and delayed-recall components. It is not a game mechanic library and must not be copied or represented as replaced by Memory Horizon.
+
+**Design consequence:** translate validated cognitive constructs into gameplay situations, while keeping each construct's data lane separate and preserving raw observations. See [GAME_DESIGN_SWEEPS.md](GAME_DESIGN_SWEEPS.md).
+
 ## Continuous recognition comparator
 
 **MemTrax**  
 https://memtrax.com/
 
 MemTrax runs in a browser and presents repeated images at varied intervals, capturing recognition accuracy and reaction time. It demonstrates low-friction browser memory measurement but targets continuous recognition rather than the proposed naturalistic event/free-cued-recognition retention curve.
+
+## Mechanical game reference
+
+**Fear & Hunger** is a mechanical/aesthetic reference only. Its official product description documents four character classes, unforgiving dungeon-crawler/survival gameplay, roguelike elements and randomized dungeon/events/loot/enemy placement across playthroughs.
+
+Memory Horizon may borrow the general design principles:
+- low-fi presentation;
+- small character choice set;
+- hostile branching exploration;
+- persistent inventory/status;
+- randomized event variation;
+- learning through repeated runs.
+
+We do not copy its art, characters, lore, maps, dialogue, enemies, encounters or distinctive protected expression.
 
 ## Browser experiment engine
 
