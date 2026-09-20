@@ -1,3 +1,49 @@
+## Call-local skill-safety diagnostic contract — 2026-09-20
+
+The **10/P2 static qualification** is complete; implementation remains separate.
+The existing permission policy returns its own Boolean verdict, but the process
+consumer subsequently reads the mutable latest explanation at four projections:
+warning log, blocked action reason, blocked response and passed action policy.
+The existing six nested-publication fixtures show why latest state can belong
+to another call. This is a deterministic source/fixture argument, not a measured
+concurrent production failure or a claim that Boolean admission is broken.
+
+Choose a keyword-only `details=False` opt-in on the existing policy and DAE
+method. Legacy no-argument/force/default calls still return `bool`. Only literal
+`details=True` returns the captured local `(allowed, message)` tuple after the
+existing latest-state publication. Do not read that tuple from shared fields.
+The process caller explicitly unpacks `skill_allowed, skill_message`, rejects a
+non-Boolean verdict/non-text explanation, then branches on the Boolean alone.
+All four projections use the local text, including after a logger/action callback
+changes latest fields. Missing/wrong-length results fail before downstream
+preflight/execution; no shared-state fallback or truthy-tuple authorization.
+Earlier continuity/classification reporting is not claimed to be absent.
+
+Preserve REQUIRED/ENFORCED/MAX_SEVERITY drift rejection, current rescanning,
+force/TTL/ALWAYS compatibility and status rendering of latest diagnostics.
+The current boundary tests patch this same DAE method: migrate their explicit-mode
+doubles and keyword assertion rather than bypassing that seam. Retain legacy
+Boolean assertions, non-mutating no-call coverage, RESEARCH route checks, and
+negative false-pair/malformed-result/interleaved-projection cases.
+
+A new helper/wrapper would add unnecessary ownership and grow the inherited DAE;
+a callback sink adds unnecessary delivery/fallback semantics. Local signatures,
+return selection and caller field checks fit the current 1580-line DAE/3-line
+wrapper and 229-line process owner/216-line function. Existing gate-adjacent blank
+lines accommodate the local checks; no unrelated compression or new exemption.
+All three sources are existing members of the 1400-file backend manifest. A future
+repair must regenerate only their changed hashes and the two existing digest
+pins, preserve membership/version and reconcile current peer effective diffs.
+
+No source, tests, registry, manifest, pins or runtime changed in this plan; zero
+tests or behavior probes ran. Both PR1828 main workflows passed. Preserve 26
+original packets and 42 histories; the distinct next repair makes 43. Its freshly
+scored **10/P2** packet beats optional cache planning 9/P3 and remains conditional
+on exact-source/ownership preflight and independent test-harness qualification.
+Current source safety, production concurrency, policy ABA/atomicity, runtime
+admission, retained learning and AmIBot readiness remain separate boundaries.
+Exact source map, independent oracle and future M2M packet: current RSI backlog.
+
 ## R25 approval-owner qualification — 2026-09-20
 
 The13/P1 planning action is complete with a precise implementation dependency.

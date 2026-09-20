@@ -1,3 +1,16 @@
+## 2026-09-20: Qualify call-local OpenClaw safety explanations
+
+- Completed the 10/P2 static contract in six existing documents. Existing Boolean verdict is call-local; four route projections still read latest shared text. Chose literal details=True local pair on the existing method, retaining default Boolean/force semantics.
+- Qualified explicit unpack/strict Boolean-and-text checks, false-pair rejection, nested publication/log/action oracle and intentional existing boundary-test migration. Preserve inherited DAE 1580/process 216 spans and current policy/scanner/status behavior; no new helper/skill/owner.
+- Verified three source members in the 1400-file backend manifest; future exact ownership, canonical generation and two digest pins remain entry requirements. No source/test/package change, tests, runtime or retention activation in this plan.
+- Both PR1828 main workflows passed; 98 peer heads unchanged. Preserve 26 packets/42 histories and archive prior observation; distinct next 10/P2 repair makes 43, over optional cache planning 9/P3. WSP00/11/15/22/50/62/84/95/97/99. Exact receipts in current backlog.
+
+## 2026-09-20: Close abrupt-exit witness; select diagnostic contract
+
+- PR1828 merged as b202c14c169b4754bad35808e72a008b0c668165; ten exact-head checks passed and ten reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed42 histories and next-source bindings; 10/P2 call-local diagnostic qualification selected over optional cache planning9/P3. No next plan/source execution, recovery or runtime activation.
+- Accounting134 merged/21 closed-unmerged since September9UTC/98peers. Shared checkout and external owners preserved. WSP15/22/97.
+
 ## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
 
 - Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
