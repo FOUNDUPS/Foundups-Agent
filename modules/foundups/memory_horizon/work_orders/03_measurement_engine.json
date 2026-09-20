@@ -1,0 +1,109 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "B",
+  "S": {
+    "owner": "modules/foundups/memory_horizon/src/measurement",
+    "read": [
+      "modules/foundups/memory_horizon/docs/DATA_AND_SCORING_CONTRACT.md",
+      "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md",
+      "modules/foundups/memory_horizon/docs/RESEARCH.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/src/measurement",
+      "modules/foundups/memory_horizon/tests/measurement",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-03.json"
+    ]
+  },
+  "M": "exec",
+  "T": "MH-RSI-03",
+  "A": "IMPLEMENT Sweep 1 adaptive episodic measurement engine",
+  "R": [
+    0,
+    6,
+    11,
+    15,
+    22,
+    34,
+    49,
+    50,
+    62,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "sweep": "1",
+    "delay_candidates_ms": [
+      30000,
+      60000,
+      120000,
+      240000,
+      480000
+    ],
+    "retire_scored_event": true,
+    "separate_free_cued_recognition": true,
+    "transparent_estimator": true,
+    "no_clinical_cutoffs": true,
+    "effect_boundary": "Module-local measurement engine/tests only."
+  },
+  "O": [
+    "event eligibility/retirement contract",
+    "adaptive delay scheduler",
+    "free/cued/recognition scoring",
+    "transparent retention bracket/curve projection",
+    "focused contamination/timing tests",
+    "work_orders/results/MH-RSI-03.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-01",
+    "depends_on": [
+      "MH-RSI-01"
+    ],
+    "objective": "Implement the measurement engine independently of game presentation so raw observations reproduce every derived result.",
+    "steps": [
+      "Implement immutable event/probe linkage and validity state.",
+      "Schedule probes only against eligible unretired events.",
+      "Record scheduled and actual delay plus response latency.",
+      "Retire event after scored probe; cue/recognition follow-ups remain same sample.",
+      "Use transparent bracketing/staircase rules; report insufficient evidence when appropriate."
+    ],
+    "wsp15": {
+      "complexity": 4,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 19,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read",
+        "repository_write",
+        "test_runner"
+      ],
+      "verification_class": "MEASUREMENT_INTEGRITY"
+    },
+    "acceptance": [
+      "No event contributes two independent retention samples after retirement.",
+      "Free/cued/recognition outcomes remain distinct.",
+      "Derived curve/bracket is reproducible from raw records.",
+      "No diagnostic threshold or medical label exists."
+    ],
+    "rollback": "Revert only measurement/test paths; preserve failing fixtures and result evidence."
+  }
+}

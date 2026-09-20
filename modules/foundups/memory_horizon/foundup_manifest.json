@@ -1,0 +1,15 @@
+{
+  "foundup_id": "memory_horizon",
+  "manifest_version": "1.0.0",
+  "lifecycle_stage": "incubating",
+  "tier": "F0_DAE",
+  "implementation_status": "SPECIFIED",
+  "runtime_status": "NO_RUNTIME",
+  "poc_status": "idea",
+  "token_status": "TOKEN_DEFERRED",
+  "created_date": "2026-09-20",
+  "last_updated": "2026-09-20",
+  "maintainer": "0102",
+  "dependencies": [],
+  "next_slice": "MEMORY_HORIZON_POC_PHASE1"
+}

@@ -1,0 +1,98 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "A",
+  "S": {
+    "owner": "modules/foundups/memory_horizon/src/game",
+    "read": [
+      "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md",
+      "modules/foundups/memory_horizon/docs/DATA_AND_SCORING_CONTRACT.md",
+      "modules/foundups/memory_horizon/INTERFACE.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/src/game",
+      "modules/foundups/memory_horizon/tests/game",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-02.json"
+    ]
+  },
+  "M": "exec",
+  "T": "MH-RSI-02",
+  "A": "IMPLEMENT Sweep 0 low-fi survival shell and deterministic event ledger",
+  "R": [
+    0,
+    6,
+    11,
+    15,
+    22,
+    34,
+    49,
+    50,
+    62,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "sweep": "0",
+    "deterministic_seed": true,
+    "no_measurement_logic": true,
+    "no_external_network": true,
+    "no_copied_game_assets": true,
+    "effect_boundary": "Module-local game engine/tests only."
+  },
+  "O": [
+    "game state/room/action/inventory/status engine",
+    "deterministic event ledger with >=12 event-capable paths",
+    "focused tests",
+    "work_orders/results/MH-RSI-02.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-01",
+    "depends_on": [
+      "MH-RSI-01"
+    ],
+    "objective": "Build the smallest playable low-fi survival/dungeon shell without embedding cognitive scoring.",
+    "steps": [
+      "Inspect nearest module/test patterns before creating files.",
+      "Implement seeded state transitions and append-only game event output.",
+      "Keep presentation-independent world logic testable without browser UI.",
+      "Add focused deterministic replay tests."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1"
+    },
+    "requirements": {
+      "compute_class": "MID",
+      "reasoning_depth": "MEDIUM",
+      "tools": [
+        "repository_read",
+        "repository_write",
+        "test_runner"
+      ],
+      "verification_class": "MODULE"
+    },
+    "acceptance": [
+      "Same seed/action sequence yields same event ledger.",
+      "At least 12 unique scorable event opportunities can be generated.",
+      "Game engine contains no retention-score or medical logic."
+    ],
+    "rollback": "Revert only owned game/test paths; preserve result evidence."
+  }
+}
