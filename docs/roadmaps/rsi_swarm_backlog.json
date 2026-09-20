@@ -1851,19 +1851,19 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "section": "current_observation.ci_closure_repair",
-    "base_commit": "0d21c8cbcf771bee7f0dbc8640b5e34ce753bf93",
-    "selected_action": "Close-owned-PR1806-manifest-integration",
-    "status": "owned_ci_closure_dependency",
+    "section": "current_observation.post_sprint_reobservation",
+    "base_commit": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
+    "selected_action": "DaemonSelfAudit-PatternMemory-lifecycle-contract",
+    "status": "next_daemon_pattern_memory_lifecycle_qualification",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
-      "deferability": 5,
+      "deferability": 3,
       "impact": 3,
-      "total": 14,
+      "total": 13,
       "priority": "P1"
     }
   },
@@ -1885,7 +1885,7 @@
       "total": 12,
       "priority": "P2"
     },
-    "status": "locally_verified_manifest_corrected_fresh_remote_closure_pending",
+    "status": "merged_exact_head_checks_passed",
     "truth_boundary": "One existing WSL probe repair and its existing tests. Local Codex author/review lanes are not admitted WRE workers. No real WSL, service, provider, model, install/update, runtime admission/promotion, production memory, AmIBot build or protected FoundUp effect. Diagnostic configuration is not an effect-use lease or retained-learning claim.",
     "retrieval": {
       "ok": true,
@@ -2694,11 +2694,11 @@
         "dependency_security": 61,
         "AmIBot": 1
       },
-      "merged_since_20260909_utc": 116,
+      "merged_since_20260909_utc": 117,
       "closed_without_merge_since_20260909_utc": 15,
       "all_102_prior_heads_unchanged": true,
       "counts_are_overlapping_dimensions": true,
-      "post_snapshot_owned_merge": 1805,
+      "post_snapshot_owned_merge": 1806,
       "post_snapshot_concurrent_merge": 1804,
       "peer_head_recheck": "2026-09-20T00:20:29.821220+00:00",
       "initial_open_snapshot": 103,
@@ -2713,7 +2713,27 @@
         "preflight.json",
         "peers-after-1804.json",
         "peer1804-merge.json"
-      ]
+      ],
+      "fresh_rest_reconciliation": {
+        "receipt": "accounting-rest-reconciliation.json",
+        "pre_merge_counts": {
+          "merged": 116,
+          "closed_without_merge": 15
+        },
+        "post_snapshot_merge": 1806,
+        "merged_after_verified_owned_closure": 117,
+        "method": "Paginated REST sorted by updated_at through before cutoff; parse timezone-aware ISO dates, filter closed_at, then distinguish merged_at. GitHub search omitted8 closed-unmerged PRs. Search is not a complete closure inventory.",
+        "search_omissions_preserved": [
+          1789,
+          1788,
+          1778,
+          1775,
+          1776,
+          1669,
+          1671,
+          1649
+        ]
+      }
     },
     "runtime_source": {
       "artifact_root": "O:/Foundups-Agent-audits/20260920-rsi-feedback-contract-0656",
@@ -2926,12 +2946,23 @@
       "ci-repair-validation.json": "b8e8ebde7915392f87ac17cbf17bc7f134103596143600a2a6d7efc3aa0bd250",
       "ci-repair-manifest-tests.xml": "3e32c45cbdfc222aa7a663f12ac8a2da1b101c2fe17e6aab25f84142ae985d96",
       "ci-repair-independent-review.json": "350b1967310d0f460acb1ebcfd93f69234b818fe6e6adcb0d53584fde2c2c4d5",
-      "ci-repair-peers.json": "2d06ca20b4307602f7143d1b8ecdbafe309c80c70f2c1a3c28bfc075a1d1d201"
+      "ci-repair-peers.json": "2d06ca20b4307602f7143d1b8ecdbafe309c80c70f2c1a3c28bfc075a1d1d201",
+      "closeout.json": "277c0b624eef10baa268dc197a517203e2713090ebfe4f674a0e8ae87a5ca736",
+      "ci-repair-doc-review.json": "65be7588283686b15818d27ede5f3ac4b8660d2ef7cb9f94a881b41e0473e93f",
+      "publication-ci-preflight.json": "0cf0110ba61cd9b358bb075abc73b7dfd7a2de6d423b7a68bdf11f8790fac6ae",
+      "merge-readiness.json": "524b729f9a0a4c91d6f8b7768146a10c958029d5feeb303908505373b59506a4",
+      "current-peers.json": "741eacbf472eae492570cdce16843160fbc46696dcd2f17e410a5936fefdbfac",
+      "main-workflows.json": "249fb56ebf89bca0ff964f12a090346599c369a4b895b8a5f56937c1db561bcf",
+      "accounting-rest-reconciliation.json": "39c5468ac8735d8ea7d9df6a730ca678d257299a30d2d133023fae726b8ffa08",
+      "accounting-rest-closed-1.json": "d34abb6b4bf54b345cffcd33b00ceae93aa91671bd5870355de4863633591788",
+      "accounting-rest-closed-2.json": "a6029b3265f2533bffb35016e94b446b07eb1f23b9c9c234a8703d69fb7153a4",
+      "accounting-closed-refresh.json": "339a3573b1b0cebe6567cb99c8a4797be07eb1a552f4978ca2579dce1f87c161",
+      "accounting-merged-refresh.json": "26aa52964d5fbf02397152f08cf8622d31e4c505ef32a8a3c55f07acf5f71719"
     },
     "post_sprint_reobservation": {
-      "status": "local_source_closed_next_lifecycle_contract_selected_remote_closure_pending",
-      "observed_at": "2026-09-20T00:38:48.522744+00:00",
-      "base_commit": "0d21c8cbcf771bee7f0dbc8640b5e34ce753bf93",
+      "status": "merged_source_closed_lifecycle_qualification_selected",
+      "observed_at": "2026-09-20T01:09:52.561351+00:00",
+      "base_commit": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
@@ -2948,7 +2979,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve existing external owner and protected scope."
         },
         {
@@ -2963,7 +2994,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Independent runtime admission absent",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Independent runtime admission absent"
         },
         {
@@ -2981,7 +3012,7 @@
           "evidence": [
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Prior authority-root/head mismatch remains unresolved. This sprint requested a lexical owner bundle only: UNKNOWN freshness/index gap, not a newly repeated semantic failure. Preserve the existing maintenance owner; no reindex."
         },
         {
@@ -2999,7 +3030,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve existing external owner and protected scope."
         },
         {
@@ -3017,7 +3048,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve existing external owner and protected scope."
         },
         {
@@ -3032,7 +3063,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
         },
         {
@@ -3047,7 +3078,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current signed job/model/runtime admission absent",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Current signed job/model/runtime admission absent"
         },
         {
@@ -3062,7 +3093,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current deployment owner and runtime qualification",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "security_dependency": "Current Dependabot alerts322/286 for direct chromadb in holo_index/requirements.txt; first_patched_version is null. Exposure/mitigation needs existing owner evidence; no blind runtime change.",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Current deployment owner and runtime qualification"
         },
@@ -3081,7 +3112,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1."
         },
         {
@@ -3103,7 +3134,7 @@
             "genesis-next-source-overlap.json"
           ],
           "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill.",
           "fresh_disposition": "Preserve exact prior closed scope and its recorded unresolved remainder; no automatically qualified new source action."
         },
@@ -3125,7 +3156,7 @@
           ],
           "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding.",
           "why_score": "Existing security/dependency owners remain; no new exposure proof changes scope. The equally17/P0 typed genesis gap has a concrete local static witness and existing fixtures; continue security owner triage separately.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding."
         },
         {
@@ -3140,7 +3171,7 @@
           "priority": "P0",
           "state": "partial_transaction_dependency",
           "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
         },
         {
@@ -3155,7 +3186,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "012 reader-policy question remains unanswered",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. 012 reader-policy question remains unanswered"
         },
         {
@@ -3173,7 +3204,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Fresh1751 head04ef322f remains draft, CONFLICTING and validateFAILURE. Preserve permanent detect_ai lineage and route/project owner; no main registration or build dispatch claimed.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve existing external owner and protected scope."
         },
         {
@@ -3209,7 +3240,7 @@
           "effort": "One existing producer/consumer seam after contract retrieval.",
           "cost": "Deterministic fixtures first; provider cost remains unmeasured.",
           "verification_burden": "Independent exact-field/semantic preservation and scope failures before admission.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "score_reconciliation": "Historical18/P0 covered now-closed concrete serialization/seed handoff prerequisites. Residual local contract is15/P1; do not inherit18 automatically.",
           "fresh_disposition": "Not a qualified source patch; residual context/child contract remains deliberate and unresolved."
         },
@@ -3225,7 +3256,7 @@
           "priority": "P1",
           "state": "contract_eligible_live_measurement_blocked",
           "next_step": "Qualify whole-wardrobe policy/content/scanner identity and stable ownership before restoring caching; live latency/cost measurement awaits admitted isolated execution.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Restoring caching is unqualified and optional for correctness."
         },
         {
@@ -3243,7 +3274,7 @@
             "public/member/tests/test_route_contract_bridge.py"
           ],
           "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Existing route-owner contract reconciliation remains unqualified for source/test changes in this lane."
         },
         {
@@ -3262,7 +3293,7 @@
             "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
           ],
           "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill."
         },
         {
@@ -3277,7 +3308,7 @@
           "priority": "P1",
           "state": "external",
           "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. Registry PR1751 triggers existing eSingularity assertions; treat this as an external owner dependency.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve existing external owner and protected scope."
         },
         {
@@ -3296,7 +3327,7 @@
             "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
           ],
           "next_step": "Use the separate13/P1 daemon lifetime qualifier; preserve other worker lifecycles, transaction and R11 authority scope.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Narrow to selected 13/P1 daemon lifetime contract qualifier."
         },
         {
@@ -3315,7 +3346,7 @@
             "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
           ],
           "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task."
         },
         {
@@ -3341,7 +3372,7 @@
           "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source.",
           "review": "next-fixture-contract-review.json",
           "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve exact prior closed scope and its recorded unresolved remainder; no automatically qualified new source action."
         },
         {
@@ -3356,7 +3387,7 @@
           "priority": "P1",
           "state": "compatibility_qualification_complete_source_contract_blocked",
           "next_step": "Choose and independently qualify an explicit feedback approval assertion, issuer and consumer under existing authenticated conversation/record owners. No exact source patch or new implementation score is qualified.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "evidence": [
             "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20",
             "r25-disclosure-contract-review.json",
@@ -3379,7 +3410,7 @@
           "priority": "P1",
           "state": "eligible-later",
           "next_step": "Python-exit restoration closed; actual process/volume failure remains",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Python-exit restoration closed; actual process/volume failure remains"
         },
         {
@@ -3400,7 +3431,7 @@
           ],
           "next_step": "Existing R19/CI owner: qualify why report-only42passing results have no uploaded artifact before changing upload configuration; preserve report-only policy and independently validate artifact delivery.",
           "wsp97_action": "Extend existing observation workflow/test-evidence owner, no second workflow or automatic gate activation.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Separate actionable delivery qualification remains eligible, but no workflow patch is qualified here."
         },
         {
@@ -3423,7 +3454,7 @@
           "blocker": "None within completed planning scope; source repair is separately scored.",
           "wsp97_action": "Reuse existing dependency launcher probe/test and intentional activation owners. Qualify no-start advisory versus intentionally started execution without inventing an effect-use lease.",
           "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "effort_cost": "One bounded source/contract/test-seam qualification; no provider cost or runtime activation.",
           "fresh_disposition": "Preserve exact prior closed scope and its recorded unresolved remainder; no automatically qualified new source action."
         },
@@ -3450,7 +3481,7 @@
           ],
           "blocker": "None for this local contract qualification. Source repair remains dependent on a deterministic distinct-thread witness, disposal/failure/timeout contract and exact owner reconciliation; no production memory or runtime admission is supplied.",
           "next_step": "Use existing daemon and PatternMemory fixtures with explicitly redirected disposable storage to reproduce cached-handle use across distinct threads and missing disposal. Qualify one smallest create/use/close-on-owning-thread repair for scan_once and start/stop/restart, preserving disabled telemetry and fail-soft behavior. Do not implement source this wake.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "effort_cost": "One existing owner/test pair contract qualification with injected threads/storage; no model/provider cost or service start."
         },
         {
@@ -3475,7 +3506,7 @@
             "Program/proposal, oracle, environment and authenticated reader evidence",
             "Resource measurement and independently retained benefit"
           ],
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "evidence": [
             "modules/infrastructure/wre_core/src/wre_auto_researcher.py:419",
             "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py:526"
@@ -3511,7 +3542,7 @@
             "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
           ],
           "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence."
         },
         {
@@ -3524,19 +3555,19 @@
           },
           "score": 12,
           "priority": "P2",
-          "state": "locally_complete_independently_verified_remote_closure_pending",
+          "state": "closed_pr1806",
           "evidence": [
             "modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20",
             "wsl-contract-review.json",
             "wsl-owner-review.json",
             "wsl-witness-review.json"
           ],
-          "blocker": "Exact-head remote closure only; no remaining local source repair.",
+          "blocker": "None within completed source scope.",
           "wsp97_action": "Extend existing probe and test owner, preserving receipt semantics, intentional Gateway exports and structural guards; no new module or authority.",
-          "next_step": "Close exact reviewed source/docs through CI and merge; preserve43 focused/four connected and independent43 overlap/18 probes. No runtime activation.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted.",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "effort_cost": "One existing source/test pair plus required docs; deterministic disposable tests, no provider cost or runtime activation.",
-          "fresh_disposition": "Conditionally resolved by the current independently qualified source slice; wait for actual closure evidence, then remove it from eligible selection."
+          "fresh_disposition": "Resolved by PR1806 after corrected exact-head CI and independent review; merged tree and all18 reviewed blobs match. Removed from eligible selection; actual runtime authority remains separate."
         },
         {
           "task": "Detect-AI-WSP109-intake",
@@ -3553,7 +3584,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module.",
-          "reconciled_against": "38c66580d4311956904f69353f52552e9ce324a3",
+          "reconciled_against": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
           "fresh_disposition": "Preserve recorded dependency/state; no new exact bounded source repair qualified in this review. Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module."
         }
       ],
@@ -3608,7 +3639,10 @@
         "mergeable": "CONFLICTING",
         "validate": "FAILURE",
         "main_registry": "17 entries; detect_ai absent; prepared registration remains in existing draft"
-      }
+      },
+      "closure_reobservation": "Merged tree and18 reviewed blobs match corrected candidate;102 peer heads/shared checkout unchanged. Current source12/P2 and its14/P1 CI closure dependency are closed. The daemon lifetime action remains C3/I4/D3/Impact3=13/P1; no default store, daemon or runtime activation. Recheck its exact source/ownership at the next wake rather than inheriting queue position.",
+      "local_branch_count": 641,
+      "worktree_count": 157
     },
     "next_packet": {
       "schema": "0102_m2m_v1",
@@ -3661,7 +3695,7 @@
           "New module, pool, skill, authority grant, effect lease, schema or R11 acceptance implementation."
         ],
         "dependencies": [
-          "Close the current WSL source slice with independent and exact-head validation; then freshly re-observe WSP15 and ownership.",
+          "PR1806 independently accepted and merged after ten exact-head checks. Fresh WSP15/ownership and source reconciliation remains required before lifecycle qualification.",
           "Preserve the merged per-instance SQLite creating-thread contract and the existing disabled telemetry behavior."
         ],
         "invariants": [
@@ -3726,7 +3760,7 @@
         "New owner/abstraction, unrelated source edits or missing source-bound evidence."
       ]
     },
-    "next_step": "Finish current owned PR1806 closure after fresh reviewed18-file exact-head CI and ownership checks; only then re-observe/rescore the contingent13/P1 daemon memory lifetime qualification.",
+    "next_step": "Re-observe exact source and ownership, then qualify the existing daemon PatternMemory lifecycle with disposable storage under the planning-only13/P1 packet.",
     "requires_fresh_reobservation_after_closure": true,
     "ci_closure_repair": {
       "observed_at": "2026-09-20T00:58:21.726259+00:00",
@@ -3842,7 +3876,7 @@
       },
       "independent_review": "ci-repair-independent-review.json",
       "original_review_status": "Original13-file source/docs review remains historical and source-bound; revised18-file candidate requires fresh doc/promotion review.",
-      "remote_status": "Fresh exact-head CI pending; never retry the unchanged failing candidate or bypass the compatibility gate.",
+      "remote_status": "Corrected candidate ea38751e2f9ffc1495f01af5ec51a495a21428dd passed all ten exact-head checks and merged; original failed candidate and CI log remain preserved.",
       "retention": "Reusable test guidance is documented in the existing dependency_launcher/tests/README.md; no governed runtime retention claim.",
       "ownership": {
         "shared_derived_path_overlaps": [
@@ -3875,6 +3909,165 @@
         ],
         "action": "Parent should re-observe exact peer heads at publication and document current-tree derived-pin maintenance. Path overlap does not authorize adopting/changing unmerged peer source or behavior; avoid manifest merges from stale peer branches."
       }
-    }
+    },
+    "remote_closure": {
+      "observed_at": "2026-09-20T01:08:33.038187+00:00",
+      "pr": 1806,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1806",
+      "candidate_commit": "ea38751e2f9ffc1495f01af5ec51a495a21428dd",
+      "merge_commit": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
+      "merged_at": "2026-09-20T01:08:21Z",
+      "exact_head_checks": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:06:55Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480394616/job/105997029607",
+          "name": "test (3.12)",
+          "startedAt": "2026-09-20T01:03:37Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:04:27Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480392125/job/105997024698",
+          "name": "Analyze (actions)",
+          "startedAt": "2026-09-20T01:03:35Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:05:05Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480392125/job/105997024570",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-09-20T01:03:35Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:05:46Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480392125/job/105997024625",
+          "name": "Analyze (python)",
+          "startedAt": "2026-09-20T01:03:35Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:04:27Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480392125/job/105997024675",
+          "name": "Analyze (rust)",
+          "startedAt": "2026-09-20T01:03:35Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:04:03Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480394616/job/105997029589",
+          "name": "lint",
+          "startedAt": "2026-09-20T01:03:37Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:03:48Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480394616/job/105997029617",
+          "name": "security",
+          "startedAt": "2026-09-20T01:03:36Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:04:00Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480394616/job/105997029624",
+          "name": "holoindex_freshness",
+          "startedAt": "2026-09-20T01:03:37Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:05:54Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480394616/job/105997029592",
+          "name": "redteam observation (report-only)",
+          "startedAt": "2026-09-20T01:03:37Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-20T01:04:20Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/FOUNDUPS/Foundups-Agent/runs/105997116127",
+          "name": "CodeQL",
+          "startedAt": "2026-09-20T01:04:18Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "tree_matches_reviewed_candidate": true,
+      "reviewed_files": {
+        "ModLog.md": "4c40df77442267d1036b90f4f62841bdba05583d",
+        "ROADMAP.md": "518d039762608fcea7afc448a427463cb5acb5f8",
+        "WSP_knowledge/WSP_Test_Registry.json": "77d7ad36e649f741b86e656154d24846c156af69",
+        "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json": "380b572db7ced60064763daea4d4b850ae8e7549",
+        "docs/roadmaps/rsi_swarm_backlog.json": "8894a68f22f31249bcf954e3d0406face20bb28f",
+        "extensions/reddog/ModLog.md": "465718f859dd74d5bcc48975fa7619d910a92e29",
+        "extensions/reddog/backend_compatibility_constants.js": "4520ae7da181894641db0f75a030ce0e82cb2ea8",
+        "extensions/reddog/tests/TestModLog.md": "928f15ce5821bcb35adca2cf3950688a3a4a2e07",
+        "modules/infrastructure/dependency_launcher/INTERFACE.md": "256ffa480634cfa8bf8308dcc35c8654d7729c22",
+        "modules/infrastructure/dependency_launcher/ModLog.md": "0f11034a01ed7236619497df9516b5c3811f4437",
+        "modules/infrastructure/dependency_launcher/README.md": "ac7fda58cad3c3acb4771d69e327fd4f20bf765f",
+        "modules/infrastructure/dependency_launcher/ROADMAP.md": "bdd1bf33d70c7cb789e92f7664f13f59c1ab06ee",
+        "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py": "536be86a055c66b5f5a4ddad4d5d78b262b234fc",
+        "modules/infrastructure/dependency_launcher/tests/README.md": "3b6a04421712bcbd443abbd1d8e29edcd9a9b6c4",
+        "modules/infrastructure/dependency_launcher/tests/TestModLog.md": "a23b35cc5da76ef6b45a4dd888ae17f548ddd35f",
+        "modules/infrastructure/dependency_launcher/tests/test_wsl_agent_runtime.py": "b23cb974b00a9edfd3fa31fd577532c068b3436e",
+        "scripts/reddog_backend_manifest.json": "ebfc7477959685602e0a1489f20ea73a8e3189ae",
+        "scripts/tests/test_generate_reddog_backend_manifest.py": "4cec952c9a218e5db1a8278ef99f8aa3c484334e"
+      },
+      "peer_count": 102,
+      "peer_heads_unchanged": true,
+      "shared_unchanged": true,
+      "source_review_sha256": "8377b1fb0555b95c02ab82731ce719dc3b32505bcaff4ad2aedbe1e9d1113467",
+      "derived_closure_review_sha256": "350b1967310d0f460acb1ebcfd93f69234b818fe6e6adcb0d53584fde2c2c4d5",
+      "doc_review_sha256": "65be7588283686b15818d27ede5f3ac4b8660d2ef7cb9f94a881b41e0473e93f",
+      "first_failed_candidate": "2033939c76ff7af16b1e7f6269e947fa20f1def3",
+      "first_failure_preserved": true,
+      "subsequent_main_workflows": [
+        {
+          "conclusion": "",
+          "databaseId": 35480607649,
+          "headSha": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
+          "status": "in_progress",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480607649",
+          "workflowName": "CI"
+        },
+        {
+          "conclusion": "",
+          "databaseId": 35480607038,
+          "headSha": "d3a75d6727854f116ae4cb8e9e0b6efc557536cb",
+          "status": "in_progress",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35480607038",
+          "workflowName": "CodeQL"
+        }
+      ],
+      "workflow_truth": "Ten exact-head PR checks passed before merge; later main workflow statuses are recorded separately."
+    },
+    "checkpoint_branch": "agent/rsi-self-audit-memory-lifecycle-20260920"
   }
 }

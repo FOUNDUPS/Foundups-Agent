@@ -1,3 +1,21 @@
+## 2026-09-20: WSL command-control repair merged; memory lifetime qualifier next
+
+- PR1806 merged as `d3a75d6727854f116ae4cb8e9e0b6efc557536cb` after all ten exact-head checks passed. The merged
+  tree and18 independently reviewed blobs match the corrected candidate; source12/P2
+  and its14/P1 CI closure dependency are closed. Original failed CI is preserved.
+- Fresh31-history reconciliation selects the bounded13/P1 daemon PatternMemory
+  lifetime qualifier. Its proof must use injected/disposable storage and distinct
+  threads, with no production handle, daemon start or runtime-memory effects.
+- Existing43 focused/four connected checks and independent43 overlap/18 probes
+  remain source-bound. Backend generator8 tests, RedDog15 fast groups and package
+  checks pass after the derived manifest repair. Shared checkout and102 peer heads are unchanged; later
+  main workflows are recorded separately. No admitted runtime or retained-learning
+  claim. WSP15/22/97; next packet is planning-only and non-dispatchable.
+- Fresh paginated REST confirms116 prior merges and15 unmerged closures since
+  September9 UTC; this verified merge raises the total to117. Search omitted
+  eight unmerged closures, so its seven-item result is retained only as incomplete
+  retrieval evidence. All102 open peer heads remain unchanged.
+
 ## 2026-09-20: Close WSL repair's backend manifest integration gap
 
 - PR1806 first candidate `2033939c76ff7af16b1e7f6269e947fa20f1def3` failed the
