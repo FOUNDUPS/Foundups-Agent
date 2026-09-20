@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-09-20 - Daemon counter ownership backend binding
+
+- Refreshed the existing daemon member digest and its JavaScript/Python manifest pins to 0f65af35cfd806cc1cdc22fc3f4654e5090a8d27dc47b605831af7cc2069b60c.
+- All 1,400 members, manifest API/version, package caps and safeguard assertions remain unchanged. No installed extension, provider or runtime is updated.
+- Generator 8 tests, existing RedDog 15 fast groups and deterministic 67-file/950,440-byte package pass. Source repair is owned by WRE Core; exact-head CI remains required. WSP15/22/50/84/97.
+
 ## 2026-09-20 - WSL command-control backend digest reconciliation
 
 - PR1806 candidate2033939 failed the unchanged backend compatibility gate.

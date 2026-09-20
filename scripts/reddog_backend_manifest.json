@@ -2636,7 +2636,7 @@
     "modules/infrastructure/wre_core/skillz/wre_skills_loader.py": "f9fc069ac24d298453f8b08c52d0b9c9ffe56215776d119ebb71f96ba880acd0",
     "modules/infrastructure/wre_core/src/__init__.py": "e416e549da20d918b4fcb91d9b8cb0df5cece68ef149a3edc019175dc5da50de",
     "modules/infrastructure/wre_core/src/dae_preflight.py": "80c4daf49055bd3f5bcab7113fcc134bd4e896d0adf7d3f4007909845342bcc6",
-    "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py": "dae68e2ccfa2ca140b7635b165acc983fe2583f1254591ca8b9fd97955a0580f",
+    "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py": "238ef62685394f954c962bad32937f0cbb9b0d5d0edfe5906686f9bc12f710d4",
     "modules/infrastructure/wre_core/src/dashboard_alerts.py": "ea1b8909c2d80caf3f19b73b20551aab31abae68ed8f166d852ef94bfbabc930",
     "modules/infrastructure/wre_core/src/fmas_finding_contract.py": "2228ca6488b240ccb05de7c4ff835ad4a6aa326be5788080335af92f259b5010",
     "modules/infrastructure/wre_core/src/fmas_improvement_bridge.py": "736edb189348bcbe53d2a0db68c7235b8045dbc0a4940c5f1d950ecec4cf8d50",

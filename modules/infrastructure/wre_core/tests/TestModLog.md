@@ -1,3 +1,10 @@
+## 2026-09-20: Counter ownership, failure cleanup and active timeout
+
+- Preserved all 20 original daemon tests/helper ASTs; appended ten cases in the same file. Distinct simultaneously alive threads process different error events and must persist both increments; per-operation handles must close exactly once on their creator.
+- Added disabled/factory/increment/close failure and KeyboardInterrupt coverage plus a controlled active-counter stop timeout. Stop returns while the blocked operation is still running; release completes with one owner-thread close. No actual daemon.start or live logs.
+- Unchanged source: 8 failures/22 passes. Repaired: 30 passes; combined with unchanged 41-case PatternMemory suite: 71 passes, independently replayed 71 overlap. Disposable real SQLite/default-path interception, 115 combined DB opens, zero external attempts. Close-failure injection raises after actual close and does not prove recovery from partial SQLite close.
+- Test file 750 lines, largest function 40, original assertions preserved. Registry check current 1651/269. Exact red/green logs, author and independent receipts are bound in the existing RSI backlog observation; no production acceptance claim.
+
 ## 2026-09-20: Proposal input identity regressions
 
 - Reused the existing model-disable fixture and real evaluator. New thirteen-case coverage checks distinct proposal text with equal outcomes, UTF-8/newlines, repeated invocations, write/diff/evaluation interruption, missing/non-text returns and a string encoder override.

@@ -172,40 +172,36 @@ Continue parity-proven decomposition in later focused slices:
 
 ## Daemon counter memory lifetime — 2026-09-20
 
-The bounded 13/P1 qualifier is locally complete with independent witness acceptance.
-The existing supervisor starts a daemon worker and also calls the same object's
-synchronous scan method. The daemon caches one creating-thread SQLite handle.
-A controlled witness on unchanged source kept two distinct threads alive: both
-scans returned one new event, but only one telemetry increment persisted. The
-second increment raised sqlite3.ProgrammingError, swallowed by fail-soft
-logging. A fresh second-thread-owned handle succeeded.
+The 13/P1 qualifier merged in PR1807. On unchanged source, its independent
+witness returned two events from distinct live threads but persisted only one
+counter increment. The existing supervisor both starts the daemon and invokes
+synchronous scans; its cached connection violated SQLite creating-thread use.
 
-The 61 existing daemon/PatternMemory tests pass in isolated storage (81 disposable
-opens). They did not detect this distinct-event handoff. The witness kept no
-production handles; creator-thread cleanup and both joins completed. Observed
-retention after injected loop exit and stop(0) is not an active-scan shutdown or
-actual start/restart test. Initial harness marker failure is preserved separately.
+The separately scored **C2/I4/D4/Impact3=13/P1 source repair is locally verified**.
+The existing daemon now creates, uses and finally closes a handle per counter
+operation on its calling thread. It retains no cache. Disabled telemetry opens
+nothing, ordinary errors remain fail-soft, and interruption propagates after
+cleanup. Scheduler methods, public signatures and PatternMemory are unchanged.
 
-Next action: **C2/I4/D4/Impact3=13/P1**, a separately scored minimal source repair
-inside _get_pattern_memory/_increment_counter. Create, use and finally close
-a fresh handle per counter on its calling thread; remove retained daemon caching.
-Keep telemetry-disabled construction empty and ordinary failures fail-soft.
-Do not change PatternMemory, SQLite affinity, scheduler/public signatures or
-proposal-only dispatch. Reuse the existing test owner to prove distinct-thread
-persistence, per-handle close, factory/write/close failure and bounded injected
-timeout behavior. Preserve inherited source/class size debt without growth.
+Ten new tests preserve the original 20. Before repair: 8 failed/22 passed.
+After: 30 passed; connected 71 passed with 115 disposable database opens and zero
+external attempts. Independent 71 replay overlaps. Distinct events persist both
+increments; a blocked-counter timeout proves stop does not close a foreign
+handle and the owner closes when released. No actual start/restart or live log
+tail was exercised. Close-failure injection follows real close, not partial
+SQLite close failure. Partial constructor failure, contention, initialization
+cost, real shutdown/restart, other consumers and R11 acceptance remain open.
 
-The daemon is already a backend-manifest member: its changed digest and existing
-JS/Python manifest pins belong in the same future candidate, with unchanged
-membership/API/assertions and existing packaging checks. Constructor overhead,
-partial-constructor cleanup, real shutdown/restart, contention, other consumers
-and R11 acceptance remain separate. This qualifier implements no repair and
-admits no daemon, provider, WRE worker or production retention.
+Source 865/class755 retain inherited size without growth; constructor shrinks
+62→61. Tests 750/max function 40 satisfy their bounds. Existing 1,400-file backend
+membership/API/assertions remain unchanged; only this member digest and both
+existing pins advance. Generator 8 tests, RedDog 15 fast groups and 67-file package
+pass. Registry 1651/269 remains current; no generated registry edit is needed.
 
-Canonical evidence/next packet:
-[current_observation](../../../docs/roadmaps/rsi_swarm_backlog.json),
-daemon_pattern_memory_lifecycle_qualified_20260920; independent receipts in
-O:/Foundups-Agent-audits/20260920-rsi-memory-lifecycle-1046.
+Canonical current evidence and next selection are in
+[the existing backlog](../../../docs/roadmaps/rsi_swarm_backlog.json),
+daemon_counter_memory_ownership_20260920. Local verification is not WRE worker
+admission, deployment, authenticated write acceptance or retained RSI benefit.
 
 ## Execution-truth P0 follow-ons
 
@@ -220,9 +216,9 @@ O:/Foundups-Agent-audits/20260920-rsi-memory-lifecycle-1046.
 - prove a production end-to-end RSI canary before describing WRE as production RSI;
 - add typed admission-failure audit storage without conflating it with successful
   PatternMemory outcomes.
-- execute the qualified 13/P1 daemon per-counter owning-thread repair above;
-  other cached consumers, actual restart/shutdown, same-handle multi-call
-  transactions and R11 acceptance remain unimplemented;
+- the daemon per-counter lifetime is locally repaired above; qualify remaining
+  cached consumers, actual restart/shutdown, same-handle multi-call transactions
+  and R11 acceptance separately before concurrent production use;
 - qualify remaining concurrent coordinator state after the merged per-call
   report and fingerprint repairs; per-mapping refresh synchronization, severity
   binding, 128-entry retention, private scanner reports and explicit dispatch

@@ -102,6 +102,13 @@ SQLite rejects use on another thread. Read the [interface](INTERFACE.md#patternm
 for transaction and worker-handoff limits. The existing tests reproduce foreign
 commit/rollback/close interference and verify independent owner lifetimes.
 
+The self-audit daemon treats each telemetry increment as a work item: it opens
+a fresh handle and attempts close in finally on the same calling thread.
+Background and synchronous scans no longer share a cached connection.
+Disabled telemetry opens none. Ordinary telemetry errors remain diagnostic;
+interruption still propagates after cleanup. This does not change scanner,
+scheduler or production-memory admission behavior.
+
 ## Scanner cache ownership
 
 The existing admission cache now binds scan severity, invalidates old success

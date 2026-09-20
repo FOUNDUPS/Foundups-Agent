@@ -1,5 +1,13 @@
 # WRE Core - ModLog
 
+## 2026-09-20: Close daemon counter handles on the calling thread
+
+- Replaced the existing daemon's cached PatternMemory with one handle per counter operation; construction, increment and finally-close occur on the calling thread. Ordinary factory/write/close failures remain fail-soft; increment interruption propagates after cleanup. Telemetry disabled still constructs no handle.
+- Ten new cases in the existing test owner preserve all 20 original definitions. Red: 8 failed/22 passed; repaired: 30 passed. Connected daemon/PatternMemory 71 passed with 115 disposable DB opens and no external attempts; independent 71 replay overlaps.
+- Only constructor and two private helpers changed; all signatures and remaining methods are AST-identical. Source 865/class755 unchanged, constructor62→61; tests 750, max function 40. No new module, pool, schema, skill or exception.
+- Existing 1,400-member backend manifest changes only this source digest; both existing pins updated together. Generator 8 tests, RedDog 15 fast groups and 67-file/950,440-byte package pass. Registry remains current 1651/269.
+- No real daemon start/restart, production storage, provider or WRE admission. Close-failure injection follows real close; partial SQLite close/constructor failures, performance, other consumers and R11 retention remain separate. Evidence: canonical backlog daemon_counter_memory_ownership_20260920; WSP00/15/22/48/50/62/84/97/99.
+
 ## 2026-09-20: Qualify daemon PatternMemory lifetime without source changes
 
 - Confirmed source-bound mismatch: the supervisor starts and synchronously scans the same daemon, whose cached SQLite connection remains bound to its creating thread. Two distinct-thread events yielded two scan results but one persisted counter; fresh owned-handle control succeeded.
