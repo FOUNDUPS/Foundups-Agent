@@ -1,3 +1,12 @@
+## 2026-09-20: Qualify prepared-context binding and reconcile RSI status
+
+- Closed local 13/P1 contract qualification: 12 synthetic cases / 27 mocked adapter calls; 4 altered context forms pass under unchanged sealed prompt. Existing redaction/prompt negatives, size and one-shot checks remain. Initial harness typo retained; no source/test changes.
+- Independent review qualifies an existing-owner raw-context digest repair, preserving legitimate redaction and legacy absence. Exact next packet, size/test/manifest budgets and evidence remain in the current backlog; no live provider or native-child proof.
+- Fresh accounting: 126 merged / 21 closed-unmerged since September 9 UTC; 95 open, 12 drafts, 15 failing-check, 20 all-success, 59 success/neutral/skipped and 1 unchecked. Both PR1814 main workflows pass. Peer heads/shared checkout preserved.
+- Reconciled daily-work/retention and PC metadata; native OpenClaw 2026.5.2, current WSL/Hermes sandbox unverified. AmIBot main registration absent; existing PR1751/issue1750 retained. Corrected stale typed-genesis/receipt-forwarding and historical-test roadmap wording.
+- Prior observation archived intact; 26 original packets and 34 prior candidate histories retained, one source successor independently scored. WSP00/15/22/50/62/84/97/99; no runtime activation or retained-RSI claim.
+- Actual M2M codec rejected the first next-packet draft: invalid lane, WSP-reference types and extra top-level metadata. Corrected within the existing schema; exact encode/decode/re-encode passes at 9,578 UTF-8 bytes. Initial receipt and failures retained; source contract unchanged.
+
 ## 2026-09-20: Close verified report upload; select M2M context qualification
 
 - PR1814 merged as 8eda8fe73428a1a592f20bc331cec262a1fca5a1 after ten successful exact-head checks. All seven reviewed blobs and merged tree match; later main workflows are separate observations.

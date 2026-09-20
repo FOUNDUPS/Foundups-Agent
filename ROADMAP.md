@@ -62,10 +62,10 @@ Both later PR1807 main workflows now passed; protected PR1808/1809 changes are p
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
 Refreshed September 9 UTC onward accounting found 126 merged PRs and 21
 closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
-preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
-passing/skipped checks and one with no reported checks; bulk mergeability was
-76 MERGEABLE and 26 CONFLICTING, including PR1751. Check/mergeability summaries
-were not refreshed in this contract sprint. These categories overlap;
+current full inventory reports 12 drafts and 15 PRs with failing checks; 20 have
+all-success checks, 59 have success/neutral/skipped results, and one has no checks.
+After individual AmIBot confirmation, merge-state reports 93 UNKNOWN, one CLEAN
+and one DIRTY. These interval observations are not an atomic GitHub snapshot;
 reported green checks alone do not establish current merge or runtime authority.
 R19 qualification preserves two earlier hosted runs with 42 passing observations
 each, XML creation and parsing, but zero artifacts because the configured action
@@ -103,9 +103,9 @@ and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not inges
 raw conversations automatically or claim that merged Codex work was autonomously
 executed and retained by WRE.
 
-**PC execution:** this session can run local Windows commands. The September19
-22:21 UTC metadata snapshot found native OpenClaw2026.5.2 and stopped WSL distros;
-this contract audit did not refresh or activate those runtimes. Current Hermes,
+**PC execution:** this session can run local Windows commands. The September20
+06:07 UTC metadata refresh found native OpenClaw 2026.5.2 and registered WSL distros;
+running state and canonical WSL versions were not queried or activated. Current Hermes,
 WSL OpenClaw/provider bindings and a real admitted sandbox remain unverified.
 The existing resolver still supplies no authoritative effect-use lease. A cold
 WSL launch can start user services, so a disposable sandbox must first be bound
@@ -123,12 +123,39 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the current R19 upload repair, exact evidence and next bounded M2M context contract.
+the closed R19 evidence, completed context qualification and next bounded context source repair.
 R19 qualification is merged in PR1811. Its one-step upload repair has actual
 hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
 and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
-PR1814 passed final checks and merged; later main workflows remain separate. The next separately scored 13/P1 contract is
+PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
+
+## Governed-context qualification and resumed audit — 2026-09-20
+
+Twelve bounded synthetic cases (27 mocked adapter calls) confirm four altered,
+empty, swapped or stripped context forms pass existing adapter validation when
+the approved M2M prompt stays unchanged. Existing prompt-tamper and blocked-
+redaction negatives still reject before mocked effects. Combined length and
+one-shot synthetic capability checks pass. An initial harness attribute typo
+was corrected and retained; repeated cases overlap. This is a missing contract
+demonstrated with fixtures, not a live exploit or repaired production source.
+
+Independent review qualifies the next M2M-prepared-context-digest packet: bind
+the exact prepared RAW context using the existing digest/opaque capability and
+check it at the three current pre-effect validator calls. Preserve legitimate
+redaction, truly legacy absence, prompt fidelity and one-shot semantics.
+Incomplete canonical bindings must reject and be regenerated. Existing provider
+framing, native-child fidelity, source provenance and live admission are separate.
+See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#governed-context-binding-contract--2026-09-20)
+and current backlog for exact source/test scope and differential size budgets.
+This sprint implements none of that next source packet.
+
+Daily coding, tests, review and PR outcomes can be scoped system evidence.
+Personal feedback has separate R25 consent/target/version requirements. Neither
+ordinary receipts nor conversation-response heuristics prove independently
+retained RSI learning. The old pattern-import script has fixed historical
+examples; the verified sink still requires its existing activation/transaction
+owner. Reuse these owners rather than adding another transcript collector.
 
 ## AmIBot autonomous production experiment — 2026-09-15
 
@@ -142,7 +169,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. Refreshed main `4ce762a4c` has 17 registry
+manifest and the existing intake package. At this refresh main `8eda8fe73` has 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -154,15 +181,15 @@ the canonical `/f/detect_ai` namespace. No build order or public route is activa
 |---|---|
 | OpenClaw | Native Windows npm metadata: 2026.5.2. Governed WSL installation/service unverified today; September13 WSL 2026.7.1-2 is historical. |
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
-| Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
+| Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Authorized commander handoff now preserves validated genesis lineage (PR1799); public draft-to-commander entitlement and runtime admission remain open. The live new-scaffold writer still rejects an existing module. |
 | WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
-| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Principal normalization, receipt-to-seed forwarding, full context and downstream/native-child fidelity remain open. |
+| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Omission-aware receipt-plan forwarding is implemented (PR1798). Principal normalization, full context and downstream/native-child fidelity remain open; the raw-context contract is qualified for a separate repair. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
 | Execution valve | Current resolver explicitly returns `authoritative_use_lease=None`. Current trust/effect/model authority remains required. |
 | Skillz | Reuse existing intake and diligence skills. The intake skill exists as a prototype but is absent from the standard WRE skill registries; wardrobe admission/freshness remains unqualified. |
-| Validation | Fresh PC readiness audit: 175 runtime-contract tests pass; two real-subprocess fixtures are deliberately deselected. Historical route suites: 53 pass/11 fail; genesis: 27 pass/1 fail. Existing failures concern removed UI expectations and earlier commander authentication; preserve the gates. |
+| Validation | Historical G0 PC audit:175 runtime-contract passes/two subprocess deselections; route53pass/11fail and genesis27pass/1fail belong to older source. Later PR1801 reconciled four current FoundUp fixtures (205 focused/677 connected passes). This refresh reran no readiness suite; no live acceptance follows. |
 | Documentation | Static Firebase `/f/**` owner exists; package claims do not establish the game. Root npm build merely echoes a message and is not frontend acceptance. |
 
 The smallest selected reusable repair was the legacy invariant guard in
