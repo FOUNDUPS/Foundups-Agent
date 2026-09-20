@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "AMIBOT_AUTONOMOUS_BUILD_POC_V1",
+  "foundup_id": "detect_ai",
+  "display_name": "AmIBot",
+  "tagline": "Can you detect AI?",
+  "status": "PLANNING_NOT_DISPATCHED",
+  "dispatchable": false,
+  "principal_interface": "RedDog",
+  "principal_role": {
+    "id": "012",
+    "allowed": ["state intent", "correct direction", "set boundaries", "observe outcomes"],
+    "not_required": ["research", "write package", "score work", "edit JSON", "manage agents", "route workers", "review implementation details"]
+  },
+  "machine_role": {
+    "id": "0102",
+    "owns": ["research", "WSP retrieval", "WSP 15 scoring", "work-package generation", "dependency graph", "dispatch preparation", "repository knowledge", "verification synthesis", "documentation", "public-surface setup"]
+  },
+  "execution_model": {
+    "orchestrator": "WRE_AgentDB",
+    "supervisor": "OpenClaw",
+    "leaf_worker": "Hermes_or_admitted_equivalent",
+    "verifier": "independent_verifier",
+    "rsi_loop": "Observe -> Score -> Reconcile -> Select -> Execute -> Validate -> Document -> Re-observe",
+    "rule": "parallelize only dependency-independent work; preserve one owner per path and fail closed on uncertain evidence"
+  },
+  "source_authority": {
+    "module": "modules/foundups/detect_ai",
+    "intake": "modules/foundups/detect_ai/docs/intake",
+    "research": ["modules/foundups/detect_ai/docs/RESEARCH.md", "modules/foundups/detect_ai/docs/CHAT_PWA_SAFETY_RESEARCH.md"],
+    "roadmap": "modules/foundups/detect_ai/ROADMAP.md",
+    "benchmark": "modules/foundups/detect_ai/docs/BENCHMARK_CONTRACT.md",
+    "package": "modules/foundups/detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.json",
+    "registry": "modules/foundups/foundup_registry.json",
+    "manifest": "modules/foundups/detect_ai/foundup_manifest.json"
+  },
+  "registration": {
+    "status": "REGISTERED_SPECIFIED_NOT_IMPLEMENTED",
+    "foundup_id": "detect_ai",
+    "canonical_routing_prefix": "/f/detect_ai",
+    "data_namespace": "idb_detect_ai",
+    "public_surface_status": "hidden",
+    "hermes_openclaw_build_status": "none",
+    "note": "Declarative onboarding only; not WRE admission, runtime dispatch or public activation."
+  },
+  "public_surface": {
+    "target_origin": "https://foundups.com",
+    "target_route": "/f/amibot",
+    "route_status": "PROPOSED_NOT_DEPLOYED",
+    "new_domain_required": false,
+    "owner": "0102",
+    "note": "Requested /f/amibot differs from canonical /f/detect_ai. Existing shell owner must reconcile that request without a second FoundUp identity; no alias or active route exists."
+  },
+  "wsp15": {
+    "formula": "C + I + D + Impact",
+    "priority_ranges": {"P0":"16-20","P1":"13-15","P2":"10-12","P3":"7-9","P4":"4-6"}
+  },
+  "work_orders": [
+    {
+      "id": "AMI-A01",
+      "title": "Authority and duplicate preflight",
+      "owner_role": "architect_research",
+      "paths": ["modules/foundups/detect_ai", "modules/foundups/foundup_registry.json", "public/f"],
+      "depends_on": [],
+      "parallel_group": "G0",
+      "mps": {"complexity":3,"importance":5,"deferability":5,"impact":4,"total":17,"priority":"P0"},
+      "deliverables": ["source-bound retrieval receipts", "duplicate/update/fork decision", "route-owner evidence", "approved execution boundaries"],
+      "acceptance": ["current-source evidence", "no conflicting active owner", "no unsupported completion claim"]
+    },
+    {
+      "id": "AMI-A02",
+      "title": "Transport, session and entitlement contract",
+      "owner_role": "backend_architect",
+      "paths": ["modules/communication", "modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A01"],
+      "parallel_group": "G1",
+      "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
+      "deliverables": ["single selected realtime transport", "session authorization", "queue/reconnect contract"],
+      "acceptance": ["reuse existing owner where viable", "no second scheduler", "reconnect cannot bypass authorization"]
+    },
+    {
+      "id": "AMI-A03",
+      "title": "Clean-chat moderation and abuse controls",
+      "owner_role": "safety_worker",
+      "paths": ["modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A01"],
+      "parallel_group": "G1",
+      "mps": {"complexity":4,"importance":5,"deferability":5,"impact":4,"total":18,"priority":"P0"},
+      "deliverables": ["pre-delivery moderation path", "report/block/leave", "blocked-pair exclusion", "rate limits", "operator kill switch"],
+      "acceptance": ["human and AI output use same safety boundary", "moderation failure holds delivery", "bypass/obfuscation tests defined"]
+    },
+    {
+      "id": "AMI-A04",
+      "title": "Round truth, verdict and score state machine",
+      "owner_role": "game_backend_worker",
+      "paths": ["modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A01"],
+      "parallel_group": "G1",
+      "mps": {"complexity":4,"importance":5,"deferability":5,"impact":5,"total":19,"priority":"P0"},
+      "deliverables": ["server-held assignment", "locked verdict/confidence", "coordinated reveal", "idempotent scoring", "abort/timeout states"],
+      "acceptance": ["client cannot read truth before reveal", "duplicate scoring rejected", "human absence never silently becomes AI"]
+    },
+    {
+      "id": "AMI-A05",
+      "title": "Mobile-first PWA shell and AmIBot FoundUps page",
+      "owner_role": "0102_public_surface",
+      "paths": ["public/f/amibot", "modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A01"],
+      "parallel_group": "G1",
+      "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
+      "deliverables": ["mobile-first UI", "installable PWA contract", "join/chat/guess/reveal screens", "FoundUps extension page"],
+      "acceptance": ["no new domain", "route owner verified before write", "keyboard/safe-area accessibility", "no private chat data in offline cache"]
+    },
+    {
+      "id": "AMI-A06",
+      "title": "Single approved AI opponent adapter",
+      "owner_role": "ai_gateway_worker",
+      "paths": ["modules/ai_intelligence/ai_gateway", "modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A01"],
+      "parallel_group": "G1",
+      "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
+      "deliverables": ["one pinned Qwen-class configuration", "budget cap", "provider/license evidence", "neutral chat adapter"],
+      "acceptance": ["no tools exposed to opponent", "server-side execution for ranked trial", "configuration/version captured"]
+    },
+    {
+      "id": "AMI-B01",
+      "title": "Human-human random clean-chat POC",
+      "owner_role": "integration_worker",
+      "paths": ["modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A02", "AMI-A03", "AMI-A05"],
+      "parallel_group": "G2",
+      "mps": {"complexity":3,"importance":5,"deferability":4,"impact":5,"total":17,"priority":"P0"},
+      "deliverables": ["two-browser random matchmaking", "clean message relay", "disconnect/rejoin behavior", "report/block/leave"],
+      "acceptance": ["real two-client test", "no identity leakage", "moderation precedes delivery"]
+    },
+    {
+      "id": "AMI-B02",
+      "title": "Human-or-AI randomized detection POC",
+      "owner_role": "integration_worker",
+      "paths": ["modules/foundups/detect_ai"],
+      "depends_on": ["AMI-A04", "AMI-A06", "AMI-B01"],
+      "parallel_group": "G3",
+      "mps": {"complexity":4,"importance":5,"deferability":5,"impact":5,"total":19,"priority":"P0"},
+      "deliverables": ["random assignment", "identical visible chat surface", "guess/confidence", "reveal", "provisional points"],
+      "acceptance": ["human and AI arms exercised", "truth inaccessible pre-reveal", "practice fallback visibly labeled and excluded from benchmark"]
+    },
+    {
+      "id": "AMI-B03",
+      "title": "Real-device PWA acceptance",
+      "owner_role": "test_worker",
+      "paths": ["modules/foundups/detect_ai"],
+      "depends_on": ["AMI-B01", "AMI-B02"],
+      "parallel_group": "G4",
+      "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
+      "deliverables": ["iPhone acceptance evidence", "Android acceptance evidence", "install/resume/reconnect results", "stale-send/cache tests"],
+      "acceptance": ["real-device evidence", "keyboard does not block controls", "state restoration does not reveal truth"]
+    },
+    {
+      "id": "AMI-C01",
+      "title": "Independent security, privacy and benchmark verification",
+      "owner_role": "independent_verifier",
+      "paths": ["modules/foundups/detect_ai"],
+      "depends_on": ["AMI-B02", "AMI-B03"],
+      "parallel_group": "G5",
+      "mps": {"complexity":4,"importance":5,"deferability":5,"impact":5,"total":19,"priority":"P0"},
+      "deliverables": ["identity-leak review", "score recomputation", "moderation bypass review", "consent/retention review", "go/no-go receipt"],
+      "acceptance": ["verifier separate from implementation owner", "fail closed on unresolved P0 defects", "exact evidence references"]
+    },
+    {
+      "id": "AMI-C02",
+      "title": "FoundUps.com POC publication",
+      "owner_role": "0102_public_surface",
+      "paths": ["public/f/amibot"],
+      "depends_on": ["AMI-C01"],
+      "parallel_group": "G6",
+      "mps": {"complexity":2,"importance":4,"deferability":5,"impact":5,"total":16,"priority":"P0"},
+      "deliverables": ["/f/amibot POC surface", "health/rollback receipt", "public truth labels"],
+      "acceptance": ["authorized route owner", "verified rollback", "no claim beyond tested POC"]
+    },
+    {
+      "id": "AMI-C03",
+      "title": "RSI outcome capture and next-cycle rescore",
+      "owner_role": "0102_rsi_evaluator",
+      "paths": ["modules/foundups/detect_ai", "docs/operations", "docs/roadmaps"],
+      "depends_on": ["AMI-C01"],
+      "parallel_group": "G6",
+      "mps": {"complexity":3,"importance":4,"deferability":3,"impact":4,"total":14,"priority":"P1"},
+      "deliverables": ["cost/latency/defect data", "worker success/failure evidence", "reusable launch lessons", "rescored next work"],
+      "acceptance": ["observed evidence only", "no self-promotion from benchmark score", "verified lessons stored in repo knowledge"]
+    },
+    {
+      "id": "AMI-D01",
+      "title": "Mature 18+ queue research",
+      "owner_role": "policy_research_worker",
+      "paths": ["modules/foundups/detect_ai/docs"],
+      "depends_on": [],
+      "parallel_group": "DEFERRED_RESEARCH",
+      "mps": {"complexity":3,"importance":2,"deferability":1,"impact":2,"total":8,"priority":"P3"},
+      "deliverables": ["jurisdiction/provider review", "age-assurance options", "separate mature content policy"],
+      "acceptance": ["no mature runtime enabled", "no self-declared age treated as verification", "clean queue unaffected"]
+    }
+  ],
+  "parallel_plan": {
+    "G0": ["AMI-A01"],
+    "G1": ["AMI-A02", "AMI-A03", "AMI-A04", "AMI-A05", "AMI-A06"],
+    "G2": ["AMI-B01"],
+    "G3": ["AMI-B02"],
+    "G4": ["AMI-B03"],
+    "G5": ["AMI-C01"],
+    "G6": ["AMI-C02", "AMI-C03"],
+    "DEFERRED_RESEARCH": ["AMI-D01"]
+  },
+  "autonomy_assessment": {
+    "suitability": "GOOD_CONTROLLED_RSI_TEST",
+    "why": ["early-stage FoundUp", "isolatable scope", "clear user-visible acceptance tests", "reversible POC route", "parallelizable independent work", "measurable worker and verifier outcomes"],
+    "not_yet_proven": ["general unconstrained autonomous product launch", "fully automatic production promotion", "mature-content compliance", "autonomous economic rewards"],
+    "first_dispatch_gate": "AMI-A01 accepted with current-source evidence and WRE admission"
+  }
+}

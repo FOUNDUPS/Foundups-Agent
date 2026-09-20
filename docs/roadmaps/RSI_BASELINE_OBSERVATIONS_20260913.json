@@ -76114,5 +76114,24 @@
     "immutable_observation": "cb62de4f3978069ba2ced01c9cce74b431e6835c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
     "git_blob": "ee4bbbeaf14cbf78841f52f55c6718efc2c9966e",
     "reason": "Complete pushed checkpoint retained in Git; reference avoids copying the large unchanged closure and43histories again. New cache qualification does not alter previous receipts."
+  },
+  "amibot_pre_reconciliation_20260921": {
+    "current_main_observation": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "current_main_blob": "f2df2dfd5165a741ed7815ff055ec3ea71321e45",
+    "original_draft_root_history": {
+      "ROADMAP.md": {
+        "commit": "04ef322f172bed2504583a058ee8210674d98eeb",
+        "git_blob": "d013002ea6a2edaf113b7cec1d9665b472be1d24"
+      },
+      "ModLog.md": {
+        "commit": "04ef322f172bed2504583a058ee8210674d98eeb",
+        "git_blob": "cba6a1fab289fc45a8f8e1c21adfbb5e00f96d2c"
+      },
+      "docs/roadmaps/rsi_swarm_backlog.json": {
+        "commit": "04ef322f172bed2504583a058ee8210674d98eeb",
+        "git_blob": "07b1baf9b9819ed9f8b41e57aa15c49f78495abc"
+      }
+    },
+    "reason": "Preserve exact prior main/cache closure and original AmIBot planning history while resolving only three planning conflicts."
   }
 }

@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "734d46fae6332f4e8feaca9d3b172992dd394147",
+    "base_commit": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
     "selected_action": "AmIBot-registry-prerequisite",
-    "status": "cache_plan_closed_next_bounded_action",
+    "status": "amibot_existing_draft_candidate_remote_pending",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1868,56 +1868,52 @@
     }
   },
   "current_observation": {
-    "observation_id": "openclaw_cache_identity_qualification_20260921",
-    "observed_at": "2026-09-20T16:58:27.387984+00:00",
-    "base_commit": "734d46fae6332f4e8feaca9d3b172992dd394147",
-    "authoring_head": "cb62de4f3978069ba2ced01c9cce74b431e6835c",
+    "observation_id": "amibot_existing_draft_reconciliation_20260921",
+    "observed_at": "2026-09-20T17:20:14.565676+00:00",
+    "base_commit": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
+    "authoring_head": "04ef322f172bed2504583a058ee8210674d98eeb",
     "role": "coordinator",
     "origin": "external_principal",
     "principal_ref": "012",
-    "previous_observation": "cb62de4f3978069ba2ced01c9cce74b431e6835c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "static_qualification_closed_retain_rescan",
-    "selected_task": "OpenClaw-content-bound-cache-qualification",
-    "selected_score": 9,
-    "execution_packet_ref": "cb62de4f3978069ba2ced01c9cce74b431e6835c:docs/roadmaps/rsi_swarm_backlog.json#current_observation.next_packet",
-    "decision": "Retain always-rescan. Existing WRE four-file identity does not prove recursive scanner coverage; no measured caching benefit. No implementation qualified.",
-    "contract": "modules/communication/moltbot_bridge/ROADMAP.md#recursive-wardrobe-cache-qualification--2026-09-21",
+    "previous_observation": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "historical_candidate_reference_base": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "local_differential_validated_remote_pending",
+    "selected_task": "AmIBot-registry-prerequisite",
+    "selected_score": 14,
+    "wsp15": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 3,
+      "total": 14,
+      "priority": "P1"
+    },
+    "execution_packet_ref": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation.next_packet",
+    "changes": [
+      "Integrate current main into existing1751 ancestry; only three root planning conflicts resolved toward current main.",
+      "Existing17registry entries unchanged; exactly one detect_ai declaration, original13planning orders and inactive namespaces preserved.",
+      "Protected source/test/workflow/runtime and public trees exactly match current main; no application implementation or activation."
+    ],
     "retrieval": {
-      "noise": "Large historical docs contain stale snapshots; narrowed to exact current owner ranges.",
-      "ordering": "WSP00 gate, historical shelf, WSP15/97, roadmap/backlog, governed lexical bundle, NAVIGATION, module docs/source/test owners.",
-      "missing": "No detect_ai module on main; package exists only on draft1751. Previously absent optional module artifacts were not created.",
-      "freshness": "Holo ok=true but UNKNOWN/index_gap=true; degraded lexical navigation, exact Git blobs independently bound. No reindex or semantic-current claim.",
-      "duplication": "Reused existing cache, scanner, manifest, intake and43candidate rows; closed diagnostics/recovery not reopened. Qwen/Gemma prototype routing is not qualified for exact cache authority; static coordinator plus independent review used."
+      "noise": "Historical generic domain docs narrowed to actual registry/namespace/README test and existing intake owners.",
+      "ordering": "WSP00/15/97, prior accepted packet, governed lexical bundle, onboarding skill/protocol, exact draft/main docs and local test contracts.",
+      "missing": "No application/tests/runtime implementation in detect_ai by design; no new duplicate module or skill.",
+      "freshness": "Holo ok=true, UNKNOWN/index_gap=true; degraded lexical navigation backed by exact Git bindings, not current semantic authority.",
+      "duplication": "Reuse same draft1751, permanentdetect_ai, original13orders and existing static suites. No prototype skill or model delegation activated."
     },
     "validation": {
-      "independent_verdict": "ACCEPT_STATIC_QUALIFICATION_RETAIN_RESCAN",
-      "tests_executed": 0,
-      "product_runtime_calls": 0,
-      "scope": "Static source/document review; exact source/test bytes unchanged; no runtime or retained-learning proof."
+      "baseline": "105pass/5fail on current-main tree",
+      "candidate": "106pass/same5fail; new detect_ai README case passes",
+      "differential": "Same failure IDs/phases/full messages; zero forbidden attempts, unchanged inputs within each run. Selections overlap; not an all-green domain result.",
+      "harness": "Two precollection guard rejections for local hostname metadata and Windows NUL retained; narrow runner corrections did not change tests or criteria.",
+      "runtime_calls": 0,
+      "remote": "Fresh exact-head checks pending; old Sept15failure neither passes nor fails current integrated candidate."
     },
-    "repository_accounting": {
-      "merged_since_20260909_utc": 136,
-      "closed_without_merge_since_20260909_utc": 21,
-      "open_peer_count": 98,
-      "draft_count": 14,
-      "failing_check_prs": 15,
-      "all_success_prs": 23,
-      "success_neutral_skipped_prs": 59,
-      "no_check_prs": 1,
-      "main_ci": "35521754997 SUCCESS at734d46",
-      "main_codeql": "35521754890 SUCCESS at734d46",
-      "method": "REST3page closed interval corroborated; search omitted14 closed PRs.98peerheads unchanged. Rollups observed sequentially; not merge readiness."
-    },
-    "amibot": "Registry17 entries without detect_ai; existing1751 draft04ef322f has validateFAILURE and CONFLICTING; issue1750open. Onboarding skill is prototype; WSP109 intake does not itself register or dispatch.",
-    "daily_work": "R25 consented exact-summary proposal path remains intended input; external host/consumer not wired. Do not infer transcript capture or feedback approval from routine conversation.",
-    "runtime": "No OpenClaw/Hermes update, version probe or launch. Local PC tools exist; current admitted worker, provider/model, verifier and confinement receipts still required for live build.",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-cache-identity-0142",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-reconcile-0210",
     "evidence_sha256": {
-      "current-accounting.json": "edfc0c9fe537342d9c465f2f5cc5df655233e0473a685e8534616a5142cfd91d",
-      "accounting-rest-reconciliation.json": "796821897a6acda25d891eb0e8651ae9cf070149c6853f4e72ff52857651750c",
-      "contract-map.json": "5a0f38bcff3db0099af60a6a5a048399a6ea4fd9d05ebcdfaae7195b2369d8e7",
-      "independent-cache-review.json": "6b808fd325a319506688acac7483d366b58629d6edebaa33e4a6dc3c8cb33e13",
-      "next-selection.json": "7db3fd98b3ee6ab70b5a65dd12ffbb8a323c6edd591823fdd7fe76de114bd9f8"
+      "preflight.json": "84c4a8b776465a1c67cf924b90dfb261bdad5617737e46dde79043ecff424217",
+      "runner-qualification.json": "e2907bbaaf7b1164ef255533d03840dd8d99cf5a29a584e2d1256562b31757e6",
+      "candidate-comparison.json": "f5daf8cf93ebf44947e20f9f331398751bb248d075be70143f63fdbd76473a20"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2299,15 +2295,15 @@
           },
           "score": 16,
           "priority": "P0",
-          "state": "qualified_current_main_reconciliation_on_existing_draft_lineage",
+          "state": "existing_draft_reconciled_local_differential_validated_remote_pending",
           "evidence": [
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
-          "next_step": "Integrate current main with exact existing PR1751 lineage without rewriting history; resolve only the three root planning conflicts, preserve current protected trees, revalidate the declarative registration and publish only to the existing draft for fresh exact-head CI.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Current-main reconciliation is ordinary executable development at14/P1; the old exact-head CI failure is not a permanent blocker because both implicated protected inputs changed.",
+          "next_step": "Publish the independently reviewed current-main merge to existing draft1751; require fresh exact-head CI before main integration. Local five baseline failures remain documented; no runtime/build authority.",
+          "reconciled_against": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
+          "fresh_disposition": "Current-main integration now locally validated; old hosted failure is historical. No new local failure; registry metadata remains separate from main publication/runtime.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "current_pr_state": "Draft1751 remains04ef322f/conflicting with old validateFAILURE. Fresh integration and checks required; no pass, main registration or runtime activation inferred.",
+          "current_pr_state": "Local two-parent candidate retains1751 lineage; remote still04ef322f until verified push. Fresh hosted checks pending.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
@@ -3203,15 +3199,15 @@
           },
           "score": 11,
           "priority": "P2",
-          "state": "consolidated_in_existing_pr_blocked_ci",
+          "state": "existing_draft_reconciled_local_differential_validated_remote_pending",
           "evidence": [
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
-          "next_step": "Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "next_step": "Publish the independently reviewed current-main merge to existing draft1751; require fresh exact-head CI before main integration. Local five baseline failures remain documented; no runtime/build authority.",
+          "reconciled_against": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
+          "fresh_disposition": "Current-main integration now locally validated; old hosted failure is historical. No new local failure; registry metadata remains separate from main publication/runtime.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
+          "current_pr_state": "Local two-parent candidate retains1751 lineage; remote still04ef322f until verified push. Fresh hosted checks pending.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
@@ -3314,40 +3310,10 @@
         "total": 14,
         "priority": "P1"
       },
-      "selection_rationale": [
-        "Fresh C3: bounded two-parent integration, three planning conflicts, metadata and hosted-validation compatibility. I4: canonical registration is a direct AmIBot prerequisite. D4: the requested experiment cannot advance its main registry prerequisite while this stale draft is left unreconciled. Impact3: removes concrete integration drift but creates no product/runtime implementation. Fresh14/P1 is separate from historical registry16/P0 and package17/P0.",
-        "PR1751 still has exactly25 effective paths against merge-base67db494; only three root planning paths also changed on current main. Its18-entry registry preserves all17 current entities and adds detect_ai. No other peer declares that identity.",
-        "The old failing CampaignTicker and contract-test blobs both changed on current main, within22 changed protected eSingularity files. The Sept15 exact-head failure is historical evidence, not an unconditional current blocker. Fresh CI remains required; no current pass is inferred.",
-        "Security parent17/P0 remains important; its available221-alert/nine-critical summary explicitly proves inventory only. Existing PR1762/1526 own dependency work. A bounded fresh triage is still eligible but no verified package exposure or disjoint exact update is newly qualified here; it does not displace this complete, direct AmIBot reconciliation contract.",
-        "Cache planning closes retain-rescan; recovery/R25/Hermes qualifications stay closed with their exact remaining producer/host dependencies. No ordinary development gate is invented from missing runtime authority."
-      ],
-      "status": "next_bounded_action_requires_fresh_entry",
-      "peer_count": 98
+      "status": "finish_current_publication_before_next_slice",
+      "selection_rationale": "Highest eligible14/P1 action materially advances AmIBot metadata. Source integration is locally reconciled; exact-head hosted validation remains its next action. Do not promote runtime or reopen completed cache work."
     },
-    "next_packet": {
-      "schema": "0102_m2m_v1",
-      "ROLE": "worker",
-      "ORIGIN": "internal_handoff",
-      "PRINCIPAL_REF": "012",
-      "L": "QA",
-      "S": "Existing AmIBot draft PR1751 declarative registry/package integration with current main, in an isolated owned worktree; no product/runtime or protected-owner repair.",
-      "M": "exec",
-      "T": "RSI-AMIBOT-EXISTING-DRAFT-REGISTRY-RECONCILIATION-20260921",
-      "A": "Integrate current main with exact existing PR1751 lineage without rewriting history; resolve only the three root planning conflicts, preserve current protected trees, revalidate the declarative registration and publish only to the existing draft for fresh exact-head CI.",
-      "R": [0,15,97,99,50,84,22,49,104,109],
-      "I": {
-        "allowed_paths": ["ModLog.md","ROADMAP.md","docs/roadmaps/rsi_swarm_backlog.json","modules/foundups/ModLog.md","modules/foundups/ROADMAP.md","modules/foundups/detect_ai/INTERFACE.md","modules/foundups/detect_ai/ModLog.md","modules/foundups/detect_ai/README.md","modules/foundups/detect_ai/ROADMAP.md","modules/foundups/detect_ai/docs/BENCHMARK_CONTRACT.md","modules/foundups/detect_ai/docs/CHAT_PWA_SAFETY_RESEARCH.md","modules/foundups/detect_ai/docs/RESEARCH.md","modules/foundups/detect_ai/docs/VALIDATION.md","modules/foundups/detect_ai/docs/intake/FOUNDUP_MANIFEST_DRAFT.md","modules/foundups/detect_ai/docs/intake/INTAKE_SOURCE.md","modules/foundups/detect_ai/docs/intake/OUTCOME.md","modules/foundups/detect_ai/docs/intake/PAIN.md","modules/foundups/detect_ai/docs/intake/POC_SCOPE.md","modules/foundups/detect_ai/docs/intake/PROTOTYPE_GATE.md","modules/foundups/detect_ai/docs/intake/SKILLS_MAP.md","modules/foundups/detect_ai/docs/intake/SOLUTION.md","modules/foundups/detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.json","modules/foundups/detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.md","modules/foundups/detect_ai/foundup_manifest.json","modules/foundups/foundup_registry.json","docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json"],
-        "dependencies": ["Finish current cache-plan closure; freshly pin main, PR1751 head/ref, peer heads and clean isolated worktree before integration. Requalify any changed scope.","Reuse existing onboarding skill/protocol and exact PR package. This is ordinary authorized Git/document/registry work; runtime admission is not a prerequisite.","Reuse current main plus existing draft as merge parents; normal fast-forward update to its existing remote branch only after independent review. No new PR, force push or history replacement."],
-        "invariants": ["Only ModLog.md, ROADMAP.md and docs/roadmaps/rsi_swarm_backlog.json presently overlap. Resolve those toward current main truth while preserving old AmIBot evidence and all 43 histories/26 original packets; existing archive may hold exact historical observation.","All 17 current registry entries remain unchanged; add exactly one detect_ai/AmIBot entry. Preserve hidden/SPECIFIED/NO_RUNTIME, inactive /f/detect_ai and idb_detect_ai, 13 planning orders and dispatchable=false. /f/amibot remains an unresolved public-owner alias.","All protected eSingularity/YUMORI/AutoPost/RedDog/public/workflow/source/test/manifest-pin bytes must equal freshly pinned main, except the explicitly allowed declarative registry and AmIBot package paths. Do not import unmerged peer entries or fix protected assertions.","Do not execute or promote the prototype onboarding skill. No provider/model/service/worker/DB activation, public catalog/route/domain/deployment changes or signed runtime claim.","Capture current-main baselines before isolated existing registry/schema/namespace/README tests; preserve failures and compare exact identities. Verify metadata, paths, links, 13 orders, prior entries and untouched-tree hashes independently. No product tests executed in this selection review.","Use existing fake/local harness with qualified Python -B, bytecode off, UTF8, importlib/plugin isolation and external scratch. Do not run protected applications locally; the existing required hosted workflow supplies fresh exact-head results.","If integration conflicts extend beyond the three pinned planning paths or scope/protected-byte checks fail, stop and requalify. Abort only the newly begun owned merge if restoration is needed; preserve shared checkout, peer branches and original PR history.","Keep PR draft until required exact-head CI and independent scope review pass. Old Sept15 failures and current-main CI success are neither proof of failure nor proof of success for the new candidate. Never bypass a gate; no automatic merge on failure."],
-        "budget": {"imported_existing_pr_paths":25,"additional_existing_archive_paths":1,"new_product_source_or_test_files":0,"protected_source_test_workflow_edits":0,"history_rows_preserved":43,"original_packets_preserved":26},
-        "wsp15": {"complexity":3,"importance":4,"deferability":4,"impact":3,"total":14,"priority":"P1"},
-        "runtime_dispatchable": false
-      },
-      "O": ["Current-main integrated candidate on the existing AmIBot lineage, exact scope/protected-byte evidence and preserved declarative package/registry identity.","Current isolated validation plus independent review, then fresh exact-head hosted checks on the existing draft; unchanged owner failures remain explicit dependencies rather than silently repaired.","Precise main-registration versus draft/runtime truth in existing planning records; no automatic runtime progression or new candidate-history row."],
-      "F": ["Unexpected ownership/head/scope drift or conflicts outside the pinned planning paths.","Changed existing registry entities, duplicate detect_ai, modified planning-order meaning or public/runtime activation.","Protected/shared/peer bytes overwritten, history rewritten, tests/workflows weakened or any missing exact-head validation."]
-    },
-    "next_step": "Integrate current main with exact existing PR1751 lineage without rewriting history; resolve only the three root planning conflicts, preserve current protected trees, revalidate the declarative registration and publish only to the existing draft for fresh exact-head CI.",
-    "requires_fresh_reobservation_after_closure": true,
-    "historical_candidate_reference_base": "cb62de4f3978069ba2ced01c9cce74b431e6835c:docs/roadmaps/rsi_swarm_backlog.json#current_observation"
+    "next_step": "Independent exact candidate review, then normal fast-forward publication to existing draft1751 and fresh hosted checks. Preserve failures; no protected fixes or runtime launch.",
+    "requires_fresh_reobservation_after_closure": true
   }
 }

@@ -1,3 +1,8 @@
+## 2026-09-21: Reconcile existing AmIBot registration draft
+
+- WSP00/15/22/50/97/99/104/109;14/P1 current-main integration of existing PR1751. Resolve only three root planning conflicts; preserve original draft history, all43candidate histories/26packets and protected current-main trees.
+- Exactly one hidden detect_ai declaration preserves17prior registry entries and13unchanged nondispatchable orders. Current-main105pass/5fail becomes106pass/the identical5fail; no protected test/source fixes or runtime calls. Exact differential and pending hosted validation are in the RSI backlog and AmIBot VALIDATION.md.
+
 ## 2026-09-21: Refresh accounting and close optional cache plan
 
 - WSP00/15/22/97: REST corroborates136merged/21closed-without-merge since September9;98open/14draft/15failing-check PRs. Search omitted14closed records; both1830main workflows now pass. No peer work changed.
