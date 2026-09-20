@@ -1,3 +1,9 @@
+## 2026-09-20: Close diagnostic contract; select bounded repair
+
+- PR1829 merged as 3d84117ce101ac2b6887084fbf3a58ef127d6c32; ten exact-head checks passed and six reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed43 histories and next-source/package bindings; 10/P2 call-local diagnostic repair selected over optional cache planning9/P3. Exact peer effective-diff and test-harness entry checks remain; no source/test/runtime execution.
+- Accounting135 merged/21 closed-unmerged since September9UTC/98peers. Shared checkout and external owners preserved. WSP15/22/97.
+
 ## 2026-09-20: Qualify call-local OpenClaw safety explanations
 
 - Completed the 10/P2 static contract in six existing documents. Existing Boolean verdict is call-local; four route projections still read latest shared text. Chose literal details=True local pair on the existing method, retaining default Boolean/force semantics.
