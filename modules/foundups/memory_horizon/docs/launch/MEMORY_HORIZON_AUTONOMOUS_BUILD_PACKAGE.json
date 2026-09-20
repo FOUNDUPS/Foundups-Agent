@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "MEMORY_HORIZON_AUTONOMOUS_BUILD_POC_V1",
+  "foundup_id": "memory_horizon",
+  "display_name": "Memory Horizon",
+  "status": "PLANNING_NOT_DISPATCHED",
+  "dispatchable": false,
+  "principal_interface": "RedDog",
+  "principal_role": {
+    "id": "012",
+    "allowed": [
+      "state intent",
+      "correct direction",
+      "set boundaries",
+      "observe outcomes",
+      "accept or reject product direction"
+    ],
+    "not_required": [
+      "decompose work",
+      "write M2M packets",
+      "choose worker models",
+      "manage worktrees",
+      "coordinate tickets",
+      "review routine implementation details"
+    ]
+  },
+  "machine_role": {
+    "id": "0102",
+    "owns": [
+      "WSP retrieval",
+      "repository research",
+      "WSP 15 scoring",
+      "WSP 97 reconciliation",
+      "ticket generation",
+      "dependency graph",
+      "dispatch preparation",
+      "verification synthesis",
+      "integration",
+      "public-surface contract",
+      "RSI outcome capture"
+    ]
+  },
+  "execution_model": {
+    "orchestrator": "WRE_AgentDB",
+    "supervisor": "OpenClaw",
+    "leaf_worker": "Hermes_or_admitted_equivalent",
+    "model_router": "AI_Gateway",
+    "provider_rule": "OpenRouter only with current admitted runtime binding; no ticket grants provider authority",
+    "verifier": "independent_verifier",
+    "rsi_loop": "Observe -> Score -> Reconcile -> Select -> Execute -> Validate -> Document -> Re-observe"
+  },
+  "source_authority": {
+    "module": "modules/foundups/memory_horizon",
+    "design": "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md",
+    "data_contract": "modules/foundups/memory_horizon/docs/DATA_AND_SCORING_CONTRACT.md",
+    "research": "modules/foundups/memory_horizon/docs/RESEARCH.md",
+    "roadmap": "modules/foundups/memory_horizon/ROADMAP.md",
+    "interface": "modules/foundups/memory_horizon/INTERFACE.md",
+    "package": "modules/foundups/memory_horizon/docs/launch/MEMORY_HORIZON_AUTONOMOUS_BUILD_PACKAGE.json",
+    "registry": "modules/foundups/foundup_registry.json",
+    "manifest": "modules/foundups/memory_horizon/foundup_manifest.json"
+  },
+  "public_surface": {
+    "canonical_landing": "/f/memory_horizon",
+    "canonical_app": "/f/memory_horizon/app",
+    "data_namespace": "idb_memory_horizon",
+    "owner": "0102_public_surface",
+    "status": "PROPOSED_NOT_DEPLOYED",
+    "note": "WSP 102/104 shell/tenant contract controls. No bespoke root route."
+  },
+  "orders": [
+    "MH-RSI-01",
+    "MH-RSI-02",
+    "MH-RSI-03",
+    "MH-RSI-04",
+    "MH-RSI-05",
+    "MH-RSI-06",
+    "MH-RSI-07",
+    "MH-RSI-08",
+    "MH-RSI-09",
+    "MH-RSI-10"
+  ],
+  "parallel_plan": {
+    "G0": [
+      "MH-RSI-01"
+    ],
+    "G1": [
+      "MH-RSI-02",
+      "MH-RSI-03",
+      "MH-RSI-04",
+      "MH-RSI-05"
+    ],
+    "G2": [
+      "MH-RSI-06"
+    ],
+    "G3": [
+      "MH-RSI-07"
+    ],
+    "G4": [
+      "MH-RSI-08"
+    ],
+    "G5": [
+      "MH-RSI-09",
+      "MH-RSI-10"
+    ]
+  },
+  "first_admission_gate": "MH-RSI-01 accepted against current main and current runtime authority",
+  "issue": 1825
+}
