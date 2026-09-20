@@ -1,5 +1,16 @@
 # Member Area Module Change Log
 
+## 2026-09-21: Reconcile public-route validation with existing access boundary
+
+The existing route suite expected public tenant iframe launch after the public
+surface had moved to scope-free discovery and a membership handoff. Test-only
+repair changes 34 pass / 11 fail to 48 pass and removes comment/CSS false positives.
+Hosted CodeQL caught the initial regex parser gap; stdlib HTMLParser plus three
+case/attribute tests resolves it without changing production HTML.
+No route, catalog, admission, RedDog or frontend behavior changed. Existing
+WSP 104 identity-versus-authorization boundary is preserved; no AmIBot alias
+or public activation follows. Validation detail: `tests/TestModLog.md`. WSP 15/22/97.
+
 ## [2026-08-26] REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1
 
 - Aligned the member Red Dog contract with RedDog as the continuous

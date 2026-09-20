@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
-    "selected_action": "AmIBot-registry-prerequisite",
-    "status": "amibot_existing_draft_candidate_remote_pending",
+    "base_commit": "f7307291fac709bd1bcfe240cc0e2c125ae821d1",
+    "selected_action": "AmIBot-public-route-contract-drift",
+    "status": "independently_validated_exact_head_ci_pending",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1862,64 +1862,171 @@
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 14,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     }
   },
   "current_observation": {
-    "observation_id": "amibot_existing_draft_reconciliation_20260921",
-    "observed_at": "2026-09-20T17:20:14.565676+00:00",
-    "base_commit": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
-    "authoring_head": "04ef322f172bed2504583a058ee8210674d98eeb",
+    "observation_id": "public_route_contract_reconciliation_20260921",
+    "observed_at": "2026-09-20T18:13:08.956760+00:00",
+    "base_commit": "f7307291fac709bd1bcfe240cc0e2c125ae821d1",
     "role": "coordinator",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "previous_observation": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "historical_candidate_reference_base": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "local_differential_validated_remote_pending",
-    "selected_task": "AmIBot-registry-prerequisite",
-    "selected_score": 14,
+    "previous_observation": "f7307291fac709bd1bcfe240cc0e2c125ae821d1:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "historical_candidate_reference_base": "f7307291fac709bd1bcfe240cc0e2c125ae821d1:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "independently_validated_exact_head_ci_pending",
+    "selected_task": "AmIBot-public-route-contract-drift",
+    "selected_score": 15,
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 14,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
-    "execution_packet_ref": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c:docs/roadmaps/rsi_swarm_backlog.json#current_observation.next_packet",
-    "changes": [
-      "Integrate current main into existing1751 ancestry; only three root planning conflicts resolved toward current main.",
-      "Existing17registry entries unchanged; exactly one detect_ai declaration, original13planning orders and inactive namespaces preserved.",
-      "Protected source/test/workflow/runtime and public trees exactly match current main; no application implementation or activation."
-    ],
+    "execution_packet": {
+      "schema": "0102_m2m_v1",
+      "ROLE": "worker",
+      "ORIGIN": "internal_handoff",
+      "PRINCIPAL_REF": "012",
+      "L": "QA",
+      "S": "Existing public route test owner and canonical closure documents only",
+      "M": "exec",
+      "T": "RSI-PUBLIC-ROUTE-CONTRACT-RECONCILIATION-20260921",
+      "A": "Correct obsolete public iframe/member-catalog test expectations to current scope-free public discovery and membership handoff, preserving production behavior.",
+      "R": [
+        0,
+        15,
+        22,
+        50,
+        84,
+        97,
+        99,
+        104
+      ],
+      "I": {
+        "allowed_paths": [
+          "public/member/tests/test_route_contract_bridge.py",
+          "public/member/tests/TestModLog.md",
+          "public/member/ModLog.md",
+          "ModLog.md",
+          "ROADMAP.md",
+          "docs/roadmaps/rsi_swarm_backlog.json",
+          "docs/operations/RSI_SWARM_DISPATCH.md",
+          "WSP_knowledge/WSP_Test_Registry.json"
+        ],
+        "denied_paths": [
+          "public/f/**",
+          "public/member/js/**",
+          "public/member/*.html",
+          "public/member/*catalog*.json",
+          "modules/foundups/esingularity/**",
+          "modules/communication/**",
+          "WSP_framework/**",
+          ".github/**"
+        ],
+        "dependencies": [
+          "exact source/peer ownership preflight",
+          "independent verification and fresh exact-head CI before merge"
+        ],
+        "invariants": [
+          "No public iframe or member-catalog regression",
+          "No catalog/router/auth/source/runtime mutation",
+          "No test skip, weakening admission, new module or skill",
+          "Preserve member tenant checks and13 AmIBot planning orders"
+        ],
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 15,
+          "priority": "P1"
+        }
+      },
+      "O": [
+        "existing route test repair",
+        "baseline/candidate receipts",
+        "independent negative controls",
+        "required logs and WSP15/97 re-observation"
+      ],
+      "F": [
+        "scope violation",
+        "test failure",
+        "missing evidence",
+        "owner change",
+        "authority violation"
+      ]
+    },
     "retrieval": {
-      "noise": "Historical generic domain docs narrowed to actual registry/namespace/README test and existing intake owners.",
-      "ordering": "WSP00/15/97, prior accepted packet, governed lexical bundle, onboarding skill/protocol, exact draft/main docs and local test contracts.",
-      "missing": "No application/tests/runtime implementation in detect_ai by design; no new duplicate module or skill.",
-      "freshness": "Holo ok=true, UNKNOWN/index_gap=true; degraded lexical navigation backed by exact Git bindings, not current semantic authority.",
-      "duplication": "Reuse same draft1751, permanentdetect_ai, original13orders and existing static suites. No prototype skill or model delegation activated."
+      "initial_error": "request_field_invalid (unsupported lexical_only key); no owner attempt/reindex. Corrected to actual retrieval_mode contract.",
+      "freshness": "UNKNOWN/index_gap=true lexical bundle; not current semantic evidence",
+      "noise": "Broad member RedDog docs reduced to route source, existing projector contract, exact tests.",
+      "missing": "Member tests README absent; projector ROADMAP/test README absent. Existing owner docs/test log retained.",
+      "ordering": "WSP00/15/97 and owner scope before exact route/test contract",
+      "duplication": "Existing route test and projector owner; no new router/module/skill."
     },
+    "closure_reconciliation": {
+      "pr1751": {
+        "merge": "f7307291fac709bd1bcfe240cc0e2c125ae821d1",
+        "registry_entries": 18,
+        "planning_orders": 13,
+        "all_main_workflows": "success",
+        "runtime": "not admitted"
+      },
+      "open_peer_heads": 97,
+      "accounting": "138 merged /21 closed without merge since September9UTC,97open after previous verified closures; unchanged current97heads, not a new all-history search",
+      "prior_histories": "43 prior candidates retained by exact Git reference and compact reconciliation; original26 packets unchanged"
+    },
+    "effort": "One existing test owner, its generated registry description and six existing closure/navigation documents; no production behavior changes.",
+    "cost": "No product model/provider/service calls; coordinator/reviewer tokens not metered here.",
+    "verification_burden": "Frozen-source 45-case suite, independent replay and targeted in-memory negative controls; exact-head hosted checks separate from browser/device proof.",
     "validation": {
-      "baseline": "105pass/5fail on current-main tree",
-      "candidate": "106pass/same5fail; new detect_ai README case passes",
-      "differential": "Same failure IDs/phases/full messages; zero forbidden attempts, unchanged inputs within each run. Selections overlap; not an all-green domain result.",
-      "harness": "Two precollection guard rejections for local hostname metadata and Windows NUL retained; narrow runner corrections did not change tests or criteria.",
-      "runtime_calls": 0,
-      "remote": "Fresh exact-head checks pending; old Sept15failure neither passes nor fails current integrated candidate."
+      "baseline": {
+        "passed": 34,
+        "failed": 11
+      },
+      "candidate": {
+        "passed": 48
+      },
+      "effects": "Both guarded runs have zero forbidden attempts and no input changes within each run",
+      "independent": "ACCEPT revised HTMLParser candidate:48-case replay and11/11 positive/negative mutation pairs. Prior mocked VM6/4 remains bound to unchanged public inline source.",
+      "remote": "Initial head4721613ba rejected by CodeQL: HTML regex missed uppercase SCRIPT tags. All other initial checks passed. Revised standard-parser head requires fresh hosted CI; no waiver or weakened check.",
+      "limits": "Static route contract validation, not browser/device acceptance, public route activation, authenticated runtime or RSI retained-learning proof. Prior five broader FoundUp static failures remain outside scope. Mocked VM does not run public fetch callbacks or external scripts, authenticate a person or execute a tenant.",
+      "registry": "Initial description-only generation remains current1651/269 after parser correction; classifications/shards unchanged.",
+      "initial_candidate": {
+        "passed": 45
+      },
+      "initial_independent": "ACCEPT:45-case replay,11 positive/negative mutation pairs; mocked Node6route controls/4mutations. Counts overlap, not distinct product tests."
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-reconcile-0210",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-route-contract-0304",
     "evidence_sha256": {
-      "preflight.json": "84c4a8b776465a1c67cf924b90dfb261bdad5617737e46dde79043ecff424217",
-      "runner-qualification.json": "e2907bbaaf7b1164ef255533d03840dd8d99cf5a29a584e2d1256562b31757e6",
-      "candidate-comparison.json": "f5daf8cf93ebf44947e20f9f331398751bb248d075be70143f63fdbd76473a20"
+      "preflight.json": "48c8f504ed633746e8b91502762b421c4db1e378e0dcc363f99db7971b942729",
+      "holo-query.json": "48f84c5734c2eb6c4970eb75238221133de0ffd8496b0781150cf7c33a2dcf12",
+      "runner-qualification.json": "aaef5cc84cc3b79d461d4c3128866854ba60f2503c6d783ca89ee78c69a08d76",
+      "baseline/receipt.json": "71256f53d25bc9c55d9429ebedb5559449f9477c32240266404018132ac1cad2",
+      "candidate/receipt.json": "f91e2d48528fc129c9d9c02ca2c517f02dfeb0e5b696f09d04953bab7df85d67",
+      "independent-review.json": "4e65dbdd1010000928e2db5ed232a2c88ecf4837eed609195f6606a85c4b555f",
+      "independent-test-diff-review.json": "6479a2a0cb4d8dc1610a3f984d82225cbb31f4d88bff2b2a7883aa6398ff6452",
+      "independent/receipt.json": "64ac34e0e3966bb84c8b158cdf3f14d62280a3737507aafd1b723bde527bac77",
+      "independent-controls/receipt.json": "50c275d55764d4f08023e4032eeae5c8e0ab16293c9c17cbac242110188e3570",
+      "independent-vm-receipt.json": "184b242f80d12e6e221841f87fa3b6e50a066489206a6a2f54b53f297c944ec8",
+      "registry-reconciliation.json": "e8da7871ea0bde89f65f7d241f5e9194271b63100bf6c81abe1ab5be90c68877",
+      "initial-codeql-annotations.json": "3c31ba4e8fdacc99848a3415ad57d153ca7af0b517e5965249c6cd49e56c9dc6",
+      "initial-hosted-checks.json": "5ec022c303092c2059677ca8a2838f7514130d1405b2420a4e4ea8266517881d",
+      "candidate-htmlparser/receipt.json": "fa92ffee72abe53e4dcc13079200d0637c082b2cc0c3e92c8e41d2b19937ec88",
+      "independent-review-v2.json": "057d9227dfc7c6893c059194462d09a6f5997cef56c1f04e6e24644160499f0c",
+      "independent-htmlparser/receipt.json": "55e4677dd55c176f6b1a6f091030827f539bbde061dab9c69927d4e48641de82",
+      "independent-controls-htmlparser/receipt.json": "5ceaea7d533d85e25084f9b7e5315084ee713dd2a4a524a1a13fd0493e0b2ccd"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
-          "dimensions": {
+          "wsp15": {
             "complexity": 5,
             "importance": 5,
             "deferability": 5,
@@ -1928,27 +2035,11 @@
           "score": 20,
           "priority": "P0",
           "state": "external_owner",
-          "evidence": [
-            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
-          ],
-          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
         },
         {
           "task": "independent-execution-verification-promotion",
-          "dimensions": {
+          "wsp15": {
             "complexity": 5,
             "importance": 5,
             "deferability": 4,
@@ -1957,24 +2048,11 @@
           "score": 19,
           "priority": "P0",
           "state": "blocked",
-          "next_step": "Independent runtime admission absent",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Independent runtime admission absent"
         },
         {
           "task": "current-semantic-retrieval",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 5,
@@ -1983,27 +2061,11 @@
           "score": 19,
           "priority": "P0",
           "state": "blocked",
-          "next_step": "Prior authority-root/head mismatch remains unresolved. This sprint requested a lexical owner bundle only: UNKNOWN freshness/index gap, not a newly repeated semantic failure. Preserve the existing maintenance owner; no reindex.",
-          "evidence": [
-            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
-          ],
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Prior authority-root/head mismatch remains unresolved. This sprint requested a lexical owner bundle only: UNKNOWN freshness/index gap, not a newly repeated semantic failure. Preserve the existing maintenance owner; no reindex."
         },
         {
           "task": "RedDog-backend-closure-consolidation",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 5,
@@ -2012,27 +2074,11 @@
           "score": 19,
           "priority": "P0",
           "state": "external_owner",
-          "evidence": [
-            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
-          ],
-          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
         },
         {
           "task": "RedDog-conversation-durable-adapters",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 5,
@@ -2041,27 +2087,11 @@
           "score": 19,
           "priority": "P0",
           "state": "external_owner",
-          "evidence": [
-            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
-          ],
-          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Still externally owned19/P0. Current three resident admission aggregates are explicitly host-unwired; R25 records the dependency without absorbing host/product work.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
         },
         {
           "task": "integrated-mcp-qualification",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 4,
@@ -2070,24 +2100,11 @@
           "score": 18,
           "priority": "P0",
           "state": "blocked",
-          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
         },
         {
           "task": "wre-openclaw-hermes-worker",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 4,
@@ -2096,24 +2113,11 @@
           "score": 18,
           "priority": "P0",
           "state": "blocked",
-          "next_step": "Current signed job/model/runtime admission absent",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Current signed job/model/runtime admission absent"
         },
         {
           "task": "chroma-deployment",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 5,
             "deferability": 4,
@@ -2122,25 +2126,11 @@
           "score": 17,
           "priority": "P0",
           "state": "blocked",
-          "next_step": "Current deployment owner and runtime qualification",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "security_dependency": "Current Dependabot alerts322/286 for direct chromadb in holo_index/requirements.txt; first_patched_version is null. Exposure/mitigation needs existing owner evidence; no blind runtime change.",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Current deployment owner and runtime qualification"
         },
         {
           "task": "AmIBot-package-admission",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 5,
             "deferability": 5,
@@ -2149,27 +2139,11 @@
           "score": 17,
           "priority": "P0",
           "state": "blocked",
-          "evidence": [
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
-          ],
-          "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1."
         },
         {
           "task": "FoundUp-genesis-conversation-lineage",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 4,
@@ -2178,32 +2152,11 @@
           "score": 17,
           "priority": "P0",
           "state": "commander_data_handoff_closed_remaining_public_entitlement_unqualified",
-          "evidence": [
-            "modules/communication/moltbot_bridge/src/openclaw_dae.py:195",
-            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:962",
-            "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py:155",
-            "next-contract-independent-review.json",
-            "genesis-next-source-overlap.json"
-          ],
-          "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill.",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct."
         },
         {
           "task": "Dependency-security-reconciliation",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 5,
             "deferability": 4,
@@ -2212,30 +2165,11 @@
           "score": 17,
           "priority": "P0",
           "state": "partially_triaged_existing_owner_dependencies",
-          "evidence": [
-            "dependabot-open-pages.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1762",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1526"
-          ],
-          "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding.",
-          "why_score": "Existing security/dependency owners remain; no new exposure proof changes scope. The equally17/P0 typed genesis gap has a concrete local static witness and existing fixtures; continue security owner triage separately.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 5,
             "deferability": 3,
@@ -2244,24 +2178,11 @@
           "score": 16,
           "priority": "P0",
           "state": "partial_transaction_dependency",
-          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
         },
         {
           "task": "authenticated-response-read",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 4,
             "deferability": 4,
@@ -2270,24 +2191,11 @@
           "score": 16,
           "priority": "P0",
           "state": "blocked",
-          "next_step": "012 reader-policy question remains unanswered",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "012 reader-policy question remains unanswered"
         },
         {
           "task": "AmIBot-registry-prerequisite",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 5,
@@ -2295,37 +2203,12 @@
           },
           "score": 16,
           "priority": "P0",
-          "state": "existing_draft_reconciled_local_differential_validated_remote_pending",
-          "evidence": [
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
-          ],
-          "next_step": "Publish the independently reviewed current-main merge to existing draft1751; require fresh exact-head CI before main integration. Local five baseline failures remain documented; no runtime/build authority.",
-          "reconciled_against": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
-          "fresh_disposition": "Current-main integration now locally validated; old hosted failure is historical. No new local failure; registry metadata remains separate from main publication/runtime.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "current_pr_state": "Local two-parent candidate retains1751 lineage; remote still04ef322f until verified push. Fresh hosted checks pending.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound.",
-          "bounded_action_score": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3,
-            "total": 14,
-            "priority": "P1"
-          }
+          "state": "closed_pr1751_metadata_only",
+          "next_step": "Metadata scope merged1751 with all main workflows successful; runtime/build/route alias remain separate."
         },
         {
           "task": "M2M-canonical-envelope-qualification",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 4,
             "deferability": 3,
@@ -2334,48 +2217,11 @@
           "score": 15,
           "priority": "P1",
           "state": "parent_partial_context_closed_child_input_and_lifecycle_gaps",
-          "evidence": [
-            "modules/communication/moltbot_bridge/src/reddog_architect_fix_promotion_profile.py:42",
-            "modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py:655",
-            "next-profile-boundary-probes.json",
-            "modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py:389",
-            "modules/communication/moltbot_bridge/src/reddog_backend_architect_queue_candidate.py:94"
-          ],
-          "next_step": "Raw prepared-context repair is closed. Preserve full child-input and detached-delivery gaps; separately qualified stop-receipt correction does not close them.",
-          "closed_scope": [
-            "Canonical packet/profile/signing/provider fixture handoff merged through PR1761; explicit seed API in1763.",
-            "Explicit proposal plan, seed lineage and direct promotion consistency merged in1794/1795/1796.",
-            "Actual producer/result/persistence canonical child composition:617connected tests,86overlapping independent tests+72boundary assertions.",
-            "PR1797 merged as6556a0d14 after10passing exact-head checks; reviewed tree identical.",
-            "PR1798 omitted-plan bootstrap selection merged;638connected,43overlapping independent tests and69boundary cases/191assertions; exact reviewed tree."
-          ],
-          "remaining_scope": [
-            "Define and independently qualify expected context/child-input fidelity where current provider contract is deliberately prompt-only.",
-            "Live job/model/runtime admission and independent retained benefit remain separately blocked."
-          ],
-          "effort": "One existing producer/consumer seam after contract retrieval.",
-          "cost": "Deterministic fixtures first; provider cost remains unmeasured.",
-          "verification_burden": "Independent exact-field/semantic preservation and scope failures before admission.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "score_reconciliation": "Historical18/P0 covered now-closed concrete serialization/seed handoff prerequisites. Residual local contract is15/P1; do not inherit18 automatically.",
-          "fresh_disposition": "Remaining15/P1 is a broader provider/full-context fidelity contract, with no new demonstrated incompatibility or qualified source patch.",
-          "retain_score": 15,
-          "retain_history": true,
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Raw prepared-context repair is closed. Preserve full child-input and detached-delivery gaps; separately qualified stop-receipt correction does not close them."
         },
         {
           "task": "OpenClaw-content-bound-cache-qualification",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 4,
             "deferability": 3,
@@ -2384,49 +2230,11 @@
           "score": 15,
           "priority": "P1",
           "state": "qualification_closed_retain_rescan_implementation_deferred",
-          "next_step": "Keep current rescanning. Reopen optional cache only with measured workload benefit and complete scanner/wardrobe/policy/use-time identity; no source slice qualified.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "C3/I2/D2/Impact2=9/P3 static qualification closed; historical15/P1 parent preserved. No cache implementation or live runtime evidence.",
-          "retain_score": 15,
-          "retain_history": true,
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "bounded_action_score": {
-            "complexity": 3,
-            "importance": 2,
-            "deferability": 2,
-            "impact": 2,
-            "total": 9,
-            "priority": "P3",
-            "scope": "Bounded optional cache identity/invalidation PLAN only; parent15/P1 and prior bounded12/P2 preserved in archived observations.",
-            "disposition": "Fresh source/test review confirms deliberate safe rescanning and no measured latency/capacity harm. Cache planning is helpful, deferrable, and minor direct benefit; no longer scored as urgent diagnostic work."
-          },
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound.",
-          "bounded_dimensions": {
-            "complexity": 3,
-            "importance": 2,
-            "deferability": 2,
-            "impact": 2
-          },
-          "bounded_score": 9,
-          "bounded_priority": "P3",
-          "evidence": [
-            "current_observation.contract",
-            "current_observation.evidence_sha256.independent-cache-review.json"
-          ],
-          "blocker": "Optional implementation lacks measured benefit and complete scanner input identity; not an AmIBot prerequisite."
+          "next_step": "Keep current rescanning. Reopen optional cache only with measured workload benefit and complete scanner/wardrobe/policy/use-time identity; no source slice qualified."
         },
         {
           "task": "AmIBot-public-route-contract-drift",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
@@ -2434,28 +2242,12 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "outstanding_route_owner_reconciliation_required",
-          "evidence": [
-            "public/member/tests/test_route_contract_bridge.py"
-          ],
-          "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "state": "test_repair_independently_validated_remote_pending",
+          "next_step": "Final exact-tree scope review and hosted CI before merge; no public source changes."
         },
         {
           "task": "FoundUp-genesis-wardrobe-admission",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
@@ -2464,28 +2256,11 @@
           "score": 15,
           "priority": "P1",
           "state": "partial_dependency",
-          "evidence": [
-            "modules/ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md",
-            "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
-          ],
-          "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill."
         },
         {
           "task": "protected-foundup-work",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
@@ -2494,24 +2269,11 @@
           "score": 14,
           "priority": "P1",
           "state": "external",
-          "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. Registry PR1751 triggers existing eSingularity assertions; treat this as an external owner dependency.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. PR1751 and its three main workflows passed; its former eSingularity CI failure is closed and no longer a blocker."
         },
         {
           "task": "PatternMemory-worker-lifecycle-integration",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2520,28 +2282,11 @@
           "score": 14,
           "priority": "P1",
           "state": "partial_daemon_counter_lifetime_closed_pr1810",
-          "evidence": [
-            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
-            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
-          ],
-          "next_step": "Daemon per-counter lifetime closed; other consumers, actual shutdown/restart, transaction acceptance and retained benefit remain separately unqualified.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Parent partially advanced by daemon slice. Master SQLite memory is also shared with SkillSelector and handles outcomes/A-B records; remaining contract cannot simply reuse daemon counter repair. No new source-qualified handoff witness in this selection.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Daemon per-counter lifetime closed; other consumers, actual shutdown/restart, transaction acceptance and retained benefit remain separately unqualified."
         },
         {
           "task": "AmIBot-public-route-identity",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
@@ -2550,28 +2295,11 @@
           "score": 14,
           "priority": "P1",
           "state": "blocked_route_owner",
-          "evidence": [
-            "public/f/index.html:980",
-            "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
-          ],
-          "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task."
         },
         {
           "task": "FoundUp-validation-fixture-reconciliation",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
@@ -2580,35 +2308,11 @@
           "score": 14,
           "priority": "P1",
           "state": "closed_pr1801",
-          "evidence": [
-            "baseline-debt.xml",
-            "connected-v2.xml"
-          ],
-          "paths": [
-            "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
-            "modules/communication/moltbot_bridge/tests/test_e2e_foundup_job_seam.py"
-          ],
-          "rationale": "Fresh4fail/197pass reproduction and prior independent14/P1 scope; same current FoundUp validation matrix, two explicit acceptance sets. Higher aggregate contract estimates have no qualified concrete source repair; parent estimate is not executable priority.",
-          "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source.",
-          "review": "next-fixture-contract-review.json",
-          "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source."
         },
         {
           "task": "Hermes-runs-delegation-lifecycle-compatibility",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
@@ -2617,31 +2321,11 @@
           "score": 14,
           "priority": "P1",
           "state": "lifecycle_qualification_closed_pr1818_delivery_gap_remains",
-          "evidence": [
-            "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
-            "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
-            "current_observation.validation.upstream",
-            "current_observation.validation.next_selection"
-          ],
-          "next_step": "Preserve input/result/cancellation gaps and existing event gates. Qualify explicit same-run synchronous/cancel/result producer support before changing transport or successful-result acceptance.",
-          "blocker": "Pinned background completion is persisted and published to a separate process completion queue. Consumer/wake delivery into a new turn or the original run, and child-quiescence guarantees, remain unqualified. Parent instructions do not force synchronous execution.",
-          "wsp97_action": "Reuse current provider lifecycle/event/transport owners and pinned sources. Do not force prose into runtime policy or weaken event confinement.",
-          "effort": "Bounded source/data-flow compatibility review; no install, runtime or source mutation.",
-          "cost": "Reuse pinned evidence; bounded missing-source retrieval only as next packet permits.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Qualification and distinct parent-only rejection correction are closed. Full child input, detached delivery and cancellation gaps remain; R25 approval-owner planning is selected after fresh reconciliation.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve input/result/cancellation gaps and existing event gates. Qualify explicit same-run synchronous/cancel/result producer support before changing transport or successful-result acceptance."
         },
         {
           "task": "R25-A consented local daily-work proposal",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2650,32 +2334,11 @@
           "score": 13,
           "priority": "P1",
           "state": "parent_partial_approval_design_qualified_host_consumer_unimplemented",
-          "next_step": "Preserve compatibility and approval-owner findings; wait for exact externally owned host and matching consumer contract before a source slice.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "evidence": [
-            "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20",
-            "r25-disclosure-contract-review.json",
-            "r25-contract-replay.json"
-          ],
-          "wsp97_action": "Close this13/P1 planning action. Preserve v1 IDs/bytes and architect-only disclosure; no new schema/source/consent engine. Keep the permission assertion/issuance/consumption gap explicit.",
-          "score_reconciliation": "Independent follow-on assessment: moderate contract mapping3, critical consent separation4, moderate urgency3, significant internal benefit3. Historical parent15/P1 is not inherited.",
-          "score_scope": "Completed compatibility qualification only;13 is not the score of the unqualified source remainder.",
-          "fresh_disposition": "Representation and conditional record design are specified; full consented feedback remains unimplemented. No work, learning, reward or outreach authority inferred.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve compatibility and approval-owner findings; wait for exact externally owned host and matching consumer contract before a source slice."
         },
         {
           "task": "auto-researcher-process-durability",
-          "dimensions": {
+          "wsp15": {
             "complexity": 4,
             "importance": 3,
             "deferability": 3,
@@ -2684,26 +2347,11 @@
           "score": 13,
           "priority": "P1",
           "state": "parent_partial_prior_qualification_and_witness_closed_recovery_contract_still_unqualified",
-          "next_step": "Do not repeat PR1827/1828. Resume a distinct recovery-policy qualification when an explicit existing caller/owned recovery use case is identified; bind durable baseline, current ownership/quiescence and idempotent target effects together. No automatic restore/resume/delete is presently authorized.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "13/P1 parent retained. Deterministic process exits now demonstrate missing/temporary report limits. Durable pre-mutation baseline, quiescence/current ownership and recovery caller remain absent; no power durability or automatic recovery claim.",
-          "retain_score": 13,
-          "retain_history": true,
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Do not repeat PR1827/1828. Resume a distinct recovery-policy qualification when an explicit existing caller/owned recovery use case is identified; bind durable baseline, current ownership/quiescence and idempotent target effects together. No automatic restore/resume/delete is presently authorized."
         },
         {
           "task": "R19-redteam-artifact-delivery",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2712,31 +2360,11 @@
           "score": 13,
           "priority": "P1",
           "state": "bounded_delivery_repair_closed_pr1814",
-          "evidence": [
-            ".github/workflows/ci.yml:168",
-            "main-ci-artifacts.json",
-            "redteam-observation-gap.json"
-          ],
-          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step.",
-          "wsp97_action": "Reuse existing CI observation documentation and redteam test owner; preserve report-only policy and separate creation/selection/upload/listing/download evidence.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
-          "blocker": "None in two-report delivery scope; observation-window stability and blocking activation remain separate.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step."
         },
         {
           "task": "WSL-advisory-cold-start-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2745,33 +2373,11 @@
           "score": 13,
           "priority": "P1",
           "state": "closed_pr1805",
-          "evidence": [
-            "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
-            "modules/infrastructure/dependency_launcher/tests/test_wsl_agent_runtime.py",
-            "modules/infrastructure/dependency_launcher/INTERFACE.md",
-            "resumed-runtime-audit.json"
-          ],
-          "blocker": "None within completed planning scope; source repair is separately scored.",
-          "wsp97_action": "Reuse existing dependency launcher probe/test and intentional activation owners. Qualify no-start advisory versus intentionally started execution without inventing an effect-use lease.",
-          "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "effort_cost": "One bounded source/contract/test-seam qualification; no provider cost or runtime activation.",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2."
         },
         {
           "task": "DaemonSelfAudit-PatternMemory-lifecycle-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2780,31 +2386,11 @@
           "score": 13,
           "priority": "P1",
           "state": "closed_pr1807",
-          "evidence": [
-            "modules/infrastructure/wre_core/ROADMAP.md#daemon-counter-memory-lifetime--2026-09-20",
-            "witness-review.json",
-            "contract-review.json"
-          ],
-          "blocker": "None in closed qualification; separately qualified source repair closed in PR1810. Other lifecycle concerns require their own evidence.",
-          "next_step": "No remaining work in the closed qualifier. Preserve accepted defect evidence and execute only the separately scored source packet after fresh observation.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "effort_cost": "One existing owner/test pair contract qualification with injected threads/storage; no model/provider cost or service start.",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining work in the closed qualifier. Preserve accepted defect evidence and execute only the separately scored source packet after fresh observation."
         },
         {
           "task": "DaemonSelfAudit-per-counter-memory-ownership",
-          "dimensions": {
+          "wsp15": {
             "complexity": 2,
             "importance": 4,
             "deferability": 4,
@@ -2813,35 +2399,11 @@
           "score": 13,
           "priority": "P1",
           "state": "closed_pr1810",
-          "evidence": [
-            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:744",
-            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:758",
-            "modules/communication/moltbot_bridge/src/openclaw_supervisor.py:2237",
-            "modules/communication/moltbot_bridge/src/openclaw_supervisor.py:2373",
-            "witness-review.json"
-          ],
-          "blocker": "None within closed source scope.",
-          "wsp97_action": "Remove shared cached-handle assumption in the existing daemon; reuse PatternMemory creating-thread ownership and existing tests. No new module, pool, skill or SQLite policy.",
-          "next_step": "No remaining source work in this counter-lifetime slice; preserve accepted evidence and separately qualify other consumers or runtime concerns.",
-          "why_score": "C2 localized ownership idiom; I4 observed telemetry integrity; D4 existing supervisor both starts and synchronously scans the same object; Impact3 scoped observation benefit. Independent review scored the actual source action, not the parent.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Merged and independently accepted existing-owner counter repair; removed from executable selection.",
-          "effort_cost": "One source/test pair with required canonical docs and derived packaging updates; disposable tests, no paid provider or runtime calls.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining source work in this counter-lifetime slice; preserve accepted evidence and separately qualify other consumers or runtime concerns."
         },
         {
           "task": "R19-explicit-report-file-upload",
-          "dimensions": {
+          "wsp15": {
             "complexity": 2,
             "importance": 4,
             "deferability": 4,
@@ -2850,33 +2412,11 @@
           "score": 13,
           "priority": "P1",
           "state": "bounded_delivery_repair_closed_pr1814",
-          "evidence": [
-            ".github/workflows/ci.yml:257",
-            "qualification.json"
-          ],
-          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step.",
-          "wsp97_action": "Extend existing workflow only; preserve producer, tests and report-only gate.",
-          "blocker": "None in two-report delivery scope; observation-window stability and blocking activation remain separate.",
-          "effort": "One upload-step edit plus existing documentation closure.",
-          "cost": "No model/provider/runtime cost; normal PR CI and bounded selected artifact retrieval.",
-          "verification_burden": "Exact semantic YAML diff, independent review, normal PR run-bound artifact list/download/XML/stdout checks; no dispatch or rerun.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step."
         },
         {
           "task": "M2M-governed-context-binding-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2885,38 +2425,11 @@
           "score": 13,
           "priority": "P1",
           "state": "closed_pr1815",
-          "evidence": [
-            "next-selection.json"
-          ],
-          "next_step": "No remaining qualification work; preserve accepted contract and execute only the separately scored source packet after fresh observation.",
-          "fresh_disposition": [
-            "The broad15/P1 M2M residual contains a precise existing seam: canonical runtime context is constructed at264–269, but _binding300–301 seals prompt identity only; provider helper41 explicitly leaves context unbound. This is an acknowledged contract boundary, not a newly executed exploit.",
-            "Local contract qualification is eligible without live-model authority. C3 covers serialization/redaction/legacy integration; I4 protects the consistency of governed constraints already passed to providers; D3 reflects near-term follow-on rather than a proven live failure; Impact3 is bounded internal assurance. The13 score is not inherited from parent15.",
-            "OpenClaw cache planning remains eligible, but current always-rescan safely avoids stale success. The adjacent WRE cache hashes a fixed single bundle and lacks a drop-in whole-wardrobe/scanner identity, so restoring caching now would require more assumptions. A narrow cache contract plan independently scores C3/I3/D3/Impact3=12/P2 absent measured performance loss; parent15 remains unchanged.",
-            "Process/volume durability remains eligible at aggregate13/P1. Its next contract-only recovery-oracle step is C3/I3/D3/Impact3=12/P2; it has no proven data-restoration owner across process death yet. This is sequencing based on the more concrete prompt/context seam, not a fabricated authority blocker or rejection merely because no patch exists.",
-            "Native Hermes child payload fidelity is separate: _request_payload instructs complete goal/context, while event validation binds child identity/order/status/effect counts. Parent egress integrity will not prove actual delegated child inputs.",
-            "Existing higher external owners and explicit live authority/principal policy dependencies are preserved; this bounded comparison does not re-audit or dismiss those rows. R19 is not closed until root obtains hosted proof."
-          ],
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "effort": "One bounded existing producer/binding/consumer contract qualification.",
-          "cost": "Read-only source and existing deterministic fixtures first; no provider/runtime calls.",
-          "verification_burden": "Independent exact-field and ownership review before any source change.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "wsp97_action": "Extend current preparation/capability/shared validator/three adapter owners; no new authority or module.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining qualification work; preserve accepted contract and execute only the separately scored source packet after fresh observation."
         },
         {
           "task": "M2M-prepared-context-digest",
-          "dimensions": {
+          "wsp15": {
             "complexity": 2,
             "importance": 4,
             "deferability": 4,
@@ -2925,31 +2438,11 @@
           "score": 13,
           "priority": "P1",
           "state": "closed_pr1816",
-          "evidence": [
-            "modules/communication/moltbot_bridge/ROADMAP.md#governed-context-binding-contract--2026-09-20",
-            "current_observation.validation.independent"
-          ],
-          "next_step": "No remaining context repair; preserve validated ingress binding and qualify actual native-child input evidence separately.",
-          "blocker": "none for this bounded repair",
-          "wsp97_action": "Reuse existing preparation, capability and validator, preserve redaction and framing; no new owner.",
-          "effort": "Five source seams, four existing test owners, manifest/two pins and required docs, within packet budgets.",
-          "cost": "Deterministic fakes; zero model/provider calls.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "PR1816 closed the exact prepared raw-context and canonical-prompt binding repair before provider effects. Its reviewed source remains unchanged; no remaining work in that bounded repair. Child input, lifecycle and rejection-evidence scopes are tracked separately.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining context repair; preserve validated ingress binding and qualify actual native-child input evidence separately."
         },
         {
           "task": "Hermes-native-child-input-evidence-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2958,31 +2451,11 @@
           "score": 13,
           "priority": "P1",
           "state": "qualification_closed_pr1817_full_input_gap_remains",
-          "evidence": [
-            "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
-            "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
-            "current_observation.validation.next_selection"
-          ],
-          "next_step": "Preserve the unsupported complete child-input evidence boundary. Lifecycle qualification is now complete; the distinct parent-only rejection-evidence correction is next. Full input/delivery repair still requires an adequate producer contract.",
-          "blocker": "Current pinned /v1/runs stream does not expose complete child context/accepted input. HTTP retrieval failure was recovered; no repeated download is the missing capability.",
-          "wsp97_action": "Reuse current lifecycle/event/provider/test owners; distinguish requested input from authenticated actual child input.",
-          "effort": "Bounded read-only qualification; six existing closure docs, no source/runtime changes.",
-          "cost": "No model/provider calls; exact version-bound source retrieval only if absent locally.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "PR1817 closed the 13/P1 input-evidence qualification. This sprint completes lifecycle qualification and selects the separate 13/P1 rejection-evidence repair; no full input-fidelity implementation or runtime activation is qualified.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve the unsupported complete child-input evidence boundary. Lifecycle qualification is now complete; the distinct parent-only rejection-evidence correction is next. Full input/delivery repair still requires an adequate producer contract."
         },
         {
           "task": "R25-feedback-approval-owner-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 3,
@@ -2991,29 +2464,11 @@
           "score": 13,
           "priority": "P1",
           "state": "qualification_closed_pr1826_host_consumer_dependency_retained",
-          "evidence": [
-            "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-            "current_observation.validation.independent"
-          ],
-          "next_step": "Resume source qualification only after the external conversation host owner supplies a typed exact-summary approval/withdrawal handoff and matching existing-owner pre-projection consumer, with version creation/migration and current revocation/retry contracts.",
-          "blocker": "No authenticated R25 approval issuer/consumer is currently connected. Ordinary v4 CAS cannot change immutable schema_version. Missing live permission does not block design, but disconnected record fields cannot satisfy the source gate.",
-          "wsp97_action": "Close the completed approval-owner qualification and preserve the precise external host, version-creation/transition and current-state consumer dependency. Reuse existing record/learning owners; no disconnected source packet or generic consent engine.",
-          "effort": "Bounded existing-owner plan and seven existing closure docs.",
-          "cost": "Source inspection; no provider calls.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "fresh_disposition": "Planning result closed with exact source/independent/doc evidence; conditional record design preferred but no complete issuer/version-transition/use-time consumer or source packet qualified. Preserve external host owner.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Resume source qualification only after the external conversation host owner supplies a typed exact-summary approval/withdrawal handoff and matching existing-owner pre-projection consumer, with version creation/migration and current revocation/retry contracts."
         },
         {
           "task": "Hermes-parent-only-rejection-effect-evidence",
-          "dimensions": {
+          "wsp15": {
             "complexity": 2,
             "importance": 4,
             "deferability": 4,
@@ -3022,30 +2477,11 @@
           "score": 13,
           "priority": "P1",
           "state": "repair_closed_pr1819",
-          "evidence": [
-            "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py:144",
-            "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py:112",
-            "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py:260",
-            "current_observation.validation.next_selection"
-          ],
-          "next_step": "Preserve truthful rejection receipts and successful acceptance gates. Follow independently scored existing-owner work; do not infer runtime readiness or retention.",
-          "blocker": "None for this narrow two-branch correction; wider child-input/delivery/cancellation gaps are distinct.",
-          "wsp97_action": "Change existing stop and non-completed terminal rejection evidence semantics conservatively; reuse current fixture/result/receipt paths. Do not fix detached cancellation, add polling, change endpoint, loosen successful acceptance or invent schema.",
-          "effort": "One existing source and nearest existing tests, generated backend manifest/two pins and required docs; bounded mocked validation.",
-          "cost": "No paid model/provider calls or live sandbox needed; normal source/manifest/package CI only.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Exact reviewed source/test/derived/docs merged with all ten head checks successful. No live execution or full lifecycle completion implied.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve truthful rejection receipts and successful acceptance gates. Follow independently scored existing-owner work; do not infer runtime readiness or retention."
         },
         {
           "task": "AutoResearcher-report-completeness",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 3,
             "deferability": 3,
@@ -3054,51 +2490,11 @@
           "score": 12,
           "priority": "P2",
           "state": "proposal_text_identity_closed_pr1803_remaining_contracts_unqualified",
-          "next_step": "No next report source slice was newly qualified by this bounded review; retain exact program/evaluated-byte/provenance and reader distinctions without inferring authority.",
-          "effort": "Extend existing WRE producer/report/reader owners after current handoff priority.",
-          "cost": "Existing deterministic fixtures first; live measurement requires admitted provider/runtime.",
-          "verification_burden": "Existing researcher suite and controlled rehearsals; keep evidence scoped to measured claims.",
-          "closed_scope": [
-            "Completed/aborted per-invocation accounting, mode gate and baseline input snapshot (PR1755 source)."
-          ],
-          "remaining_scope": [
-            "Program/proposal, oracle, environment and authenticated reader evidence",
-            "Resource measurement and independently retained benefit"
-          ],
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "evidence": [
-            "modules/infrastructure/wre_core/src/wre_auto_researcher.py:419",
-            "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py:526"
-          ],
-          "parent_scope_estimate": {
-            "dimensions": {
-              "complexity": 3,
-              "importance": 4,
-              "deferability": 4,
-              "impact": 4
-            },
-            "score": 15,
-            "priority": "P1",
-            "scope": "aggregate program/proposal/oracle/environment/reader qualification; not a single admitted action"
-          },
-          "wsp97_action": "Do not assign aggregate parent15 to a modest diagnostic step; retain five offline witnesses and preserve closed input-snapshot work.",
-          "score_scope": "Completed12/P2 proposal-text diagnostic action; aggregate program/oracle/environment/reader qualification remains separate.",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No next report source slice was newly qualified by this bounded review; retain exact program/evaluated-byte/provenance and reader distinctions without inferring authority."
         },
         {
           "task": "OpenClaw-invocation-diagnostic-attribution",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 3,
             "deferability": 3,
@@ -3107,28 +2503,11 @@
           "score": 12,
           "priority": "P2",
           "state": "parent_partial_call_local_repair_closed_pr1830",
-          "evidence": [
-            "modules/communication/moltbot_bridge/src/openclaw_process_loop.py:115",
-            "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
-          ],
-          "next_step": "Retain broader parent boundaries; no unresolved work in the merged call-local repair.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "fresh_disposition": "Historical12/P2 parent retained; call-local source substep closed. Broader status/freshness/runtime claims remain unqualified.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Retain broader parent boundaries; no unresolved work in the merged call-local repair."
         },
         {
           "task": "WSL-advisory-explicit-command-opt-in",
-          "dimensions": {
+          "wsp15": {
             "complexity": 2,
             "importance": 4,
             "deferability": 3,
@@ -3137,33 +2516,11 @@
           "score": 12,
           "priority": "P2",
           "state": "closed_pr1806",
-          "evidence": [
-            "modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20",
-            "wsl-contract-review.json",
-            "wsl-owner-review.json",
-            "wsl-witness-review.json"
-          ],
-          "blocker": "None within completed source scope.",
-          "wsp97_action": "Extend existing probe and test owner, preserving receipt semantics, intentional Gateway exports and structural guards; no new module or authority.",
-          "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "effort_cost": "One existing source/test pair plus required docs; deterministic disposable tests, no provider cost or runtime activation.",
-          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted."
         },
         {
           "task": "auto-researcher-process-recovery-oracle-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 3,
             "deferability": 3,
@@ -3172,26 +2529,11 @@
           "score": 12,
           "priority": "P2",
           "state": "qualification_closed_pr1827",
-          "evidence": [
-            "current_observation.validation.independent",
-            "modules/infrastructure/wre_core/ROADMAP.md"
-          ],
-          "next_step": "Preserve exact completed static contract; missing checkpoint/reader requirements are already recorded, not a new defect witness.",
-          "blocker": "None for the completed plan. Automatic recovery and launch reading remain unqualified.",
-          "wsp97_action": "Close completed planning scope; reuse unchanged producer and existing test owner for a separately scored witness. Do not create an unused reader, journal or recovery manager.",
-          "effort": "Bounded existing-source/test inspection and six existing closure documents.",
-          "cost": "No provider/model/runtime calls, behavior probes or test runs in this plan.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "fresh_disposition": "Static lifecycle/oracle plan closed; no test execution or automatic recovery implemented. Separate10/P2 test-only packet is qualified subject to fresh entry and derived-registry reconciliation.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve exact completed static contract; missing checkpoint/reader requirements are already recorded, not a new defect witness."
         },
         {
           "task": "Detect-AI-WSP109-intake",
-          "dimensions": {
+          "wsp15": {
             "complexity": 2,
             "importance": 3,
             "deferability": 3,
@@ -3199,29 +2541,12 @@
           },
           "score": 11,
           "priority": "P2",
-          "state": "existing_draft_reconciled_local_differential_validated_remote_pending",
-          "evidence": [
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
-          ],
-          "next_step": "Publish the independently reviewed current-main merge to existing draft1751; require fresh exact-head CI before main integration. Local five baseline failures remain documented; no runtime/build authority.",
-          "reconciled_against": "1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c",
-          "fresh_disposition": "Current-main integration now locally validated; old hosted failure is historical. No new local failure; registry metadata remains separate from main publication/runtime.",
-          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
-          "current_pr_state": "Local two-parent candidate retains1751 lineage; remote still04ef322f until verified push. Fresh hosted checks pending.",
-          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
-          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
-          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "approval_owner_refresh": "Both PR1819 main workflows passed.95 existing peer heads unchanged;3 new external PRs have no seven-document/source overlap. R25 contract inspection changes no runtime or source authority; preserve external durable-adapter ownership and closed/blocked histories.",
-          "recovery_oracle_refresh": "Both PR1826 main workflows passed;98 peer heads unchanged;10 prior read dependencies unchanged. Closed R25 issuer/version/consumer qualification retains external host dependency. No source/runtime or durability claim follows from this plan.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "state": "closed_pr1751_metadata_only",
+          "next_step": "Metadata scope merged1751 with all main workflows successful; runtime/build/route alias remain separate."
         },
         {
           "task": "auto-researcher-abrupt-exit-diagnostic-witness",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 3,
             "deferability": 2,
@@ -3230,25 +2555,11 @@
           "score": 10,
           "priority": "P2",
           "state": "witness_closed_pr1828",
-          "evidence": [
-            "current_observation.validation",
-            "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py"
-          ],
-          "next_step": "Preserve known controlled exit/byte observations and all limitations; no rerun or new process harness.",
-          "blocker": "None for bounded local witness; automatic recovery and consumer admission remain unqualified.",
-          "wsp97_action": "Close the demonstrated fixture; preserve unknown/missing and temporary-only report semantics. Do not add unused reader or recovery machinery.",
-          "effort": "Bounded test-only witness after separately scoped approval of the exact packet; independent replay.",
-          "cost": "No model/provider jobs. Three external suite attempts: initial harness failure before collection, then author112 and independent112 overlapping cases; six disposable child invocations. Coordinator/reviewer cost unavailable.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "fresh_disposition": "Local diagnostic witness closed: two overlapping112-case passes, six children and one prior zero-child harness failure preserved. Missing/temporary reports remain unknown; no recovery implementation.",
-          "exit_witness_refresh": "PR1827 exact-merge main workflows both passed;98 peer heads unchanged at preflight. Current bounded witness closes only local diagnostic evidence; higher parent residuals and external owners remain.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve known controlled exit/byte observations and all limitations; no rerun or new process harness."
         },
         {
           "task": "OpenClaw-call-local-skill-safety-diagnostic-contract",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 3,
             "deferability": 2,
@@ -3257,24 +2568,11 @@
           "score": 10,
           "priority": "P2",
           "state": "contract_closed_pr1829",
-          "evidence": [
-            "current_observation.validation",
-            "modules/communication/moltbot_bridge/ROADMAP.md"
-          ],
-          "next_step": "Preserve completed contract and source repair; do not repeat either closure.",
-          "blocker": "None; contract and subsequent bounded source repair closed.",
-          "wsp97_action": "Keep existing policy, DAE wrapper and process consumer; opt in to local diagnostic pair without replacing default Boolean API.",
-          "effort": "Bounded static compatibility plan in existing owners.",
-          "cost": "No product model/provider jobs, tests or runtime probes; coordinator/reviewer cost unavailable.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "fresh_disposition": "PR1829 static contract and PR1830 separate source repair closed with independent/exact-head evidence.",
-          "diagnostic_contract_refresh": "Both PR1828 main workflows passed; 98 peer heads unchanged. Current static contract preserves default Boolean policy and current rescan. Source repair requires fresh ownership/packaging/test qualification at entry; broader parent and external dependencies remain.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Preserve completed contract and source repair; do not repeat either closure."
         },
         {
           "task": "OpenClaw-call-local-skill-safety-diagnostic-repair",
-          "dimensions": {
+          "wsp15": {
             "complexity": 3,
             "importance": 3,
             "deferability": 2,
@@ -3283,37 +2581,23 @@
           "score": 10,
           "priority": "P2",
           "state": "repair_closed_pr1830",
-          "evidence": [
-            "current_observation.validation.runs",
-            "current_observation.validation.independent",
-            "current_observation.source_changes",
-            "modules/communication/moltbot_bridge/ROADMAP.md"
-          ],
-          "next_step": "Completed and merged; retain exact validation limits. Do not repeat source repair.",
-          "blocker": "None for this completed diagnostic repair.",
-          "wsp97_action": "Extend existing Boolean API with literal details mode; same process caller uses own validated pair. No new owner.",
-          "effort": "Focused source/test repair with packaging reconciliation and independent replay.",
-          "cost": "No live scanner/model/provider; local fake-only validation and existing deterministic packaging checks, actual token/time costs recorded when run.",
-          "reconciled_against": "734d46fae6332f4e8feaca9d3b172992dd394147",
-          "post_closure_reconciliation": "Exact18-path repair merge verified;98peerheads and sharedbytes unchanged. Fresh9/P3 optional existing cache plan selected; runtime/host/reader/recovery dependencies unchanged. No new scoring history or execution authority.",
-          "fresh_disposition": "Boolean-compatible call-local safety explanations repaired and independently verified; exact-head CI and18reviewed blobs/tree closed. No runtime or retained-learning claim.",
-          "diagnostic_repair_refresh": "Current10/P2 repair locally verified with141pass/one existing link skip/two child cases excluded and independent replay;98peer heads reconciled, shared process-loop hunk preserved. Runtime/host/reader and producer dependencies remain separately bound."
+          "next_step": "Completed and merged; retain exact validation limits. Do not repeat source repair."
         }
       ],
-      "selected": "AmIBot-registry-prerequisite",
-      "score": 14,
+      "selected": "AmIBot-public-route-contract-drift",
+      "score": 15,
       "wsp15": {
         "complexity": 3,
         "importance": 4,
         "deferability": 4,
-        "impact": 3,
-        "total": 14,
+        "impact": 4,
+        "total": 15,
         "priority": "P1"
       },
-      "status": "finish_current_publication_before_next_slice",
-      "selection_rationale": "Highest eligible14/P1 action materially advances AmIBot metadata. Source integration is locally reconciled; exact-head hosted validation remains its next action. Do not promote runtime or reopen completed cache work."
+      "status": "finish_owned_review_publication_before_next_slice",
+      "selection_rationale": "Closed registry prerequisite removed; higher jobs retain unchanged runtime/owner/consumer dependencies. Route test drift is eligible for local qualification using existing sources. A test-only repair must preserve public projection and participation gate; no route or product source change."
     },
-    "next_step": "Independent exact candidate review, then normal fast-forward publication to existing draft1751 and fresh hosted checks. Preserve failures; no protected fixes or runtime launch.",
-    "requires_fresh_reobservation_after_closure": true
+    "requires_fresh_reobservation_after_closure": true,
+    "next_step": "Publish separately reviewed parser correction to same PR1832; require fresh exact-head checks before merge, preserve initial rejection and rescore after closure."
   }
 }

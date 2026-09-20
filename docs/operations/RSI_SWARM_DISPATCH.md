@@ -72,7 +72,7 @@ independent retained learning or production RSI.
 
 **Current selection evidence:** `current_observation` in the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
 The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) preserves historical checkpoints; its JSON field count is not a count of experiments or completed RSI cycles. Git retains subsequent checkpoints.
-The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: registry candidate held in draft PR1751; explicit M2M profile/signing, provider fidelity and seed API input qualified locally; runtime admission remains open.
+The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: hidden registry/intake merged in PR1751 (`f7307291`, all three main workflows passed); explicit M2M profile/signing, provider fidelity and seed API input qualified locally; runtime admission remains open.
 Explicit proposal-plan admission and receipt-to-seed consistency are locally qualified through the merged handoff work. The current backlog records remaining context/child fidelity, runtime admission and AmIBot gates, exact validation and fresh main workflow status. Use its re-scored action rather than the historical18/P0 parent as an automatic assignment. No planning checkpoint grants ingress or runtime authority.
 
 ## Production-line operating model

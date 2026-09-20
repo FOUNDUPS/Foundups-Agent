@@ -5,12 +5,14 @@ Tests for the /f/{foundup_id} canonical landing route.
 WSP 104: /f/{foundup_id} is the canonical FoundUp landing namespace.
 
 Route behavior:
-  - /f/{foundup_id} renders landing content directly (no redirect)
-  - Canonical URL stays visible in address bar
-  - Subpath support preserved for future /app mount
+  - /f/ and /f/{foundup_id} render scope-free public discovery
+  - /f/{foundup_id}/app and app deep links hand off to /member/
+  - Member runtime catalog and entry_url stay outside public rendering
 """
 import json
 import os
+import re
+from html.parser import HTMLParser
 import pytest
 
 # public/member
@@ -44,6 +46,61 @@ def _read(relpath, base=ROOT):
         return f.read()
 
 
+class _InlineScripts(HTMLParser):
+    """Collect inline script text using HTML's case-insensitive tag semantics."""
+
+    def __init__(self):
+        super().__init__()
+        self.scripts = []
+        self.in_script = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "script":
+            self.in_script = not any(name == "src" for name, _ in attrs)
+            if self.in_script:
+                self.scripts.append("")
+
+    def handle_endtag(self, tag):
+        if tag == "script":
+            self.in_script = False
+
+    def handle_data(self, data):
+        if self.in_script:
+            self.scripts[-1] += data
+
+
+def _landing_script():
+    """Inspect executable inline code, excluding full-line documentation comments.
+
+    Historical catalog names and retired mount CSS remain in the HTML. They
+    must not satisfy current runtime contract checks merely by being present.
+    """
+    parser = _InlineScripts()
+    parser.feed(_read("../f/index.html"))
+    parser.close()
+    assert len(parser.scripts) == 1, "Expected the canonical inline route owner"
+    return re.sub(r"(?m)^\s*//[^\n]*$", "", parser.scripts[0])
+
+
+def _app_gate():
+    script = _landing_script()
+    gate = re.search(r"if\s*\(isAppMount\)\s*\{([^}]+)\}", script)
+    assert gate, "App routes must retain an explicit participation gate"
+    return script, gate
+
+
+@pytest.mark.parametrize("tag", ["SCRIPT", "ScRiPt", 'script type="text/javascript"'])
+def test_inline_script_extraction_uses_html_tag_semantics(monkeypatch, tag):
+    """Casing/attributes cannot hide code; external script names are not code."""
+    close_tag = tag.split()[0]
+    html = (
+        '<SCRIPT SRC="/member/mall-video-catalog.json"></SCRIPT>'
+        f"<{tag}>\n// documentation only\nvar marker = 'actual code';\n</{close_tag}>"
+    )
+    monkeypatch.setitem(globals(), "_read", lambda _: html)
+    assert _landing_script().strip() == "var marker = 'actual code';"
+
+
 class TestCanonicalRouteExists:
     """Test that the canonical landing surface exists."""
 
@@ -59,10 +116,13 @@ class TestCanonicalRouteExists:
         assert "foundup_id" in landing.lower() or "foundupId" in landing
 
     def test_landing_fetches_catalog(self):
-        """Landing fetches catalog to resolve FoundUp."""
-        landing = _read("../f/index.html")
-        assert "mall-video-catalog.json" in landing
-        assert "fetch(" in landing
+        """Discovery fetches only the scope-free projection, never member data."""
+        script = _landing_script()
+        assert "var PUBLIC_CATALOG_URL = '/f/public_catalog.json';" in script
+        assert re.findall(r"fetch\(([^)]+)\)", script) == [
+            "PUBLIC_CATALOG_URL", "PUBLIC_CATALOG_URL"
+        ]
+        assert "mall-video-catalog.json" not in script
 
 
 @pytest.mark.skipif(not _firebase_json_exists(), reason="firebase.json not tracked in repo")
@@ -111,9 +171,10 @@ class TestCanonicalRouteBehavior:
     """Test canonical landing page behavior."""
 
     def test_landing_handles_missing_id(self):
-        """Landing shows error for missing foundup_id."""
-        landing = _read("../f/index.html")
-        assert "No FoundUp specified" in landing
+        """The root route is the public portfolio, not an old missing-ID error."""
+        script = _landing_script()
+        assert "var isPortfolioIndex = !match || !match[1] || match[1] === 'index.html';" in script
+        assert "renderPortfolioShowcase(projection);" in script
 
     def test_landing_handles_invalid_id(self):
         """Landing shows error for unknown/invalid foundup_id."""
@@ -226,7 +287,7 @@ class TestTransitionalFallbackPreserved:
 
 
 class TestAppMountRoute:
-    """Test /f/{foundup_id}/app canonical app mount (WSP 104)."""
+    """Canonical identity does not grant participation (WSP 104/97)."""
 
     def test_app_mount_detection(self):
         """Landing detects /app subpath."""
@@ -234,78 +295,81 @@ class TestAppMountRoute:
         assert "isAppMount" in landing
         assert "subpath === 'app'" in landing or "'app'" in landing
 
-    def test_app_mount_renders_container(self):
-        """App mount has container CSS and structure."""
-        landing = _read("../f/index.html")
-        assert "app-mount-container" in landing
-        assert "app-mount-frame" in landing
-        assert "app-mount-header" in landing
+    def test_app_mount_hands_off_to_existing_member_gate(self):
+        """Public app routes leave before reading a tenant or rendering it."""
+        script, gate = _app_gate()
+        assert "var MALL_HOME = '/member/';" in script
+        assert re.fullmatch(r"\s*window\.location\.href = MALL_HOME;\s*return;\s*", gate[1])
+        assert "fetch(" not in script[script.index("var foundupId"):gate.start()]
 
-    def test_app_mount_uses_entry_url(self):
-        """App mount uses manifest entry_url."""
-        landing = _read("../f/index.html")
-        assert "entry_url" in landing
-        assert "renderAppMount" in landing
+    def test_public_route_does_not_use_member_entry_url(self):
+        """A member entry_url cannot become a public iframe source."""
+        script = _landing_script()
+        assert "entry_url" not in script
+        assert "renderAppMount" not in script
 
-    def test_app_mount_back_link(self):
-        """App mount has back link to landing."""
-        landing = _read("../f/index.html")
-        assert "Back to FoundUp" in landing
-        assert "app-mount-back" in landing
+    def test_public_landing_retains_return_to_mall(self):
+        """Discovery keeps navigation to the existing admission owner."""
+        script = _landing_script()
+        assert "'return_to_mall'" in script
+        assert "'Return to Mall'" in script
+        assert "window.location.href = MALL_HOME;" in script
 
-    def test_app_mount_sandbox(self):
-        """App mount iframe has sandbox attribute."""
-        landing = _read("../f/index.html")
-        assert 'sandbox="' in landing
-        assert "allow-scripts" in landing
+    def test_public_route_does_not_embed_tenant_iframe(self):
+        """Retired CSS must not count as an active or authorized app mount."""
+        script = _landing_script().lower()
+        assert "<iframe" not in script
+        assert not re.search(r"createelement\(['\"]iframe['\"]\)", script)
 
-    def test_app_not_ready_error(self):
-        """App mount shows error when entry_url missing."""
-        landing = _read("../f/index.html")
-        assert "App Not Ready" in landing
-        assert "does not have an app entry" in landing
+    def test_app_gate_is_independent_of_catalog_readiness(self):
+        """Admission happens before a catalog response or readiness decision."""
+        script, gate = _app_gate()
+        detail = script[script.index("var foundupId"):]
+        assert detail.index("if (isAppMount)") < detail.index("fetch(PUBLIC_CATALOG_URL)")
+        assert "entry_url" not in gate[1]
 
 
 class TestAppMountDeepLinks:
-    """Test /f/{foundup_id}/app/{path...} deep link support."""
+    """App deep links use the same admission owner; no public frame forwarding."""
 
-    def test_deep_path_captured(self):
-        """Deep path after /app is captured."""
-        landing = _read("../f/index.html")
-        assert "appSubpath" in landing
-        assert "deepPath" in landing or "deep" in landing.lower()
+    def test_deep_path_is_included_in_participation_gate(self):
+        script = _landing_script()
+        assert "subpath === 'app' || subpath.startsWith('app/')" in script
+        _app_gate()
 
-    def test_deep_path_forwarded(self):
-        """Deep path is forwarded to app frame."""
-        landing = _read("../f/index.html")
-        # Should pass path as query param or in URL
-        assert "path=" in landing or "deepPath" in landing
+    def test_deep_path_does_not_become_public_frame_url(self):
+        script = _landing_script()
+        assert "appSubpath" not in script
+        assert "deepPath" not in script
+        assert "resolvedUrl" not in script
 
 
-class TestLaunchAppCTA:
-    """Test Launch App CTA on landing surface."""
+class TestPublicDiscoveryLinks:
+    """Public view links do not resurrect the retired member launch control."""
 
-    def test_launch_app_cta_exists(self):
-        """Landing has Launch App CTA block."""
-        landing = _read("../f/index.html")
-        assert "entry-launch-app-block" in landing
-        assert "entry-launch-app-btn" in landing
+    def test_public_link_container_exists(self):
+        script = _landing_script()
+        assert "entry-cta-block" in script
+        assert "entry-launch-app-block" not in script
+        assert "entry-launch-app-btn" not in script
 
-    def test_launch_app_links_to_app_route(self):
-        """Launch App CTA links to /f/{id}/app."""
-        landing = _read("../f/index.html")
-        assert "'/f/' + foundupId + '/app'" in landing
+    def test_public_links_do_not_construct_tenant_mount_route(self):
+        script = _landing_script()
+        assert "'/f/' + foundupId + '/app'" not in script
+        assert "addLink('app_url', 'Open App', item.app_url);" in script
 
-    def test_launch_app_conditional_on_entry_url(self):
-        """Launch App CTA only shown when entry_url exists."""
-        landing = _read("../f/index.html")
-        assert "item.entry_url" in landing
+    def test_public_links_use_validated_url_properties(self):
+        script = _landing_script()
+        assert "var safe = safeUrl(url);" in script
+        assert "if (safe) links.push" in script
+        assert "a.href = l[2];" in script
+        assert "item.entry_url" not in script
 
-    def test_launch_app_recommendation(self):
-        """Red Dog has Launch App recommendation."""
-        landing = _read("../f/index.html")
-        assert "launch_app" in landing
-        assert "'Launch App'" in landing
+    def test_recommendations_do_not_offer_public_tenant_launch(self):
+        script = _landing_script()
+        assert "launch_app" not in script
+        assert "'Launch App'" not in script
+        assert "'return_to_mall'" in script
 
 
 class TestGotJunkTenantBinding:
@@ -397,20 +461,19 @@ class TestKoseiTenantBinding:
         assert '"ready"' in kosei_entry
 
 
-class TestCatalogArrayHandling:
-    """Test catalog array format handling."""
+class TestPublicProjectionHandling:
+    """Public projection shapes are sanitized before landing rendering."""
 
-    def test_landing_handles_array_catalog(self):
-        """Landing handles catalog as direct array (not wrapped)."""
-        landing = _read("../f/index.html")
-        assert "Array.isArray(catalog)" in landing
+    def test_landing_handles_public_projection_shapes(self):
+        script = _landing_script()
+        assert "Array.isArray(projection.entities)" in script
+        assert "Array.isArray(projection.items)" in script
+        assert "Array.isArray(projection)" in script
+        assert "var items = projectionEntities(projection);" in script
 
-    def test_url_resolution_uses_foundups_path(self):
-        """Relative URLs resolve to /foundups/{id}/ not routing_prefix."""
-        landing = _read("../f/index.html")
-        assert "'/foundups/' + foundupId" in landing
-        # Should NOT use routingPrefix for asset resolution
-        idx = landing.find("resolvedUrl = ")
-        if idx > 0:
-            snippet = landing[idx:idx+200]
-            assert "routingPrefix + '/'" not in snippet
+    def test_projection_is_sanitized_before_use(self):
+        script = _landing_script()
+        assert "return raw.map(sanitizeEntity);" in script
+        assert "Object.prototype.hasOwnProperty.call(entity, k)" in script
+        assert "PUBLIC_FIELD_ALLOWLIST[k] === true" in script
+        assert "resolvedUrl" not in script
