@@ -9,6 +9,12 @@ the current repository does not yet prove end-to-end production RSI.
 fidelity scores, and consensus do not independently grant effect or promotion
 authority.
 
+For a per-call dry executor, use `execute_foundup_job(job, force_dry_run=True)`.
+The consumer forwards its captured mode automatically. Omission/False retains
+legacy singleton selection; job validation and action gates still apply.
+See the [force-dry contract](INTERFACE.md#consumer-force-dry-boundary): local
+dry-run evidence may write files and does not establish runtime confinement.
+
 ## Current responsibility
 
 WRE Core owns:

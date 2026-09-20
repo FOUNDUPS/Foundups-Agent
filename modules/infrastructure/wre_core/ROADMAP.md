@@ -15,7 +15,7 @@ probe stopped before any case on an unrelated editable-install metadata read;
 child-only search-path pruning produced the scoped witness with zero forbidden
 effects. Exact source/runner/replay receipts are bound in the RSI backlog.
 
-Next bounded source repair is separately scored C3/I4/D3/Impact3=13/P1.
+The bounded source repair is scored C3/I4/D3/Impact3=13/P1 and locally implemented below.
 Live delegation already blocks; the witness is not a production incident:
 
 - Extend existing `execute_foundup_job` with a keyword-only force-dry request,
@@ -34,15 +34,23 @@ Live delegation already blocks; the witness is not a production incident:
 A fresh executor uses normal workspace discovery, not the warmed instance's
 custom root; bind an owned disposable root before tests. Per-call allocation cost
 remains unmeasured. Dry-run evidence may write files and is not OS confinement.
-The repair has not been implemented or tested by this qualification.
+The original qualification did not implement or test the repair; the subsequent source sprint does.
 
 The next source sprint's baseline exposed a separate local fixture prerequisite:
 the shared runtime helper supplies an enriched receipt and an aggregator provider,
 while this projection accepts an exact core/direct-provider contract. The 10/P2
 test-only adapter repair now yields 49 focused and 174 connected passing cases,
 with production/shared-helper bytes unchanged. Rejection controls remain active.
-The 13/P1 forced-dry source repair is still open. OpenRouter compatibility and live
-provider admission remain separate questions; direct-provider fixtures do not answer them.
+The fixture prerequisite is closed in PR1837, with all ten PR checks and both main
+workflows successful. The 13/P1 repair now implements the contract above in the
+existing consumer/executor owners. New regression cases reproduce 24 failures and
+23 passes on unchanged production, then pass all 47 after repair. Expanded connected
+and size-governance coverage passes 221 tests; ContextBundle wiring passes 24 more.
+These runs overlap and observed zero forbidden effects. Independent source review
+accepted the repair and replayed the same 245 cases;84 source/test hashes remained
+stable. Hosted publication is tracked separately in the canonical RSI backlog.
+OpenRouter compatibility and live provider admission remain separate questions;
+direct-provider fixtures do not answer them.
 
 ## AutoResearcher abrupt-exit witness — 2026-09-20
 

@@ -1,5 +1,20 @@
 # wre_core Test Suite
 
+## Consumer forced-dry isolation
+
+The existing projection-consumer suite covers fresh/warmed dry, non-dry and
+controlled executors, both consumer/job modes, strict boolean requests, callback
+mutation, legacy singleton identity and shared default-validator nonce history.
+A custom warmed validator is not copied into forced dry execution. Real executor
+body cases preserve simulation, destructive-action rejection and token rejection
+under both feature-flag values without calling a delegate or adapter.
+
+The new regression baseline is 24 failed/23 passed, then 47 passed after the repair.
+Expanded consumer/executor/projection/adversarial/size coverage passes 221 cases;
+the separate ContextBundle wiring suite passes 24. Counts overlap across runs.
+Disposable Python guards observed zero forbidden effects; they are not native
+process containment. Existing test registry and backend manifest remain unchanged.
+
 ## Core receipt versus authenticated runtime fixtures
 
 The projection tests reuse the paired runtime helper with explicit `provider="openai"`

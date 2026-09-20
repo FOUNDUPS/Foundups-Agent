@@ -1852,126 +1852,133 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "278ea96272c66ef8564422ea9789502f0a75de86",
-    "selected_action": "WRE-core-receipt-fixture-reconciliation",
-    "status": "local_tests_pass_independent_review_and_hosted_gates_pending",
+    "base_commit": "19b749d15399dfae653453984b405fdd84534b9e",
+    "selected_action": "FoundUp-consumer-force-dry-isolation-repair",
+    "status": "independent_source_accepted_hosted_publication_pending",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
     "wsp15": {
-      "complexity": 2,
-      "importance": 3,
+      "complexity": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 2,
-      "total": 10,
-      "priority": "P2"
+      "impact": 3,
+      "total": 13,
+      "priority": "P1"
     }
   },
   "current_observation": {
-    "observation_id": "core_receipt_fixture_reconciliation_20260921",
-    "observed_at": "2026-09-20T21:33:36.515361+00:00",
-    "base_commit": "278ea96272c66ef8564422ea9789502f0a75de86",
+    "observation_id": "consumer_force_dry_isolation_repair_20260921",
+    "observed_at": "2026-09-20T22:32:52.689535+00:00",
+    "base_commit": "19b749d15399dfae653453984b405fdd84534b9e",
     "role": "coordinator",
     "origin": "external_principal",
     "principal_ref": "012",
-    "previous_observation": "278ea96272c66ef8564422ea9789502f0a75de86:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "local_tests_pass_independent_review_and_hosted_gates_pending",
-    "selected_task": "WRE-core-receipt-fixture-reconciliation",
+    "previous_observation": "19b749d15399dfae653453984b405fdd84534b9e:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "independent_source_accepted_hosted_publication_pending",
+    "selected_task": "FoundUp-consumer-force-dry-isolation-repair",
     "wsp15": {
-      "complexity": 2,
-      "importance": 3,
+      "complexity": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 2,
-      "total": 10,
-      "priority": "P2"
+      "impact": 3,
+      "total": 13,
+      "priority": "P1"
     },
-    "selection_basis": "Re-observation found model-binding baseline drift before13/P1 forced-dry source repair. Close exact test oracle prerequisite, then rescore.",
+    "selection_basis": "Fixture prerequisite is now fully closed. Demonstrated active-consumer isolation repair13/P1 outranks separately scoped prototype qualifier10/P2. Higher aggregates retain current external ownership, exact runtime/admission, memory transaction and lifecycle producer dependencies. Reuse exact prior independent repair contract, no changed source owner.",
     "retrieval": {
-      "freshness": "Governed lexical bundle ok=true, UNKNOWN/index_gap=true at current workspace HEAD; not accepted semantic evidence.",
-      "noise": "Exact projection/consumer/adversarial tests and paired helper/normalizer/rehydration source inspected after concrete failures.",
-      "ordering": "WSP00/15/97 and prior closure -> baseline failures -> isolated module reproduction -> source/dialectic review -> existing local fixture adaptation.",
-      "missing": "Runtime admission and OpenRouter compatibility evidence absent; these tests do not establish either. Module memory artifacts reused from prior source-bound qualification.",
-      "duplication": "Existing local fixture and paired helper reused; no new module, skill, schema or runtime adapter."
+      "freshness": "Governed lexical owner query at19b749: UNKNOWN/index_gap=true; not accepted semantic authority. Exact Git/source/docs and test evidence control this repair.",
+      "noise": "Read bounded active consumer/executor/helper/validator owners; legacy alternate executor is not this production seam.",
+      "ordering": "WSP00/15/97, merged fixture closure and independent contract -> fresh failing regression -> smallest existing-owner repair -> connected proof -> independent review.",
+      "missing": "Current admitted runtime/provider and native containment evidence absent. Constructor cost unmeasured.",
+      "duplication": "No new module, skill, registry, scheduler, schema or admission path."
     },
     "closure_reconciliation": {
-      "pr1836": {
-        "merge": "278ea96272c66ef8564422ea9789502f0a75de86",
+      "pr1837": {
+        "merge": "19b749d15399dfae653453984b405fdd84534b9e",
         "pr_checks": "10 success",
         "main_workflows": [
           {
-            "conclusion": "",
-            "databaseId": 35538739494,
-            "headSha": "278ea96272c66ef8564422ea9789502f0a75de86",
-            "status": "in_progress",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35538739494",
-            "workflowName": "CodeQL"
+            "conclusion": "success",
+            "databaseId": 35539635205,
+            "headSha": "19b749d15399dfae653453984b405fdd84534b9e",
+            "status": "completed",
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35539635205",
+            "workflowName": "CI"
           },
           {
             "conclusion": "success",
-            "databaseId": 35538739652,
-            "headSha": "278ea96272c66ef8564422ea9789502f0a75de86",
+            "databaseId": 35539635132,
+            "headSha": "19b749d15399dfae653453984b405fdd84534b9e",
             "status": "completed",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35538739652",
-            "workflowName": "CI"
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35539635132",
+            "workflowName": "CodeQL"
           }
         ]
       },
-      "accounting": "142 merged/21 closed without merge since September9UTC;98 peers unchanged after PR1836 closure. Fresh preceding REST snapshot had13 drafts and14 open PRs with failing checks; not an atomic or perpetual state.",
+      "accounting": "143 merged/21 closed without merge since September9UTC, derived from prior paginated REST snapshot plus verified PR1836/1837 closures.98 peer heads unchanged at preflight; prior13draft/14failing-check counts remain dated.",
       "original_packets": "26 unchanged",
-      "prior_candidate_histories": 48,
       "candidate_histories": 49
     },
     "execution_scope": {
-      "plane": "Test fixture and canonical documentation only",
+      "plane": "Existing consumer/executor source, existing tests and canonical documentation; no live worker execution",
       "allowed_paths": [
         "ModLog.md",
         "ROADMAP.md",
         "docs/roadmaps/rsi_swarm_backlog.json",
-        "modules/infrastructure/wre_core/ROADMAP.md",
+        "modules/infrastructure/wre_core/INTERFACE.md",
         "modules/infrastructure/wre_core/ModLog.md",
+        "modules/infrastructure/wre_core/README.md",
+        "modules/infrastructure/wre_core/ROADMAP.md",
+        "modules/infrastructure/wre_core/src/foundup_job_consumer.py",
+        "modules/infrastructure/wre_core/src/hermes_job_executor.py",
         "modules/infrastructure/wre_core/tests/README.md",
         "modules/infrastructure/wre_core/tests/TestModLog.md",
-        "modules/infrastructure/wre_core/tests/test_foundup_job_model_capability_projection.py"
+        "modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py",
+        "modules/infrastructure/wre_core/tests/test_foundup_job_model_capability_projection_consumer.py"
       ],
       "invariants": [
-        "Production normalizer/provider policy and shared runtime helper unchanged",
-        "No force-dry source repair in this slice",
-        "Only known outer wrapper removed before mutations; never filter arbitrary unknown fields",
-        "No provider/process/socket/DB effects or writes outside disposable evidence in tests",
-        "Protect shared checkout and active RedDog/YUMORI/eSingularity/Remote AutoPost"
+        "Preserve original job flags and validation/model/token/action gates",
+        "Strict bool before executor selection; preserve legacy singleton and default validator nonce history",
+        "Do not copy warmed controlled/adapter/tools/custom-validator state",
+        "No provider/process/socket/DB effects in guarded tests; writes confined to disposable evidence",
+        "Protect shared checkout, active RedDog/YUMORI/eSingularity and Remote AutoPost"
       ]
     },
     "findings": {
-      "cause": "Shared helper adds verification_receipt and defaults aggregator provider; exact WRE core receipt normalizer and provider lineage reject both before intended assertions.",
-      "repair": "Existing paired helper with explicit direct provider; strict removal of its one known wrapper before overrides/ID refresh. Negative wrapper and aggregator cases remain rejected.",
-      "limits": "No production fix or claim that current OpenRouter constraints are correct for future authoring. Future provider compatibility requires independent contract qualification."
+      "repair": "Capture consumer mode before callbacks; keyword-only force_dry_run=True selects a fresh normal dry executor without changing global state.",
+      "limits": "Normal workspace discovery applies; dry-run evidence may write. No native sandbox, live admission, retained learning or AmIBot authoring proven. Custom warmed validator is not inherited; normal shared default validator remains authoritative."
     },
     "validation": {
-      "local": "Focused baseline31pass16fail ->49pass; connected174pass. Initial subset132pass6fail, isolated consumer7pass6fail. All successful guarded runs have zero forbidden attempts; two pytest configuration warnings reflect disabled plugin autoload.",
-      "independent": "Diagnosis and10/P2 prerequisite score sealed; candidate replay/review pending at observation.",
-      "remote": "Prior PR1836 ten checks success; this candidate not published. Main workflow states bound above.",
-      "harness": "Initial guard denied Windows NUL before tests; V2 only allows the exact null device. All initial receipts preserved; no production-policy relaxation."
+      "local": "New regression baseline24fail23pass ->47pass; expanded connected/size221pass; ContextBundle24pass. Successful guarded runs have zero forbidden attempts. Counts overlap.",
+      "independent": "ACCEPT of exact four source/test blobs; seven-suite independent245pass,0fail,0skip and zero forbidden effects.84 source/test hashes stable. Same cases as author221+24, not additive coverage.",
+      "remote": "PR1837 ten PR checks and both main workflows successful. This candidate has not been published.",
+      "packaging": "Backend manifest --check and test-registry --check succeed without regeneration.1400-member digest unchanged; registry1651 entries/269 quarantined. Neither modified production owner is a manifest member."
     },
-    "effort": "One existing local fixture helper and two negative controls plus required canonical documentation.",
-    "cost": "No model/provider calls; coordinator/reviewer usage unmetered.",
-    "manual_rationale": "Grounded deterministic test fixture adaptation; no admitted local-model runtime needed.",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-consumer-force-dry",
+    "effort": "Two existing production functions/call sites and existing test owners; respect no-growth ceilings and any derived integrity pins.",
+    "cost": "No provider/model/runtime calls; coordinator/reviewer usage unmetered. Constructor cost unmeasured.",
+    "manual_rationale": "Small deterministic compatibility repair based on independently qualified contract; no admitted Qwen/Gemma provider runtime needed.",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-forced-dry-repair-0716",
     "evidence_sha256": {
-      "preflight.json": "6837e40cbbe60c46947c8a91376fe2589de153244f733a7fff79973ea591a05b",
-      "fixture-holo-query.json": "cee7c22711ce424683af1264e004a3a7e7e1013833a28ab6cc0ce8839a852b73",
-      "projection-baseline-diagnosis.json": "76b53733510153c9835fcda734a8739aa77c107548690bd2d319101561c5ecdb",
-      "guarded_tests.py": "bd672bc87b9df7dd7b226622ac58283e90754df5fcaf91e0c37eebb29143365a",
-      "guarded_tests_v2.py": "a108a9860b0a615d32e67d918659e9ca0f0592996930e8e44b4fc37eae6f9f47",
-      "guarded_tests_v3.py": "f47f36122f24f1691af682cfedc619829b03a61f96187e2108af0dca6b415865",
-      "baseline/receipt.json": "dc2259c116cbbb0c0cee00c237145db3207ed82cbbea498ca66783c1a2b427f7",
-      "baseline-v2/receipt.json": "643757858d67cb1844f2ba80844e8b0b317c13fdfbe30c749ca26a1bdbc5a16c",
-      "projection-alone/receipt.json": "31f30592a27e7ea891d0fe7240dd8995abec5ed97457afa068eff7946a97cb93",
-      "fixture-baseline/receipt.json": "3fb042c1c8de2fa91b0de27946b4db56034f2195424519e93046a9efbb2a47bf",
-      "fixture-baseline/junit.xml": "b173b46ebb092a586f78bc9bb59d75e9413b5fc19ce1ecff0b5980c695912a3a",
-      "fixture-candidate/receipt.json": "ec414df87760b7807acc09fee35d4e107a8cdb786aee5f18d95a3569fa0b910f",
-      "fixture-candidate/junit.xml": "52e606448734bea9500e2ddcb33123984abeeafb9965385d87c09f258fb6728f",
-      "connected-candidate/receipt.json": "4db3ecffa78fcf9ba13af9fbf5f5f72a5ddc213e3ebfa72bda4cdc858b64cabb",
-      "connected-candidate/junit.xml": "c808dc8d0c95de4215a53b614062f183e1454427e2a85ee80f9e79f15519225d"
+      "preflight.json": "64bd24f7baaf4ddbb9ed9a736b5f504c0e2f1871c03875112b6b51d9881fcb8a",
+      "holo-query.json": "6d123fc685a6b2f2f21dfc512b05e15ab8c7c7c7676f827b4a4d39ae51e9bd8b",
+      "owner-paths.json": "456bd22edf36cb20e798d096581b7b0ffca2346928a86f1d90d7b807d3d93ed2",
+      "change-footprint-review.json": "3c6b59fea572ef974e6cf88a42dfb44f5b32a8155075c732b43949a90d699927",
+      "guarded_tests.py": "f47f36122f24f1691af682cfedc619829b03a61f96187e2108af0dca6b415865",
+      "regression-baseline/receipt.json": "4462a5684655900114fceeedd27a32999717f95251d4e750c75f22d8bcab62fa",
+      "regression-baseline/junit.xml": "41c52f87673d79cf352ccb0c589350c9a6df90d21cc99fbbbe363138348fd580",
+      "regression-candidate/receipt.json": "b6194bbcc2ed5194616cc80c67b6d7ed0f092de31ebb455ee6c3100e7bdd683f",
+      "regression-candidate/junit.xml": "ab1f16c0d68365a4534ab919976da320fb01b031377e5d7af87d2df69bdd87e5",
+      "connected-candidate/receipt.json": "a4ae6bbe50efb8cad4466af38f4993726af37929fb9b69dbcf6532b150b99795",
+      "connected-candidate/junit.xml": "b3dbf432a29b4fe6d29de7a0dfbd8d9fd6d7eccea70a0cde8e6bad7003243cfb",
+      "context-preview/receipt.json": "08616a9124b42b365a12a09b43d816021bd9a2201ad62480436b1a42c203dd5c",
+      "context-preview/junit.xml": "b6304b2ca469f90c6132e890aeac57842dd5bcd9b69570915009f991391a446c",
+      "source-review.json": "45ab6c1f642fcb7975507cd94f26944c841af756c47ac1438451612382b59721",
+      "independent-repair/receipt.json": "22c994a75695693375d9bb776f1ed747bc7a18a3e64aca0a9faedd5acb91df9a",
+      "independent-repair/junit.xml": "4ae63467c3527eea74a29979e4b82ba5598ad2f5fad691132dd733efe0180bb9",
+      "checkpoint-accounting.json": "720f66e945a3d3583c6028a09226fea69cf923945b7e71cd1ee1868a12ca4e57",
+      "local-validation.json": "aa8ec7f8bf23e6f04d84946fa7c534d06c3397a26ffa29d11e5f7eb37c8ba7f2",
+      "next-selection.json": "f9da376cd1ac317b76b036270d3b8667e9e5172030d8ee2e03324a62b861cfe8"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2284,8 +2291,8 @@
           },
           "score": 14,
           "priority": "P1",
-          "state": "blocked_route_owner",
-          "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task."
+          "state": "partial_hidden_projection_and_exact_id_dependencies",
+          "next_step": "Current98-peer inventory has no public-route path overlap; blanket owner blocking is too broad. detect_ai remains hidden/not_portfolio and absent from public projection, while shell matches exact IDs. Local alias/discovery contract qualification is possible without runtime admission, but alias alone remains not-found. Retain canonical identity and public activation boundary; do not duplicate entity."
         },
         {
           "task": "FoundUp-validation-fixture-reconciliation",
@@ -2479,8 +2486,8 @@
           },
           "score": 13,
           "priority": "P1",
-          "state": "qualified_pending_fixture_prerequisite_closure",
-          "next_step": "Close the independently diagnosed10/P2 core-receipt test fixture prerequisite, then re-observe and implement the existing-owner strict forced-dry contract. All production guards and shared-validator lifetime remain unchanged.",
+          "state": "independent_source_accepted_hosted_publication_pending",
+          "next_step": "Exact source/test review and245-case replay accepted. Complete final candidate review and hosted checks, then re-observe. Fixture prerequisite closed in PR1837. No live runtime or provider authority added.",
           "rationale": "Moderate cross-instance/callback compatibility complexity; critical isolation limitation; next-release urgency and significant internal benefit. Live delegation is already blocked, so this is not a production incident or an inherited 15-point investigation score."
         },
         {
@@ -2597,7 +2604,7 @@
           },
           "score": 10,
           "priority": "P2",
-          "state": "eligible_local_qualification_not_runtime_admission",
+          "state": "conditional_next_after_force_dry_closure",
           "next_step": "Read-only reconciliation of existing registry/scanner/intake prototype contracts; produce missing-evidence matrix and allowed local-evaluation seams in existing owners. No source activation, promotion or new skill.",
           "rationale": "Moderate three-contract reconciliation, useful reusable genesis readiness, deferrable because detect_ai already exists, limited impact without authoring capability. Independently scored; aggregate admission retains15/P1."
         },
@@ -2611,27 +2618,28 @@
           },
           "score": 10,
           "priority": "P2",
-          "state": "local_tests_pass_independent_review_and_publication_pending",
-          "next_step": "Review/publish only the local fixture adapter and explicit rejection controls. Preserve production normalization/provider rules and the shared enriched helper. Re-observe before forced-dry source repair.",
+          "state": "closed_pr1837",
+          "next_step": "Exact merged tree with ten successful PR checks and both main workflows successful;174 connected and independent overlapping tests passed.",
           "rationale": "Simple existing-helper adaptation; important trustworthy regression oracle; near-term prerequisite to selected13/P1 repair; limited test-evidence impact, no runtime capability."
         }
       ],
+      "selection_basis": "Fresh comparison of current source, registry, skill and98-peer path inventory supports existing10/P2 prototype-compatibility qualification (C3/I3/D2/Impact2) after this repair closes. Higher14/P1 public-route aggregate is not wholly owner-blocked: hidden/public-projection/exact-ID dependencies mean alias alone would remain not-found and not advance authoring. Prototype qualification reuses existing loader/scanner/intake evidence seams and advances reusable launch readiness. Preserve shared skill-registry owners; no promotion, registration or runtime authority.",
+      "selection_rule": "Fresh WSP15/97, source/ownership/CI check after completion or blockage; planning is not execution admission.",
       "provisional_next_action": {
-        "task": "FoundUp-consumer-force-dry-isolation-repair",
+        "task": "FoundUp-genesis-prototype-compatibility-qualification",
         "wsp15": {
           "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 3
+          "importance": 3,
+          "deferability": 2,
+          "impact": 2
         },
-        "score": 13,
-        "priority": "P1",
-        "state": "qualified_pending_fixture_prerequisite_closure",
-        "next_step": "Close the independently diagnosed10/P2 core-receipt test fixture prerequisite, then re-observe and implement the existing-owner strict forced-dry contract. All production guards and shared-validator lifetime remain unchanged.",
-        "rationale": "Moderate cross-instance/callback compatibility complexity; critical isolation limitation; next-release urgency and significant internal benefit. Live delegation is already blocked, so this is not a production incident or an inherited 15-point investigation score."
+        "score": 10,
+        "priority": "P2",
+        "state": "conditional_next_after_force_dry_closure",
+        "next_step": "Read-only reconciliation of existing registry/scanner/intake prototype contracts; produce missing-evidence matrix and allowed local-evaluation seams in existing owners. No source activation, promotion or new skill.",
+        "rationale": "Moderate three-contract reconciliation, useful reusable genesis readiness, deferrable because detect_ai already exists, limited impact without authoring capability. Independently scored; aggregate admission retains15/P1."
       },
-      "selection_basis": "The newly observed test-evidence prerequisite must close before accepting force-dry behavior. After exact closure, independently qualified13/P1 repair outranks the unrelated10/P2 prototype qualifier; higher aggregates retain their recorded dependencies.",
-      "selection_rule": "Refresh source/ownership/CI and apply WSP15/97 after closure; no automatic dispatch or runtime admission."
+      "independent_selection_receipt": "next-selection.json"
     }
   }
 }

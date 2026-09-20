@@ -1,3 +1,11 @@
+## 2026-09-21: Isolate consumer forced-dry execution
+
+- WSP 15/22/49/50/62/97; C3/I4/D3/Impact3 = 13/P1. PR1837 closed the prerequisite receipt fixture with ten PR checks and both main workflows successful.
+- The existing consumer snapshots its mode before routing/binding callbacks. The existing executor helper accepts keyword-only `force_dry_run=False`; literal True selects a fresh safe dry executor, leaving the warmed singleton untouched. False/omission preserves legacy selection. Invalid types fail before construction.
+- Default capability-validator identity and nonce history remain shared; custom warmed validators, tools, roots and controlled-adapter settings are not copied. Job flags, validation, model admission, token/action guards and live-delegation blocks are unchanged.
+- Regression baseline: 24 failures/23 passes; repaired: 47 passes. Expanded connected/size suite: 221 passes; ContextBundle wiring: 24 passes. Runs overlap and observed zero forbidden effects in the disposable Python guard. Independent review accepted the four-file source/test change and replayed the same 245 cases with zero forbidden effects; publication remains pending in the canonical backlog.
+- No runtime/provider calls or new module/skill. Normal root discovery applies and dry-run evidence can write; this is not OS containment, live admission, retained learning or an AmIBot build. Constructor cost remains unmeasured.
+
 ## 2026-09-21: Reconcile WRE core-receipt test fixtures
 
 - WSP 15/22/50/62/97; prerequisite C2/I3/D3/Impact2 = 10/P2 before the separate 13/P1 forced-dry repair. Focused unchanged-source baseline: 31 pass/16 fail; the initial connected subset was 132 pass/6 fail.
