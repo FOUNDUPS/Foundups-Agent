@@ -27,7 +27,7 @@ These are durable project documents. Preserve their file IDs and update in place
 | --- | --- | --- | --- |
 | `PICS` | **YUMORI Contact Photos & Business Cards** | Human-readable visual contact memory; photos/business cards | `10bLavCQg3FnjFQ3q_8JkyRw3Kmr4IatqUAGG8M3a-WI` |
 | `CONTACTS` | **YUMORI Master Contact Sheet** | Contact database and outreach tracking | `1BZl2F5B-bBQEGKsOhD0y7Wy1qPLnFJgyUUJEIR3QONo` |
-| `LOG` | **YUMORI Mosh Pit Activity Ledger** | Chronological activity ledger / transparency feed | `1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM` |
+| `LOG` | **YUMORI Moshpit Activity Ledger** | Chronological activity ledger / transparency feed | `1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM` |
 | `COMMITTEE` | **YUMORI Preparatory Committee Charter & Related Drafts** | Committee formation, rules and governance drafts | `15oRM09iAGQ09d7qRKmpO-bS-aoL1r7zFGfNu2EqjfS8` |
 | `PRESS` | **YUMORI Media Outreach & Press Kit** | Media-facing material and reporter context | `1Co7ruDw9BbihxsQ0DvgBVf-qTfrABfJXgscbTAcceXU` |
 | `PROCLAMATION` | **YUMORI Founding Declaration & Citizens' Statement** | Founding/civic declaration | `1VSzLUcf-L2gUYDSxwbcVBbS2Qj3JOwjPbtPB7KfbusA` |
