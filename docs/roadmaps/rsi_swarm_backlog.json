@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "470161321f6b95371b52c756d339560520f093c3",
+    "base_commit": "9909103ea4d38c6659438ea140c2f85b78a45686",
     "selected_action": "Hermes-runs-delegation-lifecycle-compatibility",
-    "status": "child_input_gap_qualified_next_lifecycle_plan_selected",
+    "status": "next_hermes_lifecycle_compatibility_plan",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1876,7 +1876,7 @@
     "origin": "autonomous_trigger",
     "principal_ref": "012",
     "previous_observation": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#m2m_prepared_context_digest_closed_20260920",
-    "status": "source_qualification_complete_pending_publication",
+    "status": "child_input_qualification_closed_pr1817",
     "selected_task": "Hermes-native-child-input-evidence-contract",
     "selected_score": {
       "complexity": 3,
@@ -2783,7 +2783,8 @@
         "Child constructor/user entry wiring is not proof of final model input.",
         "Top-level dispatcher requests background irrespective of model argument, but delivery/wake/pool fallback can be synchronous; no universal async/live-failure claim.",
         "No new WRE admission, AmIBot registry/build, deployment, verified retention or full RSI completion."
-      ]
+      ],
+      "remote": "PR1817 merged after all ten exact-head checks passed; all six independently reviewed document blobs and merge tree verified. Later main workflows recorded separately."
     },
     "effort_cost": {
       "repo_docs": 6,
@@ -2810,11 +2811,15 @@
       "official-ref-probe.json": "9e734483098b414d67f933967d1292e61daa7536b0dfd39336e3301c31dccd02",
       "official-tag-object.json": "946c9e1195340a6726721dc4e2c42b9a7bf75e800d9e83d499e5d426b8fa7a8a",
       "qualification-review.json": "d71102a7bd33b898425483d7c905dbce89242146099dea31d156e54d314460cb",
-      "next-selection.json": "f2c67ba314c10cc0afc9c1d00cfe88d96b1ce2fa3c387d7091fa1146df5c05ea"
+      "next-selection.json": "f2c67ba314c10cc0afc9c1d00cfe88d96b1ce2fa3c387d7091fa1146df5c05ea",
+      "final-validation.json": "e2dfa1368ece5525c9b2dc42dc2a9c980b08b24e8f6538c49f6f897348d7fd4c",
+      "final-review.json": "552d25587dd4d358ce02adf65a3e107012dd4b6d8da2849027244df0342c3efa",
+      "publication-readiness.json": "3d9015c8933163968f144dbe871b79a28dd95abab1dbe89a3abc4043fc7935bd",
+      "closeout.json": "4033bc0bcb83bcd4a772399cf3a91030c41e19b4188dfd3fedaa0a8e5cfb3650"
     },
     "post_sprint_reobservation": {
-      "observed_at": "2026-09-20T08:35:41.104456+00:00",
-      "base_commit": "470161321f6b95371b52c756d339560520f093c3",
+      "observed_at": "2026-09-20T08:48:05.517729+00:00",
+      "base_commit": "9909103ea4d38c6659438ea140c2f85b78a45686",
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
@@ -2831,7 +2836,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2849,7 +2854,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Independent runtime admission absent",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2870,7 +2875,7 @@
           "evidence": [
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2891,7 +2896,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2912,7 +2917,7 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2930,7 +2935,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2948,7 +2953,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current signed job/model/runtime admission absent",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -2966,7 +2971,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current deployment owner and runtime qualification",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "security_dependency": "Current Dependabot alerts322/286 for direct chromadb in holo_index/requirements.txt; first_patched_version is null. Exposure/mitigation needs existing owner evidence; no blind runtime change.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -2988,7 +2993,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3013,7 +3018,7 @@
             "genesis-next-source-overlap.json"
           ],
           "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -3038,7 +3043,7 @@
           ],
           "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding.",
           "why_score": "Existing security/dependency owners remain; no new exposure proof changes scope. The equally17/P0 typed genesis gap has a concrete local static witness and existing fixtures; continue security owner triage separately.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3056,7 +3061,7 @@
           "priority": "P0",
           "state": "partial_transaction_dependency",
           "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3074,7 +3079,7 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "012 reader-policy question remains unanswered",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3095,7 +3100,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Fresh1751 head04ef322f remains draft, CONFLICTING and validateFAILURE. Preserve permanent detect_ai lineage and route/project owner; no main registration or build dispatch claimed.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
@@ -3135,7 +3140,7 @@
           "effort": "One existing producer/consumer seam after contract retrieval.",
           "cost": "Deterministic fixtures first; provider cost remains unmeasured.",
           "verification_burden": "Independent exact-field/semantic preservation and scope failures before admission.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "score_reconciliation": "Historical18/P0 covered now-closed concrete serialization/seed handoff prerequisites. Residual local contract is15/P1; do not inherit18 automatically.",
           "fresh_disposition": "Remaining15/P1 is a broader provider/full-context fidelity contract, with no new demonstrated incompatibility or qualified source patch.",
           "retain_score": 15,
@@ -3156,7 +3161,7 @@
           "priority": "P1",
           "state": "eligible_contract_qualification_current_rescan_preserved",
           "next_step": "Qualify whole-wardrobe membership/content/manifest plus scanner executable/version/config identity before reusing any success. Reuse WRE reservation/fingerprint patterns only after proving their single-bundle assumptions. Current always-rescan is deliberate; live latency is a separate dependency, not a blocker to local planning.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Remaining15/P1 contract still requires whole-wardrobe/scanner ownership; live measurement unadmitted, no qualified next repair.",
           "retain_score": 15,
           "retain_history": true,
@@ -3179,7 +3184,7 @@
             "public/member/tests/test_route_contract_bridge.py"
           ],
           "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3201,7 +3206,7 @@
             "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
           ],
           "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3219,7 +3224,7 @@
           "priority": "P1",
           "state": "external",
           "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. Registry PR1751 triggers existing eSingularity assertions; treat this as an external owner dependency.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3241,7 +3246,7 @@
             "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
           ],
           "next_step": "Daemon per-counter lifetime closed; other consumers, actual shutdown/restart, transaction acceptance and retained benefit remain separately unqualified.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Parent partially advanced by daemon slice. Master SQLite memory is also shared with SkillSelector and handles outcomes/A-B records; remaining contract cannot simply reuse daemon counter repair. No new source-qualified handoff witness in this selection.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3263,7 +3268,7 @@
             "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
           ],
           "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3292,7 +3297,7 @@
           "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source.",
           "review": "next-fixture-contract-review.json",
           "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3308,7 +3313,7 @@
           },
           "score": 14,
           "priority": "P1",
-          "state": "selected_next_bounded_contract_plan",
+          "state": "selected_next_plan_after_verified_closure",
           "evidence": [
             "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
             "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
@@ -3320,7 +3325,8 @@
           "wsp97_action": "Reuse current provider lifecycle/event/transport owners and pinned sources. Do not force prose into runtime policy or weaken event confinement.",
           "effort": "Bounded source/data-flow compatibility review; no install, runtime or source mutation.",
           "cost": "Reuse pinned evidence; bounded missing-source retrieval only as next packet permits.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3"
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
+          "fresh_disposition": "Fresh source bindings and peer heads unchanged after reviewed documentation merge. Actual bounded lifecycle plan remains 14/P1, above R25 approval-owner plan 13/P1 and cache/recovery plans 12/P2; broader high-score parents remain dependent on owner or admission evidence. No live failure or runtime authority inferred."
         },
         {
           "task": "R25-A consented local daily-work proposal",
@@ -3334,7 +3340,7 @@
           "priority": "P1",
           "state": "compatibility_qualification_complete_source_contract_blocked",
           "next_step": "Choose and independently qualify an explicit feedback approval assertion, issuer and consumer under existing authenticated conversation/record owners. No exact source patch or new implementation score is qualified.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "evidence": [
             "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20",
             "r25-disclosure-contract-review.json",
@@ -3360,7 +3366,7 @@
           "priority": "P1",
           "state": "eligible_contract_qualification_after_currently_selected_seam",
           "next_step": "Use existing _run_with_report/_write_run_report, scratch allocation and rollback owners to specify process-interruption/recovery identity and independent recovery oracle. Missing source patch alone does not block planning; power/volume guarantees must not be inferred from Python finally or atomic replace.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Remains eligible-later at13/P1; process/volume recovery and oracle contract are broader than existing R19 discrepancy; no accepted next source slice.",
           "retain_score": 13,
           "retain_history": true,
@@ -3386,7 +3392,7 @@
           ],
           "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step.",
           "wsp97_action": "Reuse existing CI observation documentation and redteam test owner; preserve report-only policy and separate creation/selection/upload/listing/download evidence.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
           "blocker": "None in two-report delivery scope; observation-window stability and blocking activation remain separate.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -3413,7 +3419,7 @@
           "blocker": "None within completed planning scope; source repair is separately scored.",
           "wsp97_action": "Reuse existing dependency launcher probe/test and intentional activation owners. Qualify no-start advisory versus intentionally started execution without inventing an effect-use lease.",
           "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "effort_cost": "One bounded source/contract/test-seam qualification; no provider cost or runtime activation.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -3438,7 +3444,7 @@
           ],
           "blocker": "None in closed qualification; separately qualified source repair closed in PR1810. Other lifecycle concerns require their own evidence.",
           "next_step": "No remaining work in the closed qualifier. Preserve accepted defect evidence and execute only the separately scored source packet after fresh observation.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "effort_cost": "One existing owner/test pair contract qualification with injected threads/storage; no model/provider cost or service start.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -3467,7 +3473,7 @@
           "wsp97_action": "Remove shared cached-handle assumption in the existing daemon; reuse PatternMemory creating-thread ownership and existing tests. No new module, pool, skill or SQLite policy.",
           "next_step": "No remaining source work in this counter-lifetime slice; preserve accepted evidence and separately qualify other consumers or runtime concerns.",
           "why_score": "C2 localized ownership idiom; I4 observed telemetry integrity; D4 existing supervisor both starts and synchronously scans the same object; Impact3 scoped observation benefit. Independent review scored the actual source action, not the parent.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Merged and independently accepted existing-owner counter repair; removed from executable selection.",
           "effort_cost": "One source/test pair with required canonical docs and derived packaging updates; disposable tests, no paid provider or runtime calls.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -3495,7 +3501,7 @@
           "effort": "One upload-step edit plus existing documentation closure.",
           "cost": "No model/provider/runtime cost; normal PR CI and bounded selected artifact retrieval.",
           "verification_burden": "Exact semantic YAML diff, independent review, normal PR run-bound artifact list/download/XML/stdout checks; no dispatch or rerun.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3524,7 +3530,7 @@
             "Native Hermes child payload fidelity is separate: _request_payload instructs complete goal/context, while event validation binds child identity/order/status/effect counts. Parent egress integrity will not prove actual delegated child inputs.",
             "Existing higher external owners and explicit live authority/principal policy dependencies are preserved; this bounded comparison does not re-audit or dismiss those rows. R19 is not closed until root obtains hosted proof."
           ],
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "effort": "One bounded existing producer/binding/consumer contract qualification.",
           "cost": "Read-only source and existing deterministic fixtures first; no provider/runtime calls.",
           "verification_burden": "Independent exact-field and ownership review before any source change.",
@@ -3553,7 +3559,7 @@
           "wsp97_action": "Reuse existing preparation, capability and validator, preserve redaction and framing; no new owner.",
           "effort": "Five source seams, four existing test owners, manifest/two pins and required docs, within packet budgets.",
           "cost": "Deterministic fakes; zero model/provider calls.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Main changed only by reviewed documentation; five source seams and existing tests unchanged. Requalified13/P1 after closure, no source execution begun.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority."
@@ -3568,7 +3574,7 @@
           },
           "score": 13,
           "priority": "P1",
-          "state": "source_contract_qualified_no_full_fidelity_patch",
+          "state": "qualification_closed_pr1817_full_input_gap_remains",
           "evidence": [
             "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
             "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
@@ -3579,8 +3585,8 @@
           "wsp97_action": "Reuse current lifecycle/event/provider/test owners; distinguish requested input from authenticated actual child input.",
           "effort": "Bounded read-only qualification; six existing closure docs, no source/runtime changes.",
           "cost": "No model/provider calls; exact version-bound source retrieval only if absent locally.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
-          "fresh_disposition": "Bounded 13/P1 source qualification is complete; full child-input fidelity remains unsupported by the pinned route. New source evidence selects the distinct lifecycle compatibility plan at 14/P1; no source repair or runtime activation is qualified.",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
+          "fresh_disposition": "Qualification closed; pinned route lacks complete child-input evidence. No current consumer repair qualified. Lifecycle compatibility remains a distinct next action.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority."
         },
         {
@@ -3603,7 +3609,7 @@
           "wsp97_action": "Distinct next action from already completed compatibility qualification; preserve v1 IDs and architect-only disclosure.",
           "effort": "Bounded existing-owner plan and seven existing closure docs.",
           "cost": "Source inspection; no provider calls.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3"
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686"
         },
         {
           "task": "AutoResearcher-report-completeness",
@@ -3627,7 +3633,7 @@
             "Program/proposal, oracle, environment and authenticated reader evidence",
             "Resource measurement and independently retained benefit"
           ],
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "evidence": [
             "modules/infrastructure/wre_core/src/wre_auto_researcher.py:419",
             "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py:526"
@@ -3666,7 +3672,7 @@
             "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
           ],
           "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
@@ -3692,7 +3698,7 @@
           "blocker": "None within completed source scope.",
           "wsp97_action": "Extend existing probe and test owner, preserving receipt semantics, intentional Gateway exports and structural guards; no new module or authority.",
           "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "effort_cost": "One existing source/test pair plus required docs; deterministic disposable tests, no provider cost or runtime activation.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
@@ -3714,7 +3720,7 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module.",
-          "reconciled_against": "470161321f6b95371b52c756d339560520f093c3",
+          "reconciled_against": "9909103ea4d38c6659438ea140c2f85b78a45686",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
@@ -3737,10 +3743,13 @@
         "Actual execution outcome remains untested; qualification must trace finite API sessions, wake path, synchronous fallback and terminal/event ownership before code.",
         "R25approval-owner design remains eligible and distinct from closed compatibility qualification; no newlive012permission required for that design.",
         "Cache/recovery concrete plans12/P2 remain later; preserve broader parents and higher external/admission-blocked owners.",
-        "Source input observability gap is qualified; neither absent fields nor a successful child/output grants full fidelity. Do not retry recovered retrieval as though it were still blocked."
+        "Source input observability gap is qualified; neither absent fields nor a successful child/output grants full fidelity. Do not retry recovered retrieval as though it were still blocked.",
+        "After PR1817, re-observed all 38 histories against verified merge and 95 unchanged peer heads. Six-document qualification changes no source, admission or consent evidence. Rescored executable lifecycle plan C3/I4/D4/Impact3=14/P1 remains above R25 plan 13/P1 and actual cache/recovery plans 12/P2; blocked higher parents remain blocked."
       ],
       "peer_count": 95,
-      "status": "next_lifecycle_plan_pending_current_qualification_closure"
+      "status": "child_input_qualification_closed_next_lifecycle_plan_selected",
+      "local_branch_count": 648,
+      "worktree_count": 157
     },
     "next_packet": {
       "schema": "0102_m2m_v1",
@@ -3838,6 +3847,47 @@
       ]
     },
     "next_step": "Reconcile the current synchronous leaf/result acceptance contract with pinned upstream top-level background dispatch, finite-session wake/inline fallbacks and parent versus child terminal ownership. Qualify one smallest compatible existing-owner repair or state the exact producer/transport prerequisite; do not implement, weaken gates or activate runtime.",
-    "requires_fresh_reobservation_after_closure": true
+    "requires_fresh_reobservation_after_closure": true,
+    "remote_closure": {
+      "observed_utc": "2026-09-20T08:48:05.517729+00:00",
+      "pr": 1817,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1817",
+      "candidate": "b76afb079ac8f86bb277b1e7de4fdf129b454cc4",
+      "merge_commit": "9909103ea4d38c6659438ea140c2f85b78a45686",
+      "merged_at": "2026-09-20T08:47:42Z",
+      "merged_tree": "0a0eb83ba3b6ba63bcbf39e1ba1a60f4c930bd71",
+      "reviewed_blobs_match": true,
+      "exact_head_all_ten_success": true,
+      "peer_count": 95,
+      "peer_heads_unchanged": true,
+      "shared_checkout_unchanged": true,
+      "postmerge_workflows": [
+        {
+          "id": 35500540986,
+          "name": "CI",
+          "head_sha": "9909103ea4d38c6659438ea140c2f85b78a45686",
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35500540986"
+        },
+        {
+          "id": 35500540668,
+          "name": "Push on main",
+          "head_sha": "9909103ea4d38c6659438ea140c2f85b78a45686",
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35500540668"
+        }
+      ],
+      "scope": "Six existing planning and closure documents; no source change, runtime tests or live activation."
+    },
+    "checkpoint_branch": "agent/rsi-hermes-lifecycle-contract-20260920",
+    "repository_accounting_after_own_merge": {
+      "observed_utc": "2026-09-20T08:48:05.517729+00:00",
+      "merged_since_20260909_utc": 129,
+      "closed_without_merge": 21,
+      "open_peer_count": 95,
+      "method": "Prior complete 128-merge accounting plus this verified own merge; peer heads refreshed unchanged. Interval evidence, not an atomic full-repository snapshot."
+    }
   }
 }

@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`470161321f6b95371b52c756d339560520f093c3`, including PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`9909103ea4d38c6659438ea140c2f85b78a45686`, including PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,7 +60,7 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 128 merged PRs and 21
+Refreshed September 9 UTC onward accounting found 129 merged PRs and 21
 closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
 current full inventory reports 12 drafts and 15 PRs with failing checks; 20 have
 all-success checks, 59 have success/neutral/skipped results, and one has no checks.
@@ -170,6 +170,14 @@ latest-version substitution. Failures and corrected background wording remain
 in the source-bound receipts. No new tests, probes, source edits, provider calls,
 runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
 backlog preserves all36 prior histories and adds two separately scored actions.
+
+Qualification merged in [PR #1817](https://github.com/FOUNDUPS/Foundups-Agent/pull/1817) as `9909103ea4d38c6659438ea140c2f85b78a45686`.
+All ten exact-head checks passed; the six reviewed document blobs and merge tree
+match. Post-closure WSP 15/97 reconciliation of 38 histories selects the 14/P1
+lifecycle compatibility plan; it has not started. The full child-input evidence
+gap remains. Later main workflow results are separately recorded in the backlog.
+Accounting adds this verified merge: 129 merged, 21 closed without merge and
+95 unchanged peer heads. Protected shared checkout remains unchanged.
 
 ## Prepared-context integrity repair — 2026-09-20
 
