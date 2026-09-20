@@ -69,6 +69,9 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     assert "YUMORI Moshpit" in skill
     assert "0102 Moshpit" in skill
     assert "reverse chronological within each day" in skill
+    assert "https://docs.google.com/document/d/1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM/edit" in skill
+    assert "is the canonical YUMORI campaign ledger" in skill
+    assert "Do not create or maintain a parallel Markdown, DOCX, Library, or repository campaign ledger." in skill
     assert "Branch-protection “required” status alone is never sufficient evidence." in skill
     assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
 

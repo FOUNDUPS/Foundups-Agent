@@ -1,5 +1,10 @@
 # eSingularity TestModLog
 
+## 2026-09-20 — Canonical YUMORI Moshpit ledger pointer contract
+
+- Extended the existing Moshpit Skillz registry test; no duplicate test file was created.
+- The contract now requires the exact live Google Doc pointer, its canonical-ledger declaration, and the prohibition on parallel Markdown, DOCX, Library, or repository campaign ledgers.
+
 ## 2026-09-18 — PR lifecycle merge-gate regression
 
 - Extended the existing Moshpit Skillz registry test in `test_contracts.py`; no new test file.

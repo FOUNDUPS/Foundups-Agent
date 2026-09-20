@@ -1,5 +1,11 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — Canonical Google Doc bound to YUMORI Moshpit Skillz
+
+- Bound the reusable `yumori_moshpit` Skillz to the live Google Doc `LOG — YUMORI Moshpit Activity Ledger | 活動ログ` as the canonical campaign-history ledger.
+- Defined the repository Skillz as the routing/order/evidence contract rather than a parallel activity store, and prohibited Markdown, DOCX, Library, or repository ledger duplication.
+- Added a Drive-unavailable recovery rule: retain pending input for the next authorized Drive session instead of creating a competing public-Git activity copy.
+
 ## 2026-09-20 — Live Tsurugi-Otani field ticker
 
 - Replaced the expired September 16 field plan with 012-confirmed live activity as of 08:12 JST at an intersection in 福井市剣大谷町（つるぎおおたにちょう）, near the former Sukatto Land Kuzuryu.

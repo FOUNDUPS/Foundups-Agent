@@ -1,7 +1,7 @@
 ---
 name: yumori_moshpit
 description: Route YUMORI campaign events and 0102 learning events to the correct Moshpit, preserve reverse-chronological JST campaign history, and verify ledger structure after writes.
-version: 0.1.0
+version: 0.1.1
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -29,6 +29,16 @@ Maintain two distinct logs without relying on chat memory:
 - **0102 Moshpit** = agent operations, errors, repairs, confidence failures, reusable rules, and RED DOG CANDIDATE lessons.
 
 Do not duplicate an event into both logs unless the same campaign event also produced a meaningful agent-learning incident.
+
+## Canonical campaign ledger
+
+The live Google Doc **[LOG — YUMORI Moshpit Activity Ledger | 活動ログ](https://docs.google.com/document/d/1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM/edit)** is the canonical YUMORI campaign ledger.
+
+- Update that Google Doc in place when Drive access is available.
+- This repository Skillz is the routing, ordering, evidence, and recovery contract; it is not a second activity ledger.
+- Do not create or maintain a parallel Markdown, DOCX, Library, or repository campaign ledger.
+- If Drive access is unavailable, retain the event as pending input for the next authorized Drive session; do not substitute a public-Git activity copy.
+- Before every write, read the live document top and deduplicate against the current JST day.
 
 ## Event classification
 
