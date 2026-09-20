@@ -71,9 +71,9 @@ scope actually observed. Repository convergence is a prerequisite, not proof of
 independent retained learning or production RSI.
 
 **Current selection evidence:** `current_observation` in the [planning backlog](../roadmaps/rsi_swarm_backlog.json).
-The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) is preserved at 55 entries near its local size budget; Git retains subsequent observation history.
-The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: codec merged; generation now checks a detached order against its signed full-order digest.
-Next: admitted normalization and provider-bound canonical bytes/context, 18/P0. No planning, codec or local test grants runtime authority.
+The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) preserves historical checkpoints; its JSON field count is not a count of experiments or completed RSI cycles. Git retains subsequent checkpoints.
+The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: registry candidate held in draft PR1751; explicit M2M profile/signing, provider fidelity and seed API input qualified locally; runtime admission remains open.
+Explicit proposal-plan admission and receipt-to-seed consistency are locally qualified through the merged handoff work. The current backlog records remaining context/child fidelity, runtime admission and AmIBot gates, exact validation and fresh main workflow status. Use its re-scored action rather than the historical18/P0 parent as an automatic assignment. No planning checkpoint grants ingress or runtime authority.
 
 ## Production-line operating model
 

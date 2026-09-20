@@ -1,5 +1,33 @@
 # eSingularity TestModLog
 
+## 2026-09-20 — YUMORI.me correspondence registration and voice contracts
+
+- Extended the existing operational-skill contract test for the `yumori_contact_ledger` WRE entry, canonical Skillz file, thin projections, 0102 proxy voice, third-person monk boundary, default signature, and recursive-learning marker.
+- Reused `test_contracts.py`; no parallel test file or private recipient fixture was added.
+- Exact-head CI exposed the expected fail-closed RedDog compatibility digest after the registry changed. Refreshed the generated registry and manifest digests, then reran the failing backend-compatibility contract.
+
+## 2026-09-20 — Multilingual live ticker control plane
+
+- Extended `test_jhr_public_contract.py` in place for the versioned JSON schema, required Japanese/English/Portuguese copy, explicit expiry, one-minute live-branch polling, visibility and timestamp bounds, allowed destinations, safe fallback, and isolation from the legacy DOM translator.
+- Updated the existing ticker/deck contract in `test_contracts.py` for structured localized actions and the JSON status source; no parallel test file was created.
+
+## 2026-09-20 — Canonical YUMORI Moshpit ledger pointer contract
+
+- Extended the existing Moshpit Skillz registry test; no duplicate test file was created.
+- The contract now requires the exact live Google Doc pointer, its canonical-ledger declaration, and the prohibition on parallel Markdown, DOCX, Library, or repository campaign ledgers.
+
+## 2026-09-18 — PR lifecycle merge-gate regression
+
+- Extended the existing Moshpit Skillz registry test in `test_contracts.py`; no new test file.
+- The contract now requires explicit rejection of branch-protection-only evidence and forbids merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed.
+- Baseline-unrelated red workflows require independent evidence and a separate owner rather than silent exclusion.
+
+## 2026-09-18 — YUMORI Moshpit Skillz / Rolodex contract
+
+- Reused `test_contracts.py` after reviewing this TestModLog and the tests README; no duplicate test file was created.
+- Added a regression that requires the canonical `skillz/yumori_moshpit/SKILLz.md`, its `prototype` WRE registry entry, 0102 ownership metadata, both thin operator projections, and absence of the duplicate legacy module `SKILL.md`.
+- Corrected two stale exact-route assertions exposed by CI to current main truth: the shared field-status destination is `https://yumori.me/`, and the JHR ticker action is `/reports/jhr#jhr-002`. The assertions remain exact and were not weakened to generic pass-through checks.
+
 ## 2026-09-13 — Civic-message route and ticker action coverage
 
 - Extended the existing public-contract suite for the YUMORI.me council/mayor route, supersession notice, privacy boundary, official council contact, removal of the obsolete Monk action, the 10/20/32 px/s responsive ticker ladder, and the phone bottom-dock/swipe contract.

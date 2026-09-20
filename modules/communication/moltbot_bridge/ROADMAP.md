@@ -1,4 +1,364 @@
+## Recursive wardrobe cache qualification — 2026-09-21
+
+**Decision: keep current rescanning.** The optional C3/I2/D2/Impact2 = 9/P3
+qualification is complete; no cache source slice is justified. This optimization
+is not a prerequisite for AmIBot. Static review establishes neither scan latency
+harm nor a speedup. Exact source baseline is main `734d46fa`, with independent
+review and immutable prior closure linked by the root RSI backlog.
+
+| Existing owner | Covered inputs and remaining boundary |
+|---|---|
+| `openclaw_permission_policy.py:298` / `openclaw_dae.py:735` | Required/enforced/severity snapshot and post-scan drift check; call-local Boolean/details pair. TTL/ALWAYS/force remain compatibility inputs, not reuse permission. |
+| `skill_safety_guard.py:111` | Root SKILLz.md then SKILL.md selects `scan`; otherwise `scan-all --recursive`. Actual external scanner traversal/support-file reads are not qualified. |
+| `skill_safety_guard.py:133,168,232,276` | Manifest required/enforced/signature/allow-extra/override, protected key authority, scanner override/PATH/fallback, argv, inherited cwd, allowlisted environment, private TEMP/TMP, timeout and parser/severity affect the result. A future identity needs their resolved generations, without exposing secrets. |
+| `skill_manifest_guard.py:42,126,239` / `skill_path_security.py` | Discovery covers recursive SKILL.md/SKILLz.md/executor.py; explicit entries may name more files. Declared hashes/signatures and link/reparse checks do not prove equality with the scanner's full read set. |
+| `skill_runtime_admission.py:45,94,175` / `registered_skill_executor.py:132` | Existing WRE key binds directory/four-file fingerprint/severity, with pending ownership, capacity, TTL/force, cancellation and post-scan rehash. Four files are SKILLz.md/SKILL.md/executor.py/SKILL_MANIFEST.json; reuse the mechanism as reference, never its verdict as wardrobe authority. |
+
+Reopen only after measurable workload benefit and a complete input/use-time
+contract exist. Cover additions, deletion, rename, nesting, support files, root
+mode, path aliases/links/reparse, manifest policy/override/signature authority,
+scanner/interpreter/dependency/config version, cwd/environment, and scan-to-use
+changes. Pre/post equality alone does not prove atomicity or exclude ABA changes.
+Latest diagnostic JSON is mutable; only each call's verdict/message is local.
+
+Future synthetic oracles belong in the existing `test_skill_safety_guard.py`,
+`test_wre_runtime_admission_truth.py`, `test_wre_execution_truth.py` and
+`test_skill_manifest_guard.py`: unchanged complete identity positive control;
+each changed input invalidates; pending/failed/malformed/timed-out/cancelled work
+never reuses success; late reservations and nested callbacks preserve ownership;
+force/ALWAYS/expiry/backwards clock and use-time byte mismatches reject reuse.
+No such new tests ran here. Source/test spans, runtime manifest, registry and pins
+remain unchanged; any future repair needs its own size/package budget and review.
+
+## Call-local skill-safety diagnostic repair — 2026-09-21
+
+The 10/P2 repair implements the contract qualified in PR1829 in the existing
+policy, DAE wrapper and process consumer. Default/no-argument/force calls return
+Boolean; only literal `details=True` returns this call's `(allowed, message)`.
+The process caller validates Boolean/text fields, branches on the verdict and
+uses the local message for its warning, blocked action/response and passed action.
+Malformed pairs raise before downstream preflight/execution; earlier continuity
+and classification reporting may already have occurred. There is no latest-state
+fallback. Latest status rendering, rescan, policy-drift and scanner semantics stay.
+
+Qualified baseline59 failures/82 passes/one link skip becomes141 passes/one skip;
+independent replay agrees. Two existing real-child cases are excluded. The first
+baseline62 failures included26 Windows asyncio socket self-pipe guard failures;
+the harness was corrected narrowly, without changing product/test criteria.
+New detail-mode API expectations are separate from the four consumer witnesses.
+All88 original test assertions are retained apart from the intentional keyword
+expectation migration. Source spans remain322/25,1580/3 and229/216; no new owner.
+Backend1400 membership is unchanged, with three source hashes/two pins refreshed.
+Exact packaging, registry, publication and rescore evidence: current RSI backlog.
+No live scanner/provider/service, retained-learning or AmIBot-readiness claim.
+
+## R25 approval-owner qualification — 2026-09-20
+
+The13/P1 planning action is complete with a precise implementation dependency.
+Authenticated conversation identity is not approval to disclose an exact summary
+as FoundUp feedback. The current closed TURN/STATUS/CANCEL envelope lacks that
+action, and all three resident admission aggregates remain host-unwired.
+Preserve the external RedDog durable-adapter owner; this sprint does not wire it.
+
+Prefer a conditional explicit-version assertion in the existing signed record
+owners, rather than a second consent engine. Current v4 schema is immutable under
+ordinary CAS: creation or a version transition must be qualified before source work.
+No complete R25 implementation packet is admitted by this planning result.
+
+The existing [R25 packet](../../../docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) now
+records exact preapproval bytes, prior-source binding, current revocation/retry
+checks, legacy compatibility and the missing issuer-to-consumer handoff.
+No tests or behavior probes ran; source-bound independent review validates the
+finding, not consented feedback or live RSI. Both PR1819 main workflows passed.
+
+Re-scoring retains39 histories and adds one distinct12/P2 AutoResearcher
+process-recovery oracle plan. It wins the tie over cache planning because truthful
+interruption/report ownership advances RSI evidence, while always-rescan remains
+deliberately safe. Its parent13/P1 score is not inherited. The next packet remains
+conditional on exact closure and fresh reconciliation; no next-plan work ran here.
+
+## Historical parent-only Hermes rejection evidence — 2026-09-20
+
+The existing lifecycle owner now keeps effect observation and abort confirmation
+false after parent-only stop evidence and noncompleted/forbidden terminal rejection.
+Best-effort stop/status calls, rejection reasons, effects-possible reporting and
+withheld artifacts remain. Successful acceptance and event/confinement gates are
+unchanged; this does not implement detached-child cancellation or result delivery.
+
+The C2/I4/D4/Impact3 = 13/P1 repair uses one source and one existing test owner.
+Qualified red-v2: 10 failed/98 passed; focused green: 108 passed. The initial
+test-assertion placement error is retained separately, not counted as a product
+regression. Connected-v2 passes 114 after a Windows extended-path isolation-guard
+correction; the earlier seven harness failures remain recorded. Independent review
+accepts 117 passes: the same 108 focused cases plus nine external controls.
+All use fakes/disposable state, with no live provider or sandbox proof. Manifest
+check/eight tests, 15 extension fast groups and the 67-file package pass;
+exact-head closure remains separately bound in the current backlog.
+
+After this repair closes and fresh ownership/source checks pass, the conditional
+next action is R25 approval-owner planning at 13/P1. Preserve all 39 histories
+and 26 original packets; no next-plan execution or feedback authority is implied.
+
+## Historical Hermes lifecycle qualification — 2026-09-20
+
+Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
+14/P1 compatibility question. Both PR1817 main workflows now pass. This is
+source qualification, not a live runtime test or proof of installed version.
+
+| Boundary | Qualified finding |
+|---|---|
+| Top-level dispatch | Model `background=false` does not govern dispatch. API binds `async_delivery=False`, but a captured nonempty API session ID permits background dispatch through the wake-target branch. |
+| Accepted background work | Children detach from the parent list; dispatch returns a handle. Combined results are persisted and published to a separate process completion queue; delivery into a new turn or the original run is unqualified. |
+| Inline fallback | No usable async/wake path or rejected dispatch can execute inline. Capacity fallback occurs after detachment; it does not establish parent-owned cancellation. |
+| Original run | Parent conversation return controls terminal output/status and stream closure. Existing child-before-delegate-completion and terminal-last checks remain unchanged. |
+| Stop evidence | Parent stop invokes an interrupt and schedules process cleanup. A parent `cancelled` status does not establish detached-child quiescence or complete effect observation. |
+
+The [pinned delegation owner](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/tools/delegate_tool.py#L4088)
+and exact session/async/interrupt sources were inspected: four prior immutable
+files reused and three permitted dependency reads used. The completion queue
+consumer/wake implementation remains unqualified. Do not relax event gates,
+change private depth/session identity, or substitute another endpoint on this evidence.
+Full child-input fidelity, result delivery and live sandbox readiness remain open.
+
+At that checkpoint, the qualified successor was a conservative correction in existing
+`reddog_hermes_api_run_lifecycle`: retain best-effort stop/status and rejection,
+but report incomplete effect observation and unconfirmed abort from parent-only
+stop evidence. Failed/cancelled terminal rejection must also report incomplete
+observation because those event checks do not establish child closure. Existing
+receipt fields already represent this uncertainty. No schema
+or shared consumer change is needed. This does not implement detached cancellation,
+change successful-result acceptance, or prove a live leak.
+
+WSP 15 then selected that repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
+approval-owner planning. The verified receipt overclaim breaks the tie; R25 remains
+eligible. All 26 original packets and 38 prior candidate histories are preserved;
+one repair row makes 39. No source/tests/runtime changed during this qualification.
+That qualification's implementation packet led to the repair recorded above.
+
+## Hermes child-input evidence qualification — 2026-09-20
+
+Historical PR1817 qualification; current lifecycle finding and next action are above.
+
+Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
+Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
+the official v2026.8.18 tag resolves to commit
+`e624e9fde561e1add9388384012b295fde669ade`, whose package version matches.
+The legacy vendor gitlink is0.9.0 and is not this API-provider source. Neither
+release metadata nor historical canaries prove the current installed runtime.
+
+| Boundary | Verified source contract |
+|---|---|
+| Prepared parent | Existing raw-context/prompt checks precede provider effects; approved redacted strings enter the parent request. |
+| Requested delegation | Parent prose requests complete goal/context and background=false; it is not observed child acceptance. |
+| Child construction | Pinned delegate source places goal in child user input and nonblank context in its system framing. Final model delivery remains unproven. |
+| Current /v1/runs events | Producer drops tool arguments/call linkage; child whitelist has redacted goal and lifecycle metadata, but no complete context or accepted input. |
+| Local verifier | Checks run/child/session identity, ordering, reported empty effects and parent terminal-output agreement. These do not establish child content fidelity. |
+
+The [pinned API producer](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/gateway/platforms/api_server.py#L6580)
+feeds the same queued dictionaries to the run event stream. Generic preview
+completeness is unknown; a goal-only check cannot close missing context coverage.
+The separate /v1/responses argument stream has a different contract and cannot
+be substituted without qualification. The smallest prerequisite is an adequate
+version-bound accepted-child-input evidence contract in existing upstream/route
+owners. No consumer patch, invented telemetry field or new authority is qualified.
+
+New source evidence changes priority: the pinned model dispatcher ignores the
+background argument and requests background when `_delegate_depth` is not above0.
+Actual delivery can still fall back inline through session/wake/pool conditions.
+This conflicts with relying on parent prose for synchronous execution, but is not
+a demonstrated live failure. Next is bounded lifecycle/result-delivery compatibility
+qualification, C3/I4/D4/Impact3=14/P1, before R25approval-owner planning13/P1.
+Preserve the existing layered/error telemetry positive case and event confinement;
+do not loosen gates or change instructions until the pinned path is understood.
+
+The initial raw-host429 was recovered through one responsive official contents
+API read at the same commit: five of six source requests used, no raw retry or
+latest-version substitution. Failures and corrected background wording remain
+in the source-bound receipts. No new tests, probes, source edits, provider calls,
+runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
+backlog preserves all36 prior histories and adds two separately scored actions.
+
+## Prepared-context integrity repair — 2026-09-20
+
+The existing runtime now seals the exact prepared raw governed context together
+with the canonical prompt. OpenClaw, Hermes and Fusion verify both before their
+existing effect boundaries. Legitimate context redaction remains supported;
+partial canonical bindings fail closed, while all-absent legacy calls remain.
+Regenerate older canonical calls through the current preparation path.
+
+Local validation: 45 intended red failures resolved; 247 focused and 39 connected
+tests pass. Independent review repeats the 247 cases and adds 26 adversarial
+probes; repeats overlap. Two real-process fixtures remain deliberately excluded.
+Actual capability replay/callback isolation, empty evidence, 24,000/24,001 bounds
+and final fake provider framing are covered. No live provider/child proof follows.
+Manifest generation/check and eight packaging tests pass; 15 extension fast groups,
+67-file package and unchanged test registry pass. Inherited test-pin drift was
+reproduced before repair and reconciled with both existing pins.
+
+WSP15 re-observation retains all 35 prior histories and conditionally selects
+Hermes native-child input-evidence qualification (C3/I4/D3/Impact3=13/P1) after
+this repair closes. R25 approval-owner planning is also eligible at13/P1; the
+tie favors the concrete current handoff boundary. Cache/recovery plans score12/P2.
+Native-child telemetry must be version-bound; no new implementation is qualified.
+Source provenance, live admission, AmIBot registration/build and retained RSI
+remain open. Exact receipts and publication state are in the current backlog.
+
+## Governed-context binding contract — 2026-09-20
+
+Historical PR1815 baseline, superseded by the repair above. Preparation then built
+canonical prompt plus JSON output rules/evidence and enforces their combined
+24,000-character bound. The invocation binding seals only the prompt. Twelve
+synthetic cases, including 27 mocked adapter calls, confirm altered context can
+cross each existing adapter's validator. Prompt tampering and blocked redaction
+still reject before mocked effects. No live provider or repository source changed.
+
+The next M2M-prepared-context-digest packet reuses five source owners: runtime,
+shared validator and OpenClaw/Hermes/Fusion call sites. Add a canonical-only digest
+of the exact prepared RAW context before existing capability issuance. Reuse its
+detached JSON storage and one-use consumption. Check raw context at the current
+validator before runtime-root/process, key/API or Fusion key/loader effects.
+Never derive expected identity from later caller-supplied context.
+
+| Stage | Contract |
+|---|---|
+| Canonical M2M prompt | Existing exact raw/redacted prompt checks and codec unchanged. |
+| Prepared raw context | Bind serialized output contract/evidence with existing digest. |
+| Redacted context | Existing trusted fusion_redaction.v1 audit gate; may differ from raw. |
+| Final provider frame | Unchanged adapter framing; eventual native-child inputs unproven. |
+
+All-absent canonical markers preserve legacy behavior. Missing/null/malformed
+canonical context digests, including context-only partial markers, must reject;
+regenerate old canonical calls through the updated runtime. Empty evidence still
+produces structured context. Preserve combined bounds and capability replay checks.
+The redaction witness used newly supplied synthetic email text, not matching
+future sealed-context metadata; the next repair needs that positive test.
+Callback isolation and actual final framing were source-inspected, not dynamically
+proven by these adapter stubs.
+
+The subsequent source sprint needs FOUR existing test owners: bounded runtime,
+bounded authority (Fusion), OpenClaw provider and Hermes provider. This qualifier
+used three existing fixture owners; it did not expand its 12-case budget. Existing
+backend manifest and both digest pins must be regenerated together. The current
+generator-test pin disagrees with the extension pin; preserve that inherited
+baseline separately from new defects. Exact paths, size baselines, growth budgets
+and validation are in the current root backlog's next_packet.
+
+Actual canonical encode/decode caught invalid routing fields in the first next-packet draft. The corrected packet roundtrips exactly at 9,578 UTF-8 bytes; its initial receipt and failure remain in evidence. This is planning validation, not admission.
+
+The broader M2M15/P1 parent remains partial. No new capability/module/skill,
+scheduler, startup hook, live WRE admission, AmIBot build/registration, public
+deployment or retained-learning claim follows from this contract.
+
+## RSI commander genesis handoff — 2026-09-20
+
+Existing intent metadata now reaches the validated, detached dry-run job payload;
+legacy bare-build precedence and current action/mode remain. Source990lines,
+dispatcher40/handler78; independent review accepted after3defects were repaired.
+Focused111pass; connected1048pass with4unchanged-main failures retained. Exact
+hashes, packaging checks and remote closure live in the root RSI backlog.
+Next selection must reconcile those fixtures, public draft-to-commander authority,
+AmIBot's existing draft/registry/G0 gates and current worker admission separately.
+
+## RSI producer-to-bootstrap checkpoint — 2026-09-20
+
+PR1797 merged canonical child serialization; its main CI and CodeQL passed.
+The existing seed bootstrap now selects a declared plan only when its argument
+is omitted, freezing the single raw determination read before later callbacks.
+Explicit None/empty semantics and lower supplier scope/authority checks remain.
+The bounded step scores14/P1 within the18/P0 shared handoff parent; existing
+bootstrap regressions first fail7/pass34; review adds2red cases, then43pass. Source215/function111.
+Independent acceptance, connected tests and exact-head closure live in the root
+backlog. Re-observe after closure; daily-work R25-A15/P1, typed genesis ingress,
+AmIBot's existing draft/G0 and live runtime admission remain separate gaps.
+
+## RSI direct-profile consistency checkpoint — 2026-09-20
+
+The existing direct promotion and bootstrap ingress now require explicit profile
+agreement with a declared proposal plan, and freeze legacy absence before callbacks.
+Existing typed, receipt/candidate lineage and declared-scope checks are reused.
+Local connected/publication tests pass 571/32; exact review and closure evidence
+are in the root backlog. No new owner, module, skill, startup wiring or exemption.
+Close the owned candidate, then re-observe before selecting automatic forwarding.
+Whole-plan completeness, current admission and retained RSI remain open; AmIBot G0
+is not complete. Earlier checkpoint entries below are historical.
+
+## RSI seed-plan lineage checkpoint — 2026-09-19
+
+The explicit receipt-to-seed consistency prerequisite is locally verified.
+Plan-bearing receipts require matching explicit input, detached structural lineage
+and agreement with effective seed constraints. Legacy no-plan bytes remain.
+Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass.
+Close the owned candidate through CI, then reobserve under WSP15+97. Direct profile/
+promotion ingress, automatic selection and current runtime admission remain open.
+No automatic extraction, main wiring, live worker admission or retained-learning claim. AmIBot registry remains draft PR1751 under detect_ai with an external protected validation failure.
+
+## RSI explicit proposal-plan checkpoint — 2026-09-19
+
+The existing architect proposal admission now accepts optional normalized
+`bounded_worker_plan`, detaches it before callbacks, validates supplied receipt
+mirrors and conservative lexical scope, and binds the full plan into the v3 receipt.
+None/absence preserves all three legacy golden wires; `{}` stays explicit. Reused
+profile/codec owners cover both nested receipt locations. No new module or input route.
+Partial plans remain representable; this does not establish executable completeness.
+
+Independent local reviews accepted the exact seven source/test files after repairing
+wildcard deny overlap and non-plain ancestor coercion. Reconciliation onto main
+`123d86263` preserves their normalized hashes. Current-main run: 524 passed, five
+filesystem failures, one platform skip; the complete affected serial suite passes
+64/one skip with a short external temp root. Across those runs, all 529 applicable
+test IDs pass. Eight manifest tests/15 fast groups pass; registry is 1,651/269.
+
+Next under the shared 18/P0 handoff item: trace receipt-to-seed provenance and
+consistency before forwarding. The seed supplier still accepts a separate explicit
+plan, and `main.py:2844` omits it. Principal normalization, current runtime admission,
+native-child fidelity and retained RSI remain open. The root backlog owns sequencing,
+exact evidence and preserved failures. AmIBot remains at G0 with draft PR #1751.
+
 # moltbot_bridge Roadmap
+
+## RSI producer contract checkpoint — 2026-09-15
+
+PR #1763 merged as `da79e5efa` after ten passing checks. Two independent audits
+found no admitted normalized producer; the seed caller must remain unwired.
+Use the existing parsed architect model-output/proposal admission boundary for
+the next 18/P0 source slice. Preserve old receipt bytes and scope/type policies,
+then bind explicit plan data into the current receipt and downstream identities.
+The root backlog owns its bounded packet, compatibility gates and evidence.
+The 17/P0 genesis alternative also has an undeclared intake attachment and a weak
+fixture assertion; it is not an already wired substitute. No code/runtime change
+or new module/skill was made in this contract-trace checkpoint.
+
+## RSI seed-input checkpoint — 2026-09-15
+
+Both existing seed APIs now detach explicit normalized plans before receipt work
+and include them before seed receipt hashing. None retains old bytes; empty plans
+remain explicit. Existing typed, ASCII, scope, signing and no-effect gates remain.
+69 focused tests pass; independent 320 includes 52 adversarial cases (overlapping
+counts). Eight manifest tests, 15 fast groups and registry 1650/269 pass. Seed owners
+sit outside the current 1,400-member backend closure; manifest/pins stay unchanged.
+The APIs are qualified locally. `main.py:2844` still supplies no plan. WSP15/97
+selects producer/caller contract retrieval next under the shared 18/P0 handoff item.
+No new module/skill/parser/env route or runtime authority; AmIBot remains at G0.
+PR #1761 provider delivery merged as 8da0551f; exact-head and main CI/CodeQL passed.
+Root roadmap/backlog owns current sequencing; earlier entries are historical.
+
+## RSI canonical provider checkpoint — 2026-09-15
+
+Canonical signed-plan contents now reach local Fusion/OpenClaw/Hermes adapter egress.
+Whole request snapshots precede request-authority consumption; schema and prompt
+digest are sealed before model issuance. Changed raw/redacted packets reject before
+credentials, directories or provider calls. Invalid canonical requests consume their
+matching one-use handle. Legacy bytes and the 24,000-character budget remain.
+
+692 connected tests pass/one existing platform skip; independent review accepted
+309 checks plus 31 after AST-equivalent Fusion formatting. Two unchanged WSP62
+failures remain documented; Fusion itself is reduced206→200 without an exemption.
+Evidence, failed drafts and artifact-collision recovery are in the backlog current observation.
+
+WSP15/97 selects the existing explicit seed-supplier/bootstrap input boundary next,
+18/P0. Producer normalization, full context/native-child fidelity and live model/work
+authority stay open. AmIBot registry PR1751 remains draft with external CI debt.
+Root roadmap/backlog owns sequencing; earlier checkpoints below are historical.
 
 ## RSI generation admission checkpoint — 2026-09-15
 

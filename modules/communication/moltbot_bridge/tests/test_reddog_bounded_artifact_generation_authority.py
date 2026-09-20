@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import copy
+import json
 import pickle
+from types import SimpleNamespace
 
 import pytest
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
     canonical_model_runtime_binding_digest,
@@ -18,6 +21,7 @@ from modules.communication.moltbot_bridge.src import (
 )
 from modules.communication.moltbot_bridge.src import (
     reddog_bounded_artifact_generation_runtime,
+    reddog_foundups_fusion_artifact_provider as fusion_provider,
 )
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_admission_capability import (
     ArtifactGenerationAuthorityCapability,
@@ -41,6 +45,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_bounded_artifact_gen
     TASK_FAMILY,
     FakeRunner,
     _generate,
+    _m2m_context,
+    _m2m_envelope,
+    _mapping_digest,
     _request,
     _runtime_receipt_id,
 )
@@ -373,10 +380,14 @@ class _ReplayRunner:
         return self.results[1]
 
 
+@pytest.mark.parametrize("canonical", [False, True])
 def test_model_capability_is_one_shot_and_cannot_be_copied(
     monkeypatch: pytest.MonkeyPatch,
+    canonical: bool,
 ) -> None:
     request = _request()
+    if canonical:
+        request["m2m_envelope"] = _m2m_envelope()
     network_calls: list[dict[str, object]] = []
 
     def fake_fusion(api_key, user_payload, messages, payload):
@@ -466,3 +477,287 @@ def _successful_fusion(calls):
         }
 
     return run
+
+
+@pytest.mark.parametrize("envelope", [
+    None, {}, [], False, "", {"ROLE": "worker"}, "invalid_ref", "opaque_input",
+])
+def test_m2m_malformed_request_rejects_before_model_capability(monkeypatch, envelope):
+    if envelope == "invalid_ref":
+        envelope = _m2m_envelope() | {"R": [True]}
+    elif envelope == "opaque_input":
+        envelope = _m2m_envelope() | {"I": {"opaque": object()}}
+    effects, runner = [], FakeRunner()
+
+    def forbidden_issue(**kwargs):
+        effects.append("model_capability")
+        pytest.fail("malformed envelope reached model capability issuance")
+
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_issue_artifact_generation_model", forbidden_issue)
+    result = _generate(_request(m2m_envelope=envelope), runner=runner)
+    assert result.accepted is False
+    assert "FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE" in result.rejection_reasons
+    assert runner.calls == effects == []
+
+
+@pytest.mark.parametrize("payload_field,offset", [
+    ("evidence_context", -1), ("evidence_context", 0), ("evidence_context", 1), ("packet_action", 1000),
+])
+def test_m2m_combined_prompt_context_budget_is_exact(monkeypatch, payload_field, offset):
+    request = _request(m2m_envelope=_m2m_envelope(), evidence_context="")
+    wire = encode_m2m_envelope(request["m2m_envelope"])
+    padding = "x" * (24_000 - len(wire) - len(_m2m_context(request)) + offset)
+    if payload_field == "packet_action":
+        request["m2m_envelope"]["A"] += padding
+        wire = encode_m2m_envelope(request["m2m_envelope"])
+        assert len(wire) > 24_000  # Codec-valid packet alone exceeds the transport budget.
+    else:
+        request["evidence_context"] = padding
+    assert len(wire) + len(_m2m_context(request)) == 24_000 + offset
+    runner, effects = FakeRunner(), []
+
+    def forbidden_issue(**kwargs):
+        effects.append("model_capability")
+        pytest.fail("oversized canonical prompt/context reached model capability issuance")
+
+    if offset > 0:
+        monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_issue_artifact_generation_model", forbidden_issue)
+    result = _generate(request, runner=runner)
+    assert result.accepted is (offset <= 0), result.rejection_reasons
+    if offset <= 0:
+        assert runner.calls[0]["prompt"] == wire
+        assert len(runner.calls[0]["prompt"]) + len(runner.calls[0]["context"]) == 24_000 + offset
+        assert runner.calls[0]["binding"]["m2m_context_digest"] == _mapping_digest(_m2m_context(request))
+    else:
+        assert "FAIL_ARTIFACT_GENERATION_MODEL_OUTPUT" in result.rejection_reasons
+        assert runner.calls == effects == []
+
+
+@pytest.mark.parametrize("mutation", ["add", "remove", "action", "nested_type", "tuple_repair"])
+def test_m2m_request_mutation_invalidates_existing_authority(mutation):
+    request = _request()
+    if mutation != "add":
+        request["m2m_envelope"] = _m2m_envelope()
+    if mutation == "tuple_repair":
+        request["m2m_envelope"]["I"]["values"] = (True, 1)
+    authority = _issue_artifact_generation_authority(request)
+    if mutation == "tuple_repair":
+        digest = _mapping_digest(request)
+        rejected = generate_bounded_artifact_contents(request, runner=FakeRunner(), authority_capability=authority)
+        assert "FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE" in rejected.rejection_reasons
+        request["m2m_envelope"]["I"]["values"] = [True, 1]
+        assert _mapping_digest(request) == digest
+    elif mutation == "add":
+        request["m2m_envelope"] = _m2m_envelope()
+    elif mutation == "remove":
+        del request["m2m_envelope"]
+    elif mutation == "action":
+        request["m2m_envelope"]["A"] = "Changed after request authority issuance"
+    else:
+        request["m2m_envelope"]["I"]["context"]["checks"][0] = 1
+    runner = FakeRunner()
+    capability = model_runtime_binding_test_capability(request["model_selection_receipt"], request["model_runtime_binding_receipt"])
+    try:
+        result = generate_bounded_artifact_contents(
+            request, runner=runner, authority_capability=authority,
+            model_runtime_binding_capability=capability, trusted_now_epoch=lambda: 1_800_000_000,
+        )
+    finally:
+        discard_verified_runtime_binding_capability(capability)
+    assert FAIL_AUTHORITY in result.rejection_reasons
+    assert result.accepted is False and runner.calls == []
+
+
+@pytest.mark.parametrize("mutation_point", ["validation", "provider_inventory"])
+def test_m2m_request_snapshot_survives_validation_and_inventory_callbacks(mutation_point):
+    class ChangingRequest(dict):
+        def get(self, key, default=None):
+            if key == "signed_authority":
+                self["m2m_envelope"]["A"] = "Changed after request authority consumption"
+            return super().get(key, default)
+
+    request = _request(m2m_envelope=_m2m_envelope())
+    if mutation_point == "validation":
+        request = ChangingRequest(request)
+    admitted_wire = encode_m2m_envelope(request["m2m_envelope"])
+
+    class InventoryCallbackRunner(FakeRunner):
+        @property
+        def available_model_providers(self):
+            if mutation_point == "provider_inventory":
+                request.pop("m2m_envelope", None)
+            return ("openai", "openrouter")
+
+    runner = InventoryCallbackRunner()
+    result = _generate(request, runner=runner)
+    assert result.accepted is True, result.rejection_reasons
+    assert len(runner.calls) == 1
+    assert runner.calls[0]["prompt"] == admitted_wire
+    assert runner.calls[0]["binding"]["prompt_schema"] == "0102_m2m_v1"
+    assert runner.calls[0]["binding"]["m2m_prompt_digest"] == _mapping_digest(admitted_wire)
+
+
+class _M2MFusionForwarder:
+    available_model_providers = ("openai", "openrouter")
+
+    def __init__(self, wire, variant):
+        self.wire, self.variant = wire, variant
+
+    def generate_artifacts(self, *, prompt, context, binding, timeout_seconds):
+        supplied = self.wire
+        if self.variant in {"supplied", "restored"}:
+            supplied = encode_m2m_envelope(_m2m_envelope() | {"A": "Changed in transit"})
+        elif self.variant in {"noncanonical", "noncanonical_bound"}:
+            supplied += " "
+        return fusion_provider.FoundupsFusionArtifactGenerationRunner(
+            runtime_mode="foundups_fusion", available_model_providers=("openrouter",),
+        ).generate_artifacts(prompt=supplied, context=context, binding=binding, timeout_seconds=timeout_seconds)
+
+
+def _m2m_fusion_contract_probe(monkeypatch, wire, variant, effects):
+    issue = reddog_bounded_artifact_generation_runtime._issue_artifact_generation_model
+
+    def sealed_issue(**kwargs):
+        # Isolate provider validation with a real disposable opaque capability.
+        bound = dict(kwargs["invocation_binding"], prompt_schema="0102_m2m_v1", m2m_prompt_digest=_mapping_digest(wire))
+        if variant in {"missing_schema", "missing_both"}:
+            del bound["prompt_schema"]
+        if variant in {"missing_digest", "missing_both"}:
+            del bound["m2m_prompt_digest"]
+        if variant == "noncanonical_bound":
+            bound["m2m_prompt_digest"] = _mapping_digest(wire + " ")
+        kwargs["invocation_binding"] = bound
+        return issue(**kwargs)
+
+    def gate(prompt, context, **kwargs):
+        redacted = prompt.replace("Update only", "Changed only") if variant == "redacted" else prompt
+        if variant == "restored":
+            redacted = wire
+        return SimpleNamespace(status=fusion_provider.REDACTION_GATE_PASSED, redacted_prompt=redacted, redacted_context=context)
+
+    def loader():
+        effects.append("loader")
+        return _successful_fusion(effects)
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_issue_artifact_generation_model", sealed_issue)
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_load_foundups_fusion_runner", loader)
+    monkeypatch.setattr(fusion_provider, "evaluate_redaction_gate", gate)
+
+
+@pytest.mark.parametrize("variant", [
+    "intact", "supplied", "redacted", "restored", "noncanonical", "noncanonical_bound",
+    "missing_schema", "missing_digest", "missing_both",
+])
+def test_m2m_fusion_preservation_rejects_before_loader_or_provider(monkeypatch, variant):
+    envelope, effects = _m2m_envelope(), []
+    wire = encode_m2m_envelope(envelope)
+    _m2m_fusion_contract_probe(monkeypatch, wire, variant, effects)
+    result = _generate(_request(m2m_envelope=envelope), runner=_M2MFusionForwarder(wire, variant))
+    assert result.accepted is (variant == "intact"), result.rejection_reasons
+    if variant == "intact":
+        assert effects[0] == "loader" and len(effects) == 2
+    else:
+        assert "FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING" in result.rejection_reasons
+        assert effects == []
+        assert result.model_result.made_network_call is False
+        assert result.provider_invocation_performed is False
+
+
+class _ContextFusionForwarder:
+    available_model_providers = ("openai", "openrouter")
+
+    def __init__(self, variant):
+        self.variant, self.replay = variant, None
+
+    def generate_artifacts(self, *, prompt, context, binding, timeout_seconds):
+        raw = context
+        if self.variant in {"changed_evidence", "artifact_swap", "rules_stripped"}:
+            changed = json.loads(context)
+            field, value = {"changed_evidence": ("evidence_context", "Changed in transit"),
+                            "artifact_swap": ("planned_artifacts", ["src/other.py"]),
+                            "rules_stripped": ("hard_rules", [])}[self.variant]
+            changed[field] = value
+            context = json.dumps(changed, sort_keys=True, separators=(",", ":"))
+        elif self.variant in {"empty", "none"}:
+            context = "" if self.variant == "empty" else None
+        elif self.variant == "context_only_legacy":
+            prompt = "legacy governed task"
+        provider = fusion_provider.FoundupsFusionArtifactGenerationRunner(runtime_mode="foundups_fusion")
+        result = provider.generate_artifacts(prompt=prompt, context=context, binding=binding, timeout_seconds=timeout_seconds)
+        if self.variant == "changed_evidence":
+            self.replay = provider.generate_artifacts(prompt=prompt, context=raw, binding=binding, timeout_seconds=timeout_seconds)
+        return result
+
+
+def _context_fusion_probe(monkeypatch, request, variant, effects, frames):
+    issue = reddog_bounded_artifact_generation_runtime._issue_artifact_generation_model
+    expected = _mapping_digest(_m2m_context(request))
+
+    def sealed_issue(**kwargs):
+        bound = dict(kwargs["invocation_binding"])
+        if variant != "legacy":
+            bound["m2m_context_digest"] = expected
+        if variant == "missing":
+            bound.pop("m2m_context_digest")
+        elif variant in {"null", "nonstring", "mapping", "malformed", "changed_digest"}:
+            bound["m2m_context_digest"] = {"null": None, "nonstring": 7, "mapping": {},
+                "malformed": "sha256:invalid", "changed_digest": _mapping_digest("other")}[variant]
+        elif variant in {"context_only", "context_only_legacy"}:
+            bound.pop("prompt_schema"); bound.pop("m2m_prompt_digest")
+        return issue(**dict(kwargs, invocation_binding=bound))
+
+    def read_key(name, default=None):
+        assert name == "OPENROUTER_API_KEY"
+        effects.append("key")
+        return "test-key"
+
+    def loader():
+        effects.append("loader")
+        def run(key, message, messages, options):
+            effects.append("provider")
+            frames.append({"message": message, "messages": messages, "options": options})
+            return _successful_fusion([])(key, message, messages, options)
+        return run
+
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_issue_artifact_generation_model", sealed_issue)
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_load_foundups_fusion_runner", loader)
+    monkeypatch.setattr(fusion_provider, "os", SimpleNamespace(getenv=read_key))
+
+
+@pytest.mark.parametrize("variant", [
+    "canonical", "legacy", "redacted", "empty_evidence", "changed_evidence", "empty", "none",
+    "artifact_swap", "rules_stripped", "missing", "null", "nonstring", "mapping", "malformed",
+    "changed_digest", "context_only", "context_only_legacy", "blocked",
+])
+def test_m2m_fusion_raw_context_binding_and_actual_redacted_framing(monkeypatch, variant):
+    evidence = {"redacted": "Contact fixture.reader@example.test", "empty_evidence": "",
+                "blocked": "private_reasoning"}.get(variant, "Admitted evidence")
+    request = _request(evidence_context=evidence)
+    if variant != "legacy":
+        request["m2m_envelope"] = _m2m_envelope()
+    effects, frames, runner = [], [], _ContextFusionForwarder(variant)
+    _context_fusion_probe(monkeypatch, request, variant, effects, frames)
+    result = _generate(request, runner=runner)
+    positive = variant in {"canonical", "legacy", "redacted", "empty_evidence"}
+    assert result.accepted is positive, result.rejection_reasons
+    if not positive:
+        reason = "REDACTION_BLOCKED" if variant == "blocked" else "M2M_PROMPT_BINDING"
+        assert "FAIL_ARTIFACT_GENERATION_" + reason in result.rejection_reasons
+        assert effects == frames == [] and result.provider_invocation_performed is False
+        if variant == "changed_evidence":
+            assert runner.replay.rejection_reasons == (FAIL_MODEL_RUNTIME_BINDING_RECEIPT,)
+        return
+    assert effects == ["key", "loader", "provider"] and len(frames) == 1
+    raw = evidence if variant == "legacy" else _m2m_context(request)
+    prompt = frames[0]["message"].split("\n\n", 1)[0]
+    gate = fusion_provider.evaluate_redaction_gate(prompt, raw, audit_mode=True)
+    assert gate.status == fusion_provider.REDACTION_GATE_PASSED
+    assert frames[0]["message"] == prompt + "\n\n" + gate.redacted_context
+    assert frames[0]["options"]["_redacted_evidence_context"] == gate.redacted_context
+    bound = frames[0]["options"]["bridge_meta"]["artifact_generation_binding"]
+    if variant != "legacy":
+        assert bound["m2m_context_digest"] == _mapping_digest(raw)
+    if variant == "redacted":
+        assert gate.redacted_context != raw and "[REDACTED:email_pii]" in gate.redacted_context
+        assert "fixture.reader@example.test" not in json.dumps(frames)

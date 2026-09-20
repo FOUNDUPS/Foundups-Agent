@@ -1,3 +1,24 @@
+## Current-main reconciliation — 2026-09-21
+
+Main `1f18a3eebba667b1e0fcafa414ebb06eaeb36d9c` is integrated into original
+draft `04ef322f172bed2504583a058ee8210674d98eeb` without rewriting its history.
+Only three root planning files conflicted. Protected source, tests, workflows,
+public surfaces and runtime metadata match current main exactly.
+
+The same four existing suites produce baseline **105 passed / 5 failed** and
+candidate **106 passed / the identical 5 failed**. Failure IDs, phases and full
+messages match; the additional passing case is `test_foundup_readme_surface_contract[detect_ai]`.
+No tests were deselected or edited. Input hashes are stable within each run,
+with zero forbidden attempts. This is metadata regression evidence, not an
+all-green domain, working application or sandbox/runtime certification.
+
+Two earlier harness attempts stopped before collection on hostname metadata and
+Windows NUL access; narrow runner corrections preserved source/tests/oracles.
+Evidence: `amibot_existing_draft_reconciliation_20260921` in the root RSI backlog;
+the external receipt records exact commands, input hashes, JUnit and failures.
+The old hosted ticker failure is historical: both its input and test changed on
+main. Fresh candidate hosted checks are required; no current pass is inferred.
+
 # AmIBot - Documentation Validation
 
 ## Registry onboarding - 2026-09-15

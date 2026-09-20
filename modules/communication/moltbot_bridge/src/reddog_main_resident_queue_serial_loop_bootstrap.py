@@ -26,6 +26,10 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_authority_profile_m2m,
+)
+
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
@@ -882,6 +886,10 @@ def _bounded_worker_plan_from_authority_profile(
     raw_plan = authority_profile.get("bounded_worker_plan")
     if raw_plan is not None and not isinstance(raw_plan, Mapping):
         return {}, ("work_order_materializer_bounded_worker_plan_invalid:type",)
+    try:
+        authority_profile = snapshot_authority_profile_m2m(authority_profile)
+    except ValueError:
+        return {}, ("work_order_materializer_bounded_worker_plan_invalid:m2m_envelope",)
     plan = _nested_mapping(authority_profile, "bounded_worker_plan")
     if not plan:
         return {}, ()

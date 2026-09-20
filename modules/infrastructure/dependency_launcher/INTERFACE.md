@@ -209,23 +209,43 @@ validation failure returns nonzero. It never installs or invokes a component.
 
 ### `run_wsl_agent_runtime_advisory(...)`
 
-On Windows, probes the canonical `Ubuntu-24.04` WSL distribution using exact,
-shell-free argument vectors for `/usr/local/bin/openclaw --version` and
-`/usr/local/bin/hermes --version`. The optional
+On Windows, inspects registration/base metadata for the canonical `Ubuntu-24.04`
+WSL distribution. Explicit command mode uses exact shell-free argument vectors
+for `/usr/local/bin/openclaw --version` and `/usr/local/bin/hermes --version`. The optional
 `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` binding rejects a distro registration that
 has moved away from its operator-approved storage location.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED` | `0` | Explicitly enable the advisory probe |
+| `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` | `0` | Additionally opt into installed version commands; may start WSL/services |
 | `FOUNDUPS_AGENT_WSL_DISTRO` | `Ubuntu-24.04` | Exact WSL distribution name |
 | `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` | empty | Optional expected Windows distro base path |
 
-The advisory does not install, update, onboard, start, stop, or dispatch either
-agent. It is disabled by default because invoking a version command executes the
-installed program. Its receipt is explicitly unauthenticated availability
-evidence, never authority. When enabled, each component has a ten-second
-timeout. A failed probe is `NOT_READY` evidence and never denies menu access.
+The advisory has no install, update, onboarding, service-management or job-dispatch
+command. It is disabled by default and that path makes no host calls, even if
+the command flag alone is set. Enable-only mode validates distro/registration/base
+and returns `NOT_READY`, empty components and `command_probe_disabled`. Invalid
+bindings retain their existing reasons. This mode never invokes the command runner
+or trusted WSL executable resolver.
+
+With both controls enabled, it executes installed programs and may start a
+stopped WSL distribution and its configured services. Command mode therefore
+does not guarantee absence of lifecycle effects.
+Its receipt is explicitly unauthenticated availability evidence, never authority.
+Each component has a ten-second timeout. A failed probe is `NOT_READY` evidence
+and never denies menu access.
+
+The command-mode boolean is captured before the registry callback; callback
+mutation cannot upgrade a metadata request or change that invocation's selected
+mode. This is trusted configuration selection, not live revocation or a signed
+effect-use lease. Disabled receipts remain byte-compatible; explicit command
+results retain existing semantics. Enable-only configurations deliberately change
+from executing version commands to metadata-only `NOT_READY`.
+
+The [mode contract](ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20) does not
+rely on a running-state precheck, which cannot establish strict no-start behavior
+across a later `--exec`. Injected tests do not prove live runtime health or admission.
 
 ### `resolve_trusted_wsl_executable() -> Path | None`
 

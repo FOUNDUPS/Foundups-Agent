@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import datetime
+import json
 import re
 
 
@@ -32,28 +33,45 @@ def test_jhr_001_is_updated_in_place_japanese_first_and_bilingual() -> None:
 
 
 def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() -> None:
-    status = read(FRONTEND_ROOT / "content" / "current-field-status.ts")
+    status = json.loads(read(FRONTEND_ROOT / "content" / "current-field-status.json"))
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
 
-    timestamp = re.search(r"updatedAt: '([^']+)'", status)
-    assert timestamp is not None
-    assert datetime.fromisoformat(timestamp.group(1)).utcoffset().total_seconds() == 9 * 3600
-    for field in ("updatedLabelJa", "locationJa", "tickerJa", "detailJa", "detailEn", "href"):
-        assert re.search(rf"{field}: '[^']+'", status)
-    assert "currentFieldStatus.href" in ticker
+    assert status["schemaVersion"] == 1
+    assert datetime.fromisoformat(status["updatedAt"]).utcoffset().total_seconds() == 9 * 3600
+    assert datetime.fromisoformat(status["expiresAt"]) > datetime.fromisoformat(status["updatedAt"])
+    for field in ("label", "message"):
+        assert set(status[field]) == {"ja", "en", "pt"}
+        assert all(status[field][language] for language in ("ja", "en", "pt"))
+    assert status["href"].startswith("https://")
+    assert "current-field-status.json" in ticker
     project = read(FRONTEND_ROOT / "app" / "page.tsx")
     movement = read(FRONTEND_ROOT / "app" / "yumori" / "page.tsx")
     assert project.count("<CampaignTicker />") == 1
     assert movement.count("<CampaignTicker movement />") == 1
     assert "../../components/CampaignTicker" in movement
     assert "https://esingularity.ai/${action.href}" in ticker
-    assert "currentFieldStatus.tickerJa" in ticker
-    assert "label: 'JHR'" in ticker
-    assert "href: '/reports/jhr'" in ticker
+    assert "fieldStatus.message" in ticker
+    assert "label: { ja: 'JHR', en: 'JHR', pt: 'JHR' }" in ticker
+    assert "href: '/reports/jhr#jhr-002'" in ticker
     assert "https://yumori.me/vote-no#council" in ticker
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "Monkとつながる" not in ticker
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
+
+
+def test_runtime_field_status_feed_is_multilingual_bounded_and_fail_safe() -> None:
+    ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
+
+    assert "refs/heads/live/yumori-field-status" in ticker
+    assert "LIVE_FIELD_STATUS_POLL_MS = 60_000" in ticker
+    assert "cache: 'no-store'" in ticker
+    assert "payload.visible !== true" in ticker
+    assert "now >= expiresAt" in ticker
+    assert "['ja', 'en', 'pt']" in ticker
+    assert "ALLOWED_STATUS_ORIGINS" in ticker
+    assert "parseFieldStatus(compiledFieldStatus)" in ticker
+    assert "fallbackAction" in ticker
+    assert "data-yumori-localized" in ticker
 
 
 def test_vote_no_public_record_is_reachable_and_privacy_bounded() -> None:

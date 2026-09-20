@@ -1,5 +1,33 @@
 # wre_core Test Suite
 
+## Abrupt-exit lifecycle evidence
+
+The same `test_wre_auto_researcher.py` now has 112 cases (109 unchanged plus three
+child modes), passing locally and in an independent replay. The embedded child
+uses fixed metrics and disables model construction before product import; the
+original real-evaluator tests remain intact. Disposable external roots, reviewed
+pre-import effect guards, isolated Python flags and 20s wait/5s owned-child reap
+bound each case. Never run these fixtures against a live source/work directory.
+Missing and temporary-only reports remain unknown; only normal return matches
+the saved terminal report and acknowledgment. Prior sentinel bytes test
+preservation, not a previous successful run. See the module roadmap for the exact
+oracle, initial pre-collection runner failure and replay receipts. The 996 lines retain
+the existing cohesive size review; original 31 definitions unchanged, new functions
+<=50. Registry process capability is generated; no recovery or model-quality proof.
+
+
+## Proposal input identity
+
+`test_wre_auto_researcher.py` now covers returned UTF-8 proposal identity without
+changing the evaluator or pre-construction model-disable fixture. Thirteen new
+cases reproduce the missing field on unchanged source; final109 pass. Independent
+109-case execution overlaps. Tests cover equal-outcome/distinct-text diagnostics,
+LF/CRLF and non-ASCII input, sequential report preservation, preparation/diff/
+evaluation aborts, missing/non-text returns and overridden string encoders.
+All new functions remain≤50 lines. Retain this cohesive suite's800-line guideline
+review; no new exemption. Use the isolated execution instructions below.
+Hashes are local diagnostics, not authenticated provenance or runtime admission.
+
 ## Researcher baseline snapshot
 
 Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
@@ -97,6 +125,16 @@ Use the isolation setup below with importlib mode, explicit `pytest_asyncio.plug
 no cache provider and a unique external basetemp. The connected 206-case selection
 and exact commands are recorded in `pattern_memory_ownership_continuation_20260914`.
 These selections overlap; thread isolation is not production concurrency proof.
+
+The existing test_daemon_self_audit_loop.py now adds ten counter-lifetime
+cases (30 daemon cases; 71 with the unchanged PatternMemory suite). Its tracked
+fixture wraps real SQLite handles at an explicit disposable path and observes
+creating/closing threads. It tests two distinct events across simultaneously
+alive threads, successive operations, disabled telemetry, failure/interruption
+cleanup and stop returning during an injected blocked counter. No actual
+daemon.start runs. Close failure is injected after real close; partial close
+and real restart/shutdown are not certified. Preserve actual factory/default-
+path interception: WRE_PATTERN_MEMORY_DB alone is not read by PatternMemory().
 
 ## Auto Researcher run isolation
 

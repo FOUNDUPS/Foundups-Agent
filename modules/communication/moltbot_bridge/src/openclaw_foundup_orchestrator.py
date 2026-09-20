@@ -27,6 +27,11 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from modules.infrastructure.wre_core.src.foundup_scaffold_route_contract import (
+    canonical_json,
+    canonical_json_copy,
+)
+
 from .foundup_job_contract import FoundUpJob, create_job
 
 logger = logging.getLogger("openclaw_foundup_orchestrator")
@@ -164,21 +169,47 @@ def _is_foundup_launch_or_onboard_intent(message: str) -> bool:
     return any(phrase in msg_lower for phrase in _FOUNDUP_LAUNCH_ONBOARD_PHRASES)
 
 
-def _extract_envelope_data(intent: Any) -> Dict[str, Any]:
-    """Extract a genesis envelope dict from an intent, if present.
+def _require_plain_json(value: Any) -> None:
+    """Reject Python coercions/hooks before the existing JSON snapshot boundary."""
+    if type(value) is dict:
+        for key, item in value.items():
+            if type(key) is not str:
+                raise TypeError("Envelope keys must be strings")
+            _require_plain_json(item)
+    elif type(value) is list:
+        for item in value:
+            _require_plain_json(item)
+    elif value is not None and type(value) not in (str, bool, int, float):
+        raise TypeError("Envelope must contain plain JSON values")
 
-    Chat/voice prompts do NOT carry a structured FoundUpGenesisEnvelope; a future
-    WSP 109 intake packet would populate ``intent.payload['genesis_envelope']``.
-    Returns ``{}`` when no structured envelope exists, which the genesis gate treats
-    as ``NO_ENVELOPE`` (NOT_READY). Defensive against mock intents: only a real
-    ``dict`` payload/envelope is honoured.
+
+def _extract_envelope_data(intent: Any) -> Dict[str, Any]:
+    """Detach one unambiguous envelope; malformed declared presence never falls back.
+
+    Metadata is the declared intent field. Missing legacy attributes and optional
+    payload=None remain absent; metadata=None violates the declared dict contract.
     """
-    payload = getattr(intent, "payload", None)
-    if isinstance(payload, dict):
-        envelope = payload.get("genesis_envelope")
-        if isinstance(envelope, dict):
-            return envelope
-    return {}
+    missing = object()
+    envelope = {}
+    for attribute in ("metadata", "payload"):
+        context = getattr(intent, attribute, missing)
+        if context is missing or (attribute == "payload" and context is None):
+            continue
+        if type(context) is not dict:
+            raise TypeError("Intent context must be a plain dict")
+        if any(type(key) is not str for key in context):
+            raise TypeError("Intent context keys must be strings")
+        if "genesis_envelope" not in context:
+            continue
+        supplied = context["genesis_envelope"]
+        if type(supplied) is not dict or not supplied:
+            raise ValueError("Declared genesis envelope must be nonempty")
+        _require_plain_json(supplied)
+        snapshot = canonical_json_copy(supplied)
+        if envelope and canonical_json(envelope) != canonical_json(snapshot):
+            raise ValueError("Conflicting genesis envelopes")
+        envelope = snapshot
+    return envelope
 
 
 def _extract_foundup_id(message: str) -> Optional[str]:
@@ -194,8 +225,8 @@ def _extract_foundup_id(message: str) -> Optional[str]:
 
     # Remove trigger phrases to find remainder
     remainder = msg_lower
-    for phrase in _FOUNDUP_BUILD_WORDS:
-        remainder = remainder.replace(phrase, " ")
+    for phrase in _FOUNDUP_BUILD_WORDS + _FOUNDUP_LAUNCH_ONBOARD_PHRASES:
+        remainder = re.sub(r"(?<!\w)" + re.escape(phrase) + r"(?!\w)", " ", remainder)
 
     # Extract first non-stopword token
     tokens = [t for t in remainder.split() if t not in _FOUNDUP_ID_STOPWORDS]
@@ -838,59 +869,14 @@ def _genesis_gate_handoff(intent: Any, gate_result: GenesisGateResult) -> str:
 
 
 def dispatch_foundup(dae: Any, intent: Any) -> str:
-    """
-    Dispatch FOUNDUP intent through orchestrator entrypoint.
+    """Route mutations through commander/gate checks; preserve FAM advisory reads.
 
-    Phase 2: Detects explicit build intent and creates typed FoundUpJob.
-    Launch/onboard intents pass through the WSP 109 genesis gate before any FAM
-    launch. Advisory/catalog queries still route to FAM passthrough.
-
-    WSP 109 enforcement (#737 S1 / 9.1#1 remediation): onboarding and launch
-    intents must pass ``validate_genesis_envelope`` before reaching
-    ``fam_adapter.launch_foundup``. A chat prompt carries no genesis envelope, so
-    the gate returns NOT_READY and dispatch emits a W10 handoff instead of
-    launching.
-
-    Args:
-        dae: OpenClawDAE instance
-        intent: Classified OpenClawIntent
-
-    Returns:
-        Response string: job creation confirmation, NOT_READY genesis handoff, or
-        FAM advisory response.
+    An accepted mutation creates only a queued dry-run job, never a live launch.
+    Missing onboarding data returns the existing WSP 109 NOT_READY handoff.
     """
     raw_message = intent.raw_message
-
-    if (
-        _is_explicit_build_intent(raw_message)
-        or _is_foundup_launch_or_onboard_intent(raw_message)
-    ) and getattr(intent, "is_authorized_commander", False) is not True:
-        logger.warning(
-            "[OPENCLAW-FOUNDUP-ORCH] mutation_denied | sender=%s",
-            getattr(intent, "sender", "unknown"),
-        )
-        return (
-            "FoundUp mutation denied: authenticated commander authority is required. "
-            "No job was queued and no launch was attempted."
-        )
-
-    # Phase 2: explicit build/create/queue intents -> typed FoundUpJob (QUEUED,
-    # dry-run; no launch). Safe intake path; never calls fam_adapter.launch_foundup.
-    if _is_explicit_build_intent(raw_message):
-        return _handle_build_intent(intent)
-
-    # WSP 109 genesis gate: onboarding / launch intents must pass genesis envelope
-    # validation BEFORE any FAM launch handoff (#737 S1 / 9.1#1). With no envelope in
-    # a chat prompt, validate_genesis_envelope returns NO_ENVELOPE -> NOT_READY W10
-    # handoff. Closes the FOUNDUP permission/genesis bypass.
-    if _is_foundup_launch_or_onboard_intent(raw_message):
-        gate_result = get_orchestrator().validate_genesis_envelope(
-            _extract_envelope_data(intent),
-            actor_id=getattr(intent, "sender", "openclaw"),
-        )
-        if not gate_result.allowed:
-            return _genesis_gate_handoff(intent, gate_result)
-        # Envelope valid -> proceed through the gated build/launch path.
+    if (_is_explicit_build_intent(raw_message)
+            or _is_foundup_launch_or_onboard_intent(raw_message)):
         return _handle_build_intent(intent)
 
     # Phase 1 preserved: Advisory/catalog queries route to FAM (no mutation).
@@ -925,28 +911,7 @@ def dispatch_foundup(dae: Any, intent: Any) -> str:
 
 
 def _handle_build_intent(intent: Any) -> str:
-    """
-    Handle explicit build intent by creating a FoundUpJob.
-
-    Creates job in QUEUED state. Does NOT execute - Hermes handles execution.
-
-    WSP 97 Truth Fields:
-        - policy_flags are NOT set to passed (no gates checked yet)
-        - policy_flags.dry_run_mode set if dry-run detected in message/payload
-        - status_reason reflects creation, not execution
-        - evidence_refs are empty (nothing proven yet)
-
-    Dry-Run Detection (OpenClaw 2026.5.2 alignment):
-        - --dry-run, dry_run=true, [dry-run] patterns in message
-        - payload.dry_run = True/1 if present
-        - Maps to policy_flags.dry_run_mode = True
-
-    Args:
-        intent: Classified OpenClawIntent with build message
-
-    Returns:
-        Job creation confirmation with job_id and status
-    """
+    """Queue a commander-authorized snapshot without granting execution authority."""
     if getattr(intent, "is_authorized_commander", False) is not True:
         return (
             "FoundUp mutation denied: authenticated commander authority is required. "
@@ -958,21 +923,33 @@ def _handle_build_intent(intent: Any) -> str:
     session_key = getattr(intent, "session_key", None)
     channel = getattr(intent, "channel", "unknown")
 
-    # Extract action and foundup_id
     requested_action = _extract_action(raw_message)
     foundup_id = _extract_foundup_id(raw_message)
-
-    # Build payload
     payload = {
         "raw_message": raw_message,
         "channel": channel,
         "source": "openclaw_foundup_orchestrator",
     }
+    try:
+        envelope = _extract_envelope_data(intent)
+        requires_gate = bool(envelope) or (
+            not _is_explicit_build_intent(raw_message)
+            and _is_foundup_launch_or_onboard_intent(raw_message))
+        gate_result = (get_orchestrator().validate_genesis_envelope(
+            canonical_json_copy(envelope), actor_id=sender) if requires_gate else None)
+    except (TypeError, ValueError, AttributeError, KeyError, RecursionError, OverflowError):
+        return _genesis_gate_handoff(intent, GenesisGateResult(
+            False, GenesisGateReason.ENVELOPE_PARSE_ERROR))
+    if gate_result is not None:
+        if gate_result.allowed is not True:
+            return _genesis_gate_handoff(intent, gate_result)
+        if foundup_id and foundup_id != envelope["foundup_id"]:
+            return _genesis_gate_handoff(intent, GenesisGateResult(
+                False, GenesisGateReason.ENVELOPE_INVALID))
+        foundup_id = envelope["foundup_id"]
+        payload["genesis_envelope"] = envelope
 
-    # Detect dry-run mode from message or payload
     is_dry_run = _detect_dry_run_mode(raw_message, payload)
-
-    # Create job
     job = create_job(
         tenant_id=sender,
         requested_action=requested_action,
@@ -982,7 +959,6 @@ def _handle_build_intent(intent: Any) -> str:
         generate_idempotency=True,
     )
 
-    # Set dry_run_mode policy flag if detected
     if is_dry_run:
         job.policy_flags.dry_run_mode = True
 
@@ -991,7 +967,6 @@ def _handle_build_intent(intent: Any) -> str:
         "Hermes/WRE execution not started."
     )
 
-    # Add to queue
     _FOUNDUP_JOB_QUEUE.append(job)
 
     logger.info(
@@ -1002,7 +977,6 @@ def _handle_build_intent(intent: Any) -> str:
         sender,
     )
 
-    # Build response
     foundup_str = foundup_id if foundup_id else "(none specified)"
     dry_run_str = " [DRY-RUN]" if job.policy_flags.dry_run_mode else ""
     return (

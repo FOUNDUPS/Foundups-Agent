@@ -1,5 +1,40 @@
 # WRE Core - ModLog
 
+## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
+
+- Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
+- Author 112 and independent 112 pass (overlapping), after a preserved pre-collection null-device harness failure. Three suite attempts/six children; 111 denied symlink attempts per passing run recorded; pytest-helper attribution is inferred. Child fixed metrics isolate lifecycle, not evaluator/model quality or hostile-host sandboxing.
+- Generated only existing process capability; registry 1651/269 preserved and peer1820 overlap reconciled. Test 996 lines, parent 41, new helpers <=50; existing cohesive size review retained.
+- Both PR1827 main workflows passed. Preserve 26 packets/41 histories and archive the prior observation; distinct next 10/P2 OpenClaw diagnostic plan makes 42 histories. No recovery, reader, live runtime or retained model improvement claim. WSP00/15/22/50/62/84/97/99; exact receipts in current backlog.
+
+## 2026-09-20: Qualify AutoResearcher interruption evidence
+
+- Completed the12/P2 static lifecycle/oracle plan in six existing documents. Missing/temp reports remain incomplete/unknown; terminal files are local diagnostics, not caller acknowledgement, independent acceptance or durable recovery.
+- No bound report consumer found in the tracked Python symbol search. Defer a new reader and automatic recovery; retain missing durable baseline, ownership/quiescence and recovery-caller contracts.
+- Independent review qualifies separate 10/P2 `auto-researcher-abrupt-exit-diagnostic-witness` using the existing test owner and unchanged producer. The exact child/oracle/budget contract is in the backlog; no test, process, source change or runtime activation occurred in this plan.
+- Both PR1826 main workflows passed;98peer heads and10 prior source bindings unchanged. Preserve26 packets/40 histories and archived prior observation; new concrete action scored separately. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-20: Close daemon counter handles on the calling thread
+
+- Replaced the existing daemon's cached PatternMemory with one handle per counter operation; construction, increment and finally-close occur on the calling thread. Ordinary factory/write/close failures remain fail-soft; increment interruption propagates after cleanup. Telemetry disabled still constructs no handle.
+- Ten new cases in the existing test owner preserve all 20 original definitions. Red: 8 failed/22 passed; repaired: 30 passed. Connected daemon/PatternMemory 71 passed with 115 disposable DB opens and no external attempts; independent 71 replay overlaps.
+- Only constructor and two private helpers changed; all signatures and remaining methods are AST-identical. Source 865/class755 unchanged, constructor62→61; tests 750, max function 40. No new module, pool, schema, skill or exception.
+- Existing 1,400-member backend manifest changes only this source digest; both existing pins updated together. Generator 8 tests, RedDog 15 fast groups and 67-file/950,440-byte package pass. Registry remains current 1651/269.
+- No real daemon start/restart, production storage, provider or WRE admission. Close-failure injection follows real close; partial SQLite close/constructor failures, performance, other consumers and R11 retention remain separate. Evidence: canonical backlog daemon_counter_memory_ownership_20260920; WSP00/15/22/48/50/62/84/97/99.
+
+## 2026-09-20: Qualify daemon PatternMemory lifetime without source changes
+
+- Confirmed source-bound mismatch: the supervisor starts and synchronously scans the same daemon, whose cached SQLite connection remains bound to its creating thread. Two distinct-thread events yielded two scan results but one persisted counter; fresh owned-handle control succeeded.
+- Baseline 61 tests pass with 81 disposable database opens. Independent reviewer accepted the witness and checked its database read-only. No actual daemon start/restart, live logs, production memory or worker dispatch; stop(0) evidence follows injected loop exit, not an active scan.
+- Six-document qualifier only. Proposed next source action is independently 13/P1 (2+4+4+3): per-counter create/use/finally-close in the existing daemon and existing test owner; preserve SQLite/thread/dispatch contracts. Include derived backend digest and both existing pins when source changes.
+- Current backlog binds receipts/source hashes, preserved initial harness error, acceptance matrix, limitations and 32-row re-observation. Source still defective; no accepted retained improvement. WSP00/15/22/48/50/62/84/97/99.
+
+## 2026-09-20: Preserve proposal-text identity before preparation
+
+- Added one diagnostic report list in the existing AutoResearcher. Nonempty text that passes the mode gate is hashed as UTF-8 before scratch write/diff; later failed/rejected attempts retain their input identity. No raw text is added to the field.
+- Preserved three-argument proposal callbacks, outcome history, evaluator/acceptance rules, cleanup, missing proposals, non-text TypeError and string-subclass acceptance. Bounded helper avoids growth in inherited class285/loop82; no new module, skill, runtime route or exemption.
+- Initial13 new failures with96 existing passes; repaired109 pass, independent109 overlap. Canonical registry1651/269 remains current. Input hashes are unsigned diagnostics, not an evaluated-byte guarantee or retained RSI improvement. WSP15/22/48/50/62/84/97.
+
 ## 2026-09-15: Invocation baseline snapshot for report qualification
 
 - Reused the existing researcher to remove constructor target rereads and freeze invocation baseline text for preparation, first proposal and cleanup. Reports include a UTF-8 text hash; source/program/oracle/environment authentication is still pending.

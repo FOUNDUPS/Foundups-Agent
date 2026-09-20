@@ -17,6 +17,18 @@ For “apply the website skill” or “eSingularity skill”, use [esingularity
 
 The WSP 97 workflow also covers bounded history/research, distinct homepage ownership, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the existing FoundUp registry expose it to agent and Red Dog discovery. Skill updates alone do not publish website or form changes.
 
+## Government and correspondence operations skills
+
+YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
+
+- [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.
+- [YUMORI.me correspondence / contact ledger](skillz/yumori_contact_ledger/SKILLz.md): parent contract for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, receipts and reusable operator learning.
+- `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.
+- [YUMORI funding / PPP intelligence](skillz/yumori_funding_ppp_intelligence/SKILLz.md): current grant/subsidy/PPP status with primary-source and no-false-funding boundaries.
+- [YUMORI Moshpit](skillz/yumori_moshpit/SKILLz.md): campaign-history versus 0102-learning routing and JST ordering.
+
+The live YUMORI.me Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
+
 ## Public architecture — one project, two focused sites
 
 YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. Its current council request is **VOTE NO** on demolition preparation; the fixed review-period proposal has been withdrawn. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) for local checkout locations, QR provenance, and the supporting Google Doc.
@@ -63,9 +75,15 @@ Use [docs/DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md) before creating
 
 Repository state is canonical for project status and source-of-truth labels. Drive is the working drafting/evidence layer. If repo, Drive and a primary government source disagree, re-verify the primary source first, update the repo authority, then reconcile Drive. Do not create another Drive file merely because an existing file is hard to find.
 
+## YUMORI Moshpit logging
+
+Use the module-owned [YUMORI Moshpit Skillz](skillz/yumori_moshpit/SKILLz.md) for campaign activity, stakeholder/procedural milestones, monk field activity, and 0102 learning-log routing. It is registered in the WRE Skillz/Rolodex registry at `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`; the `.agents` and `.claude` files are thin operator projections, not separate authorities.
+
+The campaign Moshpit is reverse chronological within each JST day. Agent-internal repairs and learning belong in the private 0102 Moshpit unless the same event materially changes campaign history.
+
 ## Campaign ticker updates
 
-Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it on both eSingularity.ai and YUMORI.me. Date and time-limit each invitation in Japan time.
+Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. A routine verbal update becomes one Japanese/English/Portuguese `frontend/content/current-field-status.json` payload on the dedicated `live/yumori-field-status` branch; the deployed shared `CampaignTicker.tsx` polls it for both eSingularity.ai and YUMORI.me. Each item is explicitly time-limited in Japan time and falls back safely after expiry.
 
 The public civic-action record lives at `https://YUMORI.me/vote-no`. It publishes privacy-bounded transcripts of the committee's sent council and mayor messages, clearly labels superseded historical requests, and links visitors to official Fukui contact channels.
 

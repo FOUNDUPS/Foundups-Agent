@@ -1,5 +1,41 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-20 - Hermes rejection-evidence package validation
+
+- One existing runtime member changed; the 1,400-member manifest and both digest pins now bind `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. Membership, API/version, package caps and safeguard assertions stay unchanged.
+- Manifest check/eight generator tests pass with two pytest configuration warnings; existing fast tier passes 15 groups and deterministic packaging passes 67 files/950,440 bytes. Test registry remains 1,651 entries/269 quarantined; exact-head closure is recorded separately in the RSI backlog.
+- Bridge evidence is fake-only: qualified 10-failure red baseline, 108 focused passes and 114 connected passes after an external guard correction. Independent 117 repeats the 108 and adds nine controls; do not sum repeats. No installation, service, provider or real detached-child stop was tested. WSP 15/22/50/62/84/97.
+
+## 2026-09-20 - Prepared-context backend manifest binding
+
+- Updated five existing runtime member hashes; unchanged1,400-member manifest/API/version and extension behavior. Both digest pins now match `cbd1292a4857bf071ab2d8807114c7a03932f98f2e3dc1535bac4b09884469ef`.
+- Reproduced inherited generator-test pin mismatch before edits; retained it separately, then refreshed both pins together. Eight generator tests/check pass;15 fast groups and67-file/950,440-byte package pass.
+- No installed extension/provider/runtime updated. Source repair and exact publication evidence belong to the current RSI backlog. WSP15/22/50/84/97.
+
+
+## 2026-09-20 - Daemon counter manifest and package validation
+
+- Refreshed the existing daemon member digest and its JavaScript/Python manifest pins to 0f65af35cfd806cc1cdc22fc3f4654e5090a8d27dc47b605831af7cc2069b60c.
+- All 1,400 members, manifest API/version, package caps and safeguard assertions remain unchanged. No installed extension, provider or runtime is updated.
+- Generator 8 tests, existing RedDog 15 fast groups and deterministic 67-file/950,440-byte package pass. Source repair is owned by WRE Core; exact-head CI remains required. WSP15/22/50/84/97.
+
+## 2026-09-20 - WSL source and backend compatibility closure
+
+- PR1806 candidate2033939 failed the unchanged backend compatibility gate.
+  Independent diagnostics identify the changed WSL adapter as the sole stale
+  member. The original failure is retained in the canonical RSI backlog.
+- Regenerated the existing1,400-file manifest and refreshed its extension and
+  Python test digest pins to `11b2a45c0feca2b3c53372b0c07f22788091edf89fef91555142325f560a24f1`. The member set, API, version, caps and
+  all safeguard assertions are unchanged. No installed extension is updated.
+- Local generator8 tests, RedDog15 fast groups, exact backend contract and
+  package67 files/950,440 bytes pass; backend contract overlaps the fast tier.
+  Fresh exact-head CI is still required. WSP15/22/50/84/97; no runtime effects.
+
+## 2026-09-19 - Backend inventory after Skillz registry registration
+
+- `runBackendCompatibilityPreflight(repoRoot)` reproduced the exact fail-closed reason from issue #1784: `required_runtime_file_integrity_mismatch:modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.
+- Regenerated the canonical 1,400-file inventory after the WRE Skillz registry changes, refreshed the manifest pin, and kept `test_backend_compatibility_contract.js` unchanged. The focused backend compatibility test and generator `--check` must pass before this repair can commit.
+
 ## 2026-09-14 - 0.4.141 release identity reconciliation
 
 - Reproduced the exhaustive core failure against exact current main: the

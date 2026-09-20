@@ -44,5 +44,7 @@ replace the five G1 writers' overlapping module scopes before dispatch. No build
 runtime bootstrap, model inference, device test or deployment has occurred.
 
 System prioritization stays in the [root RSI roadmap](../../../ROADMAP.md) and its
-existing backlog. Current shared next action: canonical M2M admission, 18/P0;
-the requested registry prerequisite is 3+4+5+4=16/P0. No second launch backlog.
+existing backlog. The bounded current-main draft reconciliation is14/P1;
+the historical registry parent remains16/P0. Local contract differential is
+validated; fresh hosted checks/main integration remain distinct from runtime
+admission and the incomplete POC. No second launch backlog.

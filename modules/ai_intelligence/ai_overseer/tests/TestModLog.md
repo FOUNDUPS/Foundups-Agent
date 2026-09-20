@@ -1,4 +1,15 @@
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 # AI Overseer Test ModLog
+
+## 2026-09-20: Commander metadata-to-job regression
+
+Existing intake fixture now uses the actual intent dataclass, explicit fixture authority and exact queue assertions. Covers malformed/root/field types, JSON coercions/cycles/depth, conflicting copies/targets, callback detachment, unchanged dry-run/action/digest semantics and authority-before-intake. Thirteen cases preserve independent review's three discoveries. Qualified RED15fail/16pass; focused111pass; independent99overlap plus31adversarial cases. Connected1048pass/4fail; all4failures reproduce on clean main d00b156f and remain separately tracked. No live worker/provider and no fabricated all-green result. Evidence: root RSI backlog current_observation (WSP22/49/97).
+
 
 | Date       | Author | Description | Notes |
 |------------|--------|-------------|-------|

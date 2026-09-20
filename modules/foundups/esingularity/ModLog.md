@@ -1,5 +1,70 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — YUMORI.me correspondence parent rebuilt on current main
+
+- Rebuilt the bounded correspondence/contact-ledger capability from stale PR #1793 without carrying its older branch history forward.
+- Added one canonical YUMORI.me parent contract for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, third-person monk reference, receipt reconciliation, and recursive operator learning.
+- Made the Fukui City procedure delegate to that parent while retaining the existing recipient-preflight authority for consequential outbound actions.
+- Registered the capability through the existing WRE Skillz registry and thin `.agents` / `.claude` projections; no independent runtime, recipient authority, or parallel contact database was created.
+- Refreshed the hash-bound RedDog compatibility manifest for the changed registry file after exact-head CI correctly failed closed on the stale digest; no RedDog runtime behavior changed.
+- No private recipient addresses, BCC lists, credentials, messages, Gmail state, Sheets, Docs, RSI, RedDog behavior, or public website/deployment content changed.
+
+## 2026-09-20 — YUMORI.me funding registry and Fukui reuse history reconciled
+
+- Reconciled the stale funding/PPP PR against current main and official Fukui City sources instead of merging its older branch history.
+- Standardized the project name as `YUMORI.me` in the funding registry and reusable funding Skillz contract.
+- Recorded that Sukatto is absent from the FY2026 call without treating that omission as categorical ineligibility: official FY2025 results show two rejected Sukatto proposals, while FY2021 results show a partial-use proposal that reached contract.
+- Replaced the stale FY2025 page link with the surviving official results PDF and retained the current FY2026 call plus FY2021 result as primary-source evidence.
+- WSP 97: this is a bounded YUMORI/eSingularity reconciliation; no RSI, WRE, RedDog, external messaging, Drive document, financial workbook, DNS, hosting, or deployment surface changed.
+
+## 2026-09-20 — One verbal update drives the multilingual live ticker
+
+- Replaced the duplicated TypeScript/status-translation path with one small `current-field-status.json` schema carrying Japanese, English and Portuguese together. Seeded it with the completed September 20 field report (approximately 06:30–10:00 JST) and an explicit expiry.
+- Added a bounded runtime feed from the dedicated `live/yumori-field-status` branch. Both eSingularity.ai and YUMORI.me poll the same payload every 60 seconds; hidden, expired, malformed, future-dated, overlong or off-domain data falls back to a durable campaign action.
+- Made the entire ticker—including its controls, accessibility label, static actions and live item—render directly in the selected language. Removed the stale September 25 translation mapping that incorrectly shadowed changing field reports.
+- Updated the ticker/website operating contracts so 012 can request a change verbally; 0102 authors all three language variants and updates one JSON file. Material field activity remains recorded in the canonical Google Doc through the YUMORI Moshpit Skillz; the ticker is only the public current-status projection.
+- WSP 00/22/50/97: audited current source, both consumers, language handling, tests and stale PR #1771 before implementation. Reused and extended the existing ticker contract tests rather than adding a parallel test file.
+
+## 2026-09-20 — Canonical Google Doc bound to YUMORI Moshpit Skillz
+
+- Bound the reusable `yumori_moshpit` Skillz to the live Google Doc `LOG — YUMORI Moshpit Activity Ledger | 活動ログ` as the canonical campaign-history ledger.
+- Defined the repository Skillz as the routing/order/evidence contract rather than a parallel activity store, and prohibited Markdown, DOCX, Library, or repository ledger duplication.
+- Added a Drive-unavailable recovery rule: retain pending input for the next authorized Drive session instead of creating a competing public-Git activity copy.
+
+## 2026-09-20 — Live Tsurugi-Otani field ticker
+
+- Replaced the expired September 16 field plan with 012-confirmed live activity as of 08:12 JST at an intersection in 福井市剣大谷町（つるぎおおたにちょう）, near the former Sukatto Land Kuzuryu.
+- The shared status states that the monk is speaking with local residents about the reuse proposal and handing out YUMORI.me T-shirts and tickets. The end time is explicitly left unconfirmed rather than invented.
+- Preserved the single `current-field-status.ts` source, Japanese-first wording, third-person monk reference, YUMORI.me destination, and both homepage consumers. No CampaignTicker component, routing, DNS, or hosting configuration changed.
+- WSP 97 / ticker-skill bounded pass: retrieved current source, website/ticker skills, WSP 97, module docs, recent ModLog, and overlapping open PR surfaces before editing. Source publication and live Sites deployment remain separate gates.
+
+
+## 2026-09-18 — Fail-closed PR lifecycle gate after #1782 merge incident
+
+- Audited the temporary PR-finisher behavior after #1782 squash-merged while its eSingularity workflow was red from the inherited Cloudflare peer mismatch. The prior wording relied too heavily on GitHub's “required checks” concept and did not force inspection/classification of every workflow triggered for the exact PR head.
+- Hardened `yumori_moshpit` Skillz: branch-protection required status is not sufficient; every exact-head workflow must be classified as RELEVANT_BLOCKING, EXPLICIT_REPORT_ONLY, or PROVEN_BASELINE_UNRELATED. Relevant pending/cancelled/failed workflows prohibit merge.
+- Unrelated failures require concrete diff/validation-surface evidence plus independent base reproduction/record and a separate owner. The currently observed RedDog backend-compatibility failure is now owned by issue #1784 rather than being silently ignored.
+- The eSingularity dependency blocker itself was repaired separately through clean-main PR #1783; its eSingularity install/lint/build gate passed without force or legacy-peer-deps.
+- WSP 00/15/22/50/95/97: no merge-gate weakening and no test deletion/generalization.
+
+## 2026-09-18 — YUMORI operational skill registry self-audit
+
+- Audited the live YUMORI scheduled correspondence, Contacts / Correspondence Routing structure, WRE registry, Red Dog recipient-preflight implementation, funding/PPP skill, Moshpit skill and Fukui procedure draft.
+- Promoted the Fukui procedure work into the FoundUp `skillz/` + WRE registry path and added Claude/Codex projections. The skill requires current official sources, exact government-form fidelity, independent procedural lanes, procurement state separation and the shared Red Dog recipient-preflight gate.
+- Registered the previously unregistered `yumori_funding_ppp_intelligence` Skillz and added discovery projections so the active grant watch can invoke repository-owned rules rather than prompt-only copies.
+- Reused the merged `reddog_recipient_preflight` as the single recipient-safety authority instead of maintaining a competing YUMORI implementation. Exact live Contacts + Correspondence Routing resolution remains mandatory for every To/CC/BCC recipient, including media BCC, followed by exact Gmail Sent read-back.
+- Added existing-contract coverage for registry entries, projections, official-template blocking, procurement-state separation and recipient-preflight dependency. No email, City filing or external message is sent by this repository change.
+
+## 2026-09-18 — YUMORI Moshpit promoted into the WRE Skillz/Rolodex path
+
+- Reclassified the Moshpit workflow under WSP 95 after a WSP 97 micro/macro pass: the reusable authority now lives at `skillz/yumori_moshpit/SKILLz.md`, not as a module-local legacy `skills/.../SKILL.md`.
+- Registered `yumori_moshpit` in `modules/infrastructure/wre_core/skillz/skills_registry_v2.json` as a truthful `prototype` DECISION workflow for 0102/Qwen/Gemma. No production admission, executor authority, or autonomous effect claim is made.
+- Kept `.agents/skills/yumori-moshpit/SKILL.md` and `.claude/skills/yumori-moshpit/SKILL.md` as thin projections to the canonical Skillz source. README and ROADMAP now expose the registered capability.
+- Encoded the durable split: YUMORI Moshpit = campaign/monk history; 0102 Moshpit = agent errors, repairs, learning, and RED DOG candidates. YUMORI entries are reverse chronological per JST day; interval events sort by completion/end time.
+- Added PR-lifecycle ownership: 0102 owns bounded skill PRs through exact-head checks, squash merge, main verification, and watcher retirement; routine GitHub mechanics are not delegated to 012.
+- WSP 97 test-reuse gate: reused `tests/test_contracts.py` rather than creating a new test file, after reading `tests/TestModLog.md` and `tests/README.md`. Added registry/projection/duplicate-authority assertions.
+- CI exposed two stale ticker route assertions already inconsistent with current main. Updated them to the exact current routes (`https://yumori.me/` and `/reports/jhr#jhr-002`) rather than weakening or bypassing the checks.
+
 ## 2026-09-13 — Public council/mayor messages and responsive action ticker
 
 - Added the canonical YUMORI.me `/vote-no` civic-action page with the September 10 council/mayor VOTE NO message, the September 7 mayor-focused historical request, a prominent supersession note, official contact routes, and no BCC/private distribution details.

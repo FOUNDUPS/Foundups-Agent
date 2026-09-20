@@ -118,12 +118,24 @@ available an aborted mapping is published before propagation.
 | `baseline_evaluations`, `candidate_evaluations` | Actual evaluator entries, including calls that raise; zero before entry |
 | `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
 | `baseline_input_sha256` | SHA-256 of the invocation's captured baseline text encoded as UTF-8; constructor reads normalize newlines. Describes prepared input even on abort before evaluation; not raw source bytes, program/oracle identity or authenticated provenance |
+| `proposal_inputs` | Per-invocation ordered list of `{iteration, proposal_input_sha256}` for nonempty text reaching candidate preparation. SHA-256 covers returned Unicode content encoded as UTF-8 before scratch write/diff; no raw proposal content is added to this field |
 | `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
 
 Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
 `crashed`. History/TSV record missing proposals with blank metric cells. `crashed`
 may include evaluation or later acceptance/logging failures. Best metrics advance
 only after acceptance recording succeeds; accepted info names previous fitness.
+
+`proposal_inputs` is separate from finished `history`: a subsequent preparation,
+diff or evaluation interruption can leave an input record without an outcome.
+Equal text has the same digest; iteration and invocation distinguish attempts.
+The list resets for each invocation. The existing falsy/no-proposal branch remains;
+truthy non-text values raise `TypeError` in `candidate_preparation` before write,
+diff or candidate evaluation. `str` subclasses remain accepted; hashing uses the
+built-in UTF-8 encoder rather than an overridden `encode` method. Encoding failure
+produces no record. Mode rejection before preparation also produces no record,
+even if a backend returned text. Digests do not identify raw model wire, normalized
+scratch bytes or the later evaluator input, and do not authenticate a proposal.
 
 Each sequential call reserves a distinct subdirectory, stages complete JSON in
 `report.tmp`, then replaces `report.json` in that directory after cleanup settles.
@@ -352,6 +364,13 @@ SQLite connection. Construct, use and close it on the same worker thread;
 foreign-thread database operations raise `sqlite3.ProgrammingError`. Default
 instances share the database path and committed records, not a live connection,
 transaction or close lifecycle. The previous process-global alias is removed.
+
+DaemonSelfAuditLoop owns one handle for each _increment_counter call. After a
+successful factory return it always attempts close on the calling thread,
+including write failure or BaseException propagation. Ordinary factory/write/
+close exceptions remain fail-soft. Disabled telemetry invokes no factory.
+The daemon retains no connection; stop never closes a worker's connection.
+A timed-out stop does not mean an in-flight operation completed or stopped.
 
 Use one handle per work item; do not pass a cached handle across worker handoff
 or thread restart. This is a connection ownership boundary, not a transaction

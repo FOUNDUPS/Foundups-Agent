@@ -1,4 +1,116 @@
+## Call-local skill-safety regression evidence — 2026-09-21
+
+- Extend the two existing safety/boundary suites: legacy Boolean plus literal detail mode, nested publication, policy drift, RESEARCH, four callback-stable projections and malformed pair rejection before downstream work. Preserve original assertions, module docstrings and import capabilities.
+- Run the externally qualified `run_guarded_suites.py focused <unique_label>` with the qualified Python -B interpreter. Author141pass/one platform directory-link skip; independent141pass/one skip overlaps. Two existing real-child scan cases excluded by exact name. No broad DAE/service or runtime certification.
+- Initial baseline62fail/79pass/one skip contained26 blocked Windows asyncio self-pipe binds and36 API expectations; corrected baseline59fail/82pass/one skip isolates36 API,7 keyword migration,12 malformed rejection and4 consumer witnesses. Failures and runner revisions are retained.
+- Harness permits only source-bound stdlib Proactor loopback self-pipes, records them separately, and denies product network/DB/child effects. Constructor peripheral adapters are inert/disposable; real policy/wrapper/process are exercised. Scope, commands, hashes and package checks: root backlog current_observation.
+
 # Tests - OpenClaw Bridge
+
+## Governed raw-context integrity
+
+Run the four existing bounded runtime/authority and OpenClaw/Hermes provider
+suites with isolated imports and disposable state. Canonical cases seal the raw
+context before actual opaque issuance; assert altered/partial bindings reject
+before fake effects. Capture real redaction and final fake provider framing.
+Keep legacy absence, 24,000/24,001 bounds, replay and callback mutation checks.
+The two system-transport subprocess tests require their separate process boundary;
+they are excluded from the fake-only evidence. Exact commands/results and the two
+connected resident-queue suites are bound in the root RSI backlog.
+
+## FoundUp job seam fixtures
+
+`test_e2e_foundup_job_seam.py` reuses the canonical synthetic manifest factory in
+`modules/foundups/agent/tests/test_foundup_manifest_validator.py`. Its fixture
+temporarily changes cwd to an external temporary repository and supplies
+`Path(".")`: the real validator rejects absolute roots outside its checkout.
+Only the Hermes builder is mocked. Assert its exact canonical path calls;
+missing manifests and mismatched FoundUp IDs must reject before construction.
+Non-dry-run status simulation is not live execution or completed verification.
+For mixed AI Overseer runs set `AI_OVERSEER_HEAVY_TESTS=1` and use importlib mode
+so the sibling suites execute rather than inheriting collection skips.
+
+## Omitted seed-plan selection
+
+Use the existing bootstrap suite: omitted/None/empty/matching/conflicting inputs,
+legacy byte oracle, raw-only receipt, single-read mutation and output preservation.
+The actual fake-model producer feeds fresh canonical receipts to this bootstrap;
+give its input FoundUp-local scope before admission and matching disposable Memex/
+principal evidence. Do not rewrite receipt identities to make fixtures pass.
+Explicit-input snapshots and downstream scope failures must remain covered.
+
+## Actual determination serialization coverage
+
+The existing exact-schema suite reuses the backend fake-model and in-memory-store
+fixtures to exercise real producer, top-level result and persisted receipt output.
+An absent/None proposal plan must remain omitted and validate; empty/full plans
+remain explicit and detached. Explicit wire null still rejects. Compare proposal,
+determination and candidate lineage before/after with identical fixture inputs;
+keep checkout-bound byte oracles external rather than freezing a local path in CI.
+No provider, real sandbox, stored-record migration or automatic forwarding is tested.
+
+## Direct profile/proposal ingress coverage
+
+Use the existing exact-schema and model-runtime bootstrap suites. Matching plans
+must remain identical at root and both projected proposal locations. Rejection must
+precede direct store reads and bootstrap capability/probe/lock/recovery; check file
+bytes and file inventory. Cover receipt-wrapper selection, absent-plan callback
+mutation, canonical scalar distinctions, explicit empty plans and declared scope.
+Run existing bounded packet preflight before generic profile traversal; malformed
+plan/packet/invariant mappings must reject without invoking their methods.
+Sign the final selected determination bytes before wrapping it, and use the existing
+verified model-runtime fixture. These are disposable integration fixtures, not live
+worker admission. Local connected/publication coverage is 571 + 32 distinct tests.
+
+## Receipt-to-seed lineage coverage
+
+Reuse the existing seed/bootstrap suites and determination rebind fixture. Cover
+canonical equality, lineage tampering, explicit scope mirrors, snapshots, malformed
+callbacks and overridden presence methods. Ensure the fixture receipt's operation
+matches its own plan before testing downstream seed scope. Author 553 passes;
+independent 471 plus 139 probes overlap. The publication long-path regression requires
+a root satisfying its unchanged <260 final-file and >260 temporary-file conditions;
+other suites can use short roots. Preserve failed evidence and existing golden bytes.
+
+## Explicit proposal-plan coverage
+
+Reuse the existing proposal admission and exact profile-schema tests plus the seed
+supplier/bootstrap fixtures. Check all three legacy golden wires, explicit empty
+plans, typed canonical packets, digest tampering, mutation detachment, known receipt
+mirrors, wildcard/denied paths and non-plain ancestors at both embedded locations.
+Independent 395-case runs overlap; do not sum them as distinct coverage. Existing
+backend fixtures additionally prove persistence binds the full proposal digest.
+
+Keep generated manifest writes and staging complete before starting dependent
+packaging tests. Use a short, unique external pytest temp root for the resident-loop
+suite: the long audit-directory root produced five FileNotFoundError rejections;
+all 64 cases pass with one platform skip at the short root. Preserve both receipts.
+Commands, exact-source hashes, independent findings and limits are recorded in
+`docs/roadmaps/rsi_swarm_backlog.json#current_observation`. These fixtures do not
+establish live OpenClaw/Hermes admission or runtime RSI retention.
+
+## Explicit seed-plan coverage
+
+Reuse the two existing seed supplier/bootstrap test files and current source/schema
+fixtures. Baseline 47 failed/22 passed; final 69 pass. Independent 320 includes 52
+external cases and overlaps the focused run. The pre-change seed byte oracle,
+typed packet, receipt/nonce rules, both callback snapshots and unchanged existing
+output on rejection are checked. Lane artifacts use separate subdirectories.
+Commands/hashes and the package-closure correction are in the current backlog.
+
+## Canonical M2M generation and provider coverage
+
+Reuse existing runtime/authority/handler/integration and three-provider fixtures.
+Keep absent-field golden bytes, exact typed canonical wire and original I/O/F,
+24,000-character combined boundaries, supplied/redacted drift, sealed-pair errors,
+copied/original/replayed handles and post-signature tamper rejection. Callback
+fixtures require the admitted request snapshot; tuple→list repair cannot reuse a
+handle after canonical rejection. Assert zero preflight/provider effects on denial.
+692 connected passes/one AF_UNIX skip; two unchanged WSP62 failures remain explicit.
+Use distinct author-*, generation-* and provider-* artifact names per lane; a
+collision required evidence reconstruction during this sprint. Commands, hashes,
+rejections and independent review live in the backlog current observation.
+These local fixtures do not qualify live runtime, full context or native child tasks.
 
 ## Generation admission regressions
 
@@ -515,10 +627,10 @@ egress where applicable.
 
 ## Current upstream worker providers
 
-`test_reddog_hermes_api_artifact_provider.py` proves Hermes API `0.20.4`
-accepts only one stable completed native leaf, paired delegate-only telemetry,
-explicit zero child file reads/writes, ordered final completion, zero skills,
-and unchanged pre/postflight policy.
+`test_reddog_hermes_api_artifact_provider.py` uses fakes for API `0.20.4`, one stable completed leaf,
+paired delegate-only telemetry, empty child file arrays, ordered completion, zero skills and unchanged policy.
+Its 24 stop/three terminal variants keep parent-only observation/abort flags false while retaining possible effects,
+withheld artifacts, receipt rehydration and bootstrap effect propagation; they do not prove real child termination.
 `test_reddog_openclaw_gateway_artifact_provider.py` proves OpenClaw
 `2026.7.1-2` service/plugin identity, WSL cold-start-safe RPC ordering, exact
 sandbox policy, signed provider-prefixed routing, and bounded non-empty artifact

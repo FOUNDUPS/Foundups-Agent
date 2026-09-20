@@ -295,8 +295,8 @@ def check_containment(dae: Any, sender: str, channel: str) -> Optional[Dict[str,
         return None
 
 
-def ensure_skill_safety(dae: Any, force: bool = False) -> bool:
-    """Return this call's verdict; diagnostics cannot authorize another call."""
+def ensure_skill_safety(dae: Any, force: bool = False, *, details: bool = False) -> bool | tuple[bool, str]:
+    """Return this call's verdict, or its verdict/explanation with literal details=True."""
     now = time.time()
     policy = (dae._skill_scan_required, dae._skill_scan_enforced, dae._skill_scan_max_severity)
     required, enforced, max_severity = policy
@@ -319,4 +319,4 @@ def ensure_skill_safety(dae: Any, force: bool = False) -> bool:
     dae._skill_scan_checked_at = now
     dae._skill_scan_ok = allowed
     dae._skill_scan_message = message
-    return allowed
+    return (allowed, message) if details is True else allowed

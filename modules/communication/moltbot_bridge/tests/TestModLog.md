@@ -1,4 +1,82 @@
+## Call-local skill-safety regression evidence — 2026-09-21
+
+- Extend the two existing safety/boundary suites: legacy Boolean plus literal detail mode, nested publication, policy drift, RESEARCH, four callback-stable projections and malformed pair rejection before downstream work. Preserve original assertions, module docstrings and import capabilities.
+- Run the externally qualified `run_guarded_suites.py focused <unique_label>` with the qualified Python -B interpreter. Author141pass/one platform directory-link skip; independent141pass/one skip overlaps. Two existing real-child scan cases excluded by exact name. No broad DAE/service or runtime certification.
+- Initial baseline62fail/79pass/one skip contained26 blocked Windows asyncio self-pipe binds and36 API expectations; corrected baseline59fail/82pass/one skip isolates36 API,7 keyword migration,12 malformed rejection and4 consumer witnesses. Failures and runner revisions are retained.
+- Harness permits only source-bound stdlib Proactor loopback self-pipes, records them separately, and denies product network/DB/child effects. Constructor peripheral adapters are inert/disposable; real policy/wrapper/process are exercised. Scope, commands, hashes and package checks: root backlog current_observation.
+
+## 2026-09-20: Parent-only Hermes rejection evidence regressions
+
+- Extend only `test_reddog_hermes_api_artifact_provider.py`: 24 stop combinations cover approval/status/timeout causes against cancelled/running/failed/malformed/wrong-ID/denied/error replies; three terminal cases cover failed, cancelled and forbidden activity. Existing fakes and bounded disposable paths remain.
+- Correct the old parent-cancelled assertion to require false observation/abort flags. Assert original reasons, no artifacts, possible external effects, canonical model-result digest and receipt round-trip; follow the same flags through provider bootstrap and the resident effect reader.
+- Qualified red-v2: 10 failed/98 passed; green: 108 passed. Initial insertion displaced an existing key/transport assertion; restore it before the qualified baseline and retain the rejected draft/placement receipt separately. No original assertion was silently dropped.
+- Connected-v2: 114 passed, zero skips/errors/forbidden effects. Initial 7 failed/107 passed were legitimate external lock paths rejected by the harness's Windows extended-prefix check; fix only that guard and preserve the first receipt. No live provider/service/model calls.
+- Independent review accepts 117 passes: the same 108 focused cases plus nine external controls. Its initial classname-count postcheck failed; exact test names reconcile all nine against unchanged XML without a rerun. Preserve that receipt and do not add repeated coverage.
+- Source/test sizes are 190/590 lines against 200/600 caps; all functions stay within 50 lines and classes within 200. Packaging and exact publication receipts are linked by the current RSI backlog. WSP 00/15/22/50/62/84/97/99; repair 13/P1, no child-quiescence or retained-learning proof.
+
+## 2026-09-20: Bind prepared raw context before provider effects
+
+- WSP00/15/22/50/62/84/97/99; selected13/P1 repair extends five source/four test owners. No new module, skill or runtime policy.
+- Exact prepared raw-context digest is sealed before opaque capability issuance; all three adapters check it before effects. Legitimate redaction/all-absent legacy/one-use behavior remain; partial canonical bindings reject.
+- Red45 failures resolved; focused247/connected39 pass. Independent247 overlap plus26 new probes pass; two real-process cases excluded. Exact receipts, source hashes and inherited packaging baseline retained in the current backlog.
+- Manifest1400 members unchanged, eight generator tests,15 extension groups,67-file package and unchanged1651-entry test registry pass. Current repair still awaits exact-head remote closure; no live runtime, AmIBot or retained-RSI claim.
+- Re-observed35 histories and added one independently scored conditional13/P1 native-child contract plan. Preserve R25 eligible planning, protected owners and Remote AutoPost.
+
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
+## 2026-09-20: Actual producer optional-plan serialization
+
+- Existing exact-schema tests now drive backend FakeArchitectRunner and InMemoryArchitectDeterminationStore through the actual producer. Cover result/persisted receipt, absent/None versus empty/full plans, explicit-null rejection, detached nested output, three linked identities and rejected/no-proposal output.
+- Portable red2failed/84passed; green86passed. The connected suite passes617 including those86. Identical-input before/after oracle preserves IDs, canonical child/queue bytes and provider binding; only absent/None nested null disappears. Checkout-bound golden bytes remain external.
+- Packaging and independent source-bound review are retained in current root backlog; no provider, sandbox, live storage or automatic startup execution tested. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-20: Profile/proposal ingress regressions
+
+- Extended the existing exact-schema and model-runtime bootstrap test owners. Check absent/null/empty/conflicting plans, bool/int/float distinctions, declared scope, stale lineage, raw/wrapped inputs, nested wrapper selection, callback mutation, non-plain mappings and unchanged bootstrap files on rejection.
+- Reused current determination, signing and runtime capability fixtures. Initial fixture failures were corrected before the qualified baseline: sign the final selected receipt bytes, and use the existing verified model-runtime fixture. Preserve those preliminary failures as fixture evidence, not product defects.
+- Qualified baseline: 28 failed/18 passed. Independent review then exposed generic traversal before bounded packet validation; four additional regressions failed before repair and the final focused suite passes 50. Connected suites: 571 passed; publication: 32 passed at the existing Windows path precondition. Independent and packaging results are bound in the root backlog; overlapping runs are not added together.
+
+## 2026-09-19: Seed-plan provenance regression closure
+
+- Extended existing seed/bootstrap tests for missing/None/empty/matching/conflicting plans, canonical scalar distinctions, receipt/candidate/stage tampering, stale rehashed outer lineage, scope mirrors, detached aliases, malformed callback returns and overridden presence methods.
+- Baseline 30 failed/72 passed. Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Preserve failed review probes and fixture evidence. The short-root publication precondition failure was resolved by rerunning the unchanged whole suite at qualifying path geometry; no test criterion changed.
+- No runtime claims follow from these fixtures. Exact source hashes, commands, review and closure evidence live in docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+
+## 2026-09-19: Bind explicit worker plans to existing proposal receipts
+
+- Extended five existing admission/profile owners and two existing test files. Optional normalized plans are detached before callbacks, validated with existing codec/closed schemas and included in the v3 receipt digest. None retains legacy bytes; empty plans remain explicit. No new module, skill, parser or startup wiring. WSP00/15/22/50/62/84/97/99.
+- Independent review rejected wildcard/deny overlap and non-plain ancestor coercion; both were repaired, with path-alias cases and three unchanged legacy byte oracles. Two final 395-case reviews overlap; backend fake persistence adds 14 bounded checks. Reviewed normalized hashes survive reconciliation from 46f656033 onto main 123d86263.
+- Current-main validation: 524 passes/five filesystem failures/one platform skip; all 64 serial cases pass/one skip using a short external temp root. Eight manifest tests, 15 fast groups and registry 1651/269 pass. The 1400-member closure retains every member; four runtime hashes and existing digest pins change. Original test/review failures, stale digest assertion and a packaging write/test overlap are preserved in the existing backlog observation.
+- Next 18/P0: qualify the receipt-to-seed provenance/consistency contract before forwarding. AmIBot registration remains in draft PR1751 (detect_ai); protected eSingularity CI still fails. No live build, public route, provider/runtime update or retained-improvement claim.
+
+## 2026-09-18: Recipient verification-quality regressions
+
+- Added two focused cases to the existing recipient-preflight suite: sent-only/unverified Contacts evidence must block with `UNVERIFIED_ROUTE`; a separately verified current public-directory route may authorize the same exact address.
+- Existing closed-route, exact-character, duplicate-coverage, BCC-only and provider read-back contracts remain in the same suite. CI owns exact-head execution; no send-capable provider is invoked by these unit tests.
+
+## 2026-09-15: Explicit normalized seed input
+
+- Reused the supplier/bootstrap and existing typed profile/ASCII owners. Both entries snapshot before receipt work; the seed hash includes the plan, None preserves legacy bytes, empty mappings remain explicit, and nonce basis is unchanged. No new module, skill, parser, env route or runtime authority. WSP00/15/22/34/50/62/84/97/99.
+- Baseline 47 failures/22 passes; final 69 focused passes; independent 320 includes 52 external cases. Stable hashes, prior byte oracle and rejected-input output preservation verified. Packaging: 8 passes, 15 fast groups, registry 1650/269 current. Initial expected-two-member manifest assertion failed before writing: these two seed owners are outside its 1,400-member closure, so manifest/pins correctly remain unchanged.
+- Prior PR #1761 merged as 8da0551f after 10 exact-head checks; main CI/CodeQL passed. Next 18/P0: retrieve the real normalized-plan producer/caller contract; main startup still omits it. Scope/evidence: `docs/roadmaps/rsi_swarm_backlog.json#current_observation`, artifact ID `m2m_seed_input_continuation_20260915`. No live AmIBot build, promotion or retained-learning claim.
+
+## 2026-09-15: Canonical request and provider fidelity
+
+- Before: provider 32 failures/91 passes; generation 26 failures/73 passes. Independent follow-ups reproduced 16 directory-order failures, two callback failures and one same-digest tuple/list authority retry. All failures and the separate harness assertion correction are preserved.
+- Final author-accepted: 692 passes/one AF_UNIX skip with stable hashes; independent 309 plus 31 Fusion checks; generation 105. Two unchanged WSP62 failures remain advisory. Fusion now meets 200 lines; no acceptance criterion or size exemption changed.
+- A shared artifact basename collision invalidated overlapping XML/log attribution. Final evidence uses distinct author-accepted, generation-accepted and provider-* names, receipts and hashes. Eight manifest tests, 15 fast groups and registry 1650/269 pass; actual commands and inherited failures are in `m2m_provider_fidelity_continuation_20260915`. All models/signers are disposable local fixtures; no live provider or retention claim. WSP00/15/22/34/50/62/97/99.
+
 ## 2026-09-15: Local verdict handoff and policy drift
+
+## 2026-09-15: M2M profile and final-signing coverage
+
+- Initial new profile selection: 15 failures / 57 passes; valid packets failed admission and deep/cyclic inputs raised before bounds. Initial independent integration lane: three failures / seven legacy passes.
+- Added source publication/direct reader checks; independent review caught draft policy/alias bypasses and supplied counterexamples before correction. Final connected run: 582 passed / three platform skips (AF_UNIX unavailable; symlink privileges absent). No new test file or weakened assertion; complete signers are disposable fixtures.
+- External commands, XML, adversarial receipts and source hashes: `m2m_profile_admission_continuation_20260915` in the existing backlog. Resource/ASCII/secret/digest/no-effect rules and the existing 24,000-character generation budget stay unchanged. WSP00/15/22/50/62/84/97/99.
 
 ## 2026-09-15: Full-work-order generation admission
 
@@ -2926,3 +3004,27 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   Every new security module is at most 200 lines with functions at most 50.
 - Added owner-policy v4 tier/requester regressions and a real signer-socket check
   proving only the signed provider principal reaches grant signing.
+
+
+## 2026-09-18: RedDog recipient transaction preflight
+
+- Command: `PYTHONPATH=<isolated temp repo> pytest -q modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py`
+- Status: PASS
+- Result: `12 passed`
+- Coverage:
+  - newer explicit provider route overrides stale Contacts evidence;
+  - newer address evidence cannot silently reopen an existing closed routing policy;
+  - one-character/hyphen near-match blocks;
+  - closed personal route blocks even on exact address;
+  - BCC-only route policy enforcement;
+  - duplicate Sent coverage blocks by default;
+  - conflicting top-precedence routes and unknown routes block;
+  - display-name/case normalization does not rewrite address characters;
+  - one bad recipient blocks a mixed multi-recipient transaction;
+  - provider Sent read-back detects missing/extra recipients.
+- Scope: deterministic provider-agnostic guard only; no Gmail send or external side effect.
+## 2026-09-20: Bootstrap selection and callback snapshot regressions
+
+- Extended the existing bootstrap suite for omitted/None/empty/matching/conflicting plans, raw wrappers, tampered receipt/candidate, scope contradiction, one-read callback mutation and actual producer→seed handoff. Scope enters the fake model before admission; fresh receipt IDs remain untouched.
+- Baseline7failed/34passed; first repair41passed. Independent review reproduced invalid ancestor copy coercion; two additional cases failed, then final43passed. Connected638pass; independent43 overlap plus69 probe cases/191assertions, with exact pre/post hashes. Do not add overlapping counts together.
+- Existing legacy seed-byte oracle and explicit pre-read snapshot remain unchanged. Source215/public function111; manifest8pass, fast15groups, registry1651/269 current. No live provider, sandbox, signing authority or retained-improvement claim. Evidence: root backlog current_observation.

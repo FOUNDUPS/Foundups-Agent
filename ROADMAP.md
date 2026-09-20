@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-15. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-21. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -49,43 +49,347 @@ The existing backlog points to the current ranked observation; historical packet
 scores below retain their original planning scope. Standing local authorization
 and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
+## Repository accounting and resumed RSI — 2026-09-21
+
+The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
+`734d46fae6332f4e8feaca9d3b172992dd394147`, including PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
+passed, as did both PR1803 main workflows and all three observed PR1804 main
+workflows. PR1805 passed all ten exact-head checks and both later main workflows.
+PR1806 passed all ten exact-head checks; both later main workflows now report
+SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
+Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
+Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
+Refreshed September 9 UTC onward accounting confirms 136 merged PRs and 21
+closed without merge; 98 current peer heads are reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
+fresh inventory reports 14 drafts and 15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
+REST pagination corroborates 136 merged/21 closed; search omitted 14 closed records. Both PR1830 main workflows now passed. These observations are not an atomic snapshot;
+reported green checks alone do not establish current merge or runtime authority.
+R19 qualification preserves two earlier hosted runs with 42 passing observations
+each, XML creation and parsing, but zero artifacts because the configured action
+excluded the hidden report directory. The separately scored 13/P1 repair
+is merged in PR1814 after two normal PR runs delivered exactly the two reports.
+Final candidate checks passed; report-only gate activation stays separate.
+The original 102 heads, check summaries and 107 merge identities are retained in the
+[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+under `repository_pr_accounting_20260920`; the current backlog observation binds the
+complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1810 closures and all 102 peer heads/checks.
+
+| Work observed | Reconciliation and next action |
+|---|---|
+| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796/#1797/#1798 are merged. Omitted-plan bootstrap selection is closed with638 connected tests and independent review. Its14/P1 step advanced the historical18/P0 parent; the remaining local context/child fidelity contract is now15/P1. |
+| Typed FoundUp intake | PR1799 merged the commander data handoff15/P1 within17/P0 parent; metadata survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
+| FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; PR1801 is merged with ten exact-head checks passed and both main workflows now successful. |
+| Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is merged in PR1802. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
+| AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
+| WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is merged in PR1806:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. PR1806 first CI caught an omitted backend digest refresh; corrected manifest/pins passed all ten fresh exact-head checks before merge. No real WSL/provider call. |
+| PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
+| AmIBot | Existing PR #1751 is reconciled locally with main `1f18a3ee`; this revision declares18 entries including hidden `detect_ai`, preserving the prior17. Local106pass/same5baseline failures; new AmIBot contract case passes. Publication and fresh hosted checks remain pending; no runtime or public route. |
+| Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
+| Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
+| Local branches/worktrees | 655 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+
+**Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
+same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
+Store a task summary, source lineage, test/review outcome and accepted repair;
+a conversational reply or nonempty model response is not a verified improvement.
+The [R25 source qualification](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20)
+shows why signed personal architect context and structural learning candidates
+cannot yet supply a consented FoundUp feedback proposal. Current OpenClaw conversation memory records previews under its own weaker outcome
+criterion. The governed retention sink still requires an activation capability,
+and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not ingest
+raw conversations automatically or claim that merged Codex work was autonomously
+executed and retained by WRE.
+
+**PC execution:** this session can run local Windows commands. The September20
+06:07 UTC metadata refresh found native OpenClaw 2026.5.2 and registered WSL distros;
+running state and canonical WSL versions were not queried or activated. Current Hermes,
+WSL OpenClaw/provider bindings and a real admitted sandbox remain unverified.
+The existing resolver still supplies no authoritative effect-use lease. A cold
+WSL launch can start user services, so a disposable sandbox must first be bound
+through the existing launcher/admission/rollback path. There is no evidence yet
+that blindly upgrading either runtime is the required repair. The existing WSL
+advisory contract is now qualified13/P1: enabled `--exec ... --version` calls
+may cold-start a stopped distro, and a running-state precheck cannot exclude a
+stop-before-exec race. Independent review selects the smaller12/P2 repair:
+separate metadata-only inspection from an explicit command opt-in inside the
+[existing owner](modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20).
+The repair is independently verified and merged in PR1806; exact closure is
+tracked in the backlog. Command opt-in selects diagnostic execution,
+not runtime or effect-use authority. The daemon lifetime qualifier reproduced mixed-thread telemetry loss with disposable
+storage; independent review accepted the scoped witness. The separately scored
+13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
+Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
+constructor cost and live RSI retention remain unverified. The backlog binds
+the closed R19/context repairs, qualified child-input/lifecycle gaps and current rejection-evidence repair.
+R19 qualification is merged in PR1811. Its one-step upload repair has actual
+hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
+and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
+PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
+`M2M-governed-context-binding-contract`. No runtime or gate activation.
+
+## OpenClaw call-local diagnostic repair — 2026-09-21
+
+The **10/P2** repair closed in [PR #1830](https://github.com/FOUNDUPS/Foundups-Agent/pull/1830), merge `734d46fae6332f4e8feaca9d3b172992dd394147`, after all ten exact-head checks passed and18reviewed blobs/tree matched: the existing Boolean API has a literal `details=True` pair mode; the process caller validates it and keeps its own explanation through all four projections. See the [module roadmap](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-repair--2026-09-21).
+Focused and independent runs each pass141 tests/one existing link skip; two actual-child cases are explicitly excluded. Package checks and unchanged test-registry checks pass. Preserve the initial Windows self-pipe harness failure separately; no runtime/provider/scanner or AmIBot activation occurred.
+The optional9/P3 cache-identity qualification is now closed: retain current rescanning; existing four-file WRE identity does not cover the recursive scanner input set. No measured benefit justifies cache implementation. See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#recursive-wardrobe-cache-qualification--2026-09-21). Fresh WSP15/97 selection and exact current accounting are in the backlog; no live runtime is admitted.
+
+## Next executable AmIBot step — 2026-09-21
+
+Fresh WSP15 C3/I4/D4/Impact3 = **14/P1** reconciliation is locally validated on existing draft PR1751. Only three root planning conflicts were resolved; protected trees and all 17 prior registry entries are preserved. The new AmIBot contract case passes; five unchanged baseline failures remain. Finish independent review and fresh exact-head hosted checks. No worker launch, route activation or automatic promotion follows.
+
+## R25 approval-owner qualification — 2026-09-20
+
+The13/P1 planning action is complete with a precise implementation dependency.
+Authenticated conversation identity is not approval to disclose an exact summary
+as FoundUp feedback. The current closed TURN/STATUS/CANCEL envelope lacks that
+action, and all three resident admission aggregates remain host-unwired.
+Preserve the external RedDog durable-adapter owner; this sprint does not wire it.
+
+Prefer a conditional explicit-version assertion in the existing signed record
+owners, rather than a second consent engine. Current v4 schema is immutable under
+ordinary CAS: creation or a version transition must be qualified before source work.
+No complete R25 implementation packet is admitted by this planning result.
+
+Closed in [PR #1826](https://github.com/FOUNDUPS/Foundups-Agent/pull/1826) as `531b753406c10df454d83e6e1a9de0ed717e87d1`.
+All ten exact-head checks passed; seven reviewed blobs and the merge tree match.
+Both later main workflows passed: CI35509047240 and Push on main35509047066; exact-merge evidence is in the backlog.
+
+The existing [R25 packet](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) now
+records exact preapproval bytes, prior-source binding, current revocation/retry
+checks, legacy compatibility and the missing issuer-to-consumer handoff.
+No tests or behavior probes ran; source-bound independent review validates the
+finding, not consented feedback or live RSI. Both PR1819 main workflows passed.
+
+Re-scoring retains39 histories and adds one distinct12/P2 AutoResearcher
+process-recovery oracle plan. It wins the tie over cache planning because truthful
+interruption/report ownership advances RSI evidence, while always-rescan remains
+deliberately safe. Its parent13/P1 score is not inherited. The next packet remains
+selected after fresh closure/source/ownership reconciliation; no next-plan work ran here.
+
+## Hermes rejection evidence repair — 2026-09-20
+
+Historical PR1819 repair; current R25 qualification and next action are above.
+
+The selected C2/I4/D4/Impact3 =13/P1 repair is locally verified in the existing
+run-lifecycle owner. Parent-only stop acknowledgements/status and noncompleted
+or forbidden terminal rejections report incomplete effect observation and
+unconfirmed abort. Best-effort stop/status, reasons, withheld artifacts and
+effects-possible reporting remain; successful acceptance gates are unchanged.
+This corrects receipts, not detached-child cancellation or result delivery.
+
+Corrected RED:10 failed/98 passed; GREEN:108 passed; connected:114 passed.
+Independent verification passes108 overlapping cases plus9 additional probes.
+Test-author placement, Windows temporary-path guard and independent JUnit-count
+errors are retained separately with their corrections. Backend manifest membership
+remains1,400; one runtime hash and both pins changed. Eight generator tests,
+15 extension groups,67-file package and unchanged1,651-entry registry pass.
+
+Closed in [PR #1819](https://github.com/FOUNDUPS/Foundups-Agent/pull/1819) as `fdb23b0606800547edf664c0a665d0447392058b` after all ten exact-head checks passed.
+All17 reviewed blobs and the merge tree match; main workflows are recorded separately.
+All26 original packets and39 candidate
+histories are preserved. Fresh post-closure WSP15/97 selection returns to the
+existing R25 feedback approval-owner plan at C3/I4/D3/Impact3 =13/P1: determine
+how an exact daily-work summary gains valid approval for a specific FoundUp and
+version through current owners. It is not live consent or permission to dispatch.
+The current backlog binds exact receipts, limitations and the next M2M packet.
+
+## Hermes lifecycle qualification — 2026-09-20
+
+Historical PR1818 qualification; the implemented correction and current selection are above.
+
+Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
+14/P1 compatibility question. Both PR1817 main workflows now pass. This is
+source qualification, not a live runtime test or proof of installed version.
+
+| Boundary | Qualified finding |
+|---|---|
+| Top-level dispatch | Model `background=false` does not govern dispatch. API binds `async_delivery=False`, but a captured nonempty API session ID permits background dispatch through the wake-target branch. |
+| Accepted background work | Children detach from the parent list; dispatch returns a handle. Combined results are persisted and published to a separate process completion queue; delivery into a new turn or the original run is unqualified. |
+| Inline fallback | No usable async/wake path or rejected dispatch can execute inline. Capacity fallback occurs after detachment; it does not establish parent-owned cancellation. |
+| Original run | Parent conversation return controls terminal output/status and stream closure. Existing child-before-delegate-completion and terminal-last checks remain unchanged. |
+| Stop evidence | Parent stop invokes an interrupt and schedules process cleanup. A parent `cancelled` status does not establish detached-child quiescence or complete effect observation. |
+
+The [pinned delegation owner](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/tools/delegate_tool.py#L4088)
+and exact session/async/interrupt sources were inspected: four prior immutable
+files reused and three permitted dependency reads used. The completion queue
+consumer/wake implementation remains unqualified. Do not relax event gates,
+change private depth/session identity, or substitute another endpoint on this evidence.
+Full child-input fidelity, result delivery and live sandbox readiness remain open.
+
+The smallest qualified successor is a conservative correction in existing
+`reddog_hermes_api_run_lifecycle`: retain best-effort stop/status and rejection,
+but report incomplete effect observation and unconfirmed abort from parent-only
+stop evidence. Failed/cancelled terminal rejection must also report incomplete
+observation because those event checks do not establish child closure. Existing
+receipt fields already represent this uncertainty. No schema
+or shared consumer change is needed. This does not implement detached cancellation,
+change successful-result acceptance, or prove a live leak.
+
+WSP 15 selects that distinct repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
+approval-owner planning. The verified receipt overclaim breaks the tie; R25 remains
+eligible. All 26 original packets and 38 prior candidate histories are preserved;
+one repair row makes 39. No source/tests/runtime changed during this qualification.
+The existing backlog carries the independently reviewed implementation packet.
+
+Qualification merged in [PR #1818](https://github.com/FOUNDUPS/Foundups-Agent/pull/1818) as `443c8d33a263dcea79a2ab11a054c6e7fb2a8a81`.
+All ten exact-head checks passed; the six reviewed document blobs and merge tree
+match. Post-closure WSP 15/97 reconciliation of 39 histories selects the 13/P1
+rejection-evidence repair; it has not started. Full child-input, delivery and descendant cancellation
+gaps remain. Later main workflow results are separately recorded in the backlog.
+Accounting adds this verified merge: 130 merged, 21 closed without merge and
+95 unchanged peer heads. Protected shared checkout remains unchanged.
+
+## Hermes child-input evidence qualification — 2026-09-20
+
+Historical PR1817 qualification; current lifecycle finding and next action are above.
+
+Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
+Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
+the official v2026.8.18 tag resolves to commit
+`e624e9fde561e1add9388384012b295fde669ade`, whose package version matches.
+The legacy vendor gitlink is0.9.0 and is not this API-provider source. Neither
+release metadata nor historical canaries prove the current installed runtime.
+
+| Boundary | Verified source contract |
+|---|---|
+| Prepared parent | Existing raw-context/prompt checks precede provider effects; approved redacted strings enter the parent request. |
+| Requested delegation | Parent prose requests complete goal/context and background=false; it is not observed child acceptance. |
+| Child construction | Pinned delegate source places goal in child user input and nonblank context in its system framing. Final model delivery remains unproven. |
+| Current /v1/runs events | Producer drops tool arguments/call linkage; child whitelist has redacted goal and lifecycle metadata, but no complete context or accepted input. |
+| Local verifier | Checks run/child/session identity, ordering, reported empty effects and parent terminal-output agreement. These do not establish child content fidelity. |
+
+The [pinned API producer](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/gateway/platforms/api_server.py#L6580)
+feeds the same queued dictionaries to the run event stream. Generic preview
+completeness is unknown; a goal-only check cannot close missing context coverage.
+The separate /v1/responses argument stream has a different contract and cannot
+be substituted without qualification. The smallest prerequisite is an adequate
+version-bound accepted-child-input evidence contract in existing upstream/route
+owners. No consumer patch, invented telemetry field or new authority is qualified.
+
+New source evidence changes priority: the pinned model dispatcher ignores the
+background argument and requests background when `_delegate_depth` is not above0.
+Actual delivery can still fall back inline through session/wake/pool conditions.
+This conflicts with relying on parent prose for synchronous execution, but is not
+a demonstrated live failure. Next is bounded lifecycle/result-delivery compatibility
+qualification, C3/I4/D4/Impact3=14/P1, before R25approval-owner planning13/P1.
+Preserve the existing layered/error telemetry positive case and event confinement;
+do not loosen gates or change instructions until the pinned path is understood.
+
+The initial raw-host429 was recovered through one responsive official contents
+API read at the same commit: five of six source requests used, no raw retry or
+latest-version substitution. Failures and corrected background wording remain
+in the source-bound receipts. No new tests, probes, source edits, provider calls,
+runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
+backlog preserves all36 prior histories and adds two separately scored actions.
+
+Qualification merged in [PR #1817](https://github.com/FOUNDUPS/Foundups-Agent/pull/1817) as `9909103ea4d38c6659438ea140c2f85b78a45686`.
+All ten exact-head checks passed; the six reviewed document blobs and merge tree
+match. Post-closure WSP 15/97 reconciliation of 38 histories selects the 14/P1
+lifecycle compatibility plan; it has not started. The full child-input evidence
+gap remains. Later main workflow results are separately recorded in the backlog.
+Accounting adds this verified merge: 129 merged, 21 closed without merge and
+95 unchanged peer heads. Protected shared checkout remains unchanged.
+
+## Prepared-context integrity repair — 2026-09-20
+
+The existing runtime now seals the exact prepared raw governed context together
+with the canonical prompt. OpenClaw, Hermes and Fusion verify both before their
+existing effect boundaries. Legitimate context redaction remains supported;
+partial canonical bindings fail closed, while all-absent legacy calls remain.
+Regenerate older canonical calls through the current preparation path.
+
+Local validation: 45 intended red failures resolved; 247 focused and 39 connected
+tests pass. Independent review repeats the 247 cases and adds 26 adversarial
+probes; repeats overlap. Two real-process fixtures remain deliberately excluded.
+Actual capability replay/callback isolation, empty evidence, 24,000/24,001 bounds
+and final fake provider framing are covered. No live provider/child proof follows.
+Manifest generation/check and eight packaging tests pass; 15 extension fast groups,
+67-file package and unchanged test registry pass. Inherited test-pin drift was
+reproduced before repair and reconciled with both existing pins.
+
+WSP15 re-observation retains all 35 prior histories and conditionally selects
+Hermes native-child input-evidence qualification (C3/I4/D3/Impact3=13/P1) after
+this repair closes. R25 approval-owner planning is also eligible at13/P1; the
+tie favors the concrete current handoff boundary. Cache/recovery plans score12/P2.
+Native-child telemetry must be version-bound; no new implementation is qualified.
+Source provenance, live admission, AmIBot registration/build and retained RSI
+remain open. Exact receipts and publication state are in the current backlog.
+
+Repair merged in [PR #1816](https://github.com/FOUNDUPS/Foundups-Agent/pull/1816) as `470161321f6b95371b52c756d339560520f093c3`.
+All ten exact-head checks passed; merged tree and24reviewed blobs match.
+Re-observation selects the13/P1 Hermes child-evidence contract plan. Later main
+workflows are separate observations. The128merged count adds this verified merge
+to the prior127;95peer heads and protected shared checkout remain unchanged.
+
+## Governed-context qualification and resumed audit — 2026-09-20
+
+Historical PR1815 qualification below; current repair status is above.
+
+Twelve bounded synthetic cases (27 mocked adapter calls) confirm four altered,
+empty, swapped or stripped context forms pass existing adapter validation when
+the approved M2M prompt stays unchanged. Existing prompt-tamper and blocked-
+redaction negatives still reject before mocked effects. Combined length and
+one-shot synthetic capability checks pass. An initial harness attribute typo
+was corrected and retained; repeated cases overlap. This is a missing contract
+demonstrated with fixtures, not a live exploit or repaired production source.
+
+Independent review qualifies the next M2M-prepared-context-digest packet: bind
+the exact prepared RAW context using the existing digest/opaque capability and
+check it at the three current pre-effect validator calls. Preserve legitimate
+redaction, truly legacy absence, prompt fidelity and one-shot semantics.
+Incomplete canonical bindings must reject and be regenerated. Existing provider
+framing, native-child fidelity, source provenance and live admission are separate.
+See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#governed-context-binding-contract--2026-09-20)
+and current backlog for exact source/test scope and differential size budgets.
+This sprint implements none of that next source packet.
+
+Qualification merged in [PR #1815](https://github.com/FOUNDUPS/Foundups-Agent/pull/1815)
+as 11c2f164dcd4f23c75fd3e35fe8d61b0b72cb507. All ten exact-head checks passed; merged tree and
+six reviewed blobs match. The post-merge checkpoint again selects the 13/P1
+prepared-context digest repair. Both later PR1815 main workflows now pass.
+The 127 merged count is the complete 126-merge inventory plus this verified merge.
+
+Daily coding, tests, review and PR outcomes can be scoped system evidence.
+Personal feedback has separate R25 consent/target/version requirements. Neither
+ordinary receipts nor conversation-response heuristics prove independently
+retained RSI learning. The old pattern-import script has fixed historical
+examples; the verified sink still requires its existing activation/transaction
+owner. Reuse these owners rather than adding another transcript collector.
+
 ## AmIBot autonomous production experiment — 2026-09-15
 
 AmIBot is the low-consequence test fixture; the production system is the subject
 of the experiment. 012 supplies ideas and observes meaningful results through
 RedDog. 0102 coordinates research, prioritization, packaging, workers and review.
 Use **principal prose → Prometheus normalization → ORCH → WSP 99 M2M → admitted
-OpenClaw/Hermes workers** through existing WRE/AgentDB owners. This session's two
-read-only Codex audit lanes are coordinator assistance, not admitted build workers.
+OpenClaw/Hermes workers** through existing WRE/AgentDB owners. Local Codex author/test/review lanes are coordinator assistance, not admitted
+OpenClaw/Hermes build workers.
 
-**Current result: G0 controlled failure; registry candidate locally verified, PR held.**
-This revision continues the 17-document intake from [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751)
-at `c9a33a124` on main `67db49496`, adding the required declarative manifest,
-interface and single `detect_ai` registry entry. Follow [AmIBot's roadmap](modules/foundups/detect_ai/ROADMAP.md)
-and [validation](modules/foundups/detect_ai/docs/VALIDATION.md); preserve [issue #1750](https://github.com/FOUNDUPS/Foundups-Agent/issues/1750).
-AmIBot stays hidden, unbuilt and token-deferred. Registry membership is not WRE
-admission or public readiness. The package has
-13 planning orders and an acyclic DAG, but its five G1 writers have ten overlapping
-scope pairs. No AmIBot build order has been admitted or executed.
-
-At candidate `9a89bb74`, ten remote checks passed but the registry-triggered
-eSingularity workflow failed two existing campaign-ticker assertions. Its source
-tree is identical to base `67db49496`. PR1751 stays draft/unmerged until its owner
-resolves that dependency; no workflow bypass or protected-project repair here.
+**Current result: G0 controlled failure.** Registration is prepared on draft
+[PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
+one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
+manifest and the existing intake package. The earlier main `8eda8fe73` observation found 17 registry
+entries and no `detect_ai` module. The candidate has 18; its public projection
+remains four entries. Existing eSingularity ticker assertions fail in its registry-
+triggered CI; keep the PR unmerged and the protected project with its owner.
+The 13 planning orders remain unchanged; five G1 writers still overlap in ten
+scope pairs. Requested `/f/amibot` needs the existing route owner to reconcile
+the canonical `/f/detect_ai` namespace. No build order or public route is activated.
 
 | Readiness gate | Current evidence / prerequisite |
 |---|---|
 | OpenClaw | Native Windows npm metadata: 2026.5.2. Governed WSL installation/service unverified today; September13 WSL 2026.7.1-2 is historical. |
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
-| Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Conversation drops typed genesis lineage; the live new-scaffold writer rejects an existing module. |
-| WSP 109 intake | Existing eight preparation documents are preserved. Registry/manifest/interface now identify the hidden candidate; current normalizer does not automatically consume intake prose. |
-| WSP 99 handoff | Legacy emission rejects lossy invariants. The same module now has a bounded canonical JSON codec for already normalized identity, task ID and nested constraints. Producer/consumer handoff and admission remain unqualified. |
+| Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Authorized commander handoff now preserves validated genesis lineage (PR1799); public draft-to-commander entitlement and runtime admission remain open. The live new-scaffold writer still rejects an existing module. |
+| WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
+| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Omission-aware receipt-plan forwarding is implemented (PR1798). Raw-context ingress binding is now locally verified in all three adapters. Principal normalization, source provenance, downstream/native-child fidelity and live admission remain open. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
 | Execution valve | Current resolver explicitly returns `authoritative_use_lease=None`. Current trust/effect/model authority remains required. |
-| Skillz | Existing genesis-intake guidance applied; strict pure-envelope validation and duplicate-rejection control pass. Prototype skill runtime/wardrobe admission remains unqualified. |
-| Validation | Registration: 106 pass, five identical baseline namespace/README failures outside AmIBot. Earlier G0 runtime probes: 174 pass; route 53 pass/11 fail; genesis 27 pass/1 fail. No product acceptance follows. |
+| Skillz | Reuse existing intake and diligence skills. The intake skill exists as a prototype but is absent from the standard WRE skill registries; wardrobe admission/freshness remains unqualified. |
+| Validation | Historical G0 PC audit:175 runtime-contract passes/two subprocess deselections; route53pass/11fail and genesis27pass/1fail belong to older source. Later PR1801 reconciled four current FoundUp fixtures (205 focused/677 connected passes). This refresh reran no readiness suite; no live acceptance follows. |
 | Documentation | Static Firebase `/f/**` owner exists; package claims do not establish the game. Root npm build merely echoes a message and is not frontend acceptance. |
 
 The smallest selected reusable repair was the legacy invariant guard in
@@ -94,26 +398,75 @@ The smallest selected reusable repair was the legacy invariant guard in
 cases. Independent review caught two representable-input regressions; after the
 author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedDog fast groups pass.
 Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
-This closed unsafe legacy emission; later layers below extend its evidence.
+This closes unsafe legacy emission, not the canonical envelope or the RSI system.
 
-The canonical JSON codec merged through PR #1757 as `15d653d1`; all ten
-exact-head checks and both merged-main workflows passed. Its 356 local cases
-qualify normalized serialization, not principal-prose compilation or admission.
-Handoff review then exposed a use-time gap: generation did not compare the
-resolved complete work order with the signer's existing digest. The existing
-handler now checks a detached snapshot before model verification or generation.
-Fourteen new cases reproduced the gap; 115 connected local tests and 12 extra
-independent probes pass. PR #1758 merged at `67db49496`; all ten exact-head checks
-and both main workflows passed. Supplied-artifact behavior and provider code stay unchanged.
-Re-observation keeps **normalized producer/consumer handoff qualification, 18/P0**.
-Next qualify admitted normalization and provider-bound canonical bytes, including
-redaction and output-contract context. Higher items remain blocked or separately
-owned. The historical observation file and 26 packets stay unchanged; Git retains
-observation history. AutoResearcher reporting remains 15/P1. No dispatch is enabled.
+The codec, signing, profile and provider layers are merged through PRs
+#1757/#1758/#1760/#1761. PR #1761 merged as `8da0551f` after ten exact-head checks;
+both main CI and CodeQL passed. Its local provider qualification remains 692 passes
+/one platform skip, with independent review and two inherited size failures.
+
+PR #1763 merged the explicit seed-plan APIs as `da79e5efa` after ten passing
+exact-head checks. The merged tree matches the independently reviewed files plus
+reconciled main. Its 69 focused/320 independent checks overlap; they qualify the
+seed APIs, not a producer or live build. The backend manifest/pins remain unchanged.
+
+PR #1794 merged as `b2e9e3db2` after ten passing exact-head checks; its tree
+matches the reviewed candidate. Post-merge main CI and CodeQL both passed; the latter was closed by a fresh
+remote check. Exact run IDs/statuses remain in the evidence chain.
+
+The existing architect model-output → proposal → v3 receipt now preserves an
+explicit normalized worker plan and binds its complete contents to receipt identity.
+Existing determination/candidate persistence already binds that full receipt.
+Independent local reviews accepted the seven changed source/test files after
+repairing wildcard-deny overlap and non-plain ancestor coercion. All three legacy
+receipt wires remain unchanged. Partial data does not establish an executable plan.
+
+Reconciliation onto main `123d86263` preserves the reviewed normalized hashes.
+Current-main validation: 524 passed/five filesystem failures/one platform skip;
+the affected serial suite passes 64/one skip with a short external temp root.
+All 529 applicable IDs therefore have passing local evidence. Eight manifest tests
+and 15 fast groups pass; registry is 1,651/269. Four of 1,400 runtime hashes change.
+Earlier failures and review corrections remain in the backlog evidence chain.
+
+**Receipt-to-seed prerequisite, 18/P0:** PR #1795 merged as `7de1d9ca9` after ten
+passing exact-head checks; the merged tree matches the reviewed candidate.
+A declared plan requires matching explicit seed input; missing/tampered/conflicting
+lineage rejects before later callbacks. Declared execution constraints must agree
+with effective seed scope. Legacy bytes remain. Author 553 tests and independent 471
+plus 139 probes pass; eight manifest tests/15 fast groups pass. Post-merge main CI
+and CodeQL both passed (runs 35448028771 / 35448028395).
+
+**Direct-profile prerequisite, 18/P0:** PR #1796 merged as `15f203ee3` after all ten
+checks passed on exact `f7c74fa00`. The merged tree equals the independently reviewed
+tree. Both promotion inputs are detached before capability/storage effects and
+must agree with a declared proposal plan. Local 571 +32 publication tests pass;
+independent 318 +177 asserted probes, eight manifest tests and 15 fast groups pass.
+Post-merge main CI and CodeQL both passed (35451972360 / 35451972324).
+
+**Producer serialization prerequisite, merged in [PR #1797](https://github.com/FOUNDUPS/Foundups-Agent/pull/1797):** the existing determination
+serializer now composes canonical proposal output, removing the invalid nested null
+for legacy absent plans. Result/persistence, empty/full plans and all linked IDs are
+covered by 617 connected tests. Independent review accepts86 overlapping tests plus
+72 boundary assertions;8 manifest tests/15 fast groups pass, registry1651/269 remains
+current. Source1532 and interface1592 lines do not grow; no new module or exemption.
+All10 exact-head checks passed; squash `6556a0d14` matches the reviewed tree.
+Post-merge main workflows are tracked separately in the backlog. WSP15/97 re-scored
+27 current candidates. The next bootstrap substep scores14/P1 within the18/P0
+handoff parent; explicit lower APIs already work. Omission-aware selection belongs in the existing seed bootstrap's single read, preserving
+explicit None/empty semantics. `main.py:2844` remains unwired; no prose inference.
+Principal normalization, full context/native-child fidelity, current signed admission
+and live RSI retention remain open; this local source qualification does not close G0.
+
+The adjacent 17/P0 genesis path also lacks declared typed ingress: actual
+`OpenClawIntent` has metadata, while an old fixture attaches a future payload.
+Its NOT_READY-only assertion can accept commander denial. Strengthen that evidence
+with the actual intent contract and queued job lineage before claiming integration.
+Higher 19-20 work remains blocked or separately owned. All 26 planning packets
+and the dated baseline remain unchanged; detailed audit receipts are in the backlog.
 
 | Gate | Planned work and advancement rule |
 |---|---|
-| G0 serial | Registry identity/metadata reconciled in existing PR1751. Qualify typed intake/Skillz, current runtime/update evidence, signed admission and route owner; validate complete M2M packets and disjoint scopes. |
+| G0 serial | Reconcile PR/package, registry identity, typed genesis/Skillz, current runtime/update evidence, signed admission and route owner; validate complete M2M packets and disjoint scopes. |
 | G1 parallel | Transport/session, moderation, scoring/state, PWA and AI adapter lanes; separate test-fixture lane only where ownership is disjoint. Each depends on accepted G0 and has its own worktree, claim and verifier. |
 | G2 integration | Prove clean two-browser human↔human chat, authorization, disconnect/reconnect and moderation before game assignment. |
 | G3 game | Hidden randomized human↔AI/human↔human assignment, server-held truth, locked verdict/confidence, reveal and benchmark scoring. |
@@ -139,13 +492,12 @@ YUMORI/eSingularity and Remote's `FOUNDUPS/autopost` remain separate owners.
 Record per-order provider/model, retries, failures, scopes, conflicts, independent
 rejections, 012/0102 interventions, tokens/cost when available, elapsed time, tests,
 integration/public defects, package changes and reusable repairs/accepted retention.
-Current counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
-lanes; 3 independently reviewed shared source changes; 0 WRE-retained improvements.
+Initial G0 observation counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
+lanes; 1 locally independently accepted shared repair; 0 WRE-retained improvements.
 No OpenClaw/Hermes provider invocation occurred; Codex token/cost metadata is unavailable.
 Unrun device/public tests and integration defects are unknown, not zero. Detailed
-G0 evidence remains in `amibot_g0_continuation_20260915` in the [dated observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
-Current registration evidence and the re-scored queue are in the [existing backlog](docs/roadmaps/rsi_swarm_backlog.json),
-`current_observation`; prior source checkpoints remain in Git history.
+evidence and the re-scored queue are in `amibot_g0_continuation_20260915` in the
+[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
 After every accepted or blocked layer, reapply WSP15/97 before the next assignment.
 
 ## Current delivery checkpoint — 2026-09-15

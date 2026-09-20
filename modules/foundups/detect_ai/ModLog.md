@@ -1,3 +1,11 @@
+## 2026-09-21 - Existing draft reconciliation with current main
+
+Integrated main1f18a3ee into PR1751 lineage04ef322f. Only root planning conflicts
+were resolved; original declarative registry, manifest and13orders are unchanged.
+Local106pass/same5baseline failures, including the added AmIBot README pass;
+independent scope review and fresh hosted checks govern publication. No game,
+worker, route, model, token or deployment activation. WSP00/15/22/97/104/109.
+
 # AmIBot - ModLog
 
 ## 2026-09-15 - AMIBOT_REGISTRY_ONBOARDING_PHASE1

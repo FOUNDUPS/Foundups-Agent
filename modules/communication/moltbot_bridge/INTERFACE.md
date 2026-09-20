@@ -38,20 +38,66 @@ rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale bound
 
 ## Receipt-bound artifact generation models
 
-The resident handler's generation request compares a detached complete order
-with recorded signed `work_order_digest` using the existing canonical full-order
-digest. `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` rejects missing/mismatched
-or unserializable content before model verification or issuance. This does not
-change the injected-artifact writer path or introduce optional M2M metadata.
+`ArchitectProposalExecutabilityReceipt.bounded_worker_plan` is optional in v3.
+Omission preserves the 60-field legacy wire; `{}` adds a distinct 61st field.
+`ArchitectDeterminationReceipt.to_dict()` uses canonical child serializers for result
+and persistence; absent plans stay omitted. Null, unknown fields, invalid typed/ASCII
+data and changed receipt digests reject; no stored-wire migration is performed.
+Proposal snapshots precede callbacks. Declared operation/domain/tests, paths/artifacts
+and recognized packet `I` mirrors are checked without inferring mirrors or `S`/`A`/`T`
+prose authority. Conservative lexical checks reject uncertain wildcard/deny overlap,
+case aliases, trailing dots/spaces and controls; filesystem/use-time guards remain.
 
-`build_generation_dependencies(...)` injects exactly one provider and an explicit
-`available_model_providers` inventory. `generate_bounded_artifact_contents(...)`
-uses the AI Gateway to bind invocation, selection, current runtime verification,
-resolution receipt and endpoint sequence into one one-shot capability.
-`FoundupsFusionArtifactGenerationRunner`, `OpenClawGatewayArtifactGenerationRunner`
-and `HermesApiArtifactGenerationRunner` consume it once. Fusion requires
-OpenRouter; upstream workers preserve the provider/model pair. Default inventories
-are empty; fallback, environment names and worker identity cannot select models.
+`snapshot_seed_worker_plan` now lives in the existing profile rehydration owner and
+is re-exported under its unchanged seed-supplier import name. Closed profile readers
+admit the plan only at the root and the two declared proposal receipt locations,
+including `operational_context_binding.proposal_admission`. Non-plain ancestors reject
+before reconstruction. Existing M2M codec bounds are unchanged. Whole-plan completeness,
+current authenticity/admission and startup forwarding remain separate requirements;
+direct profile agreement is checked by the preparation contract below; no provider, signer, worker or promotion authority is added.
+
+`prepare_architect_fix_promotion_inputs(determination, profile)` lives in the
+existing promotion profile owner and returns detached raw/wrapped input, a typed
+source profile and rejection reasons. Public promotion calls it before store.load;
+bootstrap calls it after artifact reads and before runtime capability verification,
+output probing, locks, store construction or publication recovery. One nonempty
+plain-dict receipt wrapper is selected; ordinary empty/None fallback is retained.
+Absence is detached too, preventing a callback from introducing a new plan.
+
+A declared proposal plan requires explicit canonical root-plan equality, existing
+receipt/candidate lineage and declared effective profile scope. Failure uses
+`REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_INCOMPLETE:proposal_plan_binding`;
+generic profile diagnostics retain their existing codes. Legacy receipts without
+a plan still permit a separately supplied plan. Current authenticity, revision,
+HEAD/Holo, model and worker authority remain downstream. Direct calls to internal
+post-verification transaction/projection helpers are outside this ingress contract.
+
+`run_reddog_authority_profile_seed_supply(...)` retains `bounded_worker_plan=None`.
+Its bootstrap distinguishes an omitted argument: select only a declared plan from
+the single raw determination read and freeze that determination before later reads.
+Explicit `None`/`{}` remain explicit; legacy absence retains identical seed bytes.
+`snapshot_seed_worker_plan` detaches explicit typed/ASCII input before receipt reads; invalid
+explicit input returns `authority_seed_bounded_worker_plan_invalid`. Selected plans
+reuse proposal/determination/candidate validation; malformed/null or tampered lineage
+returns `authority_seed_proposal_plan_invalid`. Wrappers are not unwrapped.
+`snapshot_architect_fix_plan_lineage` and the pure lineage comparator live in the
+existing candidate gate; current work-state/HEAD/Holo and authenticity checks remain
+in promotion. Reused `worker_plan_matches_execution_scope` lives in typed rehydration
+and remains importable from the proposal contract. It checks operation/domain tests,
+requested paths/artifacts, and explicit `I` mirrors of requested_operation, allowed_paths,
+denied_paths, required_tests and required_policy_gates against effective seed values.
+Contradictions return `authority_seed_worker_plan_scope_invalid`; no S/A/T inference or
+other packet identity mapping is added. Rejection preserves existing output. Seed
+digest coverage and nonce derivation remain unchanged; the lower supplier still requires explicit plan agreement.
+No scope inference, parser, env option or main.py read is added. Generation checks the complete signed `work_order_digest`; mismatch
+returns `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` before model admission.
+Explicit `m2m_envelope` becomes detached canonical JSON before one-use authority
+consumption. `FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE` burns only the matching handle.
+Absent input preserves legacy bytes; prompt/context share the 24,000-character cap.
+`validate_provider_m2m_prompt` takes optional fourth raw `context`, required with
+all three canonical binding fields; changed/partial input returns `FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING` before effects.
+Legitimate context redaction and all-absent legacy behavior remain. Gateway, inventory,
+authority and output rules remain; provenance/native-child/live admission/retained learning are unqualified.
 
 ## RedDog advisory bridge support
 
@@ -374,18 +420,18 @@ and proof digest match signed authority at use time; self-rehashed evidence and
 model substitution fails before `foundups_fusion`, sandbox-verified upstream
 `openclaw agent`, or the upstream Hermes API; actual invocation effects remain
 receipt-bound. `hermes_api` consumes the signed principal model/provider route,
-uses the fixed authenticated loopback `/v1/runs` surface, and requires exact
-version/profile identity, bearer enforcement, the sole `delegation` toolset
-with exactly `delegate_task`, zero skills, one stable completed leaf lifecycle,
-explicit empty child file-read/write arrays, ordered delegate completion, and
-unchanged tool/skill state after the run. The final terminal event and polled
-output must match. Because upstream Hermes reports
-`tool_execution=server` and `split_runtime=false`, the leaf receives no shell,
-file, web, browser, MCP, memory, or approval tool. A second child, other tool,
-approval, timeout, uncertain stop, malformed output, or confinement drift fails closed.
-Each returns only an artifact map accepted by the shared bounded relative-path,
-non-empty UTF-8 content validator to the existing Foundups materializer, and
-commit rejects pre-staged, undeclared, changed, protected, or base-mismatched state.
+fixed authenticated loopback `/v1/runs`, exact version/profile and bearer checks,
+sole `delegation`/`delegate_task`, zero skills and one stable completed leaf.
+Empty child file arrays, ordered delegate completion and unchanged postflight
+policy are required; final event and polled output must match. Server tool execution
+without split-runtime confinement excludes shell/file/web/browser/MCP/memory/approval tools.
+Second children, other tools, approvals, timeout, malformed output or drift reject.
+Stop/status remain best-effort. Parent-only stop or noncompleted/forbidden terminal
+rejection reports `effect_observation_complete=false` and `run_abort_confirmed=false`;
+effects remain possible and artifacts are withheld. This establishes neither child
+cancellation nor delivery and leaves successful acceptance gates unchanged. Accepted
+maps pass bounded relative-path/non-empty UTF-8 validation to the existing materializer;
+commit rejects pre-staged, undeclared, changed, protected or base-mismatched state.
 
 The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is
 canonically revalidated before the verifier request is built. The stage does
@@ -462,9 +508,9 @@ generic receipt as an optional all-or-none extension of
 fields remain valid. Legacy OpenRouter data remains compatibility telemetry,
 not a second authoritative provider-call identity.
 
-### FoundUpJob create_foundup Lineage
+### FoundUpJob intake and create_foundup lineage
 
-`FoundUpJob` exposes typed top-level `creation_mode`, `genesis_envelope_digest`, and `scaffold_contract_digest` fields through `create_job()` and `to_dict()` / `from_dict()`. For `create_foundup`, use `creation_mode="new_scaffold"`, explicit `PolicyFlags(dry_run_mode=True)`, canonical SHA-256 digests, and `payload.genesis_envelope`; WRE validates the route and never aliases it to build/extract.
+`dispatch_foundup()` requires existing commander authority before mutation intake. It accepts a plain `metadata.genesis_envelope` (compatible legacy `payload.genesis_envelope` only if unambiguous), revalidates a detached copy and queues the frozen envelope with tenant/session/FoundUp identity. Malformed declared data and conflicting parsed targets return `NOT_READY`; bare explicit builds retain their queue behavior. Draft public authentication and `requested_by` are not commander authority. Jobs remain dry-run with no fabricated execution evidence, creation mode or typed digest. Separately, `FoundUpJob` exposes `creation_mode`, `genesis_envelope_digest`, and `scaffold_contract_digest` through `create_job()` and round-trip serialization. The admitted `create_foundup` route requires `new_scaffold`, explicit dry-run policy, planner-compatible digests and `payload.genesis_envelope`; WRE never aliases that route to build/extract. This handoff does not grant scaffold or worker admission.
 
 ### Durable Resident Architect Cycle
 
@@ -1138,7 +1184,7 @@ Token symbol resolution:
 - COMMAND/SYSTEM intents blocked for non-commanders (WSP 50)
 - `run_skill_scan(skills_dir, report_dir=...)` owns private report/TMP files per call,
   validates before publishing a mutable latest diagnostic, and fails closed on errors.
-  [Full scanner contract](README.md#skill-safety-gate-cisco-skill-scanner): per-call verdict, observed policy-drift rejection, latest diagnostics; no effect/promotion authority.
+  [Full scanner contract](README.md#skill-safety-gate-cisco-skill-scanner): `_ensure_skill_safety(force=False, *, details=False)` returns `bool`; literal `details=True` returns local `(bool, str)`. The process consumer validates both fields; malformed results raise `TypeError`/`ValueError` before downstream execution. Latest diagnostics and policy-drift rejection remain; no effect/promotion authority.
 - Secret patterns (AIza*, sk-*, oauth_token*) redacted from output
 - Key-isolation mode:
   - `OPENCLAW_NO_API_KEYS=1` blocks cloud provider fallback in conversation/FAM paths.
@@ -1515,3 +1561,32 @@ runtime invocation dry-run, executor plan dry-run, execution valve, then isolate
 worktree create. Requires accepted signed work authority and `VALVE_OPEN_WORKTREE_CREATE`
 for acceptance. The result keeps WSP 97 truth fields explicit: no task execution,
 no file edits, no PR, no OpenClaw enqueue, no Hermes dispatch, no push, and no merge.
+
+
+### RedDog Recipient Transaction Preflight
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_recipient_preflight import (
+    EvidenceLevel,
+    ProposedRecipient,
+    RecipientRole,
+    RouteEvidence,
+    RoutePolicy,
+    preflight_recipients,
+    verify_sent_readback,
+)
+```
+
+`reddog_recipient_preflight.py` is a provider-agnostic, fail-closed sender-boundary
+guard. It does not send correspondence. It resolves each intended recipient from
+authoritative evidence, gives newer explicit provider instructions precedence over
+stale Contacts/history, enforces closed/BCC-only/organization-only route policy,
+requires exact normalized address equality, blocks duplicate sent coverage, and
+returns a deterministic SEND/BLOCK receipt.
+
+HIGH/CRITICAL correspondence should run this as an independent second pass after
+composition and before provider transmission. After a successful provider send,
+`verify_sent_readback(...)` compares actual To/CC/BCC against the approved receipt.
+Search snippets, memory, autocomplete, and visually similar addresses are not exact
+routing evidence. A one-character or punctuation difference blocks rather than being
+silently corrected.

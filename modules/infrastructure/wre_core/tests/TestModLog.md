@@ -1,3 +1,23 @@
+## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
+
+- Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
+- Author 112 and independent 112 pass (overlapping), after a preserved pre-collection null-device harness failure. Three suite attempts/six children; 111 denied symlink attempts per passing run recorded; pytest-helper attribution is inferred. Child fixed metrics isolate lifecycle, not evaluator/model quality or hostile-host sandboxing.
+- Generated only existing process capability; registry 1651/269 preserved and peer1820 overlap reconciled. Test 996 lines, parent 41, new helpers <=50; existing cohesive size review retained.
+- Both PR1827 main workflows passed. Preserve 26 packets/41 histories and archive the prior observation; distinct next 10/P2 OpenClaw diagnostic plan makes 42 histories. No recovery, reader, live runtime or retained model improvement claim. WSP00/15/22/50/62/84/97/99; exact receipts in current backlog.
+
+## 2026-09-20: Counter ownership, failure cleanup and active timeout
+
+- Preserved all 20 original daemon tests/helper ASTs; appended ten cases in the same file. Distinct simultaneously alive threads process different error events and must persist both increments; per-operation handles must close exactly once on their creator.
+- Added disabled/factory/increment/close failure and KeyboardInterrupt coverage plus a controlled active-counter stop timeout. Stop returns while the blocked operation is still running; release completes with one owner-thread close. No actual daemon.start or live logs.
+- Unchanged source: 8 failures/22 passes. Repaired: 30 passes; combined with unchanged 41-case PatternMemory suite: 71 passes, independently replayed 71 overlap. Disposable real SQLite/default-path interception, 115 combined DB opens, zero external attempts. Close-failure injection raises after actual close and does not prove recovery from partial SQLite close.
+- Test file 750 lines, largest function 40, original assertions preserved. Registry check current 1651/269. Exact red/green logs, author and independent receipts are bound in the existing RSI backlog observation; no production acceptance claim.
+
+## 2026-09-20: Proposal input identity regressions
+
+- Reused the existing model-disable fixture and real evaluator. New thirteen-case coverage checks distinct proposal text with equal outcomes, UTF-8/newlines, repeated invocations, write/diff/evaluation interruption, missing/non-text returns and a string encoder override.
+- Before source repair:13 failed/96 passed. After:109 passed; independent109 rerun overlaps. External temporary/database paths isolate all work; no provider construction, live Git runner or target execution.
+- Existing class/loop spans remain285/82; all new tests≤50 lines. Cohesive test file crosses800-line review guideline, remains below1000; module roadmap records the review. Canonical registry check remains1651/269. WSP15/22/48/50/62/84/97; exact receipts in the current RSI backlog observation.
+
 ## 2026-09-15: Baseline snapshot and preparation regressions
 
 - Reused the unchanged pre-construction model-disable fixture. Ten new LF/CRLF cases cover live source changes during construction, dirty scratch between calls, and baseline/proposal/interruption callbacks changing original_code. Assertions bind evaluated text, proposal seed, restored scratch and saved report digest while preserving source bytes.

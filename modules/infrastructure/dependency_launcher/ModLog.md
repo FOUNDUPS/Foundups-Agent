@@ -7,6 +7,35 @@
 
 ## Change Log
 
+### 2026-09-20: Default WSL availability checks to metadata-only
+
+- Added a separate default-off `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` control
+  in the existing probe. Enable-only calls validate registration/base and return
+  `NOT_READY` without command execution; both controls opt into the existing
+  version path. Existing enable-only configurations intentionally change behavior.
+- Capture mode before resolver callbacks. Preserve disabled receipt bytes,
+  explicit-mode parsing/commands, trusted resolver exports, fail-soft callers and
+  existing structural guards; source remains238 lines. No new runtime authority.
+- Local43 focused and four connected checks pass; exact red/green, independent
+  review and remote state live in the canonical RSI backlog. Added the missing
+  WSP97-required TestModLog inventory; generated registry changes only this
+  suite's corrected description. No live WSL, update, provider or FoundUp effects.
+  WSP00/15/22/50/62/84/97/99; selected source12/P2.
+
+### 2026-09-20: Qualify the WSL advisory lifecycle boundary
+
+- WSP15 13/P1 contract qualification complete locally; source/test behavior is
+  unchanged. Corrected current README/INTERFACE/ROADMAP claims: enabled version
+  commands execute programs and may cold-start WSL/services; disabled remains
+  no-host-access. A running-state precheck cannot eliminate the later-exec race.
+- Existing 25 tests pass; seven external injected witnesses pass with zero real
+  WSL calls. Independent contract/caller reviews accept the separate 12/P2 next
+  repair: default-off command opt-in within the same owner, preserving Gateway
+  exports, fail-soft startup, receipt limits and structural guards.
+- The new control is not implemented. No runtime/update/provider activation,
+  main wiring, new module/skill or AmIBot work is included. Exact evidence and
+  fresh selection are in the canonical RSI backlog. WSP00/15/22/50/62/97/99.
+
 ### 2026-09-13: Recognize installed OpenClaw numeric release suffix
 
 - RSI readiness inspection found the existing WSL advisory rejected installed

@@ -1006,9 +1006,9 @@ class OpenClawDAE:
         """Check if sender or channel is under containment."""
         return _policy_check_containment(self, sender, channel)
 
-    def _ensure_skill_safety(self, force: bool = False) -> bool:
-        """Scan current workspace skills; force remains a compatibility input."""
-        return _policy_ensure_skill_safety(self, force=force)
+    def _ensure_skill_safety(self, force: bool = False, *, details: bool = False) -> bool | tuple[bool, str]:
+        """Return current verdict; literal details=True includes its local explanation."""
+        return _policy_ensure_skill_safety(self, force=force, details=details)
 
     # ------------------------------------------------------------------
     # Phase 4: Plan Execution

@@ -6,6 +6,13 @@ import ast
 import json
 from pathlib import Path
 
+import pytest
+
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
+from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_exact_schema import (
+    _invalid_m2m, _m2m_envelope,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply import (
     AUTHORITY_PROFILE_SOURCE_SUPPLY_ACCEPT,
     AUTHORITY_PROFILE_SOURCE_SUPPLY_REJECT,
@@ -105,12 +112,16 @@ def _seed(**overrides):
     return payload
 
 
-def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Path) -> None:
+@pytest.mark.parametrize("with_m2m", (False, True))
+def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Path, with_m2m: bool) -> None:
     output = tmp_path / "runtime" / "authority_profile_source.json"
+    seed = _seed()
+    if with_m2m:
+        seed["bounded_worker_plan"] = {"m2m_envelope": _m2m_envelope()}
 
     result = run_reddog_authority_profile_source_artifact_supply(
         repo_root=REPO_ROOT,
-        authority_seed=_seed(),
+        authority_seed=seed,
         principal_authority_record=_principal(),
         permission_snapshot=_snapshot(),
         output_path=output,
@@ -134,6 +145,33 @@ def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Pa
     assert promoted.authority_profile["authority_profile_source_receipt_id"] == profile[
         "authority_profile_source_receipt_id"
     ]
+    if with_m2m:
+        expected = encode_m2m_envelope(_m2m_envelope())
+        for preserved in (profile, promoted.authority_profile):
+            assert encode_m2m_envelope(preserved["bounded_worker_plan"]["m2m_envelope"]) == expected
+        seed["bounded_worker_plan"]["m2m_envelope"]["I"]["fixture"].append("late mutation")
+        assert encode_m2m_envelope(profile["bounded_worker_plan"]["m2m_envelope"]) == expected
+
+
+@pytest.mark.parametrize("case", ("null", "wire_string", "partial", "depth", "cycle", "bytes", "secret", "digest", "non_ascii"))
+def test_supplier_m2m_rejects_before_publication(tmp_path, monkeypatch, case) -> None:
+    from modules.communication.moltbot_bridge.src import reddog_authority_profile_source_artifact_supply as supplier
+    packet = _invalid_m2m(case)
+    if case == "non_ascii":
+        packet["A"] = "validate \u2603"
+    def forbidden_write(*args, **kwargs):
+        pytest.fail("invalid M2M reached publication")
+    monkeypatch.setattr(supplier, "_write_json_atomic", forbidden_write)
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT, authority_seed=_seed(bounded_worker_plan={"m2m_envelope": packet}),
+        principal_authority_record=_principal(), permission_snapshot=_snapshot(),
+        output_path=output, now_epoch=NOW,
+    )
+    assert result.accepted is False
+    expected = AuthorityProfileSourceSupplyReason.SEED_NON_ASCII if case == "non_ascii" else AuthorityProfileSourceSupplyReason.TYPED_SCHEMA
+    assert expected in result.rejection_reasons
+    assert not output.exists()
 
 
 def test_supplier_rejects_output_inside_repo(tmp_path: Path) -> None:

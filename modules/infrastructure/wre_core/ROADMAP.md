@@ -1,6 +1,103 @@
 # WRE Core Roadmap
 
+## AutoResearcher abrupt-exit witness — 2026-09-20
+
+The **10/P2** test-only witness is locally verified on unchanged production source.
+The existing suite passes **112 cases**, independently replayed with the same 112
+cases; these runs overlap. Three deterministic child modes establish:
+
+| Mode | Observed scratch | Publication and acknowledgment |
+|---|---|---|
+| Normal return | Baseline restored | Final report and return acknowledgment agree; no temporary report. |
+| Exit71 after proposal write | Proposal remains | No final report or acknowledgment. |
+| Exit72 before atomic replacement | Baseline restored | Temporary JSON only, despite completed/restored labels; no final report or acknowledgment. |
+
+Exact exit/phase markers and owned paths identify these injected events. Missing
+reports alone remain incomplete/unknown. Target/program and seeded prior-artifact
+bytes remain unchanged; that prior fixture is not a prior successful invocation.
+The child uses fixed proposal/evaluator/model stubs. This does not prove model
+quality, live concurrency, an adversarial OS sandbox, power durability or recovery.
+Durable pre-mutation baseline, current ownership/quiescence and a recovery caller
+are still required before automatic restore/resume/delete can be qualified.
+
+Static review preceded execution. Initial pytest logging hit the parent's Windows
+null-device restriction before collection: zero tests/children. A narrowly
+reviewed external runner correction yielded author 112 and independent 112 passes.
+Each run records 111 denied symlink attempts, consistent with the installed pytest
+best-effort alias helper; per-event attribution is inferred, not stack-proven.
+There were three suite attempts and six actual witness child invocations, within
+the 3/9 budget. The test is 996 lines; its original 896-line prefix/31 definitions are
+preserved. The new parent test is 41 lines and embedded functions are <=50. Retain
+the existing cohesive 800-line size review; no new exemption or product edit.
+Canonical registry generation/check preserves 1651/269 and adds only the existing
+test's process capability; independently reconciled against unmerged PR1820.
+
+The freshly selected conditional next action is **10/P2** call-local OpenClaw
+skill-safety diagnostic qualification, ahead of optional cache planning 9/P3.
+Correct per-call Boolean admission already exists; a nested publication can
+replace its caller's latest explanation. Qualify compatibility in existing owners
+before any repair. Preserve 26 original packets and 41 histories; the distinct next
+plan makes 42. Both PR1827 main workflows passed. Exact receipts, limitations and
+the next M2M packet are in the current RSI backlog. No live runtime activation.
+
+
+## AutoResearcher interruption qualification — 2026-09-20
+
+The **12/P2** source-only qualification is complete. The producer reserves an
+invocation directory but writes no initial report or durable baseline manifest.
+Abrupt process exit can bypass cleanup. A missing report cannot say
+whether scratch is dirty, restored, still in use or abandoned.
+
+| Observed evidence | Permitted interpretation |
+|---|---|
+| Missing report or temporary JSON only | Incomplete/unknown; never promote TSV or temporary JSON to completion. |
+| Completed/aborted `report.json` | Local terminal diagnostic at its exact invocation; no caller acknowledgement, current liveness or independent acceptance claim. |
+| Cleanup failure or missing cleanup evidence | Restoration is not certified; no automatic restore/resume/delete. |
+| Partial/mismatched terminal JSON | Unqualified diagnostic; reader validation remains a separate contract. |
+
+Tracked Python class/schema searches found only the producer and its tests/CLI,
+not a current report consumer. Adding an unused classifier would duplicate a
+future reader boundary. Automatic recovery also lacks a durable baseline manifest,
+current ownership/quiescence and an idempotent recovery caller. These remain open.
+
+The independently reviewed next action is **10/P2**:
+`auto-researcher-abrupt-exit-diagnostic-witness`. Its exact bounded M2M packet is in the current backlog. Reuse the existing
+test owner and unchanged producer; compare an isolated abrupt-exit witness with a
+normal control. Inject synthetic model/evaluator dependencies before import;
+observe explicit owned paths, exit markers and bytes independently. This tests
+producer lifecycle only, not the real evaluator, arbitrary-host sandboxing,
+power-loss durability or production recovery. No child/test runs occurred here.
+
+Preserve all26 original packets and40 prior candidate histories; this distinct
+test action is scored separately. The optional cache plan is freshly9/P3:
+safe rescanning remains correct and no measured latency harm justifies the
+earlier12/P2 bounded score. Preserve that earlier score and the15/P1 broad parent
+in their historical scope. Both PR1826 main workflows passed. Re-observe
+before executing the next packet; no model, WSL, service, AmIBot or startup activation.
+
+
+## Proposal diagnostic lineage — 2026-09-20
+
+The independently qualified **12/P2** proposal-text step extends the existing
+report with per-attempt `proposal_inputs`. Text identity is captured before
+scratch write/diff after mode admission, including later rejected/interrupted
+attempts. Existing outcomes, evaluator, callback, cleanup and live-mode rejection
+remain unchanged. This advances the aggregate report qualification work; it does
+not complete its program/oracle/environment/reader or retained-learning contracts.
+
+Thirteen new regressions failed against unchanged source while96 existing cases
+passed. The repaired suite passes109; independent review reruns the same109
+cases separately. Counts overlap. Tests share the existing model-disable fixture,
+use external state and cover Unicode/newlines, sequential invocations, write/diff/
+evaluation interruptions, missing/non-text returns and string subclasses.
+The existing test file crosses the800-line review guideline but remains a cohesive
+report-lifecycle suite below1000; no new fixture owner, module or exemption is added.
+All new functions stay within50 lines, while inherited class285/loop82 do not grow.
+Exact evidence and fresh selection are in the canonical backlog's current observation.
+
 ## Current local RSI checkpoint — 2026-09-15
+
+Historical checkpoint; the September20 qualification above is current.
 
 Report input consistency is locally closed within **15/P1** qualification work.
 Constructor scratch no longer rereads the live target. Each invocation freezes
@@ -151,6 +248,39 @@ Continue parity-proven decomposition in later focused slices:
 - separate selection, evolution proposals, and telemetry;
 - keep every new module/function below WSP 62 thresholds.
 
+## Daemon counter memory lifetime — 2026-09-20
+
+The 13/P1 qualifier merged in PR1807. On unchanged source, its independent
+witness returned two events from distinct live threads but persisted only one
+counter increment. The existing supervisor both starts the daemon and invokes
+synchronous scans; its cached connection violated SQLite creating-thread use.
+
+The separately scored **C2/I4/D4/Impact3=13/P1 source repair is locally verified**.
+The existing daemon now creates, uses and finally closes a handle per counter
+operation on its calling thread. It retains no cache. Disabled telemetry opens
+nothing, ordinary errors remain fail-soft, and interruption propagates after
+cleanup. Scheduler methods, public signatures and PatternMemory are unchanged.
+
+Ten new tests preserve the original 20. Before repair: 8 failed/22 passed.
+After: 30 passed; connected 71 passed with 115 disposable database opens and zero
+external attempts. Independent 71 replay overlaps. Distinct events persist both
+increments; a blocked-counter timeout proves stop does not close a foreign
+handle and the owner closes when released. No actual start/restart or live log
+tail was exercised. Close-failure injection follows real close, not partial
+SQLite close failure. Partial constructor failure, contention, initialization
+cost, real shutdown/restart, other consumers and R11 acceptance remain open.
+
+Source 865/class755 retain inherited size without growth; constructor shrinks
+62→61. Tests 750/max function 40 satisfy their bounds. Existing 1,400-file backend
+membership/API/assertions remain unchanged; only this member digest and both
+existing pins advance. Generator 8 tests, RedDog 15 fast groups and 67-file package
+pass. Registry 1651/269 remains current; no generated registry edit is needed.
+
+Canonical current evidence and next selection are in
+[the existing backlog](../../../docs/roadmaps/rsi_swarm_backlog.json),
+daemon_counter_memory_ownership_20260920. Local verification is not WRE worker
+admission, deployment, authenticated write acceptance or retained RSI benefit.
+
 ## Execution-truth P0 follow-ons
 
 - implement an authenticated independent outcome evaluator;
@@ -164,9 +294,9 @@ Continue parity-proven decomposition in later focused slices:
 - prove a production end-to-end RSI canary before describing WRE as production RSI;
 - add typed admission-failure audit storage without conflating it with successful
   PatternMemory outcomes.
-- reconcile cached PatternMemory handle disposal/restart/handoff with the new
-  per-instance creating-thread contract before concurrent multi-agent execution;
-  same-handle multi-call transactions and R11 acceptance remain unimplemented;
+- the daemon per-counter lifetime is locally repaired above; qualify remaining
+  cached consumers, actual restart/shutdown, same-handle multi-call transactions
+  and R11 acceptance separately before concurrent production use;
 - qualify remaining concurrent coordinator state after the merged per-call
   report and fingerprint repairs; per-mapping refresh synchronization, severity
   binding, 128-entry retention, private scanner reports and explicit dispatch

@@ -52,18 +52,33 @@ authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact model routing
 
-The resident generation path first compares a detached complete work order
-with its signed `work_order_digest`. Missing, changed or unserializable orders
-reject before model verification, capability issuance or generation. Already
-supplied artifact contents retain their existing writer path. This comparison
-does not grant admission or qualify canonical M2M provider transport.
+Architect model-output proposals accept optional `bounded_worker_plan`. The existing
+producer and v3 receipt reader detach/validate it and bind its complete contents to
+the receipt digest. Missing/None input preserves legacy wire bytes; explicit `{}`
+is retained. For example, add `"bounded_worker_plan": {"m2m_envelope": packet}` to
+the existing proposal only when `packet` is already complete, normalized WSP 99 data.
+Supplied operation, tests, path scope and recognized receipt mirrors must agree.
+Prose is not converted or inferred here. Partial plans are data, not work admission.
 
-The AI Gateway then verifies current runtime authority and resolves the exact
-role/provider/model topology into a one-shot capability. Explicit provider
-inventory is required. Fusion accepts only the configured `openrouter` route;
-OpenClaw and Hermes preserve the resolved principal model/provider pair.
-No worker may infer a replacement model or use the RedDog evaluation fallback.
-Provider credentials, worker authority and runtime-model authority stay separate.
+Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. When the
+proposal receipt contains a plan, supply the same explicit plan: omission/None and
+conflicting content reject. The supplier detaches and validates receipt/candidate
+lineage before other receipt callbacks, then checks declared execution constraints
+against effective seed scope. Legacy plain-dict receipts without a plan retain their
+previous bytes and separate-plan behavior; `{}` is explicit. Main startup still
+supplies no plan; automatic extraction and principal normalization remain open.
+Direct promotion and bootstrap now enforce profile/proposal agreement using the
+existing profile owner. Both input snapshots are detached before downstream effects,
+including the legacy absent-plan branch. A declared proposal plan must equal the
+explicit profile plan and its declared scope; missing, conflicting or tampered
+lineage rejects. This does not automatically extract a plan or authorize execution.
+Generation checks the signed full-order digest before one-use model admission.
+Explicit M2M packets survive profile/signing and detached request preparation;
+rejection consumes the matching handle. Legacy bytes and the 24,000-character
+prompt/context budget remain. Sealed prompt and prepared raw-context digests reject
+changed delivery before Fusion/OpenClaw/Hermes effects; legitimate context redaction
+is preserved. Partial canonical bindings reject; all-absent markers retain legacy.
+Source provenance, native-child fidelity, live admission and retained RSI remain unqualified.
 
 ## RedDog HoloIndex promotion binding
 
@@ -411,26 +426,26 @@ not repository-local classes that merely carry their names:
   generates the artifact map; the existing Foundups writer alone materializes
   the already-authorized paths in the isolated worktree.
 - `hermes_api` calls the installed upstream Hermes Agent `/v1/runs` API through
-  authenticated loopback HTTP. It requires the fixed `reddogartifact` profile,
-  Hermes API `0.20.4`, bearer authentication, exactly the native `delegation`
-  toolset (`delegate_task` only), zero visible skills, and the same surface
-  after the run. The complete event queue must prove one stable completed leaf
-  identity with explicit empty file-read/write arrays and ordered delegate
-  completion before the final terminal event. Any second child, other tool, approval,
-  failed/interrupted child, effect, or drift rejects. Foundups retains all file,
-  worktree, commit, verification, PR, and merge effects.
+  authenticated loopback HTTP: fixed `reddogartifact` profile, API `0.20.4`,
+  bearer authentication, native `delegation` (`delegate_task` only), zero skills,
+  and unchanged postflight policy. The event queue must prove one stable completed
+  leaf, explicit empty file-read/write arrays, and ordered delegate completion
+  before the final terminal event. Other children/tools, approvals, failed or
+  interrupted children, effects and drift reject. Stop/status remain best-effort.
+  Parent-only stop or noncompleted/forbidden terminal evidence reports
+  `effect_observation_complete=false` and `run_abort_confirmed=false`;
+  effects remain possible and no artifacts return. This does not prove child
+  cancellation or delivery. Foundups retains all file, worktree, commit,
+  verification, PR, and merge effects.
 
 Both providers pass their returned map through the same bounded validator:
 canonical relative paths only, no traversal/absolute/device paths, non-empty
 UTF-8 text, and the author-stage per-file and aggregate size ceilings.
 
-Both modes consume the existing signed model-runtime binding and remain below
-the AgentDB/WRE work-order, WSP 15, exact-path, commit, and independent-verifier
-authority chain. Provider invocation and worker-process effects are recorded
-in the resident-cycle result instead of being reported as dry-run purity.
-`foundups_fusion` remains supported; unknown provider modes fail closed. The
-legacy repository `HermesJobExecutor` is not used by this route and no local
-class is presented as the upstream Hermes runtime.
+Both modes require the signed model-runtime binding and AgentDB/WRE work-order,
+WSP 15, exact-path, commit and independent-verifier authority chain. Invocation
+and process effects stay receipt-bound. `foundups_fusion` remains supported;
+unknown modes reject. The legacy `HermesJobExecutor` is not used by this route.
 
 The Hermes bearer key is read only from
 `<resident-runtime-root>/hermes-api/api-key` through the confined runtime-file
@@ -966,7 +981,7 @@ scanner or workspace/publication error fails closed. Raw scanner streams are
 omitted and its environment excludes credentials. `SkillScanResult` is supply-chain
 evidence only; it grants no execution, effect, evaluation or promotion authority.
 
-Each call returns its own verdict; REQUIRED/ENFORCED/MAX_SEVERITY drift observed during scanning rejects. Diagnostic fields show latest state; `force`, TTL and ALWAYS remain compatible.
+Each call returns its own Boolean verdict; keyword-only literal `details=True` returns its local `(allowed, message)` pair. The process caller validates Boolean/text fields and uses that explanation for logs/actions/responses; malformed results raise before downstream preflight/execution. REQUIRED/ENFORCED/MAX_SEVERITY drift rejects; diagnostic fields remain latest state and `force`, TTL and ALWAYS remain compatible.
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
 - `OPENCLAW_SKILL_SCAN_ENFORCED=1` (default): block risky scans above threshold
 - `OPENCLAW_SKILL_SCAN_MAX_SEVERITY=medium` (default)

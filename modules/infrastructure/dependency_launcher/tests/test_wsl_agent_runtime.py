@@ -1,8 +1,10 @@
-"""Tests for the read-only OpenClaw/Hermes WSL runtime binding."""
+"""Injected tests for WSL metadata and explicit command-probe modes."""
 
 from __future__ import annotations
 
 import ast
+import json
+from dataclasses import asdict
 from pathlib import Path
 
 import pytest
@@ -18,9 +20,19 @@ from modules.infrastructure.dependency_launcher.src.wsl_agent_runtime import (
 
 ENV = {
     "FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED": "1",
+    "FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED": "1",
     "FOUNDUPS_AGENT_WSL_DISTRO": "Ubuntu-24.04",
     "FOUNDUPS_AGENT_WSL_EXPECTED_BASE": r"E:\Agents\WSL\Ubuntu-24.04",
 }
+
+# Captured legacy disabled wire; it contains no checkout or platform paths.
+DISABLED_WIRE = (
+    '{"authority_class":"advisory_unverified_runtime_report","base_path":"",'
+    '"components":[],"distro":"","expected_base_path":"",'
+    '"reasons":["runtime_probe_disabled"],'
+    '"receipt_id":"sha256:ca46e9f3279389db36e506279323e6de1e6a633f8113faf107c56c92c57b966e",'
+    '"schema_version":"foundups_agent_wsl_runtime_receipt.v1","state":"DISABLED"}'
+)
 
 
 def _base(_distro: str) -> str:
@@ -56,6 +68,7 @@ def test_probe_accepts_exact_named_distro_and_components(capsys, openclaw_versio
     assert {item.component_id for item in receipt.components} == {"openclaw", "hermes"}
     assert receipt.components[0].version == openclaw_version
     assert all("--exec" in command and "--version" in command for command in calls)
+    assert calls == [build_wsl_version_command(name, "Ubuntu-24.04") for name in COMPONENT_EXECUTABLES]
     assert "preflight=PASS" in capsys.readouterr().out
 
 
@@ -95,7 +108,8 @@ def test_unknown_component_rejects() -> None:
         build_wsl_version_command("other", "Ubuntu-24.04")
 
 
-def test_base_path_mismatch_rejects_before_component_probe() -> None:
+@pytest.mark.parametrize("command_enabled", ["0", "1"])
+def test_base_path_mismatch_rejects_before_component_probe(command_enabled) -> None:
     calls = 0
 
     def runner(_command, _timeout):
@@ -104,7 +118,7 @@ def test_base_path_mismatch_rejects_before_component_probe() -> None:
         return 0, "unexpected"
 
     receipt = probe_wsl_agent_runtime(
-        environment=ENV,
+        environment={**ENV, "FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED": command_enabled},
         runner=runner,
         base_path_resolver=lambda _distro: r"C:\Users\user\AppData\Local\wsl",
     )
@@ -114,7 +128,7 @@ def test_base_path_mismatch_rejects_before_component_probe() -> None:
     assert calls == 0
 
 
-def test_missing_component_fails_closed_without_start_or_update() -> None:
+def test_missing_component_returns_not_ready_in_command_mode() -> None:
     def runner(command, _timeout):
         if any(str(part).endswith("/openclaw") for part in command):
             return 0, "OpenClaw 2026.7.1"
@@ -151,13 +165,20 @@ def test_version_evidence_excludes_trailing_diagnostic_metadata() -> None:
     assert all("diagnostic" not in item.version for item in receipt.components)
 
 
-def test_disabled_probe_performs_no_host_access() -> None:
+@pytest.mark.parametrize("runtime_enabled", [None, "0"])
+@pytest.mark.parametrize("command_enabled", ["0", "1"])
+def test_disabled_probe_performs_no_host_access(monkeypatch, runtime_enabled, command_enabled) -> None:
+    environment = {"FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED": command_enabled}
+    if runtime_enabled is not None:
+        environment["FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED"] = runtime_enabled
+    monkeypatch.setattr(runtime_module, "_trusted_wsl_path", lambda: pytest.fail("WSL resolved"))
     receipt = probe_wsl_agent_runtime(
-        environment={"FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED": "0"},
+        environment=environment,
         runner=lambda *_args: pytest.fail("runner called"),
         base_path_resolver=lambda *_args: pytest.fail("resolver called"),
     )
     assert receipt.state == "DISABLED"
+    assert json.dumps(asdict(receipt), sort_keys=True, separators=(",", ":")) == DISABLED_WIRE
 
 
 def test_probe_is_disabled_by_default() -> None:
@@ -167,6 +188,75 @@ def test_probe_is_disabled_by_default() -> None:
         base_path_resolver=lambda *_args: pytest.fail("resolver called"),
     )
     assert receipt.state == "DISABLED"
+    assert json.dumps(asdict(receipt), sort_keys=True, separators=(",", ":")) == DISABLED_WIRE
+
+
+@pytest.mark.parametrize("command_enabled", [None, "0", "false", "off", "unknown"])
+@pytest.mark.parametrize("injected_runner", [False, True])
+def test_metadata_mode_checks_binding_without_command_access(monkeypatch, command_enabled, injected_runner):
+    environment = dict(ENV)
+    environment.pop("FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED")
+    if command_enabled is not None:
+        environment["FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED"] = command_enabled
+    resolutions = []
+
+    def resolver(distro):
+        resolutions.append(distro)
+        return _base(distro)
+
+    monkeypatch.setattr(runtime_module, "_trusted_wsl_path", lambda: pytest.fail("WSL resolved"))
+    receipt = probe_wsl_agent_runtime(
+        environment=environment, base_path_resolver=resolver,
+        runner=(lambda *_args: pytest.fail("runner called")) if injected_runner else None,
+    )
+    assert resolutions == ["Ubuntu-24.04"]
+    assert receipt.state == "NOT_READY"
+    assert receipt.components == ()
+    assert receipt.reasons == ("command_probe_disabled",)
+    assert receipt.base_path == receipt.expected_base_path == _base("Ubuntu-24.04")
+    assert receipt.distro == "Ubuntu-24.04"
+    assert receipt.authority_class == "advisory_unverified_runtime_report"
+
+
+@pytest.mark.parametrize("command_enabled", ["0", "1"])
+def test_unregistered_distro_rejects_before_command_access(monkeypatch, command_enabled):
+    def resolver(_distro):
+        raise ValueError("private registration detail")
+
+    monkeypatch.setattr(runtime_module, "_trusted_wsl_path", lambda: pytest.fail("WSL resolved"))
+    receipt = probe_wsl_agent_runtime(
+        environment={**ENV, "FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED": command_enabled},
+        base_path_resolver=resolver, runner=lambda *_args: pytest.fail("runner called"),
+    )
+    assert receipt.state == "NOT_READY"
+    assert receipt.components == ()
+    assert receipt.reasons == ("distro_not_registered",)
+    assert "private registration detail" not in repr(receipt)
+
+
+@pytest.mark.parametrize("initial,changed", [("0", "1"), ("1", "0")])
+def test_command_mode_is_captured_before_resolver_callback(initial, changed):
+    environment = {**ENV, "FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED": initial}
+    calls = []
+
+    def resolver(distro):
+        environment["FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED"] = changed
+        return _base(distro)
+
+    def runner(command, timeout):
+        calls.append((tuple(command), timeout))
+        version = "OpenClaw 2026.7.1" if command[-2].endswith("/openclaw") else "Hermes Agent v0.19.1 (2026.7.30)"
+        return 0, version
+
+    receipt = probe_wsl_agent_runtime(environment=environment, base_path_resolver=resolver, runner=runner)
+    if initial == "0":
+        assert calls == []
+        assert receipt.state == "NOT_READY"
+        assert receipt.components == ()
+        assert receipt.reasons == ("command_probe_disabled",)
+    else:
+        assert receipt.state == "PASS"
+        assert calls == [(build_wsl_version_command(name, "Ubuntu-24.04"), 10.0) for name in COMPONENT_EXECUTABLES]
 
 
 @pytest.mark.parametrize("version", [

@@ -25,10 +25,14 @@ NAVIGATION:
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+from modules.foundups.agent.tests.test_foundup_manifest_validator import _valid_manifest
 
 # W2: Contract (single source of truth)
 from modules.communication.moltbot_bridge.src.foundup_job_contract import (
@@ -79,12 +83,45 @@ from modules.communication.moltbot_bridge.src.pavs_verification_seam import (
 
 
 @pytest.fixture
+def foundup_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Use the canonical synthetic manifest with the real path/identity validators."""
+    manifest = _valid_manifest()
+    module = tmp_path / manifest["build_contract"]["module_path"]
+    module.mkdir(parents=True)
+    (module / "foundup_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    # The validator accepts repo-relative paths; foreign absolute roots fail closed.
+    monkeypatch.chdir(tmp_path)
+    return Path(".")
+
+
+@pytest.mark.parametrize("action", ["extract_foundup", "validate_foundup"])
+@pytest.mark.parametrize("invalidity", ["manifest_missing", "cross_foundup_mismatch"])
+def test_e2e_invalid_manifest_identity_never_constructs_builder(
+    foundup_repo: Path, action: str, invalidity: str,
+) -> None:
+    """Real validation must reject before the mocked actuator is even constructed."""
+    if invalidity == "manifest_missing":
+        (foundup_repo / "modules/foundups/example/foundup_manifest.json").unlink()
+    job = create_job(
+        tenant_id="012", requested_action=action,
+        foundup_id="other" if invalidity == "cross_foundup_mismatch" else "example",
+        payload={"module_path": "modules/foundups/example"},
+    )
+    with patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder") as builder:
+        result = execute_foundup_job(job, repo_root=foundup_repo, force_dry_run=True)
+    builder.assert_not_called()
+    assert result.job.status == JobStatus.FAILED
+    assert result.job.status_reason_code == StatusReasonCode.FAIL_VALIDATION_ERROR
+    assert "fail_token:" + invalidity in result.job.evidence_refs
+
+
+@pytest.fixture
 def mock_hermes_success() -> Dict[str, Any]:
     """Mock successful Hermes extraction result."""
     return {
         "success": True,
-        "source_module": "modules/foundups/test_module",
-        "target_repo": "FOUNDUPS/test_module",
+        "source_module": "modules/foundups/example",
+        "target_repo": "FOUNDUPS/example",
         "boundary_analysis": {
             "product_files": 5,
             "core_dependencies": 2,
@@ -102,7 +139,7 @@ def mock_hermes_success() -> Dict[str, Any]:
             },
         },
         "adapters": {"adapters_created": ["adapters/wre_adapter.py"], "dry_run": True},
-        "manifest": {"foundup_id": "test_module", "signature": "e2e_sig"},
+        "manifest": {"foundup_id": "example", "signature": "e2e_sig"},
         "dry_run": True,
     }
 
@@ -120,29 +157,20 @@ class TestE2EFoundUpJobSeam:
         self,
         mock_builder_class: MagicMock,
         mock_hermes_success: Dict[str, Any],
+        foundup_repo: Path,
     ) -> None:
-        """
-        E2E: extract_foundup success path through all components.
+        """Route a typed job through real validation and mocked extraction to its receipt.
 
-        OpenClaw Intent
-          → FoundUpJob (QUEUED, canonical action)
-          → WRE Router (ROUTED to HERMES_BUILDER)
-          → Hermes Executor (SUCCEEDED)
-          → FAM Receipt (PENDING_PAVS)
-          → pAVS Verifier (ACCEPTED_FOR_REVIEW)
-
-        Proves:
-          - No raw chat sent (typed job only)
-          - WSP 97 truth preserved (dry_run, cabr_ready=False, payout_ready=False)
+        Dry-run evidence never establishes verification, CABR or payout readiness.
         """
         # === Step 1: OpenClaw creates typed FoundUpJob ===
         job = create_job(
             tenant_id="012",
             requested_action="extract_foundup",
-            foundup_id="modules/foundups/test_module",
+            foundup_id="example",
             intent_id="openclaw_session_abc123",
             payload={
-                "module_path": "modules/foundups/test_module",
+                "module_path": "modules/foundups/example",
                 "target_org": "FOUNDUPS",
             },
         )
@@ -168,7 +196,10 @@ class TestE2EFoundUpJobSeam:
         mock_builder.extract_foundup.return_value = mock_hermes_success
         mock_builder_class.return_value = mock_builder
 
-        result: HermesJobExecutionResult = execute_foundup_job(job, force_dry_run=True)
+        result: HermesJobExecutionResult = execute_foundup_job(job, repo_root=foundup_repo, force_dry_run=True)
+        mock_builder_class.assert_called_once_with(repo_root=foundup_repo)
+        mock_builder.extract_foundup.assert_called_once_with(
+            source_module="modules/foundups/example", target_org="FOUNDUPS")
 
         # Verify: Job reached terminal state with evidence
         assert result.job.status == JobStatus.SUCCEEDED
@@ -212,13 +243,9 @@ class TestE2EFoundUpJobSeam:
     def test_e2e_validate_foundup_with_evidence_accepted(
         self,
         mock_builder_class: MagicMock,
+        foundup_repo: Path,
     ) -> None:
-        """
-        E2E: validate_foundup with real execution (not dry-run) accepted for review.
-
-        Tests: PENDING_PAVS → ACCEPTED_FOR_REVIEW when evidence present.
-        """
-        # Setup mock for validation
+        """Mocked non-dry-run status simulation: evidence admits review, not verification."""
         mock_gate = MagicMock()
         mock_gate.passed = True
         mock_gate.module_boundary_clear = True
@@ -235,26 +262,29 @@ class TestE2EFoundUpJobSeam:
         mock_analysis.blockers = []
 
         mock_builder = MagicMock()
-        mock_builder.dry_run = False  # NOT dry-run
+        mock_builder.dry_run = False  # Simulated status only; no live worker.
         mock_builder.check_exfoliation_gate.return_value = mock_gate
         mock_builder.analyze_boundary.return_value = mock_analysis
         mock_builder_class.return_value = mock_builder
 
-        # Create and execute
         job = create_job(
             tenant_id="012",
             requested_action="validate_foundup",
-            payload={"module_path": "modules/foundups/real_module"},
+            foundup_id="example",
+            payload={"module_path": "modules/foundups/example"},
         )
         job.policy_flags.dry_run_mode = False
 
-        result = execute_foundup_job(job)
+        result = execute_foundup_job(job, repo_root=foundup_repo)
+        mock_builder_class.assert_called_once_with(repo_root=foundup_repo)
+        mock_builder.check_exfoliation_gate.assert_called_once_with("modules/foundups/example")
+        mock_builder.analyze_boundary.assert_called_once_with("modules/foundups/example")
 
         assert result.job.status == JobStatus.SUCCEEDED
         assert result.job.status_reason_code == StatusReasonCode.OK_COMPLETED
         assert result.job.policy_flags.dry_run_mode is False
 
-        # Create receipt - should be PENDING_PAVS (real execution)
+        # Receipt records the simulated non-dry-run status.
         receipt_result = create_receipt_from_job(result.job)
         assert receipt_result.success is True
         receipt = receipt_result.receipt
@@ -269,6 +299,7 @@ class TestE2EFoundUpJobSeam:
         # WSP 97 truth still preserved
         assert pavs_result.cabr_ready is False
         assert pavs_result.payout_ready is False
+        assert pavs_result.verification_complete is False
 
     def test_e2e_queue_foundup_job_routes_to_openclaw(self) -> None:
         """
@@ -314,6 +345,7 @@ class TestE2EFoundUpJobSeam:
     def test_e2e_blocked_job_creates_blocked_receipt(
         self,
         mock_builder_class: MagicMock,
+        foundup_repo: Path,
     ) -> None:
         """
         E2E: BLOCKED job → BLOCKED receipt → BLOCKED_UPSTREAM verification.
@@ -323,7 +355,7 @@ class TestE2EFoundUpJobSeam:
         mock_builder.extract_foundup.return_value = {
             "success": False,
             "error": "exfoliation_gate_failed",
-            "source_module": "modules/foundups/blocked_module",
+            "source_module": "modules/foundups/example",
             "exfoliation_gate": {
                 "passed": False,
                 "checks": {
@@ -341,10 +373,14 @@ class TestE2EFoundUpJobSeam:
         job = create_job(
             tenant_id="012",
             requested_action="extract_foundup",
-            payload={"module_path": "modules/foundups/blocked_module"},
+            foundup_id="example",
+            payload={"module_path": "modules/foundups/example"},
         )
 
-        result = execute_foundup_job(job, force_dry_run=True)
+        result = execute_foundup_job(job, repo_root=foundup_repo, force_dry_run=True)
+        mock_builder_class.assert_called_once_with(repo_root=foundup_repo)
+        mock_builder.extract_foundup.assert_called_once_with(
+            source_module="modules/foundups/example", target_org="FOUNDUPS")
         assert result.job.status == JobStatus.BLOCKED
 
         receipt_result = create_receipt_from_job(result.job)

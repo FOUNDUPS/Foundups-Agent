@@ -10,6 +10,11 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from prompt.swarm.m2m_compiler import decode_m2m_envelope
+from modules.communication.moltbot_bridge.tests.test_reddog_openclaw_gateway_artifact_provider import (
+    _M2M_PROVIDER_CASES, _m2m_provider_case, _M2M_CONTEXT_CASES,
+    _m2m_context_case, _m2m_redaction_case,
+)
 
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import REDACTION_GATE_PASSED
 from modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider import (
@@ -24,13 +29,15 @@ from modules.communication.moltbot_bridge.src.reddog_hermes_api_transport import
     RuntimeHermesApiKeyProvider,
     SystemHermesApiTransport,
 )
+from modules.communication.moltbot_bridge.src import reddog_hermes_api_run_lifecycle as lifecycle
 
 
 class FakeKeyProvider:
     def __init__(self, value="k" * 48):
-        self.value = value
+        self.value, self.reads = value, 0
 
     def read_key(self):
+        self.reads += 1
         if isinstance(self.value, Exception):
             raise self.value
         return self.value
@@ -255,7 +262,7 @@ def test_tool_or_approval_activity_is_stopped_and_rejected():
     transport = FakeTransport(status=[{"status": "waiting_for_approval", "last_event": "approval.request"}])
     result = _generate(transport)
     assert result.rejection_reasons == ("FAIL_HERMES_TOOL_ACTIVITY",)
-    assert result.run_abort_confirmed is True
+    assert result.run_abort_confirmed is False and result.effect_observation_complete is False
     assert any(path.endswith("/stop") for _, path, *_ in transport.calls)
 
 
@@ -450,3 +457,134 @@ def test_provider_has_no_shell_subprocess_or_repository_write():
             and node.func.attr in {"write_text", "write_bytes", "mkdir", "Popen", "system"}
             for node in ast.walk(tree)
         )
+
+
+@pytest.mark.parametrize("case", _M2M_PROVIDER_CASES)
+def test_m2m_prompt_integrity_precedes_hermes_key_and_network(case):
+    transport, key = FakeTransport(), FakeKeyProvider()
+    metadata, supplied, redacted = _m2m_provider_case(case)
+    context = '{"output_schema":"artifact_contents","planned_artifacts":["src/example.py"]}'
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=redacted, redacted_context=context)
+    with patch("modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(transport, binding={**_binding(), **metadata}, key_provider=key,
+                           prompt=supplied, context=context)
+    if case not in ("canonical", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert key.reads == 0 and transport.calls == []
+        assert result.made_network_call is False and result.hermes_dispatch_performed is False
+        return
+    assert result.ok and key.reads == 1
+    submit = next(call for call in transport.calls if call[:2] == ("POST", "/v1/runs"))
+    task = submit[3]["input"].split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)[0]
+    assert task == supplied and submit[3]["input"].endswith(context)
+    if case == "canonical":
+        assert [type(value) for value in decode_m2m_envelope(task)["I"]["values"][:4]] == [bool, int, float, type(None)]
+
+
+@pytest.mark.parametrize("case", _M2M_CONTEXT_CASES)
+def test_m2m_raw_context_integrity_precedes_hermes_key_and_network(case):
+    transport, key = FakeTransport(), FakeKeyProvider()
+    metadata, prompt, context = _m2m_context_case(case)
+    redacted = context if type(context) is str else "synthetic redacted context"
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=prompt, redacted_context=redacted)
+    with patch("modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(transport, binding={**_binding(), **metadata}, key_provider=key,
+                           prompt=prompt, context=context)
+    if case not in ("exact", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert key.reads == 0 and transport.calls == []
+        assert result.made_network_call is False and result.hermes_dispatch_performed is False
+        return
+    assert result.ok and key.reads == 1
+    submit = next(call for call in transport.calls if call[:2] == ("POST", "/v1/runs"))
+    task, delivered = submit[3]["input"].split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == context
+
+
+@pytest.mark.parametrize("case", ("redacted", "blocked", "prompt_tamper"))
+def test_m2m_hermes_real_redaction_and_final_frame(case):
+    transport, key = FakeTransport(), FakeKeyProvider()
+    metadata, prompt, context, gate = _m2m_redaction_case(case)
+    result = _generate(transport, binding={**_binding(), **metadata}, key_provider=key,
+                       prompt=prompt, context=context)
+    if case != "redacted":
+        expected = "FAIL_HERMES_REDACTION_BLOCKED" if case == "blocked" else "FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING"
+        assert result.rejection_reasons == (expected,)
+        assert key.reads == 0 and transport.calls == []
+        assert result.made_network_call is False and result.hermes_dispatch_performed is False
+        return
+    assert gate.status == REDACTION_GATE_PASSED and gate.redacted_context != context
+    assert result.ok and key.reads == 1
+    submit = next(call for call in transport.calls if call[:2] == ("POST", "/v1/runs"))
+    task, delivered = submit[3]["input"].split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == gate.redacted_context
+    assert "fixture@example.invalid" not in submit[3]["input"]
+
+
+def test_hermes_context_argument_remains_required():
+    transport, key = FakeTransport(), FakeKeyProvider()
+    runner = HermesApiArtifactGenerationRunner(transport, key, sleeper=lambda _value: None)
+    with pytest.raises(TypeError, match="context"):
+        runner.generate_artifacts(prompt="legacy task", binding=object(), timeout_seconds=5)
+    assert key.reads == 0 and transport.calls == []
+
+
+def _assert_parent_only_rejection(result, reason, tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_artifact_generation_result import build_generation_result, rehydrate_bounded_artifact_generation_receipt
+    from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_bootstrap import read_artifact_provider_effects
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import _artifact_provider_effects
+    assert (result.ok, result.status, result.artifact_contents) == (False, "MODEL_REJECT", {})
+    assert result.rejection_reasons == (reason,) and result.model_receipt_id is None
+    assert result.model_result_digest == lifecycle.artifact_generation_digest({"reason": reason})
+    assert (result.made_network_call, result.provider_invocation_performed, result.hermes_dispatch_performed) == (True, True, True)
+    generation = build_generation_result({}, planned=[], model_selection={}, model_result=result,
+                                        artifacts={}, reasons=[reason]).to_dict()
+    assert generation["accepted"] is False and generation["artifact_contents"] == {}
+    receipt = rehydrate_bounded_artifact_generation_receipt(generation["receipt"])
+    assert receipt is not None and receipt.to_dict() == generation["receipt"]
+    path = tmp_path / "chain.json"
+    path.write_text(json.dumps({"stage_results": {"bounded_worker_pilot": {
+        "artifact_generation_result": generation}}}), encoding="utf-8")
+    for value in (result.to_dict(), generation, receipt.to_dict(),
+                  read_artifact_provider_effects(path), _artifact_provider_effects(generation)):
+        assert value["external_side_effects_possible"] is True
+        assert value["effect_observation_complete"] is False and value["run_abort_confirmed"] is False
+
+
+@pytest.mark.parametrize("cause", ["approval", "status", "timeout"])
+@pytest.mark.parametrize("reply", ["cancelled", "running", "failed", "malformed", "wrong_id", "denied", "post_error", "get_error"])
+def test_parent_only_stop_preserves_uncertainty(cause, reply, monkeypatch, tmp_path):
+    transport = FakeTransport()
+    original = transport.request
+    def request(method, path, **kwargs):
+        response = original(method, path, **kwargs)
+        if path.endswith("/stop"):
+            if reply == "post_error":
+                raise OSError("synthetic stop failure")
+            return HermesApiResponse(403 if reply == "denied" else 202, response.body)
+        if path != "/v1/runs/run-1":
+            return response
+        if not any(call[1].endswith("/stop") for call in transport.calls):
+            return _response({"status": "waiting_for_approval"}) if cause == "approval" else HermesApiResponse(503)
+        if reply == "get_error":
+            raise OSError("synthetic status failure")
+        return HermesApiResponse(200, "{") if reply == "malformed" else _response({
+            "status": reply if reply in {"cancelled", "running", "failed"} else "cancelled",
+            "run_id": "other-parent" if reply == "wrong_id" else "run-1"})
+    monkeypatch.setattr(transport, "request", request)
+    ticks = iter((0, 6 if cause == "timeout" else 0))
+    runner = SimpleNamespace(transport=transport, monotonic=lambda: next(ticks), sleeper=lambda _: None)
+    result = lifecycle.execute_hermes_artifact_run(runner, api_key="k" * 48, route=("model", "provider"),
+                                                  prompt="task", context="context", timeout_seconds=5)
+    stop = next(i for i, call in enumerate(transport.calls) if call[1].endswith("/stop"))
+    assert [(c[0], c[1]) for c in transport.calls[stop:]] == [("POST", "/v1/runs/run-1/stop")] + ([] if reply == "post_error" else [("GET", "/v1/runs/run-1")])
+    reason = "FAIL_HERMES_" + {"approval": "TOOL_ACTIVITY", "status": "RUN_STATUS", "timeout": "RUN_TIMEOUT"}[cause]
+    _assert_parent_only_rejection(result, reason, tmp_path)
+
+
+@pytest.mark.parametrize("state", ["failed", "cancelled", "forbidden"])
+def test_parent_only_terminal_preserves_uncertainty(state, tmp_path):
+    status = _completed(approval=True) if state == "forbidden" else _completed(status=state)
+    result = (lifecycle._terminal(status, "run-1", "model", "provider", native_delegation=True)
+              if state == "forbidden" else _generate(FakeTransport(status=[status])))
+    _assert_parent_only_rejection(result, "FAIL_HERMES_RUN_REJECTED", tmp_path)

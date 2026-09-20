@@ -301,3 +301,76 @@ Parallel candidates (do not require activation):
 **CI Observation Active From**: 2026-05-22 (upon PR merge)
 **Worker-Lane**: W7 (W10-support)
 **WSP Lock**: WSP_00, WSP_15, WSP_50, WSP_6, WSP_87, WSP_97, WSP_22
+
+## 2026-09-20: R19 artifact-delivery qualification
+
+WSP 00 bootstrap and WSP 15/97 reconciliation selected the existing R19 contract
+at C3/I4/D3/Impact3 = 13/P1. Source and workflow remain unchanged.
+
+| Evidence | Historical run | Current main run |
+|---|---|---|
+| Run / attempt | 35455694581 / 1 | 35486733009 / 1 |
+| Head | 6556a0d1427651baef518de799ccb7df19e16c35 | 4bec22b6d6775369d09495ac5ea507be003729e1 |
+| Red-team job | 105930435014 | 106014380963 |
+| Logged XML creation and parsed summary | 42 passed, zero failures/errors/skips | 42 passed, zero failures/errors/skips |
+| Upload selection / artifact API | no files / 0 artifacts | no files / 0 artifacts |
+
+Both jobs resolve `actions/upload-artifact@v4` to
+`ea165f8d65b6e75b540449e92b4886f43607fa02`. Its default hidden-file exclusion is
+passed into bundled `@actions/glob` 0.5.0. The exact bundled implementation skips
+the dot-prefixed `.redteam-observation` directory before descending. Both jobs
+explicitly log `include-hidden-files: false` and the no-files warning. This
+qualifies file selection as the cause of these missing reports; it is not an
+upload-service outage. The two runs repeat the same 42 cases, not 84 unique tests.
+
+Primary source: [resolved action search helper](https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/src/shared/search.ts)
+and [bundled implementation](https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/dist/upload/index.js),
+lines 9955–9958. Run receipts, hashes and bounded source copies are bound by
+`docs/roadmaps/rsi_swarm_backlog.json` current observation. No artifact exists to
+download. No local test suite, upstream code, runtime or workflow was executed.
+
+Smallest next repair, separately scored C2/I4/D4/Impact3 = 13/P1: change only the
+existing upload step to allow hidden files with two literal report paths (XML
+and stdout). A directory-wide opt-in is broader than necessary; renaming the
+directory touches several producer/parser references. Preserve `warn`,
+`always()`, retention, name, action version, permissions and report-only policy.
+Normal PR CI must then prove artifact listing, exact two-member download and
+XML/stdout content. Until then delivery is **not fixed** and gate activation is
+not justified. The synthetic harness is not production safety certification.
+
+Retrieval: governed lexical bundle, zero missing required module artifacts;
+semantic freshness UNKNOWN with index gap. Direct reads bound the workflow and
+adjacent docs; historical module noise and optional missing docs were recorded.
+No reindex, new module, skill or repository document. Existing 101 peer heads and
+the shared checkout are unchanged; qualification has no conflicting workflow
+owner. Routine coordinator/reviewer work is not admitted WRE execution or
+independently retained RSI learning.
+
+## 2026-09-20: Restore delivery of the two observation reports
+
+The existing upload step now selects only the literal XML and stdout paths and
+enables hidden-file inclusion. Whole-workflow YAML comparison confirms every
+other field is unchanged: report-only behavior, test command, summary parser,
+`always()`, `warn`, retention, artifact name, action version and permissions.
+
+Normal PR1814 run 35490794138, attempt1, at `2784a2e899038eaa7f3741e192983a98ae91c618` produced artifact
+10598364742 (`redteam-observation-35490794138-1`). The run API head names the
+PR candidate; checkout logs bind synthetic merge `3bfe35f19293482996831a6d542c7f0adf96fd33`
+of that candidate into base `b94bada9bfc05e0ef7c5d7a4ce6641ed9e867dc2`. The downloaded ZIP digest
+matches the artifact API. Its only members are `redteam-report.xml` and
+`redteam-stdout.log`; XML and stdout agree on42 passing cases with zero failures,
+errors or skips. The logs bind the previously qualified immutable upload-action
+revision, hidden inclusion and selection of two files. Receipt/member hashes
+are in the canonical backlog. This is actual hosted delivery for that run;
+final candidate verification and merge are still pending at this checkpoint.
+
+The first archive inspection succeeded while the overall CI run was active,
+but `gh` withheld job logs until completion. That tooling failure is retained;
+the already-downloaded ZIP was reused against the API digest, not downloaded
+again. No local suite rerun, upstream code execution or workflow rerun.
+
+WSP15 action C2/I4/D4/Impact3 =13/P1; independent source review accepted. Rescoring
+selects `M2M-governed-context-binding-contract` as the next bounded contract after closure. This
+does not activate a blocking gate or establish observation-window stability,
+production safety, admitted WRE execution or retained RSI learning. Historical
+zero-artifact observations remain preserved. WSP00/15/22/50/97/99.

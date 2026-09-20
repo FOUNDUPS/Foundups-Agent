@@ -1,4 +1,18 @@
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 # AI Intelligence Overseer - ModLog
+
+## 2026-09-20: Prove commander draft handoff with the declared intent
+
+- Corrected the intake integration fixture that mistook an authority-denial response for success. Actual OpenClawIntent metadata now proves a queued, detached envelope only with explicit commander authority; the dry-run builder itself still does not queue.
+- Focused111pass and independent99overlap/31adversarial cases. Connected1048pass/4fail; all4 reproduced on clean d00b156f. Existing tests retain the13review-discovered regression cases.
+- Reconciled the scaffold roadmap against existing typed job/route/planner owners. Public intake grants draft rights only; planner digest, admission, registry and runtime execution remain separate.
+- WSP00/15/22/50/62/84/95/97/99/109. Exact evidence and PR closure: docs/roadmaps/rsi_swarm_backlog.json#current_observation. Preserved pre-existing ModLog NUL bytes; no unrelated cleanup.
+
 
 ## 2026-09-13 - RSI context preservation evidence
 

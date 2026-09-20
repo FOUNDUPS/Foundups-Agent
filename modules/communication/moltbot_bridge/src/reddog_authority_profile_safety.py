@@ -164,6 +164,7 @@ _SOURCE_AUTHORITY_BASIS_FIELDS = frozenset(
 )
 _BOUNDED_WORKER_PLAN_FIELDS = frozenset(
     {
+        "m2m_envelope",
         "domain_id",
         "domain_profile",
         "env_policy",
@@ -423,7 +424,7 @@ def _field_set(value: str) -> frozenset[str]:
 
 _PROPOSAL_ADMISSION_FIELDS = _field_set(
     """
-    accepted action admissible_to_authoritative_queue allowed_paths
+    accepted action admissible_to_authoritative_queue allowed_paths bounded_worker_plan
     authorized_foundup_id conversation_binding_digest conversation_binding_present
     conversation_grounding_receipt_id conversation_id conversation_revision
     conversation_revision_receipt_id conversation_scope_record_digest decision_reasons
@@ -546,6 +547,12 @@ _NESTED_FIELD_SCHEMAS = (
         "operational_context_binding.proposal_admission.progressive_policy_stage_receipt",
         _PROGRESSIVE_EXECUTION_STAGE_FIELDS,
     ),
+)
+_NESTED_FIELD_SCHEMAS += tuple(
+    (f"{parent}.{path}", fields)
+    for parent in ("proposal_admission", "operational_context_binding.proposal_admission")
+    for path, fields in _NESTED_FIELD_SCHEMAS
+    if path == "bounded_worker_plan" or path.startswith("bounded_worker_plan.")
 )
 _SEQUENCE_MAPPING_SCHEMAS = (
     ("slice_verifier_plan.required_checks", _SLICE_VERIFIER_CHECK_FIELDS),
