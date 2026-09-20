@@ -1,4 +1,29 @@
-## Parent-only Hermes rejection evidence — 2026-09-20
+## R25 approval-owner qualification — 2026-09-20
+
+The13/P1 planning action is complete with a precise implementation dependency.
+Authenticated conversation identity is not approval to disclose an exact summary
+as FoundUp feedback. The current closed TURN/STATUS/CANCEL envelope lacks that
+action, and all three resident admission aggregates remain host-unwired.
+Preserve the external RedDog durable-adapter owner; this sprint does not wire it.
+
+Prefer a conditional explicit-version assertion in the existing signed record
+owners, rather than a second consent engine. Current v4 schema is immutable under
+ordinary CAS: creation or a version transition must be qualified before source work.
+No complete R25 implementation packet is admitted by this planning result.
+
+The existing [R25 packet](../../../docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) now
+records exact preapproval bytes, prior-source binding, current revocation/retry
+checks, legacy compatibility and the missing issuer-to-consumer handoff.
+No tests or behavior probes ran; source-bound independent review validates the
+finding, not consented feedback or live RSI. Both PR1819 main workflows passed.
+
+Re-scoring retains39 histories and adds one distinct12/P2 AutoResearcher
+process-recovery oracle plan. It wins the tie over cache planning because truthful
+interruption/report ownership advances RSI evidence, while always-rescan remains
+deliberately safe. Its parent13/P1 score is not inherited. The next packet remains
+conditional on exact closure and fresh reconciliation; no next-plan work ran here.
+
+## Historical parent-only Hermes rejection evidence — 2026-09-20
 
 The existing lifecycle owner now keeps effect observation and abort confirmation
 false after parent-only stop evidence and noncompleted/forbidden terminal rejection.

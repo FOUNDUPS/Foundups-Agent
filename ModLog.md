@@ -1,3 +1,16 @@
+## 2026-09-20: Qualify R25 feedback approval owners and preserve host boundary
+
+- WSP00/15/22/50/62/84/97/99/103/104; seven existing documents only. Compared current record, turn and scoped-receipt options; prefer conditional explicit record version while preserving v4 signatures/CAS/recovery exactly.
+- Exact-summary authenticated issuer and pre-projection consumer remain missing. Three admission aggregates are host-unwired; preserve external durable-adapter ownership. Existing architect disclosure and work promotion are not feedback permission. No complete source packet qualified.
+- Record source revision/digest, canonical preapproval bytes, purpose/FoundUp/version/window, current revoke/expiry checks and retry semantics; include legacy/negative oracles. Independent source review only: zero tests/probes/source edits/runtime calls.
+- Both PR1819 main workflows passed.95 existing peer heads unchanged;3 external peers added. Preserve26 packets/39 histories, add one independently scored12/P2 AutoResearcher recovery-oracle plan; actual cache plan also12/P2, higher broad/blocked scopes retained. Exact publication remains in the current backlog.
+
+## 2026-09-20: Close Hermes rejection repair; select R25 approval-owner plan
+
+- PR1819 merged as fdb23b0606800547edf664c0a665d0447392058b; all ten exact-head checks passed,17 reviewed blobs and merge tree verified. Later main workflows remain separate observations.
+- Re-observed39 histories and18 next-plan source bindings; next R25 approval-owner planning13/P1 is selected, not executed. Daily-work consent and full Hermes input/delivery/cancellation remain open.
+- Accounting131 merged/21 closed-unmerged/95unchanged peers; protected shared checkout preserved. No live provider/runtime activation or retained RSI proof. WSP15/22/97; exact receipts in the backlog.
+
 ## 2026-09-20: Correct parent-only Hermes rejection evidence
 
 - WSP00/15/22/50/62/84/95/97/99;13/P1 existing-owner source repair. Parent stop/status and rejected terminal evidence no longer claim complete effects or confirmed descendant abort. Keep best-effort stop, reasons, withheld artifacts and effects-possible flags; success/event controls unchanged.

@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`443c8d33a263dcea79a2ab11a054c6e7fb2a8a81`, including PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`fdb23b0606800547edf664c0a665d0447392058b`, including PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,9 +60,9 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 130 merged PRs and 21
-closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
-current full inventory reports 12 drafts and 15 PRs with failing checks; 20 have
+Refreshed September 9 UTC onward accounting confirms 131 merged PRs and 21
+closed without merge; 98 current peer heads are reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
+prior full inventory reported 12 drafts and 15 PRs with failing checks; 20 have
 all-success checks, 59 have success/neutral/skipped results, and one has no checks.
 After individual AmIBot confirmation, merge-state reports 93 UNKNOWN, one CLEAN
 and one DIRTY. These interval observations are not an atomic GitHub snapshot;
@@ -89,7 +89,7 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 649 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 650 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -130,7 +130,34 @@ and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
+## R25 approval-owner qualification — 2026-09-20
+
+The13/P1 planning action is complete with a precise implementation dependency.
+Authenticated conversation identity is not approval to disclose an exact summary
+as FoundUp feedback. The current closed TURN/STATUS/CANCEL envelope lacks that
+action, and all three resident admission aggregates remain host-unwired.
+Preserve the external RedDog durable-adapter owner; this sprint does not wire it.
+
+Prefer a conditional explicit-version assertion in the existing signed record
+owners, rather than a second consent engine. Current v4 schema is immutable under
+ordinary CAS: creation or a version transition must be qualified before source work.
+No complete R25 implementation packet is admitted by this planning result.
+
+The existing [R25 packet](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) now
+records exact preapproval bytes, prior-source binding, current revocation/retry
+checks, legacy compatibility and the missing issuer-to-consumer handoff.
+No tests or behavior probes ran; source-bound independent review validates the
+finding, not consented feedback or live RSI. Both PR1819 main workflows passed.
+
+Re-scoring retains39 histories and adds one distinct12/P2 AutoResearcher
+process-recovery oracle plan. It wins the tie over cache planning because truthful
+interruption/report ownership advances RSI evidence, while always-rescan remains
+deliberately safe. Its parent13/P1 score is not inherited. The next packet remains
+conditional on exact closure and fresh reconciliation; no next-plan work ran here.
+
 ## Hermes rejection evidence repair — 2026-09-20
+
+Historical PR1819 repair; current R25 qualification and next action are above.
 
 The selected C2/I4/D4/Impact3 =13/P1 repair is locally verified in the existing
 run-lifecycle owner. Parent-only stop acknowledgements/status and noncompleted
@@ -146,8 +173,10 @@ errors are retained separately with their corrections. Backend manifest membersh
 remains1,400; one runtime hash and both pins changed. Eight generator tests,
 15 extension groups,67-file package and unchanged1,651-entry registry pass.
 
-Exact-head publication remains required. All26 original packets and39 candidate
-histories are preserved. Fresh WSP15/97 selection conditionally returns to the
+Closed in [PR #1819](https://github.com/FOUNDUPS/Foundups-Agent/pull/1819) as `fdb23b0606800547edf664c0a665d0447392058b` after all ten exact-head checks passed.
+All17 reviewed blobs and the merge tree match; main workflows are recorded separately.
+All26 original packets and39 candidate
+histories are preserved. Fresh post-closure WSP15/97 selection returns to the
 existing R25 feedback approval-owner plan at C3/I4/D3/Impact3 =13/P1: determine
 how an exact daily-work summary gains valid approval for a specific FoundUp and
 version through current owners. It is not live consent or permission to dispatch.
