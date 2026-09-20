@@ -1,3 +1,16 @@
+## 2026-09-21: Preserve call-local OpenClaw safety explanations
+
+- WSP00/11/15/22/50/62/84/95/97/99;10/P2 same-owner repair. Existing Boolean API gains literal details=True pair; process validates and uses local fields across all four projections, without changing admission/scanner policy or latest-status rendering.
+- Focused141pass/one existing link skip/two child cases excluded, independently replayed. Preserve qualified59-failure baseline and earlier26-event Windows self-pipe harness failure; no product/runtime failure count inflation.
+- Three source spans remain unchanged; two test owners,1400-member manifest and two pins updated; registry1651/269 unchanged. Shared external preflight hunk and98peer heads reconciled; no runtime/service/AmIBot activation or retained-learning claim.
+- Exact source, packaging, independent review, publication state and fresh next action are in the current RSI backlog; prior PR1829 contract observation archived verbatim.
+
+## 2026-09-20: Close diagnostic contract; select bounded repair
+
+- PR1829 merged as 3d84117ce101ac2b6887084fbf3a58ef127d6c32; ten exact-head checks passed and six reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed43 histories and next-source/package bindings; 10/P2 call-local diagnostic repair selected over optional cache planning9/P3. Exact peer effective-diff and test-harness entry checks remain; no source/test/runtime execution.
+- Accounting135 merged/21 closed-unmerged since September9UTC/98peers. Shared checkout and external owners preserved. WSP15/22/97.
+
 ## 2026-09-20: Qualify call-local OpenClaw safety explanations
 
 - Completed the 10/P2 static contract in six existing documents. Existing Boolean verdict is call-local; four route projections still read latest shared text. Chose literal details=True local pair on the existing method, retaining default Boolean/force semantics.

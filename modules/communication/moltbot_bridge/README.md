@@ -981,7 +981,7 @@ scanner or workspace/publication error fails closed. Raw scanner streams are
 omitted and its environment excludes credentials. `SkillScanResult` is supply-chain
 evidence only; it grants no execution, effect, evaluation or promotion authority.
 
-Each call returns its own verdict; REQUIRED/ENFORCED/MAX_SEVERITY drift observed during scanning rejects. Diagnostic fields show latest state; `force`, TTL and ALWAYS remain compatible.
+Each call returns its own Boolean verdict; keyword-only literal `details=True` returns its local `(allowed, message)` pair. The process caller validates Boolean/text fields and uses that explanation for logs/actions/responses; malformed results raise before downstream preflight/execution. REQUIRED/ENFORCED/MAX_SEVERITY drift rejects; diagnostic fields remain latest state and `force`, TTL and ALWAYS remain compatible.
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
 - `OPENCLAW_SKILL_SCAN_ENFORCED=1` (default): block risky scans above threshold
 - `OPENCLAW_SKILL_SCAN_MAX_SEVERITY=medium` (default)
