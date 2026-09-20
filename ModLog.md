@@ -1,3 +1,9 @@
+## 2026-09-20: Close R19 qualification; select bounded upload repair
+
+- PR1811 merged as 3f15adeb27c6b3cc47efc4cc0ff6ebbc60b92729 after ten successful exact-head checks. All six reviewed blobs and the expected combined merge tree match, preserving PR1812. Candidate checks are distinct from later main workflows.
+- Recalculated 33 candidate scores. Qualification is closed; next is the separate C2/I4/D4/Impact3 = 13/P1 two-file upload repair. Workflow and report delivery remain unchanged until that sprint verifies hosted artifact contents.
+- Accounting: 124 merged / 19 closed unmerged / 97 current peer heads. Shared checkout and protected product work preserved. WSP 15/22/97; no gate or runtime activation.
+
 ## 2026-09-20: Qualify R19 missing CI report delivery
 
 - Two exact hosted run attempts logged XML creation and 42 passing cases each, but selected no upload files and list zero artifacts. Immutable resolved action and bundled glob identify hidden-directory exclusion.
