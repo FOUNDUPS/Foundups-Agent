@@ -1,5 +1,41 @@
 # WRE Core Roadmap
 
+## Consumer dry-run isolation qualification — 2026-09-21
+
+The15/P1 qualification at main `e1c64d00674f1205ec20ca460c8b963fb34b6daa`
+reached eight actual-module control-flow cases: fresh, warmed dry, warmed non-dry
+and warmed controlled executors, each with consumer dry-run True/False. Two
+force-dry configurations violate the documented promise: a True consumer reaches
+an executor with `dry_run=False`, or inherits controlled-harness/adapter flags and
+terminal tools. The executor body, routing result, receipt and ContextBundle sinks
+were mocked. This is configuration-isolation evidence, not a live-effect result.
+
+The existing mocked singleton test cannot establish this guarantee. An initial
+probe stopped before any case on an unrelated editable-install metadata read;
+child-only search-path pruning produced the scoped witness with zero forbidden
+effects. Exact source/runner/replay receipts are bound in the RSI backlog.
+
+Next bounded source repair is separately scored C3/I4/D3/Impact3=13/P1.
+Live delegation already blocks; the witness is not a production incident:
+
+- Extend existing `execute_foundup_job` with a keyword-only force-dry request,
+  default False, preserving one-argument callers and `get_executor` semantics.
+- Validate the request as a literal boolean before construction. True selects a
+  fresh dry-run executor with ordinary safe defaults; never modify or copy warmed
+  harness/tools/adapter state. Preserve the default capability-validator singleton
+  so nonce/replay history is not reset. False grants no live authority.
+- Capture consumer policy once before routing/binding callbacks and use the same
+  value for model admission and dispatch. Keep job flags as independent guard
+  input; do not rewrite them to make a dry-run succeed.
+- Prove fresh/warmed state, flag combinations, invalid requests, callback mutation,
+  legacy caller compatibility, model-admission rejection and shared-validator
+  preservation in existing tests. No real delegation or weaker gates.
+
+A fresh executor uses normal workspace discovery, not the warmed instance's
+custom root; bind an owned disposable root before tests. Per-call allocation cost
+remains unmeasured. Dry-run evidence may write files and is not OS confinement.
+The repair has not been implemented or tested by this qualification.
+
 ## AutoResearcher abrupt-exit witness — 2026-09-20
 
 The **10/P2** test-only witness is locally verified on unchanged production source.

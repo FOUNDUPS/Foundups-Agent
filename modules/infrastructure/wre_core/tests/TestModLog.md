@@ -1,3 +1,9 @@
+## 2026-09-21: Qualify consumer dry-run configuration isolation
+
+- WSP00/15/22/50/97;15/P1 actual-module witness, no production edits. Eight configurations reach the consumer/convenience/factory seam; two True-consumer cases inherit warmed non-dry or controlled-harness/tools state, contrary to its documented promise.
+- Routing result, executor body, receipt and ContextBundle sinks mocked. No queue, guard execution, provider, runtime or product build. Initial probe denied an unrelated editable-install metadata read before cases; child-only path isolation yielded zero forbidden attempts. Exact input hashes and independent replay are recorded in the canonical backlog.
+- Existing module roadmap/interface now bind the defect and a separately scored13/P1 force-dry repair: preserve legacy/default factory behavior, validator replay state and all live gates; capture consumer policy once. Source repair and its full behavioral matrix remain unimplemented.
+
 ## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
 
 - Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
