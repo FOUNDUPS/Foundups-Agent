@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`470161321f6b95371b52c756d339560520f093c3`, including PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`9909103ea4d38c6659438ea140c2f85b78a45686`, including PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,7 +60,7 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 128 merged PRs and 21
+Refreshed September 9 UTC onward accounting found 129 merged PRs and 21
 closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
 current full inventory reports 12 drafts and 15 PRs with failing checks; 20 have
 all-success checks, 59 have success/neutral/skipped results, and one has no checks.
@@ -123,14 +123,52 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the closed R19/context repairs, qualified child-input observability gap and next14/P1 lifecycle compatibility plan.
+the closed R19/context repairs, qualified child-input/lifecycle gaps and next 13/P1 stop-evidence correction.
 R19 qualification is merged in PR1811. Its one-step upload repair has actual
 hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
 and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
+## Hermes lifecycle qualification — 2026-09-20
+
+Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
+14/P1 compatibility question. Both PR1817 main workflows now pass. This is
+source qualification, not a live runtime test or proof of installed version.
+
+| Boundary | Qualified finding |
+|---|---|
+| Top-level dispatch | Model `background=false` does not govern dispatch. API binds `async_delivery=False`, but a captured nonempty API session ID permits background dispatch through the wake-target branch. |
+| Accepted background work | Children detach from the parent list; dispatch returns a handle. Combined results are persisted and published to a separate process completion queue; delivery into a new turn or the original run is unqualified. |
+| Inline fallback | No usable async/wake path or rejected dispatch can execute inline. Capacity fallback occurs after detachment; it does not establish parent-owned cancellation. |
+| Original run | Parent conversation return controls terminal output/status and stream closure. Existing child-before-delegate-completion and terminal-last checks remain unchanged. |
+| Stop evidence | Parent stop invokes an interrupt and schedules process cleanup. A parent `cancelled` status does not establish detached-child quiescence or complete effect observation. |
+
+The [pinned delegation owner](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/tools/delegate_tool.py#L4088)
+and exact session/async/interrupt sources were inspected: four prior immutable
+files reused and three permitted dependency reads used. The completion queue
+consumer/wake implementation remains unqualified. Do not relax event gates,
+change private depth/session identity, or substitute another endpoint on this evidence.
+Full child-input fidelity, result delivery and live sandbox readiness remain open.
+
+The smallest qualified successor is a conservative correction in existing
+`reddog_hermes_api_run_lifecycle`: retain best-effort stop/status and rejection,
+but report incomplete effect observation and unconfirmed abort from parent-only
+stop evidence. Failed/cancelled terminal rejection must also report incomplete
+observation because those event checks do not establish child closure. Existing
+receipt fields already represent this uncertainty. No schema
+or shared consumer change is needed. This does not implement detached cancellation,
+change successful-result acceptance, or prove a live leak.
+
+WSP 15 selects that distinct repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
+approval-owner planning. The verified receipt overclaim breaks the tie; R25 remains
+eligible. All 26 original packets and 38 prior candidate histories are preserved;
+one repair row makes 39. No source/tests/runtime changed during this qualification.
+The existing backlog carries the independently reviewed implementation packet.
+
 ## Hermes child-input evidence qualification — 2026-09-20
+
+Historical PR1817 qualification; current lifecycle finding and next action are above.
 
 Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
 Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
@@ -170,6 +208,14 @@ latest-version substitution. Failures and corrected background wording remain
 in the source-bound receipts. No new tests, probes, source edits, provider calls,
 runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
 backlog preserves all36 prior histories and adds two separately scored actions.
+
+Qualification merged in [PR #1817](https://github.com/FOUNDUPS/Foundups-Agent/pull/1817) as `9909103ea4d38c6659438ea140c2f85b78a45686`.
+All ten exact-head checks passed; the six reviewed document blobs and merge tree
+match. Post-closure WSP 15/97 reconciliation of 38 histories selects the 14/P1
+lifecycle compatibility plan; it has not started. The full child-input evidence
+gap remains. Later main workflow results are separately recorded in the backlog.
+Accounting adds this verified merge: 129 merged, 21 closed without merge and
+95 unchanged peer heads. Protected shared checkout remains unchanged.
 
 ## Prepared-context integrity repair — 2026-09-20
 

@@ -1,4 +1,42 @@
+## Hermes lifecycle qualification — 2026-09-20
+
+Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
+14/P1 compatibility question. Both PR1817 main workflows now pass. This is
+source qualification, not a live runtime test or proof of installed version.
+
+| Boundary | Qualified finding |
+|---|---|
+| Top-level dispatch | Model `background=false` does not govern dispatch. API binds `async_delivery=False`, but a captured nonempty API session ID permits background dispatch through the wake-target branch. |
+| Accepted background work | Children detach from the parent list; dispatch returns a handle. Combined results are persisted and published to a separate process completion queue; delivery into a new turn or the original run is unqualified. |
+| Inline fallback | No usable async/wake path or rejected dispatch can execute inline. Capacity fallback occurs after detachment; it does not establish parent-owned cancellation. |
+| Original run | Parent conversation return controls terminal output/status and stream closure. Existing child-before-delegate-completion and terminal-last checks remain unchanged. |
+| Stop evidence | Parent stop invokes an interrupt and schedules process cleanup. A parent `cancelled` status does not establish detached-child quiescence or complete effect observation. |
+
+The [pinned delegation owner](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/tools/delegate_tool.py#L4088)
+and exact session/async/interrupt sources were inspected: four prior immutable
+files reused and three permitted dependency reads used. The completion queue
+consumer/wake implementation remains unqualified. Do not relax event gates,
+change private depth/session identity, or substitute another endpoint on this evidence.
+Full child-input fidelity, result delivery and live sandbox readiness remain open.
+
+The smallest qualified successor is a conservative correction in existing
+`reddog_hermes_api_run_lifecycle`: retain best-effort stop/status and rejection,
+but report incomplete effect observation and unconfirmed abort from parent-only
+stop evidence. Failed/cancelled terminal rejection must also report incomplete
+observation because those event checks do not establish child closure. Existing
+receipt fields already represent this uncertainty. No schema
+or shared consumer change is needed. This does not implement detached cancellation,
+change successful-result acceptance, or prove a live leak.
+
+WSP 15 selects that distinct repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
+approval-owner planning. The verified receipt overclaim breaks the tie; R25 remains
+eligible. All 26 original packets and 38 prior candidate histories are preserved;
+one repair row makes 39. No source/tests/runtime changed during this qualification.
+The existing backlog carries the independently reviewed implementation packet.
+
 ## Hermes child-input evidence qualification — 2026-09-20
+
+Historical PR1817 qualification; current lifecycle finding and next action are above.
 
 Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
 Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
