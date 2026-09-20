@@ -345,3 +345,32 @@ No reindex, new module, skill or repository document. Existing 101 peer heads an
 the shared checkout are unchanged; qualification has no conflicting workflow
 owner. Routine coordinator/reviewer work is not admitted WRE execution or
 independently retained RSI learning.
+
+## 2026-09-20: Restore delivery of the two observation reports
+
+The existing upload step now selects only the literal XML and stdout paths and
+enables hidden-file inclusion. Whole-workflow YAML comparison confirms every
+other field is unchanged: report-only behavior, test command, summary parser,
+`always()`, `warn`, retention, artifact name, action version and permissions.
+
+Normal PR1814 run 35490794138, attempt1, at `2784a2e899038eaa7f3741e192983a98ae91c618` produced artifact
+10598364742 (`redteam-observation-35490794138-1`). The run API head names the
+PR candidate; checkout logs bind synthetic merge `3bfe35f19293482996831a6d542c7f0adf96fd33`
+of that candidate into base `b94bada9bfc05e0ef7c5d7a4ce6641ed9e867dc2`. The downloaded ZIP digest
+matches the artifact API. Its only members are `redteam-report.xml` and
+`redteam-stdout.log`; XML and stdout agree on42 passing cases with zero failures,
+errors or skips. The logs bind the previously qualified immutable upload-action
+revision, hidden inclusion and selection of two files. Receipt/member hashes
+are in the canonical backlog. This is actual hosted delivery for that run;
+final candidate verification and merge are still pending at this checkpoint.
+
+The first archive inspection succeeded while the overall CI run was active,
+but `gh` withheld job logs until completion. That tooling failure is retained;
+the already-downloaded ZIP was reused against the API digest, not downloaded
+again. No local suite rerun, upstream code execution or workflow rerun.
+
+WSP15 action C2/I4/D4/Impact3 =13/P1; independent source review accepted. Rescoring
+selects `M2M-governed-context-binding-contract` as the next bounded contract after closure. This
+does not activate a blocking gate or establish observation-window stability,
+production safety, admitted WRE execution or retained RSI learning. Historical
+zero-artifact observations remain preserved. WSP00/15/22/50/97/99.
