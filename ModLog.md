@@ -1,3 +1,17 @@
+## 2026-09-20: Qualify R19 missing CI report delivery
+
+- Two exact hosted run attempts logged XML creation and 42 passing cases each, but selected no upload files and list zero artifacts. Immutable resolved action and bundled glob identify hidden-directory exclusion.
+- Existing six-document planning scope only; no workflow/source/test/runtime change. Primary receipts and upstream hashes are bound in the canonical backlog; prior daemon closure archived without modification.
+- Reconciled 32 histories and separately scored the next bounded upload-step repair C2/I4/D4/Impact3 = 13/P1. Require two literal report files and verified hosted archive contents; report-only policy stays unchanged.
+- PR1810 main CI and CodeQL now pass. Publication reconciliation preserves the separate PR1668 YUMORI asset registry merge; accounting is 122 merged / 16 closed unmerged / 100 unchanged surviving peer heads. WSP 00/15/22/50/97/99; no admitted execution or retained-learning claim.
+
+## 2026-09-20: Close daemon counter repair; select report-delivery qualification
+
+- PR1810 merged as 4bec22b6d6775369d09495ac5ea507be003729e1 after final exact-head checks passed. Reviewed tree and all17 blobs match; source13/P1 is closed.
+- Thirty daemon and71 connected passes, independent71 overlap plus7 edge probes,8 manifest tests,15 RedDog fast groups and67-file package remain exact-source-bound. Original red8 failures and independent harness setup failures are preserved separately.
+- Re-scored32 candidate histories; next is R19 report-delivery qualification at C3/I4/D3/Impact3=13/P1. Existing six-document M=plan packet permits no workflow/test/source/gate change and no runtime activation.
+- Accounting121 merged/16 closed-unmerged since September9 UTC;101 surviving peer heads and shared checkout unchanged. Later main workflows are separate observations. No production-memory, admitted worker or retained RSI benefit claim. WSP15/22/97.
+
 ## 2026-09-20: Repair existing daemon counter memory ownership
 
 - Fresh WSP15/WSP97 reconciliation preserved 32 candidate histories and selected the actual C2/I4/D4/Impact3=13/P1 source action. New main PR1808 affects only protected YUMORI files; merged its unchanged base into the owned branch. PR1807 main workflows both passed.
