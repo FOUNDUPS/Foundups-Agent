@@ -1,3 +1,9 @@
+## 2026-09-20: Close prepared-context repair; select child-evidence qualification
+
+- PR1816 merged as 470161321f6b95371b52c756d339560520f093c3; all ten exact-head checks passed and24reviewed blobs/merge tree match. Later main workflows remain separately recorded.
+- Re-observed36candidate histories; next13/P1 Hermes native-child input-evidence contract is M=plan only. No new source/runtime sprint started.
+- Accounting128merged/21closed-unmerged/95unchangedpeers; protected shared checkout preserved. WSP15/22/97; exact closure receipts in the backlog.
+
 ## 2026-09-20: Bind prepared raw context before provider effects
 
 - WSP00/15/22/50/62/84/97/99; selected13/P1 repair extends five source/four test owners. No new module, skill or runtime policy.

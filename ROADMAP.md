@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`11c2f164dcd4f23c75fd3e35fe8d61b0b72cb507`, including PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`470161321f6b95371b52c756d339560520f093c3`, including PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,7 +60,7 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 127 merged PRs and 21
+Refreshed September 9 UTC onward accounting found 128 merged PRs and 21
 closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
 current full inventory reports 12 drafts and 15 PRs with failing checks; 20 have
 all-success checks, 59 have success/neutral/skipped results, and one has no checks.
@@ -89,7 +89,7 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 646 branch refs and 157 registered worktrees after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 647 branch refs and 157 registered worktrees after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -154,6 +154,12 @@ tie favors the concrete current handoff boundary. Cache/recovery plans score12/P
 Native-child telemetry must be version-bound; no new implementation is qualified.
 Source provenance, live admission, AmIBot registration/build and retained RSI
 remain open. Exact receipts and publication state are in the current backlog.
+
+Repair merged in [PR #1816](https://github.com/FOUNDUPS/Foundups-Agent/pull/1816) as `470161321f6b95371b52c756d339560520f093c3`.
+All ten exact-head checks passed; merged tree and24reviewed blobs match.
+Re-observation selects the13/P1 Hermes child-evidence contract plan. Later main
+workflows are separate observations. The128merged count adds this verified merge
+to the prior127;95peer heads and protected shared checkout remain unchanged.
 
 ## Governed-context qualification and resumed audit — 2026-09-20
 
