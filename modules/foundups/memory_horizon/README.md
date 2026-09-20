@@ -18,7 +18,7 @@ A later **Memory Horizon Companion** track extends the same event model into an 
 7. [Manifest draft](docs/intake/FOUNDUP_MANIFEST_DRAFT.md)
 8. [Intake source](docs/intake/INTAKE_SOURCE.md)
 
-Supporting records: [research](docs/RESEARCH.md), [data/scoring contract](docs/DATA_AND_SCORING_CONTRACT.md), [assistive companion](docs/ASSISTIVE_MEMORY_COMPANION.md), [validation](docs/VALIDATION.md), [roadmap](ROADMAP.md), [interface](INTERFACE.md), [change log](ModLog.md).
+Supporting records: [research](docs/RESEARCH.md), [data/scoring contract](docs/DATA_AND_SCORING_CONTRACT.md), [assistive companion](docs/ASSISTIVE_MEMORY_COMPANION.md), [FoundUps memory terminology audit](docs/FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md), [validation](docs/VALIDATION.md), [roadmap](ROADMAP.md), [interface](INTERFACE.md), [change log](ModLog.md).
 
 ## Core loop
 
@@ -49,3 +49,7 @@ Proposed future host: `memory.foundups.com`. Not configured or reserved by this 
 ## WSP references
 
 WSP 00, 15, 22, 49, 50, 60, 95, 97, 109. Follow the existing FoundUp onboarding protocol before runtime/public promotion.
+
+## Terminology gate
+
+Any FoundUps/RedDog memory term used in this FoundUp must pass WSP 97 retrieve-before-stating against the canonical repository definition. Do not silently synonymize Brain, Breadcrumbs, FoundUp Memex, Principal Memex, HoloIndex, Contact Memory, Mosh Pit, AgentDB, workspace memory, or Memory Nudge Engine. The spoken term `Memic` is currently `UNRESOLVED_TERM_MEMIC`; no canonical repository definition was found and it must not be auto-normalized to `Memex` without an explicit 012 definition.
