@@ -49,10 +49,10 @@ The existing backlog points to the current ranked observation; historical packet
 scores below retain their original planning scope. Standing local authorization
 and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
 
-## Repository accounting and resumed RSI — 2026-09-20
+## Repository accounting and resumed RSI — 2026-09-21
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`3d84117ce101ac2b6887084fbf3a58ef127d6c32`, including PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`734d46fae6332f4e8feaca9d3b172992dd394147`, including PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,12 +60,10 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting confirms 135 merged PRs and 21
+Refreshed September 9 UTC onward accounting confirms 136 merged PRs and 21
 closed without merge; 98 current peer heads are reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
-prior full inventory reported 12 drafts and 15 PRs with failing checks; 20 have
-all-success checks, 59 have success/neutral/skipped results, and one has no checks.
-After individual AmIBot confirmation, merge-state reports 93 UNKNOWN, one CLEAN
-and one DIRTY. These interval observations are not an atomic GitHub snapshot;
+fresh inventory reports 14 drafts and 15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
+REST pagination corroborates 136 merged/21 closed; search omitted 14 closed records. Both PR1830 main workflows now passed. These observations are not an atomic snapshot;
 reported green checks alone do not establish current merge or runtime authority.
 R19 qualification preserves two earlier hosted runs with 42 passing observations
 each, XML creation and parsing, but zero artifacts because the configured action
@@ -86,10 +84,10 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
 | WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is merged in PR1806:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. PR1806 first CI caught an omitted backend digest refresh; corrected manifest/pins passed all ten fresh exact-head checks before merge. No real WSL/provider call. |
 | PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
-| AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
+| AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration against current main: both old failing inputs changed, so the old failure is not an unconditional current blocker. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 654 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 655 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -132,9 +130,13 @@ PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now p
 
 ## OpenClaw call-local diagnostic repair — 2026-09-21
 
-The **10/P2** repair is locally verified: the existing Boolean API has a literal `details=True` pair mode; the process caller validates it and keeps its own explanation through all four projections. See the [module roadmap](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-repair--2026-09-21).
+The **10/P2** repair closed in [PR #1830](https://github.com/FOUNDUPS/Foundups-Agent/pull/1830), merge `734d46fae6332f4e8feaca9d3b172992dd394147`, after all ten exact-head checks passed and18reviewed blobs/tree matched: the existing Boolean API has a literal `details=True` pair mode; the process caller validates it and keeps its own explanation through all four projections. See the [module roadmap](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-repair--2026-09-21).
 Focused and independent runs each pass141 tests/one existing link skip; two actual-child cases are explicitly excluded. Package checks and unchanged test-registry checks pass. Preserve the initial Windows self-pipe harness failure separately; no runtime/provider/scanner or AmIBot activation occurred.
-The current backlog contains the fresh WSP15/WSP97 next selection and its exact entry prerequisites; remote publication and post-closure observation remain pending.
+The optional9/P3 cache-identity qualification is now closed: retain current rescanning; existing four-file WRE identity does not cover the recursive scanner input set. No measured benefit justifies cache implementation. See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#recursive-wardrobe-cache-qualification--2026-09-21). Fresh WSP15/97 selection and exact current accounting are in the backlog; no live runtime is admitted.
+
+## Next executable AmIBot step — 2026-09-21
+
+Fresh WSP15 C3/I4/D4/Impact3 = **14/P1** selects reconciliation of existing draft PR1751 with current main. Only three root planning files overlap; preserve protected product trees and all 17 registry entries, adding only detect_ai. Resolve the draft lineage in isolation, validate, independently review, and obtain fresh exact-head hosted checks. No worker launch, route activation or automatic promotion follows.
 
 ## R25 approval-owner qualification — 2026-09-20
 

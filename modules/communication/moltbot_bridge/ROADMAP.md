@@ -1,3 +1,35 @@
+## Recursive wardrobe cache qualification — 2026-09-21
+
+**Decision: keep current rescanning.** The optional C3/I2/D2/Impact2 = 9/P3
+qualification is complete; no cache source slice is justified. This optimization
+is not a prerequisite for AmIBot. Static review establishes neither scan latency
+harm nor a speedup. Exact source baseline is main `734d46fa`, with independent
+review and immutable prior closure linked by the root RSI backlog.
+
+| Existing owner | Covered inputs and remaining boundary |
+|---|---|
+| `openclaw_permission_policy.py:298` / `openclaw_dae.py:735` | Required/enforced/severity snapshot and post-scan drift check; call-local Boolean/details pair. TTL/ALWAYS/force remain compatibility inputs, not reuse permission. |
+| `skill_safety_guard.py:111` | Root SKILLz.md then SKILL.md selects `scan`; otherwise `scan-all --recursive`. Actual external scanner traversal/support-file reads are not qualified. |
+| `skill_safety_guard.py:133,168,232,276` | Manifest required/enforced/signature/allow-extra/override, protected key authority, scanner override/PATH/fallback, argv, inherited cwd, allowlisted environment, private TEMP/TMP, timeout and parser/severity affect the result. A future identity needs their resolved generations, without exposing secrets. |
+| `skill_manifest_guard.py:42,126,239` / `skill_path_security.py` | Discovery covers recursive SKILL.md/SKILLz.md/executor.py; explicit entries may name more files. Declared hashes/signatures and link/reparse checks do not prove equality with the scanner's full read set. |
+| `skill_runtime_admission.py:45,94,175` / `registered_skill_executor.py:132` | Existing WRE key binds directory/four-file fingerprint/severity, with pending ownership, capacity, TTL/force, cancellation and post-scan rehash. Four files are SKILLz.md/SKILL.md/executor.py/SKILL_MANIFEST.json; reuse the mechanism as reference, never its verdict as wardrobe authority. |
+
+Reopen only after measurable workload benefit and a complete input/use-time
+contract exist. Cover additions, deletion, rename, nesting, support files, root
+mode, path aliases/links/reparse, manifest policy/override/signature authority,
+scanner/interpreter/dependency/config version, cwd/environment, and scan-to-use
+changes. Pre/post equality alone does not prove atomicity or exclude ABA changes.
+Latest diagnostic JSON is mutable; only each call's verdict/message is local.
+
+Future synthetic oracles belong in the existing `test_skill_safety_guard.py`,
+`test_wre_runtime_admission_truth.py`, `test_wre_execution_truth.py` and
+`test_skill_manifest_guard.py`: unchanged complete identity positive control;
+each changed input invalidates; pending/failed/malformed/timed-out/cancelled work
+never reuses success; late reservations and nested callbacks preserve ownership;
+force/ALWAYS/expiry/backwards clock and use-time byte mismatches reject reuse.
+No such new tests ran here. Source/test spans, runtime manifest, registry and pins
+remain unchanged; any future repair needs its own size/package budget and review.
+
 ## Call-local skill-safety diagnostic repair — 2026-09-21
 
 The 10/P2 repair implements the contract qualified in PR1829 in the existing

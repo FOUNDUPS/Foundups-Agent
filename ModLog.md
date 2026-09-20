@@ -1,3 +1,15 @@
+## 2026-09-21: Refresh accounting and close optional cache plan
+
+- WSP00/15/22/97: REST corroborates136merged/21closed-without-merge since September9;98open/14draft/15failing-check PRs. Search omitted14closed records; both1830main workflows now pass. No peer work changed.
+- Close9/P3 cache qualification with independent review and retain current rescanning; update existing43histories/26packets, preserve prior full observation at immutable cb62de4f. Onboarding review confirms AmIBot remains unregistered on main and draft1751 remains conflicting/validation-blocked.
+- Rescore the next bounded action in the existing backlog. No runtime launch, automatic daily-conversation capture or retained RSI result claimed.
+
+## 2026-09-21: Close OpenClaw diagnostic repair; rescore next plan
+
+- PR1830 merged as 734d46fae6332f4e8feaca9d3b172992dd394147; all ten exact-head checks passed and18reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed43histories/26packets: conditional9/P3 existing cache-identity plan selected, without inheriting parent15/P1 or repeating completed recovery planning. Source rebindings and unchanged98peer/shared scope retained.
+- Accounting136merged/21closed-unmerged since September9UTC. No live scanner/provider/service, AmIBot admission or retained-learning claim. WSP15/22/97.
+
 ## 2026-09-21: Preserve call-local OpenClaw safety explanations
 
 - WSP00/11/15/22/50/62/84/95/97/99;10/P2 same-owner repair. Existing Boolean API gains literal details=True pair; process validates and uses local fields across all four projections, without changing admission/scanner policy or latest-status rendering.
