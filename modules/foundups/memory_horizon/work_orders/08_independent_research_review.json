@@ -1,0 +1,100 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "verifier",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "SENTINEL",
+  "S": {
+    "owner": "modules/foundups/memory_horizon",
+    "read": [
+      "modules/foundups/memory_horizon/docs/RESEARCH.md",
+      "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md",
+      "modules/foundups/memory_horizon/docs/DATA_AND_SCORING_CONTRACT.md",
+      "modules/foundups/memory_horizon/src/measurement",
+      "modules/foundups/memory_horizon/src/analytics"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-08.json"
+    ]
+  },
+  "M": "qa",
+  "T": "MH-RSI-08",
+  "A": "VALIDATE measurement claims, privacy boundary and research fidelity",
+  "R": [
+    0,
+    5,
+    6,
+    15,
+    22,
+    50,
+    60,
+    71,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "depends_on": [
+      "MH-RSI-07"
+    ],
+    "non_diagnostic": true,
+    "raw_observations_primary": true,
+    "construct_separation": true,
+    "privacy_local_default": true,
+    "effect_boundary": "Independent read/review only except result evidence."
+  },
+  "O": [
+    "measurement-fidelity review",
+    "privacy/safety boundary review",
+    "research-claim truth table",
+    "go/no-go for public POC surface",
+    "work_orders/results/MH-RSI-08.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-07",
+    "depends_on": [
+      "MH-RSI-07"
+    ],
+    "objective": "Ensure the playable POC does not overclaim scientific or medical meaning and that its raw data support the descriptive outputs.",
+    "steps": [
+      "Trace each displayed metric to raw event/probe fields.",
+      "Check episodic retention is not conflated with reaction time/working memory.",
+      "Verify no clinical cutoff, diagnosis or return-to-play language.",
+      "Verify local/private defaults and explicit export behavior.",
+      "Check source-derived claims remain accurately attributed and bounded."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 18,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read"
+      ],
+      "verification_class": "RESEARCH_PRIVACY_SENTINEL"
+    },
+    "acceptance": [
+      "Every user-facing metric has raw-data lineage.",
+      "No unsupported clinical/scientific claim.",
+      "Privacy behavior matches documented boundary.",
+      "Public POC recommendation is explicit accept/reject/blocked."
+    ],
+    "rollback": "Read-only; preserve dissent and unresolved evidence."
+  }
+}
