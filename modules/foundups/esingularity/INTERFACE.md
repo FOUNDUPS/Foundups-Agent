@@ -100,6 +100,16 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 
 **Merge/deployment gate:** any branch that changes `frontend/app/page.tsx`, `frontend/app/yumori/page.tsx`, or `frontend/next.config.ts` must be checked against the domain matrix above. A valid change may update one experience while the other is being developed in another branch or session; reconciliation must keep both latest intended surfaces. Never solve a conflict by choosing one landing page for both hostnames.
 
+## YUMORI economic model contract
+
+The YUMORI project-finance calculation authority lives in `src/yumori_economic_model.py`. Its stable entrypoints are `run_yumori_economic_model`, `calculate_heat_recovery`, `load_japan_infrastructure_flows`, and `analyze_infrastructure_flows`, re-exported by `src/__init__.py`.
+
+- It belongs to YUMORI/eSingularity and must not import or project the generic FoundUps token/ROC simulator.
+- Only `committed_awarded_grants_jpy` reduces base financing. A potential grant is scenario metadata until award evidence exists.
+- Heat value is capped by recoverable, deliverable, demanded thermal energy; rejected heat is never revenue.
+- The JHR ledger records sourced infrastructure relationships with undisclosed amounts left null. Investments, partnerships, selections and compute commitments do not become YUMORI revenue or funding.
+- The dependency analysis implements only the three reproducible network indicators from the cited external methodology. Its 50% coverage result is not a Japan bubble index, forecast, or investment conclusion.
+
 ## Safety boundary
 
 - No secrets belong in the frontend or module manifests.
