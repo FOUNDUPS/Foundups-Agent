@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify the existing FoundUp genesis prototype
+
+- WSP 00/15/22/50/95/97/109; static qualification C3/I3/D2/Impact2 = 10/P2 after PR1838 merged its exact reviewed tree. The previous repair's245 overlapping local/independent cases and ten exact-head checks passed; its main workflows are tracked separately.
+- Existing prototype frontmatter, canonical registry/loader, safety scanner and typed intake contracts are distinct. Missing executable registration/manifest/outcome evidence does not justify a second skill, weaker admission or redundant generic tests.
+- The structured builder/gate is implemented but does not execute the prototype document or turn arbitrary prose into the full WSP109 packet. New-ID collision checking is explicit/injected; the default gate does not load current registry occupancy. Preserve the registered detect_ai identity when extending AmIBot.
+- This slice changes canonical planning/logs only. No production, skill, registry, manifest or test changes; no tests, product imports, scanner subprocess, model/provider or runtime activation. Source/AST/JSON checks and independent review are recorded in the backlog.
+
 ## 2026-09-20: Reconcile four FoundUp validation fixture failures
 
 - WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.

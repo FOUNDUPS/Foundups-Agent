@@ -3,6 +3,49 @@
 Scope: the `src/foundup_genesis/` intake trajectory (envelope -> validator -> gate -> builder ->
 scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
 
+## Genesis prototype compatibility qualification — 2026-09-21
+
+Static C3/I3/D2/Impact2 = **10/P2** qualification after the consumer isolation
+repair merged in PR1838. This records exact existing contracts, not a skill
+invocation, fresh test pass, production admission or complete WSP109 workflow.
+
+| Existing owner | Current contract and missing evidence |
+|---|---|
+| [Genesis Skillz](skillz/foundup_genesis_intake/SKILLz.md) | Prototype instruction document, `category: workflow`, `evals: []`; no adjacent executor or manifest. Empty evals alone is not a prototype hygiene rejection. The described scaffold/build sequence is a plan. |
+| [Canonical loader](../../infrastructure/wre_core/skillz/wre_skills_loader.py) | `foundup_genesis_intake` has no canonical registry entry. `load_skill` rejects it before reading content; same-name search cannot substitute. A temporary injected registry can support local content evaluation without changing production registration. |
+| [Safety guard](../../communication/moltbot_bridge/src/skill_safety_guard.py) | The default manifest-required path rejects the absent manifest before looking up/spawning a scanner. The rejection's `available=True` field does not prove scanner installation. Existing exact-file SKILLz CLI support needs no new adapter. |
+| [Typed builder](src/foundup_genesis/intake_packet_builder.py) | Recognized `key: value` fields and four-part acceptance lines produce a draft; ordinary prose returns `NO_ENVELOPE`. It calls the existing programmatic gate, not the Skillz document, and neither writes the WSP109 document packet nor scaffolds, registers or authorizes workers. |
+| [Validator](src/foundup_genesis/validator.py) and [actual gate](../../communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py) | Strict structural checks exist. `existing_ids` can reject new-ID collisions, but the lazy default gate supplies only strict mode. It does not certify current namespace occupancy. Evidence-string presence is not independent implementation verification. |
+
+**AmIBot reuse:** `detect_ai` is already registered. Do not create another identity,
+rerun new-entity onboarding as though it were absent, or inject a blanket duplicate-ID
+rejection into the existing-FoundUp build path. The create-versus-extend contract
+must remain explicit; current gate success grants neither registry nor build effects.
+
+**Local evaluation:** existing loader/scanner tests already cover injected relative
+registry roots, no same-name fallback, direct SKILLz scanning and manifest rejection
+before subprocess. Existing intake tests cover structured success, unstructured/empty
+input, invalid IDs and injected existing-ID conflicts. A disposable copy with temporary
+registry/manifest and a mocked scanner can assess artifact compatibility, but adding
+generic fixtures solely to repeat these mechanisms would duplicate coverage.
+
+**Production gap:** retain WSP95's exact digests, held-out outcome/security/regression
+evidence, runtime/model/tool binding, independent promotion receipt, rollback and lineage.
+No such evidence is created by this static review. A model/evaluator experiment must
+declare its fixtures, import/effect boundary and outcome oracle before execution.
+
+Retrieval preserved `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`; the read-only lexical
+bundle binds current `49f878ffa` with UNKNOWN freshness/index gap, not semantic authority.
+Existing governed Holo maintenance owns repair; no inline reindex or service launch.
+`memory/README.md` is absent; no placeholder was added. Static inspection followed
+the adjacent actual gate and manifest-validation helper to settle their input/failure
+boundaries; this narrow read refinement grants no additional execution scope.
+Independent findings, source hashes, comparison and next selection live in the
+[canonical RSI backlog](../../../docs/roadmaps/rsi_swarm_backlog.json).
+The conditional next **10/P2** action is the existing public alias/discovery contract:
+decide one compatible representation and behavioral oracle under WSP104 while
+preserving hidden `detect_ai` and membership gates. No new identity or activation.
+
 ## Cross-cutting active P0
 
 - Holo retrieval A-grade evidence now has a pure sealed-corpus gate with an
