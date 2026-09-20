@@ -41,7 +41,7 @@ Run this workflow when any of the following occurs:
 3. Drive document 03: City/Prefecture/Council evidence and education surface.
 4. Drive document 05: PPP/PFI mechanics, applicant/ownership/contracting and funding-stack implementation.
 5. Financial/grant audit models: scenario analysis only.
-6. Mosh Pit / Email Log: operational receipts, not grant-status authority.
+6. Moshpit / Email Log: operational receipts, not grant-status authority.
 
 If sources conflict, re-verify the primary source and update the repository registry first.
 
@@ -138,7 +138,7 @@ Use the canonical YUMORI.me contact/Gmail routing rules. After sending:
 - verify Sent;
 - capture Gmail MID/TID;
 - update Email Log / Contacts as required;
-- add the material event to the Mosh Pit;
+- add the material event to the Moshpit;
 - record any reply as evidence and update the registry only if it changes program status.
 
 ## 03 / 05 decision rule
