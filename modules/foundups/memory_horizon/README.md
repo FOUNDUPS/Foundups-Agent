@@ -52,4 +52,4 @@ WSP 00, 15, 22, 49, 50, 60, 95, 97, 109. Follow the existing FoundUp onboarding 
 
 ## Terminology gate
 
-Any FoundUps/RedDog memory term used in this FoundUp must pass WSP 97 retrieve-before-stating against the canonical repository definition. Do not silently synonymize Brain, Breadcrumbs, FoundUp Memex, Principal Memex, HoloIndex, Contact Memory, Mosh Pit, AgentDB, workspace memory, or Memory Nudge Engine. The spoken term `Memic` is currently `UNRESOLVED_TERM_MEMIC`; no canonical repository definition was found and it must not be auto-normalized to `Memex` without an explicit 012 definition.
+Any FoundUps/RedDog memory term used in this FoundUp must pass WSP 97 retrieve-before-stating against the canonical repository definition. Do not silently synonymize Brain, Breadcrumbs, FoundUp Memex, Principal Memex, HoloIndex, Contact Memory, Moshpit, AgentDB, workspace memory, or Memory Nudge Engine. The spoken term `Memic` is currently `UNRESOLVED_TERM_MEMIC`; no canonical repository definition was found and it must not be auto-normalized to `Memex` without an explicit 012 definition.
