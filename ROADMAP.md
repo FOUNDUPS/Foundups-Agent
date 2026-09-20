@@ -55,8 +55,8 @@ The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
 `0d21c8cbcf771bee7f0dbc8640b5e34ce753bf93`, including PR1797–1805. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
-workflows. PR1805 passed all ten exact-head checks; its later main workflows are
-separate observations in the backlog. The protected ticker change is preserved.
+workflows. PR1805 passed all ten exact-head checks and both later main workflows.
+The protected ticker change is preserved.
 Refreshed September 9 UTC onward accounting found 116 merged PRs and 15
 closed without merge; the 102 open peer heads were rechecked unchanged. The
 preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
@@ -78,11 +78,12 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805 closures and all 102 
 | FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; PR1801 is merged with ten exact-head checks passed and both main workflows now successful. |
 | Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is merged in PR1802. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
 | AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
-| WSL advisory lifecycle | Contract qualification13/P1 is merged in PR1805:25 unchanged tests and seven injected witnesses, independent caller/contract review, zero actual WSL calls. Next12/P2 is a separate default-off command opt-in in the existing probe; source behavior is not yet changed. |
+| WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is locally complete:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. Remote source closure is pending; no real WSL/provider call. |
+| PatternMemory lifecycle | Fresh next13/P1 is a bounded daemon self-audit lifetime qualification within the14/P1 worker-integration parent. The existing daemon caches a SQLite handle across possible thread changes without disposal; reproduce with explicit disposable storage and qualify owning-thread cleanup. No production memory or daemon activation. |
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 639 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 640 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -109,8 +110,11 @@ may cold-start a stopped distro, and a running-state precheck cannot exclude a
 stop-before-exec race. Independent review selects the smaller12/P2 repair:
 separate metadata-only inspection from an explicit command opt-in inside the
 [existing owner](modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20).
-The repair is planned, not implemented. Command opt-in will still be diagnostic
-configuration, not runtime or effect-use authority.
+The repair is locally implemented and independently verified; exact remote
+closure is tracked in the backlog. Command opt-in selects diagnostic execution,
+not runtime or effect-use authority. The next13/P1 action qualifies the existing
+self-audit daemon's cached PatternMemory lifetime using disposable thread/storage
+fixtures, before any further source change or live RSI retention.
 
 ## AmIBot autonomous production experiment — 2026-09-15
 

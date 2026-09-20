@@ -7,6 +7,21 @@
 
 ## Change Log
 
+### 2026-09-20: Default WSL availability checks to metadata-only
+
+- Added a separate default-off `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` control
+  in the existing probe. Enable-only calls validate registration/base and return
+  `NOT_READY` without command execution; both controls opt into the existing
+  version path. Existing enable-only configurations intentionally change behavior.
+- Capture mode before resolver callbacks. Preserve disabled receipt bytes,
+  explicit-mode parsing/commands, trusted resolver exports, fail-soft callers and
+  existing structural guards; source remains238 lines. No new runtime authority.
+- Local43 focused and four connected checks pass; exact red/green, independent
+  review and remote state live in the canonical RSI backlog. Added the missing
+  WSP97-required TestModLog inventory; generated registry changes only this
+  suite's corrected description. No live WSL, update, provider or FoundUp effects.
+  WSP00/15/22/50/62/84/97/99; selected source12/P2.
+
 ### 2026-09-20: Qualify the WSL advisory lifecycle boundary
 
 - WSP15 13/P1 contract qualification complete locally; source/test behavior is

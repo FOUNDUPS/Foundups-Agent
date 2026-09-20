@@ -1,3 +1,19 @@
+## 2026-09-20: Separate WSL metadata inspection from explicit commands
+
+- Implemented the qualified12/P2 repair in the existing WSL probe. Enable-only
+  requests return metadata-only `NOT_READY`; version execution requires a second
+  default-off flag, captured before resolver callbacks. Disabled receipt bytes,
+  explicit-mode behavior, Gateway exports and source guards remain preserved.
+- Red11fail/32pass became43 focused pass; four connected caller checks pass.
+  Independent43 overlap plus18 boundary probes pass. Harness-only import/setup
+  failures are preserved; no actual WSL, provider, service or model invocation.
+- Added the missing canonical TestModLog required by WSP97 after material test
+  expansion; reused four existing test owners. Generated registry changes one
+  description only and is current1651/269. No new module, skill or test suite.
+- Re-observed30 histories and qualified a separate13/P1 daemon PatternMemory
+  lifetime action; its source/production memory is untouched. Current source
+  remote closure is pending. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-20: WSL advisory contract merged; bounded source repair selected
 
 - PR1805 merged as `0d21c8cbcf771bee7f0dbc8640b5e34ce753bf93` after all ten exact-head checks passed; merged tree
