@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`11c2f164dcd4f23c75fd3e35fe8d61b0b72cb507`, including PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`470161321f6b95371b52c756d339560520f093c3`, including PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,7 +60,7 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 127 merged PRs and 21
+Refreshed September 9 UTC onward accounting found 128 merged PRs and 21
 closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
 current full inventory reports 12 drafts and 15 PRs with failing checks; 20 have
 all-success checks, 59 have success/neutral/skipped results, and one has no checks.
@@ -89,7 +89,7 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 646 branch refs and 157 registered worktrees after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 647 branch refs and 157 registered worktrees after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -123,12 +123,53 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the closed R19 evidence, verified local context repair and conditional native-child contract plan.
+the closed R19/context repairs, qualified child-input observability gap and next14/P1 lifecycle compatibility plan.
 R19 qualification is merged in PR1811. Its one-step upload repair has actual
 hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
 and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
+
+## Hermes child-input evidence qualification — 2026-09-20
+
+Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
+Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
+the official v2026.8.18 tag resolves to commit
+`e624e9fde561e1add9388384012b295fde669ade`, whose package version matches.
+The legacy vendor gitlink is0.9.0 and is not this API-provider source. Neither
+release metadata nor historical canaries prove the current installed runtime.
+
+| Boundary | Verified source contract |
+|---|---|
+| Prepared parent | Existing raw-context/prompt checks precede provider effects; approved redacted strings enter the parent request. |
+| Requested delegation | Parent prose requests complete goal/context and background=false; it is not observed child acceptance. |
+| Child construction | Pinned delegate source places goal in child user input and nonblank context in its system framing. Final model delivery remains unproven. |
+| Current /v1/runs events | Producer drops tool arguments/call linkage; child whitelist has redacted goal and lifecycle metadata, but no complete context or accepted input. |
+| Local verifier | Checks run/child/session identity, ordering, reported empty effects and parent terminal-output agreement. These do not establish child content fidelity. |
+
+The [pinned API producer](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/gateway/platforms/api_server.py#L6580)
+feeds the same queued dictionaries to the run event stream. Generic preview
+completeness is unknown; a goal-only check cannot close missing context coverage.
+The separate /v1/responses argument stream has a different contract and cannot
+be substituted without qualification. The smallest prerequisite is an adequate
+version-bound accepted-child-input evidence contract in existing upstream/route
+owners. No consumer patch, invented telemetry field or new authority is qualified.
+
+New source evidence changes priority: the pinned model dispatcher ignores the
+background argument and requests background when `_delegate_depth` is not above0.
+Actual delivery can still fall back inline through session/wake/pool conditions.
+This conflicts with relying on parent prose for synchronous execution, but is not
+a demonstrated live failure. Next is bounded lifecycle/result-delivery compatibility
+qualification, C3/I4/D4/Impact3=14/P1, before R25approval-owner planning13/P1.
+Preserve the existing layered/error telemetry positive case and event confinement;
+do not loosen gates or change instructions until the pinned path is understood.
+
+The initial raw-host429 was recovered through one responsive official contents
+API read at the same commit: five of six source requests used, no raw retry or
+latest-version substitution. Failures and corrected background wording remain
+in the source-bound receipts. No new tests, probes, source edits, provider calls,
+runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
+backlog preserves all36 prior histories and adds two separately scored actions.
 
 ## Prepared-context integrity repair — 2026-09-20
 
@@ -154,6 +195,12 @@ tie favors the concrete current handoff boundary. Cache/recovery plans score12/P
 Native-child telemetry must be version-bound; no new implementation is qualified.
 Source provenance, live admission, AmIBot registration/build and retained RSI
 remain open. Exact receipts and publication state are in the current backlog.
+
+Repair merged in [PR #1816](https://github.com/FOUNDUPS/Foundups-Agent/pull/1816) as `470161321f6b95371b52c756d339560520f093c3`.
+All ten exact-head checks passed; merged tree and24reviewed blobs match.
+Re-observation selects the13/P1 Hermes child-evidence contract plan. Later main
+workflows are separate observations. The128merged count adds this verified merge
+to the prior127;95peer heads and protected shared checkout remain unchanged.
 
 ## Governed-context qualification and resumed audit — 2026-09-20
 
