@@ -1,3 +1,49 @@
+## Governed-context binding contract — 2026-09-20
+
+Plan-only WSP00/15/22/50/62/84/97/99 qualification. Current preparation builds
+canonical prompt plus JSON output rules/evidence and enforces their combined
+24,000-character bound. The invocation binding seals only the prompt. Twelve
+synthetic cases, including 27 mocked adapter calls, confirm altered context can
+cross each existing adapter's validator. Prompt tampering and blocked redaction
+still reject before mocked effects. No live provider or repository source changed.
+
+The next M2M-prepared-context-digest packet reuses five source owners: runtime,
+shared validator and OpenClaw/Hermes/Fusion call sites. Add a canonical-only digest
+of the exact prepared RAW context before existing capability issuance. Reuse its
+detached JSON storage and one-use consumption. Check raw context at the current
+validator before runtime-root/process, key/API or Fusion key/loader effects.
+Never derive expected identity from later caller-supplied context.
+
+| Stage | Contract |
+|---|---|
+| Canonical M2M prompt | Existing exact raw/redacted prompt checks and codec unchanged. |
+| Prepared raw context | Bind serialized output contract/evidence with existing digest. |
+| Redacted context | Existing trusted fusion_redaction.v1 audit gate; may differ from raw. |
+| Final provider frame | Unchanged adapter framing; eventual native-child inputs unproven. |
+
+All-absent canonical markers preserve legacy behavior. Missing/null/malformed
+canonical context digests, including context-only partial markers, must reject;
+regenerate old canonical calls through the updated runtime. Empty evidence still
+produces structured context. Preserve combined bounds and capability replay checks.
+The redaction witness used newly supplied synthetic email text, not matching
+future sealed-context metadata; the next repair needs that positive test.
+Callback isolation and actual final framing were source-inspected, not dynamically
+proven by these adapter stubs.
+
+The subsequent source sprint needs FOUR existing test owners: bounded runtime,
+bounded authority (Fusion), OpenClaw provider and Hermes provider. This qualifier
+used three existing fixture owners; it did not expand its 12-case budget. Existing
+backend manifest and both digest pins must be regenerated together. The current
+generator-test pin disagrees with the extension pin; preserve that inherited
+baseline separately from new defects. Exact paths, size baselines, growth budgets
+and validation are in the current root backlog's next_packet.
+
+Actual canonical encode/decode caught invalid routing fields in the first next-packet draft. The corrected packet roundtrips exactly at 9,578 UTF-8 bytes; its initial receipt and failure remain in evidence. This is planning validation, not admission.
+
+The broader M2M15/P1 parent remains partial. No new capability/module/skill,
+scheduler, startup hook, live WRE admission, AmIBot build/registration, public
+deployment or retained-learning claim follows from this contract.
+
 ## RSI commander genesis handoff — 2026-09-20
 
 Existing intent metadata now reaches the validated, detached dry-run job payload;
