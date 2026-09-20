@@ -18,7 +18,7 @@ A later **Memory Horizon Companion** track extends the same event model into an 
 7. [Manifest draft](docs/intake/FOUNDUP_MANIFEST_DRAFT.md)
 8. [Intake source](docs/intake/INTAKE_SOURCE.md)
 
-Supporting records: [research](docs/RESEARCH.md), [data/scoring contract](docs/DATA_AND_SCORING_CONTRACT.md), [assistive companion](docs/ASSISTIVE_MEMORY_COMPANION.md), [FoundUps memory terminology audit](docs/FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md), [validation](docs/VALIDATION.md), [roadmap](ROADMAP.md), [interface](INTERFACE.md), [change log](ModLog.md).
+Supporting records: [research](docs/RESEARCH.md), [data/scoring contract](docs/DATA_AND_SCORING_CONTRACT.md), [game-design sweeps](docs/GAME_DESIGN_SWEEPS.md), [assistive companion](docs/ASSISTIVE_MEMORY_COMPANION.md), [FoundUps memory terminology audit](docs/FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md), [validation](docs/VALIDATION.md), [roadmap](ROADMAP.md), [interface](INTERFACE.md), [change log](ModLog.md).
 
 ## Core loop
 
