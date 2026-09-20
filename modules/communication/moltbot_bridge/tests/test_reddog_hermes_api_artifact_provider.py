@@ -12,7 +12,8 @@ from unittest.mock import patch
 import pytest
 from prompt.swarm.m2m_compiler import decode_m2m_envelope
 from modules.communication.moltbot_bridge.tests.test_reddog_openclaw_gateway_artifact_provider import (
-    _M2M_PROVIDER_CASES, _m2m_provider_case,
+    _M2M_PROVIDER_CASES, _m2m_provider_case, _M2M_CONTEXT_CASES,
+    _m2m_context_case, _m2m_redaction_case,
 )
 
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import REDACTION_GATE_PASSED
@@ -477,3 +478,51 @@ def test_m2m_prompt_integrity_precedes_hermes_key_and_network(case):
     assert task == supplied and submit[3]["input"].endswith(context)
     if case == "canonical":
         assert [type(value) for value in decode_m2m_envelope(task)["I"]["values"][:4]] == [bool, int, float, type(None)]
+
+
+@pytest.mark.parametrize("case", _M2M_CONTEXT_CASES)
+def test_m2m_raw_context_integrity_precedes_hermes_key_and_network(case):
+    transport, key = FakeTransport(), FakeKeyProvider()
+    metadata, prompt, context = _m2m_context_case(case)
+    redacted = context if type(context) is str else "synthetic redacted context"
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=prompt, redacted_context=redacted)
+    with patch("modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(transport, binding={**_binding(), **metadata}, key_provider=key,
+                           prompt=prompt, context=context)
+    if case not in ("exact", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert key.reads == 0 and transport.calls == []
+        assert result.made_network_call is False and result.hermes_dispatch_performed is False
+        return
+    assert result.ok and key.reads == 1
+    submit = next(call for call in transport.calls if call[:2] == ("POST", "/v1/runs"))
+    task, delivered = submit[3]["input"].split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == context
+
+
+@pytest.mark.parametrize("case", ("redacted", "blocked", "prompt_tamper"))
+def test_m2m_hermes_real_redaction_and_final_frame(case):
+    transport, key = FakeTransport(), FakeKeyProvider()
+    metadata, prompt, context, gate = _m2m_redaction_case(case)
+    result = _generate(transport, binding={**_binding(), **metadata}, key_provider=key,
+                       prompt=prompt, context=context)
+    if case != "redacted":
+        expected = "FAIL_HERMES_REDACTION_BLOCKED" if case == "blocked" else "FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING"
+        assert result.rejection_reasons == (expected,)
+        assert key.reads == 0 and transport.calls == []
+        assert result.made_network_call is False and result.hermes_dispatch_performed is False
+        return
+    assert gate.status == REDACTION_GATE_PASSED and gate.redacted_context != context
+    assert result.ok and key.reads == 1
+    submit = next(call for call in transport.calls if call[:2] == ("POST", "/v1/runs"))
+    task, delivered = submit[3]["input"].split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == gate.redacted_context
+    assert "fixture@example.invalid" not in submit[3]["input"]
+
+
+def test_hermes_context_argument_remains_required():
+    transport, key = FakeTransport(), FakeKeyProvider()
+    runner = HermesApiArtifactGenerationRunner(transport, key, sleeper=lambda _value: None)
+    with pytest.raises(TypeError, match="context"):
+        runner.generate_artifacts(prompt="legacy task", binding=object(), timeout_seconds=5)
+    assert key.reads == 0 and transport.calls == []

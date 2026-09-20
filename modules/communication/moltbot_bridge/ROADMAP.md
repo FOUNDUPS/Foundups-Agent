@@ -1,6 +1,31 @@
+## Prepared-context integrity repair — 2026-09-20
+
+The existing runtime now seals the exact prepared raw governed context together
+with the canonical prompt. OpenClaw, Hermes and Fusion verify both before their
+existing effect boundaries. Legitimate context redaction remains supported;
+partial canonical bindings fail closed, while all-absent legacy calls remain.
+Regenerate older canonical calls through the current preparation path.
+
+Local validation: 45 intended red failures resolved; 247 focused and 39 connected
+tests pass. Independent review repeats the 247 cases and adds 26 adversarial
+probes; repeats overlap. Two real-process fixtures remain deliberately excluded.
+Actual capability replay/callback isolation, empty evidence, 24,000/24,001 bounds
+and final fake provider framing are covered. No live provider/child proof follows.
+Manifest generation/check and eight packaging tests pass; 15 extension fast groups,
+67-file package and unchanged test registry pass. Inherited test-pin drift was
+reproduced before repair and reconciled with both existing pins.
+
+WSP15 re-observation retains all 35 prior histories and conditionally selects
+Hermes native-child input-evidence qualification (C3/I4/D3/Impact3=13/P1) after
+this repair closes. R25 approval-owner planning is also eligible at13/P1; the
+tie favors the concrete current handoff boundary. Cache/recovery plans score12/P2.
+Native-child telemetry must be version-bound; no new implementation is qualified.
+Source provenance, live admission, AmIBot registration/build and retained RSI
+remain open. Exact receipts and publication state are in the current backlog.
+
 ## Governed-context binding contract — 2026-09-20
 
-Plan-only WSP00/15/22/50/62/84/97/99 qualification. Current preparation builds
+Historical PR1815 baseline, superseded by the repair above. Preparation then built
 canonical prompt plus JSON output rules/evidence and enforces their combined
 24,000-character bound. The invocation binding seals only the prompt. Twelve
 synthetic cases, including 27 mocked adapter calls, confirm altered context can

@@ -61,7 +61,7 @@ class OpenClawGatewayArtifactGenerationRunner:
         model, session_key = _signed_invocation(verified)
         if not model or not session_key:
             return _reject("FAIL_OPENCLAW_MODEL_BINDING")
-        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt):
+        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt, context):
             return _reject(FAIL_M2M_PROMPT_BINDING)
         runtime = _runtime_root(self.runtime_root, self.repo_root)
         if runtime is None:

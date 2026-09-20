@@ -123,14 +123,41 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the closed R19 evidence, completed context qualification and next bounded context source repair.
+the closed R19 evidence, verified local context repair and conditional native-child contract plan.
 R19 qualification is merged in PR1811. Its one-step upload repair has actual
 hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
 and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
+## Prepared-context integrity repair — 2026-09-20
+
+The existing runtime now seals the exact prepared raw governed context together
+with the canonical prompt. OpenClaw, Hermes and Fusion verify both before their
+existing effect boundaries. Legitimate context redaction remains supported;
+partial canonical bindings fail closed, while all-absent legacy calls remain.
+Regenerate older canonical calls through the current preparation path.
+
+Local validation: 45 intended red failures resolved; 247 focused and 39 connected
+tests pass. Independent review repeats the 247 cases and adds 26 adversarial
+probes; repeats overlap. Two real-process fixtures remain deliberately excluded.
+Actual capability replay/callback isolation, empty evidence, 24,000/24,001 bounds
+and final fake provider framing are covered. No live provider/child proof follows.
+Manifest generation/check and eight packaging tests pass; 15 extension fast groups,
+67-file package and unchanged test registry pass. Inherited test-pin drift was
+reproduced before repair and reconciled with both existing pins.
+
+WSP15 re-observation retains all 35 prior histories and conditionally selects
+Hermes native-child input-evidence qualification (C3/I4/D3/Impact3=13/P1) after
+this repair closes. R25 approval-owner planning is also eligible at13/P1; the
+tie favors the concrete current handoff boundary. Cache/recovery plans score12/P2.
+Native-child telemetry must be version-bound; no new implementation is qualified.
+Source provenance, live admission, AmIBot registration/build and retained RSI
+remain open. Exact receipts and publication state are in the current backlog.
+
 ## Governed-context qualification and resumed audit — 2026-09-20
+
+Historical PR1815 qualification below; current repair status is above.
 
 Twelve bounded synthetic cases (27 mocked adapter calls) confirm four altered,
 empty, swapped or stripped context forms pass existing adapter validation when
@@ -153,7 +180,7 @@ This sprint implements none of that next source packet.
 Qualification merged in [PR #1815](https://github.com/FOUNDUPS/Foundups-Agent/pull/1815)
 as 11c2f164dcd4f23c75fd3e35fe8d61b0b72cb507. All ten exact-head checks passed; merged tree and
 six reviewed blobs match. The post-merge checkpoint again selects the 13/P1
-prepared-context digest repair; later main workflows are reported separately.
+prepared-context digest repair. Both later PR1815 main workflows now pass.
 The 127 merged count is the complete 126-merge inventory plus this verified merge.
 
 Daily coding, tests, review and PR outcomes can be scoped system evidence.
@@ -175,7 +202,7 @@ OpenClaw/Hermes build workers.
 **Current result: G0 controlled failure.** Registration is prepared on draft
 [PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
 one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
-manifest and the existing intake package. At this refresh main `8eda8fe73` has 17 registry
+manifest and the existing intake package. The earlier main `8eda8fe73` observation found 17 registry
 entries and no `detect_ai` module. The candidate has 18; its public projection
 remains four entries. Existing eSingularity ticker assertions fail in its registry-
 triggered CI; keep the PR unmerged and the protected project with its owner.
@@ -189,7 +216,7 @@ the canonical `/f/detect_ai` namespace. No build order or public route is activa
 | Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
 | Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Authorized commander handoff now preserves validated genesis lineage (PR1799); public draft-to-commander entitlement and runtime admission remain open. The live new-scaffold writer still rejects an existing module. |
 | WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
-| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Omission-aware receipt-plan forwarding is implemented (PR1798). Principal normalization, full context and downstream/native-child fidelity remain open; the raw-context contract is qualified for a separate repair. |
+| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Omission-aware receipt-plan forwarding is implemented (PR1798). Raw-context ingress binding is now locally verified in all three adapters. Principal normalization, source provenance, downstream/native-child fidelity and live admission remain open. |
 | Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
 | Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
 | Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |

@@ -1,5 +1,16 @@
 # Tests - OpenClaw Bridge
 
+## Governed raw-context integrity
+
+Run the four existing bounded runtime/authority and OpenClaw/Hermes provider
+suites with isolated imports and disposable state. Canonical cases seal the raw
+context before actual opaque issuance; assert altered/partial bindings reject
+before fake effects. Capture real redaction and final fake provider framing.
+Keep legacy absence, 24,000/24,001 bounds, replay and callback mutation checks.
+The two system-transport subprocess tests require their separate process boundary;
+they are excluded from the fake-only evidence. Exact commands/results and the two
+connected resident-queue suites are bound in the root RSI backlog.
+
 ## FoundUp job seam fixtures
 
 `test_e2e_foundup_job_seam.py` reuses the canonical synthetic manifest factory in

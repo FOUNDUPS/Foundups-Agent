@@ -37,16 +37,19 @@ def artifact_generation_output_contract(planned: Sequence[str]) -> dict[str, Any
 
 def validate_provider_m2m_prompt(
     binding: Mapping[str, Any], prompt: str, redacted_prompt: str,
+    context: str | None = None,
 ) -> bool:
-    """Check the sealed canonical prompt before egress; legacy context is unbound.
+    """Check sealed canonical instructions and raw context before egress.
 
-    Both mode and digest originate in runtime preparation, never caller text.
-    Missing either bound field rejects. An entirely legacy binding cannot carry
-    a complete canonical packet, including one introduced by redaction.
+    All three fields originate in preparation; partial bindings reject. Context
+    may be legitimately redacted after its raw identity is checked. A legacy
+    binding cannot carry a canonical packet, including through redaction.
     """
     if not isinstance(binding, Mapping):
         return False
-    if "prompt_schema" not in binding and "m2m_prompt_digest" not in binding:
+    if not any(key in binding for key in (
+        "prompt_schema", "m2m_prompt_digest", "m2m_context_digest",
+    )):
         for wire in (prompt, redacted_prompt):
             try:
                 decode_m2m_envelope(wire)
@@ -56,6 +59,11 @@ def validate_provider_m2m_prompt(
         return True
     expected = binding.get("m2m_prompt_digest")
     if binding.get("prompt_schema") != "0102_m2m_v1" or type(expected) is not str:
+        return False
+    expected_context = binding.get("m2m_context_digest")
+    if type(context) is not str or type(expected_context) is not str:
+        return False
+    if artifact_generation_digest(context) != expected_context:
         return False
     try:
         canonical = encode_m2m_envelope(decode_m2m_envelope(prompt))

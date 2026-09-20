@@ -94,10 +94,10 @@ returns `FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING` before model admission.
 Explicit `m2m_envelope` becomes detached canonical JSON before one-use authority
 consumption. `FAIL_ARTIFACT_GENERATION_M2M_ENVELOPE` burns only the matching handle.
 Absent input preserves legacy bytes; prompt/context share the 24,000-character cap.
-`validate_provider_m2m_prompt` checks sealed schema/digest and raw/redacted wire;
-changed delivery returns `FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING` before effects.
-Gateway, inventory, credentials, authority and output rules remain. Producer/prose,
-full context/native-child, runtime admission and retained learning remain unqualified.
+`validate_provider_m2m_prompt` takes optional fourth raw `context`, required with
+all three canonical binding fields; changed/partial input returns `FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING` before effects.
+Legitimate context redaction and all-absent legacy behavior remain. Gateway, inventory,
+authority and output rules remain; provenance/native-child/live admission/retained learning are unqualified.
 
 ## RedDog advisory bridge support
 
