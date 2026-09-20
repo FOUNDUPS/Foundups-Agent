@@ -10,12 +10,19 @@ The test suite verifies the monorepo and public-presentation contracts:
 - exactly one presentation notification is added to the existing ticker;
 - the Japanese canonical source has ten slides with complete derived language states;
 - floor allocation, COG DC ownership, economics labels, timed controls, assets, and outreach provenance remain truth-bound;
-- the `/future` source remains valid UTF-8 and free of the superseded speculative capacity schedule.
+- the `/future` source remains valid UTF-8 and free of the superseded speculative capacity schedule;
+- YUMORI project-finance parity, grant exclusion, heat-demand caps, and partial Japan dependency-math truth boundaries.
 
 Run from the repository root:
 
 ```powershell
 python -m pytest modules/foundups/esingularity/tests -q
+```
+
+Focused YUMORI economic-model contract:
+
+```powershell
+python -m pytest modules/foundups/esingularity/tests/test_yumori_economic_model.py -q
 ```
 
 ## Shared-host domain routing
