@@ -257,6 +257,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: redteam-observation-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .redteam-observation/
+          path: |
+            .redteam-observation/redteam-report.xml
+            .redteam-observation/redteam-stdout.log
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
