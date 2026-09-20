@@ -1,3 +1,9 @@
+## 2026-09-20: Close interruption qualification; select bounded test witness
+
+- PR1827 merged as 7c7d97b0b79031e2750b7d9f0534287a1c8fe212; ten exact-head checks passed and six reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed41 histories and next-source bindings;10/P2 test witness selected over freshly9/P3 optional cache plan. No next test execution; shared derived registry entry must reconcile with PR1820 before work.
+- Accounting133 merged/21 closed-unmerged sinceSeptember9UTC/98peers. Shared checkout preserved; no source/runtime activation. WSP15/22/97.
+
 ## 2026-09-20: Qualify AutoResearcher interruption evidence
 
 - Completed the12/P2 static lifecycle/oracle plan in six existing documents. Missing/temp reports remain incomplete/unknown; terminal files are local diagnostics, not caller acknowledgement, independent acceptance or durable recovery.
