@@ -45,8 +45,13 @@ dry-run evidence path. STANDALONE and return-value-only: it consumes a
 ContextBundle as its TRUSTED input and RETURNS a typed `DryRunResult`
 describing what a FoundUp dry-run WOULD do. It performs NO live build, NO real
 execution, NO subprocess, NO Hermes real delegation, NO executor sink, NO FAM
-event, and NO file write. It is NOT plumbed into the live OpenClaw/WRE loop
-(runtime wiring is a separate Phase-2 slice).
+event, and NO file write. The return-value-only component is now called by
+`wre_core/src/foundup_job_consumer.py::_attach_context_bundle_dry_run` on the
+existing SIMULATED/no-real-execution/disabled-delegation branch. That attachment
+is implemented; live worker execution is not. The surrounding executor may write
+evidence artifacts, so invoking the whole consumer is not a read-only query.
+See `wre_core/tests/test_foundup_job_consumer_context_bundle_wiring.py`; its real
+seam positive fixture uses `validate_foundup`, not a completed product build.
 
 ```python
 # modules/foundups/agent/src/context_bundle_dry_run_consumer.py  (NEW)
