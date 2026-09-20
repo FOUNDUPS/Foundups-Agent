@@ -12,6 +12,24 @@ Explicit "remember these three words" tests encourage rehearsal and reveal the t
 
 The game remains intentionally simple. Measurement quality has priority over graphics.
 
+## Game wrapper and sweep model
+
+Use a low-fi survival-dungeon wrapper as the player-facing experience. The structural reference is *Fear & Hunger*'s compact character selection, hostile exploration, persistent state, randomized elements and consequential decisions—not its content or IP.
+
+Our implementation grows through controlled **sweeps** rather than one giant feature build:
+
+- Sweep 0: survival shell + event ledger.
+- Sweep 1: delayed episodic retention.
+- Sweep 2: temporal/sequence memory.
+- Sweep 3: associative/context memory.
+- Sweep 4: working memory/interference.
+- Sweep 5: attention/inhibition/processing speed.
+- Sweep 6: executive switching/route rules.
+- Sweep 7: adaptive mixed-domain campaign.
+- Sweep 8: longitudinal alternate forms.
+
+Only Sweep 0 + Sweep 1 are Phase 1. Full contracts: [GAME_DESIGN_SWEEPS.md](../GAME_DESIGN_SWEEPS.md).
+
 ## Probe ladder
 
 For a selected event:
