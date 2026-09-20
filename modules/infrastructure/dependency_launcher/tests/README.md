@@ -3,18 +3,44 @@
 The suite covers browser dependency recovery and the read-only runtime
 compatibility advisory.
 
-The separate WSL version advisory is executable when enabled. On 2026-09-20,
-the unchanged `test_wsl_agent_runtime.py` passed all 25 tests in an isolated
+The separate WSL version advisory now requires both advisory and command opt-ins
+before executing installed programs. The existing suite expanded from25 to43
+cases: initial11 failed/32 passed, then43 passed after the source repair. Four
+selected existing main/Gateway caller checks also passed. All used injected
+boundaries; no real WSL, agent, provider or model was invoked.
+
+The canonical [test inventory](TestModLog.md) lists all four existing test owners.
+
+This WSL owner is content-bound by RedDog's existing backend manifest. Source
+edits also require `python -B scripts/generate_reddog_backend_manifest.py --check`,
+the existing generator tests (including staged-index closure), and RedDog's
+backend compatibility/fast/package checks. If stale, regenerate the manifest and
+update its existing extension and generator-test digest pins together; preserve
+membership and gate assertions. PR1806 first CI caught this omitted integration
+step after local adapter checks had passed. This maintenance does not release
+or install an extension, launch WSL, or grant runtime authority.
+The initial connected-check collection failed because the external dotenv stub
+lacked `dotenv_values`; correcting that harness enabled the unchanged four
+checks. This was not an application test failure or application-code repair.
+
+For connected main imports, stub `env_managed_enabled`, `load_managed_env`, and
+dotenv loading/value functions before collection, and use an external working
+directory for logs. Select the two fail-soft runtime adapter tests and the two
+Gateway transport-vector tests; avoid launching main or installed runtimes.
+Use `python -B`, disabled bytecode/plugin autoload, isolated TMP/TEMP/database
+paths, `--import-mode=importlib`, `-p pytest_asyncio.plugin` and
+`-p no:cacheprovider`. Exact commands and receipts are bound in the system backlog.
+
+Historical qualification on 2026-09-20: unchanged WSL source/tests passed25 in an isolated
 temporary environment. Seven external injected witnesses also passed, covering
 disabled, stopped, running, stop-before-exec, invalid distro, base mismatch and
-an as-yet unsupported command-mode flag. These establish current command
+the then-unsupported command-mode flag. These establish pre-repair command
 reachability and modeled state transitions; they do not prove real WSL startup,
 service health or no-start behavior. No WSL or provider was invoked.
 
-The source/test lifecycle wording remains a qualified repair item in the
+The source/test lifecycle wording is now corrected per the
 [module roadmap](../ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20).
-Extend this existing suite for that change; preserve its structural limits and
-adjacent Gateway/main contracts. No new test owner is required.
+The original source structural limits and adjacent Gateway/main contracts remain.
 
 `test_wsl_agent_runtime.py` covers plain and numeric-suffixed OpenClaw releases,
 optional build IDs, exact version preservation and rejection of unrecognized

@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-09-20 - WSL command-control backend digest reconciliation
+
+- PR1806 candidate2033939 failed the unchanged backend compatibility gate.
+  Independent diagnostics identify the changed WSL adapter as the sole stale
+  member. The original failure is retained in the canonical RSI backlog.
+- Regenerated the existing1,400-file manifest and refreshed its extension and
+  Python test digest pins to `11b2a45c0feca2b3c53372b0c07f22788091edf89fef91555142325f560a24f1`. The member set, API, version, caps and
+  all safeguard assertions are unchanged. No installed extension is updated.
+- Local generator8 tests, RedDog15 fast groups, exact backend contract and
+  package67 files/950,440 bytes pass; backend contract overlaps the fast tier.
+  Fresh exact-head CI is still required. WSP15/22/50/84/97; no runtime effects.
+
 ## 2026-09-19 - Reconcile WRE Skillz registry backend hash
 
 - Reproduced issue #1784 on exact current main: the authenticated backend manifest itself remained canonical, but runtime integrity failed closed only for `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.

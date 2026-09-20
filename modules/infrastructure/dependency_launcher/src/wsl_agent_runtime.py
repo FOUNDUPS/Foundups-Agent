@@ -76,10 +76,11 @@ def probe_wsl_agent_runtime(
     runner: Runner | None = None,
     base_path_resolver: BasePathResolver | None = None,
 ) -> WslAgentRuntimeReceipt:
-    """Return non-authoritative availability evidence without lifecycle changes."""
+    """Read metadata unless command probing is explicit; commands may start WSL."""
     env = environment if environment is not None else os.environ
     if not _truthy(env.get("FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED", "0")):
         return _receipt("DISABLED", "", "", "", (), ("runtime_probe_disabled",))
+    command_probe = _truthy(env.get("FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED", "0"))
     try:
         distro = _validate_distro(env.get("FOUNDUPS_AGENT_WSL_DISTRO", DEFAULT_DISTRO))
     except ValueError:
@@ -94,6 +95,10 @@ def probe_wsl_agent_runtime(
         return _receipt(
             "NOT_READY", distro, base_path, expected, (), ("distro_base_path_mismatch",)
         )
+    if not command_probe:
+        return _receipt(
+            "NOT_READY", distro, base_path, expected, (), ("command_probe_disabled",)
+        )
     executor = runner or _run_command
     components = tuple(_probe_component(distro, name, executor) for name in COMPONENT_EXECUTABLES)
     reasons = tuple(item.reason for item in components if not item.available)
@@ -107,14 +112,7 @@ def build_wsl_version_command(component_id: str, distro: str) -> tuple[str, ...]
     executable = COMPONENT_EXECUTABLES.get(component_id)
     if executable is None:
         raise ValueError("wsl_component_not_allowlisted")
-    return (
-        "wsl.exe",
-        "--distribution",
-        normalized,
-        "--exec",
-        executable,
-        "--version",
-    )
+    return ("wsl.exe", "--distribution", normalized, "--exec", executable, "--version")
 
 
 def _probe_component(distro: str, component_id: str, runner: Runner) -> WslAgentComponentStatus:

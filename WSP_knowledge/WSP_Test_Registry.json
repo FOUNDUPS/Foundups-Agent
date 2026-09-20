@@ -16123,7 +16123,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for the read-only OpenClaw/Hermes WSL runtime binding."
+      "description": "Injected tests for WSL metadata and explicit command-probe modes."
     },
     {
       "id": "test::modules::infrastructure::doc_dae::tests::test_doc_dae_demo",

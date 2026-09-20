@@ -92,19 +92,21 @@ governed proposal.
   seven external injected witnesses show command reachability and the
   running-check/stop-before-exec race, with zero actual WSL calls. Independent
   source/caller reviews accept this bounded qualification (WSP15 13/P1).
-- [ ] Implement the separately qualified existing-owner repair (C2/I4/D3/Impact3,
-  12/P2) in `src/wsl_agent_runtime.py` and its existing test file.
+- [x] Implement the separately qualified existing-owner repair (C2/I4/D3/Impact3,
+  12/P2) in `src/wsl_agent_runtime.py` and its existing test file; 43 focused and
+  four connected caller checks pass locally. Remote closure is tracked in the
+  canonical backlog. No runtime activation is included.
 
-Current behavior: the default is disabled; setting only
-`FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED=1` executes two fixed version commands.
+Before this repair, setting only `FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED=1` executed
+two fixed version commands. It now inspects metadata without command execution.
 Microsoft documents [distribution execution and running-state observation](https://learn.microsoft.com/en-us/windows/wsl/basic-commands)
 as separate commands and [systemd startup after distribution restart](https://learn.microsoft.com/en-us/windows/wsl/systemd).
 Together with the existing Gateway cold-start handling, this establishes a
 possible lifecycle effect, not proof that this audit started any service.
 
-The next source contract is **not implemented**:
+The implemented source contract is:
 
-| Advisory enabled | Proposed `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` | Required result |
+| Advisory enabled | `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` | Result |
 |---|---|---|
 | false | any | Preserve existing `DISABLED` receipt bytes; no host access |
 | true | absent/false | Validate registration/base; return `NOT_READY`, empty components, stable `command_probe_disabled` reason; no command runner |
@@ -124,11 +126,12 @@ guards. No replacement launcher, supervisor, schema, skill or source owner is
 needed. Metadata observation cannot yield version `PASS`. Explicit command mode
 does not authorize workers, models, updates, deployment or provider effects.
 
-The source slice must validate disabled-byte compatibility, zero calls in
-metadata mode, callback mutation, rejected bindings, explicit-mode legacy results,
-trusted executable resolution and connected main/Gateway fixtures. Correct the
-existing source/test lifecycle overclaims without treating injected tests as a
-live sandbox qualification. Exact evidence and the next packet are in the
+The source slice validates disabled-byte compatibility, zero calls in metadata
+mode, callback mutation, rejected bindings, explicit-mode legacy results, trusted
+executable resolution and connected main/Gateway fixtures. Source/test lifecycle
+wording is corrected; injected checks are not live sandbox qualification. The
+file remains238 lines with the original240-line guard unchanged. Exact evidence
+and the next packet are in the
 [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json).
 
 ## 0102 Directive
