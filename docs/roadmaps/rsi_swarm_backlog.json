@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "1571ec5528bf2f1a8e34ebc6046fc78397ec4da7",
-    "selected_action": "AmIBot-existing-module-build-route-qualification",
-    "status": "source_qualified_candidate_review_and_hosted_gates_pending",
+    "base_commit": "e1c64d00674f1205ec20ca460c8b963fb34b6daa",
+    "selected_action": "FoundUp-consumer-dry-run-isolation-qualification",
+    "status": "independent_witness_complete_candidate_review_and_hosted_gates_pending",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1868,15 +1868,15 @@
     }
   },
   "current_observation": {
-    "observation_id": "existing_foundup_build_route_qualification_20260921",
-    "observed_at": "2026-09-20T20:08:37.386700+00:00",
-    "base_commit": "1571ec5528bf2f1a8e34ebc6046fc78397ec4da7",
+    "observation_id": "consumer_dryrun_isolation_qualification_20260921",
+    "observed_at": "2026-09-20T21:12:57.068210+00:00",
+    "base_commit": "e1c64d00674f1205ec20ca460c8b963fb34b6daa",
     "role": "coordinator",
-    "origin": "autonomous_trigger",
+    "origin": "external_principal",
     "principal_ref": "012",
-    "previous_observation": "1571ec5528bf2f1a8e34ebc6046fc78397ec4da7:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "source_qualified_candidate_review_and_hosted_gates_pending",
-    "selected_task": "AmIBot-existing-module-build-route-qualification",
+    "previous_observation": "e1c64d00674f1205ec20ca460c8b963fb34b6daa:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "independent_witness_complete_candidate_review_and_hosted_gates_pending",
+    "selected_task": "FoundUp-consumer-dry-run-isolation-qualification",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1885,86 +1885,92 @@
       "total": 15,
       "priority": "P1"
     },
-    "selection_basis": "Fresh45-candidate reconciliation removes closed package scope repair. Higher items retain source-bound admission, ownership or consumer prerequisites. Current15/P1 existing-module route trace is unblocked and directly tests whether build means authoring, extraction or simulation; genesis skill promotion alone cannot answer this. No authoring/runtime changes until exact consumer and test evidence qualified.",
+    "selection_basis": "Finish the already-owned 15/P1 qualification after exact main/peer reconciliation. The demonstrated consumer promise mismatch qualifies a separate 13/P1 source repair; it does not inherit the investigation score. Re-evaluate higher partial/blocked work before selecting that repair.",
     "retrieval": {
-      "freshness": "lexical bundle ok=true, UNKNOWN/index_gap=true; authority head differs from current source, not CURRENT semantic evidence",
-      "noise": "Broad module history reduced to actual consumer/router/executor and existing test owners",
-      "ordering": "WSP00/15/97 and main/peer closure -> governed query -> exact module memory/source -> caller/test trace",
-      "missing": "Bundle INTERFACE open_rejected, ModLog oversize and README/ROADMAP truncated; direct selected reads used. memory/README absent.",
-      "duplication": "Two executor names are not evidence of duplicate active dispatch; actual consumer imports WRE owner. No new module/skill/builder."
+      "freshness": "Governed lexical bundle ok=true, UNKNOWN with index_gap_detected=true; not CURRENT semantic evidence.",
+      "noise": "Narrowed broad histories to active consumer, WRE factory, constructor and caller/test contracts.",
+      "ordering": "WSP00/15/97 -> main/peer/source reconciliation -> owner query and module memory -> actual control-flow witness -> independent replay.",
+      "missing": "Bundle truncation/open rejection handled by direct targeted module/source reads; no complete semantic index claim.",
+      "duplication": "Reuse active WRE owner and existing consumer/executor tests; separate legacy extraction executor left intact."
     },
     "closure_reconciliation": {
-      "pr1833": {
-        "merge": "1571ec5528bf2f1a8e34ebc6046fc78397ec4da7",
+      "pr1834": {
+        "merge": "e1c64d00674f1205ec20ca460c8b963fb34b6daa",
         "pr_checks": "10 success",
         "main_workflows": [
           {
             "conclusion": "success",
-            "databaseId": 35532699289,
-            "headSha": "1571ec5528bf2f1a8e34ebc6046fc78397ec4da7",
+            "databaseId": 35535525754,
+            "headSha": "e1c64d00674f1205ec20ca460c8b963fb34b6daa",
             "status": "completed",
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35535525754",
             "workflowName": "CI"
           },
           {
             "conclusion": "success",
-            "databaseId": 35532699330,
-            "headSha": "1571ec5528bf2f1a8e34ebc6046fc78397ec4da7",
+            "databaseId": 35535525424,
+            "headSha": "e1c64d00674f1205ec20ca460c8b963fb34b6daa",
             "status": "completed",
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35535525424",
             "workflowName": "CodeQL"
           }
         ],
-        "scope": "13-order planning DAG only; no runtime admission"
+        "scope": "Existing route/source and ContextBundle documentation qualification only"
       },
-      "accounting": "140 merged/21 closed without merge since September9UTC;97 unchanged open peer heads. Paginated REST baseline plus verified owned closures, not new all-history search.",
-      "local_branches": 659,
+      "accounting": "Fresh paginated REST inventory since September9UTC:141 merged/21 closed without merge;98 currently open,13 drafts,14 with failing checks. Prior97 peer heads unchanged; new PR1835 changes only docs/architecture/FOUNDUPS_AGI_SCHEMA_OVERVIEW.md and is separately owned. Sequential observations, not atomic.",
+      "local_branches": 660,
       "worktrees": 157,
       "original_packets": "26 unchanged",
-      "candidate_histories": 46
+      "candidate_histories": 48
     },
     "execution_scope": {
-      "plane": "isolated source/test-contract qualification and existing documentation reconciliation",
+      "plane": "isolated actual-module configuration witness and existing canonical documentation",
       "allowed_paths": [
         "ModLog.md",
         "ROADMAP.md",
         "docs/roadmaps/rsi_swarm_backlog.json",
-        "modules/foundups/agent/INTERFACE.md",
-        "modules/foundups/agent/ROADMAP.md",
-        "modules/foundups/agent/ModLog.md",
-        "modules/foundups/detect_ai/ROADMAP.md",
-        "modules/foundups/detect_ai/ModLog.md",
-        "modules/foundups/detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.md"
+        "modules/infrastructure/wre_core/INTERFACE.md",
+        "modules/infrastructure/wre_core/ROADMAP.md",
+        "modules/infrastructure/wre_core/ModLog.md",
+        "modules/infrastructure/wre_core/tests/TestModLog.md"
       ],
       "invariants": [
-        "No runtime source/test/registry/package-JSON edits",
-        "Preserve13-order planning DAG, existing detect_ai identity and original26 RSI packets",
-        "No queue drain, product imports/tests, workers/providers/WSL/services or domain/token/deployment effects",
-        "Protect shared checkout, active product owners and Remote AutoPost"
+        "No production source, test, registry, package JSON, skill or module edits",
+        "Preserve original26 packets and prior candidate scores",
+        "No provider/model/DB/process/socket effects in witness; routing and executor/receipt/context bodies mocked",
+        "No worker admission, WSL/service launch, domain/token/deployment effects",
+        "Preserve shared checkout and peer-owned RedDog/YUMORI/eSingularity/Remote AutoPost"
       ]
     },
     "findings": {
-      "active_route": "Commander queues typed job; consumer routes to WRE execute_foundup_job/get_executor, not older agent extraction helper. Source path only; no claim of running service.",
-      "runtime_boundary": "Fresh singleton defaults dry-run; guard-admitted disabled/dry paths simulate, but unqualified build/extract can block first. Enabled/non-dry live execution remains blocked. Controlled adapter boundary proof never calls live delegate.",
-      "completed_but_stale": "ContextBundle dry-run preview is attached by existing consumer; stale agent interface/roadmap corrected. Positive real-seam fixture is validate_foundup, not build authoring.",
-      "model_dependency": "Build/extract profiles have unspecified requirements; model-capability consumer admission is validate-only. Existing roadmap already owns expansion prerequisites.",
-      "next_policy_question": "Consumer documentation promises forced dry-run, but convenience dispatch reuses cached process-global executor. Mocked singleton test cannot prove policy. Qualify fresh/warmed state and effect boundaries before any source repair."
+      "defect": "True consumer dispatch passes only job to execute_foundup_job; get_executor reuses an already configured global. Warm non-dry and warm controlled/adapter/tool states violate the documented forced-dry configuration promise.",
+      "witness_scope": "Actual consumer/convenience/factory/constructors reach a mocked execute sink in8 cases, with2 mismatches. No real executor body, guard, queue drain or downstream sink executed.",
+      "initial_harness_failure": "Zero cases; unrelated editable-install science-swarm-hub metadata read denied. V2 prunes only child sys.path to qualified repo/runtime roots; environment unchanged.",
+      "proposed_repair": "Strict optional keyword force; fresh safe defaults only when True, legacy factory unchanged otherwise; capture consumer value once; retain default shared validator and normal workspace discovery. Source repair not implemented.",
+      "daily_activity": "Existing R25 consented proposal and verified-memory acceptance owners remain canonical. Conversation/model output is candidate evidence, not accepted learning or WRE execution."
     },
     "validation": {
-      "local": "Eight source-owner AST/source assertions and exact existing test-contract inspection. Revised source receipt explicitly preserves validation/token/action gates before simulation. No repository imports or product tests.",
-      "independent": "21 exact base source/test/doc bindings; qualified static route and documentation reconciliation. Candidate diff review pending.",
-      "remote": "Not published at observation time",
-      "limits": "Source availability and tests read are not executed test results, running-PC proof, signed admission, sandbox confinement or autonomous AmIBot build. Simulated/blocked execution can still write evidence; future probes require disposable roots and effect guards."
+      "local": "8 configuration observations,2 mismatches; zero forbidden attempts in successful V2 witness.48 imported repository sources bound to exact base blobs/hashes. Initial failed harness preserved separately.",
+      "independent": "Independent replay of the same8 cases confirms the same2 mismatches, zero forbidden attempts. Counts overlap; not16 distinct tests. Repair contract independently qualified13/P1.",
+      "remote": "No publication for this candidate at observation time; PR1834 exact-head and main checks independently observed.",
+      "limits": "Mocked sink results are not passing product tests, real SIMULATED executor results, sandbox confinement, runtime admission or an autonomous AmIBot build. Python guards do not claim hostile native-code containment."
     },
-    "effort": "Bounded source and test-contract qualification, then existing canonical docs only if a gap is proved.",
-    "cost": "No model/provider/runtime calls; coordinator and independent reviewer usage not metered.",
-    "verification_burden": "Source-bound independent review and structural/doc preservation checks only; no new product test is warranted for this documentation-only correction. Hosted checks separate.",
-    "manual_rationale": "No current admitted Qwen/Gemma runtime binding. Coordinator source tracing and independent read-only reviewer qualify existing owners without opening providers.",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-existing-build-0505",
+    "effort": "One bounded configuration qualification, independent replay and canonical documentation closure; subsequent repair has separate scope/score.",
+    "cost": "No provider/model calls; coordinator/reviewer usage unmetered. Future constructor cost unmeasured.",
+    "verification_burden": "Preserve exact source/runner bindings; independent diff/score review and structural doc checks before publication. Full source behavior matrix remains future work.",
+    "manual_rationale": "No admitted Qwen/Gemma runtime route is established; coordinator executes bounded local probe with independent reviewer instead of claiming a FoundUps worker run.",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-dryrun-isolation-0557",
     "evidence_sha256": {
-      "preflight.json": "0e3bc7c17dbf8adb8c07ac46d42f0d505af30f9f96aba29458280cd21f20467c",
-      "holo-query.json": "0964d1864e2b4ae3957cff6c476e1732fa9d10b17647690d34149c5c4feee8f4",
-      "source-route-qualification.json": "1bb975ef9fad02775d44b5b229f61a50f2b7431cd671de0538810bb726ee991c",
-      "build-test-qualification.json": "b467158caf906fa2fd0315126c28655f0ad7168ad5d003af845a220f166d375d",
-      "source-route-qualification-v2.json": "8e3734ae2547652e6aa1c7063ece0ba3b1ea78dc28afca339a227d63e056553b"
+      "preflight.json": "7ed871e58934eb2676f8e370f5aa9642641e5c254b3c0126305ab8376b1914d5",
+      "holo-query.json": "9f6f85af3d8e7c1442c7867f840081846969ee0c9887ee0132884dac149f6ff3",
+      "probe.py": "20ae6b83878e6a630af1e8b4f3335f1a44e29c6aa99e95299f17a713bbd67dad",
+      "probe-v2.py": "c987dca5fc4f966431d5bb475a29027a11bba17caf370136874cfe30c4821cd5",
+      "baseline-witness/receipt.json": "f60154b6eb431aff449ab31efba3415441c55d7a6468ff3b53bc8044de6cfbc4",
+      "baseline-witness-v2/receipt.json": "6a2a8269c49baf92e226812c868d5d7e12194621ee2d913143457514df73e958",
+      "witness-binding.json": "ea163d604e321168363d2360a1b5efd079b53768bd48ac43a798539115fc1387",
+      "independent-witness/receipt.json": "90678e96e1ad6350e69e0410d64856a4a33603a64c400aaed777470cfe9279b2",
+      "policy-qualification.json": "9b168c5330f5960f0fbde04f728ec238b37af313127c7463adb876dd0aed4e86",
+      "resume-accounting.json": "c49fdd8bd5f999d7132544b4c5001bb237d63523425a6350a854eda858839e0a"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2200,7 +2206,7 @@
           "score": 15,
           "priority": "P1",
           "state": "partial_dependency",
-          "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill."
+          "next_step": "Preserve aggregate15/P1 partial dependency. Existing foundup_genesis_intake is prototype, evals empty and absent from canonical registry; production admission lacks exact held-out/runtime/rollback evidence under WSP95. Prototype local qualification remains eligible, separately scoped/scored10/P2 below; no duplicate skill or invented authority block."
         },
         {
           "task": "AmIBot-work-package-scope-qualification",
@@ -2225,8 +2231,8 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "source_qualification_complete_docs_review_and_ci_pending",
-          "next_step": "Review and publish exact documentation reconciliation. Keep WRE live authoring blocked; no further source trace is required for the old extraction-vs-active-consumer ambiguity."
+          "state": "closed_pr1834_documentation_only",
+          "next_step": "Exact reviewed documentation tree merged; all ten PR checks and both main workflows passed. Preserve source-route findings; do not repeat the qualification."
         },
         {
           "task": "FoundUp-consumer-dry-run-isolation-qualification",
@@ -2238,8 +2244,8 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "eligible_bounded_followup_pending_fresh_reobservation",
-          "next_step": "Qualify actual consumer force-dry promise using isolated fresh/warmed executor instances and consumer/job flag combinations in existing tests. Current convenience function reuses a global instance; mocked singleton test does not check policy. Fix only after a failing behavioral witness and exact existing caller/authority contracts; preserve no-live gates."
+          "state": "independent_witness_complete_documentation_publication_pending",
+          "next_step": "Eight configuration cases independently replayed; two forced-dry mismatches. Finish canonical evidence closure. Source repair is a distinct 13/P1 task; no live-effect proof."
         },
         {
           "task": "protected-foundup-work",
@@ -2463,6 +2469,20 @@
           "next_step": "Preserve truthful rejection receipts and successful acceptance gates. Follow independently scored existing-owner work; do not infer runtime readiness or retention."
         },
         {
+          "task": "FoundUp-consumer-force-dry-isolation-repair",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "qualified_local_repair_pending_fresh_selection",
+          "next_step": "Extend existing WRE convenience entry with strict keyword-only force_dry_run=False; True uses a fresh safe-default dry executor, False preserves legacy singleton behavior. Capture consumer policy once before callbacks; preserve shared validator nonce lifetime, job policy fields, all guards and live blocking. Use existing test owners; no new module/skill.",
+          "rationale": "Moderate cross-instance/callback compatibility complexity; critical isolation limitation; next-release urgency and significant internal benefit. Live delegation is already blocked, so this is not a production incident or an inherited 15-point investigation score."
+        },
+        {
           "task": "AutoResearcher-report-completeness",
           "wsp15": {
             "complexity": 3,
@@ -2565,23 +2585,38 @@
           "priority": "P2",
           "state": "repair_closed_pr1830",
           "next_step": "Completed and merged; retain exact validation limits. Do not repeat source repair."
+        },
+        {
+          "task": "FoundUp-genesis-prototype-compatibility-qualification",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 2,
+            "impact": 2
+          },
+          "score": 10,
+          "priority": "P2",
+          "state": "eligible_local_qualification_not_runtime_admission",
+          "next_step": "Read-only reconciliation of existing registry/scanner/intake prototype contracts; produce missing-evidence matrix and allowed local-evaluation seams in existing owners. No source activation, promotion or new skill.",
+          "rationale": "Moderate three-contract reconciliation, useful reusable genesis readiness, deferrable because detect_ai already exists, limited impact without authoring capability. Independently scored; aggregate admission retains15/P1."
         }
       ],
       "provisional_next_action": {
-        "task": "FoundUp-consumer-dry-run-isolation-qualification",
+        "task": "FoundUp-consumer-force-dry-isolation-repair",
         "wsp15": {
           "complexity": 3,
           "importance": 4,
-          "deferability": 4,
-          "impact": 4
+          "deferability": 3,
+          "impact": 3
         },
-        "score": 15,
+        "score": 13,
         "priority": "P1",
-        "state": "eligible_bounded_followup_pending_fresh_reobservation",
-        "next_step": "Qualify actual consumer force-dry promise using isolated fresh/warmed executor instances and consumer/job flag combinations in existing tests. Current convenience function reuses a global instance; mocked singleton test does not check policy. Fix only after a failing behavioral witness and exact existing caller/authority contracts; preserve no-live gates."
+        "state": "qualified_local_repair_pending_fresh_selection",
+        "next_step": "Extend existing WRE convenience entry with strict keyword-only force_dry_run=False; True uses a fresh safe-default dry executor, False preserves legacy singleton behavior. Capture consumer policy once before callbacks; preserve shared validator nonce lifetime, job policy fields, all guards and live blocking. Use existing test owners; no new module/skill.",
+        "rationale": "Moderate cross-instance/callback compatibility complexity; critical isolation limitation; next-release urgency and significant internal benefit. Live delegation is already blocked, so this is not a production incident or an inherited 15-point investigation score."
       },
-      "selection_basis": "Existing-module dry-run policy is directly relevant before a sandbox writer. It ties15/P1 genesis wardrobe work, which does not itself qualify already registered-module authoring. Higher items retain exact runtime/ownership dependencies; re-observe at closure, do not auto-select.",
-      "selection_rule": "Refresh source/ownership/CI and reapply WSP15/97 after closure; prior runner-up is not automatic."
+      "selection_basis": "The demonstrated active-consumer repair13/P1 outranks the separately scoped new-genesis prototype qualifier10/P2. Preserve wardrobe aggregate15/P1; do not call its permitted local work authority-blocked. Higher unresolved aggregates retain explicit runtime, external-owner, memory transaction, child-input or lifecycle-producer dependencies already recorded. Fresh source/peer/CI checks still required at closure.",
+      "selection_rule": "Re-observe source/ownership/CI and apply WSP15/97 after closure. Do not automatically take prior runner-up."
     }
   }
 }
