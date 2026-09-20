@@ -22642,7 +22642,7 @@
       "quarantine_reasons": [
         "module_scope_local_function_invocation"
       ],
-      "description": "Route Contract Bridge Tests\n\nTests for the /f/{foundup_id} canonical landing route.\nWSP 104: /f/{foundup_id} is the canonical FoundUp landing namespace.\n\nRoute behavior:\n  - /f/{foundup_id} renders landing content directly (no redirect)\n  - Canonical URL stays visible in address bar\n  - Subpath support preserved for future /app mount"
+      "description": "Route Contract Bridge Tests\n\nTests for the /f/{foundup_id} canonical landing route.\nWSP 104: /f/{foundup_id} is the canonical FoundUp landing namespace.\n\nRoute behavior:\n  - /f/ and /f/{foundup_id} render scope-free public discovery\n  - /f/{foundup_id}/app and app deep links hand off to /member/\n  - Member runtime catalog and entry_url stay outside public rendering"
     },
     {
       "id": "test::public::member::tests::test_search_mall_concierge_wiring_phase1",

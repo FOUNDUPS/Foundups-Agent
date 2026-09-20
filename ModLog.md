@@ -1,3 +1,9 @@
+## 2026-09-21: Close AmIBot registration and reconcile public-route test drift
+
+- PR1751 merged as `f7307291`; all three main workflows passed. Hidden `detect_ai` is one of18 declarations;13 planning orders remain inactive.
+- WSP15 C3/I4/D4/Impact4=15/P1 selects existing public route tests:34pass/11fail ->45pass. Scope-free discovery and membership handoff preserved; no product/runtime edits.
+- Fresh97peer heads unchanged. WSP97 removes merged registry/intake scope from executable work; independent review, exact-head CI and next re-scoring remain explicit in the canonical backlog.
+
 ## 2026-09-21: Reconcile existing AmIBot registration draft
 
 - WSP00/15/22/50/97/99/104/109;14/P1 current-main integration of existing PR1751. Resolve only three root planning conflicts; preserve original draft history, all43candidate histories/26packets and protected current-main trees.
