@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-20 — YUMORI Economic Model calculation and evidence contracts
+
+- Added a materially distinct standard-library test surface for the new YUMORI project-finance subsystem after reviewing the module test inventory and nearest JHR/contract tests.
+- Covers exact parity with the current FIN.YUMORI base case, exclusion of unawarded grants, awarded-grant treatment, fail-closed revenue shares, demand-capped heat value, the three reproducible dependency metrics, and official-source/undisclosed-amount ledger integrity.
+- Fresh constrained-environment evidence: six test functions passed through direct invocation; Python compilation and JSON validation passed. The local runtime did not provide pytest, so no pytest-run claim is made; CI remains the pytest authority.
+
 ## 2026-09-20 — YUMORI.me correspondence registration and voice contracts
 
 - Extended the existing operational-skill contract test for the `yumori_contact_ledger` WRE entry, canonical Skillz file, thin projections, 0102 proxy voice, third-person monk boundary, default signature, and recursive-learning marker.
