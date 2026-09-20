@@ -1,3 +1,10 @@
+## 2026-09-20: Repair existing daemon counter memory ownership
+
+- Fresh WSP15/WSP97 reconciliation preserved 32 candidate histories and selected the actual C2/I4/D4/Impact3=13/P1 source action. New main PR1808 affects only protected YUMORI files; merged its unchanged base into the owned branch. PR1807 main workflows both passed.
+- Existing daemon now creates/uses/finally-closes one handle per counter on its calling thread; cached cross-thread ownership removed. Ten added tests preserve all 20 originals. Red 8 failed/22 passed; green 30 and connected 71 passed, independent 71 overlaps.
+- Source 865/class755 unchanged, constructor61; tests 750/max 40. Manifest refresh changes one existing member and both pins;8 generator tests,15 RedDog fast groups and 67-file package pass. Registry 1651/269 unchanged.
+- Canonical observations retain prior qualification, source-bound failures, disposable storage evidence and independent reviews. No new module, scheduler, skill, production memory, runtime activation or retained-learning claim. Partial constructor/close failures and unmeasured overhead remain limits; re-observe the next action after closure. WSP00/15/22/48/50/62/84/97/99.
+
 ## 2026-09-20: Close daemon lifetime qualifier; select existing-owner repair
 
 - PR1807 merged as 51a83ff1683ca99148d5d3c20703e58bc98cf44f after exact-head checks passed. Reviewed tree and all six document blobs match; source/tests remain unchanged.

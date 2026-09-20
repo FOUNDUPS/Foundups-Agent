@@ -110,6 +110,16 @@ no cache provider and a unique external basetemp. The connected 206-case selecti
 and exact commands are recorded in `pattern_memory_ownership_continuation_20260914`.
 These selections overlap; thread isolation is not production concurrency proof.
 
+The existing test_daemon_self_audit_loop.py now adds ten counter-lifetime
+cases (30 daemon cases; 71 with the unchanged PatternMemory suite). Its tracked
+fixture wraps real SQLite handles at an explicit disposable path and observes
+creating/closing threads. It tests two distinct events across simultaneously
+alive threads, successive operations, disabled telemetry, failure/interruption
+cleanup and stop returning during an injected blocked counter. No actual
+daemon.start runs. Close failure is injected after real close; partial close
+and real restart/shutdown are not certified. Preserve actual factory/default-
+path interception: WRE_PATTERN_MEMORY_DB alone is not read by PatternMemory().
+
 ## Auto Researcher run isolation
 
 Reuse `test_wre_auto_researcher.py` and its fixture that disables model construction

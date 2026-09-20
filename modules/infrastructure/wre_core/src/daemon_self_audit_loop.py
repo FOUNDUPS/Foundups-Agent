@@ -174,7 +174,6 @@ class DaemonSelfAuditLoop:
         self._fix_stats: Dict[str, Dict[str, Any]] = {}
         self._signature_stats: Dict[str, Dict[str, Any]] = {}
         self._last_escalation_at: Dict[str, float] = {}
-        self._pattern_memory: Any = None
         self._thread: Optional[threading.Thread] = None
         self._stop = threading.Event()
         self._scan_lock = threading.Lock()
@@ -744,16 +743,12 @@ class DaemonSelfAuditLoop:
     def _get_pattern_memory(self) -> Any:
         if not self.enable_telemetry:
             return None
-        if self._pattern_memory is not None:
-            return self._pattern_memory
         try:
             from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
-
-            self._pattern_memory = PatternMemory()
+            return PatternMemory()
         except Exception as exc:
             logger.debug("[SELF-AUDIT] PatternMemory unavailable: %s", exc)
-            self._pattern_memory = None
-        return self._pattern_memory
+            return None
 
     def _increment_counter(self, counter_name: str, delta: int = 1) -> None:
         memory = self._get_pattern_memory()
@@ -763,6 +758,11 @@ class DaemonSelfAuditLoop:
             memory.increment_counter(counter_name, delta)
         except Exception as exc:
             logger.debug("[SELF-AUDIT] counter increment failed (%s): %s", counter_name, exc)
+        finally:
+            try:
+                memory.close()
+            except Exception as exc:
+                logger.debug("[SELF-AUDIT] counter close failed (%s): %s", counter_name, exc)
 
     def _persist_event(self, event: SelfAuditEvent) -> None:
         row = asdict(event)

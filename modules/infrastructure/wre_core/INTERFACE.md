@@ -365,6 +365,13 @@ foreign-thread database operations raise `sqlite3.ProgrammingError`. Default
 instances share the database path and committed records, not a live connection,
 transaction or close lifecycle. The previous process-global alias is removed.
 
+DaemonSelfAuditLoop owns one handle for each _increment_counter call. After a
+successful factory return it always attempts close on the calling thread,
+including write failure or BaseException propagation. Ordinary factory/write/
+close exceptions remain fail-soft. Disabled telemetry invokes no factory.
+The daemon retains no connection; stop never closes a worker's connection.
+A timed-out stop does not mean an in-flight operation completed or stopped.
+
 Use one handle per work item; do not pass a cached handle across worker handoff
 or thread restart. This is a connection ownership boundary, not a transaction
 pool, async-task isolation, authenticated memory write or atomic R11 acceptance.
