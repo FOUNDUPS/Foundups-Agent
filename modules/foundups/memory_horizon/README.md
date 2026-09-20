@@ -18,7 +18,7 @@ A later **Memory Horizon Companion** track extends the same event model into an 
 7. [Manifest draft](docs/intake/FOUNDUP_MANIFEST_DRAFT.md)
 8. [Intake source](docs/intake/INTAKE_SOURCE.md)
 
-Supporting records: [research](docs/RESEARCH.md), [data/scoring contract](docs/DATA_AND_SCORING_CONTRACT.md), [game-design sweeps](docs/GAME_DESIGN_SWEEPS.md), [assistive companion](docs/ASSISTIVE_MEMORY_COMPANION.md), [FoundUps memory terminology audit](docs/FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md), [validation](docs/VALIDATION.md), [roadmap](ROADMAP.md), [interface](INTERFACE.md), [change log](ModLog.md).
+Supporting records: [RSI autonomous-build package](docs/launch/MEMORY_HORIZON_AUTONOMOUS_BUILD_PACKAGE.md), [machine work orders](work_orders/README.md), [research](docs/RESEARCH.md), [data/scoring contract](docs/DATA_AND_SCORING_CONTRACT.md), [game-design sweeps](docs/GAME_DESIGN_SWEEPS.md), [assistive companion](docs/ASSISTIVE_MEMORY_COMPANION.md), [FoundUps memory terminology audit](docs/FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md), [validation](docs/VALIDATION.md), [roadmap](ROADMAP.md), [interface](INTERFACE.md), [change log](ModLog.md).
 
 ## Core loop
 
@@ -40,7 +40,9 @@ Memory Horizon is not a concussion test, diagnosis, triage system, discharge too
 
 This intake authorizes documentation and a bounded POC proposal only. No public route, DNS, patient-data service, clinical workflow, wearable runtime, token, or reward mechanism is activated.
 
-Next bounded slice: [issue #1821](https://github.com/FOUNDUPS/Foundups-Agent/issues/1821), `MEMORY_HORIZON_POC_PHASE1`.
+Product POC: [issue #1821](https://github.com/FOUNDUPS/Foundups-Agent/issues/1821), `MEMORY_HORIZON_POC_PHASE1`.
+
+RSI autonomous-build experiment: [issue #1825](https://github.com/FOUNDUPS/Foundups-Agent/issues/1825), `MEMORY_HORIZON_RSI_AUTONOMOUS_BUILD_EXPERIMENT_PHASE1`. The authored WSP 99 ticket pack is planning/not-dispatched until current runtime admission succeeds.
 
 Deferred assistive track: [issue #1823](https://github.com/FOUNDUPS/Foundups-Agent/issues/1823), `MEMORY_HORIZON_COMPANION_PHASE1`.
 
