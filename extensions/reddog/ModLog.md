@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-09-20 - Hermes rejection-evidence backend binding
+
+- Refresh the existing manifest's Hermes lifecycle member and both digest pins to `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. All 1,400 members, API/version and extension behavior remain unchanged.
+- The bridge's 13/P1 repair keeps parent-only stop and noncompleted/forbidden terminal evidence from claiming complete observation or confirmed abort; it preserves possible effects and artifact withholding. No child cancellation or delivery support is added.
+- Manifest check and eight generator tests pass with two pytest configuration warnings; 15 fast groups and the deterministic 67-file/950,440-byte package pass. Independent source review accepts 117 cases (108 repeated plus nine controls); exact-head publication remains separately tracked in the RSI backlog.
+- No installed extension, runtime or provider is updated. WSP 15/22/50/62/84/97.
+
 ## 2026-09-20 - Prepared-context backend manifest binding
 
 - Updated five existing runtime member hashes; unchanged1,400-member manifest/API/version and extension behavior. Both digest pins now match `cbd1292a4857bf071ab2d8807114c7a03932f98f2e3dc1535bac4b09884469ef`.

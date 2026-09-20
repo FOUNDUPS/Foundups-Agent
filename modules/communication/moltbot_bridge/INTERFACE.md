@@ -420,18 +420,18 @@ and proof digest match signed authority at use time; self-rehashed evidence and
 model substitution fails before `foundups_fusion`, sandbox-verified upstream
 `openclaw agent`, or the upstream Hermes API; actual invocation effects remain
 receipt-bound. `hermes_api` consumes the signed principal model/provider route,
-uses the fixed authenticated loopback `/v1/runs` surface, and requires exact
-version/profile identity, bearer enforcement, the sole `delegation` toolset
-with exactly `delegate_task`, zero skills, one stable completed leaf lifecycle,
-explicit empty child file-read/write arrays, ordered delegate completion, and
-unchanged tool/skill state after the run. The final terminal event and polled
-output must match. Because upstream Hermes reports
-`tool_execution=server` and `split_runtime=false`, the leaf receives no shell,
-file, web, browser, MCP, memory, or approval tool. A second child, other tool,
-approval, timeout, uncertain stop, malformed output, or confinement drift fails closed.
-Each returns only an artifact map accepted by the shared bounded relative-path,
-non-empty UTF-8 content validator to the existing Foundups materializer, and
-commit rejects pre-staged, undeclared, changed, protected, or base-mismatched state.
+fixed authenticated loopback `/v1/runs`, exact version/profile and bearer checks,
+sole `delegation`/`delegate_task`, zero skills and one stable completed leaf.
+Empty child file arrays, ordered delegate completion and unchanged postflight
+policy are required; final event and polled output must match. Server tool execution
+without split-runtime confinement excludes shell/file/web/browser/MCP/memory/approval tools.
+Second children, other tools, approvals, timeout, malformed output or drift reject.
+Stop/status remain best-effort. Parent-only stop or noncompleted/forbidden terminal
+rejection reports `effect_observation_complete=false` and `run_abort_confirmed=false`;
+effects remain possible and artifacts are withheld. This establishes neither child
+cancellation nor delivery and leaves successful acceptance gates unchanged. Accepted
+maps pass bounded relative-path/non-empty UTF-8 validation to the existing materializer;
+commit rejects pre-staged, undeclared, changed, protected or base-mismatched state.
 
 The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is
 canonically revalidated before the verifier request is built. The stage does

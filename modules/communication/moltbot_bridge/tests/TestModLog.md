@@ -1,3 +1,12 @@
+## 2026-09-20: Parent-only Hermes rejection evidence regressions
+
+- Extend only `test_reddog_hermes_api_artifact_provider.py`: 24 stop combinations cover approval/status/timeout causes against cancelled/running/failed/malformed/wrong-ID/denied/error replies; three terminal cases cover failed, cancelled and forbidden activity. Existing fakes and bounded disposable paths remain.
+- Correct the old parent-cancelled assertion to require false observation/abort flags. Assert original reasons, no artifacts, possible external effects, canonical model-result digest and receipt round-trip; follow the same flags through provider bootstrap and the resident effect reader.
+- Qualified red-v2: 10 failed/98 passed; green: 108 passed. Initial insertion displaced an existing key/transport assertion; restore it before the qualified baseline and retain the rejected draft/placement receipt separately. No original assertion was silently dropped.
+- Connected-v2: 114 passed, zero skips/errors/forbidden effects. Initial 7 failed/107 passed were legitimate external lock paths rejected by the harness's Windows extended-prefix check; fix only that guard and preserve the first receipt. No live provider/service/model calls.
+- Independent review accepts 117 passes: the same 108 focused cases plus nine external controls. Its initial classname-count postcheck failed; exact test names reconcile all nine against unchanged XML without a rerun. Preserve that receipt and do not add repeated coverage.
+- Source/test sizes are 190/590 lines against 200/600 caps; all functions stay within 50 lines and classes within 200. Packaging and exact publication receipts are linked by the current RSI backlog. WSP 00/15/22/50/62/84/97/99; repair 13/P1, no child-quiescence or retained-learning proof.
+
 ## 2026-09-20: Bind prepared raw context before provider effects
 
 - WSP00/15/22/50/62/84/97/99; selected13/P1 repair extends five source/four test owners. No new module, skill or runtime policy.

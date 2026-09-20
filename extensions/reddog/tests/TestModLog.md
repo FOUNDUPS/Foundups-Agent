@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-20 - Hermes rejection-evidence package validation
+
+- One existing runtime member changed; the 1,400-member manifest and both digest pins now bind `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. Membership, API/version, package caps and safeguard assertions stay unchanged.
+- Manifest check/eight generator tests pass with two pytest configuration warnings; existing fast tier passes 15 groups and deterministic packaging passes 67 files/950,440 bytes. Test registry remains 1,651 entries/269 quarantined; exact-head closure is recorded separately in the RSI backlog.
+- Bridge evidence is fake-only: qualified 10-failure red baseline, 108 focused passes and 114 connected passes after an external guard correction. Independent 117 repeats the 108 and adds nine controls; do not sum repeats. No installation, service, provider or real detached-child stop was tested. WSP 15/22/50/62/84/97.
+
 ## 2026-09-20 - Prepared-context backend manifest binding
 
 - Updated five existing runtime member hashes; unchanged1,400-member manifest/API/version and extension behavior. Both digest pins now match `cbd1292a4857bf071ab2d8807114c7a03932f98f2e3dc1535bac4b09884469ef`.

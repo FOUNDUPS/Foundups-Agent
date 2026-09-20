@@ -1,4 +1,12 @@
-## 2026-09-20: Qualify Hermes lifecycle and parent-only stop evidence
+## 2026-09-20: Correct parent-only Hermes rejection evidence
+
+- WSP 00/15/22/50/62/84/97/99; C2/I4/D4/Impact3 = 13/P1. Existing stop and noncompleted/forbidden terminal rejection now report incomplete effect observation and unconfirmed abort. Best-effort stop/status, reasons, effects-possible flags and artifact withholding remain; successful acceptance is unchanged.
+- Existing fake-provider tests cover 24 stop variants and three terminal variants, including receipt rehydration and provider-effect propagation. Qualified red-v2 10 failed/98 passed becomes green 108 passed. The earlier misplaced assertion was restored before that baseline and remains separate fixture evidence.
+- Connected-v2 passes 114 after correcting only the external Windows extended-path containment guard; initial seven failures/107 passes are retained as harness evidence. Independent review accepts 117 passes, repeating the 108 focused cases plus nine external controls; do not sum repeats. No real provider, child, service or sandbox ran.
+- Manifest check/eight generator tests, 15 extension fast groups and the 67-file package pass; 1,400 members retain one changed source hash. Independent JUnit classname accounting was corrected against unchanged XML without rerunning tests. Exact evidence and publication are tracked in the current RSI backlog.
+- Conditional next action is R25 approval-owner planning at 13/P1 after closure and fresh re-observation. No detached cancellation/delivery repair, AmIBot build, WRE admission or retained learning is claimed.
+
+## 2026-09-20: Qualify Hermes lifecycle and parent-only stop evidence (historical)
 
 - WSP 00/15/22/50/62/84/97/99; six existing docs only. Exact pinned API session can enable background wake dispatch despite async_delivery=False; original parent terminal and detached completion queue have distinct ownership. Preserve event gates and unresolved full child-input/delivery contracts.
 - Parent interrupt/stop does not establish detached-child quiescence. Independently qualify a narrow correction to existing stop and non-completed terminal rejection receipt flags; no schema or consumer change. Actual source repair ranks 13/P1, tied with eligible R25 design and selected for verified receipt correctness.

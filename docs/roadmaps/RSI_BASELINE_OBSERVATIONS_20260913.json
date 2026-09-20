@@ -58241,5 +58241,1979 @@
       "open_peer_count": 95,
       "method": "Prior complete 128-merge accounting plus this verified own merge; peer heads refreshed unchanged. Interval evidence, not an atomic full-repository snapshot."
     }
+  },
+  "hermes_lifecycle_qualification_closed_20260920": {
+    "observation_id": "hermes_runs_lifecycle_compatibility_20260920",
+    "observed_at": "2026-09-20T09:37:41.525829+00:00",
+    "base_commit": "9909103ea4d38c6659438ea140c2f85b78a45686",
+    "authoring_head": "e22d063cd0662f1c04f86cd38e2290705d4332de",
+    "role": "coordinator",
+    "origin": "autonomous_trigger",
+    "principal_ref": "012",
+    "previous_observation": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#hermes_child_input_qualification_closed_20260920",
+    "status": "lifecycle_qualification_closed_pr1818",
+    "selected_task": "Hermes-runs-delegation-lifecycle-compatibility",
+    "selected_score": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 3,
+      "total": 14,
+      "priority": "P1"
+    },
+    "execution_packet": {
+      "schema": "0102_m2m_v1",
+      "ROLE": "verifier",
+      "ORIGIN": "internal_handoff",
+      "PRINCIPAL_REF": "012",
+      "L": "QA",
+      "S": "Plan-only compatibility qualification of the existing Hermes /v1/runs native-child lifecycle and result delivery; coordinator closure limited to six existing documents, worker evidence external.",
+      "M": "plan",
+      "T": "RSI-HERMES-RUNS-DELEGATION-LIFECYCLE-COMPATIBILITY-20260920",
+      "A": "Reconcile the current synchronous leaf/result acceptance contract with pinned upstream top-level background dispatch, finite-session wake/inline fallbacks and parent versus child terminal ownership. Qualify one smallest compatible existing-owner repair or state the exact producer/transport prerequisite; do not implement, weaken gates or activate runtime.",
+      "R": [
+        0,
+        15,
+        97,
+        99,
+        50,
+        62,
+        22,
+        11,
+        49
+      ],
+      "I": {
+        "allowed_paths": [
+          "ROADMAP.md",
+          "ModLog.md",
+          "docs/roadmaps/rsi_swarm_backlog.json",
+          "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+          "modules/communication/moltbot_bridge/ROADMAP.md",
+          "modules/communication/moltbot_bridge/ModLog.md"
+        ],
+        "read_only_dependencies": [
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_binding.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_contract.py",
+          "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py",
+          "modules/communication/moltbot_bridge/README.md",
+          "modules/communication/moltbot_bridge/INTERFACE.md",
+          "modules/communication/moltbot_bridge/tests/README.md",
+          "modules/communication/moltbot_bridge/tests/TestModLog.md"
+        ],
+        "denied_paths": [
+          "All repository paths except six enumerated coordinator closure documents; source/tests/config/registry/manifest/extension/runtime remain read-only.",
+          "No new modules, documents, skills, schemas, generic authority types, runtime grants or workflow implementations.",
+          "No provider/model/runtime/API service calls, WSL, installs/upgrades, database/credential access, live workers, retention, production changes, outreach or reward.",
+          "Protected FoundUp/YUMORI/eSingularity and Remote AutoPost work remain separately owned."
+        ],
+        "dependencies": [
+          "Close current child-input qualification and verify source/owner/base evidence anew. Preserve exact known input-telemetry limitation; do not repeatedly qualify the completed raw-context ingress repair.",
+          "Use official NousResearch/hermes-agent v2026.8.18 commit e624e9fde561e1add9388384012b295fde669ade whose package is0.20.4, with stored source hashes. Do not replace with legacy vendor0.9.0 or a moving latest release.",
+          "Current lifecycle assumes child completion before parent terminal and a successful delegate completion after child. Upstream _dispatch_delegate_task forces top-level background; declared background=false is not dispatch authority. Actual inline fallbacks must be traced before claiming universal failure."
+        ],
+        "upstream_evidence_policy": "Reuse the four immutable stored source files and exact retrieval receipts first. At most three additional directly referenced official source-file reads at the same commit may qualify async dispatch/session wake or actual tool invocation if not already stored. No broad crawl, repeated failed request, alternate version, executable import/install or runtime call; record precise unresolved producer boundary.",
+        "invariants": [
+          "M=plan and runtime_dispatchable=false; no source/test mutation or behavior probes in this packet. Pure packet codec validation is permitted.",
+          "Separate requested parent instructions, actual dispatcher arguments, child construction, background dispatch acceptance, session/result delivery, child completion and parent run completion. A completion handle or output echo is not finished child work.",
+          "Inspect both real outcomes: successful background dispatch and existing inline fallback (unsupported async without wake session, capacity/rejection). A source branch is not proof of observed live behavior.",
+          "Preserve raw-context ingress digest, approved redaction, canonical prompt identity, current model route, one-use authority, bounded effects and all event/cardinality/output/confinement controls. Do not set private upstream depth to impersonate a subagent or simply accept missing child completion.",
+          "Preserve intentional layered delegate progress and early error pairs until exact upstream dispatch/tool callback semantics justify a separately qualified compatibility change. No assumed one-tool-pair rule or invented tool-call identity.",
+          "Current /v1/runs producer drops complete args and does not include context/accepted child prompt; redacted stripped goal is partial telemetry. Do not substitute /v1/responses fields or goal-only equality for complete child input fidelity.",
+          "Compare the existing route/synchronous provider option, narrowly owned upstream producer/capability extension and explicit unsupported disposition. Any alternate endpoint changes lifecycle/confinement surface and requires exact owner qualification before implementation.",
+          "Trusted-provider content validation does not require inventing mandatory binary attestation. State its limited trust claim separately from stronger provenance and actual model-delivery evidence.",
+          "Return a source packet only when the exact supported producer/consumer/caller contract is complete; include existing tests, source and derived manifest/pins/docs plus WSP62 budgets. Do not inherit this planning score onto code.",
+          "Preserve all26 original packets and36 inherited score histories. Current closure adds two distinct scored planning rows: R25 approval-owner13/P1 eligible and Hermes lifecycle14/P1 selected; preserve all38 then-current rows. Do not relabel the completed R25 compatibility action. Keep R25 locally eligible without requiring live consent for design.",
+          "Only coordinator edits listed closure docs. Independent worker writes exact source-bound evidence externally; no source/runtime admission follows from plan completion."
+        ],
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "runtime_dispatchable": false
+      },
+      "O": [
+        "Exact pinned dispatch-to-delivery map, including top-level versus subagent, async-supported/wake/no-wake, accepted/rejected dispatch and run/session ownership.",
+        "Compatibility verdict for current /v1/runs verifier and declared parent instructions, distinguishing source-level conflicts from live failures and unresolved input fidelity.",
+        "Smallest existing-owner repair contract with precise fallback/order/timeout/cancel/result-oracle requirements, or explicit upstream producer/delivery dependency.",
+        "If implementation is qualified, one separately scored packet listing exact existing source/test/manifest/pins/docs owners and WSP62 budgets; otherwise no anticipatory code packet.",
+        "Six canonical closure docs with previous observation archival, preserved scores/packets and immediate WSP15/WSP97 re-observation."
+      ],
+      "F": [
+        "Unknown or moving upstream version/source",
+        "Missing exact dispatch/session/delivery semantics despite compatibility claim",
+        "Partial goal/preview/result metadata claimed as complete accepted child input",
+        "Weakening confinement/completion or changing private depth to bypass contract",
+        "Scope/runtime/credential/side-effect violation",
+        "Unqualified source implementation packet or fabricated live success/failure"
+      ]
+    },
+    "changes": [
+      "Pinned source trace distinguishes top-level background request, API session wake override, inline fallback and original parent run terminal from detached result queue.",
+      "Full successful background delivery, accepted child input and detached cancellation remain unqualified; preserve existing fail-closed event controls.",
+      "Smallest separately qualified correction: local stop and non-completed terminal rejection receipts must not infer complete effect observation from parent status alone; stop must not claim confirmed tree abort. No implementation in this plan sprint."
+    ],
+    "retrieval": {
+      "noise": "Use exact current packet/source and current doc sections, historical audit tails retained but not reread.",
+      "ordering": "WSP00/15/97; checkpoint/base/owner reconcile; existing governed lexical bundle and native lifecycle/event/session-delivery owners.",
+      "missing": "Four reused immutable sources plus three directly referenced pinned source files inspected. Detached completion queue consumer/wake remains outside this bounded qualification; no claim it returns results to original run.",
+      "freshness": "Lexical only; no semantic CURRENT claim. Source bindings independently checked against verified merge.",
+      "duplication": "Reuse lifecycle/event/provider/result/receipt/test owners. No new source, module, skill, document, schema or upstream fork."
+    },
+    "validation": {
+      "independent": {
+        "observed_utc": "2026-09-20T09:37:16.508677+00:00",
+        "reviewer": "/root/proposal_identity_review",
+        "head": "e22d063cd0662f1c04f86cd38e2290705d4332de",
+        "base": "9909103ea4d38c6659438ea140c2f85b78a45686",
+        "verdict": "ACCEPT_LIFECYCLE_QUALIFICATION_AND_TWO_BRANCH_EVIDENCE_REPAIR_CONTRACT",
+        "blockers": [],
+        "mode": "plan",
+        "runtime_dispatchable": false,
+        "source_implementation_qualified": true,
+        "qualification_boundary": "Only the future local two-branch rejection-evidence correction is source-ready. Full detached child delivery, complete input fidelity and descendant cleanup are not qualified implementations; no code is changed now.",
+        "findings": [
+          "Pinned API async_delivery=false does not force inline execution: the nonempty captured API origin chat ID enables wake-capable background dispatch. Accepted scheduling returns a handle and transfers child ownership; inline fallbacks exist, including after detachment. No universal runtime-failure claim.",
+          "Original parent run controls terminal and SSE close; separate async completion-queue producer is not same-run consumer proof. Exact consumer/wake linkage is outside exhausted3-read budget. Full child-input telemetry limitation remains unchanged.",
+          "Pinned API stop requests a parent hard interrupt and fire-and-forget process reaping. Parent active-child propagation and detached async registry are separate; registry cancellation methods exist, but none supplies a child quiescence acknowledgement in the inspected API stop contract.",
+          "_stop currently promotes both flags from accepted stop plus parent cancelled status; this cannot prove complete descendant effects or abort. Preserve requests and reject with both flags false.",
+          "Event verification accepts matching failed/cancelled parent terminals without successful child closure. The same-owner _terminal noncompleted/forbidden rejection inherits observed=True; explicitly set it false and retain abort=False.",
+          "Shared model result, canonical receipt hashing/rehydration, effect reader, pilot and main-facing bootstrap copy false flags without schema or caller changes. Direct main.py flag search found no owner; actual main-facing projection is reddog_main_resident_queue_serial_loop_bootstrap.py1626-1627.",
+          "Completed success and other error paths are outside the correction. Preserve intentional layered early tool-error traces and all existing identity, confinement and cardinality gates. Conservative reporting fixes evidence claims, not detached cleanup or native build readiness."
+        ],
+        "decision": {
+          "current_plan": "Complete source qualification with explicit delivery/input/cancellation prerequisites; final six-doc review pending.",
+          "next_selected": "Hermes-parent-only-rejection-effect-evidence",
+          "next_wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "next_scope_paths": 17,
+          "source_owners": 1,
+          "test_owners": 1,
+          "derived_files": 3,
+          "closure_docs": 12,
+          "inherited_histories": 38,
+          "after_new_source_row": 39,
+          "original_packets": 26
+        },
+        "checks": {
+          "all_local_map_source_blobs_and_LF_hashes_verified": 19,
+          "all7_stored_upstream_hashes_and_sizes_verified": 7,
+          "three_new_official_Git_blobs_verified": true,
+          "codec_roundtrip": "PASS",
+          "codec_bytes": 9734,
+          "repository_status_after_review": ""
+        },
+        "source_bindings": [
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+            "raw_sha256": "1223443c8dc798d27f38587b9f2646af4970fb9233c9a4e30c049f5fced20031",
+            "lf_sha256": "24584023ef71a092ea3f193537a7698153714dd7ce1b4e407f18716b08dd3d07",
+            "git_blob": "523129e31a91fe6ef67db23bc07c2ae2518a0d71",
+            "lines": 191,
+            "max_function_span": 50,
+            "max_class_span": 0
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+            "raw_sha256": "b027f782352e9c71bf0484f320d8543b7624c14a14dec7ded254d529c479067c",
+            "lf_sha256": "9c367fad3b1d9c0c1139ae96a7e118e173628a54e4753c91fc7fd9de6745d10b",
+            "git_blob": "ecf2ae1f0758ac3929c46a4de41faec6029547b5",
+            "lines": 169,
+            "max_function_span": 32,
+            "max_class_span": 0
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",
+            "raw_sha256": "9e2d473751908c7160514b317a9025974cf96dd1ca303d69471dac4e37de44b0",
+            "lf_sha256": "273dcb99c74e3cd94e7d79eae9a29097841c64e3025fa4e26b9e9fe6bafcbf63",
+            "git_blob": "37df7ea0accf91cc20a6db7819a8c03424c54774",
+            "lines": 108,
+            "max_function_span": 34,
+            "max_class_span": 43
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+            "raw_sha256": "8a172defddb5ccda62cbcd7c20b66a04535c4810cf81a07b928c8a4b4480c8a2",
+            "lf_sha256": "6a3425479c53074ff4f43630fe0f9eee849662e67e3b1157c3c8647687307ec4",
+            "git_blob": "4ab09c9650e3d9cb8714bbc52e6881959675f039",
+            "lines": 169,
+            "max_function_span": 31,
+            "max_class_span": 4
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+            "raw_sha256": "af670417d34bf09bf6f5ca4e26af3b1a4a0d2b49efccdd154568bb7c7c5bbc2c",
+            "lf_sha256": "e8d4db8f008fbad14964f17e36ff5044706c88025b3429bc383b0cf28b6b3d69",
+            "git_blob": "c87212b74f786333d787d20e1e2a472f4baecfdb",
+            "lines": 119,
+            "max_function_span": 36,
+            "max_class_span": 41
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_binding.py",
+            "raw_sha256": "a2e32f4b2fb4fbe3deb6666efbd8b3af9b2b9b873c8d4829246c9cd0705f6638",
+            "lf_sha256": "b3eeac73b46eedee626320595eb0cec4278e5a5f10bccf3caf77a0848c1b1dd3",
+            "git_blob": "021502e760e85b9c6336f8034286583f4a5077dd",
+            "lines": 173,
+            "max_function_span": 33,
+            "max_class_span": 0
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_contract.py",
+            "raw_sha256": "dcb70c4493d494f37853b31bb4f86abe7e23fff329ceeee81d0c7c1433cb5ce3",
+            "lf_sha256": "bce4c56a8976bdfe296ecc447d39d3f529786b69aa5e66676c6816910825f263",
+            "git_blob": "96b47d3271d83d70660469feab43261227b813ce",
+            "lines": 163,
+            "max_function_span": 40,
+            "max_class_span": 20
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py",
+            "raw_sha256": "31979a3ae28be230b3743603ddd415357882be9f84d2b9a82798bb0a39b32832",
+            "lf_sha256": "31979a3ae28be230b3743603ddd415357882be9f84d2b9a82798bb0a39b32832",
+            "git_blob": "b53e90f95877097b31f6c4957a4e086e01c05e3b",
+            "lines": 528,
+            "max_function_span": 26,
+            "max_class_span": 29
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/README.md",
+            "raw_sha256": "765a42263a57113d8d5894390f3f6c8109b1dc141ec12b62664eafe492d48263",
+            "lf_sha256": "765a42263a57113d8d5894390f3f6c8109b1dc141ec12b62664eafe492d48263",
+            "git_blob": "9aa4907300cfea93cd03e8e402f18dd06c4117cd",
+            "lines": 1051
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/INTERFACE.md",
+            "raw_sha256": "2a670f2d24fcc2fd579966202634cbbfe3ccc6dbbc0416927542f1764742ca2f",
+            "lf_sha256": "cdc8040a85bb4829d86aec2cfb5cc4fc4e4add6a10c203e9e2ebfb2a994c0b40",
+            "git_blob": "5cef193a84d59219acf639081b03ca78bc14af2c",
+            "lines": 1592
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/README.md",
+            "raw_sha256": "5729c3be91fe596997288e47535a768b206bf9f4001239556fe6571418bc9452",
+            "lf_sha256": "b6c38d18769a18cb5c48da16b95d40103dd73b0d6b36bcafa509d467b6684e48",
+            "git_blob": "07204ac4ead56a27f27738c6d7e5dfa989a36bcf",
+            "lines": 949
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/TestModLog.md",
+            "raw_sha256": "80295df1d2bae1ef0770041a2e4d3b978b3935e6610e6622b28a8c2a2c213e32",
+            "lf_sha256": "3f596e120906f126d06a41285f9a23ced4b3bfd8d982b3b0b1649c031ecea33d",
+            "git_blob": "5c30656bab31a25a0565195dad1bb8bc9c3867a4",
+            "lines": 3014
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_result.py",
+            "raw_sha256": "39b2cad9da91d26ee1336c8d2d8119bf0326509bcfa7c1d4e9316937cbf915e2",
+            "lf_sha256": "6a6804fdee8101ad37173af51232f0a08996c7d34f011fa84b9d1cd098b71008",
+            "git_blob": "4ee94ed078ffa062a049e7c6ce900b68389fa251",
+            "lines": 141,
+            "max_function_span": 40,
+            "max_class_span": 30
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py",
+            "raw_sha256": "f036576b5c59b10a37cd94325ff29a2198220dc0b665b9aaaadbb1fdd81ad561",
+            "lf_sha256": "05d2969dfb5d08b956d6656664dfdaf30f1c64524e281438de2e26dce8822231",
+            "git_blob": "ecd5385508720cdc0306ec8d48012c2fe5d9acc3",
+            "lines": 131,
+            "max_function_span": 31,
+            "max_class_span": 36
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
+            "raw_sha256": "d2cb0f3f6bf0c311cefee5a8c8963cd6bb7ff8aec403acfe8e3fbf96667f71bf",
+            "lf_sha256": "5e08d00f8b97ef82dc072593439e7f4378d8b49303ad20f69aa2d48c05f40c2f",
+            "git_blob": "1591a2bb1ea4d908c3c4bed33a5b22036c82dc53",
+            "lines": 216,
+            "max_function_span": 42,
+            "max_class_span": 6
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_resident_queue_bounded_worker_pilot_handler.py",
+            "raw_sha256": "5edf501f39808fe5b02f888e7413a3051c9a4903a6314b1f74a74dbae124851a",
+            "lf_sha256": "0df202c49db0bc75defb0af51ee49c2c177c0e0b23da14814840c3312a3a6e45",
+            "git_blob": "0af604022b442c8cef2598339c19563639389864",
+            "lines": 594,
+            "max_function_span": 46,
+            "max_class_span": 175
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+            "raw_sha256": "22076a9a891e411fb9c786ac7b1623773cee214dd6d312d0fd0a303045f8ccc4",
+            "lf_sha256": "84015db0596f626e713c383f13a43b0ad7e3cc9343fb2dbf324373cec413b8e8",
+            "git_blob": "2a67015f5ededb4442c55a4fda17695e9d7cc15f",
+            "lines": 1666,
+            "max_function_span": 459,
+            "max_class_span": 48
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py",
+            "raw_sha256": "63972ca3e8a4389de042499f751bdd527c6e47a3f3a95426e87a3a9286f327c1",
+            "lf_sha256": "e248650f000096f67867a1fbb332e0eeeae24d24087d506c6a80434440db8142",
+            "git_blob": "36675c8baa2715805a96920c3edb709c42c26edd",
+            "lines": 496,
+            "max_function_span": 50,
+            "max_class_span": 5
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py",
+            "raw_sha256": "2dcb97d8e1f043b74c8686ae68c1ac758a9123b9a88c5b9cfbf23245a11a8dad",
+            "lf_sha256": "d3c557a86b9b6e7e9f469d1c062890c7f981775caad9d405b64bad6c5d58fc65",
+            "git_blob": "032ce7ba995481436714068b4a1bb476418516ba",
+            "lines": 139,
+            "max_function_span": 21,
+            "max_class_span": 2
+          }
+        ],
+        "evidence_sha256": {
+          "preflight.json": "0d717219627b879892733f55fd9e8bd3afa827d6bb88343ff5184bff9083542c",
+          "api-session-lifecycle-map.json": "7cac79bdb518d9fe1137eb3baad9638b4842610cdae5eefd085c33007701c43c",
+          "local-lifecycle-map.json": "ea8072b2f17045c5de327d06f46a8551775098dd2cbeb74917ac2e81c34edca1",
+          "upstream-lifecycle-map.json": "5d7e9265390cb90e57f9a2066325d9c544e6a1e7dbd55821e42246fdf6bdcccc",
+          "additional-source-retrieval.json": "a0177a8af42e89787754215a3942bb3a363c65fa659b4a1a5bd1c6f460b3b61c"
+        },
+        "next_selection_sha256": "13333b4cf1c4517aa9cd062134e38cdaaf9ddbb4032ce0a87eae8f5f414a36cf",
+        "limitations": [
+          "Read-only static evidence, not behavior or runtime verification.",
+          "No current source/test edit, tests, probes, network/provider/service/key/database calls.",
+          "Pure canonical M2M codec import/roundtrip only; does not confer WRE authority.",
+          "Future17-path source scope is conditional; current6-doc plan scope remains unchanged.",
+          "Version-bound source map is not installed binary attestation or live run/cancellation observation.",
+          "No full upstream source or broad historical audit; selective stored line ranges plus independently hash-verified authored maps.",
+          "An initial inferred reddog_artifact_generation_cli.py lexical read path was absent; corrected scope uses actual effect consumer owners. No execution or repository mutation resulted."
+        ]
+      },
+      "next_selection": {
+        "observed_utc": "2026-09-20T09:37:16.508677+00:00",
+        "reviewer": "/root/proposal_identity_review",
+        "head": "e22d063cd0662f1c04f86cd38e2290705d4332de",
+        "base": "9909103ea4d38c6659438ea140c2f85b78a45686",
+        "verdict": "ACCEPT_QUALIFIED_NEXT_LOCAL_REJECTION_EVIDENCE_REPAIR",
+        "selected": "Hermes-parent-only-rejection-effect-evidence",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "conditional": true,
+        "condition": "Current six-doc planning closure and fresh source/peer/base admission checks must complete; current sprint still permits no source edit or runtime.",
+        "rationale": {
+          "complexity": "2: one small existing source owner, two rejected branches, one existing fake test owner and deterministic derived content pins; no new schema or runtime mechanism.",
+          "importance": "4: correct current externally visible evidence flags already copied into digest-checked receipts and effect reports.",
+          "deferability": "4: near-term provider qualification should not retain a now-proven source-level overclaim. No observed live outage or escaped child is asserted.",
+          "impact": "3: reusable truthful provider effect accounting across existing consumers; not full RSI, async lifecycle or child input fidelity.",
+          "tie_break": "Ties R25 owner-contract plan13/P1 but closes two exact qualified current defects through an existing representation and measurable fake-only oracles; R25 remains eligible, cache/recovery actual plans remain12/P2. Parent aggregate scores and runtime-blocked work do not rank as executable slices."
+        },
+        "comparison": [
+          {
+            "action": "R25 approval issuer/assertion/consumer contract",
+            "wsp15": {
+              "complexity": 3,
+              "importance": 4,
+              "deferability": 3,
+              "impact": 3,
+              "total": 13,
+              "priority": "P1"
+            },
+            "eligible": "local plan; no new live 012 permission needed for design",
+            "distinct_from": "Completed R25 compatibility qualification remains historical13/P1; implementation not scored."
+          },
+          {
+            "action": "OpenClaw wardrobe/scanner cache identity contract",
+            "wsp15": {
+              "complexity": 3,
+              "importance": 3,
+              "deferability": 3,
+              "impact": 3,
+              "total": 12,
+              "priority": "P2"
+            },
+            "eligible": "local plan",
+            "evidence": "skill_safety_guard.run_skill_scan359-394 always resolves configured manifest/scanner and enters owned scan; no reuse hit here. Whole-wardrobe/scanner identity needs qualification. No measured performance harm in current evidence. Broad15/P1 parent preserved."
+          },
+          {
+            "action": "AutoResearcher process-recovery oracle contract",
+            "wsp15": {
+              "complexity": 3,
+              "importance": 3,
+              "deferability": 3,
+              "impact": 3,
+              "total": 12,
+              "priority": "P2"
+            },
+            "eligible": "local plan",
+            "evidence": "_run_with_report444-479 finally rollback and _write_run_report482-488 same-directory replace address ordinary Python exceptions; no power/volume/process recovery oracle follows. Broader13/P1 parent preserved."
+          }
+        ],
+        "closed_current_action": {
+          "action": "Hermes-runs-delegation-lifecycle-compatibility",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3,
+            "total": 14,
+            "priority": "P1"
+          },
+          "disposition": "Read-only qualification complete after final doc acceptance; full child delivery remains an explicit prerequisite, not an unqualified implementation packet."
+        },
+        "next_packet": {
+          "schema": "0102_m2m_v1",
+          "ROLE": "worker",
+          "ORIGIN": "internal_handoff",
+          "PRINCIPAL_REF": "012",
+          "L": "A",
+          "S": "Conservative effect-evidence reporting in two existing Hermes lifecycle rejection branches; one source owner, one existing test owner, required derived manifest and two digest pins, and twelve exact closure documents.",
+          "M": "exec",
+          "T": "RSI-HERMES-PARENT-ONLY-REJECTION-EVIDENCE-20260920",
+          "A": "Keep parent-only stop and noncompleted/forbidden terminal rejection from claiming complete effect observation or descendant abort. Preserve best-effort transport, reasons, withheld artifacts, effects-possible reporting and all successful acceptance gates. Validate with existing fake-only tests and canonical receipt propagation before closure.",
+          "R": [
+            0,
+            15,
+            97,
+            99,
+            50,
+            62,
+            22,
+            11,
+            49
+          ],
+          "I": {
+            "allowed_paths": [
+              "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+              "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py",
+              "scripts/reddog_backend_manifest.json",
+              "extensions/reddog/backend_compatibility_constants.js",
+              "scripts/tests/test_generate_reddog_backend_manifest.py",
+              "ROADMAP.md",
+              "ModLog.md",
+              "docs/roadmaps/rsi_swarm_backlog.json",
+              "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+              "modules/communication/moltbot_bridge/README.md",
+              "modules/communication/moltbot_bridge/INTERFACE.md",
+              "modules/communication/moltbot_bridge/ROADMAP.md",
+              "modules/communication/moltbot_bridge/ModLog.md",
+              "modules/communication/moltbot_bridge/tests/README.md",
+              "modules/communication/moltbot_bridge/tests/TestModLog.md",
+              "extensions/reddog/ModLog.md",
+              "extensions/reddog/tests/TestModLog.md"
+            ],
+            "read_only_dependencies": [
+              "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+              "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",
+              "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+              "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+              "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_binding.py",
+              "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_contract.py",
+              "modules/communication/moltbot_bridge/src/reddog_artifact_generation_result.py",
+              "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py",
+              "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
+              "modules/communication/moltbot_bridge/src/reddog_resident_queue_bounded_worker_pilot_handler.py",
+              "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+              "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py",
+              "modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py",
+              "scripts/generate_reddog_backend_manifest.py",
+              "prompt/swarm/m2m_compiler.py"
+            ],
+            "denied_paths": [
+              "Every repository path outside the seventeen explicit allowed_paths; all other source/test/registry/workflow/config files remain read-only.",
+              "extensions/reddog/** except backend_compatibility_constants.js, ModLog.md and tests/TestModLog.md; no extension behavior, version, publishing or dependency change.",
+              "Protected FoundUp/YUMORI/eSingularity and separately owned Remote AutoPost work; no unrelated cleanup or peer worktree modification.",
+              "No new module, test file, document, skill, schema, cancellation mechanism, endpoint, model/provider routing or authority type.",
+              "No live provider/model/transport/network execution, API key/credential/production DB access, WSL, services, installs/upgrades, worker/runtime admission, retention, reward or deployment."
+            ],
+            "dependencies": [
+              "Close the current 14/P1 lifecycle qualification, then freshly re-observe WSP15/WSP97, canonical source hashes, peer ownership and clean isolated branch before any source execution.",
+              "Reuse exact pinned e624e9fde561e1add9388384012b295fde669ade source qualification and shared existing false/false receipt representation; no additional upstream fetch or caller redesign is needed for this correction.",
+              "Required backend content manifest and both digest pins must be generated/updated together and validated against the candidate source; do not repeat the prior stale-manifest omission."
+            ],
+            "invariants": [
+              "This is a separately scored ordinary local source sprint. M=exec does not create WRE/AgentDB admission or runtime dispatch authority; runtime_dispatchable remains false.",
+              "_stop must preserve its best-effort POST /v1/runs/{run_id}/stop then status-read behavior and existing exception behavior; its rejected result must always use observed=False and abort=False, independent of parent acknowledgement/status.",
+              "The existing _terminal noncompleted/forbidden rejection branch must retain FAIL_HERMES_RUN_REJECTED, invoked=True and abort=False while explicitly setting observed=False. No global reject_hermes or result defaults change.",
+              "Both paths preserve network/invocation/Hermes dispatch/external-side-effects-possible=true, original reason/digest derivation, rejection and empty artifacts. Flags communicate lack of proof; they do not certify live cleanup or establish a new cancellation guarantee.",
+              "Do not change completed success, other error branches, event order/cardinality/output identity, intentional early paired tool errors, confinement, raw-context/canonical-prompt binding, approved redaction, one-use authority, signed model route or timeout semantics.",
+              "No parent status ID validation, retry, new endpoint, private-depth/session workaround, broader deadline algorithm, accepted-input identity, async consumer or cancellation registry wiring. Wrong-ID test data only proves no false confidence under current behavior.",
+              "Build and rehydrate actual rejected generation receipts and inspect existing effect-reader/pilot projection with disposable local data. Both false values must survive existing receipt ID/semantic validation; no source change outside the lifecycle owner.",
+              "Use existing fake transport tests only; no real service/provider/API key invocation. Independent reviewers must qualify source plus targeted tests before promotion. Ordinary-success control remains a regression check, not new native-runtime certification.",
+              "Generator output may change only this lifecycle member content identity and consequent derived digest/pins; preserve backend membership and extension behavior/version. Existing canonical test registry check only; no registry mutation is authorized.",
+              "Preserve all26 original packets and all39 score histories existing after this qualification closure (38 inherited plus this new repair). Archive the previous current_observation verbatim; preserve historical baseline objects and separate closed14/P1 plan from this13/P1 source action.",
+              "Source/test owners act only within assigned paths. Coordinator integrates generated files and required canonical closure; independent verification remains separate. After closure immediately re-observe and rescore instead of automatically selecting the old queue successor."
+            ],
+            "wsp62": {
+              "source_current_lines": 191,
+              "source_max_lines": 200,
+              "source_growth_policy": "Prefer no growth; at most nine lines only for the two explicit evidence qualifications.",
+              "test_current_lines": 528,
+              "test_max_lines": 600,
+              "test_growth_policy": "Existing oversized test owner; at most72 additional lines for parameterized branch/transport and receipt oracles, no duplicate test owner.",
+              "function_max_lines": 50,
+              "class_max_lines": 200,
+              "README_current_lines": 1051,
+              "INTERFACE_current_lines": 1592,
+              "oversized_docs_policy": "Replace current behavior wording without net growth in module README/INTERFACE; existing append-only history/structured evidence exemptions remain, no new broad exemption."
+            },
+            "wsp15": {
+              "complexity": 2,
+              "importance": 4,
+              "deferability": 4,
+              "impact": 3,
+              "total": 13,
+              "priority": "P1"
+            },
+            "runtime_dispatchable": false
+          },
+          "O": [
+            "Minimal two-branch lifecycle correction in the existing source owner; no successful acceptance or runtime behavior expansion.",
+            "Red before green: parent-cancelled stop rejects with false/false; drive approval, invalid status and timeout stop reasons. Parameterize accepted/nonaccepted stop, cancelled/running/failed/malformed/wrong-ID status and POST/GET exceptions; none may produce true confidence.",
+            "Matching failed and cancelled terminal-event fixtures without child closure must reject with incomplete observation. Cover the existing forbidden terminal guard without weakening the event verifier.",
+            "Actual canonical receipt roundtrip and existing effect reader/pilot false-value projection; preserve rejection, reason/digest semantics, no artifact, and all invocation/effect fields. Existing success/layered-progress and confinement negatives remain unchanged.",
+            "Independent fake-only source/test acceptance with exact blobs and WSP62 line/AST evidence; required connected result/receipt/bootstrap checks only.",
+            "Manifest generation --check, exact digest-pin test, existing extension fast/package checks and test-registry --check; distinguish local from any later exact-head hosted evidence.",
+            "Required twelve existing docs record narrow local correction and unresolved full input/delivery/quiescence limitations, then WSP15/WSP97 re-observation with preserved archive,26 packets and39 histories."
+          ],
+          "F": [
+            "Current qualification not closed or stale source/peer/base ownership",
+            "Scope, runtime, provider, credential or production side effect",
+            "Parent-only evidence still promotes complete observation/abort in either selected branch",
+            "Other successful/rejection behavior, schema, authority, endpoint or cancellation semantics changed",
+            "Failed red/green, receipt projection, independent review, line budget or generated manifest/pin validation",
+            "Missing exact evidence or claim of live child cleanup/native build success"
+          ]
+        },
+        "codec": {
+          "actual_module": "prompt.swarm.m2m_compiler",
+          "roundtrip": "PASS",
+          "bytes": 9734,
+          "sha256": "22eea1c23334be3e7153f05df41538f805caa4fd9532ef1674e9f93b6c2ce56b",
+          "admission": false
+        },
+        "evidence_sha256": {
+          "preflight.json": "0d717219627b879892733f55fd9e8bd3afa827d6bb88343ff5184bff9083542c",
+          "api-session-lifecycle-map.json": "7cac79bdb518d9fe1137eb3baad9638b4842610cdae5eefd085c33007701c43c",
+          "local-lifecycle-map.json": "ea8072b2f17045c5de327d06f46a8551775098dd2cbeb74917ac2e81c34edca1",
+          "upstream-lifecycle-map.json": "5d7e9265390cb90e57f9a2066325d9c544e6a1e7dbd55821e42246fdf6bdcccc",
+          "additional-source-retrieval.json": "a0177a8af42e89787754215a3942bb3a363c65fa659b4a1a5bd1c6f460b3b61c"
+        },
+        "source_bindings": [
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+            "raw_sha256": "1223443c8dc798d27f38587b9f2646af4970fb9233c9a4e30c049f5fced20031",
+            "lf_sha256": "24584023ef71a092ea3f193537a7698153714dd7ce1b4e407f18716b08dd3d07",
+            "git_blob": "523129e31a91fe6ef67db23bc07c2ae2518a0d71",
+            "lines": 191,
+            "max_function_span": 50,
+            "max_class_span": 0
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+            "raw_sha256": "b027f782352e9c71bf0484f320d8543b7624c14a14dec7ded254d529c479067c",
+            "lf_sha256": "9c367fad3b1d9c0c1139ae96a7e118e173628a54e4753c91fc7fd9de6745d10b",
+            "git_blob": "ecf2ae1f0758ac3929c46a4de41faec6029547b5",
+            "lines": 169,
+            "max_function_span": 32,
+            "max_class_span": 0
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",
+            "raw_sha256": "9e2d473751908c7160514b317a9025974cf96dd1ca303d69471dac4e37de44b0",
+            "lf_sha256": "273dcb99c74e3cd94e7d79eae9a29097841c64e3025fa4e26b9e9fe6bafcbf63",
+            "git_blob": "37df7ea0accf91cc20a6db7819a8c03424c54774",
+            "lines": 108,
+            "max_function_span": 34,
+            "max_class_span": 43
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+            "raw_sha256": "8a172defddb5ccda62cbcd7c20b66a04535c4810cf81a07b928c8a4b4480c8a2",
+            "lf_sha256": "6a3425479c53074ff4f43630fe0f9eee849662e67e3b1157c3c8647687307ec4",
+            "git_blob": "4ab09c9650e3d9cb8714bbc52e6881959675f039",
+            "lines": 169,
+            "max_function_span": 31,
+            "max_class_span": 4
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+            "raw_sha256": "af670417d34bf09bf6f5ca4e26af3b1a4a0d2b49efccdd154568bb7c7c5bbc2c",
+            "lf_sha256": "e8d4db8f008fbad14964f17e36ff5044706c88025b3429bc383b0cf28b6b3d69",
+            "git_blob": "c87212b74f786333d787d20e1e2a472f4baecfdb",
+            "lines": 119,
+            "max_function_span": 36,
+            "max_class_span": 41
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_binding.py",
+            "raw_sha256": "a2e32f4b2fb4fbe3deb6666efbd8b3af9b2b9b873c8d4829246c9cd0705f6638",
+            "lf_sha256": "b3eeac73b46eedee626320595eb0cec4278e5a5f10bccf3caf77a0848c1b1dd3",
+            "git_blob": "021502e760e85b9c6336f8034286583f4a5077dd",
+            "lines": 173,
+            "max_function_span": 33,
+            "max_class_span": 0
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_contract.py",
+            "raw_sha256": "dcb70c4493d494f37853b31bb4f86abe7e23fff329ceeee81d0c7c1433cb5ce3",
+            "lf_sha256": "bce4c56a8976bdfe296ecc447d39d3f529786b69aa5e66676c6816910825f263",
+            "git_blob": "96b47d3271d83d70660469feab43261227b813ce",
+            "lines": 163,
+            "max_function_span": 40,
+            "max_class_span": 20
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py",
+            "raw_sha256": "31979a3ae28be230b3743603ddd415357882be9f84d2b9a82798bb0a39b32832",
+            "lf_sha256": "31979a3ae28be230b3743603ddd415357882be9f84d2b9a82798bb0a39b32832",
+            "git_blob": "b53e90f95877097b31f6c4957a4e086e01c05e3b",
+            "lines": 528,
+            "max_function_span": 26,
+            "max_class_span": 29
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/README.md",
+            "raw_sha256": "765a42263a57113d8d5894390f3f6c8109b1dc141ec12b62664eafe492d48263",
+            "lf_sha256": "765a42263a57113d8d5894390f3f6c8109b1dc141ec12b62664eafe492d48263",
+            "git_blob": "9aa4907300cfea93cd03e8e402f18dd06c4117cd",
+            "lines": 1051
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/INTERFACE.md",
+            "raw_sha256": "2a670f2d24fcc2fd579966202634cbbfe3ccc6dbbc0416927542f1764742ca2f",
+            "lf_sha256": "cdc8040a85bb4829d86aec2cfb5cc4fc4e4add6a10c203e9e2ebfb2a994c0b40",
+            "git_blob": "5cef193a84d59219acf639081b03ca78bc14af2c",
+            "lines": 1592
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/README.md",
+            "raw_sha256": "5729c3be91fe596997288e47535a768b206bf9f4001239556fe6571418bc9452",
+            "lf_sha256": "b6c38d18769a18cb5c48da16b95d40103dd73b0d6b36bcafa509d467b6684e48",
+            "git_blob": "07204ac4ead56a27f27738c6d7e5dfa989a36bcf",
+            "lines": 949
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/TestModLog.md",
+            "raw_sha256": "80295df1d2bae1ef0770041a2e4d3b978b3935e6610e6622b28a8c2a2c213e32",
+            "lf_sha256": "3f596e120906f126d06a41285f9a23ced4b3bfd8d982b3b0b1649c031ecea33d",
+            "git_blob": "5c30656bab31a25a0565195dad1bb8bc9c3867a4",
+            "lines": 3014
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_result.py",
+            "raw_sha256": "39b2cad9da91d26ee1336c8d2d8119bf0326509bcfa7c1d4e9316937cbf915e2",
+            "lf_sha256": "6a6804fdee8101ad37173af51232f0a08996c7d34f011fa84b9d1cd098b71008",
+            "git_blob": "4ee94ed078ffa062a049e7c6ce900b68389fa251",
+            "lines": 141,
+            "max_function_span": 40,
+            "max_class_span": 30
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py",
+            "raw_sha256": "f036576b5c59b10a37cd94325ff29a2198220dc0b665b9aaaadbb1fdd81ad561",
+            "lf_sha256": "05d2969dfb5d08b956d6656664dfdaf30f1c64524e281438de2e26dce8822231",
+            "git_blob": "ecd5385508720cdc0306ec8d48012c2fe5d9acc3",
+            "lines": 131,
+            "max_function_span": 31,
+            "max_class_span": 36
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
+            "raw_sha256": "d2cb0f3f6bf0c311cefee5a8c8963cd6bb7ff8aec403acfe8e3fbf96667f71bf",
+            "lf_sha256": "5e08d00f8b97ef82dc072593439e7f4378d8b49303ad20f69aa2d48c05f40c2f",
+            "git_blob": "1591a2bb1ea4d908c3c4bed33a5b22036c82dc53",
+            "lines": 216,
+            "max_function_span": 42,
+            "max_class_span": 6
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_resident_queue_bounded_worker_pilot_handler.py",
+            "raw_sha256": "5edf501f39808fe5b02f888e7413a3051c9a4903a6314b1f74a74dbae124851a",
+            "lf_sha256": "0df202c49db0bc75defb0af51ee49c2c177c0e0b23da14814840c3312a3a6e45",
+            "git_blob": "0af604022b442c8cef2598339c19563639389864",
+            "lines": 594,
+            "max_function_span": 46,
+            "max_class_span": 175
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+            "raw_sha256": "22076a9a891e411fb9c786ac7b1623773cee214dd6d312d0fd0a303045f8ccc4",
+            "lf_sha256": "84015db0596f626e713c383f13a43b0ad7e3cc9343fb2dbf324373cec413b8e8",
+            "git_blob": "2a67015f5ededb4442c55a4fda17695e9d7cc15f",
+            "lines": 1666,
+            "max_function_span": 459,
+            "max_class_span": 48
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py",
+            "raw_sha256": "63972ca3e8a4389de042499f751bdd527c6e47a3f3a95426e87a3a9286f327c1",
+            "lf_sha256": "e248650f000096f67867a1fbb332e0eeeae24d24087d506c6a80434440db8142",
+            "git_blob": "36675c8baa2715805a96920c3edb709c42c26edd",
+            "lines": 496,
+            "max_function_span": 50,
+            "max_class_span": 5
+          },
+          {
+            "path": "modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py",
+            "raw_sha256": "2dcb97d8e1f043b74c8686ae68c1ac758a9123b9a88c5b9cfbf23245a11a8dad",
+            "lf_sha256": "d3c557a86b9b6e7e9f469d1c062890c7f981775caad9d405b64bad6c5d58fc65",
+            "git_blob": "032ce7ba995481436714068b4a1bb476418516ba",
+            "lines": 139,
+            "max_function_span": 21,
+            "max_class_span": 2
+          }
+        ],
+        "limits": [
+          "Read-only static evidence, not behavior or runtime verification.",
+          "No current source/test edit, tests, probes, network/provider/service/key/database calls.",
+          "Pure canonical M2M codec import/roundtrip only; does not confer WRE authority.",
+          "Future17-path source scope is conditional; current6-doc plan scope remains unchanged."
+        ]
+      },
+      "source_pin": "e624e9fde561e1add9388384012b295fde669ade",
+      "source_receipts": [
+        "api-session-lifecycle-map.json",
+        "local-lifecycle-map.json",
+        "upstream-lifecycle-map.json"
+      ],
+      "additional_source_reads": 3,
+      "additional_read_budget": 3,
+      "source_tests_run": 0,
+      "synthetic_probes_run": 0,
+      "runtime_provider_calls": 0,
+      "source_write": false,
+      "postmerge_pr1817": [
+        {
+          "id": 35500540986,
+          "name": "CI",
+          "head_sha": "9909103ea4d38c6659438ea140c2f85b78a45686",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 35500540668,
+          "name": "Push on main",
+          "head_sha": "9909103ea4d38c6659438ea140c2f85b78a45686",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "limits": [
+        "Source branches are not observed live failures or installed-runtime attestation.",
+        "A successful dispatch handle, child status label or output echo is not full input/task fidelity.",
+        "Background queue consumer and wake delivery are not qualified. Existing same-run event and cardinality gates remain unchanged.",
+        "Conservative receipt correction reports uncertainty; it does not stop detached work, fix timeout bounds or certify successful paths.",
+        "No AmIBot registration/build, WRE admission, promotion, deployment or retained RSI result."
+      ],
+      "remote": "PR1818 merged after all ten exact-head checks passed; all six independently reviewed document blobs and merge tree verified. Later main workflows recorded separately."
+    },
+    "effort_cost": {
+      "repo_docs": 6,
+      "repo_source_changes": 0,
+      "repo_test_changes": 0,
+      "new_repo_files": 0,
+      "live_provider_calls": 0,
+      "tokens_cost": "Not measured. Source inspection and independent review helpers are not WRE-admitted workers."
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260920-rsi-hermes-lifecycle-1821",
+    "evidence_sha256": {
+      "preflight.json": "0d717219627b879892733f55fd9e8bd3afa827d6bb88343ff5184bff9083542c",
+      "gate.json": "670f5021b15e536552310c1459fe7406394814c2b26eab0cd92d2a1ceb186743",
+      "holo-query.json": "c5d8b9239b13fd541f8e0142419534ae39a69dff8cb932fda857b17efe404150",
+      "pr1817.json": "b046cd17c28417081469c14892fbdd5a954ca1dbed5ad243e48991cd43c9802d",
+      "postmerge-runs.json": "f2d1577d2b7104bd0dfb5c1b1db28f31f9c9a42ef4deb74cb8ca3e3624445567",
+      "additional-source-retrieval.json": "a0177a8af42e89787754215a3942bb3a363c65fa659b4a1a5bd1c6f460b3b61c",
+      "api-session-lifecycle-map.json": "7cac79bdb518d9fe1137eb3baad9638b4842610cdae5eefd085c33007701c43c",
+      "local-lifecycle-map.json": "ea8072b2f17045c5de327d06f46a8551775098dd2cbeb74917ac2e81c34edca1",
+      "upstream-lifecycle-map.json": "5d7e9265390cb90e57f9a2066325d9c544e6a1e7dbd55821e42246fdf6bdcccc",
+      "qualification-review.json": "f45ab2e48645ed37f3d8d8e0db68d1a55efb6cdddd2bf8a5cf7e7418e4be8122",
+      "next-selection.json": "13333b4cf1c4517aa9cd062134e38cdaaf9ddbb4032ce0a87eae8f5f414a36cf",
+      "final-validation.json": "d4ccf646436ca03a734e3a4d2500a9853bd409f078bb92b0e329feb63fd95a48",
+      "final-review.json": "f801cfc64d6924e0f7c00e9030ed6493acc53e7dd5eb0ea880f98a0d52e22ced",
+      "publication-readiness.json": "2e40fb9e507edaf0b81825d510aaf936924db972c1743fd1414caa67aa85aca4",
+      "closeout.json": "1eaa4b2873db990cc0f035410a34c75f0c74a1679d00dcb25d9581c17495272b"
+    },
+    "post_sprint_reobservation": {
+      "observed_at": "2026-09-20T09:45:29.625419+00:00",
+      "base_commit": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+      "ranked_candidates": [
+        {
+          "task": "RedDog-extension-decomposition",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 20,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "independent-execution-verification-promotion",
+          "dimensions": {
+            "complexity": 5,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Independent runtime admission absent",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "current-semantic-retrieval",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Prior authority-root/head mismatch remains unresolved. This sprint requested a lexical owner bundle only: UNKNOWN freshness/index gap, not a newly repeated semantic failure. Preserve the existing maintenance owner; no reindex.",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "RedDog-backend-closure-consolidation",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "RedDog-conversation-durable-adapters",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 5
+          },
+          "score": 19,
+          "priority": "P0",
+          "state": "external_owner",
+          "evidence": [
+            "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
+          ],
+          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "integrated-mcp-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "wre-openclaw-hermes-worker",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current signed job/model/runtime admission absent",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "chroma-deployment",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "Current deployment owner and runtime qualification",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "security_dependency": "Current Dependabot alerts322/286 for direct chromadb in holo_index/requirements.txt; first_patched_version is null. Exposure/mitigation needs existing owner evidence; no blind runtime change.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "AmIBot-package-admission",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 5,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "blocked",
+          "evidence": [
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+          ],
+          "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "FoundUp-genesis-conversation-lineage",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "commander_data_handoff_closed_remaining_public_entitlement_unqualified",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_dae.py:195",
+            "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:962",
+            "modules/ai_intelligence/ai_overseer/tests/test_intake_packet_builder.py:155",
+            "next-contract-independent-review.json",
+            "genesis-next-source-overlap.json"
+          ],
+          "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "Dependency-security-reconciliation",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 5,
+            "deferability": 4,
+            "impact": 5
+          },
+          "score": 17,
+          "priority": "P0",
+          "state": "partially_triaged_existing_owner_dependencies",
+          "evidence": [
+            "dependabot-open-pages.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1762",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1526"
+          ],
+          "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding.",
+          "why_score": "Existing security/dependency owners remain; no new exposure proof changes scope. The equally17/P0 typed genesis gap has a concrete local static witness and existing fixtures; continue security owner triage separately.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "R11-B-memory-acceptance-contract",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 5,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "partial_transaction_dependency",
+          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "authenticated-response-read",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "blocked",
+          "next_step": "012 reader-policy question remains unanswered",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "AmIBot-registry-prerequisite",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 5,
+            "impact": 4
+          },
+          "score": 16,
+          "priority": "P0",
+          "state": "candidate_verified_blocked_external_ci",
+          "evidence": [
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+          ],
+          "next_step": "Fresh1751 head04ef322f remains draft, CONFLICTING and validateFAILURE. Preserve permanent detect_ai lineage and route/project owner; no main registration or build dispatch claimed.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "M2M-canonical-envelope-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "parent_partial_context_closed_child_input_and_lifecycle_gaps",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/reddog_architect_fix_promotion_profile.py:42",
+            "modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py:655",
+            "next-profile-boundary-probes.json",
+            "modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py:389",
+            "modules/communication/moltbot_bridge/src/reddog_backend_architect_queue_candidate.py:94"
+          ],
+          "next_step": "Raw prepared-context repair is closed. Preserve full child-input and detached-delivery gaps; separately qualified stop-receipt correction does not close them.",
+          "closed_scope": [
+            "Canonical packet/profile/signing/provider fixture handoff merged through PR1761; explicit seed API in1763.",
+            "Explicit proposal plan, seed lineage and direct promotion consistency merged in1794/1795/1796.",
+            "Actual producer/result/persistence canonical child composition:617connected tests,86overlapping independent tests+72boundary assertions.",
+            "PR1797 merged as6556a0d14 after10passing exact-head checks; reviewed tree identical.",
+            "PR1798 omitted-plan bootstrap selection merged;638connected,43overlapping independent tests and69boundary cases/191assertions; exact reviewed tree."
+          ],
+          "remaining_scope": [
+            "Define and independently qualify expected context/child-input fidelity where current provider contract is deliberately prompt-only.",
+            "Live job/model/runtime admission and independent retained benefit remain separately blocked."
+          ],
+          "effort": "One existing producer/consumer seam after contract retrieval.",
+          "cost": "Deterministic fixtures first; provider cost remains unmeasured.",
+          "verification_burden": "Independent exact-field/semantic preservation and scope failures before admission.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "score_reconciliation": "Historical18/P0 covered now-closed concrete serialization/seed handoff prerequisites. Residual local contract is15/P1; do not inherit18 automatically.",
+          "fresh_disposition": "Remaining15/P1 is a broader provider/full-context fidelity contract, with no new demonstrated incompatibility or qualified source patch.",
+          "retain_score": 15,
+          "retain_history": true,
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "OpenClaw-content-bound-cache-qualification",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "eligible_contract_qualification_current_rescan_preserved",
+          "next_step": "Qualify whole-wardrobe membership/content/manifest plus scanner executable/version/config identity before reusing any success. Reuse WRE reservation/fingerprint patterns only after proving their single-bundle assumptions. Current always-rescan is deliberate; live latency is a separate dependency, not a blocker to local planning.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Remaining15/P1 contract still requires whole-wardrobe/scanner ownership; live measurement unadmitted, no qualified next repair.",
+          "retain_score": 15,
+          "retain_history": true,
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "AmIBot-public-route-contract-drift",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "outstanding_route_owner_reconciliation_required",
+          "evidence": [
+            "public/member/tests/test_route_contract_bridge.py"
+          ],
+          "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "FoundUp-genesis-wardrobe-admission",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "partial_dependency",
+          "evidence": [
+            "modules/ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md",
+            "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
+          ],
+          "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "protected-foundup-work",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "external",
+          "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. Registry PR1751 triggers existing eSingularity assertions; treat this as an external owner dependency.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "PatternMemory-worker-lifecycle-integration",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "partial_daemon_counter_lifetime_closed_pr1810",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:_get_pattern_memory",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
+          ],
+          "next_step": "Daemon per-counter lifetime closed; other consumers, actual shutdown/restart, transaction acceptance and retained benefit remain separately unqualified.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Parent partially advanced by daemon slice. Master SQLite memory is also shared with SkillSelector and handles outcomes/A-B records; remaining contract cannot simply reuse daemon counter repair. No new source-qualified handoff witness in this selection.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "AmIBot-public-route-identity",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "blocked_route_owner",
+          "evidence": [
+            "public/f/index.html:980",
+            "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
+          ],
+          "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "FoundUp-validation-fixture-reconciliation",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "closed_pr1801",
+          "evidence": [
+            "baseline-debt.xml",
+            "connected-v2.xml"
+          ],
+          "paths": [
+            "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
+            "modules/communication/moltbot_bridge/tests/test_e2e_foundup_job_seam.py"
+          ],
+          "rationale": "Fresh4fail/197pass reproduction and prior independent14/P1 scope; same current FoundUp validation matrix, two explicit acceptance sets. Higher aggregate contract estimates have no qualified concrete source repair; parent estimate is not executable priority.",
+          "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source.",
+          "review": "next-fixture-contract-review.json",
+          "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "Hermes-runs-delegation-lifecycle-compatibility",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "lifecycle_qualification_closed_pr1818_delivery_gap_remains",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+            "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+            "current_observation.validation.upstream",
+            "current_observation.validation.next_selection"
+          ],
+          "next_step": "Preserve input/result/cancellation gaps and existing event gates. Qualify explicit same-run synchronous/cancel/result producer support before changing transport or successful-result acceptance.",
+          "blocker": "Pinned background completion is persisted and published to a separate process completion queue. Consumer/wake delivery into a new turn or the original run, and child-quiescence guarantees, remain unqualified. Parent instructions do not force synchronous execution.",
+          "wsp97_action": "Reuse current provider lifecycle/event/transport owners and pinned sources. Do not force prose into runtime policy or weaken event confinement.",
+          "effort": "Bounded source/data-flow compatibility review; no install, runtime or source mutation.",
+          "cost": "Reuse pinned evidence; bounded missing-source retrieval only as next packet permits.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Qualification closed; preserve full detached delivery, input and cancellation gaps. Only separately qualified parent-only rejection evidence correction is next.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "R25-A consented local daily-work proposal",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "compatibility_qualification_complete_source_contract_blocked",
+          "next_step": "Choose and independently qualify an explicit feedback approval assertion, issuer and consumer under existing authenticated conversation/record owners. No exact source patch or new implementation score is qualified.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "evidence": [
+            "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20",
+            "r25-disclosure-contract-review.json",
+            "r25-contract-replay.json"
+          ],
+          "wsp97_action": "Close this13/P1 planning action. Preserve v1 IDs/bytes and architect-only disclosure; no new schema/source/consent engine. Keep the permission assertion/issuance/consumption gap explicit.",
+          "score_reconciliation": "Independent follow-on assessment: moderate contract mapping3, critical consent separation4, moderate urgency3, significant internal benefit3. Historical parent15/P1 is not inherited.",
+          "score_scope": "Completed compatibility qualification only;13 is not the score of the unqualified source remainder.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "auto-researcher-process-durability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible_contract_qualification_after_currently_selected_seam",
+          "next_step": "Use existing _run_with_report/_write_run_report, scratch allocation and rollback owners to specify process-interruption/recovery identity and independent recovery oracle. Missing source patch alone does not block planning; power/volume guarantees must not be inferred from Python finally or atomic replace.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Remains eligible-later at13/P1; process/volume recovery and oracle contract are broader than existing R19 discrepancy; no accepted next source slice.",
+          "retain_score": 13,
+          "retain_history": true,
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "R19-redteam-artifact-delivery",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "bounded_delivery_repair_closed_pr1814",
+          "evidence": [
+            ".github/workflows/ci.yml:168",
+            "main-ci-artifacts.json",
+            "redteam-observation-gap.json"
+          ],
+          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step.",
+          "wsp97_action": "Reuse existing CI observation documentation and redteam test owner; preserve report-only policy and separate creation/selection/upload/listing/download evidence.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
+          "blocker": "None in two-report delivery scope; observation-window stability and blocking activation remain separate.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "WSL-advisory-cold-start-contract",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "closed_pr1805",
+          "evidence": [
+            "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
+            "modules/infrastructure/dependency_launcher/tests/test_wsl_agent_runtime.py",
+            "modules/infrastructure/dependency_launcher/INTERFACE.md",
+            "resumed-runtime-audit.json"
+          ],
+          "blocker": "None within completed planning scope; source repair is separately scored.",
+          "wsp97_action": "Reuse existing dependency launcher probe/test and intentional activation owners. Qualify no-start advisory versus intentionally started execution without inventing an effect-use lease.",
+          "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "effort_cost": "One bounded source/contract/test-seam qualification; no provider cost or runtime activation.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "DaemonSelfAudit-PatternMemory-lifecycle-contract",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "closed_pr1807",
+          "evidence": [
+            "modules/infrastructure/wre_core/ROADMAP.md#daemon-counter-memory-lifetime--2026-09-20",
+            "witness-review.json",
+            "contract-review.json"
+          ],
+          "blocker": "None in closed qualification; separately qualified source repair closed in PR1810. Other lifecycle concerns require their own evidence.",
+          "next_step": "No remaining work in the closed qualifier. Preserve accepted defect evidence and execute only the separately scored source packet after fresh observation.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "effort_cost": "One existing owner/test pair contract qualification with injected threads/storage; no model/provider cost or service start.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "DaemonSelfAudit-per-counter-memory-ownership",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "closed_pr1810",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:744",
+            "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py:758",
+            "modules/communication/moltbot_bridge/src/openclaw_supervisor.py:2237",
+            "modules/communication/moltbot_bridge/src/openclaw_supervisor.py:2373",
+            "witness-review.json"
+          ],
+          "blocker": "None within closed source scope.",
+          "wsp97_action": "Remove shared cached-handle assumption in the existing daemon; reuse PatternMemory creating-thread ownership and existing tests. No new module, pool, skill or SQLite policy.",
+          "next_step": "No remaining source work in this counter-lifetime slice; preserve accepted evidence and separately qualify other consumers or runtime concerns.",
+          "why_score": "C2 localized ownership idiom; I4 observed telemetry integrity; D4 existing supervisor both starts and synchronously scans the same object; Impact3 scoped observation benefit. Independent review scored the actual source action, not the parent.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Merged and independently accepted existing-owner counter repair; removed from executable selection.",
+          "effort_cost": "One source/test pair with required canonical docs and derived packaging updates; disposable tests, no paid provider or runtime calls.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "R19-explicit-report-file-upload",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "bounded_delivery_repair_closed_pr1814",
+          "evidence": [
+            ".github/workflows/ci.yml:257",
+            "qualification.json"
+          ],
+          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step.",
+          "wsp97_action": "Extend existing workflow only; preserve producer, tests and report-only gate.",
+          "blocker": "None in two-report delivery scope; observation-window stability and blocking activation remain separate.",
+          "effort": "One upload-step edit plus existing documentation closure.",
+          "cost": "No model/provider/runtime cost; normal PR CI and bounded selected artifact retrieval.",
+          "verification_burden": "Exact semantic YAML diff, independent review, normal PR run-bound artifact list/download/XML/stdout checks; no dispatch or rerun.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "M2M-governed-context-binding-contract",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "closed_pr1815",
+          "evidence": [
+            "next-selection.json"
+          ],
+          "next_step": "No remaining qualification work; preserve accepted contract and execute only the separately scored source packet after fresh observation.",
+          "fresh_disposition": [
+            "The broad15/P1 M2M residual contains a precise existing seam: canonical runtime context is constructed at264–269, but _binding300–301 seals prompt identity only; provider helper41 explicitly leaves context unbound. This is an acknowledged contract boundary, not a newly executed exploit.",
+            "Local contract qualification is eligible without live-model authority. C3 covers serialization/redaction/legacy integration; I4 protects the consistency of governed constraints already passed to providers; D3 reflects near-term follow-on rather than a proven live failure; Impact3 is bounded internal assurance. The13 score is not inherited from parent15.",
+            "OpenClaw cache planning remains eligible, but current always-rescan safely avoids stale success. The adjacent WRE cache hashes a fixed single bundle and lacks a drop-in whole-wardrobe/scanner identity, so restoring caching now would require more assumptions. A narrow cache contract plan independently scores C3/I3/D3/Impact3=12/P2 absent measured performance loss; parent15 remains unchanged.",
+            "Process/volume durability remains eligible at aggregate13/P1. Its next contract-only recovery-oracle step is C3/I3/D3/Impact3=12/P2; it has no proven data-restoration owner across process death yet. This is sequencing based on the more concrete prompt/context seam, not a fabricated authority blocker or rejection merely because no patch exists.",
+            "Native Hermes child payload fidelity is separate: _request_payload instructs complete goal/context, while event validation binds child identity/order/status/effect counts. Parent egress integrity will not prove actual delegated child inputs.",
+            "Existing higher external owners and explicit live authority/principal policy dependencies are preserved; this bounded comparison does not re-audit or dismiss those rows. R19 is not closed until root obtains hosted proof."
+          ],
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "effort": "One bounded existing producer/binding/consumer contract qualification.",
+          "cost": "Read-only source and existing deterministic fixtures first; no provider/runtime calls.",
+          "verification_burden": "Independent exact-field and ownership review before any source change.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "wsp97_action": "Extend current preparation/capability/shared validator/three adapter owners; no new authority or module.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "M2M-prepared-context-digest",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "closed_pr1816",
+          "evidence": [
+            "modules/communication/moltbot_bridge/ROADMAP.md#governed-context-binding-contract--2026-09-20",
+            "current_observation.validation.independent"
+          ],
+          "next_step": "No remaining context repair; preserve validated ingress binding and qualify actual native-child input evidence separately.",
+          "blocker": "none for this bounded repair",
+          "wsp97_action": "Reuse existing preparation, capability and validator, preserve redaction and framing; no new owner.",
+          "effort": "Five source seams, four existing test owners, manifest/two pins and required docs, within packet budgets.",
+          "cost": "Deterministic fakes; zero model/provider calls.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "PR1816 closed the exact prepared raw-context and canonical-prompt binding repair before provider effects. Its reviewed source remains unchanged; no remaining work in that bounded repair. Child input, lifecycle and rejection-evidence scopes are tracked separately.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "Hermes-native-child-input-evidence-contract",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "qualification_closed_pr1817_full_input_gap_remains",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+            "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+            "current_observation.validation.next_selection"
+          ],
+          "next_step": "Preserve the unsupported complete child-input evidence boundary. Lifecycle qualification is now complete; the distinct parent-only rejection-evidence correction is next. Full input/delivery repair still requires an adequate producer contract.",
+          "blocker": "Current pinned /v1/runs stream does not expose complete child context/accepted input. HTTP retrieval failure was recovered; no repeated download is the missing capability.",
+          "wsp97_action": "Reuse current lifecycle/event/provider/test owners; distinguish requested input from authenticated actual child input.",
+          "effort": "Bounded read-only qualification; six existing closure docs, no source/runtime changes.",
+          "cost": "No model/provider calls; exact version-bound source retrieval only if absent locally.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "PR1817 closed the 13/P1 input-evidence qualification. This sprint completes lifecycle qualification and selects the separate 13/P1 rejection-evidence repair; no full input-fidelity implementation or runtime activation is qualified.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "R25-feedback-approval-owner-contract",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "eligible_plan_tied_with_stop_evidence_repair",
+          "evidence": [
+            "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+            "current_observation.validation.next_selection"
+          ],
+          "next_step": "Qualify exact-summary/FoundUp/version approval assertion, issuer and consumer through existing owners; no source or live feedback admission yet.",
+          "blocker": "No new012permission needed for local design; implementation contract remains unqualified.",
+          "wsp97_action": "Distinct next action from already completed compatibility qualification; preserve v1 IDs and architect-only disclosure.",
+          "effort": "Bounded existing-owner plan and seven existing closure docs.",
+          "cost": "Source inspection; no provider calls.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
+          "fresh_disposition": "Still eligible at 13/P1; no live consent needed for local design. Tie favors closing verified runtime-receipt overclaim before a new design lane."
+        },
+        {
+          "task": "Hermes-parent-only-rejection-effect-evidence",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "state": "selected_next_repair_after_verified_closure",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py:144",
+            "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py:112",
+            "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py:260",
+            "current_observation.validation.next_selection"
+          ],
+          "next_step": "Keep parent-only stop and noncompleted/forbidden terminal rejection from claiming complete effect observation or descendant abort. Preserve best-effort transport, reasons, withheld artifacts, effects-possible reporting and all successful acceptance gates. Validate with existing fake-only tests and canonical receipt propagation before closure.",
+          "blocker": "Current qualification must close and exact source/owner state must be re-observed before implementation. No new runtime authority is required for isolated local repair/tests.",
+          "wsp97_action": "Change existing stop and non-completed terminal rejection evidence semantics conservatively; reuse current fixture/result/receipt paths. Do not fix detached cancellation, add polling, change endpoint, loosen successful acceptance or invent schema.",
+          "effort": "One existing source and nearest existing tests, generated backend manifest/two pins and required docs; bounded mocked validation.",
+          "cost": "No paid model/provider calls or live sandbox needed; normal source/manifest/package CI only.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Fresh source and peer heads unchanged after reviewed six-document merge. Exact rejection-evidence repair C2/I4/D4/Impact3=13/P1 ties R25 design; correctness closure of verified overclaim wins. No source change or runtime activation performed in qualification."
+        },
+        {
+          "task": "AutoResearcher-report-completeness",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "state": "proposal_text_identity_closed_pr1803_remaining_contracts_unqualified",
+          "next_step": "Preserve proposal input evidence; separately qualify the next report contract. Do not infer authentication, evaluated-byte identity, retained improvement or startup authority.",
+          "effort": "Extend existing WRE producer/report/reader owners after current handoff priority.",
+          "cost": "Existing deterministic fixtures first; live measurement requires admitted provider/runtime.",
+          "verification_burden": "Existing researcher suite and controlled rehearsals; keep evidence scoped to measured claims.",
+          "closed_scope": [
+            "Completed/aborted per-invocation accounting, mode gate and baseline input snapshot (PR1755 source)."
+          ],
+          "remaining_scope": [
+            "Program/proposal, oracle, environment and authenticated reader evidence",
+            "Resource measurement and independently retained benefit"
+          ],
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "evidence": [
+            "modules/infrastructure/wre_core/src/wre_auto_researcher.py:419",
+            "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py:526"
+          ],
+          "parent_scope_estimate": {
+            "dimensions": {
+              "complexity": 3,
+              "importance": 4,
+              "deferability": 4,
+              "impact": 4
+            },
+            "score": 15,
+            "priority": "P1",
+            "scope": "aggregate program/proposal/oracle/environment/reader qualification; not a single admitted action"
+          },
+          "wsp97_action": "Do not assign aggregate parent15 to a modest diagnostic step; retain five offline witnesses and preserve closed input-snapshot work.",
+          "score_scope": "Completed12/P2 proposal-text diagnostic action; aggregate program/oracle/environment/reader qualification remains separate.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "OpenClaw-invocation-diagnostic-attribution",
+          "dimensions": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "state": "partial_diagnostic_contract",
+          "evidence": [
+            "modules/communication/moltbot_bridge/src/openclaw_process_loop.py:115",
+            "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
+          ],
+          "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "WSL-advisory-explicit-command-opt-in",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "state": "closed_pr1806",
+          "evidence": [
+            "modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20",
+            "wsl-contract-review.json",
+            "wsl-owner-review.json",
+            "wsl-witness-review.json"
+          ],
+          "blocker": "None within completed source scope.",
+          "wsp97_action": "Extend existing probe and test owner, preserving receipt semantics, intentional Gateway exports and structural guards; no new module or authority.",
+          "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "effort_cost": "One existing source/test pair plus required docs; deterministic disposable tests, no provider cost or runtime activation.",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        },
+        {
+          "task": "Detect-AI-WSP109-intake",
+          "dimensions": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 11,
+          "priority": "P2",
+          "state": "consolidated_in_existing_pr_blocked_ci",
+          "evidence": [
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
+          ],
+          "next_step": "Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module.",
+          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
+          "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
+          "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
+          "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
+          "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
+          "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair."
+        }
+      ],
+      "selected": "Hermes-parent-only-rejection-effect-evidence",
+      "score": 13,
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "selection_rationale": [
+        "After lifecycle qualification, independently score the minimal stop evidence repair instead of inheriting the completed 14/P1 planning score.",
+        "The repair and R25 approval-owner plan both rank 13/P1; tie favors removing an evidenced complete-observation overclaim in existing runtime receipts. R25 remains eligible.",
+        "Actual cache/recovery plans remain 12/P2; higher broad parent scores remain partial, owner-blocked or admission dependent.",
+        "Preserve all 38 existing histories and add one distinct source action; no duplicate module or new authority.",
+        "Full child-input/delivery and runtime admission gates remain open, with exact prerequisites rather than repeated identical probes.",
+        "After PR1818, re-observed all 39 histories against verified merge and 95 unchanged peer heads. Six-document qualification changes no source, admission or consent evidence. Rescored executable rejection-evidence repair C2/I4/D4/Impact3=13/P1 ties eligible R25 plan13/P1 and wins on verified receipt correctness; actual cache/recovery plans12/P2 remain later and higher blocked parents remain blocked."
+      ],
+      "peer_count": 95,
+      "status": "lifecycle_qualification_closed_next_rejection_evidence_repair_selected",
+      "local_branch_count": 649,
+      "worktree_count": 157
+    },
+    "next_packet": {
+      "schema": "0102_m2m_v1",
+      "ROLE": "worker",
+      "ORIGIN": "internal_handoff",
+      "PRINCIPAL_REF": "012",
+      "L": "A",
+      "S": "Conservative effect-evidence reporting in two existing Hermes lifecycle rejection branches; one source owner, one existing test owner, required derived manifest and two digest pins, and twelve exact closure documents.",
+      "M": "exec",
+      "T": "RSI-HERMES-PARENT-ONLY-REJECTION-EVIDENCE-20260920",
+      "A": "Keep parent-only stop and noncompleted/forbidden terminal rejection from claiming complete effect observation or descendant abort. Preserve best-effort transport, reasons, withheld artifacts, effects-possible reporting and all successful acceptance gates. Validate with existing fake-only tests and canonical receipt propagation before closure.",
+      "R": [
+        0,
+        15,
+        97,
+        99,
+        50,
+        62,
+        22,
+        11,
+        49
+      ],
+      "I": {
+        "allowed_paths": [
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+          "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py",
+          "scripts/reddog_backend_manifest.json",
+          "extensions/reddog/backend_compatibility_constants.js",
+          "scripts/tests/test_generate_reddog_backend_manifest.py",
+          "ROADMAP.md",
+          "ModLog.md",
+          "docs/roadmaps/rsi_swarm_backlog.json",
+          "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
+          "modules/communication/moltbot_bridge/README.md",
+          "modules/communication/moltbot_bridge/INTERFACE.md",
+          "modules/communication/moltbot_bridge/ROADMAP.md",
+          "modules/communication/moltbot_bridge/ModLog.md",
+          "modules/communication/moltbot_bridge/tests/README.md",
+          "modules/communication/moltbot_bridge/tests/TestModLog.md",
+          "extensions/reddog/ModLog.md",
+          "extensions/reddog/tests/TestModLog.md"
+        ],
+        "read_only_dependencies": [
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+          "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_model_binding.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_contract.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_result.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py",
+          "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
+          "modules/communication/moltbot_bridge/src/reddog_resident_queue_bounded_worker_pilot_handler.py",
+          "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+          "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py",
+          "modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py",
+          "scripts/generate_reddog_backend_manifest.py",
+          "prompt/swarm/m2m_compiler.py"
+        ],
+        "denied_paths": [
+          "Every repository path outside the seventeen explicit allowed_paths; all other source/test/registry/workflow/config files remain read-only.",
+          "extensions/reddog/** except backend_compatibility_constants.js, ModLog.md and tests/TestModLog.md; no extension behavior, version, publishing or dependency change.",
+          "Protected FoundUp/YUMORI/eSingularity and separately owned Remote AutoPost work; no unrelated cleanup or peer worktree modification.",
+          "No new module, test file, document, skill, schema, cancellation mechanism, endpoint, model/provider routing or authority type.",
+          "No live provider/model/transport/network execution, API key/credential/production DB access, WSL, services, installs/upgrades, worker/runtime admission, retention, reward or deployment."
+        ],
+        "dependencies": [
+          "Close the current 14/P1 lifecycle qualification, then freshly re-observe WSP15/WSP97, canonical source hashes, peer ownership and clean isolated branch before any source execution.",
+          "Reuse exact pinned e624e9fde561e1add9388384012b295fde669ade source qualification and shared existing false/false receipt representation; no additional upstream fetch or caller redesign is needed for this correction.",
+          "Required backend content manifest and both digest pins must be generated/updated together and validated against the candidate source; do not repeat the prior stale-manifest omission."
+        ],
+        "invariants": [
+          "This is a separately scored ordinary local source sprint. M=exec does not create WRE/AgentDB admission or runtime dispatch authority; runtime_dispatchable remains false.",
+          "_stop must preserve its best-effort POST /v1/runs/{run_id}/stop then status-read behavior and existing exception behavior; its rejected result must always use observed=False and abort=False, independent of parent acknowledgement/status.",
+          "The existing _terminal noncompleted/forbidden rejection branch must retain FAIL_HERMES_RUN_REJECTED, invoked=True and abort=False while explicitly setting observed=False. No global reject_hermes or result defaults change.",
+          "Both paths preserve network/invocation/Hermes dispatch/external-side-effects-possible=true, original reason/digest derivation, rejection and empty artifacts. Flags communicate lack of proof; they do not certify live cleanup or establish a new cancellation guarantee.",
+          "Do not change completed success, other error branches, event order/cardinality/output identity, intentional early paired tool errors, confinement, raw-context/canonical-prompt binding, approved redaction, one-use authority, signed model route or timeout semantics.",
+          "No parent status ID validation, retry, new endpoint, private-depth/session workaround, broader deadline algorithm, accepted-input identity, async consumer or cancellation registry wiring. Wrong-ID test data only proves no false confidence under current behavior.",
+          "Build and rehydrate actual rejected generation receipts and inspect existing effect-reader/pilot projection with disposable local data. Both false values must survive existing receipt ID/semantic validation; no source change outside the lifecycle owner.",
+          "Use existing fake transport tests only; no real service/provider/API key invocation. Independent reviewers must qualify source plus targeted tests before promotion. Ordinary-success control remains a regression check, not new native-runtime certification.",
+          "Generator output may change only this lifecycle member content identity and consequent derived digest/pins; preserve backend membership and extension behavior/version. Existing canonical test registry check only; no registry mutation is authorized.",
+          "Preserve all26 original packets and all39 score histories existing after this qualification closure (38 inherited plus this new repair). Archive the previous current_observation verbatim; preserve historical baseline objects and separate closed14/P1 plan from this13/P1 source action.",
+          "Source/test owners act only within assigned paths. Coordinator integrates generated files and required canonical closure; independent verification remains separate. After closure immediately re-observe and rescore instead of automatically selecting the old queue successor."
+        ],
+        "wsp62": {
+          "source_current_lines": 191,
+          "source_max_lines": 200,
+          "source_growth_policy": "Prefer no growth; at most nine lines only for the two explicit evidence qualifications.",
+          "test_current_lines": 528,
+          "test_max_lines": 600,
+          "test_growth_policy": "Existing oversized test owner; at most72 additional lines for parameterized branch/transport and receipt oracles, no duplicate test owner.",
+          "function_max_lines": 50,
+          "class_max_lines": 200,
+          "README_current_lines": 1051,
+          "INTERFACE_current_lines": 1592,
+          "oversized_docs_policy": "Replace current behavior wording without net growth in module README/INTERFACE; existing append-only history/structured evidence exemptions remain, no new broad exemption."
+        },
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "runtime_dispatchable": false
+      },
+      "O": [
+        "Minimal two-branch lifecycle correction in the existing source owner; no successful acceptance or runtime behavior expansion.",
+        "Red before green: parent-cancelled stop rejects with false/false; drive approval, invalid status and timeout stop reasons. Parameterize accepted/nonaccepted stop, cancelled/running/failed/malformed/wrong-ID status and POST/GET exceptions; none may produce true confidence.",
+        "Matching failed and cancelled terminal-event fixtures without child closure must reject with incomplete observation. Cover the existing forbidden terminal guard without weakening the event verifier.",
+        "Actual canonical receipt roundtrip and existing effect reader/pilot false-value projection; preserve rejection, reason/digest semantics, no artifact, and all invocation/effect fields. Existing success/layered-progress and confinement negatives remain unchanged.",
+        "Independent fake-only source/test acceptance with exact blobs and WSP62 line/AST evidence; required connected result/receipt/bootstrap checks only.",
+        "Manifest generation --check, exact digest-pin test, existing extension fast/package checks and test-registry --check; distinguish local from any later exact-head hosted evidence.",
+        "Required twelve existing docs record narrow local correction and unresolved full input/delivery/quiescence limitations, then WSP15/WSP97 re-observation with preserved archive,26 packets and39 histories."
+      ],
+      "F": [
+        "Current qualification not closed or stale source/peer/base ownership",
+        "Scope, runtime, provider, credential or production side effect",
+        "Parent-only evidence still promotes complete observation/abort in either selected branch",
+        "Other successful/rejection behavior, schema, authority, endpoint or cancellation semantics changed",
+        "Failed red/green, receipt projection, independent review, line budget or generated manifest/pin validation",
+        "Missing exact evidence or claim of live child cleanup/native build success"
+      ]
+    },
+    "next_step": "Keep parent-only stop and noncompleted/forbidden terminal rejection from claiming complete effect observation or descendant abort. Preserve best-effort transport, reasons, withheld artifacts, effects-possible reporting and all successful acceptance gates. Validate with existing fake-only tests and canonical receipt propagation before closure.",
+    "requires_fresh_reobservation_after_closure": true,
+    "remote_closure": {
+      "observed_utc": "2026-09-20T09:45:29.625419+00:00",
+      "pr": 1818,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1818",
+      "candidate": "dbbe57dc38b74a9fafccf5b40cc0b4c58588a4d5",
+      "merge_commit": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+      "merged_at": "2026-09-20T09:45:07Z",
+      "merged_tree": "7865029e2221ad73164a5e4276e06f054dfafdfb",
+      "reviewed_blobs_match": true,
+      "exact_head_all_ten_success": true,
+      "peer_count": 95,
+      "peer_heads_unchanged": true,
+      "shared_checkout_unchanged": true,
+      "postmerge_workflows": [
+        {
+          "id": 35503171616,
+          "name": "CI",
+          "head_sha": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35503171616"
+        },
+        {
+          "id": 35503171109,
+          "name": "Push on main",
+          "head_sha": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35503171109"
+        }
+      ],
+      "scope": "Six existing planning and closure documents; no source change, runtime tests or live activation."
+    },
+    "checkpoint_branch": "agent/rsi-hermes-rejection-evidence-20260920",
+    "repository_accounting_after_own_merge": {
+      "observed_utc": "2026-09-20T09:45:29.625419+00:00",
+      "merged_since_20260909_utc": 130,
+      "closed_without_merge": 21,
+      "open_peer_count": 95,
+      "method": "Prior complete 129-merge accounting plus this verified own merge; peer heads refreshed unchanged. Interval evidence, not an atomic full-repository snapshot."
+    }
   }
 }
