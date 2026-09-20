@@ -52,14 +52,15 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`1bfecebebd3545b3f585a46979215ebac2d7eccf`, including PR1797–1809. PR1803's ten
+`4bec22b6d6775369d09495ac5ea507be003729e1`, including PR1797–1810. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
 PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
-Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 120 merged PRs and 16
+Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
+Subsequent main workflows are recorded separately. The protected ticker change is preserved.
+Refreshed September 9 UTC onward accounting found 121 merged PRs and 16
 closed without merge;101 surviving peer heads are unchanged after PR1771 closed without merge. The
 preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
 passing/skipped checks and one with no reported checks; bulk mergeability was
@@ -71,7 +72,7 @@ zero uploaded artifacts; qualify existing report delivery without activating its
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; the current backlog observation binds the
-complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809 closures and all 102 peer heads/checks.
+complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1810 closures and all 102 peer heads/checks.
 
 | Work observed | Reconciliation and next action |
 |---|---|
@@ -81,11 +82,11 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809 c
 | Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is merged in PR1802. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
 | AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
 | WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is merged in PR1806:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. PR1806 first CI caught an omitted backend digest refresh; corrected manifest/pins passed all ten fresh exact-head checks before merge. No real WSL/provider call. |
-| PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact remote closure pending. |
+| PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 642 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 643 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -117,7 +118,7 @@ tracked in the backlog. Command opt-in selects diagnostic execution,
 not runtime or effect-use authority. The daemon lifetime qualifier reproduced mixed-thread telemetry loss with disposable
 storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
-Local tests and independent review pass; real daemon shutdown/restart,
+Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
 the bounded source scope, exact evidence and next 13/P1 R19 planning packet.
 R19 qualifies report delivery through exact workflow/action/run evidence before
