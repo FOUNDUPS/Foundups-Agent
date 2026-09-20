@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`4bec22b6d6775369d09495ac5ea507be003729e1`, including PR1797–1810. PR1803's ten
+`c43acc2f2399b2b331b26ebeeacd94e023a9b666`, including PR1797–1810 and the separately merged PR1668 YUMORI asset registry. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,8 +60,8 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 121 merged PRs and 16
-closed without merge;101 surviving peer heads are unchanged after PR1771 closed without merge. The
+Refreshed September 9 UTC onward accounting found 122 merged PRs and 16
+closed without merge; 100 surviving peer heads are unchanged after PR1771 closed without merge and PR1668 merged. The
 preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
 passing/skipped checks and one with no reported checks; bulk mergeability was
 76 MERGEABLE and 26 CONFLICTING, including PR1751. Check/mergeability summaries
@@ -122,7 +122,7 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the bounded source scope, exact evidence and next 13/P1 R19 planning packet.
+the bounded source scope, exact evidence and next 13/P1 R19 upload-step repair packet.
 R19 report-delivery qualification is complete locally: exact action/run evidence
 identifies hidden-directory exclusion. Its separate 13/P1 upload-step repair is
 next, subject to closure, fresh ownership and independent validation. No workflow
