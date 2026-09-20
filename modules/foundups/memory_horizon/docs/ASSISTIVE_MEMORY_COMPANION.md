@@ -73,7 +73,7 @@ The repository roles are distinct:
 - **012 Principal Memex** = separate persistent principal cognition substrate for the 012/0102 relationship; it is not a FoundUp Memex or authority source.
 - **HoloIndex** = repository/WSP retrieval and pattern-memory surface; it is not automatically the personal-event retriever for this wearable.
 - **Working Memory** under WSP 60 = current Holo result pack used for the next 0102 decision.
-- **Mosh Pit** = projection/view, not storage.
+- **Moshpit** = projection/view, not storage.
 - **Contact Memory** = principal-scoped relationship-memory architecture, currently SPECIFIED_NOT_IMPLEMENTED.
 - **Memory Nudge Engine** = existing repository/autonomy high-value-event capture into workspace memory; it is not the proposed spoken recall-cue component.
 
