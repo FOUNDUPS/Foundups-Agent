@@ -1,3 +1,20 @@
+## 2026-09-20: Close WSL repair's backend manifest integration gap
+
+- PR1806 first candidate `2033939c76ff7af16b1e7f6269e947fa20f1def3` failed the
+  RedDog CI compatibility gate. Local diagnostics and independent review proved
+  the WSL edit omitted a required generated manifest refresh; this was our
+  candidate defect. The failing CI log and earlier reviews are preserved.
+- Regenerated the existing 1,400-member manifest and updated its extension/test
+  digest pins. Only the WSL member hash changes; assertions, API, membership,
+  version and authority remain unchanged. Scope expands to five exact derived
+  or evidence paths, with fresh peer checks and shared checkout preservation.
+- Generator8 tests, RedDog15 fast groups, exact backend contract and67-file
+  package checks pass locally. Existing43/four behavioral checks remain bound
+  to unchanged source/tests. Fresh exact-head CI and final closure are pending.
+- WSP15 selects finishing this owned dependency at14/P1 before the contingent
+  daemon lifetime13/P1. Existing test guidance now requires manifest validation
+  for backend-member edits. WSP22/50/84/97; no install, release or runtime effect.
+
 ## 2026-09-20: Separate WSL metadata inspection from explicit commands
 
 - Implemented the qualified12/P2 repair in the existing WSL probe. Enable-only

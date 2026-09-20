@@ -1851,13 +1851,21 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "section": "current_observation.post_sprint_reobservation",
+    "section": "current_observation.ci_closure_repair",
     "base_commit": "0d21c8cbcf771bee7f0dbc8640b5e34ce753bf93",
-    "selected_action": "DaemonSelfAudit-PatternMemory-lifecycle-contract",
-    "status": "next_daemon_pattern_memory_lifecycle_qualification",
+    "selected_action": "Close-owned-PR1806-manifest-integration",
+    "status": "owned_ci_closure_dependency",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
-    "observation_path": "current_observation"
+    "observation_path": "current_observation",
+    "wsp15": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 5,
+      "impact": 3,
+      "total": 14,
+      "priority": "P1"
+    }
   },
   "current_observation": {
     "observation_id": "wsl_explicit_command_opt_in_20260920",
@@ -1877,7 +1885,7 @@
       "total": 12,
       "priority": "P2"
     },
-    "status": "locally_verified_source_complete_remote_closure_pending",
+    "status": "locally_verified_manifest_corrected_fresh_remote_closure_pending",
     "truth_boundary": "One existing WSL probe repair and its existing tests. Local Codex author/review lanes are not admitted WRE workers. No real WSL, service, provider, model, install/update, runtime admission/promotion, production memory, AmIBot build or protected FoundUp effect. Diagnostic configuration is not an effect-use lease or retained-learning claim.",
     "retrieval": {
       "ok": true,
@@ -2461,7 +2469,7 @@
       "ORIGIN": "internal_handoff",
       "PRINCIPAL_REF": "012",
       "L": "B",
-      "S": "Existing dependency_launcher WSL advisory source/test and required module/system documentation only.",
+      "S": "Existing WSL advisory source/test, its required generated backend manifest and two digest pins, and exact listed evidence docs only.",
       "M": "exec",
       "T": "RSI-WSL-EXPLICIT-COMMAND-OPT-IN-20260920",
       "A": "Implement a separate default-off command opt-in, capture mode before resolver callbacks, return NOT_READY without command calls in metadata mode, and validate compatibility with existing injected fixtures.",
@@ -2491,15 +2499,20 @@
           "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
           "modules/infrastructure/dependency_launcher/tests/README.md",
           "modules/infrastructure/dependency_launcher/tests/TestModLog.md",
-          "WSP_knowledge/WSP_Test_Registry.json"
+          "WSP_knowledge/WSP_Test_Registry.json",
+          "scripts/reddog_backend_manifest.json",
+          "extensions/reddog/backend_compatibility_constants.js",
+          "scripts/tests/test_generate_reddog_backend_manifest.py",
+          "extensions/reddog/ModLog.md",
+          "extensions/reddog/tests/TestModLog.md"
         ],
         "denied_paths": [
           "main.py",
           "modules/communication/moltbot_bridge/src/**",
           "modules/foundups/detect_ai/**",
           "modules/foundups/esingularity/**",
-          "extensions/reddog/**",
-          "FOUNDUPS/autopost"
+          "FOUNDUPS/autopost",
+          "extensions/reddog/** except backend_compatibility_constants.js manifest pin and ModLog.md/tests/TestModLog.md evidence entries"
         ],
         "dependencies": [
           "PR1805 independently accepted and merged with ten exact-head checks. Fresh source/ownership observation remains required before local implementation.",
@@ -2515,7 +2528,8 @@
           "Preserve DEFAULT_DISTRO, resolve_trusted_wsl_executable and Gateway imports; no main wiring or deliberate provider transport changes.",
           "Preserve file<=240, function<=50 and class<=200 structural guards without exemptions or weaker tests.",
           "No real WSL/service/provider/model calls, install/update, admission/promotion, deployment, wallet/domain effects or protected FoundUp edits.",
-          "Reuse existing source, fixtures and docs. No new module, skill, schema, launcher or replacement authority."
+          "Reuse existing source, fixtures and docs. No new module, skill, schema, launcher or replacement authority.",
+          "Derived closure correction changes only the WSL digest in the existing1400-file manifest and its existing extension/test pins; preserve membership, API/version, assertions and gates."
         ],
         "wsp15": {
           "complexity": 2,
@@ -2541,13 +2555,15 @@
     },
     "scope_reconciliation": [
       "WSP97 section1.2A requires same-slice TestModLog after material test expansion; absent canonical file is created with inventory of four existing test files, not a new test owner.",
-      "Generated canonical registry description follows the existing test docstring. Exact diff is one description field; classification/counts/guards unchanged."
+      "Generated canonical registry description follows the existing test docstring. Exact diff is one description field; classification/counts/guards unchanged.",
+      "CI at2033939 failed deterministically because reviewed WSL content was omitted from the existing authenticated backend manifest. Coordinator extends exact scope to regenerate that manifest, update its two existing digest pins, and record module/test evidence. No RedDog behavior, gate, membership, version, package release or runtime change. Finishing this dependency is C2/I4/D5/Impact3=14/P1 before the next13/P1 lane."
     ],
     "changes": [
       "Separate default-off command opt-in inside existing probe; enabled metadata path validates registration/base and returns NOT_READY before runner selection.",
       "Capture configuration before resolver callback; preserve disabled receipt bytes and explicit command-mode vectors/parser/advisory schema.",
       "Preserve source guards by formatting the unchanged fixed tuple on one line; source238/maxfunction34. All legacy assertion ASTs retained.",
-      "Update existing contracts and required canonical test inventory; generated registry changes exactly one suite description."
+      "Update existing contracts and required canonical test inventory; generated registry changes exactly one suite description.",
+      "Corrected candidate-caused CI integration omission by refreshing the existing backend manifest WSL content digest and its extension/test pins; same1400 members and unchanged assertions/gates. No version/install/release."
     ],
     "alternatives": [
       "A running-state precheck cannot remove the later-exec race, so no such check or new supervisor is added.",
@@ -2636,6 +2652,15 @@
         "is_compliant": true,
         "evidence": "receipt-validation.json",
         "limit": "Structural completeness and repository WSP-path binding; not reasoning quality or runtime authority."
+      },
+      "manifest_repair": {
+        "manifest_file_count": 1400,
+        "generator_tests_passed": 8,
+        "red_dog_fast_tier_groups_passed": 15,
+        "backend_contract": "passed; overlaps fast tier",
+        "package_surface": "67 members,950440 raw bytes,cap unchanged",
+        "evidence": "ci-repair-validation.json",
+        "behavioral_source_tests_unchanged": true
       }
     },
     "effort_cost": {
@@ -2891,7 +2916,17 @@
       "execution-receipt.json": "83e8b69e9bfd1708ba56721072420eb3753d941d0ce3656c03a50cadf1e921ad",
       "receipt-validation.json": "47470bbfa4710047e6df3b014b7f6c9106acfe1090a363cca486e50bec9e25b8",
       "previous-main-workflows.json": "0ad0dd6c16d984bb78a6a7ee850735360f8e5a9c4386c0bf77bbf9835fbf1c86",
-      "open-prs.json": "e346d4fa90eaf950836af0aebcd8c23fdfb274f7c5e8e746749e8c647987efe1"
+      "open-prs.json": "e346d4fa90eaf950836af0aebcd8c23fdfb274f7c5e8e746749e8c647987efe1",
+      "pr-first-failure.json": "88e1948fc409e95218565738b7a78066fcd686d4511baf94dff2e37c77d9f309",
+      "ci-first-failure.log": "f461576b8ccbd596134c2ba98a902e3daaf427ca367982b91733ff4e89961693",
+      "ci-failure-review.json": "2436d085f31ab87717a853cb250ff0b26bd3e84335305148394feb3c966b2c69",
+      "execution-scope-ci-amendment.json": "92070055d62bb84ed15e6f4d7a5a3bf378beb2b7bbcd4f62a15564ebfe8adec6",
+      "ci-repair-delta.json": "555e3ad4eab81b8f8daeb221c93bc12d125fe2d4d10c362ca1e20f1ebf85093d",
+      "ci-repair-holo.json": "8d6e3442cd03fa1ebbbb9538f94af9ebdf6a6b64267fc2e883d08307e21b97f8",
+      "ci-repair-validation.json": "b8e8ebde7915392f87ac17cbf17bc7f134103596143600a2a6d7efc3aa0bd250",
+      "ci-repair-manifest-tests.xml": "3e32c45cbdfc222aa7a663f12ac8a2da1b101c2fe17e6aab25f84142ae985d96",
+      "ci-repair-independent-review.json": "350b1967310d0f460acb1ebcfd93f69234b818fe6e6adcb0d53584fde2c2c4d5",
+      "ci-repair-peers.json": "2d06ca20b4307602f7143d1b8ecdbafe309c80c70f2c1a3c28bfc075a1d1d201"
     },
     "post_sprint_reobservation": {
       "status": "local_source_closed_next_lifecycle_contract_selected_remote_closure_pending",
@@ -3691,7 +3726,155 @@
         "New owner/abstraction, unrelated source edits or missing source-bound evidence."
       ]
     },
-    "next_step": "Use existing daemon and PatternMemory fixtures with explicitly redirected disposable storage to reproduce cached-handle use across distinct threads and missing disposal. Qualify one smallest create/use/close-on-owning-thread repair for scan_once and start/stop/restart, preserving disabled telemetry and fail-soft behavior. Do not implement source this wake.",
-    "requires_fresh_reobservation_after_closure": true
+    "next_step": "Finish current owned PR1806 closure after fresh reviewed18-file exact-head CI and ownership checks; only then re-observe/rescore the contingent13/P1 daemon memory lifetime qualification.",
+    "requires_fresh_reobservation_after_closure": true,
+    "ci_closure_repair": {
+      "observed_at": "2026-09-20T00:58:21.726259+00:00",
+      "first_failed_candidate": "2033939c76ff7af16b1e7f6269e947fa20f1def3",
+      "pr": 1806,
+      "ci_run": 35479494161,
+      "failure": "RedDog fast tier test_backend_compatibility_contract.js:250 rejected current backend. Local filesystem diagnostic and independent review identified the candidate WSL digest omitted from the generated manifest.",
+      "scope_amendment": "execution-scope-ci-amendment.json",
+      "delta": {
+        "observed_at": "2026-09-20T00:54:46.737669+00:00",
+        "candidate_before": "2033939c76ff7af16b1e7f6269e947fa20f1def3",
+        "ci_failure_run": 35479494161,
+        "reason": "required_runtime_file_integrity_mismatch:modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
+        "cause": "Candidate WSL edit omitted required derived closure refresh; unchanged retry would fail.",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 5,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "manifest_before": "1d1aaf7fe8c3916c5f7b26bc5d19ed782765a345a5203b3231a33b0b998f30fe",
+        "manifest_after": "11b2a45c0feca2b3c53372b0c07f22788091edf89fef91555142325f560a24f1",
+        "runtime_file_count": 1400,
+        "changed_runtime_hashes": [
+          "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py"
+        ],
+        "source_sha256": "b0a5dca9db4327856fd356eb7c9c0fbb6aa8a556abae401c0f49ea9914e589eb",
+        "membership_and_contract_unchanged": true,
+        "generated_paths": [
+          "scripts\\reddog_backend_manifest.json",
+          "extensions/reddog/backend_compatibility_constants.js",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "retrieval": {
+          "ok": true,
+          "bundle_ok": true,
+          "freshness": "UNKNOWN",
+          "index_gap_detected": true,
+          "workspace_repo_head_sha": "2033939c76ff7af16b1e7f6269e947fa20f1def3"
+        },
+        "no_runtime_execution": true
+      },
+      "local_validation": {
+        "observed_at": "2026-09-20T00:58:01.624223+00:00",
+        "results": [
+          {
+            "name": "manifest-check",
+            "command": [
+              "O:/Foundups-Agent/.venv/Scripts/python.exe",
+              "-B",
+              "scripts/generate_reddog_backend_manifest.py",
+              "--check"
+            ],
+            "exit_code": 0,
+            "seconds": 67.859,
+            "log": "ci-repair-manifest-check.log"
+          },
+          {
+            "name": "manifest-tests",
+            "command": [
+              "O:/Foundups-Agent/.venv/Scripts/python.exe",
+              "-B",
+              "-m",
+              "pytest",
+              "-q",
+              "--import-mode=importlib",
+              "-p",
+              "no:cacheprovider",
+              "scripts/tests/test_generate_reddog_backend_manifest.py",
+              "--basetemp",
+              "O:\\Foundups-Agent-audits\\20260920-rsi-wsl-command-0917\\ci-repair-validation\\pytest",
+              "--junitxml",
+              "O:\\Foundups-Agent-audits\\20260920-rsi-wsl-command-0917\\ci-repair-manifest-tests.xml"
+            ],
+            "exit_code": 0,
+            "seconds": 64.907,
+            "log": "ci-repair-manifest-tests.log"
+          },
+          {
+            "name": "backend-contract",
+            "command": [
+              "C:/Program Files/nodejs/node.exe",
+              "extensions/reddog/tests/test_backend_compatibility_contract.js"
+            ],
+            "exit_code": 0,
+            "seconds": 0.593,
+            "log": "ci-repair-backend-contract.log"
+          },
+          {
+            "name": "fast-tier",
+            "command": [
+              "C:/Program Files/nodejs/node.exe",
+              "extensions/reddog/tests/run_reddog_test_tier.js",
+              "fast"
+            ],
+            "exit_code": 0,
+            "seconds": 11.672,
+            "log": "ci-repair-fast-tier.log"
+          },
+          {
+            "name": "package",
+            "command": [
+              "C:/Program Files/nodejs/node.exe",
+              "extensions/reddog/tests/test_package_surface.js"
+            ],
+            "exit_code": 0,
+            "seconds": 19.141,
+            "log": "ci-repair-package.log"
+          }
+        ]
+      },
+      "independent_review": "ci-repair-independent-review.json",
+      "original_review_status": "Original13-file source/docs review remains historical and source-bound; revised18-file candidate requires fresh doc/promotion review.",
+      "remote_status": "Fresh exact-head CI pending; never retry the unchanged failing candidate or bypass the compatibility gate.",
+      "retention": "Reusable test guidance is documented in the existing dependency_launcher/tests/README.md; no governed runtime retention claim.",
+      "ownership": {
+        "shared_derived_path_overlaps": [
+          {
+            "number": 1759,
+            "head": "3f98c1a5df8bb6be56455db515ae8b188d693c76",
+            "paths": [
+              "extensions/reddog/backend_compatibility_constants.js",
+              "scripts/reddog_backend_manifest.json"
+            ]
+          },
+          {
+            "number": 1751,
+            "head": "04ef322f172bed2504583a058ee8210674d98eeb",
+            "paths": [
+              "extensions/reddog/backend_compatibility_constants.js",
+              "scripts/reddog_backend_manifest.json",
+              "scripts/tests/test_generate_reddog_backend_manifest.py"
+            ]
+          },
+          {
+            "number": 1680,
+            "head": "a60ea1e655f5247d871b0e958e7c5387ba40df7e",
+            "paths": [
+              "extensions/reddog/backend_compatibility_constants.js",
+              "scripts/reddog_backend_manifest.json",
+              "scripts/tests/test_generate_reddog_backend_manifest.py"
+            ]
+          }
+        ],
+        "action": "Parent should re-observe exact peer heads at publication and document current-tree derived-pin maintenance. Path overlap does not authorize adopting/changing unmerged peer source or behavior; avoid manifest merges from stale peer branches."
+      }
+    }
   }
 }

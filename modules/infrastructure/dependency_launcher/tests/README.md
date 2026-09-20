@@ -10,6 +10,15 @@ selected existing main/Gateway caller checks also passed. All used injected
 boundaries; no real WSL, agent, provider or model was invoked.
 
 The canonical [test inventory](TestModLog.md) lists all four existing test owners.
+
+This WSL owner is content-bound by RedDog's existing backend manifest. Source
+edits also require `python -B scripts/generate_reddog_backend_manifest.py --check`,
+the existing generator tests (including staged-index closure), and RedDog's
+backend compatibility/fast/package checks. If stale, regenerate the manifest and
+update its existing extension and generator-test digest pins together; preserve
+membership and gate assertions. PR1806 first CI caught this omitted integration
+step after local adapter checks had passed. This maintenance does not release
+or install an extension, launch WSL, or grant runtime authority.
 The initial connected-check collection failed because the external dotenv stub
 lacked `dotenv_values`; correcting that harness enabled the unchanged four
 checks. This was not an application test failure or application-code repair.
