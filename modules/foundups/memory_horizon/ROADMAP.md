@@ -22,6 +22,22 @@ Status: planning_reference; SPECIFIED_NOT_IMPLEMENTED; TOKEN_DEFERRED.
 
 The Companion stages remain deferred until the browser event/probe model is proven. They do not enlarge #1821.
 
+## Game-design sweep ladder
+
+The game is our persistent wrapper; measurement complexity grows in controlled sweeps:
+
+0. survival shell/event ledger;
+1. episodic retention;
+2. temporal/sequence memory;
+3. associative/context memory;
+4. working memory/interference;
+5. attention/inhibition/processing speed;
+6. executive switching;
+7. adaptive mixed-domain campaign;
+8. longitudinal alternate forms.
+
+**Current build boundary: Sweep 0 + Sweep 1 only.** Later sweeps must not enter the POC merely because they are easy to code. Each sweep requires interpretable evidence from the preceding layer. See [GAME_DESIGN_SWEEPS.md](docs/GAME_DESIGN_SWEEPS.md).
+
 ## POC implementation sequence
 
 1. Static single-session game state.
@@ -55,7 +71,7 @@ Research/architecture: [Assistive Memory Companion](docs/ASSISTIVE_MEMORY_COMPAN
 - **M2 Measurable** — export reconstructs every event/probe relationship.
 - **M3 Adaptive** — delays move up/down based on prior independent events.
 - **M4 Repeatable** — alternate forms permit repeated sessions with reduced practice contamination.
-- **M5 Research-ready** — protocol, consent model, data dictionary and analysis plan reviewed.
+- **M5 Research-ready** — Sweep 0-1 protocol, consent model, data dictionary and analysis plan reviewed; later cognitive sweeps remain gated.
 - **M6 Companion alpha** — manual lived breadcrumbs + evidence-ranked voice retrieval.
 - **M7 Wearable alpha** — privacy-preserving event extraction from approved sensors.
 - **M8 Clinically studied** — external prospective validation; no medical claims before this gate.
