@@ -1,3 +1,16 @@
+## 2026-09-20: Qualify AutoResearcher interruption evidence
+
+- Completed the12/P2 static lifecycle/oracle plan in six existing documents. Missing/temp reports remain incomplete/unknown; terminal files are local diagnostics, not caller acknowledgement, independent acceptance or durable recovery.
+- No bound report consumer found in the tracked Python symbol search. Defer a new reader and automatic recovery; retain missing durable baseline, ownership/quiescence and recovery-caller contracts.
+- Independent review qualifies separate 10/P2 `auto-researcher-abrupt-exit-diagnostic-witness` using the existing test owner and unchanged producer. The exact child/oracle/budget contract is in the backlog; no test, process, source change or runtime activation occurred in this plan.
+- Both PR1826 main workflows passed;98peer heads and10 prior source bindings unchanged. Preserve26 packets/40 histories and archived prior observation; new concrete action scored separately. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-20: Close R25 approval qualification; select AutoResearcher recovery plan
+
+- PR1826 merged as 531b753406c10df454d83e6e1a9de0ed717e87d1; ten exact-head checks passed, seven reviewed document blobs/tree verified. Later main workflows remain separate.
+- Re-observed40 histories and10 next-plan source bindings; selected12/P2 AutoResearcher recovery-oracle plan is not executed. R25 exact host/version/consumer dependency remains; no live consent or source packet is implied.
+- Accounting132 merged/21 closed-unmerged sinceSeptember9UTC/98peers; Memory Horizon head advance reconciled without scope overlap, shared checkout preserved. No source/tests/runtime activation. WSP15/22/97; exact receipts in the backlog.
+
 ## 2026-09-20: Qualify R25 feedback approval owners and preserve host boundary
 
 - WSP00/15/22/50/62/84/97/99/103/104; seven existing documents only. Compared current record, turn and scoped-receipt options; prefer conditional explicit record version while preserving v4 signatures/CAS/recovery exactly.

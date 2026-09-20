@@ -1,5 +1,40 @@
 # WRE Core Roadmap
 
+## AutoResearcher interruption qualification — 2026-09-20
+
+The **12/P2** source-only qualification is complete. The producer reserves an
+invocation directory but writes no initial report or durable baseline manifest.
+Abrupt process exit can bypass cleanup. A missing report cannot say
+whether scratch is dirty, restored, still in use or abandoned.
+
+| Observed evidence | Permitted interpretation |
+|---|---|
+| Missing report or temporary JSON only | Incomplete/unknown; never promote TSV or temporary JSON to completion. |
+| Completed/aborted `report.json` | Local terminal diagnostic at its exact invocation; no caller acknowledgement, current liveness or independent acceptance claim. |
+| Cleanup failure or missing cleanup evidence | Restoration is not certified; no automatic restore/resume/delete. |
+| Partial/mismatched terminal JSON | Unqualified diagnostic; reader validation remains a separate contract. |
+
+Tracked Python class/schema searches found only the producer and its tests/CLI,
+not a current report consumer. Adding an unused classifier would duplicate a
+future reader boundary. Automatic recovery also lacks a durable baseline manifest,
+current ownership/quiescence and an idempotent recovery caller. These remain open.
+
+The independently reviewed next action is **10/P2**:
+`auto-researcher-abrupt-exit-diagnostic-witness`. Its exact bounded M2M packet is in the current backlog. Reuse the existing
+test owner and unchanged producer; compare an isolated abrupt-exit witness with a
+normal control. Inject synthetic model/evaluator dependencies before import;
+observe explicit owned paths, exit markers and bytes independently. This tests
+producer lifecycle only, not the real evaluator, arbitrary-host sandboxing,
+power-loss durability or production recovery. No child/test runs occurred here.
+
+Preserve all26 original packets and40 prior candidate histories; this distinct
+test action is scored separately. The optional cache plan is freshly9/P3:
+safe rescanning remains correct and no measured latency harm justifies the
+earlier12/P2 bounded score. Preserve that earlier score and the15/P1 broad parent
+in their historical scope. Both PR1826 main workflows passed. Re-observe
+before executing the next packet; no model, WSL, service, AmIBot or startup activation.
+
+
 ## Proposal diagnostic lineage — 2026-09-20
 
 The independently qualified **12/P2** proposal-text step extends the existing
@@ -20,6 +55,8 @@ All new functions stay within50 lines, while inherited class285/loop82 do not gr
 Exact evidence and fresh selection are in the canonical backlog's current observation.
 
 ## Current local RSI checkpoint — 2026-09-15
+
+Historical checkpoint; the September20 qualification above is current.
 
 Report input consistency is locally closed within **15/P1** qualification work.
 Constructor scratch no longer rereads the live target. Each invocation freezes
