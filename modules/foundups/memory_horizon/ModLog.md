@@ -1,5 +1,15 @@
 # Memory Horizon - ModLog
 
+## 2026-09-20 - RSI autonomous-build restaurant-order package
+
+- Confirmed AmIBot/`detect_ai` as the first autonomous-production fixture and reused its bounded production-line pattern.
+- Opened issue #1825 for Memory Horizon as our second controlled RSI FoundUp experiment.
+- Added a principal-readable launch package plus machine-readable package metadata.
+- Added ten WSP 99 `0102_m2m_v1` kitchen tickets: preflight; game shell; measurement engine; procedural content; export/analytics; integration UI; product acceptance; independent research/privacy verification; WSP 102/104 public-surface integration; RSI outcome capture.
+- G1 game/measurement/content/analytics writers use disjoint write roots.
+- Package validation found all required WSP 99 fields present, all dependencies resolvable, all WSP 15 arithmetic correct, and no exact G1 write-path collision.
+- Package remains `PLANNING_NOT_DISPATCHED` / `dispatchable=false`; authored JSON is not a signed WRE work order and grants no OpenClaw/Hermes/OpenRouter authority.
+
 ## 2026-09-20 - Low-fi survival game + cognitive sweep architecture
 
 - Added `docs/GAME_DESIGN_SWEEPS.md`.
@@ -9,8 +19,6 @@
 - Mapped TestMyBrain/NIH/SCAT6 constructs into later, separately scored game mechanics instead of copying their UX.
 - Preserved construct separation: episodic retention, working memory, attention/reaction speed and executive switching do not collapse into one black-box score.
 - Added natural probe presentations through dialogue, inventory and route choices in addition to explicit quiz cards.
-
-# Memory Horizon - ModLog
 
 ## 2026-09-20 - WSP 97 memory terminology audit
 
