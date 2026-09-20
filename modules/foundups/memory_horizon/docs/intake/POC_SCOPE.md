@@ -2,12 +2,19 @@
 
 ## Minimum viable POC
 
-A single-player browser micro-adventure that creates unique events, interleaves delayed episodic probes, adapts subsequent delays, records observer markers and exports a transparent retention timeline.
+**Phase 1 is Sweep 0 + Sweep 1** from [GAME_DESIGN_SWEEPS.md](../GAME_DESIGN_SWEEPS.md):
+
+- Sweep 0: intentionally low-fi survival/dungeon shell with persistent state and a deterministic event ledger.
+- Sweep 1: adaptive delayed episodic-memory probes embedded into normal play.
+
+The mechanical reference is the structural feel of a difficult low-fi survival dungeon game such as *Fear & Hunger*: character selection, exploration, randomized events, inventory/status and consequential choices. We do not copy its protected art, characters, maps, dialogue, lore or distinctive encounters.
+
+The POC creates unique events, interleaves delayed episodic probes, adapts subsequent delays, records observer markers and exports a transparent retention timeline.
 
 ## Included
 
 - Mobile-first browser UI.
-- Four or five simple character/classes only if they affect flavor, not difficulty.
+- Four simple character archetypes whose initial POC differences are mostly flavor/state, so class balance does not confound the memory measurements.
 - Deterministic seeded event generation for reproducibility.
 - >=12 unique scorable events per demo session.
 - Event types: choice, object, character, route, action, location.
@@ -37,6 +44,17 @@ Diagnosis, medical advice, return-to-play decisions, normative impairment thresh
 
 ## Initial UX
 
-The player should be able to start within one tap, understand controls in <30 seconds, and play without knowing which facts will later be tested. Graphics may be text/icons/simple cards. Measurement validity beats polish.
+The player should be able to start within one tap, understand controls in <30 seconds, and play without knowing which facts will later be tested.
+
+The aesthetic is intentionally **low-fi / ugly-first**: text, crude pixel/card art, simple icons and minimal animation. Development effort goes into event variation, timing integrity and measurement—not graphical polish.
+
+Not every probe should look like a quiz. Phase 1 should support:
+- explicit card probes for validation;
+- character dialogue that naturally asks about a prior event;
+- inventory/route decisions that require retrieving an earlier event.
+
+All presentations map to the same probe schema.
+
+Measurement validity beats polish.
 
 Status: NOT_BUILT.
