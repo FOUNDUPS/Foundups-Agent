@@ -8,7 +8,7 @@ This is a planning artifact. No work packet in this document or `docs/roadmaps/r
 
 ## Authority and fast start
 
-Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-20. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-21. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
@@ -130,11 +130,11 @@ and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
-## OpenClaw call-local diagnostic contract — 2026-09-20
+## OpenClaw call-local diagnostic repair — 2026-09-21
 
-The 10/P2 static contract closed in [PR #1829](https://github.com/FOUNDUPS/Foundups-Agent/pull/1829), merge `3d84117ce101ac2b6887084fbf3a58ef127d6c32`, after ten exact-head checks passed and all six reviewed blobs/tree matched. Qualified design: preserve default Boolean admission and add an explicit local verdict/explanation mode in existing owners. The caller must unpack/validate it and never authorize tuple truthiness. See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-contract--2026-09-20).
-No source/test/runtime change occurred. Fresh conditional next action is 10/P2 same-owner diagnostic repair, ahead of optional cache planning 9/P3; exact source, peer paths and test harness must be reconciled before execution.
-The prior AutoResearcher witness closed in [PR1828](https://github.com/FOUNDUPS/Foundups-Agent/pull/1828), merge `b202c14c169b4754bad35808e72a008b0c668165`: 112 local cases independently replayed, all ten exact-head checks and both later main workflows passed. Its [interruption limits](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-abrupt-exit-witness--2026-09-20) remain; no automatic recovery was implemented.
+The **10/P2** repair is locally verified: the existing Boolean API has a literal `details=True` pair mode; the process caller validates it and keeps its own explanation through all four projections. See the [module roadmap](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-repair--2026-09-21).
+Focused and independent runs each pass141 tests/one existing link skip; two actual-child cases are explicitly excluded. Package checks and unchanged test-registry checks pass. Preserve the initial Windows self-pipe harness failure separately; no runtime/provider/scanner or AmIBot activation occurred.
+The current backlog contains the fresh WSP15/WSP97 next selection and its exact entry prerequisites; remote publication and post-closure observation remain pending.
 
 ## R25 approval-owner qualification — 2026-09-20
 

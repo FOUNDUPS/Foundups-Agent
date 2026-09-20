@@ -1184,7 +1184,7 @@ Token symbol resolution:
 - COMMAND/SYSTEM intents blocked for non-commanders (WSP 50)
 - `run_skill_scan(skills_dir, report_dir=...)` owns private report/TMP files per call,
   validates before publishing a mutable latest diagnostic, and fails closed on errors.
-  [Full scanner contract](README.md#skill-safety-gate-cisco-skill-scanner): per-call verdict, observed policy-drift rejection, latest diagnostics; no effect/promotion authority.
+  [Full scanner contract](README.md#skill-safety-gate-cisco-skill-scanner): `_ensure_skill_safety(force=False, *, details=False)` returns `bool`; literal `details=True` returns local `(bool, str)`. The process consumer validates both fields; malformed results raise `TypeError`/`ValueError` before downstream execution. Latest diagnostics and policy-drift rejection remain; no effect/promotion authority.
 - Secret patterns (AIza*, sk-*, oauth_token*) redacted from output
 - Key-isolation mode:
   - `OPENCLAW_NO_API_KEYS=1` blocks cloud provider fallback in conversation/FAM paths.

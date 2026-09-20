@@ -565,18 +565,20 @@ def test_openclaw_dae_legacy_cache_controls_rescan(ttl, age, always):
 
 @pytest.mark.parametrize("mode", ["scan", "unavailable", "import_error"])
 @pytest.mark.parametrize("passed", [False, True])
-def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
+@pytest.mark.parametrize("details", [False, True])
+def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed, details):
     dae = _openclaw_dae()
     dae._skill_scan_required = not passed
     first = guard.SkillScanResult(mode == "scan", passed, 0, "/test", None, "first")
     second = guard.SkillScanResult(True, not passed, 0, "/test", None, "second")
     results = [] if mode == "import_error" else [first]
     results.append(second)
-    later = []
+    later, messages = [], []
 
     def publish(self, name, value):
         object.__setattr__(self, name, value)
         if self is dae and name == "_skill_scan_message" and not later:
+            messages.append(value)
             later.append(None)
             monkeypatch.setitem(sys.modules, guard.__name__, guard)
             later[0] = dae._ensure_skill_safety()
@@ -585,8 +587,14 @@ def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
     if mode == "import_error":
         monkeypatch.setitem(sys.modules, guard.__name__, None)
     with patch.object(guard, "run_skill_scan", side_effect=results) as scan:
-        assert dae._ensure_skill_safety() is passed
+        if details:
+            result = dae._ensure_skill_safety(details=True)
+            assert type(result) is tuple and len(result) == 2
+            assert result[0] is passed and result[1] == messages[0]
+        else:
+            assert dae._ensure_skill_safety() is passed
     assert later == [not passed]
+    assert dae._skill_scan_message == "second"
     assert dae._skill_scan_ok is (not passed)  # Latest diagnostics are not this call's verdict.
     assert scan.call_count == len(results)
 
@@ -598,7 +606,8 @@ def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
     ("max_severity", "medium", "low"), ("max_severity", "medium", "high"),
     (None, None, None),
 ])
-def test_openclaw_dae_rejects_policy_drift(available, field, before, after):
+@pytest.mark.parametrize("details", [False, True])
+def test_openclaw_dae_rejects_policy_drift(available, field, before, after, details):
     dae = _openclaw_dae()
     if field:
         setattr(dae, "_skill_scan_" + field, before)
@@ -611,7 +620,12 @@ def test_openclaw_dae_rejects_policy_drift(available, field, before, after):
         return guard.SkillScanResult(available, True, 0, "/test", None, "current")
 
     with patch.object(guard, "run_skill_scan", side_effect=scan) as call:
-        assert dae._ensure_skill_safety() is (available and field is None)
+        if details:
+            result = dae._ensure_skill_safety(details=True)
+            assert result[0] is (available and field is None)
+            assert result[1] == ("skill scan policy changed during scan" if field else "current")
+        else:
+            assert dae._ensure_skill_safety() is (available and field is None)
     call.assert_called_once()
     if field:
         assert dae._skill_scan_message == "skill scan policy changed during scan"
@@ -656,3 +670,18 @@ def test_openclaw_dae_process_downgrades_foundup_on_safety_failure():
     with patch.object(guard, "run_skill_scan", return_value=_failed_scan_result("blocked by test")):
         gate_result = dae._ensure_skill_safety(force=False)
     assert gate_result is False
+
+
+@pytest.mark.parametrize("details", [False, None, 1, "truthy-object"])
+@pytest.mark.parametrize("force", [False, True])
+@pytest.mark.parametrize("passed", [False, True])
+def test_openclaw_dae_details_requires_literal_true(details, force, passed):
+    dae = _openclaw_dae()
+    if details == "truthy-object":
+        details = MagicMock()
+        details.__bool__.side_effect = AssertionError("details must not use truthiness")
+    result = guard.SkillScanResult(True, passed, 0, "/test", None, "current")
+    with patch.object(guard, "run_skill_scan", return_value=result) as scan:
+        assert dae._ensure_skill_safety(force=force, details=details) is passed
+    scan.assert_called_once()
+    assert dae._skill_scan_message == "current"

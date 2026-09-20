@@ -1,3 +1,10 @@
+## Call-local skill-safety regression evidence — 2026-09-21
+
+- Extend the two existing safety/boundary suites: legacy Boolean plus literal detail mode, nested publication, policy drift, RESEARCH, four callback-stable projections and malformed pair rejection before downstream work. Preserve original assertions, module docstrings and import capabilities.
+- Run the externally qualified `run_guarded_suites.py focused <unique_label>` with the qualified Python -B interpreter. Author141pass/one platform directory-link skip; independent141pass/one skip overlaps. Two existing real-child scan cases excluded by exact name. No broad DAE/service or runtime certification.
+- Initial baseline62fail/79pass/one skip contained26 blocked Windows asyncio self-pipe binds and36 API expectations; corrected baseline59fail/82pass/one skip isolates36 API,7 keyword migration,12 malformed rejection and4 consumer witnesses. Failures and runner revisions are retained.
+- Harness permits only source-bound stdlib Proactor loopback self-pipes, records them separately, and denies product network/DB/child effects. Constructor peripheral adapters are inert/disposable; real policy/wrapper/process are exercised. Scope, commands, hashes and package checks: root backlog current_observation.
+
 ## 2026-09-20: Parent-only Hermes rejection evidence regressions
 
 - Extend only `test_reddog_hermes_api_artifact_provider.py`: 24 stop combinations cover approval/status/timeout causes against cancelled/running/failed/malformed/wrong-ID/denied/error replies; three terminal cases cover failed, cancelled and forbidden activity. Existing fakes and bounded disposable paths remain.
