@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`531b753406c10df454d83e6e1a9de0ed717e87d1`, including PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`7c7d97b0b79031e2750b7d9f0534287a1c8fe212`, including PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,7 +60,7 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting confirms 132 merged PRs and 21
+Refreshed September 9 UTC onward accounting confirms 133 merged PRs and 21
 closed without merge; 98 current peer heads are reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
 prior full inventory reported 12 drafts and 15 PRs with failing checks; 20 have
 all-success checks, 59 have success/neutral/skipped results, and one has no checks.
@@ -89,7 +89,7 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 651 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 652 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -130,13 +130,12 @@ and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
-## AutoResearcher interruption qualification — 2026-09-20
+## AutoResearcher abrupt-exit witness — 2026-09-20
 
-The **12/P2** source-only qualification is complete. See the existing [WRE contract and failure-state map](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-interruption-qualification--2026-09-20).
-Missing or temporary reports remain incomplete/unknown; no reader or automatic recovery was added.
-The separately qualified next test witness is **10/P2**, ahead of optional cache planning freshly **9/P3**; earlier12/P2 and broad15/P1 cache scores remain historical.
-Reuse the unchanged producer and existing test owner with isolated dependency stubs, two deliberate exit points and a normal control. The backlog binds the exact packet and shared registry-entry reconciliation.
-No child/test runs, runtime activation or retained RSI improvement occurred in this plan. Both PR1826 main workflows passed; re-observe before the next action.
+The 10/P2 test-only witness is locally verified: 112 cases pass, independently replayed; production source is unchanged. Proposal exit leaves changed scratch without a report; pre-publication exit leaves restored scratch and temporary JSON, without a final report or acknowledgment. Neither is completion.
+The [WRE witness and limits](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-abrupt-exit-witness--2026-09-20) retain the initial pre-collection harness failure, exact three-mode oracle, registry reconciliation and missing recovery contracts. No runtime or public AmIBot acceptance follows.
+Fresh conditional next action: 10/P2 call-local OpenClaw diagnostic qualification, ahead of optional cache planning 9/P3. Re-observe before execution; preserve existing Boolean admission and product owners.
+The preceding 12/P2 qualification closed in [PR1827](https://github.com/FOUNDUPS/Foundups-Agent/pull/1827), merge `7c7d97b0b79031e2750b7d9f0534287a1c8fe212`; both later main workflows now passed. Its full contract remains in the module roadmap and archived observation.
 
 ## R25 approval-owner qualification — 2026-09-20
 

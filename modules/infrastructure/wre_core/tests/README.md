@@ -1,5 +1,21 @@
 # wre_core Test Suite
 
+## Abrupt-exit lifecycle evidence
+
+The same `test_wre_auto_researcher.py` now has 112 cases (109 unchanged plus three
+child modes), passing locally and in an independent replay. The embedded child
+uses fixed metrics and disables model construction before product import; the
+original real-evaluator tests remain intact. Disposable external roots, reviewed
+pre-import effect guards, isolated Python flags and 20s wait/5s owned-child reap
+bound each case. Never run these fixtures against a live source/work directory.
+Missing and temporary-only reports remain unknown; only normal return matches
+the saved terminal report and acknowledgment. Prior sentinel bytes test
+preservation, not a previous successful run. See the module roadmap for the exact
+oracle, initial pre-collection runner failure and replay receipts. The 996 lines retain
+the existing cohesive size review; original 31 definitions unchanged, new functions
+<=50. Registry process capability is generated; no recovery or model-quality proof.
+
+
 ## Proposal input identity
 
 `test_wre_auto_researcher.py` now covers returned UTF-8 proposal identity without

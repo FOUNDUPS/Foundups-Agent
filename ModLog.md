@@ -1,3 +1,16 @@
+## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
+
+- Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
+- Author 112 and independent 112 pass (overlapping), after a preserved pre-collection null-device harness failure. Three suite attempts/six children; 111 denied symlink attempts per passing run recorded; pytest-helper attribution is inferred. Child fixed metrics isolate lifecycle, not evaluator/model quality or hostile-host sandboxing.
+- Generated only existing process capability; registry 1651/269 preserved and peer1820 overlap reconciled. Test 996 lines, parent 41, new helpers <=50; existing cohesive size review retained.
+- Both PR1827 main workflows passed. Preserve 26 packets/41 histories and archive the prior observation; distinct next 10/P2 OpenClaw diagnostic plan makes 42 histories. No recovery, reader, live runtime or retained model improvement claim. WSP00/15/22/50/62/84/97/99; exact receipts in current backlog.
+
+## 2026-09-20: Close interruption qualification; select bounded test witness
+
+- PR1827 merged as 7c7d97b0b79031e2750b7d9f0534287a1c8fe212; ten exact-head checks passed and six reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed41 histories and next-source bindings;10/P2 test witness selected over freshly9/P3 optional cache plan. No next test execution; shared derived registry entry must reconcile with PR1820 before work.
+- Accounting133 merged/21 closed-unmerged sinceSeptember9UTC/98peers. Shared checkout preserved; no source/runtime activation. WSP15/22/97.
+
 ## 2026-09-20: Qualify AutoResearcher interruption evidence
 
 - Completed the12/P2 static lifecycle/oracle plan in six existing documents. Missing/temp reports remain incomplete/unknown; terminal files are local diagnostics, not caller acknowledgement, independent acceptance or durable recovery.
