@@ -1,3 +1,16 @@
+## 2026-09-20: Deliver the existing red-team CI reports
+
+- Existing upload step now allows hidden files only at two literal report paths. All other YAML semantics are unchanged; independent source review accepted.
+- Normal PR1814 run35490794138 produced artifact10598364742: API digest, exact two-member ZIP,42-case XML and stdout validated. Initial log-read timing failure preserved; no repeat download. Final candidate verification remains pending.
+- Reconciled existing priority histories and qualified next `M2M-governed-context-binding-contract` at13/P1. Prior R19 qualification archived intact;26 packets preserved.
+- Protected PR1813 integrated unchanged; PR1644/1793 closed unmerged. Accounting125 merged/21 closed/95 surviving peer heads. WSP00/15/22/97; no runtime/gate activation or retained-learning claim.
+
+## 2026-09-20: Close R19 qualification; select bounded upload repair
+
+- PR1811 merged as 3f15adeb27c6b3cc47efc4cc0ff6ebbc60b92729 after ten successful exact-head checks. All six reviewed blobs and the expected combined merge tree match, preserving PR1812. Candidate checks are distinct from later main workflows.
+- Recalculated 33 candidate scores. Qualification is closed; next is the separate C2/I4/D4/Impact3 = 13/P1 two-file upload repair. Workflow and report delivery remain unchanged until that sprint verifies hosted artifact contents.
+- Accounting: 124 merged / 19 closed unmerged / 97 current peer heads. Shared checkout and protected product work preserved. WSP 15/22/97; no gate or runtime activation.
+
 ## 2026-09-20: Qualify R19 missing CI report delivery
 
 - Two exact hosted run attempts logged XML creation and 42 passing cases each, but selected no upload files and list zero artifacts. Immutable resolved action and bundled glob identify hidden-directory exclusion.

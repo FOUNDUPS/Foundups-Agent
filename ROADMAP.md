@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-20
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`c43acc2f2399b2b331b26ebeeacd94e023a9b666`, including PR1797–1810 and the separately merged PR1668 YUMORI asset registry. PR1803's ten
+`b94bada9bfc05e0ef7c5d7a4ce6641ed9e867dc2`, including the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,8 +60,8 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting found 122 merged PRs and 16
-closed without merge; 100 surviving peer heads are unchanged after PR1771 closed without merge and PR1668 merged. The
+Refreshed September 9 UTC onward accounting found 125 merged PRs and 21
+closed without merge; 95 current peer heads are reconciled after PR1644/1793 closed without merge and PR1813 merged. The
 preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
 passing/skipped checks and one with no reported checks; bulk mergeability was
 76 MERGEABLE and 26 CONFLICTING, including PR1751. Check/mergeability summaries
@@ -69,8 +69,9 @@ were not refreshed in this contract sprint. These categories overlap;
 reported green checks alone do not establish current merge or runtime authority.
 R19 qualification now binds two hosted runs with 42 passing observations each,
 XML creation and parsing, but zero selected/uploaded artifacts. The exact action
-excludes the hidden report directory. The separately scored 13/P1 next repair
-allows only the two named report files; hosted delivery and gate activation remain unproven.
+excludes the hidden report directory. The separately scored 13/P1 repair
+now delivers the two named reports in a verified normal PR run. Final source
+closure remains pending; report-only gate activation stays separate.
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; the current backlog observation binds the
@@ -86,9 +87,9 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is merged in PR1806:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. PR1806 first CI caught an omitted backend digest refresh; corrected manifest/pins passed all ten fresh exact-head checks before merge. No real WSL/provider call. |
 | PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
 | AmIBot | PR #1751 remains draft at `04ef322f`, with `validate` failing; fresh mergeability is CONFLICTING. Main registry has17 entries and no `detect_ai`; issue1750 remains open. Reconcile this existing package and registration. |
-| Product work | Current open work includes YUMORI correspondence #1793, funding #1791, reusable brand context #1792 and eSingularity validation #1767. Preserve their owners and Remote's separate AutoPost work. |
+| Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 643 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 644 branch refs and 157 registered worktrees at this refresh are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -122,11 +123,12 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the bounded source scope, exact evidence and next 13/P1 R19 upload-step repair packet.
-R19 report-delivery qualification is complete locally: exact action/run evidence
-identifies hidden-directory exclusion. Its separate 13/P1 upload-step repair is
-next, subject to closure, fresh ownership and independent validation. No workflow
-change occurred in the qualification; report-only gates remain unchanged.
+the current R19 upload repair, exact evidence and next bounded M2M context contract.
+R19 qualification is merged in PR1811. Its one-step upload repair has actual
+hosted proof: artifact10598364742, exactly XML/stdout,42 passing cases
+and no failures/errors/skips. Final candidate verification and closure remain
+pending. The next separately scored 13/P1 contract is
+`M2M-governed-context-binding-contract`. No runtime or gate activation.
 
 ## AmIBot autonomous production experiment — 2026-09-15
 
