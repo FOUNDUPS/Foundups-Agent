@@ -46,7 +46,7 @@ Apply the WSP 97 loop: research → inspect the exact change → inspect adjacen
 | --- | --- | --- | --- |
 | eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI | `frontend/app/page.tsx` and its necessary dependencies |
 | YUMORI.me / www | Build the wider YUMORI movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
-| Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and `current-field-status.ts`; verify both consumers |
+| Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and multilingual `current-field-status.json`; verify both consumers |
 
 “Apply the website skill” applies the workflow to the site named in the request or established by the active task. It does not mean redesign both sites. State the target, requested outcome and bounded edit scope briefly before editing. If the target truly cannot be resolved from the request and visible context, ask one short question before a page-specific mutation.
 
@@ -65,7 +65,7 @@ Choose the actual labels and grouping from the current redesign brief and source
 | eSingularity.ai project homepage | `frontend/app/page.tsx` |
 | YUMORI.me / www movement homepage | `frontend/app/yumori/page.tsx`, selected by host-restricted rewrite in `frontend/next.config.ts` |
 | Shared ticker | `frontend/components/CampaignTicker.tsx`, rendered exactly once per homepage; the second scrolling set inside it is intentional |
-| Shared announcement | `frontend/content/current-field-status.ts`; never copy event text into either page |
+| Shared announcement | `frontend/content/current-field-status.json`; never copy event text into either page |
 | Project information alias | YUMORI.info externally redirects to eSingularity.ai; do not repurpose its forwarding |
 | Publication | One existing Sites project declared in `frontend/.openai/hosting.json` |
 
@@ -75,7 +75,7 @@ The project page mounts `<CampaignTicker />`; the movement page mounts `<Campaig
 
 Both pages retain their separate purposes and join actions. Preserve JHR access, current signup/LINE destinations, Japanese-first language behavior, assets and relevant public claim boundaries from INTERFACE. A shared component does not authorize replacing the movement page with the project page. Explicit requested changes may evolve these contracts; update their owning documentation and checks together rather than silently removing them.
 
-For announcement-only edits, use `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Keep event date, location, end time and link consistent; do not renew an expired invitation unless 012 confirms it. The current ticker has no automatic expiry: flag stale LIVE copy during a website review rather than inventing a new appearance.
+For announcement-only edits, use `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Keep event date, location, end time and link consistent; do not renew an expired invitation unless 012 confirms it. The live payload contains Japanese, English and Portuguese together and expires automatically; hidden, expired or invalid data falls back to the durable campaign action.
 
 ## Verification and publication
 
