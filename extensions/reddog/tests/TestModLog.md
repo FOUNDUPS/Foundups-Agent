@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-20 - Moshpit canonical path terminology
+
+- Reused the existing `test_reddog_identity_boundary.js`; no new test file was created.
+- Updated its canonical architecture-path assertion from the split `MOSH_PIT...` filename to `MOSHPIT...`.
+- This is a documentation/path contract change only. It does not claim the unified Moshpit renderer is implemented.
+- WSP 22/50/60/97.
+
+# Foundups(R)Agent TestModLog
+
 ## 2026-09-20 - Hermes rejection-evidence package validation
 
 - One existing runtime member changed; the 1,400-member manifest and both digest pins now bind `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. Membership, API/version, package caps and safeguard assertions stay unchanged.
