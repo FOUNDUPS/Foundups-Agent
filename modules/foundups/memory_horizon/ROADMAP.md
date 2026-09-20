@@ -80,8 +80,22 @@ Research/architecture: [Assistive Memory Companion](docs/ASSISTIVE_MEMORY_COMPAN
 
 Proposed future host: `memory.foundups.com`. DNS/public activation is a separate slice. The first POC can live as an internal/static preview under the FoundUps development surface.
 
+## RSI autonomous-build experiment
+
+Memory Horizon is our second controlled FoundUp production-line fixture after AmIBot.
+
+Package: [MEMORY_HORIZON_AUTONOMOUS_BUILD_PACKAGE.md](docs/launch/MEMORY_HORIZON_AUTONOMOUS_BUILD_PACKAGE.md)  
+Machine inventory: [work_orders/README.md](work_orders/README.md)  
+Experiment parent: issue #1825.
+
+The package contains ten bounded WSP 99 tickets. G0 is current-source/authority preflight. G1 deliberately splits game, measurement, content and analytics into disjoint writer scopes. Integration, independent acceptance, research/privacy verification, public-surface reconciliation and RSI outcome capture are dependency-gated downstream.
+
+The package is `PLANNING_NOT_DISPATCHED` and `dispatchable=false` until current runtime admission is proven. A blocked OpenClaw/Hermes/OpenRouter gate is an experiment result, not permission to bypass the architecture.
+
 ## Next work
 
-Primary: issue #1821, `MEMORY_HORIZON_POC_PHASE1`.
+Product target: issue #1821, `MEMORY_HORIZON_POC_PHASE1`.
+
+Autonomous-build orchestration: issue #1825, `MEMORY_HORIZON_RSI_AUTONOMOUS_BUILD_EXPERIMENT_PHASE1`.
 
 Deferred after the event model is proven: issue #1823, `MEMORY_HORIZON_COMPANION_PHASE1`.
