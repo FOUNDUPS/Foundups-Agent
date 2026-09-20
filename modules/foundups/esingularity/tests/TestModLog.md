@@ -1,5 +1,10 @@
 # eSingularity TestModLog
 
+## 2026-09-20 — Multilingual live ticker control plane
+
+- Extended `test_jhr_public_contract.py` in place for the versioned JSON schema, required Japanese/English/Portuguese copy, explicit expiry, one-minute live-branch polling, visibility and timestamp bounds, allowed destinations, safe fallback, and isolation from the legacy DOM translator.
+- Updated the existing ticker/deck contract in `test_contracts.py` for structured localized actions and the JSON status source; no parallel test file was created.
+
 ## 2026-09-20 — Canonical YUMORI Moshpit ledger pointer contract
 
 - Extended the existing Moshpit Skillz registry test; no duplicate test file was created.

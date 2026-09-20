@@ -82,7 +82,7 @@ The campaign Moshpit is reverse chronological within each JST day. Agent-interna
 
 ## Campaign ticker updates
 
-Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it on both eSingularity.ai and YUMORI.me. Date and time-limit each invitation in Japan time.
+Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. A routine verbal update becomes one Japanese/English/Portuguese `frontend/content/current-field-status.json` payload on the dedicated `live/yumori-field-status` branch; the deployed shared `CampaignTicker.tsx` polls it for both eSingularity.ai and YUMORI.me. Each item is explicitly time-limited in Japan time and falls back safely after expiry.
 
 The public civic-action record lives at `https://YUMORI.me/vote-no`. It publishes privacy-bounded transcripts of the committee's sent council and mayor messages, clearly labels superseded historical requests, and links visitors to official Fukui contact channels.
 
