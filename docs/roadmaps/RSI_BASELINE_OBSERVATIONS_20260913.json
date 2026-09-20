@@ -76109,5 +76109,10 @@
       "open_peer_count": 98,
       "method": "Prior corroborated134-merge/21closed-unmerged interval plus verified own merge;98peer heads unchanged. Not an atomic GitHub snapshot."
     }
+  },
+  "openclaw_call_local_repair_closed_20260921": {
+    "immutable_observation": "cb62de4f3978069ba2ced01c9cce74b431e6835c:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "git_blob": "ee4bbbeaf14cbf78841f52f55c6718efc2c9966e",
+    "reason": "Complete pushed checkpoint retained in Git; reference avoids copying the large unchanged closure and43histories again. New cache qualification does not alter previous receipts."
   }
 }

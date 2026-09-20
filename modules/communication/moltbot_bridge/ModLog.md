@@ -1,3 +1,8 @@
+## 2026-09-21: Close optional wardrobe cache qualification
+
+- WSP00/15/22/50/62/84/97/99: independently reviewed existing scanner, manifest and WRE cache; retain rescanning. Four-file bundle identity is not recursive scanner coverage; no measured optimization benefit or source slice qualified.
+- Existing owners and future synthetic oracles are mapped in the module roadmap. Zero tests/runtime calls; source, tests, manifest and registry unchanged. Full source-bound receipts and next selection are in the canonical RSI backlog.
+
 ## 2026-09-21: Preserve call-local OpenClaw safety explanations
 
 - WSP00/11/15/22/50/62/84/95/97/99;10/P2 same-owner repair. Existing Boolean API gains literal details=True pair; process validates and uses local fields across all four projections, without changing admission/scanner policy or latest-status rendering.
