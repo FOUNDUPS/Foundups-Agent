@@ -1,3 +1,9 @@
+## 2026-09-20: Close context qualification and select its source repair
+
+- PR1815 merged as 11c2f164dcd4f23c75fd3e35fe8d61b0b72cb507 after all ten exact-head checks passed; merge tree and six reviewed blobs verified. Later main workflows are separate observations.
+- Re-observed all35 candidate histories. The independently qualified13/P1 prepared-context digest repair remains next; no source implementation or runtime activation began. Accounting127 merged/21 closed-unmerged/95 peers; protected shared checkout preserved.
+- Exact closure/review receipts are bound in the current backlog. WSP15/22/97; next checkpoint uses the owned source-repair branch.
+
 ## 2026-09-20: Qualify prepared-context binding and reconcile RSI status
 
 - Closed local 13/P1 contract qualification: 12 synthetic cases / 27 mocked adapter calls; 4 altered context forms pass under unchanged sealed prompt. Existing redaction/prompt negatives, size and one-shot checks remain. Initial harness typo retained; no source/test changes.
