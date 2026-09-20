@@ -22,11 +22,12 @@ The WSP 97 workflow also covers bounded history/research, distinct homepage owne
 YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
 
 - [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.
+- [YUMORI.me correspondence / contact ledger](skillz/yumori_contact_ledger/SKILLz.md): parent contract for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, receipts and reusable operator learning.
 - `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.
 - [YUMORI funding / PPP intelligence](skillz/yumori_funding_ppp_intelligence/SKILLz.md): current grant/subsidy/PPP status with primary-source and no-false-funding boundaries.
 - [YUMORI Moshpit](skillz/yumori_moshpit/SKILLz.md): campaign-history versus 0102-learning routing and JST ordering.
 
-The live YUMORI Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
+The live YUMORI.me Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
 
 ## Public architecture — one project, two focused sites
 
