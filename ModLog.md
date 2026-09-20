@@ -1,3 +1,10 @@
+## 2026-09-20: Qualify pinned Hermes child-input observability
+
+- Six existing docs only; WSP00/15/22/50/62/84/97/99. Current /v1/runs source at official e624e9fde561e1add9388384012b295fde669ade/API0.20.4 omits full child context/accepted input. Existing lifecycle checks remain useful but cannot prove content fidelity; no consumer patch qualified.
+- Raw-host429 recovered by one exact-commit official API read; five of six source requests used. Preserve original failure and corrected background-request-versus-fallback wording. No tests, synthetic probes, source/runtime changes or live provider calls.
+- New dispatcher/delivery compatibility evidence independently selects14/P1 lifecycle qualification ahead of R25approval-owner13/P1. Preserve36prior histories and add both distinct actions; one next planning packet, no new module/skill/authority.
+- PR1816 postmerge CI and CodeQL now pass. Current documentation publication remains separate; protected shared checkout/95peer heads unchanged. Exact receipts and limitations are in the current backlog.
+
 ## 2026-09-20: Close prepared-context repair; select child-evidence qualification
 
 - PR1816 merged as 470161321f6b95371b52c756d339560520f093c3; all ten exact-head checks passed and24reviewed blobs/merge tree match. Later main workflows remain separately recorded.

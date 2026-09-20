@@ -123,12 +123,53 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the closed R19 evidence, verified local context repair and conditional native-child contract plan.
+the closed R19/context repairs, qualified child-input observability gap and next14/P1 lifecycle compatibility plan.
 R19 qualification is merged in PR1811. Its one-step upload repair has actual
 hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
 and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
+
+## Hermes child-input evidence qualification — 2026-09-20
+
+Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
+Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
+the official v2026.8.18 tag resolves to commit
+`e624e9fde561e1add9388384012b295fde669ade`, whose package version matches.
+The legacy vendor gitlink is0.9.0 and is not this API-provider source. Neither
+release metadata nor historical canaries prove the current installed runtime.
+
+| Boundary | Verified source contract |
+|---|---|
+| Prepared parent | Existing raw-context/prompt checks precede provider effects; approved redacted strings enter the parent request. |
+| Requested delegation | Parent prose requests complete goal/context and background=false; it is not observed child acceptance. |
+| Child construction | Pinned delegate source places goal in child user input and nonblank context in its system framing. Final model delivery remains unproven. |
+| Current /v1/runs events | Producer drops tool arguments/call linkage; child whitelist has redacted goal and lifecycle metadata, but no complete context or accepted input. |
+| Local verifier | Checks run/child/session identity, ordering, reported empty effects and parent terminal-output agreement. These do not establish child content fidelity. |
+
+The [pinned API producer](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/gateway/platforms/api_server.py#L6580)
+feeds the same queued dictionaries to the run event stream. Generic preview
+completeness is unknown; a goal-only check cannot close missing context coverage.
+The separate /v1/responses argument stream has a different contract and cannot
+be substituted without qualification. The smallest prerequisite is an adequate
+version-bound accepted-child-input evidence contract in existing upstream/route
+owners. No consumer patch, invented telemetry field or new authority is qualified.
+
+New source evidence changes priority: the pinned model dispatcher ignores the
+background argument and requests background when `_delegate_depth` is not above0.
+Actual delivery can still fall back inline through session/wake/pool conditions.
+This conflicts with relying on parent prose for synchronous execution, but is not
+a demonstrated live failure. Next is bounded lifecycle/result-delivery compatibility
+qualification, C3/I4/D4/Impact3=14/P1, before R25approval-owner planning13/P1.
+Preserve the existing layered/error telemetry positive case and event confinement;
+do not loosen gates or change instructions until the pinned path is understood.
+
+The initial raw-host429 was recovered through one responsive official contents
+API read at the same commit: five of six source requests used, no raw retry or
+latest-version substitution. Failures and corrected background wording remain
+in the source-bound receipts. No new tests, probes, source edits, provider calls,
+runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
+backlog preserves all36 prior histories and adds two separately scored actions.
 
 ## Prepared-context integrity repair — 2026-09-20
 
