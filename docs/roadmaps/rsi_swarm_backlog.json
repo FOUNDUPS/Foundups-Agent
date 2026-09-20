@@ -1990,13 +1990,17 @@
         "failed": 11
       },
       "candidate": {
-        "passed": 45
+        "passed": 48
       },
       "effects": "Both guarded runs have zero forbidden attempts and no input changes within each run",
-      "independent": "ACCEPT:45-case replay,11 positive/negative mutation pairs; mocked Node6route controls/4mutations. Counts overlap, not distinct product tests.",
-      "remote": "pending",
+      "independent": "ACCEPT revised HTMLParser candidate:48-case replay and11/11 positive/negative mutation pairs. Prior mocked VM6/4 remains bound to unchanged public inline source.",
+      "remote": "Initial head4721613ba rejected by CodeQL: HTML regex missed uppercase SCRIPT tags. All other initial checks passed. Revised standard-parser head requires fresh hosted CI; no waiver or weakened check.",
       "limits": "Static route contract validation, not browser/device acceptance, public route activation, authenticated runtime or RSI retained-learning proof. Prior five broader FoundUp static failures remain outside scope. Mocked VM does not run public fetch callbacks or external scripts, authenticate a person or execute a tenant.",
-      "registry": "Initial --check stale solely because module docstring changed; regenerate exactly one description with existing owner.1651 tests/269 quarantined; classification/shards unchanged."
+      "registry": "Initial description-only generation remains current1651/269 after parser correction; classifications/shards unchanged.",
+      "initial_candidate": {
+        "passed": 45
+      },
+      "initial_independent": "ACCEPT:45-case replay,11 positive/negative mutation pairs; mocked Node6route controls/4mutations. Counts overlap, not distinct product tests."
     },
     "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-route-contract-0304",
     "evidence_sha256": {
@@ -2010,7 +2014,13 @@
       "independent/receipt.json": "64ac34e0e3966bb84c8b158cdf3f14d62280a3737507aafd1b723bde527bac77",
       "independent-controls/receipt.json": "50c275d55764d4f08023e4032eeae5c8e0ab16293c9c17cbac242110188e3570",
       "independent-vm-receipt.json": "184b242f80d12e6e221841f87fa3b6e50a066489206a6a2f54b53f297c944ec8",
-      "registry-reconciliation.json": "e8da7871ea0bde89f65f7d241f5e9194271b63100bf6c81abe1ab5be90c68877"
+      "registry-reconciliation.json": "e8da7871ea0bde89f65f7d241f5e9194271b63100bf6c81abe1ab5be90c68877",
+      "initial-codeql-annotations.json": "3c31ba4e8fdacc99848a3415ad57d153ca7af0b517e5965249c6cd49e56c9dc6",
+      "initial-hosted-checks.json": "5ec022c303092c2059677ca8a2838f7514130d1405b2420a4e4ea8266517881d",
+      "candidate-htmlparser/receipt.json": "fa92ffee72abe53e4dcc13079200d0637c082b2cc0c3e92c8e41d2b19937ec88",
+      "independent-review-v2.json": "057d9227dfc7c6893c059194462d09a6f5997cef56c1f04e6e24644160499f0c",
+      "independent-htmlparser/receipt.json": "55e4677dd55c176f6b1a6f091030827f539bbde061dab9c69927d4e48641de82",
+      "independent-controls-htmlparser/receipt.json": "5ceaea7d533d85e25084f9b7e5315084ee713dd2a4a524a1a13fd0493e0b2ccd"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2588,6 +2598,6 @@
       "selection_rationale": "Closed registry prerequisite removed; higher jobs retain unchanged runtime/owner/consumer dependencies. Route test drift is eligible for local qualification using existing sources. A test-only repair must preserve public projection and participation gate; no route or product source change."
     },
     "requires_fresh_reobservation_after_closure": true,
-    "next_step": "Publish reviewed exact candidate, require successful hosted checks, verify merge tree, then re-observe and rescore; do not infer runtime authority."
+    "next_step": "Publish separately reviewed parser correction to same PR1832; require fresh exact-head checks before merge, preserve initial rejection and rescore after closure."
   }
 }

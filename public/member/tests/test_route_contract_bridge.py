@@ -12,6 +12,7 @@ Route behavior:
 import json
 import os
 import re
+from html.parser import HTMLParser
 import pytest
 
 # public/member
@@ -45,15 +46,40 @@ def _read(relpath, base=ROOT):
         return f.read()
 
 
+class _InlineScripts(HTMLParser):
+    """Collect inline script text using HTML's case-insensitive tag semantics."""
+
+    def __init__(self):
+        super().__init__()
+        self.scripts = []
+        self.in_script = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "script":
+            self.in_script = not any(name == "src" for name, _ in attrs)
+            if self.in_script:
+                self.scripts.append("")
+
+    def handle_endtag(self, tag):
+        if tag == "script":
+            self.in_script = False
+
+    def handle_data(self, data):
+        if self.in_script:
+            self.scripts[-1] += data
+
+
 def _landing_script():
     """Inspect executable inline code, excluding full-line documentation comments.
 
     Historical catalog names and retired mount CSS remain in the HTML. They
     must not satisfy current runtime contract checks merely by being present.
     """
-    scripts = re.findall(r"<script>(.*?)</script>", _read("../f/index.html"), re.S)
-    assert len(scripts) == 1, "Expected the canonical inline route owner"
-    return re.sub(r"(?m)^\s*//[^\n]*$", "", scripts[0])
+    parser = _InlineScripts()
+    parser.feed(_read("../f/index.html"))
+    parser.close()
+    assert len(parser.scripts) == 1, "Expected the canonical inline route owner"
+    return re.sub(r"(?m)^\s*//[^\n]*$", "", parser.scripts[0])
 
 
 def _app_gate():
@@ -61,6 +87,18 @@ def _app_gate():
     gate = re.search(r"if\s*\(isAppMount\)\s*\{([^}]+)\}", script)
     assert gate, "App routes must retain an explicit participation gate"
     return script, gate
+
+
+@pytest.mark.parametrize("tag", ["SCRIPT", "ScRiPt", 'script type="text/javascript"'])
+def test_inline_script_extraction_uses_html_tag_semantics(monkeypatch, tag):
+    """Casing/attributes cannot hide code; external script names are not code."""
+    close_tag = tag.split()[0]
+    html = (
+        '<SCRIPT SRC="/member/mall-video-catalog.json"></SCRIPT>'
+        f"<{tag}>\n// documentation only\nvar marker = 'actual code';\n</{close_tag}>"
+    )
+    monkeypatch.setitem(globals(), "_read", lambda _: html)
+    assert _landing_script().strip() == "var marker = 'actual code';"
 
 
 class TestCanonicalRouteExists:

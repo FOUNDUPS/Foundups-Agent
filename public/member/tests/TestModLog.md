@@ -3,7 +3,7 @@
 ## 2026-09-21 | Public discovery / participation route contract reconciliation
 
 `test_route_contract_bridge.py`: 34 passed / 11 failed on main `f7307291`;
-the corrected existing suite has 45 passing tests, no skips. Retain canonical
+the final corrected suite has 48 passing tests, no skips (three parser cases added). Retain canonical
 identity, Firebase rewrite ordering, transitional member entry and tenant
 catalog checks. Replace retired public iframe/entry_url/deep-link launch
 expectations with the existing `/member/` participation handoff, scope-free
@@ -11,7 +11,9 @@ public catalog, sanitized projection and safe public-link contracts.
 Inline-script checks exclude full-line comments and retired CSS, which had
 made member-catalog and launch checks pass without testing executable code.
 All HTML, JavaScript, catalogs and auth behavior remain byte-identical to main.
-Independent replay:45 pass. All11 in-memory source mutations rejected; mocked
+Initial replay:45 pass. Hosted CodeQL rejected regex extraction of uppercase
+SCRIPT tags; replaced it with stdlib HTMLParser and three casing/attribute
+controls. Final independent replay:48 pass. All11 in-memory mutations rejected; mocked
 Node VM:6 route controls and4 mutations pass. These overlap the same contract;
 no real browser, sign-in or tenant execution. Registry generator updates only
 this module description;1651 entries/269 quarantined, classification unchanged.
