@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — YUMORI.me correspondence parent rebuilt on current main
+
+- Rebuilt the bounded correspondence/contact-ledger capability from stale PR #1793 without carrying its older branch history forward.
+- Added one canonical YUMORI.me parent contract for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, third-person monk reference, receipt reconciliation, and recursive operator learning.
+- Made the Fukui City procedure delegate to that parent while retaining the existing recipient-preflight authority for consequential outbound actions.
+- Registered the capability through the existing WRE Skillz registry and thin `.agents` / `.claude` projections; no independent runtime, recipient authority, or parallel contact database was created.
+- No private recipient addresses, BCC lists, credentials, messages, Gmail state, Sheets, Docs, RSI, RedDog behavior, or public website/deployment content changed.
+
 ## 2026-09-20 — YUMORI.me funding registry and Fukui reuse history reconciled
 
 - Reconciled the stale funding/PPP PR against current main and official Fukui City sources instead of merging its older branch history.
