@@ -557,19 +557,27 @@ See the focused source interfaces and tests for:
 - `src/foundup_job_model_capability_projection.py`
 - `src/wre_autonomous_slice_verifier_runtime.py`
 
-### Consumer force-dry boundary (qualified gap)
+### Consumer force-dry boundary
 
-`FoundUpJobConsumer(dry_run=True)` documents a force-dry promise, but current
-`_dispatch_to_hermes` passes only the job to `execute_foundup_job`; that function
-reuses the process-global executor. A bounded eight-case witness confirms that
-warmed non-dry or controlled-harness configuration can reach the execution seam
-for a True consumer. The execution body was mocked; no live effect is established.
-A fresh singleton's default True is insufficient proof of per-call isolation.
+`execute_foundup_job(job, *, force_dry_run=False)` preserves the existing
+one-argument singleton path. The keyword must be a literal boolean; invalid types
+raise `TypeError` before selecting or constructing an executor. True constructs
+`HermesJobExecutor(dry_run=True)` with ordinary safe defaults for that call.
+It neither mutates nor copies the warmed global executor's tools, custom root,
+custom validator, controlled-harness or adapter flags. False grants no live authority.
 
-The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21)
-qualifies a compatibility-preserving force-dry extension and existing-test plan.
-That extension is not implemented. Existing validation, capability/action gates,
-model admission and blocked live-delegation contracts remain unchanged.
+`FoundUpJobConsumer.consume_one` snapshots its mode before job lookup, routing and
+binding callbacks, then uses that value for model admission and Hermes dispatch.
+Original job flags remain independent validation/action-guard input. Default
+capability-validator identity and nonce history are shared across fresh executors;
+the warmed singleton and any custom validator retain their state.
+
+Normal workspace discovery applies to the fresh executor; bind an owned root for
+tests. Dry-run evidence can write files. Validation, model admission, token/action
+guards and live-delegation blocks remain active, so not every job reaches simulation.
+Constructor cost is unmeasured. This is configuration isolation, not an OS sandbox
+or runtime admission. The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21)
+records the baseline witness, repair and verification limits.
 
 ## Test differential and independent verification
 
