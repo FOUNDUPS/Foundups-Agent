@@ -1,6 +1,6 @@
 ---
 name: yumori_funding_ppp_intelligence
-description: Verify live grant, subsidy, GX, PPP/PFI and public-asset reuse opportunities for YUMORI and synchronize City-facing evidence
+description: Verify live grant, subsidy, GX, PPP/PFI and public-asset reuse opportunities for YUMORI.me and synchronize City-facing evidence
 version: 0.1
 author: 0102
 agents: [0102, qwen, gemma]
@@ -18,18 +18,18 @@ evals:
   - city_facing_claims_preserve_eligibility_boundary
 ---
 
-# YUMORI Funding / PPP Intelligence
+# YUMORI.me Funding / PPP Intelligence
 
 ## Purpose
 
-Maintain one evidence-backed funding and PPP intelligence lane for YUMORI / former Sukatto Land Kuzuryu. The skill converts changing national, Fukui Prefecture and Fukui City programs into accurate project evidence without turning a live program into a false funding commitment.
+Maintain one evidence-backed funding and PPP intelligence lane for YUMORI.me / former Sukatto Land Kuzuryu. The skill converts changing national, Fukui Prefecture and Fukui City programs into accurate project evidence without turning a live program into a false funding commitment.
 
 ## Trigger
 
 Run this workflow when any of the following occurs:
 
 - a grant, subsidy, GX, data-center, energy-efficiency, heat-reuse, regional-infrastructure, PPP/PFI or public-asset reuse program opens, closes or materially changes;
-- 012 asks what public funding/support could apply to YUMORI;
+- 012 asks what public funding/support could apply to YUMORI.me;
 - a City/Prefecture/council communication will mention grants, subsidy, PPP/PFI or public funding;
 - document 03, document 05 or the financial model is being updated on funding;
 - a ministry, implementing body, Fukui City or Fukui Prefecture gives an eligibility answer.
@@ -78,9 +78,9 @@ For every candidate program capture:
 - application method and inquiry contact;
 - exact primary-source URLs.
 
-### 2. Map to YUMORI components
+### 2. Map to YUMORI.me components
 
-Do not ask only “does YUMORI qualify?” Map the program to the actual component:
+Do not ask only “does YUMORI.me qualify?” Map the program to the actual component:
 
 - modular/container COGDC;
 - new-build or later DC expansion;
@@ -124,16 +124,16 @@ When a live program materially changes the reuse case, prepare a concise Japanes
 1. official program and agency;
 2. what changed and deadline;
 3. published rate/cap;
-4. YUMORI/Sukatto component that may fit;
+4. YUMORI.me/Sukatto component that may fit;
 5. unresolved eligibility boundary;
 6. request to identify the responsible Fukui City department and assess eligibility before irreversible disposition;
 7. official source links.
 
-The purpose is education and eligibility determination, not a claim that the City or YUMORI has secured funding.
+The purpose is education and eligibility determination, not a claim that the City or YUMORI.me has secured funding.
 
 ### 5. Outreach and receipts
 
-Use the canonical YUMORI contact/Gmail routing rules. After sending:
+Use the canonical YUMORI.me contact/Gmail routing rules. After sending:
 
 - verify Sent;
 - capture Gmail MID/TID;
@@ -152,7 +152,7 @@ When unsure where a grant fact belongs, put the full verified program fact in th
 ## Boundaries
 
 - Do not describe open programs as secured project funding.
-- Do not imply Fukui City, Fukui Prefecture or a ministry supports YUMORI unless primary evidence says so.
+- Do not imply Fukui City, Fukui Prefecture or a ministry supports YUMORI.me unless primary evidence says so.
 - Do not book subsidy revenue before AWARDED.
 - Do not double-count the same equipment across grants.
 - Do not infer that a closed facility satisfies baseline requirements.

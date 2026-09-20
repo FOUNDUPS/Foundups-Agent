@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — YUMORI.me funding registry and Fukui reuse history reconciled
+
+- Reconciled the stale funding/PPP PR against current main and official Fukui City sources instead of merging its older branch history.
+- Standardized the project name as `YUMORI.me` in the funding registry and reusable funding Skillz contract.
+- Recorded that Sukatto is absent from the FY2026 call without treating that omission as categorical ineligibility: official FY2025 results show two rejected Sukatto proposals, while FY2021 results show a partial-use proposal that reached contract.
+- Replaced the stale FY2025 page link with the surviving official results PDF and retained the current FY2026 call plus FY2021 result as primary-source evidence.
+- WSP 97: this is a bounded YUMORI/eSingularity reconciliation; no RSI, WRE, RedDog, external messaging, Drive document, financial workbook, DNS, hosting, or deployment surface changed.
+
 ## 2026-09-20 — One verbal update drives the multilingual live ticker
 
 - Replaced the duplicated TypeScript/status-translation path with one small `current-field-status.json` schema carrying Japanese, English and Portuguese together. Seeded it with the completed September 20 field report (approximately 06:30–10:00 JST) and an explicit expiry.
