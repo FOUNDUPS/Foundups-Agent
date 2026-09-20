@@ -37,11 +37,11 @@ Canonical sources:
 
 A meaningful Breadcrumb can carry or resolve event time, actor, FoundUp/project scope, factual action, observed result, provenance, confidence/truth class, related identifiers, disclosure class, and correction/supersession linkage.
 
-Breadcrumbs preserve event history. They are not Brain consolidation and are not the Mosh Pit view.
+Breadcrumbs preserve event history. They are not Brain consolidation and are not the Moshpit view.
 
 Canonical sources:
 - `WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md`
-- `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md`
+- `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md`
 - `modules/infrastructure/cross_platform_memory/src/breadcrumb_trail.py`
 
 ### 012 Principal Memex
@@ -98,14 +98,14 @@ These are canonical 0102/HoloDAE layers. Human cognitive-science uses of the sam
 Canonical source:
 - `WSP_framework/src/WSP_60_Module_Memory_Architecture.md`
 
-### Mosh Pit
+### Moshpit
 
 **Canonical meaning:** a governed reverse-chronological projection/view over selected Breadcrumbs plus Brain/Memex current-state interpretation.
 
 It is explicitly **not a memory subsystem** and should not get a duplicate database.
 
 Canonical source:
-- `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md`
+- `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md`
 
 ### Contact Memory
 
@@ -113,7 +113,7 @@ Canonical source:
 
 Current truth label: `ARCHITECTURE_VISION / SPECIFIED_NOT_IMPLEMENTED`.
 
-It is entity/event based, with RAG as one retrieval lane rather than the whole memory model. Project-relevant interactions can become/refer to Breadcrumbs; Brain/Memex and Mosh Pit remain separate projections/roles.
+It is entity/event based, with RAG as one retrieval lane rather than the whole memory model. Project-relevant interactions can become/refer to Breadcrumbs; Brain/Memex and Moshpit remain separate projections/roles.
 
 Canonical source:
 - `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md`
