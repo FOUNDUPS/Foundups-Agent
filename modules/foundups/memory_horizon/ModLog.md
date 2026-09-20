@@ -1,5 +1,17 @@
 # Memory Horizon - ModLog
 
+## 2026-09-20 - Low-fi survival game + cognitive sweep architecture
+
+- Added `docs/GAME_DESIGN_SWEEPS.md`.
+- Adopted a mechanically inspired low-fi survival/dungeon wrapper: character selection, exploration, randomized events, inventory/status and consequential choices; no copying of Fear & Hunger content/IP.
+- Defined Sweeps 0-8 so game and measurement complexity increase one controlled layer at a time.
+- Locked Phase 1 to Sweep 0 + Sweep 1: playable survival shell plus adaptive episodic-retention probes.
+- Mapped TestMyBrain/NIH/SCAT6 constructs into later, separately scored game mechanics instead of copying their UX.
+- Preserved construct separation: episodic retention, working memory, attention/reaction speed and executive switching do not collapse into one black-box score.
+- Added natural probe presentations through dialogue, inventory and route choices in addition to explicit quiz cards.
+
+# Memory Horizon - ModLog
+
 ## 2026-09-20 - WSP 97 memory terminology audit
 
 - Retrieved canonical WSP 97, WSP 60, FoundUp Memex, Brain, Breadcrumb, Moshpit, Contact Memory, HoloIndex, AgentDB/workspace-memory and Memory Nudge Engine definitions before further architecture claims.
