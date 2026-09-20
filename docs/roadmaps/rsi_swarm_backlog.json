@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "f7307291fac709bd1bcfe240cc0e2c125ae821d1",
-    "selected_action": "AmIBot-public-route-contract-drift",
-    "status": "independently_validated_exact_head_ci_pending",
+    "base_commit": "e3753a65267e4223369c0eecd65dc32e3fa6b499",
+    "selected_action": "AmIBot-work-package-scope-qualification",
+    "status": "locally_validated_independent_and_hosted_gates_pending",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1868,17 +1868,15 @@
     }
   },
   "current_observation": {
-    "observation_id": "public_route_contract_reconciliation_20260921",
-    "observed_at": "2026-09-20T18:13:08.956760+00:00",
-    "base_commit": "f7307291fac709bd1bcfe240cc0e2c125ae821d1",
+    "observation_id": "amibot_work_package_scope_qualification_20260921",
+    "observed_at": "2026-09-20T19:14:34.714817+00:00",
+    "base_commit": "e3753a65267e4223369c0eecd65dc32e3fa6b499",
     "role": "coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "previous_observation": "f7307291fac709bd1bcfe240cc0e2c125ae821d1:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "historical_candidate_reference_base": "f7307291fac709bd1bcfe240cc0e2c125ae821d1:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "independently_validated_exact_head_ci_pending",
-    "selected_task": "AmIBot-public-route-contract-drift",
-    "selected_score": 15,
+    "previous_observation": "e3753a65267e4223369c0eecd65dc32e3fa6b499:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "locally_validated_independent_and_hosted_gates_pending",
+    "selected_task": "AmIBot-work-package-scope-qualification",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1887,140 +1885,76 @@
       "total": 15,
       "priority": "P1"
     },
-    "execution_packet": {
-      "schema": "0102_m2m_v1",
-      "ROLE": "worker",
-      "ORIGIN": "internal_handoff",
-      "PRINCIPAL_REF": "012",
-      "L": "QA",
-      "S": "Existing public route test owner and canonical closure documents only",
-      "M": "exec",
-      "T": "RSI-PUBLIC-ROUTE-CONTRACT-RECONCILIATION-20260921",
-      "A": "Correct obsolete public iframe/member-catalog test expectations to current scope-free public discovery and membership handoff, preserving production behavior.",
-      "R": [
-        0,
-        15,
-        22,
-        50,
-        84,
-        97,
-        99,
-        104
-      ],
-      "I": {
-        "allowed_paths": [
-          "public/member/tests/test_route_contract_bridge.py",
-          "public/member/tests/TestModLog.md",
-          "public/member/ModLog.md",
-          "ModLog.md",
-          "ROADMAP.md",
-          "docs/roadmaps/rsi_swarm_backlog.json",
-          "docs/operations/RSI_SWARM_DISPATCH.md",
-          "WSP_knowledge/WSP_Test_Registry.json"
-        ],
-        "denied_paths": [
-          "public/f/**",
-          "public/member/js/**",
-          "public/member/*.html",
-          "public/member/*catalog*.json",
-          "modules/foundups/esingularity/**",
-          "modules/communication/**",
-          "WSP_framework/**",
-          ".github/**"
-        ],
-        "dependencies": [
-          "exact source/peer ownership preflight",
-          "independent verification and fresh exact-head CI before merge"
-        ],
-        "invariants": [
-          "No public iframe or member-catalog regression",
-          "No catalog/router/auth/source/runtime mutation",
-          "No test skip, weakening admission, new module or skill",
-          "Preserve member tenant checks and13 AmIBot planning orders"
-        ],
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 4,
-          "impact": 4,
-          "total": 15,
-          "priority": "P1"
-        }
-      },
-      "O": [
-        "existing route test repair",
-        "baseline/candidate receipts",
-        "independent negative controls",
-        "required logs and WSP15/97 re-observation"
-      ],
-      "F": [
-        "scope violation",
-        "test failure",
-        "missing evidence",
-        "owner change",
-        "authority violation"
-      ]
-    },
+    "selection_basis": "Closed registry and route-test work removed; higher runtime jobs remain blocked and product owners external at unchanged source scope. Current15/P1 package qualification can correct unsafe planning claims without launching a worker. Optional cache and prior diagnosis qualifications remain closed.",
     "retrieval": {
-      "initial_error": "request_field_invalid (unsupported lexical_only key); no owner attempt/reindex. Corrected to actual retrieval_mode contract.",
-      "freshness": "UNKNOWN/index_gap=true lexical bundle; not current semantic evidence",
-      "noise": "Broad member RedDog docs reduced to route source, existing projector contract, exact tests.",
-      "missing": "Member tests README absent; projector ROADMAP/test README absent. Existing owner docs/test log retained.",
-      "ordering": "WSP00/15/97 and owner scope before exact route/test contract",
-      "duplication": "Existing route test and projector owner; no new router/module/skill."
+      "freshness": "ok=true lexical bundle, UNKNOWN/index_gap=true; not CURRENT semantic evidence",
+      "noise": "Narrowed broad module/role docs to package DAG and existing planner/job owners",
+      "ordering": "WSP00/15/97 -> exact main/CI/peers -> governed query -> onboarding skill -> create/scaffold/job source",
+      "missing": "No runtime source/tests in specified detect_ai. No hypothetical files treated as writable scope.",
+      "duplication": "Reuse existing13-order package and source-bound constraints; no new module/skill/scaffold/scheduler."
     },
     "closure_reconciliation": {
-      "pr1751": {
-        "merge": "f7307291fac709bd1bcfe240cc0e2c125ae821d1",
-        "registry_entries": 18,
-        "planning_orders": 13,
-        "all_main_workflows": "success",
-        "runtime": "not admitted"
+      "pr1832": {
+        "merge": "e3753a65267e4223369c0eecd65dc32e3fa6b499",
+        "pr_checks": "10 success",
+        "main_workflows": [
+          {
+            "conclusion": "success",
+            "databaseId": 35529798093,
+            "headSha": "e3753a65267e4223369c0eecd65dc32e3fa6b499",
+            "status": "completed",
+            "workflowName": "CI"
+          },
+          {
+            "conclusion": "success",
+            "databaseId": 35529797556,
+            "headSha": "e3753a65267e4223369c0eecd65dc32e3fa6b499",
+            "status": "completed",
+            "workflowName": "CodeQL"
+          }
+        ],
+        "validation": "48 local and48 independent overlap;11 mutation controls; previous initial CodeQL rejection retained"
       },
-      "open_peer_heads": 97,
-      "accounting": "138 merged /21 closed without merge since September9UTC,97open after previous verified closures; unchanged current97heads, not a new all-history search",
-      "prior_histories": "43 prior candidates retained by exact Git reference and compact reconciliation; original26 packets unchanged"
+      "accounting": "139 merged/21 closed without merge since September9UTC;97 open unchanged peer heads. Derived from paginated REST baseline plus verified owned closures, not a fresh all-history search.",
+      "local_branches": 658,
+      "worktrees": 157,
+      "original_packets": "26 unchanged",
+      "candidate_histories": 44
     },
-    "effort": "One existing test owner, its generated registry description and six existing closure/navigation documents; no production behavior changes.",
-    "cost": "No product model/provider/service calls; coordinator/reviewer tokens not metered here.",
-    "verification_burden": "Frozen-source 45-case suite, independent replay and targeted in-memory negative controls; exact-head hosted checks separate from browser/device proof.",
+    "execution_scope": {
+      "plane": "isolated repository planning/document repair; not WRE worker execution",
+      "allowed_paths": [
+        "modules/foundups/detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.json",
+        "modules/foundups/detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.md",
+        "modules/foundups/detect_ai/INTERFACE.md",
+        "modules/foundups/detect_ai/ROADMAP.md",
+        "modules/foundups/detect_ai/ModLog.md",
+        "ModLog.md",
+        "ROADMAP.md",
+        "docs/roadmaps/rsi_swarm_backlog.json"
+      ],
+      "invariants": [
+        "13 existing IDs/scores/roles/paths/deliverables preserved",
+        "No new registry identity/scaffold/module/skill/scheduler",
+        "No product source/runtime/provider/service/token/domain/deployment effects",
+        "Protected product and Remote AutoPost lanes preserved"
+      ]
+    },
     "validation": {
-      "baseline": {
-        "passed": 34,
-        "failed": 11
-      },
-      "candidate": {
-        "passed": 48
-      },
-      "effects": "Both guarded runs have zero forbidden attempts and no input changes within each run",
-      "independent": "ACCEPT revised HTMLParser candidate:48-case replay and11/11 positive/negative mutation pairs. Prior mocked VM6/4 remains bound to unchanged public inline source.",
-      "remote": "Initial head4721613ba rejected by CodeQL: HTML regex missed uppercase SCRIPT tags. All other initial checks passed. Revised standard-parser head requires fresh hosted CI; no waiver or weakened check.",
-      "limits": "Static route contract validation, not browser/device acceptance, public route activation, authenticated runtime or RSI retained-learning proof. Prior five broader FoundUp static failures remain outside scope. Mocked VM does not run public fetch callbacks or external scripts, authenticate a person or execute a tenant.",
-      "registry": "Initial description-only generation remains current1651/269 after parser correction; classifications/shards unchanged.",
-      "initial_candidate": {
-        "passed": 45
-      },
-      "initial_independent": "ACCEPT:45-case replay,11 positive/negative mutation pairs; mocked Node6route controls/4mutations. Counts overlap, not distinct product tests."
+      "local": "13-order acyclic success DAG; six dependency rows;12 unordered active literal-root overlaps become0; original dependencies preserved; all canonical WSP15 sums/ranges unchanged",
+      "independent": "Baseline source-owner review supports conservative serialization; candidate review pending",
+      "remote": "Not yet published",
+      "limits": "Static literal root-prefix analysis only; not globs/OS confinement, functional independence, compiled M2M dispatch, real workers or product acceptance. Deferred mature research excluded explicitly."
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-route-contract-0304",
+    "effort": "Eight existing package/interface/roadmap/log documents; no source implementation.",
+    "cost": "No model/provider/runtime calls; coordinator/reviewer usage not metered here.",
+    "verification_burden": "Source-bound independent review plus stdlib structural checks; exact-head hosted checks separate.",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-scope-0411",
     "evidence_sha256": {
-      "preflight.json": "48c8f504ed633746e8b91502762b421c4db1e378e0dcc363f99db7971b942729",
-      "holo-query.json": "48f84c5734c2eb6c4970eb75238221133de0ffd8496b0781150cf7c33a2dcf12",
-      "runner-qualification.json": "aaef5cc84cc3b79d461d4c3128866854ba60f2503c6d783ca89ee78c69a08d76",
-      "baseline/receipt.json": "71256f53d25bc9c55d9429ebedb5559449f9477c32240266404018132ac1cad2",
-      "candidate/receipt.json": "f91e2d48528fc129c9d9c02ca2c517f02dfeb0e5b696f09d04953bab7df85d67",
-      "independent-review.json": "4e65dbdd1010000928e2db5ed232a2c88ecf4837eed609195f6606a85c4b555f",
-      "independent-test-diff-review.json": "6479a2a0cb4d8dc1610a3f984d82225cbb31f4d88bff2b2a7883aa6398ff6452",
-      "independent/receipt.json": "64ac34e0e3966bb84c8b158cdf3f14d62280a3737507aafd1b723bde527bac77",
-      "independent-controls/receipt.json": "50c275d55764d4f08023e4032eeae5c8e0ab16293c9c17cbac242110188e3570",
-      "independent-vm-receipt.json": "184b242f80d12e6e221841f87fa3b6e50a066489206a6a2f54b53f297c944ec8",
-      "registry-reconciliation.json": "e8da7871ea0bde89f65f7d241f5e9194271b63100bf6c81abe1ab5be90c68877",
-      "initial-codeql-annotations.json": "3c31ba4e8fdacc99848a3415ad57d153ca7af0b517e5965249c6cd49e56c9dc6",
-      "initial-hosted-checks.json": "5ec022c303092c2059677ca8a2838f7514130d1405b2420a4e4ea8266517881d",
-      "candidate-htmlparser/receipt.json": "fa92ffee72abe53e4dcc13079200d0637c082b2cc0c3e92c8e41d2b19937ec88",
-      "independent-review-v2.json": "057d9227dfc7c6893c059194462d09a6f5997cef56c1f04e6e24644160499f0c",
-      "independent-htmlparser/receipt.json": "55e4677dd55c176f6b1a6f091030827f539bbde061dab9c69927d4e48641de82",
-      "independent-controls-htmlparser/receipt.json": "5ceaea7d533d85e25084f9b7e5315084ee713dd2a4a524a1a13fd0493e0b2ccd"
+      "preflight.json": "27fade4e6cf2a74ff8a36e587c19a8dde95cf1b85bddc1e5eebb4f02740f0d38",
+      "holo-query.json": "cb0471ef8c887e573b9662c564cbec60f1038849c764139fc1011dfe690dba9c",
+      "package-validation.json": "ea5a3188a3ed4c5b87bda1e119035b33cae99b89f09109e38f8c97341ffb40a6",
+      "package-scope-review.json": "3617b5f53acc60a525ba9694add154d6eaabb551efd6daf423294b72df7f0f20"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2242,8 +2176,8 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "test_repair_independently_validated_remote_pending",
-          "next_step": "Final exact-tree scope review and hosted CI before merge; no public source changes."
+          "state": "closed_pr1832_test_contract_only",
+          "next_step": "Retain48pass/independent controls and CodeQL correction; both main workflows passed. No repeated repair."
         },
         {
           "task": "FoundUp-genesis-wardrobe-admission",
@@ -2257,6 +2191,19 @@
           "priority": "P1",
           "state": "partial_dependency",
           "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill."
+        },
+        {
+          "task": "AmIBot-work-package-scope-qualification",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "locally_validated_independent_and_hosted_gates_pending",
+          "next_step": "Review exact eight-file planning correction, complete hosted gates, then re-observe and rescore; no dispatch."
         },
         {
           "task": "protected-foundup-work",
@@ -2584,20 +2531,7 @@
           "next_step": "Completed and merged; retain exact validation limits. Do not repeat source repair."
         }
       ],
-      "selected": "AmIBot-public-route-contract-drift",
-      "score": 15,
-      "wsp15": {
-        "complexity": 3,
-        "importance": 4,
-        "deferability": 4,
-        "impact": 4,
-        "total": 15,
-        "priority": "P1"
-      },
-      "status": "finish_owned_review_publication_before_next_slice",
-      "selection_rationale": "Closed registry prerequisite removed; higher jobs retain unchanged runtime/owner/consumer dependencies. Route test drift is eligible for local qualification using existing sources. A test-only repair must preserve public projection and participation gate; no route or product source change."
-    },
-    "requires_fresh_reobservation_after_closure": true,
-    "next_step": "Publish separately reviewed parser correction to same PR1832; require fresh exact-head checks before merge, preserve initial rejection and rescore after closure."
+      "selection_rule": "After exact closure, observe new source/ownership/CI and rescore eligible actions; prior runner-up is not automatic."
+    }
   }
 }

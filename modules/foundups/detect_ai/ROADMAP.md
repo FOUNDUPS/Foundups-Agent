@@ -37,14 +37,21 @@ Token rewards remain deferred. Practice XP, benchmark skill and economic contrib
 Local AI stays out of ranked blinded trials: model downloads or execution on the judge's own phone can reveal assignment, and client code/results are user-controlled. A future volunteer device pool needs a separate provenance and integrity design, not a local-compute flag on ranked rounds.
 
 Next bounded work remains `DETECT_AI_PREFLIGHT_AND_POC_CONTRACT_PHASE1` in issue
-#1750. Registration closes only the identity/metadata prerequisite. Reconcile
-`/f/amibot` with the canonical inactive `/f/detect_ai` namespace through the shell
-owner. Qualify typed intake/Skillz, runtime/provider binding and signed WRE admission;
-replace the five G1 writers' overlapping module scopes before dispatch. No build,
-runtime bootstrap, model inference, device test or deployment has occurred.
+#1750. Registration merged in PR1751 (`f7307291`); all eleven PR checks and three
+main workflows passed. PR1832 (`e3753a65`) closes existing public-route test drift:
+48 local/independent cases and all ten PR checks passed; both main workflows passed.
+Neither closure implements the public alias or admits runtime execution.
 
-System prioritization stays in the [root RSI roadmap](../../../ROADMAP.md) and its
-existing backlog. The bounded current-main draft reconciliation is14/P1;
-the historical registry parent remains16/P0. Local contract differential is
-validated; fresh hosted checks/main integration remain distinct from runtime
-admission and the incomplete POC. No second launch backlog.
+The 15/P1 package scope qualification corrects six dependency rows: conservative
+G1 serialization, G2 waiting for all writers, and final success reporting after
+publication. Static active root-overlap pairs fall from12 to0; all13orders and
+scores remain. Controlled failures can be reported without downstream completion.
+G0 still must qualify shared interfaces/hard prerequisites, exact file scopes,
+typed intake/Skillz, model/runtime bindings, WRE admission and independent verifier.
+Preserve registered `detect_ai`; do not replay new-identity scaffolding.
+Reconcile `/f/amibot` through the canonical shell owner before publication.
+
+System prioritization stays in the [root RSI roadmap](../../../ROADMAP.md) and
+existing backlog. The historical14/P1 registry integration is closed; this
+package-only repair is separate. No build, runtime bootstrap, model inference,
+device acceptance or deployment is claimed. Re-observe and rescore after closure.

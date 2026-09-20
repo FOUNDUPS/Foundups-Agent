@@ -22,7 +22,32 @@
     "leaf_worker": "Hermes_or_admitted_equivalent",
     "verifier": "independent_verifier",
     "rsi_loop": "Observe -> Score -> Reconcile -> Select -> Execute -> Validate -> Document -> Re-observe",
-    "rule": "parallelize only dependency-independent work; preserve one owner per path and fail closed on uncertain evidence"
+    "rule": "parallelize only dependency-independent work with qualified disjoint write scopes; phase labels do not create barriers; preserve one owner per path and fail closed on uncertain evidence"
+  },
+  "scope_qualification": {
+    "observed_base": "e3753a65267e4223369c0eecd65dc32e3fa6b499",
+    "status": "CONSERVATIVE_PLANNING_DAG_ONLY",
+    "paths_meaning": "Candidate owner/retrieval roots, not allowed write paths or runtime confinement. Existing paths do not grant ownership; proposed public/f/amibot is unresolved.",
+    "worker_packets": "NOT_COMPILED_OR_ADMITTED",
+    "g1_shared_root": "modules/foundups/detect_ai",
+    "g1_overlapping_pairs": 10,
+    "g1_write_order": ["AMI-A04", "AMI-A03", "AMI-A02", "AMI-A05", "AMI-A06"],
+    "ordering_basis": "Conservative serialization by existing WSP15 score descending; equal15 scores retain original order. G0 freezes cross-lane interfaces first. A discovered hard prerequisite overrides this provisional order and blocks dispatch until reconciled.",
+    "group_semantics": "G0-G6 are phase labels, not concurrency permissions or implicit completion barriers. Explicit depends_on edges govern the success plan.",
+    "existing_identity": {
+      "foundup_id": "detect_ai",
+      "new_scaffold_ineligible": true,
+      "reason": "Existing registry identity/module: an otherwise valid create_foundup request is rejected with FAIL_FOUNDUP_ID_EXISTS. Do not delete registration, alias to a new ID, or run the new-scaffold writer over existing artifacts.",
+      "candidate_action": "build_foundup",
+      "action_status": "Requires existing-module readiness and separate current admission; this package does not construct a FoundUpJob."
+    },
+    "required_before_dispatch": [
+      "AMI-A01 qualifies current shared interfaces, existing implementation owners and any hard prerequisites before G1.",
+      "Compile each row through the existing WSP99/M2M owner with ROLE/ORIGIN/PRINCIPAL_REF, exact allowed/denied files, dependencies, invariants, tests, outputs and failure conditions; broad paths cannot populate an execution allowlist.",
+      "Bind existing WRE/AgentDB claims, model/runtime budgets and independent verifier receipts; fail closed on missing evidence.",
+      "Replace the conservative chain only after independent review of exact disjoint write scopes including shared tests/docs/generated artifacts and integration dependencies."
+    ],
+    "failure_evidence": "C03 is the final success report and waits for publication. Collect provisional telemetry throughout through existing evidence owners. On any blocked/failed stage, the coordinator records a controlled-failure result from actual receipts without waiting for success-only downstream jobs or marking them complete. This is a reporting contract, not an implemented failure consumer."
   },
   "source_authority": {
     "module": "modules/foundups/detect_ai",
@@ -65,14 +90,14 @@
       "parallel_group": "G0",
       "mps": {"complexity":3,"importance":5,"deferability":5,"impact":4,"total":17,"priority":"P0"},
       "deliverables": ["source-bound retrieval receipts", "duplicate/update/fork decision", "route-owner evidence", "approved execution boundaries"],
-      "acceptance": ["current-source evidence", "no conflicting active owner", "no unsupported completion claim"]
+      "acceptance": ["current-source evidence", "no conflicting active owner", "no unsupported completion claim", "shared transport/session/safety/round interfaces and hard prerequisites qualified before G1", "existing detect_ai identity preserved; no new-scaffold replay"]
     },
     {
       "id": "AMI-A02",
       "title": "Transport, session and entitlement contract",
       "owner_role": "backend_architect",
       "paths": ["modules/communication", "modules/foundups/detect_ai"],
-      "depends_on": ["AMI-A01"],
+      "depends_on": ["AMI-A01", "AMI-A03"],
       "parallel_group": "G1",
       "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
       "deliverables": ["single selected realtime transport", "session authorization", "queue/reconnect contract"],
@@ -83,7 +108,7 @@
       "title": "Clean-chat moderation and abuse controls",
       "owner_role": "safety_worker",
       "paths": ["modules/foundups/detect_ai"],
-      "depends_on": ["AMI-A01"],
+      "depends_on": ["AMI-A01", "AMI-A04"],
       "parallel_group": "G1",
       "mps": {"complexity":4,"importance":5,"deferability":5,"impact":4,"total":18,"priority":"P0"},
       "deliverables": ["pre-delivery moderation path", "report/block/leave", "blocked-pair exclusion", "rate limits", "operator kill switch"],
@@ -105,7 +130,7 @@
       "title": "Mobile-first PWA shell and AmIBot FoundUps page",
       "owner_role": "0102_public_surface",
       "paths": ["public/f/amibot", "modules/foundups/detect_ai"],
-      "depends_on": ["AMI-A01"],
+      "depends_on": ["AMI-A01", "AMI-A02"],
       "parallel_group": "G1",
       "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
       "deliverables": ["mobile-first UI", "installable PWA contract", "join/chat/guess/reveal screens", "FoundUps extension page"],
@@ -116,7 +141,7 @@
       "title": "Single approved AI opponent adapter",
       "owner_role": "ai_gateway_worker",
       "paths": ["modules/ai_intelligence/ai_gateway", "modules/foundups/detect_ai"],
-      "depends_on": ["AMI-A01"],
+      "depends_on": ["AMI-A01", "AMI-A05"],
       "parallel_group": "G1",
       "mps": {"complexity":3,"importance":4,"deferability":4,"impact":4,"total":15,"priority":"P1"},
       "deliverables": ["one pinned Qwen-class configuration", "budget cap", "provider/license evidence", "neutral chat adapter"],
@@ -127,7 +152,7 @@
       "title": "Human-human random clean-chat POC",
       "owner_role": "integration_worker",
       "paths": ["modules/foundups/detect_ai"],
-      "depends_on": ["AMI-A02", "AMI-A03", "AMI-A05"],
+      "depends_on": ["AMI-A02", "AMI-A03", "AMI-A04", "AMI-A05", "AMI-A06"],
       "parallel_group": "G2",
       "mps": {"complexity":3,"importance":5,"deferability":4,"impact":5,"total":17,"priority":"P0"},
       "deliverables": ["two-browser random matchmaking", "clean message relay", "disconnect/rejoin behavior", "report/block/leave"],
@@ -182,7 +207,7 @@
       "title": "RSI outcome capture and next-cycle rescore",
       "owner_role": "0102_rsi_evaluator",
       "paths": ["modules/foundups/detect_ai", "docs/operations", "docs/roadmaps"],
-      "depends_on": ["AMI-C01"],
+      "depends_on": ["AMI-C01", "AMI-C02"],
       "parallel_group": "G6",
       "mps": {"complexity":3,"importance":4,"deferability":3,"impact":4,"total":14,"priority":"P1"},
       "deliverables": ["cost/latency/defect data", "worker success/failure evidence", "reusable launch lessons", "rescored next work"],
@@ -202,7 +227,7 @@
   ],
   "parallel_plan": {
     "G0": ["AMI-A01"],
-    "G1": ["AMI-A02", "AMI-A03", "AMI-A04", "AMI-A05", "AMI-A06"],
+    "G1": ["AMI-A04", "AMI-A03", "AMI-A02", "AMI-A05", "AMI-A06"],
     "G2": ["AMI-B01"],
     "G3": ["AMI-B02"],
     "G4": ["AMI-B03"],
@@ -212,7 +237,7 @@
   },
   "autonomy_assessment": {
     "suitability": "GOOD_CONTROLLED_RSI_TEST",
-    "why": ["early-stage FoundUp", "isolatable scope", "clear user-visible acceptance tests", "reversible POC route", "parallelizable independent work", "measurable worker and verifier outcomes"],
+    "why": ["early-stage FoundUp", "isolatable scope", "clear user-visible acceptance tests", "reversible POC route", "potential parallelism after scope qualification", "measurable worker and verifier outcomes"],
     "not_yet_proven": ["general unconstrained autonomous product launch", "fully automatic production promotion", "mature-content compliance", "autonomous economic rewards"],
     "first_dispatch_gate": "AMI-A01 accepted with current-source evidence and WRE admission"
   }
