@@ -115,12 +115,13 @@ separate metadata-only inspection from an explicit command opt-in inside the
 The repair is independently verified and merged in PR1806; exact closure is
 tracked in the backlog. Command opt-in selects diagnostic execution,
 not runtime or effect-use authority. The daemon lifetime qualifier reproduced mixed-thread telemetry loss with disposable
-storage; independent review accepted the scoped witness. The next13/P1 source
-action is a per-counter owning-thread lifetime in the existing daemon. It is locally repaired and tested; real daemon shutdown/restart, constructor cost
-and live RSI retention remain unverified. Exact evidence, six-document closure scope and the
-current source packet and re-observed selection are in the backlog. Next13/P1
-is R19 report-delivery qualification: inspect exact workflow/action/run evidence
-before proposing any CI change; report-only gates remain unchanged.
+storage; independent review accepted the scoped witness. The separately scored
+13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
+Local tests and independent review pass; real daemon shutdown/restart,
+constructor cost and live RSI retention remain unverified. The backlog binds
+the bounded source scope, exact evidence and next 13/P1 R19 planning packet.
+R19 qualifies report delivery through exact workflow/action/run evidence before
+any CI change; report-only gates remain unchanged.
 
 ## AmIBot autonomous production experiment — 2026-09-15
 
