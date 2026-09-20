@@ -1,3 +1,10 @@
+## 2026-09-20: Close daemon lifetime qualifier; select existing-owner repair
+
+- PR1807 merged as 51a83ff1683ca99148d5d3c20703e58bc98cf44f after exact-head checks passed. Reviewed tree and all six document blobs match; source/tests remain unchanged.
+- Re-observed32 candidate histories and independently retained C2/I4/D4/Impact3=13/P1 for the per-counter owning-thread repair. The qualifier is closed; implementation remains next, with its exact18-path packet and no runtime dispatch.
+- Evidence remains61 existing passes plus the independently accepted two-scan/one-counter defect witness; no actual daemon start/restart, production memory or accepted retained improvement.
+- Verified accounting is now118 merged/15 closed-unmerged since September9 UTC. All102 peer heads and shared checkout remain unchanged; later main workflows are separate observations. WSP15/22/97.
+
 ## 2026-09-20: Qualify daemon counter memory ownership
 
 - WSP00 bootstrap and actual WSP15/WSP97 reconciliation retained 31 candidate histories; unchanged main/102 peer heads, shared checkout preserved. PR1806's subsequent CI35480607649 and CodeQL35480607038 now both report SUCCESS.
