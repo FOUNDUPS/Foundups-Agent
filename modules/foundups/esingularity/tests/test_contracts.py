@@ -135,19 +135,20 @@ def test_sites_configuration_and_primary_routes_are_present() -> None:
 def test_existing_ticker_receives_one_deck_notification() -> None:
     page = read("app/page.tsx")
     ticker = read("components/CampaignTicker.tsx")
-    status = read("content/current-field-status.ts")
+    status = load_json(FRONTEND_ROOT / "content" / "current-field-status.json")
     assert page.count("<CampaignTicker />") == 1
     assert "<YumoriPresentation />" in page
-    assert "{ label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' }" in ticker
+    assert "label: { ja: 'NEW', en: 'NEW', pt: 'NOVO' }" in ticker
+    assert "YUMORI / COG DC 10枚のプレゼンを見る" in ticker
     assert ticker.count("href: '#yumori-deck'") == 1
     for existing_label in ("VOTE NO", "市議会", "市長", "声を届ける", "VISIT", "LISTEN", "LEARN", "EXPLORE", "JOIN"):
-        assert f"label: '{existing_label}'" in ticker
+        assert f"ja: '{existing_label}'" in ticker
     assert "CONNECT" not in ticker and "Monk" not in ticker
     assert "https://yumori.me/vote-no#council" in ticker
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "https://yumori.me/vote-no#contact" in ticker
     assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
-    assert "href: 'https://yumori.me/'" in status
+    assert status["href"] == "https://yumori.me/"
 
 
 def test_fullscreen_vision_has_ten_japanese_first_slides_and_derived_languages() -> None:

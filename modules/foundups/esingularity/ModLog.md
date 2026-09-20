@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — One verbal update drives the multilingual live ticker
+
+- Replaced the duplicated TypeScript/status-translation path with one small `current-field-status.json` schema carrying Japanese, English and Portuguese together. Seeded it with the completed September 20 field report (approximately 06:30–10:00 JST) and an explicit expiry.
+- Added a bounded runtime feed from the dedicated `live/yumori-field-status` branch. Both eSingularity.ai and YUMORI.me poll the same payload every 60 seconds; hidden, expired, malformed, future-dated, overlong or off-domain data falls back to a durable campaign action.
+- Made the entire ticker—including its controls, accessibility label, static actions and live item—render directly in the selected language. Removed the stale September 25 translation mapping that incorrectly shadowed changing field reports.
+- Updated the ticker/website operating contracts so 012 can request a change verbally; 0102 authors all three language variants and updates one JSON file. Material field activity remains recorded in the canonical Google Doc through the YUMORI Moshpit Skillz; the ticker is only the public current-status projection.
+- WSP 00/22/50/97: audited current source, both consumers, language handling, tests and stale PR #1771 before implementation. Reused and extended the existing ticker contract tests rather than adding a parallel test file.
+
 ## 2026-09-20 — Canonical Google Doc bound to YUMORI Moshpit Skillz
 
 - Bound the reusable `yumori_moshpit` Skillz to the live Google Doc `LOG — YUMORI Moshpit Activity Ledger | 活動ログ` as the canonical campaign-history ledger.

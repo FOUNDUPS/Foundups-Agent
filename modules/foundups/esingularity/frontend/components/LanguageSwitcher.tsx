@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
-import { currentFieldStatus } from '../content/current-field-status';
 
 type Language = 'ja' | 'en' | 'pt';
 
@@ -14,7 +13,6 @@ const languages: Array<{ id: Language; label: string }> = [
 ];
 
 const copy: Record<string, [string, string]> = {
-  [currentFieldStatus.tickerJa]: ['September 25 vote: VOTE NO on the demolition-preparation budget. Read the YUMORI.me Preparatory Committee message to the mayor and City Council, then make your voice heard.', 'Votação de 25 de setembro: VOTE NÃO ao orçamento de preparação da demolição. Leia a mensagem do Comitê Preparatório YUMORI.me ao prefeito e ao Conselho Municipal e faça sua voz ser ouvida.'],
   "JHR・最新レポート": ["JHR · Latest report", "JHR · Relatório atual"],
   "コンピュートで、": ["Can compute…", "A computação pode…"],
   "温泉を救えるか。": ["Save an onsen?", "Salvar um onsen?"],
