@@ -1,3 +1,10 @@
+## 2026-09-20: Qualify R19 missing CI report delivery
+
+- Two exact hosted run attempts logged XML creation and 42 passing cases each, but selected no upload files and list zero artifacts. Immutable resolved action and bundled glob identify hidden-directory exclusion.
+- Existing six-document planning scope only; no workflow/source/test/runtime change. Primary receipts and upstream hashes are bound in the canonical backlog; prior daemon closure archived without modification.
+- Reconciled 32 histories and separately scored the next bounded upload-step repair C2/I4/D4/Impact3 = 13/P1. Require two literal report files and verified hosted archive contents; report-only policy stays unchanged.
+- PR1810 main CI and CodeQL now pass. Accounting remains 121 merged / 16 closed unmerged / 101 unchanged peer heads. WSP 00/15/22/50/97/99; no admitted execution or retained-learning claim.
+
 ## 2026-09-20: Close daemon counter repair; select report-delivery qualification
 
 - PR1810 merged as 4bec22b6d6775369d09495ac5ea507be003729e1 after final exact-head checks passed. Reviewed tree and all17 blobs match; source13/P1 is closed.

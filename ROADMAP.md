@@ -59,7 +59,7 @@ workflows. PR1805 passed all ten exact-head checks and both later main workflows
 PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
-Subsequent main workflows are recorded separately. The protected ticker change is preserved.
+Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
 Refreshed September 9 UTC onward accounting found 121 merged PRs and 16
 closed without merge;101 surviving peer heads are unchanged after PR1771 closed without merge. The
 preceding complete audit recorded 13 drafts, 20 PRs with failing checks, 81 with
@@ -67,8 +67,10 @@ passing/skipped checks and one with no reported checks; bulk mergeability was
 76 MERGEABLE and 26 CONFLICTING, including PR1751. Check/mergeability summaries
 were not refreshed in this contract sprint. These categories overlap;
 reported green checks alone do not establish current merge or runtime authority.
-Post-merge R19 evidence also found42 passing red-team observations in logs but
-zero uploaded artifacts; qualify existing report delivery without activating its gate.
+R19 qualification now binds two hosted runs with 42 passing observations each,
+XML creation and parsing, but zero selected/uploaded artifacts. The exact action
+excludes the hidden report directory. The separately scored 13/P1 next repair
+allows only the two named report files; hosted delivery and gate activation remain unproven.
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; the current backlog observation binds the
@@ -121,8 +123,10 @@ storage; independent review accepted the scoped witness. The separately scored
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
 the bounded source scope, exact evidence and next 13/P1 R19 planning packet.
-R19 qualifies report delivery through exact workflow/action/run evidence before
-any CI change; report-only gates remain unchanged.
+R19 report-delivery qualification is complete locally: exact action/run evidence
+identifies hidden-directory exclusion. Its separate 13/P1 upload-step repair is
+next, subject to closure, fresh ownership and independent validation. No workflow
+change occurred in the qualification; report-only gates remain unchanged.
 
 ## AmIBot autonomous production experiment — 2026-09-15
 
