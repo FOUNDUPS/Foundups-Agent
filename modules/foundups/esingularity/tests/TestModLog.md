@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-20 — YUMORI.me correspondence registration and voice contracts
+
+- Extended the existing operational-skill contract test for the `yumori_contact_ledger` WRE entry, canonical Skillz file, thin projections, 0102 proxy voice, third-person monk boundary, default signature, and recursive-learning marker.
+- Reused `test_contracts.py`; no parallel test file or private recipient fixture was added.
+- Exact-head CI exposed the expected fail-closed RedDog compatibility digest after the registry changed. Refreshed the generated registry and manifest digests, then reran the failing backend-compatibility contract.
+
 ## 2026-09-20 — Multilingual live ticker control plane
 
 - Extended `test_jhr_public_contract.py` in place for the versioned JSON schema, required Japanese/English/Portuguese copy, explicit expiry, one-minute live-branch polling, visibility and timestamp bounds, allowed destinations, safe fallback, and isolation from the legacy DOM translator.

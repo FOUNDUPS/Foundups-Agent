@@ -36,6 +36,7 @@ These are continuing acceptance gates, not completed features that may later be 
 - [x] Add the FoundUp-owned [website operations skill](skills/website-update/SKILL.md), with history-backed shared-ticker checks and registry/agent discovery.
 - [x] Add the reusable [ticker-update skill](../../../.agents/skills/esingularity-ticker/SKILL.md) with one dated field-status source and publication verification.
 - [x] Add the WRE-registered [YUMORI Moshpit Skillz](skillz/yumori_moshpit/SKILLz.md) so Red Dog/0102 consistently separate campaign history from agent-learning telemetry and preserve reverse-chronological JST ordering.
+- [x] Add the WRE-registered [YUMORI.me correspondence parent](skillz/yumori_contact_ledger/SKILLz.md) for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, receipts and recursive operator learning without a parallel contact database.
 - [x] Add the canonical [grants/subsidies/PPP support registry](docs/GRANTS_AND_SUBSIDIES.md), reconcile it with the Drive grant-audit sheet, and require status labels that distinguish program existence from eligibility, application, selection, and award.
 - [x] Send the first formal eligibility inquiry for the MOE/RCESPA regional-coexistence data-center decarbonization program, framed around a currently closed municipal onsen and a future lawful PPP/lease/SPC structure.
 - [ ] Obtain written clarification from RCESPA on closed-facility status, applicant/operator/SPC structure, property/use-right timing, eligible heat-reuse equipment, stacking, and current-round timing.
