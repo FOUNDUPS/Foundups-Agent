@@ -46,6 +46,53 @@ https://www.jspsych.org/
 
 jsPsych is a JavaScript framework for behavioral experiments in web browsers. Its timeline/plugin/data model is a strong POC candidate for precise stimulus/response sequencing without building an experiment runtime from scratch.
 
+## Wearable assistive-memory precedent: MIT MemPal
+
+**MIT Media Lab — MemPal: Wearable Memory Assistant for Aging Population**  
+https://www.media.mit.edu/projects/mempal/overview/
+
+MemPal is the closest direct comparator to the proposed Companion. It uses a wearable camera plus AI to log actions in real time without storing image data, supports voice retrieval of misplaced objects (including the published example "where is my phone?"), provides contextual reminders, and was tested in the homes of 15 adults aged 65+. The reported study found improved object-finding performance with audio assistance and positive user perceptions.
+
+Implication: Memory Horizon must not claim novelty for a wearable that logs actions and answers object-location questions. Our differentiation target is the shared measurement/assistance event model, event-to-retrieval-failure timing, graded cueing, transparent provenance/confidence and contamination-aware longitudinal research.
+
+## Lifelogging / SenseCam
+
+**Microsoft Research / SenseCam**  
+https://www.microsoft.com/en-us/research/publication/sensecam-retrospective-memory-aid/  
+https://pubmed.ncbi.nlm.nih.gov/21995708/  
+https://pubmed.ncbi.nlm.nih.gov/24528204/
+
+SenseCam automatically captured first-person life images plus sensor data. Research and reviews report that reviewing captured events can cue autobiographical recall, including studies in people with memory impairment. Evidence varies by study/population and does not establish a general treatment effect.
+
+Implication: environmental cues can support recollection, but the Companion should retain provenance and study cue levels rather than assume every reminder restores memory.
+
+## Earlier personal memory prostheses
+
+**iRemember / audio-based personal memory aid**  
+https://cs.brown.edu/people/stellex/publications/vemuri-ubicomp2004.pdf
+
+Early ubiquitous-computing work described a wearable "memory prosthesis" that captured audio/context and provided retrieval tools for forgotten experiences. The concept predates current LLM wearables by decades and also documents social/legal concerns around ubiquitous recording.
+
+## Current ambient AI wearable comparator
+
+**Limitless Pendant**  
+https://www.limitless.ai/new
+
+Limitless markets an all-day wearable that captures spoken interactions and makes them searchable/summarizable. This demonstrates consumer availability of ambient audio-memory hardware, but conversation capture alone is not equivalent to physical-event inference, evidence-ranked breadcrumbs, or a validated memory-assistance system.
+
+## FoundUps architectural reuse
+
+WSP 60 already separates semantic, episodic, procedural and working memory, and defines Breadcrumb tracing. The RedDog/FoundUps Memex architecture treats Breadcrumbs as episodic continuity, Brain as durable consolidation and retrieval/nudge surfaces as separate responsibilities.
+
+Memory Horizon Companion can reuse this architecture conceptually:
+- lived event -> episodic Breadcrumb
+- durable relevance -> Brain/Memex-like consolidation
+- query -> evidence retrieval
+- current situation -> working memory
+- cue -> attention/nudge boundary
+
+This is conceptual reuse only until an implementation contract proves compatible runtime reuse.
+
 ## Product differentiation hypothesis
 
 Components exist separately:
@@ -55,8 +102,10 @@ Components exist separately:
 - browser recognition tests
 - high-frequency alternate-form cognitive testing
 - browser experiment frameworks
+- wearable lifelogging memory aids
+- ambient AI conversation recorders
 
-The unvalidated hypothesis is that combining a branching micro-adventure, hidden event encoding, adaptive delayed probes, event retirement, observer markers and transparent retention curves provides a useful new research surface.
+The unvalidated hypothesis is that **one event model can support both controlled retention measurement and privacy-preserving just-in-time memory assistance**, while explicitly recording event time, retrieval-failure time, cue strength and outcome.
 
 ## Open research questions
 
@@ -67,3 +116,6 @@ The unvalidated hypothesis is that combining a branching micro-adventure, hidden
 5. What alternate-form pool size controls practice effects across repeated sessions?
 6. How much do device, distraction and sleep/backgrounding affect timing and results?
 7. Does the resulting curve correlate with validated instruments or outcomes in any target population?
+8. Can real-world event extraction reach useful accuracy without retaining raw audio/video?
+9. What graded cue restores function while preserving user agency and minimizing false-memory risk?
+10. Which retrieval failures can be detected safely beyond explicit voice queries?
