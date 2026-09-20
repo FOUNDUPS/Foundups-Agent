@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "visible": true,
-  "updatedAt": "2026-09-20T10:00:00+09:00",
-  "expiresAt": "2026-09-22T10:00:00+09:00",
+  "updatedAt": "2026-09-20T12:42:16+09:00",
+  "expiresAt": "2026-09-25T23:59:59+09:00",
   "label": {
-    "ja": "9/20 活動報告",
-    "en": "SEP 20 FIELD REPORT",
-    "pt": "RELATO DE 20 SET"
+    "ja": "9/25 反対票を｜電話で声を",
+    "en": "SEP 25 · VOTE NO · CALL",
+    "pt": "25 SET · VOTE NÃO · LIGUE"
   },
   "message": {
-    "ja": "9/20 活動報告｜この僧は06:30〜10:00頃、福井市剣大谷町の交差点（旧すかっとランド九頭竜周辺）で活動し、YUMORI.meのTシャツとチケットを配布しました。",
-    "en": "September 20 field report | From about 6:30 to 10:00 a.m. JST, the monk worked at the intersection in Tsurugi-Otani-cho, Fukui City, near the former Sukatto Land Kuzuryu, handing out YUMORI.me T-shirts and tickets.",
-    "pt": "Relato de 20 de setembro | Das 6h30 às 10h, aproximadamente, no horário do Japão, o monge atuou no cruzamento de Tsurugi-Otani-cho, cidade de Fukui, perto do antigo Sukatto Land Kuzuryu, distribuindo camisetas e ingressos da YUMORI.me."
+    "ja": "9月25日の福井市議会本会議採決で、旧すかっとランド九頭竜の解体準備予算に「反対票を」と伝えてください。福井市議会事務局：0776-20-5506（平日8:30〜17:15）。送信済み要請と連絡方法はYUMORI.meへ。",
+    "en": "Before the September 25 Fukui City Council vote, ask council members to VOTE NO on demolition-preparation funding for the former Sukatto Land Kuzuryu. Fukui City Council Secretariat: 0776-20-5506 (weekdays, 8:30 a.m.–5:15 p.m. JST). Read the submitted request and contact options on YUMORI.me.",
+    "pt": "Antes da votação de 25 de setembro na Câmara Municipal de Fukui, peça aos vereadores que VOTEM NÃO ao orçamento de preparação da demolição do antigo Sukatto Land Kuzuryu. Secretaria da Câmara: 0776-20-5506 (dias úteis, 8h30–17h15, horário do Japão). Leia o pedido enviado e as formas de contato na YUMORI.me."
   },
-  "href": "https://yumori.me/"
+  "href": "https://yumori.me/vote-no#contact"
 }
