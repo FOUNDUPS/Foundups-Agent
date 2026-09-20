@@ -4,6 +4,7 @@
 
 - Extended the existing operational-skill contract test for the `yumori_contact_ledger` WRE entry, canonical Skillz file, thin projections, 0102 proxy voice, third-person monk boundary, default signature, and recursive-learning marker.
 - Reused `test_contracts.py`; no parallel test file or private recipient fixture was added.
+- Exact-head CI exposed the expected fail-closed RedDog compatibility digest after the registry changed. Refreshed the generated registry and manifest digests, then reran the failing backend-compatibility contract.
 
 ## 2026-09-20 — Multilingual live ticker control plane
 

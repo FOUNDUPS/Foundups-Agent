@@ -6,6 +6,7 @@
 - Added one canonical YUMORI.me parent contract for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, third-person monk reference, receipt reconciliation, and recursive operator learning.
 - Made the Fukui City procedure delegate to that parent while retaining the existing recipient-preflight authority for consequential outbound actions.
 - Registered the capability through the existing WRE Skillz registry and thin `.agents` / `.claude` projections; no independent runtime, recipient authority, or parallel contact database was created.
+- Refreshed the hash-bound RedDog compatibility manifest for the changed registry file after exact-head CI correctly failed closed on the stale digest; no RedDog runtime behavior changed.
 - No private recipient addresses, BCC lists, credentials, messages, Gmail state, Sheets, Docs, RSI, RedDog behavior, or public website/deployment content changed.
 
 ## 2026-09-20 — YUMORI.me funding registry and Fukui reuse history reconciled
