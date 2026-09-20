@@ -61,17 +61,25 @@ CAPTURE
 
 This is different from a passive recorder. The important loop is the transition from lived event to later retrieval failure to assistance outcome.
 
-## FoundUps memory mapping
+## FoundUps memory mapping — WSP 97 audited
 
-The repository already has a useful conceptual analogue under WSP 60:
+Use [FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md](FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md) as the canonical terminology gate.
 
-- **Episodic memory / Breadcrumbs** -> what happened, when, and with what evidence.
-- **Brain / Memex** -> consolidated understanding and durable context.
-- **HoloIndex-like retrieval** -> search the relevant evidence without replaying everything.
-- **Working memory** -> immediate current situation.
-- **RedDog attention boundary / nudge** -> stay silent until surfacing information changes the human's next action.
+The repository roles are distinct:
 
-This is an architectural analogy, not evidence that the existing RedDog runtime can already ingest human life events.
+- **Breadcrumbs** = episodic continuity / evidence-backed event trail.
+- **Brain** = durable-consolidation component inside a FoundUp Memex.
+- **FoundUp Memex** = complete evolving cognition system for one FoundUp; it is not a synonym for Brain.
+- **012 Principal Memex** = separate persistent principal cognition substrate for the 012/0102 relationship; it is not a FoundUp Memex or authority source.
+- **HoloIndex** = repository/WSP retrieval and pattern-memory surface; it is not automatically the personal-event retriever for this wearable.
+- **Working Memory** under WSP 60 = current Holo result pack used for the next 0102 decision.
+- **Mosh Pit** = projection/view, not storage.
+- **Contact Memory** = principal-scoped relationship-memory architecture, currently SPECIFIED_NOT_IMPLEMENTED.
+- **Memory Nudge Engine** = existing repository/autonomy high-value-event capture into workspace memory; it is not the proposed spoken recall-cue component.
+
+For Memory Horizon Companion, we may reuse these **architectural patterns**, but we do not claim that human life events are already admitted into FoundUps Breadcrumbs, Principal Memex, Brain, AgentDB or HoloIndex. Any such bridge requires an explicit principal-scoped interface, provenance contract and authorization.
+
+The exact term **Memic** remains `UNRESOLVED_TERM_MEMIC`: no canonical repository/issue/branch definition was found, so it must not be silently normalized to Memex.
 
 ## Sensor architecture
 
