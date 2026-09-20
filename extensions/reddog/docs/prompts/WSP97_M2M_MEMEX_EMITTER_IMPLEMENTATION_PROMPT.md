@@ -10,7 +10,7 @@ exists, passed its gates, or received authority.
 Implement the first governed runtime slice of the **Memex Projection Emitter** described in:
 
 - `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md`
-- `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md`
+- `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md`
 - `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md`
 
 The objective is to let RedDog answer questions such as:
@@ -64,7 +64,7 @@ Suggested slices:
 - Fail closed.
 - Do not invent a second auth framework if a compatible capability pattern exists.
 
-### Worker D — Mosh Pit renderer
+### Worker D — Moshpit renderer
 - Deterministic reverse-chronological projection from accepted events.
 - Preserve actor attribution and truth class.
 - No source mutation.
@@ -93,7 +93,7 @@ If the repository architecture makes these slices inappropriate, change the work
 
 ## Hard Invariants
 
-1. **Mosh Pit is a projection, not storage.**
+1. **Moshpit is a projection, not storage.**
 2. **Breadcrumbs remain the chronological evidence trail.**
 3. **Brain/Memex remains the current/open-loop consolidation layer.**
 4. **RedDog remains the lightweight attention/interface layer.**
@@ -123,7 +123,7 @@ existing/synthetic Breadcrumb + Brain/Memex inputs
 
 Do **not** implement:
 
-- persistent new Mosh Pit store;
+- persistent new Moshpit store;
 - external web publishing;
 - Google Doc write/sync;
 - automatic stakeholder distribution;
@@ -138,7 +138,7 @@ Minimum target:
 - `compact_status`
 - `accomplishments`
 - `open_loops`
-- `timeline` / `mosh_pit`
+- `timeline` / `moshpit`
 
 Minimum fields in the internal projection result:
 
@@ -177,7 +177,7 @@ RECENT ACCOMPLISHMENTS
 
 Do not dump the full timeline unless asked.
 
-For "show the history/timeline/mosh pit", emit reverse chronological events with actor attribution:
+For "show the history/timeline/moshpit", emit reverse chronological events with actor attribution:
 
 ```text
 YYYY-MM-DD
@@ -221,7 +221,7 @@ PR description must include:
 - security boundary;
 - tests run/results;
 - known non-goals;
-- confirmation that no parallel Mosh Pit store was created;
+- confirmation that no parallel Moshpit store was created;
 - confirmation that no external mutation authority was added.
 
 Squash only after the branch is coherent and validations pass.
