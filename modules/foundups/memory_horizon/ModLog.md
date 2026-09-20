@@ -2,7 +2,7 @@
 
 ## 2026-09-20 - WSP 97 memory terminology audit
 
-- Retrieved canonical WSP 97, WSP 60, FoundUp Memex, Brain, Breadcrumb, Mosh Pit, Contact Memory, HoloIndex, AgentDB/workspace-memory and Memory Nudge Engine definitions before further architecture claims.
+- Retrieved canonical WSP 97, WSP 60, FoundUp Memex, Brain, Breadcrumb, Moshpit, Contact Memory, HoloIndex, AgentDB/workspace-memory and Memory Nudge Engine definitions before further architecture claims.
 - Added `docs/FOUNDUPS_MEMORY_TERMINOLOGY_AUDIT.md` as the Memory Horizon terminology gate.
 - Corrected the Companion mapping: Brain is a durable-consolidation component **inside** FoundUp Memex; Memex is not a synonym for Brain.
 - Corrected HoloIndex and Memory Nudge Engine analogies: neither is automatically the proposed human-memory retriever/cue engine.
