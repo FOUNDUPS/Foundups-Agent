@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify AmIBot planning scopes and dependency gates
+
+- WSP00/15/22/50/97/99/104/109; bounded15/P1 repair of the existing13-order package. Preserve existing `detect_ai` identity, roles, scores, roots and deliverables; no new scaffold or runtime code.
+- Five G1 writers share the module. Serialize them conservatively; G2 waits for all five; final success report waits for publication. Six dependency rows change; acyclic static success-DAG/root analysis reduces12 unordered overlaps to0. Deferred research stays excluded; controlled-failure evidence does not wait for success-only jobs.
+- Paths remain retrieval candidates, not executable allowlists. G0 shared-interface/hard-prerequisite qualification, exact scopes, current WRE admission and independent verification remain open. PR1832 closes route-test debt with48 local/independent passes, ten PR checks and both main workflows successful; protected peers preserved.
+- Evidence and fresh WSP15/97 queue: canonical RSI backlog. Structural validation only; no worker, provider, product tests, service, token or deployment effects.
+
 ## 2026-09-21: Close AmIBot registration and reconcile public-route test drift
 
 - PR1751 merged as `f7307291`; all three main workflows passed. Hidden `detect_ai` is one of18 declarations;13 planning orders remain inactive.

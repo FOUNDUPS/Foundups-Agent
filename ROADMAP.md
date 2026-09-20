@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-21
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`734d46fae6332f4e8feaca9d3b172992dd394147`, including PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`e3753a65267e4223369c0eecd65dc32e3fa6b499`, including PR1832 route-test closure, PR1751 registry onboarding, PR1831 accounting/cache closure and PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -60,10 +60,10 @@ PR1806 passed all ten exact-head checks; both later main workflows now report
 SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
 Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
 Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
-Refreshed September 9 UTC onward accounting confirms 136 merged PRs and 21
-closed without merge; 98 current peer heads are reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
-fresh inventory reports 14 drafts and 15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
-REST pagination corroborates 136 merged/21 closed; search omitted 14 closed records. Both PR1830 main workflows now passed. These observations are not an atomic snapshot;
+The preceding full-audit snapshot (September 9 UTC onward) recorded136 merged PRs and21
+closed without merge; its98 peer heads were reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
+same historical inventory recorded14 drafts and15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
+REST baseline plus verified closures now accounts for139 merged/21 closed without merge,97open; search omitted 14 closed records. Both PR1830 main workflows now passed. These observations are not an atomic snapshot;
 reported green checks alone do not establish current merge or runtime authority.
 R19 qualification preserves two earlier hosted runs with 42 passing observations
 each, XML creation and parsing, but zero artifacts because the configured action
@@ -72,8 +72,8 @@ is merged in PR1814 after two normal PR runs delivered exactly the two reports.
 Final candidate checks passed; report-only gate activation stays separate.
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
-under `repository_pr_accounting_20260920`; the current backlog observation binds the
-complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1810 closures and all 102 peer heads/checks.
+under `repository_pr_accounting_20260920`; exact Git references in the backlog preserve the
+intervening113-merge/15-closed refresh and subsequent closures. Current reconciliation binds97 peer heads; older check summaries are historical.
 
 | Work observed | Reconciliation and next action |
 |---|---|
@@ -84,10 +84,10 @@ complete 113-merge/15-closed refresh plus PR1803/1804/1805/1806/1807/1808/1809/1
 | AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
 | WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is merged in PR1806:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. PR1806 first CI caught an omitted backend digest refresh; corrected manifest/pins passed all ten fresh exact-head checks before merge. No real WSL/provider call. |
 | PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
-| AmIBot | PR #1751 merged as `f7307291`; all11 PR checks and all3 main workflows passed. Registry18 includes hidden `detect_ai`;13 orders stay inactive. Local106pass/same5baseline failures remain. Current route-contract test repair15/P1:34pass/11fail ->48pass, independently accepted after CodeQL-driven parser correction; hosted gate separate. No runtime or public activation. |
+| AmIBot | PR1751 registered hidden `detect_ai`;13 orders inactive. PR1832 (`e3753a65`) closes route tests:48pass, independent review, ten PR checks and both main workflows passed. Current15/P1 package scope repair removes12 unordered root-overlap pairs through six dependency changes; G0/admission/public alias and POC remain open. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 655 branch refs and 157 registered worktrees (2026-09-20 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 658 branch refs and 157 registered worktrees (2026-09-21 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -136,7 +136,7 @@ The optional9/P3 cache-identity qualification is now closed: retain current resc
 
 ## Next executable AmIBot step — 2026-09-21
 
-Fresh WSP15 C3/I4/D4/Impact4 = **15/P1** selects public-route contract reconciliation after PR1751 closure. The existing test owner now checks scope-free discovery and the existing membership gate:34pass/11fail ->48pass (including three parser cases after the initial CodeQL rejection), with all production source unchanged. Independent replay and mutation controls passed; complete exact-head CI before closure; public alias, G1 ownership, worker admission and POC remain separate. Historical14/P1 registry integration is closed, not repeated.
+Fresh WSP15 C3/I4/D4/Impact4 = **15/P1** selects existing work-package scope qualification after PR1751/1832 closure. Five G1 writers share one module, and phase labels impose no barriers. The existing13-order package now serializes overlapping writers, waits for all five before integration and orders final success reporting after publication. Six dependency rows change; static literal-root analysis finds12 ->0 unordered active overlaps. Failure evidence remains recordable before success-only downstream jobs. Exact scopes, shared contracts, current WRE/worker admission and public alias remain unresolved. New-identity scaffolding is ineligible for already registered `detect_ai`; qualify existing `build_foundup` ownership. No worker or runtime is launched. The backlog binds local validation and pending independent/hosted gates; rescore after closure.
 
 ## R25 approval-owner qualification — 2026-09-20
 
