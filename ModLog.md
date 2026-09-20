@@ -1,3 +1,10 @@
+## 2026-09-20: Qualify Hermes lifecycle and parent-only stop evidence
+
+- WSP 00/15/22/50/62/84/97/99; six existing docs only. Exact pinned API session can enable background wake dispatch despite async_delivery=False; original parent terminal and detached completion queue have distinct ownership. Preserve event gates and unresolved full child-input/delivery contracts.
+- Parent interrupt/stop does not establish detached-child quiescence. Independently qualify a narrow correction to existing stop and non-completed terminal rejection receipt flags; no schema or consumer change. Actual source repair ranks 13/P1, tied with eligible R25 design and selected for verified receipt correctness.
+- Preserve 26 packets and 38 histories, add one distinct repair row. Three bounded official dependency reads, no source edits/tests/probes/live provider or runtime changes. PR1817 main CI and CodeQL now pass; protected checkout and 95 peer heads unchanged.
+- Source maps, independent qualification, precise limitations and next packet are linked in the current backlog. No AmIBot build, WRE admission or retained RSI completion claimed.
+
 ## 2026-09-20: Close child-input qualification; select lifecycle plan
 
 - PR1817 merged as 9909103ea4d38c6659438ea140c2f85b78a45686; all ten exact-head checks passed and six reviewed document blobs/merge tree match. Main workflow observations remain separate.
