@@ -1,3 +1,9 @@
+## 2026-09-20: Close abrupt-exit witness; select diagnostic contract
+
+- PR1828 merged as b202c14c169b4754bad35808e72a008b0c668165; ten exact-head checks passed and ten reviewed blobs/tree match. Later main workflows recorded separately.
+- Re-observed42 histories and next-source bindings; 10/P2 call-local diagnostic qualification selected over optional cache planning9/P3. No next plan/source execution, recovery or runtime activation.
+- Accounting134 merged/21 closed-unmerged since September9UTC/98peers. Shared checkout and external owners preserved. WSP15/22/97.
+
 ## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
 
 - Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
