@@ -1,0 +1,105 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "C",
+  "S": {
+    "owner": "modules/foundups/memory_horizon/src/content",
+    "read": [
+      "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md",
+      "modules/foundups/memory_horizon/docs/RESEARCH.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/src/content",
+      "modules/foundups/memory_horizon/tests/content",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-04.json"
+    ]
+  },
+  "M": "exec",
+  "T": "MH-RSI-04",
+  "A": "IMPLEMENT procedural event/form library for Sweep 0-1",
+  "R": [
+    0,
+    6,
+    11,
+    15,
+    22,
+    34,
+    49,
+    50,
+    62,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "event_families": [
+      "sound_threat",
+      "object_transfer",
+      "character_warning",
+      "route_choice",
+      "location_detail",
+      "inventory_item"
+    ],
+    "alternate_form_tracking": true,
+    "no_copied_fear_and_hunger_content": true,
+    "no_later_sweep_constructs": true,
+    "effect_boundary": "Module-local content/forms/tests only."
+  },
+  "O": [
+    "procedural event/form schema and content pool",
+    "distractor-generation rules for recognition",
+    "form/family exposure metadata",
+    "focused uniqueness/reproducibility tests",
+    "work_orders/results/MH-RSI-04.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-01",
+    "depends_on": [
+      "MH-RSI-01"
+    ],
+    "objective": "Create enough original procedural content to support repeated low-fi play without copying the reference game or teaching a fixed test.",
+    "steps": [
+      "Define original event families and neutral low-fi text content.",
+      "Generate controlled recognition distractors with one canonical truth.",
+      "Bind family/form identifiers for longitudinal exposure accounting.",
+      "Test seed reproducibility and within-session novelty."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability": 3,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
+    },
+    "requirements": {
+      "compute_class": "MID",
+      "reasoning_depth": "MEDIUM",
+      "tools": [
+        "repository_read",
+        "repository_write",
+        "test_runner"
+      ],
+      "verification_class": "CONTENT_MEASUREMENT"
+    },
+    "acceptance": [
+      "Content is original and mechanically generic.",
+      "Each scorable event has one deterministic truth.",
+      "Within-session form reuse rules are enforceable.",
+      "Sweep 2+ constructs are not silently added."
+    ],
+    "rollback": "Revert only content/test paths; preserve evidence."
+  }
+}
