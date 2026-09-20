@@ -1,3 +1,10 @@
+## 2026-09-20: Close verified report upload; select M2M context qualification
+
+- PR1814 merged as 8eda8fe73428a1a592f20bc331cec262a1fca5a1 after ten successful exact-head checks. All seven reviewed blobs and merged tree match; later main workflows are separate observations.
+- Final normal PR run35491315915 / artifact10598803405 independently verifies exact XML/stdout members and42 passing cases. Both hosted proofs preserve candidate-versus-synthetic-merge identities; repeated cases overlap. Report-only gate unchanged.
+- Recalculated34 histories; next is M2M-governed-context-binding-contract at13/P1, M=plan, six existing closure docs and runtime dispatch false. No new source action is admitted by the plan.
+- Accounting126 merged/21 closed unmerged/95 unchanged peer heads. Shared checkout and protected product work preserved. WSP15/22/97; no production RSI or retained-learning claim.
+
 ## 2026-09-20: Deliver the existing red-team CI reports
 
 - Existing upload step now allows hidden files only at two literal report paths. All other YAML semantics are unchanged; independent source review accepted.
