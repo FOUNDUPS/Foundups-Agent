@@ -1,3 +1,9 @@
+## 2026-09-20: Close R25 approval qualification; select AutoResearcher recovery plan
+
+- PR1826 merged as 531b753406c10df454d83e6e1a9de0ed717e87d1; ten exact-head checks passed, seven reviewed document blobs/tree verified. Later main workflows remain separate.
+- Re-observed40 histories and10 next-plan source bindings; selected12/P2 AutoResearcher recovery-oracle plan is not executed. R25 exact host/version/consumer dependency remains; no live consent or source packet is implied.
+- Accounting132 merged/21 closed-unmerged sinceSeptember9UTC/98peers; Memory Horizon head advance reconciled without scope overlap, shared checkout preserved. No source/tests/runtime activation. WSP15/22/97; exact receipts in the backlog.
+
 ## 2026-09-20: Qualify R25 feedback approval owners and preserve host boundary
 
 - WSP00/15/22/50/62/84/97/99/103/104; seven existing documents only. Compared current record, turn and scoped-receipt options; prefer conditional explicit record version while preserving v4 signatures/CAS/recovery exactly.
