@@ -42,7 +42,8 @@ main workflows passed. PR1832 (`e3753a65`) closes existing public-route test dri
 48 local/independent cases and all ten PR checks passed; both main workflows passed.
 Neither closure implements the public alias or admits runtime execution.
 
-The 15/P1 package scope qualification corrects six dependency rows: conservative
+PR1833 (`1571ec55`) closes the15/P1 package scope correction; all ten PR checks
+and both main workflows passed. Six dependency rows were corrected: conservative
 G1 serialization, G2 waiting for all writers, and final success reporting after
 publication. Static active root-overlap pairs fall from12 to0; all13orders and
 scores remain. Controlled failures can be reported without downstream completion.
@@ -53,5 +54,10 @@ Reconcile `/f/amibot` through the canonical shell owner before publication.
 
 System prioritization stays in the [root RSI roadmap](../../../ROADMAP.md) and
 existing backlog. The historical14/P1 registry integration is closed; this
-package-only repair is separate. No build, runtime bootstrap, model inference,
-device acceptance or deployment is claimed. Re-observe and rescore after closure.
+package-only repair is closed. Current15/P1 existing-module route qualification
+confirms WRE consumer -> WRE executor, a fresh dry-run default and blocked live
+authoring; unqualified build/extract can block before simulation; the older extraction helper is not this route. Existing ContextBundle
+preview attachment is implemented. See the package for exact owner/test limits,
+validation-only model admission and the unqualified consumer/singleton dry-run
+promise. No build, runtime bootstrap, model inference, device acceptance or
+deployment is claimed. Re-observe and rescore after closure.

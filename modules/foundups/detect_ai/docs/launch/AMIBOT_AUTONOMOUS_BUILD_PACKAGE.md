@@ -44,6 +44,39 @@ Phase labels supply neither barriers nor concurrency permission. Parallelism can
 
 The onboarding Skillz and `create_foundup_dryrun.py` describe new identity scaffolding. An otherwise valid new-scaffold request for already registered `detect_ai` fails `FAIL_FOUNDUP_ID_EXISTS`. Preserve that identity and existing artifacts. `build_foundup` is the existing-module candidate action in `foundup_job_contract.py`, subject to its own readiness/admission gates; no `FoundUpJob` is constructed here. Controlled-failure reporting above is a coordinator contract, not an implemented failure-event consumer.
 
+## Existing-module build route — 2026-09-21
+
+Source base: main `1571ec5528bf2f1a8e34ebc6046fc78397ec4da7`. Qualification is
+source/test-contract review, not a running-PC or end-to-end execution result.
+
+| Existing owner | What current source establishes | Remaining boundary |
+|---|---|---|
+| `modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py` | `build_foundup` returns genesis/lifecycle readiness; separate commander-authorized intent handling queues a typed job | Neither result is worker execution or AmIBot package compilation |
+| `modules/infrastructure/wre_core/run_wre.py::cmd_drain` and `modules/infrastructure/wre_core/src/foundup_job_consumer.py` | Existing CLI drain consumes the OpenClaw queue through the router | No CLI/queue was invoked here; source availability is not a running service |
+| `modules/infrastructure/wre_core/src/foundup_job_router.py` | `build_foundup` selects `HERMES_BUILDER` after route checks | A backend label is not a functioning product builder |
+| `modules/infrastructure/wre_core/src/foundup_job_consumer.py::_dispatch_to_hermes` | Imports WRE `execute_foundup_job`, not the older agent executor | Current model-capability consumer admission applies only to `validate_foundup`; build/extract requirements remain unspecified |
+| `modules/infrastructure/wre_core/src/hermes_job_executor.py` | Fresh singleton defaults to dry-run; only guard-admitted dry/disabled paths simulate. Unqualified build/extract can block first; live delegation remains blocked. Controlled adapter mode records interface proof with no live call | A configured executable/model/runtime and independently verified confined writer are still required; flags or runtime upgrades alone cannot provide them |
+| `modules/foundups/agent/src/hermes_foundup_job_executor.py` | Older `build_foundup` branch calls extraction; existing test mocks that extraction | Not the current WRE consumer target; do not delete, consolidate or route AmIBot into it based on the shared name |
+| `modules/infrastructure/wre_core/src/foundup_job_consumer.py::_attach_context_bundle_dry_run` | Existing dry branch attaches read-only ContextBundle preview with readiness false | Component wiring is implemented; its positive seam test uses validation, not live AmIBot authoring |
+
+The surrounding WRE executor writes evidence even for simulated/blocked results;
+a future local test must bind disposable evidence/workspace roots before imports.
+A dry-run label is not an OS sandbox or a no-write guarantee.
+
+The existing consumer test named `test_wre_executor_uses_singleton_dry_run`
+patches `execute_foundup_job`; it checks invocation, not the singleton's policy.
+Consumer documentation promises forced dry-run, while the convenience function
+reuses a previously configured singleton. Qualify fresh and warmed instances,
+consumer/job flag combinations and blocked-effect evidence in the existing test
+owner before a minimal policy repair. Do not weaken the promise or enable a live
+path merely to make tests pass. No such behavioral test ran in this qualification.
+
+G0 remains blocked for live authoring. Reuse the existing consumer/executor,
+model-capability contracts, typed M2M packet owners and independent verifier;
+resolve their action-specific requirements and admission before any worker.
+Current source proofs do not grant any missing authority. Preserve the13-order
+planning DAG and registered `detect_ai`; no new scaffold, builder or domain.
+
 ## RSI decision
 
 AmIBot is a strong controlled RSI/autonomous-build test, not because the system should be given unconstrained authority, but because the FoundUp is early-stage, scoped, reversible, measurable and has explicit tests. The existing RSI production-line contract already calls for admitted tickets, bounded workers, evidence synthesis and independent verification. OpenClaw supervises admitted execution; Hermes handles bounded leaf work when its profile is accepted; WRE/AgentDB retain work and process authority.
