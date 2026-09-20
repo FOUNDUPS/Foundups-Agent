@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-20: Qualify AutoResearcher interruption evidence
+
+- Completed the12/P2 static lifecycle/oracle plan in six existing documents. Missing/temp reports remain incomplete/unknown; terminal files are local diagnostics, not caller acknowledgement, independent acceptance or durable recovery.
+- No bound report consumer found in the tracked Python symbol search. Defer a new reader and automatic recovery; retain missing durable baseline, ownership/quiescence and recovery-caller contracts.
+- Independent review qualifies separate 10/P2 `auto-researcher-abrupt-exit-diagnostic-witness` using the existing test owner and unchanged producer. The exact child/oracle/budget contract is in the backlog; no test, process, source change or runtime activation occurred in this plan.
+- Both PR1826 main workflows passed;98peer heads and10 prior source bindings unchanged. Preserve26 packets/40 histories and archived prior observation; new concrete action scored separately. WSP00/15/22/50/62/84/97/99.
+
 ## 2026-09-20: Close daemon counter handles on the calling thread
 
 - Replaced the existing daemon's cached PatternMemory with one handle per counter operation; construction, increment and finally-close occur on the calling thread. Ordinary factory/write/close failures remain fail-soft; increment interruption propagates after cleanup. Telemetry disabled still constructs no handle.
