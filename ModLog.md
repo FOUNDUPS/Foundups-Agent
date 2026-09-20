@@ -1,3 +1,9 @@
+## 2026-09-20: Close lifecycle qualification; select rejection-evidence repair
+
+- PR1818 merged as 443c8d33a263dcea79a2ab11a054c6e7fb2a8a81; all ten exact-head checks passed and six reviewed document blobs/merge tree match. Main workflow observations remain separate.
+- Re-observed and reconciled 39 histories; next 13/P1 Hermes rejection-evidence repair packet is selected but not implemented or dispatched. Full child-input, delivery and descendant-cancellation proof remain unqualified.
+- Accounting: 130 merged / 21 closed without merge / 95 unchanged peers. Protected checkout preserved; no source changes, runtime tests or activation. WSP 15/22/97; exact receipts in the existing backlog.
+
 ## 2026-09-20: Qualify Hermes lifecycle and parent-only stop evidence
 
 - WSP 00/15/22/50/62/84/97/99; six existing docs only. Exact pinned API session can enable background wake dispatch despite async_delivery=False; original parent terminal and detached completion queue have distinct ownership. Preserve event gates and unresolved full child-input/delivery contracts.
