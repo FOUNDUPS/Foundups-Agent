@@ -2,7 +2,7 @@
 
 Status: `PARTIALLY_SUPPORTED` / `UNIFIED_RENDERER_NOT_IMPLEMENTED`
 
-**Canonical term:** `Moshpit` (one word). **Canonical machine token:** `moshpit`. Historical `Mosh Pit`, `MOSH_PIT`, and `mosh_pit` forms are non-canonical legacy spellings and must not be introduced into active contracts.
+**Canonical term:** `Moshpit` (one word). **Canonical machine token:** `moshpit`. Split or underscored variants must not be introduced into active contracts.
 
 Existing Breadcrumb and Brain/Memex query components are reusable inputs. The
 unified Moshpit projection and reverse-chronological renderer are not wired.
