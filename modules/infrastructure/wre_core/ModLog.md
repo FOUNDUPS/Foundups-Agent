@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-21: Reconcile WRE core-receipt test fixtures
+
+- WSP 15/22/50/62/97; prerequisite C2/I3/D3/Impact2 = 10/P2 before the separate 13/P1 forced-dry repair. Focused unchanged-source baseline: 31 pass/16 fail; the initial connected subset was 132 pass/6 fail.
+- The local projection fixture now requests an explicit direct provider through the existing paired helper and removes only its known outer verification receipt before applying mutations/digests. Production normalization, provider policy and the shared authenticated-runtime helper are unchanged.
+- Focused 49 tests and connected 174 tests pass with zero forbidden effects under the disposable Python guard. Counts overlap. Added controls preserve rejection of outer wrappers and unqualified aggregator-provider lineage. Initial null-device harness denial is preserved separately.
+- This repairs test evidence, not OpenRouter compatibility, runtime admission, retained learning or AmIBot authoring. Independent review and exact hosted publication are tracked in the canonical backlog.
+
 ## 2026-09-21: Qualify consumer dry-run configuration isolation
 
 - WSP00/15/22/50/97;15/P1 actual-module witness, no production edits. Eight configurations reach the consumer/convenience/factory seam; two True-consumer cases inherit warmed non-dry or controlled-harness/tools state, contrary to its documented promise.

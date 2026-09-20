@@ -36,6 +36,14 @@ custom root; bind an owned disposable root before tests. Per-call allocation cos
 remains unmeasured. Dry-run evidence may write files and is not OS confinement.
 The repair has not been implemented or tested by this qualification.
 
+The next source sprint's baseline exposed a separate local fixture prerequisite:
+the shared runtime helper supplies an enriched receipt and an aggregator provider,
+while this projection accepts an exact core/direct-provider contract. The 10/P2
+test-only adapter repair now yields 49 focused and 174 connected passing cases,
+with production/shared-helper bytes unchanged. Rejection controls remain active.
+The 13/P1 forced-dry source repair is still open. OpenRouter compatibility and live
+provider admission remain separate questions; direct-provider fixtures do not answer them.
+
 ## AutoResearcher abrupt-exit witness — 2026-09-20
 
 The **10/P2** test-only witness is locally verified on unchanged production source.
