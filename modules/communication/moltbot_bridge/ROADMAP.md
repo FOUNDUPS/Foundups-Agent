@@ -1,4 +1,26 @@
-## Hermes lifecycle qualification — 2026-09-20
+## Parent-only Hermes rejection evidence — 2026-09-20
+
+The existing lifecycle owner now keeps effect observation and abort confirmation
+false after parent-only stop evidence and noncompleted/forbidden terminal rejection.
+Best-effort stop/status calls, rejection reasons, effects-possible reporting and
+withheld artifacts remain. Successful acceptance and event/confinement gates are
+unchanged; this does not implement detached-child cancellation or result delivery.
+
+The C2/I4/D4/Impact3 = 13/P1 repair uses one source and one existing test owner.
+Qualified red-v2: 10 failed/98 passed; focused green: 108 passed. The initial
+test-assertion placement error is retained separately, not counted as a product
+regression. Connected-v2 passes 114 after a Windows extended-path isolation-guard
+correction; the earlier seven harness failures remain recorded. Independent review
+accepts 117 passes: the same 108 focused cases plus nine external controls.
+All use fakes/disposable state, with no live provider or sandbox proof. Manifest
+check/eight tests, 15 extension fast groups and the 67-file package pass;
+exact-head closure remains separately bound in the current backlog.
+
+After this repair closes and fresh ownership/source checks pass, the conditional
+next action is R25 approval-owner planning at 13/P1. Preserve all 39 histories
+and 26 original packets; no next-plan execution or feedback authority is implied.
+
+## Historical Hermes lifecycle qualification — 2026-09-20
 
 Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
 14/P1 compatibility question. Both PR1817 main workflows now pass. This is
@@ -19,7 +41,7 @@ consumer/wake implementation remains unqualified. Do not relax event gates,
 change private depth/session identity, or substitute another endpoint on this evidence.
 Full child-input fidelity, result delivery and live sandbox readiness remain open.
 
-The smallest qualified successor is a conservative correction in existing
+At that checkpoint, the qualified successor was a conservative correction in existing
 `reddog_hermes_api_run_lifecycle`: retain best-effort stop/status and rejection,
 but report incomplete effect observation and unconfirmed abort from parent-only
 stop evidence. Failed/cancelled terminal rejection must also report incomplete
@@ -28,11 +50,11 @@ receipt fields already represent this uncertainty. No schema
 or shared consumer change is needed. This does not implement detached cancellation,
 change successful-result acceptance, or prove a live leak.
 
-WSP 15 selects that distinct repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
+WSP 15 then selected that repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
 approval-owner planning. The verified receipt overclaim breaks the tie; R25 remains
 eligible. All 26 original packets and 38 prior candidate histories are preserved;
 one repair row makes 39. No source/tests/runtime changed during this qualification.
-The existing backlog carries the independently reviewed implementation packet.
+That qualification's implementation packet led to the repair recorded above.
 
 ## Hermes child-input evidence qualification — 2026-09-20
 

@@ -620,10 +620,10 @@ egress where applicable.
 
 ## Current upstream worker providers
 
-`test_reddog_hermes_api_artifact_provider.py` proves Hermes API `0.20.4`
-accepts only one stable completed native leaf, paired delegate-only telemetry,
-explicit zero child file reads/writes, ordered final completion, zero skills,
-and unchanged pre/postflight policy.
+`test_reddog_hermes_api_artifact_provider.py` uses fakes for API `0.20.4`, one stable completed leaf,
+paired delegate-only telemetry, empty child file arrays, ordered completion, zero skills and unchanged policy.
+Its 24 stop/three terminal variants keep parent-only observation/abort flags false while retaining possible effects,
+withheld artifacts, receipt rehydration and bootstrap effect propagation; they do not prove real child termination.
 `test_reddog_openclaw_gateway_artifact_provider.py` proves OpenClaw
 `2026.7.1-2` service/plugin identity, WSL cold-start-safe RPC ordering, exact
 sandbox policy, signed provider-prefixed routing, and bounded non-empty artifact

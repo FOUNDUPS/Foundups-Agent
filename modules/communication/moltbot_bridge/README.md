@@ -426,26 +426,26 @@ not repository-local classes that merely carry their names:
   generates the artifact map; the existing Foundups writer alone materializes
   the already-authorized paths in the isolated worktree.
 - `hermes_api` calls the installed upstream Hermes Agent `/v1/runs` API through
-  authenticated loopback HTTP. It requires the fixed `reddogartifact` profile,
-  Hermes API `0.20.4`, bearer authentication, exactly the native `delegation`
-  toolset (`delegate_task` only), zero visible skills, and the same surface
-  after the run. The complete event queue must prove one stable completed leaf
-  identity with explicit empty file-read/write arrays and ordered delegate
-  completion before the final terminal event. Any second child, other tool, approval,
-  failed/interrupted child, effect, or drift rejects. Foundups retains all file,
-  worktree, commit, verification, PR, and merge effects.
+  authenticated loopback HTTP: fixed `reddogartifact` profile, API `0.20.4`,
+  bearer authentication, native `delegation` (`delegate_task` only), zero skills,
+  and unchanged postflight policy. The event queue must prove one stable completed
+  leaf, explicit empty file-read/write arrays, and ordered delegate completion
+  before the final terminal event. Other children/tools, approvals, failed or
+  interrupted children, effects and drift reject. Stop/status remain best-effort.
+  Parent-only stop or noncompleted/forbidden terminal evidence reports
+  `effect_observation_complete=false` and `run_abort_confirmed=false`;
+  effects remain possible and no artifacts return. This does not prove child
+  cancellation or delivery. Foundups retains all file, worktree, commit,
+  verification, PR, and merge effects.
 
 Both providers pass their returned map through the same bounded validator:
 canonical relative paths only, no traversal/absolute/device paths, non-empty
 UTF-8 text, and the author-stage per-file and aggregate size ceilings.
 
-Both modes consume the existing signed model-runtime binding and remain below
-the AgentDB/WRE work-order, WSP 15, exact-path, commit, and independent-verifier
-authority chain. Provider invocation and worker-process effects are recorded
-in the resident-cycle result instead of being reported as dry-run purity.
-`foundups_fusion` remains supported; unknown provider modes fail closed. The
-legacy repository `HermesJobExecutor` is not used by this route and no local
-class is presented as the upstream Hermes runtime.
+Both modes require the signed model-runtime binding and AgentDB/WRE work-order,
+WSP 15, exact-path, commit and independent-verifier authority chain. Invocation
+and process effects stay receipt-bound. `foundups_fusion` remains supported;
+unknown modes reject. The legacy `HermesJobExecutor` is not used by this route.
 
 The Hermes bearer key is read only from
 `<resident-runtime-root>/hermes-api/api-key` through the confined runtime-file

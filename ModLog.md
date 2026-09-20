@@ -1,3 +1,10 @@
+## 2026-09-20: Correct parent-only Hermes rejection evidence
+
+- WSP00/15/22/50/62/84/95/97/99;13/P1 existing-owner source repair. Parent stop/status and rejected terminal evidence no longer claim complete effects or confirmed descendant abort. Keep best-effort stop, reasons, withheld artifacts and effects-possible flags; success/event controls unchanged.
+- Corrected RED10failed/98passed; focused108 and connected114 pass. Independent108 overlap plus9 probes pass. Preserve corrected test-placement, Windows test-root guard and verifier accounting mistakes as tooling evidence.
+- One of1,400 runtime hashes/two pins refreshed; generator8, fast15groups,67-file/950,440-byte package and registry1651/269 pass. Exact-head remote closure remains pending in the current backlog.
+- Preserve26 packets/39 histories; next conditional R25 approval-owner plan13/P1 reuses existing consent/record owners. Full child-input/delivery/cancellation, AmIBot readiness and live RSI retention remain incomplete. No live provider/runtime/production effects.
+
 ## 2026-09-20: Close lifecycle qualification; select rejection-evidence repair
 
 - PR1818 merged as 443c8d33a263dcea79a2ab11a054c6e7fb2a8a81; all ten exact-head checks passed and six reviewed document blobs/merge tree match. Main workflow observations remain separate.

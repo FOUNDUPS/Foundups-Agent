@@ -123,14 +123,39 @@ storage; independent review accepted the scoped witness. The separately scored
 13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
 Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
 constructor cost and live RSI retention remain unverified. The backlog binds
-the closed R19/context repairs, qualified child-input/lifecycle gaps and next 13/P1 stop-evidence correction.
+the closed R19/context repairs, qualified child-input/lifecycle gaps and current rejection-evidence repair.
 R19 qualification is merged in PR1811. Its one-step upload repair has actual
 hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
 and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
+## Hermes rejection evidence repair — 2026-09-20
+
+The selected C2/I4/D4/Impact3 =13/P1 repair is locally verified in the existing
+run-lifecycle owner. Parent-only stop acknowledgements/status and noncompleted
+or forbidden terminal rejections report incomplete effect observation and
+unconfirmed abort. Best-effort stop/status, reasons, withheld artifacts and
+effects-possible reporting remain; successful acceptance gates are unchanged.
+This corrects receipts, not detached-child cancellation or result delivery.
+
+Corrected RED:10 failed/98 passed; GREEN:108 passed; connected:114 passed.
+Independent verification passes108 overlapping cases plus9 additional probes.
+Test-author placement, Windows temporary-path guard and independent JUnit-count
+errors are retained separately with their corrections. Backend manifest membership
+remains1,400; one runtime hash and both pins changed. Eight generator tests,
+15 extension groups,67-file package and unchanged1,651-entry registry pass.
+
+Exact-head publication remains required. All26 original packets and39 candidate
+histories are preserved. Fresh WSP15/97 selection conditionally returns to the
+existing R25 feedback approval-owner plan at C3/I4/D3/Impact3 =13/P1: determine
+how an exact daily-work summary gains valid approval for a specific FoundUp and
+version through current owners. It is not live consent or permission to dispatch.
+The current backlog binds exact receipts, limitations and the next M2M packet.
+
 ## Hermes lifecycle qualification — 2026-09-20
+
+Historical PR1818 qualification; the implemented correction and current selection are above.
 
 Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
 14/P1 compatibility question. Both PR1817 main workflows now pass. This is
