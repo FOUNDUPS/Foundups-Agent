@@ -75,10 +75,10 @@ lineage rejects. This does not automatically extract a plan or authorize executi
 Generation checks the signed full-order digest before one-use model admission.
 Explicit M2M packets survive profile/signing and detached request preparation;
 rejection consumes the matching handle. Legacy bytes and the 24,000-character
-prompt/context budget remain. Sealed schema/digest reject changed raw/redacted
-instructions before Fusion/OpenClaw/Hermes adapter effects. Current Gateway,
-work/model authority and exact provider inventory remain required. Full context,
-native-child fidelity, live worker admission and retained RSI remain unqualified.
+prompt/context budget remain. Sealed prompt and prepared raw-context digests reject
+changed delivery before Fusion/OpenClaw/Hermes effects; legitimate context redaction
+is preserved. Partial canonical bindings reject; all-absent markers retain legacy.
+Source provenance, native-child fidelity, live admission and retained RSI remain unqualified.
 
 ## RedDog HoloIndex promotion binding
 

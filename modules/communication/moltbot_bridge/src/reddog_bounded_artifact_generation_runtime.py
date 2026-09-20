@@ -223,7 +223,7 @@ def _run_bounded_artifact_model(
         else:
             available_providers = getattr(runner, "available_model_providers", ())
             model_capability = _issue_artifact_generation_model(
-                invocation_binding=_binding(req, planned, model_selection, prompt),
+                invocation_binding=_binding(req, planned, model_selection, prompt, context),
                 runtime_binding=admission.runtime_binding,
                 selection=admission.selection,
                 verification=admission.verification,
@@ -295,9 +295,11 @@ def _binding(
     planned: Sequence[str],
     model_selection: Mapping[str, Any],
     prompt: str,
+    context: str,
 ) -> Dict[str, Any]:
     return {
-        **({"prompt_schema": "0102_m2m_v1", "m2m_prompt_digest": _digest(prompt)}
+        **({"prompt_schema": "0102_m2m_v1", "m2m_prompt_digest": _digest(prompt),
+            "m2m_context_digest": _digest(context)}
            if "m2m_envelope" in req else {}),
         "work_order_id": str(req.get("work_order_id") or ""),
         "slice_name": str(req.get("slice_name") or ""),
