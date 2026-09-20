@@ -1,3 +1,11 @@
+## 2026-09-20: Qualify daemon counter memory ownership
+
+- WSP00 bootstrap and actual WSP15/WSP97 reconciliation retained 31 candidate histories; unchanged main/102 peer heads, shared checkout preserved. PR1806's subsequent CI35480607649 and CodeQL35480607038 now both report SUCCESS.
+- Unchanged-source baseline: 61 passed (20 daemon/41 PatternMemory), 81 explicitly disposable DB opens, zero external attempts. Separate witness: two distinct concurrent threads each process one new event, but only one counter increment persists; fail-soft handling suppresses the SQLite ownership error. A fresh owned-handle control succeeds.
+- Independent witness review accepted exact source/harness bindings and verified the disposable DB read-only. Cached handle retention after injected loop exit/stop(0) is structural evidence; no actual start/restart or active-scan shutdown was tested. Initial synthetic-marker harness failure remains recorded.
+- Updated only six existing closure documents. Archived the exact prior observation; re-scored 32 rows and selected the separately qualified C2/I4/D4/Impact3=13/P1 per-counter repair. No source/test change or runtime/retention admission; existing daemon owner/test and derived backend manifest/pins are the next bounded packet.
+- Evidence: current backlog observation daemon_pattern_memory_lifecycle_qualified_20260920; external receipts under O:/Foundups-Agent-audits/20260920-rsi-memory-lifecycle-1046. WSP00/15/22/48/50/62/84/97/99.
+
 ## 2026-09-20: WSL command-control repair merged; memory lifetime qualifier next
 
 - PR1806 merged as `d3a75d6727854f116ae4cb8e9e0b6efc557536cb` after all ten exact-head checks passed. The merged

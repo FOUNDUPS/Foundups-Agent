@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 
+## 2026-09-20: Qualify daemon PatternMemory lifetime without source changes
+
+- Confirmed source-bound mismatch: the supervisor starts and synchronously scans the same daemon, whose cached SQLite connection remains bound to its creating thread. Two distinct-thread events yielded two scan results but one persisted counter; fresh owned-handle control succeeded.
+- Baseline 61 tests pass with 81 disposable database opens. Independent reviewer accepted the witness and checked its database read-only. No actual daemon start/restart, live logs, production memory or worker dispatch; stop(0) evidence follows injected loop exit, not an active scan.
+- Six-document qualifier only. Proposed next source action is independently 13/P1 (2+4+4+3): per-counter create/use/finally-close in the existing daemon and existing test owner; preserve SQLite/thread/dispatch contracts. Include derived backend digest and both existing pins when source changes.
+- Current backlog binds receipts/source hashes, preserved initial harness error, acceptance matrix, limitations and 32-row re-observation. Source still defective; no accepted retained improvement. WSP00/15/22/48/50/62/84/97/99.
+
 ## 2026-09-20: Preserve proposal-text identity before preparation
 
 - Added one diagnostic report list in the existing AutoResearcher. Nonempty text that passes the mode gate is hashed as UTF-8 before scratch write/diff; later failed/rejected attempts retain their input identity. No raw text is added to the field.
