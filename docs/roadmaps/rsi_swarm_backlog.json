@@ -2670,7 +2670,7 @@
     "scope_reconciliation": [
       "New source/test owner count1 each. Existing12 Markdown/JSON closure files and three derived packaging files only; conditional test-registry write unnecessary.",
       "Initial preflight stopped when main advanced to protected PR1808. Owned branch incorporated its disjoint base before source edits; no protected source modified relative to main.",
-      "PR1809 advanced main during review on13 protected paths; exact current packet and1,400-member manifest intersections are empty. Incorporate that unchanged base after coherent candidate commit; no repeated source tests needed for disjoint changes.",
+      "PR1809 advanced main during review on13 protected paths; exact current packet and1,400-member manifest intersections are empty. That unchanged base is incorporated after coherent candidate commit; no repeated source tests needed for disjoint changes.",
       "All101 surviving peer heads unchanged; PR1771 closed without merge; source/test path overlap absent. Shared docs/generated pins retain peer history and confer no product ownership.",
       "Author/test-author/verifier lanes are local assistance, not admitted OpenClaw/Hermes workers."
     ],
@@ -2802,7 +2802,7 @@
         "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py": "238ef62685394f954c962bad32937f0cbb9b0d5d0edfe5906686f9bc12f710d4",
         "modules/infrastructure/wre_core/tests/test_daemon_self_audit_loop.py": "28921cca7f87acbb6b7d44bc369fb5cf9031dd988007f85ee54e171349894287"
       },
-      "remote": "New source candidate not yet committed, pushed or remotely checked."
+      "remote": "Local source candidate committed and protected base incorporated; push/PR/exact-head checks remain unobserved at this documentation checkpoint."
     },
     "effort_cost": {
       "source": "Seven additions/seven removals in one existing source; ten meaningful regression cases in existing test owner.",
@@ -2946,7 +2946,16 @@
       ],
       "packet_overlap": [],
       "manifest_member_overlap": [],
-      "next_step": "Preserve disjoint protected main changes; commit coherent candidate before incorporating main into owned branch."
+      "next_step": "Protected PR1809 base incorporated without conflicts; source/test hashes and protected paths verified unchanged.",
+      "integration_verification": {
+        "observed_at": "2026-09-20T03:19:46.265508+00:00",
+        "integration_head": "8234a4fb46de6e4010b0357e4552d73aca888af0",
+        "publication_base": "1bfecebebd3545b3f585a46979215ebac2d7eccf",
+        "protected_paths_preserved": 13,
+        "source_test_hashes_unchanged": true,
+        "manifest_members_disjoint": true,
+        "peer1771_closed_without_merge": true
+      }
     },
     "artifact_root": "O:/Foundups-Agent-audits/20260920-rsi-daemon-counter-1154",
     "evidence_sha256": {
@@ -2988,7 +2997,8 @@
       "test-author/green.log": "9aaa92c6186990ac16fbc929dead7099dc15da120cc3d2f6ffc7f802374d6e67",
       "test-author/green.xml": "f0efef179bb01c909f552f0d4a1f0c2507fde8aa6af1a9d521abebbb1d740ced",
       "test-author/green-receipt.json": "3cb49db9f82ae8b4ba6a1e22f9b286ae65bc35a61ff32d302c2bb55eed77cc2d",
-      "test-author/test-author-summary.json": "a008e73d0a056468747ef4f2d555dd02142b917b746ee90962f5a90b17b0a87f"
+      "test-author/test-author-summary.json": "a008e73d0a056468747ef4f2d555dd02142b917b746ee90962f5a90b17b0a87f",
+      "base-integration-verification.json": "34786fdd2e332af6234fd70ee623316b30d9ba085ee3df07fa909d5af4b746a5"
     },
     "post_sprint_reobservation": {
       "status": "source_locally_closed_next_contract_selected_after_remote_closure",
