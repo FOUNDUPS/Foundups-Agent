@@ -1,3 +1,9 @@
+## 2026-09-20: Close Hermes rejection repair; select R25 approval-owner plan
+
+- PR1819 merged as fdb23b0606800547edf664c0a665d0447392058b; all ten exact-head checks passed,17 reviewed blobs and merge tree verified. Later main workflows remain separate observations.
+- Re-observed39 histories and18 next-plan source bindings; next R25 approval-owner planning13/P1 is selected, not executed. Daily-work consent and full Hermes input/delivery/cancellation remain open.
+- Accounting131 merged/21 closed-unmerged/95unchanged peers; protected shared checkout preserved. No live provider/runtime activation or retained RSI proof. WSP15/22/97; exact receipts in the backlog.
+
 ## 2026-09-20: Correct parent-only Hermes rejection evidence
 
 - WSP00/15/22/50/62/84/95/97/99;13/P1 existing-owner source repair. Parent stop/status and rejected terminal evidence no longer claim complete effects or confirmed descendant abort. Keep best-effort stop, reasons, withheld artifacts and effects-possible flags; success/event controls unchanged.

@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+    "base_commit": "fdb23b0606800547edf664c0a665d0447392058b",
     "selected_action": "R25-feedback-approval-owner-contract",
-    "status": "repair_verified_next_r25_plan_conditional",
+    "status": "next_r25_approval_owner_plan",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1876,7 +1876,7 @@
     "origin": "autonomous_trigger",
     "principal_ref": "012",
     "previous_observation": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json#hermes_lifecycle_qualification_closed_20260920",
-    "status": "rejection_evidence_repair_locally_verified_pending_publication",
+    "status": "rejection_evidence_repair_closed_pr1819",
     "selected_task": "Hermes-parent-only-rejection-effect-evidence",
     "selected_score": {
       "complexity": 2,
@@ -2855,7 +2855,8 @@
           "status": "completed",
           "conclusion": "success"
         }
-      ]
+      ],
+      "remote": "PR1819 merged after all ten exact-head checks passed; all17 independently reviewed blobs and merge tree verified. Later main workflows recorded separately."
     },
     "effort_cost": {
       "scope": "One source, one existing test, generated manifest/two pins and12existing docs; ordinary isolated source sprint.",
@@ -2883,7 +2884,13 @@
       "manifest-check.log": "ae550945335f386d165cc0b6218386d28d0ea9999c4b2dc30447ab71a436da5e",
       "extension-fast.log": "faa4b748c02a17c123c7cbbdfb75f0e8f9fbc6c343746edfa36fb1a24258145a",
       "extension-package.log": "efef058daab79bd6b72198c66ce9c6213801c06f1fe655fc0e05c26d50fbafde",
-      "registry-check.log": "9f1184e6c8be8bbde223b1ac647a20b4b0c332d8bf32f22e08baa457bdf4e401"
+      "registry-check.log": "9f1184e6c8be8bbde223b1ac647a20b4b0c332d8bf32f22e08baa457bdf4e401",
+      "candidate-validation.json": "7bc130fe975d0edb6e33c922ed6e3e8b2961be4f6999798a56dbef057d1b2ff9",
+      "final-review.json": "5a2bca070cfaf60a79c2e75f62ff9d00b286747821330cbc03e38474be76b28d",
+      "publication-readiness.json": "6f9a8ab9b7d08c549e8f337f071de347c1f99c0b988b05b6c77aaf5b93674abe",
+      "closeout.json": "052d7eeb1c8fcb7162c3f8fb0ce6557992123fb9813503d9ce3077b136c84ee9",
+      "documentation-worker-review.json": "8bc68f6b9416ecd3808e411ea4d7979aebc4f75ab9dde9e571f0642886616a84",
+      "registry-final-check.log": "9f1184e6c8be8bbde223b1ac647a20b4b0c332d8bf32f22e08baa457bdf4e401"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2902,13 +2909,14 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "independent-execution-verification-promotion",
@@ -2922,13 +2930,14 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Independent runtime admission absent",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "current-semantic-retrieval",
@@ -2945,13 +2954,14 @@
           "evidence": [
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "RedDog-backend-closure-consolidation",
@@ -2968,13 +2978,14 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "RedDog-conversation-durable-adapters",
@@ -2991,13 +3002,14 @@
             "docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md"
           ],
           "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "integrated-mcp-qualification",
@@ -3011,13 +3023,14 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "wre-openclaw-hermes-worker",
@@ -3031,13 +3044,14 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current signed job/model/runtime admission absent",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "chroma-deployment",
@@ -3051,14 +3065,15 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "Current deployment owner and runtime qualification",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "security_dependency": "Current Dependabot alerts322/286 for direct chromadb in holo_index/requirements.txt; first_patched_version is null. Exposure/mitigation needs existing owner evidence; no blind runtime change.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "AmIBot-package-admission",
@@ -3075,13 +3090,14 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "FoundUp-genesis-conversation-lineage",
@@ -3102,14 +3118,15 @@
             "genesis-next-source-overlap.json"
           ],
           "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "wsp97_action": "Reuse existing metadata/typed intake/job contracts and onboarding skill; preserve authority and reject deny-path false positives. No new intake module or skill.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "Dependency-security-reconciliation",
@@ -3129,13 +3146,14 @@
           ],
           "next_step": "Continue bounded exposure/owner triage before any update; reuse active security dependency and FastMCP PRs. Nine critical alerts span seven manifests; aggregate count is not a verified exploitable-path finding.",
           "why_score": "Existing security/dependency owners remain; no new exposure proof changes scope. The equally17/P0 typed genesis gap has a concrete local static witness and existing fixtures; continue security owner triage separately.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -3149,13 +3167,14 @@
           "priority": "P0",
           "state": "partial_transaction_dependency",
           "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "authenticated-response-read",
@@ -3169,13 +3188,14 @@
           "priority": "P0",
           "state": "blocked",
           "next_step": "012 reader-policy question remains unanswered",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "AmIBot-registry-prerequisite",
@@ -3192,14 +3212,15 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Fresh1751 head04ef322f remains draft, CONFLICTING and validateFAILURE. Preserve permanent detect_ai lineage and route/project owner; no main registration or build dispatch claimed.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "M2M-canonical-envelope-qualification",
@@ -3234,7 +3255,7 @@
           "effort": "One existing producer/consumer seam after contract retrieval.",
           "cost": "Deterministic fixtures first; provider cost remains unmeasured.",
           "verification_burden": "Independent exact-field/semantic preservation and scope failures before admission.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "score_reconciliation": "Historical18/P0 covered now-closed concrete serialization/seed handoff prerequisites. Residual local contract is15/P1; do not inherit18 automatically.",
           "fresh_disposition": "Remaining15/P1 is a broader provider/full-context fidelity contract, with no new demonstrated incompatibility or qualified source patch.",
           "retain_score": 15,
@@ -3243,7 +3264,8 @@
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "OpenClaw-content-bound-cache-qualification",
@@ -3257,7 +3279,7 @@
           "priority": "P1",
           "state": "eligible_contract_qualification_current_rescan_preserved",
           "next_step": "Qualify whole-wardrobe membership/content/manifest plus scanner executable/version/config identity before reusing any success. Reuse WRE reservation/fingerprint patterns only after proving their single-bundle assumptions. Current always-rescan is deliberate; live latency is a separate dependency, not a blocker to local planning.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Remaining15/P1 contract still requires whole-wardrobe/scanner ownership; live measurement unadmitted, no qualified next repair.",
           "retain_score": 15,
           "retain_history": true,
@@ -3265,7 +3287,8 @@
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "AmIBot-public-route-contract-drift",
@@ -3282,13 +3305,14 @@
             "public/member/tests/test_route_contract_bridge.py"
           ],
           "next_step": "Reconcile11 stale contract expectations with current public/member route owner; preserve deliberate membership gate.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "FoundUp-genesis-wardrobe-admission",
@@ -3306,13 +3330,14 @@
             "modules/infrastructure/wre_core/src/foundup_scaffold_adapter.py"
           ],
           "next_step": "Reuse the existing intake skill and registry/wardrobe contract; qualify freshness, allowed reads and runtime dependencies before dispatch. Do not create a duplicate skill.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "protected-foundup-work",
@@ -3326,13 +3351,14 @@
           "priority": "P1",
           "state": "external",
           "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. Registry PR1751 triggers existing eSingularity assertions; treat this as an external owner dependency.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "PatternMemory-worker-lifecycle-integration",
@@ -3350,13 +3376,14 @@
             "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py:__init__"
           ],
           "next_step": "Daemon per-counter lifetime closed; other consumers, actual shutdown/restart, transaction acceptance and retained benefit remain separately unqualified.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Parent partially advanced by daemon slice. Master SQLite memory is also shared with SkillSelector and handles outcomes/A-B records; remaining contract cannot simply reuse daemon counter repair. No new source-qualified handoff witness in this selection.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "AmIBot-public-route-identity",
@@ -3374,13 +3401,14 @@
             "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md:114"
           ],
           "next_step": "Resolve requested /f/amibot through the existing public route/catalog owner while retaining canonical detect_ai identity. No new domain or second entity; no deployment from this source-authoring task.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "FoundUp-validation-fixture-reconciliation",
@@ -3405,13 +3433,14 @@
           "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source.",
           "review": "next-fixture-contract-review.json",
           "review_sha256": "57ade75e1a9fd94c028f685a23aa90c3ef8c9d6e2a3abcf6a8c5f0e8c8b2bfca",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "Hermes-runs-delegation-lifecycle-compatibility",
@@ -3435,10 +3464,11 @@
           "wsp97_action": "Reuse current provider lifecycle/event/transport owners and pinned sources. Do not force prose into runtime policy or weaken event confinement.",
           "effort": "Bounded source/data-flow compatibility review; no install, runtime or source mutation.",
           "cost": "Reuse pinned evidence; bounded missing-source retrieval only as next packet permits.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
-          "fresh_disposition": "Qualification closed. The separately qualified parent-only rejection-evidence repair is now locally verified, pending exact-head closure. Full child input, detached delivery and cancellation gaps remain. R25 approval-owner planning is the conditional next action.",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
+          "fresh_disposition": "Qualification and distinct parent-only rejection correction are closed. Full child input, detached delivery and cancellation gaps remain; R25 approval-owner planning is selected after fresh reconciliation.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "R25-A consented local daily-work proposal",
@@ -3452,7 +3482,7 @@
           "priority": "P1",
           "state": "compatibility_qualification_complete_source_contract_blocked",
           "next_step": "Choose and independently qualify an explicit feedback approval assertion, issuer and consumer under existing authenticated conversation/record owners. No exact source patch or new implementation score is qualified.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "evidence": [
             "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20",
             "r25-disclosure-contract-review.json",
@@ -3466,7 +3496,8 @@
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "auto-researcher-process-durability",
@@ -3480,7 +3511,7 @@
           "priority": "P1",
           "state": "eligible_contract_qualification_after_currently_selected_seam",
           "next_step": "Use existing _run_with_report/_write_run_report, scratch allocation and rollback owners to specify process-interruption/recovery identity and independent recovery oracle. Missing source patch alone does not block planning; power/volume guarantees must not be inferred from Python finally or atomic replace.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Remains eligible-later at13/P1; process/volume recovery and oracle contract are broader than existing R19 discrepancy; no accepted next source slice.",
           "retain_score": 13,
           "retain_history": true,
@@ -3488,7 +3519,8 @@
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "R19-redteam-artifact-delivery",
@@ -3508,14 +3540,15 @@
           ],
           "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step.",
           "wsp97_action": "Reuse existing CI observation documentation and redteam test owner; preserve report-only policy and separate creation/selection/upload/listing/download evidence.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
           "blocker": "None in two-report delivery scope; observation-window stability and blocking activation remain separate.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "WSL-advisory-cold-start-contract",
@@ -3537,14 +3570,15 @@
           "blocker": "None within completed planning scope; source repair is separately scored.",
           "wsp97_action": "Reuse existing dependency launcher probe/test and intentional activation owners. Qualify no-start advisory versus intentionally started execution without inventing an effect-use lease.",
           "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "effort_cost": "One bounded source/contract/test-seam qualification; no provider cost or runtime activation.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "DaemonSelfAudit-PatternMemory-lifecycle-contract",
@@ -3564,14 +3598,15 @@
           ],
           "blocker": "None in closed qualification; separately qualified source repair closed in PR1810. Other lifecycle concerns require their own evidence.",
           "next_step": "No remaining work in the closed qualifier. Preserve accepted defect evidence and execute only the separately scored source packet after fresh observation.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "effort_cost": "One existing owner/test pair contract qualification with injected threads/storage; no model/provider cost or service start.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "DaemonSelfAudit-per-counter-memory-ownership",
@@ -3595,14 +3630,15 @@
           "wsp97_action": "Remove shared cached-handle assumption in the existing daemon; reuse PatternMemory creating-thread ownership and existing tests. No new module, pool, skill or SQLite policy.",
           "next_step": "No remaining source work in this counter-lifetime slice; preserve accepted evidence and separately qualify other consumers or runtime concerns.",
           "why_score": "C2 localized ownership idiom; I4 observed telemetry integrity; D4 existing supervisor both starts and synchronously scans the same object; Impact3 scoped observation benefit. Independent review scored the actual source action, not the parent.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Merged and independently accepted existing-owner counter repair; removed from executable selection.",
           "effort_cost": "One source/test pair with required canonical docs and derived packaging updates; disposable tests, no paid provider or runtime calls.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "R19-explicit-report-file-upload",
@@ -3625,13 +3661,14 @@
           "effort": "One upload-step edit plus existing documentation closure.",
           "cost": "No model/provider/runtime cost; normal PR CI and bounded selected artifact retrieval.",
           "verification_burden": "Exact semantic YAML diff, independent review, normal PR run-bound artifact list/download/XML/stdout checks; no dispatch or rerun.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Merged after exact candidate checks and two hosted artifact proofs with independent review. Repeated42-case suites overlap.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "M2M-governed-context-binding-contract",
@@ -3656,7 +3693,7 @@
             "Native Hermes child payload fidelity is separate: _request_payload instructs complete goal/context, while event validation binds child identity/order/status/effect counts. Parent egress integrity will not prove actual delegated child inputs.",
             "Existing higher external owners and explicit live authority/principal policy dependencies are preserved; this bounded comparison does not re-audit or dismiss those rows. R19 is not closed until root obtains hosted proof."
           ],
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "effort": "One bounded existing producer/binding/consumer contract qualification.",
           "cost": "Read-only source and existing deterministic fixtures first; no provider/runtime calls.",
           "verification_burden": "Independent exact-field and ownership review before any source change.",
@@ -3665,7 +3702,8 @@
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "M2M-prepared-context-digest",
@@ -3687,12 +3725,13 @@
           "wsp97_action": "Reuse existing preparation, capability and validator, preserve redaction and framing; no new owner.",
           "effort": "Five source seams, four existing test owners, manifest/two pins and required docs, within packet budgets.",
           "cost": "Deterministic fakes; zero model/provider calls.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "PR1816 closed the exact prepared raw-context and canonical-prompt binding repair before provider effects. Its reviewed source remains unchanged; no remaining work in that bounded repair. Child input, lifecycle and rejection-evidence scopes are tracked separately.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "Hermes-native-child-input-evidence-contract",
@@ -3715,11 +3754,12 @@
           "wsp97_action": "Reuse current lifecycle/event/provider/test owners; distinguish requested input from authenticated actual child input.",
           "effort": "Bounded read-only qualification; six existing closure docs, no source/runtime changes.",
           "cost": "No model/provider calls; exact version-bound source retrieval only if absent locally.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "PR1817 closed the 13/P1 input-evidence qualification. This sprint completes lifecycle qualification and selects the separate 13/P1 rejection-evidence repair; no full input-fidelity implementation or runtime activation is qualified.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "R25-feedback-approval-owner-contract",
@@ -3731,20 +3771,21 @@
           },
           "score": 13,
           "priority": "P1",
-          "state": "selected_conditional_next_existing_owner_plan",
+          "state": "selected_next_plan_after_verified_closure",
           "evidence": [
             "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
             "current_observation.validation.next_selection"
           ],
           "next_step": "Select and independently qualify the smallest existing-owner contract that binds one canonical permitted feedback summary to its authenticated principal, source record, FoundUp, purpose and proposal version before projection. Return one complete source/test handoff only if the issuer, consumer, legacy and revocation/retry contracts are grounded; otherwise report the precise unresolved seam. Do not implement or grant authority.",
-          "blocker": "The current Hermes two-path rejection-evidence repair must pass its bounded tests and independent review, complete its exact-head closure, and be followed by fresh source/base/peer/ownership re-observation. This receipt neither closes that repair nor starts the next plan.",
+          "blocker": "No blocker for bounded local design. Live consent and implementation contract remain unqualified and are not prerequisites to inspect existing owners.",
           "wsp97_action": "Distinct next action from already completed compatibility qualification; preserve v1 IDs and architect-only disclosure.",
           "effort": "Bounded existing-owner plan and seven existing closure docs.",
           "cost": "Source inspection; no provider calls.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "fresh_disposition": "R25 exact-summary approval issuer/consumer planning remains13/P1 after the receipt correction. Actual cache/recovery plans12/P2; preserve higher blocked/partial/external scopes. No source or live feedback admission in this next planning packet.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "fresh_disposition": "C3/I4/D3/Impact3=13/P1 remains highest qualified unblocked local action after source repair closure.18 exact owner bindings and95peer heads unchanged. The plan has not started and grants no live feedback or runtime authority.",
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "Hermes-parent-only-rejection-effect-evidence",
@@ -3756,21 +3797,22 @@
           },
           "score": 13,
           "priority": "P1",
-          "state": "locally_verified_repair_pending_remote_closure",
+          "state": "repair_closed_pr1819",
           "evidence": [
             "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py:144",
             "modules/communication/moltbot_bridge/src/reddog_artifact_generation_receipt.py:112",
             "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py:260",
             "current_observation.validation.next_selection"
           ],
-          "next_step": "Close exact reviewed candidate with fresh main/peer/shared reconciliation and exact-head checks. Keep full child input, result delivery and descendant quiescence as distinct gaps.",
-          "blocker": "Only exact-head publication/closure remains for this narrow repair.",
+          "next_step": "Preserve truthful rejection receipts and successful acceptance gates. Follow independently scored existing-owner work; do not infer runtime readiness or retention.",
+          "blocker": "None for this narrow two-branch correction; wider child-input/delivery/cancellation gaps are distinct.",
           "wsp97_action": "Change existing stop and non-completed terminal rejection evidence semantics conservatively; reuse current fixture/result/receipt paths. Do not fix detached cancellation, add polling, change endpoint, loosen successful acceptance or invent schema.",
           "effort": "One existing source and nearest existing tests, generated backend manifest/two pins and required docs; bounded mocked validation.",
           "cost": "No paid model/provider calls or live sandbox needed; normal source/manifest/package CI only.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
-          "fresh_disposition": "Conservative evidence flags repaired in two existing branches;108 focused/114 connected pass, independent108 overlap plus9 probes. No success gate or cancellation implementation changed.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
+          "fresh_disposition": "Exact reviewed source/test/derived/docs merged with all ten head checks successful. No live execution or full lifecycle completion implied.",
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "AutoResearcher-report-completeness",
@@ -3794,7 +3836,7 @@
             "Program/proposal, oracle, environment and authenticated reader evidence",
             "Resource measurement and independently retained benefit"
           ],
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "evidence": [
             "modules/infrastructure/wre_core/src/wre_auto_researcher.py:419",
             "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py:526"
@@ -3817,7 +3859,8 @@
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "OpenClaw-invocation-diagnostic-attribution",
@@ -3835,13 +3878,14 @@
             "modules/communication/moltbot_bridge/src/openclaw_permission_policy.py:298"
           ],
           "next_step": "The gate now returns its local bool, but route logs/readouts still read latest shared message. Bind explanation to a call only when extending the existing result contract; no diagnostic is independent admission/effect evidence.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "WSL-advisory-explicit-command-opt-in",
@@ -3863,14 +3907,15 @@
           "blocker": "None within completed source scope.",
           "wsp97_action": "Extend existing probe and test owner, preserving receipt semantics, intentional Gateway exports and structural guards; no new module or authority.",
           "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "effort_cost": "One existing source/test pair plus required docs; deterministic disposable tests, no provider cost or runtime activation.",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         },
         {
           "task": "Detect-AI-WSP109-intake",
@@ -3887,14 +3932,15 @@
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1751"
           ],
           "next_step": "Original intake consolidated with required declarative registry/manifest artifacts on existing draft PR1751 at04ef322f. Keep permanent detect_ai; protected eSingularity CI prevents merge. No duplicate intake or module.",
-          "reconciled_against": "443c8d33a263dcea79a2ab11a054c6e7fb2a8a81",
+          "reconciled_against": "fdb23b0606800547edf664c0a665d0447392058b",
           "fresh_disposition": "Retain existing closure/owner/dependency disposition; no new admission or bounded source acceptance appears in the observed base/peer reconciliation.",
           "context_qualification_refresh": "Prior ownership/closure/dependencies retained against unchanged peer heads; this local plan creates no runtime authority.",
           "current_pr_state": "Draft PR1751 at04ef322f remains conflicting; validate has two protected ticker assertion failures. No merge, build or registry activation.",
           "context_repair_refresh": "Current main/95 peer heads unchanged; retain exact closed/partial/external owner states. Local fixture validation grants no runtime authority.",
           "child_contract_refresh": "Same exact base/source and95peer heads; preserve closed/partial/owner dependencies. Pinned source qualification creates no runtime authority.",
           "lifecycle_refresh": "Exact local source and 95 peer heads unchanged; PR1817 postmerge CI and CodeQL successful. Preserve closed, partial and external scopes. New pinned lifecycle evidence qualifies only the separately scored conservative stop-evidence repair.",
-          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone."
+          "rejection_repair_refresh": "Fresh 39-row WSP15/97 reconciliation after local repair: source and guarded receipt tests accepted independently; PR1818 main CI/CodeQL successful. Exact-head repair publication still required. Higher partial/blocked/external parents do not become executable by score alone.",
+          "post_closure_reconciliation": "All39 histories re-observed against verified repair merge;95peer heads/shared checkout unchanged and18 next-plan bindings unchanged. Closed tasks stay closed, higher blocked/partial/external parents remain ineligible; actual cache/recovery plans12/P2 remain later."
         }
       ],
       "selected": "R25-feedback-approval-owner-contract",
@@ -3916,7 +3962,12 @@
         "wsp97": "Reuse the exact source-bound compatibility decision, inspect its unresolved authority seam once, then compress to one coherent contract. Do not repeat the full compatibility audit, inherit parent scores, or turn missing live permission into a prohibition on safe local design."
       },
       "peer_count": 95,
-      "status": "conditional_next_plan_pending_repair_closure"
+      "status": "repair_closed_next_r25_approval_owner_plan_selected",
+      "observed_at": "2026-09-20T10:48:22.931974+00:00",
+      "base_commit": "fdb23b0606800547edf664c0a665d0447392058b",
+      "post_closure_selection_rationale": "Reapplied actual WSP15/97 to39 preserved histories after verified repair closure. R25 exact-summary approval issuer/consumer planning remains C3/I4/D3/Impact3=13/P1; actual cache/recovery12/P2 and blocked/external broad parents do not overtake it. Existing18 plan bindings are unchanged, so reuse the reviewed M=plan packet. No source work or live consent activation in this next selection.",
+      "local_branch_count": 650,
+      "worktree_count": 157
     },
     "next_packet": {
       "schema": "0102_m2m_v1",
@@ -4036,6 +4087,48 @@
       ]
     },
     "next_step": "Select and independently qualify the smallest existing-owner contract that binds one canonical permitted feedback summary to its authenticated principal, source record, FoundUp, purpose and proposal version before projection. Return one complete source/test handoff only if the issuer, consumer, legacy and revocation/retry contracts are grounded; otherwise report the precise unresolved seam. Do not implement or grant authority.",
-    "requires_fresh_reobservation_after_closure": true
+    "requires_fresh_reobservation_after_closure": true,
+    "remote_closure": {
+      "observed_utc": "2026-09-20T10:48:22.931974+00:00",
+      "pr": 1819,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1819",
+      "candidate": "8b0a4b361747c56a9b9fb790d9e66aaee56db7ac",
+      "merge_commit": "fdb23b0606800547edf664c0a665d0447392058b",
+      "merged_at": "2026-09-20T10:47:58Z",
+      "merged_tree": "0d0eb64c49b8c36f2047a1c45a50a3198fa2d2e0",
+      "reviewed_blobs_match": true,
+      "exact_head_all_ten_success": true,
+      "peer_count": 95,
+      "peer_heads_unchanged": true,
+      "shared_checkout_unchanged": true,
+      "next_plan_source_bindings_unchanged": true,
+      "postmerge_workflows": [
+        {
+          "id": 35506069273,
+          "name": "CI",
+          "head_sha": "fdb23b0606800547edf664c0a665d0447392058b",
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35506069273"
+        },
+        {
+          "id": 35506068630,
+          "name": "Push on main",
+          "head_sha": "fdb23b0606800547edf664c0a665d0447392058b",
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35506068630"
+        }
+      ],
+      "scope": "Seventeen existing paths: one source, one test, generated manifest/two pins and twelve documentation/evidence owners. Local fake-only validation; no live activation."
+    },
+    "checkpoint_branch": "agent/rsi-r25-approval-owner-contract-20260920",
+    "repository_accounting_after_own_merge": {
+      "observed_utc": "2026-09-20T10:48:22.931974+00:00",
+      "merged_since_20260909_utc": 131,
+      "closed_without_merge": 21,
+      "open_peer_count": 95,
+      "method": "Prior130-merge accounting plus this verified own merge; peer heads refreshed unchanged. Interval evidence, not an atomic full-repository snapshot."
+    }
   }
 }
