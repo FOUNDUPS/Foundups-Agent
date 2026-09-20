@@ -1,3 +1,10 @@
+## 2026-09-20: Qualify call-local OpenClaw safety explanations
+
+- Completed the 10/P2 static contract in six existing documents. Existing Boolean verdict is call-local; four route projections still read latest shared text. Chose literal details=True local pair on the existing method, retaining default Boolean/force semantics.
+- Qualified explicit unpack/strict Boolean-and-text checks, false-pair rejection, nested publication/log/action oracle and intentional existing boundary-test migration. Preserve inherited DAE 1580/process 216 spans and current policy/scanner/status behavior; no new helper/skill/owner.
+- Verified three source members in the 1400-file backend manifest; future exact ownership, canonical generation and two digest pins remain entry requirements. No source/test/package change, tests, runtime or retention activation in this plan.
+- Both PR1828 main workflows passed; 98 peer heads unchanged. Preserve 26 packets/42 histories and archive prior observation; distinct next 10/P2 repair makes 43, over optional cache planning 9/P3. WSP00/11/15/22/50/62/84/95/97/99. Exact receipts in current backlog.
+
 ## 2026-09-20: Qualify R25 feedback approval owners and preserve host boundary
 
 - WSP00/15/22/50/62/84/97/99/103/104; seven existing documents only. Compared current record, turn and scoped-receipt options; prefer conditional explicit record version while preserving v4 signatures/CAS/recovery exactly.

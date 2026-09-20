@@ -130,12 +130,11 @@ and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
-## AutoResearcher abrupt-exit witness — 2026-09-20
+## OpenClaw call-local diagnostic contract — 2026-09-20
 
-The 10/P2 test-only witness closed in [PR #1828](https://github.com/FOUNDUPS/Foundups-Agent/pull/1828), merge `b202c14c169b4754bad35808e72a008b0c668165`, after ten exact-head checks passed and all ten reviewed blobs/tree matched. Local validation: 112 cases pass, independently replayed; production source is unchanged. Proposal exit leaves changed scratch without a report; pre-publication exit leaves restored scratch and temporary JSON, without a final report or acknowledgment. Neither is completion.
-The [WRE witness and limits](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-abrupt-exit-witness--2026-09-20) retain the initial pre-collection harness failure, exact three-mode oracle, registry reconciliation and missing recovery contracts. No runtime or public AmIBot acceptance follows.
-Fresh conditional next action: 10/P2 call-local OpenClaw diagnostic qualification, ahead of optional cache planning 9/P3. Re-observe before execution; preserve existing Boolean admission and product owners.
-The preceding 12/P2 qualification closed in [PR1827](https://github.com/FOUNDUPS/Foundups-Agent/pull/1827), merge `7c7d97b0b79031e2750b7d9f0534287a1c8fe212`; both later main workflows now passed. Its full contract remains in the module roadmap and archived observation.
+The 10/P2 static contract is qualified: preserve default Boolean admission and add an explicit local verdict/explanation mode in existing owners. The caller must unpack/validate it and never authorize tuple truthiness. See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-contract--2026-09-20).
+No source/test/runtime change occurred. Fresh conditional next action is 10/P2 same-owner diagnostic repair, ahead of optional cache planning 9/P3; exact source, peer paths and test harness must be reconciled before execution.
+The prior AutoResearcher witness closed in [PR1828](https://github.com/FOUNDUPS/Foundups-Agent/pull/1828), merge `b202c14c169b4754bad35808e72a008b0c668165`: 112 local cases independently replayed, all ten exact-head checks and both later main workflows passed. Its [interruption limits](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-abrupt-exit-witness--2026-09-20) remain; no automatic recovery was implemented.
 
 ## R25 approval-owner qualification — 2026-09-20
 
