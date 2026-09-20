@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-21
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`e1c64d00674f1205ec20ca460c8b963fb34b6daa`, including PR1834 build-route qualification and PR1833 planning-DAG closure and PR1832 route-test closure, PR1751 registry onboarding, PR1831 accounting/cache closure and PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`278ea96272c66ef8564422ea9789502f0a75de86`, including PR1836 dry-run qualification and PR1834 build-route qualification and PR1833 planning-DAG closure and PR1832 route-test closure, PR1751 registry onboarding, PR1831 accounting/cache closure and PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -63,7 +63,7 @@ Both subsequent PR1810 main workflows now pass. The protected ticker change is p
 The preceding full-audit snapshot (September 9 UTC onward) recorded136 merged PRs and21
 closed without merge; its98 peer heads were reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
 same historical inventory recorded14 drafts and15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
-Fresh paginated REST recheck accounts for141 merged/21 closed without merge,98open (13drafts;14with failing checks). Prior97 peer heads are unchanged; new PR1835 is separately owned architecture documentation. Both PR1834 main workflows passed. These observations are not an atomic snapshot;
+Preceding paginated REST inventory plus verified PR1836 closure accounts for142 merged/21 closed without merge;98 peer heads remain unchanged. The preceding snapshot had13 drafts/14 with failing checks. PR1835 remains separately owned architecture documentation. Both PR1834 main workflows passed. These observations are not an atomic snapshot;
 reported green checks alone do not establish current merge or runtime authority.
 R19 qualification preserves two earlier hosted runs with 42 passing observations
 each, XML creation and parsing, but zero artifacts because the configured action
@@ -87,7 +87,7 @@ intervening113-merge/15-closed refresh and subsequent closures. Current reconcil
 | AmIBot | Registry, route tests, planning DAG and source-route qualification closed in PR1751/1832/1833/1834, with final PR/main checks passed. Current15/P1 dry-run isolation witness observes two policy mismatches across eight configurations. Existing WRE roadmap owns the separately qualified repair; live authoring/admission, public alias and POC remain open. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
 | Dependency work | 61 open PRs are classified as dependency/security work. There are 221 open advisories, including 9 critical; this is an advisory inventory, not demonstrated exposure. Reuse existing remediation owners before updating packages. |
-| Local branches/worktrees | 660 branch refs and 157 registered worktrees (2026-09-21 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Local branches/worktrees | 661 branch refs and 157 registered worktrees (2026-09-21 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
 
 **Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
 same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
@@ -136,7 +136,7 @@ The optional9/P3 cache-identity qualification is now closed: retain current resc
 
 ## Next executable AmIBot step — 2026-09-21
 
-Fresh WSP15 C3/I4/D4/Impact4 = **15/P1** selects consumer dry-run isolation qualification after PR1834 and both main workflows passed. An eight-case actual-module witness confirms that a True consumer can inherit a warmed non-dry executor or controlled-harness/tools state. Routing result, executor body and downstream effects were mocked; this is a configuration mismatch, not a live effect. The initial unrelated editable-install metadata read was denied before cases; child-only path isolation resolved the harness issue. The [existing WRE roadmap](modules/infrastructure/wre_core/ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21) owns a separately scored13/P1 compatibility-preserving force-dry repair and test plan. No production source, flags or runtime admission changed. Backlog receipts bind independent validation and fresh priorities.
+PR1836 closed the 15/P1 dry-run qualification with all ten exact-head checks passing. Its 13/P1 source repair remains open. Fresh local tests exposed a prerequisite: the shared runtime helper now returns an enriched receipt and aggregator provider, while the WRE projection expects its exact core/direct-provider contract. The separately scored **C2/I3/D3/Impact2 = 10/P2** local fixture repair yields **49 focused / 174 connected passing tests** (overlapping), preserving production validators and the shared helper. Unknown-field, outer-wrapper and aggregator-lineage rejection remain tested. The [existing WRE roadmap](modules/infrastructure/wre_core/ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21) owns the remaining force-dry repair. These tests establish no runtime admission, OpenRouter compatibility or autonomous AmIBot build. Backlog evidence distinguishes prior merge, current local validation and pending publication.
 
 ## R25 approval-owner qualification — 2026-09-20
 

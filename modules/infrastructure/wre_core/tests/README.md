@@ -1,5 +1,17 @@
 # wre_core Test Suite
 
+## Core receipt versus authenticated runtime fixtures
+
+The projection tests reuse the paired runtime helper with explicit `provider="openai"`
+and remove its known outer `verification_receipt` only in local `_binding`, before
+test overrides and receipt/digest computation. WRE's projection consumes the exact
+core receipt; authenticated runtime consumers keep their enriched helper unchanged.
+Unknown fields, injected outer wrappers, and aggregator/provider lineage mismatches
+must still reject. Direct-provider fixture success does not qualify OpenRouter.
+Focused projection/consumer/adversarial suites pass 49 cases; adding the existing
+consumer/executor suites passes 174 overlapping cases in disposable guarded runs.
+The guard is a local effect check, not OS/native sandbox confinement.
+
 ## Abrupt-exit lifecycle evidence
 
 The same `test_wre_auto_researcher.py` now has 112 cases (109 unchanged plus three
