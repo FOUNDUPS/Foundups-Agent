@@ -1,5 +1,46 @@
 # WRE Core Roadmap
 
+## AutoResearcher abrupt-exit witness — 2026-09-20
+
+The **10/P2** test-only witness is locally verified on unchanged production source.
+The existing suite passes **112 cases**, independently replayed with the same 112
+cases; these runs overlap. Three deterministic child modes establish:
+
+| Mode | Observed scratch | Publication and acknowledgment |
+|---|---|---|
+| Normal return | Baseline restored | Final report and return acknowledgment agree; no temporary report. |
+| Exit71 after proposal write | Proposal remains | No final report or acknowledgment. |
+| Exit72 before atomic replacement | Baseline restored | Temporary JSON only, despite completed/restored labels; no final report or acknowledgment. |
+
+Exact exit/phase markers and owned paths identify these injected events. Missing
+reports alone remain incomplete/unknown. Target/program and seeded prior-artifact
+bytes remain unchanged; that prior fixture is not a prior successful invocation.
+The child uses fixed proposal/evaluator/model stubs. This does not prove model
+quality, live concurrency, an adversarial OS sandbox, power durability or recovery.
+Durable pre-mutation baseline, current ownership/quiescence and a recovery caller
+are still required before automatic restore/resume/delete can be qualified.
+
+Static review preceded execution. Initial pytest logging hit the parent's Windows
+null-device restriction before collection: zero tests/children. A narrowly
+reviewed external runner correction yielded author 112 and independent 112 passes.
+Each run records 111 denied symlink attempts, consistent with the installed pytest
+best-effort alias helper; per-event attribution is inferred, not stack-proven.
+There were three suite attempts and six actual witness child invocations, within
+the 3/9 budget. The test is 996 lines; its original 896-line prefix/31 definitions are
+preserved. The new parent test is 41 lines and embedded functions are <=50. Retain
+the existing cohesive 800-line size review; no new exemption or product edit.
+Canonical registry generation/check preserves 1651/269 and adds only the existing
+test's process capability; independently reconciled against unmerged PR1820.
+
+The freshly selected conditional next action is **10/P2** call-local OpenClaw
+skill-safety diagnostic qualification, ahead of optional cache planning 9/P3.
+Correct per-call Boolean admission already exists; a nested publication can
+replace its caller's latest explanation. Qualify compatibility in existing owners
+before any repair. Preserve 26 original packets and 41 histories; the distinct next
+plan makes 42. Both PR1827 main workflows passed. Exact receipts, limitations and
+the next M2M packet are in the current RSI backlog. No live runtime activation.
+
+
 ## AutoResearcher interruption qualification — 2026-09-20
 
 The **12/P2** source-only qualification is complete. The producer reserves an

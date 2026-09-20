@@ -19163,7 +19163,8 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "process"
       ],
       "execution_type": "unit",
       "collectable": true,

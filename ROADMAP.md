@@ -130,13 +130,12 @@ and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
 PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
 `M2M-governed-context-binding-contract`. No runtime or gate activation.
 
-## AutoResearcher interruption qualification — 2026-09-20
+## AutoResearcher abrupt-exit witness — 2026-09-20
 
-The **12/P2** source-only qualification is complete. Closed in [PR #1827](https://github.com/FOUNDUPS/Foundups-Agent/pull/1827) as `7c7d97b0b79031e2750b7d9f0534287a1c8fe212` after all ten exact-head checks passed; six reviewed blobs/tree match. Later main workflows remain separate observations. See the existing [WRE contract and failure-state map](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-interruption-qualification--2026-09-20).
-Missing or temporary reports remain incomplete/unknown; no reader or automatic recovery was added.
-The separately qualified next test witness is **10/P2**, ahead of optional cache planning freshly **9/P3**; earlier12/P2 and broad15/P1 cache scores remain historical.
-Reuse the unchanged producer and existing test owner with isolated dependency stubs, two deliberate exit points and a normal control. The backlog binds the exact packet and shared registry-entry reconciliation.
-No child/test runs, runtime activation or retained RSI improvement occurred in this plan. Both PR1826 main workflows passed; re-observe before the next action.
+The 10/P2 test-only witness is locally verified: 112 cases pass, independently replayed; production source is unchanged. Proposal exit leaves changed scratch without a report; pre-publication exit leaves restored scratch and temporary JSON, without a final report or acknowledgment. Neither is completion.
+The [WRE witness and limits](modules/infrastructure/wre_core/ROADMAP.md#autoresearcher-abrupt-exit-witness--2026-09-20) retain the initial pre-collection harness failure, exact three-mode oracle, registry reconciliation and missing recovery contracts. No runtime or public AmIBot acceptance follows.
+Fresh conditional next action: 10/P2 call-local OpenClaw diagnostic qualification, ahead of optional cache planning 9/P3. Re-observe before execution; preserve existing Boolean admission and product owners.
+The preceding 12/P2 qualification closed in [PR1827](https://github.com/FOUNDUPS/Foundups-Agent/pull/1827), merge `7c7d97b0b79031e2750b7d9f0534287a1c8fe212`; both later main workflows now passed. Its full contract remains in the module roadmap and archived observation.
 
 ## R25 approval-owner qualification — 2026-09-20
 

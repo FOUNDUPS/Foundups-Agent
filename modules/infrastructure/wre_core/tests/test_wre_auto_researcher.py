@@ -894,3 +894,103 @@ def test_proposal_text_subclass_uses_underlying_unicode(temp_research_env, tmp_p
     result = researcher.run()
     assert result["proposal_inputs"] == [{"iteration": 1, "proposal_input_sha256": hashlib.sha256(plain.encode("utf-8")).hexdigest()}]
     assert result["history"][0]["status"] == "rejected"
+
+
+_RESEARCH_EXIT_CHILD = r'''
+import json, os, sys, types
+from pathlib import Path
+repo, case, mode = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve(), sys.argv[3]
+owner = "modules.infrastructure.wre_core.src"
+readable = {repo / p for p in ("modules/__init__.py", "modules/infrastructure/wre_core/__init__.py", "modules/infrastructure/wre_core/src/__init__.py", "modules/infrastructure/wre_core/src/wre_auto_researcher.py")}
+def deny():
+    (case / "guard-denied").write_text("forbidden effect")
+    raise AssertionError("forbidden effect")
+def guard(event, args):
+    if event.startswith(("subprocess.", "socket.", "sqlite3.", "os.exec", "os.spawn", "os.fork", "os.system", "os.posix_spawn", "os.startfile", "os.kill", "ctypes.")):
+        deny()
+    if event == "open" and not isinstance(args[0], int):
+        path = Path(os.fsdecode(args[0])).resolve()
+        writing = args[2] & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)
+        allowed = path.is_relative_to(case) or (not writing and (path in readable or path.is_relative_to(Path(sys.base_prefix))))
+        if not allowed or path.name.startswith(".env") or path.suffix in (".db", ".sqlite", ".gguf", ".pem", ".key"):
+            deny()
+    if event in ("os.mkdir", "os.remove", "os.rmdir", "os.rename"):
+        for raw in args[:2] if event == "os.rename" else args[:1]:
+            if not Path(raw).resolve().is_relative_to(case):
+                deny()
+    if event in ("os.chdir", "os.symlink", "os.link", "os.chmod", "os.truncate", "os.utime", "os.chown", "os.putenv", "os.unsetenv"):
+        deny()
+sys.addaudithook(guard)
+def unused(*args):
+    raise AssertionError("unused loader")
+for name, values in (("modules.infrastructure.shared_utilities.ai_engine_singletons", {"get_qwen_engine": lambda: None}), (owner + ".wre_research_evaluator", {"evaluate_target": lambda path: {"fitness": 1.0, "roc_ratio": 1.0, "monthly_margin_usd": 1.0}, "load_target_config_from_source": unused})):
+    module = types.ModuleType(name)
+    module.__dict__.update(values)
+    sys.modules[name] = module
+sys.path.insert(0, str(repo))
+from modules.infrastructure.wre_core.src import wre_auto_researcher as subject
+assert not any(name.startswith(("modules.foundups.simulator", "holo_index", "modules.infrastructure.shared_utilities.local_llm_resolver")) for name in sys.modules)
+researcher = subject.WREAutoResearcher(case / "target.py", case / "program.md", max_iterations=1, results_dir=case / "runs")
+researcher._propose_change = lambda *args: "# proposal"
+allocate, replace, paths = subject._new_run_report, Path.replace, {}
+def reserve(*args):
+    report = allocate(*args)
+    paths.update(run=str(researcher.results_dir), scratch=str(researcher.working_target_path), report=report["report_path"])
+    (case / "paths.json").write_text(json.dumps(paths))
+    return report
+def stop(phase, code):
+    (case / "phase").write_text(phase)
+    os._exit(code)
+def publish(path, destination):
+    assert path == Path(paths["report"]).with_suffix(".tmp") and destination == Path(paths["report"])
+    if mode == "temporary":
+        stop("temporary", 72)
+    return replace(path, destination)
+subject._new_run_report, Path.replace = reserve, publish
+researcher.runner.diff = lambda *args: stop("proposal", 71) if mode == "proposal" else ""
+(case / "ack.json").write_text(json.dumps(researcher.run()))
+'''
+
+
+@pytest.mark.parametrize("mode,expected_exit", [("normal", 0), ("proposal", 71), ("temporary", 72)])
+def test_abrupt_exit_preserves_unknown_report_state(tmp_path, mode, expected_exit):
+    import subprocess
+    case = (tmp_path / mode).resolve()
+    assert not case.is_relative_to(REPO_ROOT.resolve())
+    case.mkdir()
+    inputs = {case / "target.py": b"# baseline", case / "program.md": b"fixture", case / "runs/run-prior/invocation-prior/report.json": b"prior-fixture"}
+    for path, content in inputs.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+    environment = {key: os.environ[key] for key in ("SystemRoot", "WINDIR") if key in os.environ}
+    environment.update(TMP=str(case), TEMP=str(case), HOME=str(case), USERPROFILE=str(case))
+    command = [sys.executable, "-I", "-S", "-B", "-X", f"pycache_prefix={case / 'pycache'}", "-c", _RESEARCH_EXIT_CHILD, str(REPO_ROOT), str(case), mode]
+    child = subprocess.Popen(command, cwd=case, env=environment, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        code = child.wait(timeout=20)
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.wait(timeout=5)
+    assert code == expected_exit and not (case / "guard-denied").exists()
+    paths = json.loads((case / "paths.json").read_text())
+    assert set(paths) == {"run", "scratch", "report"}
+    run, scratch, report = (Path(paths[key]).resolve() for key in ("run", "scratch", "report"))
+    assert run.parent == case / "runs" and run.name.startswith("run-") and run.name != "run-prior"
+    assert scratch == run / "target/target.py" and report.parent.parent == run
+    assert report.name == "report.json" and report.parent.name.startswith("invocation-")
+    assert scratch.read_bytes() == (b"# proposal" if mode == "proposal" else b"# baseline")
+    assert all(path.read_bytes() == content for path, content in inputs.items())
+    assert report.exists() is (mode == "normal")
+    assert report.with_suffix(".tmp").exists() is (mode == "temporary")
+    assert (case / "ack.json").exists() is (mode == "normal")
+    if mode != "normal":
+        assert (case / "phase").read_text() == mode
+    if mode in ("normal", "temporary"):
+        result = json.loads((report if mode == "normal" else report.with_suffix(".tmp")).read_text())
+        assert result["invocation_id"] == report.parent.name and Path(result["report_path"]).resolve() == report
+        assert result["status"] == "completed" and result["cleanup"] == "restored"
+        assert result["baseline_input_sha256"] == hashlib.sha256(b"# baseline").hexdigest()
+        assert result["proposal_inputs"] == [{"iteration": 1, "proposal_input_sha256": hashlib.sha256(b"# proposal").hexdigest()}]
+        if mode == "normal":
+            assert json.loads((case / "ack.json").read_text()) == result
