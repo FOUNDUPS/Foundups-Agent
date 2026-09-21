@@ -1,3 +1,9 @@
+## 2026-09-21: Reconcile critical dependency exposure and existing repair owners
+
+- WSP00/12/15/22/50/97; bounded C3/I4/D4/Impact4=15/P1 qualification advances the existing17/P0 security parent. PR1841 is merged as b6512495 with both main workflows successful;98 peer heads remain unchanged.
+- Nine critical alerts span seven manifests. Existing PR1378 covers both affected Clerk packages; PR1384 alone leaves the framework package affected. The member handler independently checks authentication. Pillow declares an affected pin but no PIL/ImageMath reference exists in inspected module Python source. Protobuf lock/source/owner evidence is retained without claiming attacker-controlled schema reachability or deployed exploitability.
+- Reuse prior Holo/MCP qualification and existing dependency PR owners. Six inspected dependency PRs have neutral CodeQL; no dependency update, scanner/runtime/model execution, alert dismissal, peer PR mutation or deployment occurred. Canonical backlog records bindings, review, ranking and the next existing-PR qualification; broad security/RSI completion remains open.
+
 ## 2026-09-21: Implement optional canonical discovery aliases
 
 - WSP00/15/22/50/62/97/99/104; C4/I2/D2/Impact2=10/P2. PR1840 and both main workflows passed; fresh98peer heads and16 source bindings reconciled.
