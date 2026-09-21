@@ -1,3 +1,12 @@
+## 2026-09-22: Repair atomic pending rewards in the existing production-line owner
+
+- WSP00/10/11/15/22/50/62/97; C4/I4/D3/Impact3=14/P1. PR1851 qualification and main checks/cleanup closed. Extend only existing FAM adapter/pipeline/test owners; no new module, ledger or schema.
+- Corrected fixed selection: baseline 79 passed/41 failed; candidate and independent replay each 120 passed, zero errors/skips/guard denials or source drift. Independent replay covers the same case IDs, not another 120 unique cases.
+- Preserve initial failures and fixture correction; pending remains VERIFIED+INITIATED, exact retries cannot duplicate debit/event, historical ambiguity and unsupported dialects reject. No production role, payment, OpenClaw/Hermes activation or retained-learning claim.
+- Backend manifest1400members and test registry1651/269 remain unchanged. Independent budget review records adapter1154→1330 and smaller class/pipeline; module debt/remediation remains explicit. Exact publication/closure evidence belongs to current_observation.
+- Re-observation nominates existing persistent role/authority qualification15/P1; native18/P0 remains blocked, PostgreSQL backend qualification13/P1 deferred behind authorization, LinkedIn13/P1 separately owned. Do not grant roles from caller-supplied labels or compute credits.
+
+
 ## 2026-09-22: Qualify atomic persistent reward initiation
 
 - WSP00/10/15/22/50/62/97; bounded qualification C3/I4/D3/Impact3=13/P1. PR1850 merged at745b9ca78 with all final checks and main CI/CodeQL successful; owned worktree/branches/staging retired, evidence preserved.92 peer heads unchanged.

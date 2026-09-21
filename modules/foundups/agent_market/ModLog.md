@@ -1,5 +1,14 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-09-22 - Atomic SQLite payout initiation and exact retry
+
+- WSP00/10/11/15/22/50/62/97; existing-owner repair C4/I4/D3/Impact3=14/P1. One BEGIN IMMEDIATE transaction covers task/proof/verification validation, payout, configured compute debit, task linkage and correlated event; pending stays VERIFIED+INITIATED.
+- Exact retry uses persisted identity and original cost, including zero cost and changed current compute policy. Ambiguous legacy records across actors and complete history fail closed; no refund/relabel/delete. Non-SQLite rejects before compute/session effects. No schema/model/migration change or live finance.
+- Corrected fixed selection: baseline 79 passed/41 failed; candidate and independent replay each 120 passed, zero errors/skips/guard denials or source drift. Independent replay covers the same case IDs, not another 120 unique cases.
+- Initial116-case baseline79pass/37fail and candidate114pass/2fail are retained. Two failures were duplicate synthetic token-symbol setup, before target execution. Corrected only the fixture; added independent lost-response, cross-scope/wrong-reason, substituted-pointer and bounded lock-timeout controls. Original test oracles remain unchanged.
+- Proposed adapter no-growth budget explicitly revised1154→1330; class875→816, pipeline446→400/class405→359, newfunctions≤40. Retained debt/remediation in ROADMAP; no exemption. Actual process/power-loss durability, unrelated wallet writers, PostgreSQL, persistent authorization and settlement remain unproved.
+
+
 ## 2026-09-22 - Persistent payout transaction qualification (planned repair)
 
 - WSP00/10/11/15/22/50/62/97; qualification13/P1, separately scored source repair14/P1.

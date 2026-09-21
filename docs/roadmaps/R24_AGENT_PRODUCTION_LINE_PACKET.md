@@ -99,10 +99,11 @@ authenticated independent product verification, production reward or retained RS
 
 ### Persistent reward initiation contract — 2026-09-22
 
-Qualification at `745b9ca7883f2e292e1146e7b3c9a177ec0981e5`; **planned repair, not implemented**.
-PR1850 and its main CI/CodeQL checks are closed; its owned lane was retired.
-Current source and retained independently reviewed SQLite witnesses still show
-an unconfirmed `PAID` label and two payouts/debits after interruption and retry.
+Qualified in PR1851, merged at `e8240466814de0727efaea892f41e376f7d5cc13`;
+**implemented and independently verified locally**, with publication checks
+tracked in the canonical backlog. The earlier unconfirmed `PAID` label and
+duplicate payout/debit witnesses remain historical failure evidence.
+Corrected fixed selection: baseline 79 passed/41 failed; candidate and independent replay each 120 passed, zero errors/skips/guard denials or source drift. Independent replay covers the same case IDs, not another 120 unique cases.
 The qualification scores C3/I4/D3/Impact3 = **13/P1**. The resulting bounded
 SQLite source repair scores C4/I4/D3/Impact3 = **14/P1**, separately from blocked
 18/P0 native execution. These planning scores confer no payment authority.
@@ -168,10 +169,14 @@ compute denial and pre-effect non-SQLite rejection. Preserve in-memory lifecycle
 schema/migration, factory and CABR consumer regressions. Fix test oracles before
 implementation; exception injection is not power-loss/durability proof.
 
-The adapter's inherited1154-line file and oversized class require WSP62 review:
-consolidate existing helpers, keep new functions bounded, record exact before/after
-debt and remediation, and do not add an exemption or parallel module to hide growth.
-Source acceptance still requires independent tests/review and exact-head CI.
+WSP62 review explicitly revises the proposed no-growth task budget: adapter
+1154→1330lines (+176) for complete history/identity guards; its class875→816,
+pipeline446→400/class405→359, newfunctions≤40. The original1154-line target did
+not pass. Retain1330 as the owner's ceiling pending cohesion/decomposition review
+before further growth; no exemption/new module or unrelated CRUD compression.
+[Module remediation](../../modules/foundups/agent_market/ROADMAP.md#persistent-reward-correctness--implementation-2026-09-22) records retained critical-window/class debt.
+Local source/test review and independent replay are complete; exact-head CI
+and publication closure remain required.
 Persistent role authentication, funded settlement, native worker admission and
 verified RSI retention remain separate unresolved requirements.
 

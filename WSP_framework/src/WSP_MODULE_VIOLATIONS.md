@@ -1,5 +1,14 @@
 # WSP Module Violations Log
 
+## FAM persistent initiation size debt — 2026-09-22 (OPEN)
+
+- Owner: FoundUps Agent Market maintainers / R24 coordinator.
+- Exact base: `e8240466814de0727efaea892f41e376f7d5cc13`; source candidate: `854e9c7f470434213a8f2d4eb897da5f0c2928a1`.
+- `modules/foundups/agent_market/src/persistence/sqlite_adapter.py`: 1154→1330 lines (+176); class875→816. Pipeline446→400/class405→359; largest new function40. Existing oversized classes/functions remain debt.
+- The proposed1154-line no-growth task budget was not met and is explicitly revised to1330. Complete historical-scope and immutable replay checks account for the growth; this is not a protocol exemption or resolved compliance.
+- Remediation: no further adapter growth before separately scoped cohesion/decomposition review under the existing FAM ROADMAP persistent reward correctness section. Preserve critical-window review; avoid unrelated CRUD compression or a duplicate module to hide growth.
+
+
 ## Purpose
 This document tracks module-specific violations that are deferred during WSP compliance work per WSP 47 protocol. These are module evolution issues that do not block framework compliance.
 

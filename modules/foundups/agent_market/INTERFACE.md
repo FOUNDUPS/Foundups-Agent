@@ -184,7 +184,9 @@ FAMEvent(
 - `trigger_payout(task_id: str, actor_id: str) -> Payout`
 - `get_task(task_id: str) -> Task`
 - `get_trace(task_id: str) -> dict[str, object]`
-- Invariant: transitions are strictly `open -> claimed -> submitted -> verified -> paid`.
+- In-memory simulation: `open -> claimed -> submitted -> verified -> paid` with a simulated completed payout.
+- Persistent SQLite initiation: `trigger_payout` delegates to `SQLiteAdapter.initiate_payout(task_id, actor_id)`. One write transaction binds task/proof/approved verification, pending payout, configured compute debit and correlated event. The task stays `VERIFIED`, payout `INITIATED`, with no settlement reference or `paid_at`.
+- Exact same-actor retry returns the persisted initiation without another debit/event, using its original cost snapshot. Conflicting or incomplete lineage and ambiguous legacy history reject before effects; missing scope cannot be guessed unrelated. No historical repair or settlement is performed. See [R24 acceptance](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22).
 
 ### TreasuryGovernanceService
 - `propose_transfer(foundup_id: str, amount: int, reason: str, proposer_id: str) -> str`
@@ -248,7 +250,7 @@ FAMDaemonHealth(
   - Events, Distribution posts, Agent profiles, Token terms
 
 **PostgresAdapter:**
-- Contract-compatible adapter using the same ORM model set and method surface as `SQLiteAdapter`.
+- CRUD adapter using the same ORM model set; atomic payout initiation rejects non-SQLite before session/compute effects. PostgreSQL compute initialization and backend locking require separate qualification.
 - Selected through repository factory (`backend=postgres`).
 - Requires a valid Postgres SQLAlchemy URL.
 
@@ -374,6 +376,7 @@ Every mutation emits an event containing:
 - `payload` (small structured dict)
 
 ## Permission Rules (PoC)
+- These role checks describe the in-memory PoC. Persistent pipeline compute access does not authenticate verifier/treasury roles; production role admission and settlement remain separate unresolved gates.
 - Task verification allowed only for actor role `verifier`.
 - Payout trigger allowed only for actor role `treasury`.
 - Distribution publish allowed only for actor role `distribution`.

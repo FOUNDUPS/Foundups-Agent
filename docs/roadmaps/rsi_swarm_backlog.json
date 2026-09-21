@@ -1852,92 +1852,170 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "745b9ca7883f2e292e1146e7b3c9a177ec0981e5",
-    "selected_action": "R24-D-payout-contract-qualification",
-    "status": "documentation_qualification_validated_publication_checks_pending",
+    "base_commit": "e8240466814de0727efaea892f41e376f7d5cc13",
+    "selected_action": "R24-D-sqlite-atomic-initiation",
+    "status": "independently_validated_local_publication_checks_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 4,
       "importance": 4,
       "deferability": 3,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-payout-contract-20260922",
-    "observed_at": "2026-09-22 JST",
-    "base_commit": "745b9ca7883f2e292e1146e7b3c9a177ec0981e5",
+    "observation_id": "rsi-payout-atomic-20260922",
+    "observed_at": "2026-09-21T21:07:47.880034+00:00",
+    "base_commit": "e8240466814de0727efaea892f41e376f7d5cc13",
     "previous_observation": {
-      "observation_id": "rsi-lifecycle-consumer-20260922",
-      "git_reference": "745b9ca7883f2e292e1146e7b3c9a177ec0981e5:docs/roadmaps/rsi_swarm_backlog.json"
+      "observation_id": "rsi-payout-contract-20260922",
+      "git_reference": "e8240466814de0727efaea892f41e376f7d5cc13:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "role": "coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Qualify existing persistent payout transaction, retry and pending-state contract",
+    "selected_task": "Existing SQLite atomic pending payout initiation and exact retry",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 4,
       "importance": 4,
       "deferability": 3,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
-    "status": "documentation_qualification_validated_publication_checks_pending",
-    "selection_basis": "Previous source sprint1850 terminally closed. Three payout core blobs and four accepted witness/qualification receipts unchanged;92peer heads unchanged.13/P1 bounded contract is eligible while native18/P0 and resident15/P1 are blocked and tiedLinkedIn remains separately owned.",
+    "status": "independently_validated_local_publication_checks_pending",
+    "selection_basis": "Finish owned14/P1 source repair from accepted qualification; native18/P0 remains blocked, resident qualification resolved with production blockers, LinkedIn13/P1 separately owned. No automatic queue-order selection.",
     "effort_cost_verification": {
-      "effort": "Read existing session/ORM/pipeline, migrations, backend, compute policy and consumers; extend existing R24 contract and canonical records only",
-      "cost": "Static local qualification and independent read-only review; no provider or database calls, no repeated unchanged tests",
-      "verification": "Exact source/receipt hashes, existing contract/consumer map, six-document consistency/link/JSON/whitespace checks and independent final-diff review; exact-head CI required"
+      "effort": "Two existing source files and one existing test owner; independent source/test lanes and verifier",
+      "cost": "Local deterministic SQLite only; provider token/cost unavailable and no live model dispatch",
+      "verification": "Same fixed120caseIDs on oldsource/candidate, independent replay and final source/docs review, exact-head CI then main workflow closure"
     },
     "closure_reconciliation": {
-      "pr": 1850,
-      "merged_commit": "745b9ca7883f2e292e1146e7b3c9a177ec0981e5",
-      "main_ci": 35634709798,
-      "main_codeql": [
-        35634709314,
-        35636224765
+      "pr": 1851,
+      "merge": "e8240466814de0727efaea892f41e376f7d5cc13",
+      "receipt": "O:/Foundups-Agent-audits/20260922-rsi-payout-contract/final-accounting.json",
+      "sha256": "e8db4fade64b6e7b7c8ee08027945e3b93bd5f13eb22a9603c6bc45792a1e672",
+      "main_workflows": [
+        {
+          "conclusion": "success",
+          "databaseId": 35644687252,
+          "headSha": "e8240466814de0727efaea892f41e376f7d5cc13",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35644687252",
+          "workflowName": "CI"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 35644685871,
+          "headSha": "e8240466814de0727efaea892f41e376f7d5cc13",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35644685871",
+          "workflowName": "CodeQL"
+        }
       ],
-      "main_checks": "completed/success at exact merge",
-      "owned_worktree_local_branch_and_test_staging": "removed; four ignored files archived; recovery bundle and evidence preserved",
-      "remote_topic_branch": "absent",
-      "shared_snapshot_unchanged": true,
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-lifecycle-consumer\\final-accounting.json",
-      "closure_receipt_sha256": "da551d843ae1e33daa0c688bb40366a1a4ef4e71fdc1c507266522f915bc7f6a",
-      "peer_heads": 92
+      "owned_lane": "retired with ignored state and recovery bundle preserved"
     },
-    "retrieval": {
-      "semantic": "Prior HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH remains at unchanged shared root0c81418; do not repeat failed query or reindex. No new CURRENT Holo claim.",
-      "fallback": "Exact-main source via owned worktree; NAVIGATION FAM mapping, actual WSP00/15/97/10/62, README/INTERFACE/ROADMAP/ModLog/test docs, persistence owner, migration/backend/compute/event/CABR consumers",
-      "noise": "Historical component-complete labels and in-memory paid simulation are not persistent reward evidence; separate them explicitly",
-      "ordering": "Current source and accepted source-bound witness before planned behavior; lookup known owners before broader symbols",
-      "missing_artifacts": "Documented memory/ directory, memory/README.md and module requirements.txt absent in this revision; no replacements created",
-      "staleness": "All three core payout Git blobs and four retained evidence hashes rechecked; exact-main merge/current peer heads verified",
-      "duplication": "Extend existing R24 packet/module roadmap/backlog; no new plan/module/ledger/schema/skill or new test owner"
+    "retrieval": "Unchanged sharedauthorityroot0c81418 and retained HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; no repeatedfailedquery/reindex. Current exactsource/modulecontracts/acceptedR24 oracles retrieved directly and NAVIGATION mapping reused. Historicalpaid/componentcomplete claims separated from persistent evidence; modulememory/requirements absent; existing owner/two source files and existing tests reused.",
+    "implementation": {
+      "owners": [
+        "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+        "modules/foundups/agent_market/src/task_pipeline.py"
+      ],
+      "atomicity": "SQLite BEGIN IMMEDIATE before reads; one transaction for pending payout/tasklink/configured debit/correlated event",
+      "retry": "Exact persisted actor/task/FoundUp/proof/verification/recipient/amount/event/cost and ledger cardinality; no rerating",
+      "legacy": "Complete relevant history across actors; missing/conflicting scope holds, no guessed repair/refund/deletion",
+      "limits": [
+        "No persistent caller/role authentication",
+        "No settlement or wallet/token activation",
+        "SQLite only; no PostgreSQL parity proof",
+        "Unrelated raw CRUD/wallet writers excluded",
+        "Exception/reopen tests are not process-death/power-loss proof",
+        "Native OpenClaw/Hermes admission and verified retention remain unproved"
+      ],
+      "schema_unchanged": true
     },
-    "qualification": {
-      "canonical_contract": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22",
-      "current_defects": "Each public CRUD/debit call commits separately; taskPAID despite payoutINITIATED; accepted interruption/reopen witness produced two payouts/debits",
-      "qualified_seam": "One adapter-owned SQLite initiation operation; BEGIN IMMEDIATE before reads, existing session/wallet owners and planned factoring of current policy/debit methods into session-taking helpers; no nested public commit or ambient session",
-      "identity": "Exact task/FoundUp/proof/approved verification/assignee/amount/actor plus initiation event and debit-cost snapshot/cardinality; zero-cost requires zero debit; replay does not re-rate/re-admit",
-      "pending": "TaskVERIFIED plus boundINITIATED; reference/paid_at remain absent; in-memory completed simulation unchanged",
-      "legacy": "Missing/conflicting lineage, orphan/duplicate payouts, PAID+INITIATED and ambiguous FoundUp-scoped trigger-payout debit/event residue across all actors reject before effects, including fresh-looking tasks after old debit-only commit. Changing actor cannot bypass; missing FoundUp scope also held for reconciliation. No guessed attribution, inferred repair/refund/deletion. Scan complete relevant history; default limited ledger/event pages are insufficient.",
-      "backend": "SQLite only first scope; non-SQLite rejects before session/compute attrs/effects. Postgres constructor lacks compute policy initialization; actual backend proof remains separate",
-      "compatibility": "Reuse v2 fields/enum and existing ledgerevent_id/eventpayload; no migration assumed; direct CRUD/outsidewalletwriters excluded from new atomicity claim",
-      "size": "Adapter1154lines has inherited critical-window/class debt; bounded helper consolidation, exact delta review/remediation, no new exemption/module",
-      "source_implemented": false,
-      "tests_executed_this_qualification": 0,
-      "retained_witness": "Real disposable SQLite plus injected postcommit Python exception/reopen; not power-loss/concurrency proof",
-      "fixed_tests": "Existing persistent_compute_wiring/persistence suites: exact reopened retry, each precommit failure, two writers/sharedwallet within operation, lineage mismatch, legacy ambiguity including debit-only interruption with no payout, changed retry actor and missing FoundUp scope, denial, zero-cost, unchanged in-memory/migration/factory/CABR and non-SQLite rejection"
+    "local_validation": {
+      "baseline": {
+        "tests": 120,
+        "failures": 41,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 79
+      },
+      "candidate": {
+        "tests": 120,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 120
+      },
+      "independent": {
+        "tests": 120,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 120
+      },
+      "same_case_selection": true,
+      "unique_cases": 120,
+      "repeated_independent_cases_not_additional": true,
+      "initial_runs": {
+        "baseline": "79passed37failed",
+        "candidate": "114passed2fixturefailures"
+      },
+      "correction": "Distinct valid synthetic token symbols only; unchanged original test ASTs/oracles. Four additional concrete fault controls frozen before corrected baseline/candidate.",
+      "guards": "-I/-B, explicit temporary SQLite, no network/subprocess/defaultDB effects; Python audit hook, not OS sandbox",
+      "receipts": {
+        "baseline-corrected": {
+          "path": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-atomic\\baseline-corrected\\receipt.json",
+          "sha256": "08006f033aa69ae47fc72434f5096eb3f79c5e62abd06b90facb7c95fb1ce704"
+        },
+        "candidate-corrected": {
+          "path": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-atomic\\candidate-corrected\\receipt.json",
+          "sha256": "37a2693cdc4113604c869a87a77a89fdc5ce1ecb467670cd814304e73abc68ea"
+        },
+        "independent-final": {
+          "path": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-atomic\\independent-final\\receipt.json",
+          "sha256": "fa7ff99fd23c0e8085460396afb9a95feee16e20b78c07df94d91143de435ad9"
+        }
+      }
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-contract",
+    "wsp62": {
+      "proposed_file_budget": 1154,
+      "actual_file_lines": 1330,
+      "proposal_met": false,
+      "revised_ceiling": 1330,
+      "adapter_class": [
+        875,
+        816
+      ],
+      "pipeline_file": [
+        446,
+        400
+      ],
+      "pipeline_class": [
+        405,
+        359
+      ],
+      "max_new_function": 40,
+      "rationale": "Complete conservative history and immutable replay checks; class/pipeline shrink. Do not hide debt with new module or unrelated CRUD compression.",
+      "remediation": "Existing FAM module ROADMAP: no further adapter growth before cohesion/decomposition review; inherited critical-window/class debt retained",
+      "exemption_added": false
+    },
+    "packaging": {
+      "backend_manifest": "check passed unchanged;1400members",
+      "test_registry": "check passed unchanged;1651files269quarantined"
+    },
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-atomic",
+    "dispatchable": false,
+    "retained_improvement_proven": false,
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
-          "task": "One real native ticket with independent audit and simulated entitlement",
+          "task": "One native admitted ticket, independent audit and simulated entitlement",
           "wsp15": {
             "complexity": 4,
             "importance": 5,
@@ -1947,35 +2025,34 @@
             "priority": "P0"
           },
           "state": "blocked",
-          "dependency": "Seven resident trust-anchor reasons, production dependency provenance and no effect-use lease; independent verifier/reward correctness remain prerequisites"
+          "dependency": "Seven resident trust anchors/absent effect lease and independently admitted production provenance"
         },
         {
-          "task": "Resident lifecycle correlation qualification (resolved with production dependency blocker)",
-          "state": "blocked_after_qualification",
-          "dependency": "No independently admitted OS-policy/dependency supplier or exact selected signer-profile source; private registered receipt alone is insufficient",
-          "score_kind": "Historical15/P1 qualification only; not a fresh priority for unspecified production-authority implementation",
-          "historical_wsp15": {
+          "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
+          "wsp15": {
             "complexity": 3,
             "importance": 4,
             "deferability": 4,
             "impact": 4,
             "total": 15,
             "priority": "P1"
-          }
+          },
+          "state": "eligible_qualification_after_current_closure",
+          "evidence": "task_pipeline.py verify_proof/trigger_payout lack role authentication; in_memory.py _require_role and tests/test_permissions.py cover in-memory only; agent_join.py remains a stub",
+          "next_step": "Map existing caller-auth/AgentProfile/WRE authority and tests before proposing any persistent role gate; do not treat profile role strings or compute credits as authority"
         },
         {
-          "task": "Implement SQLite atomic payout initiation and exact retry",
+          "task": "Qualify PostgreSQL compute initialization and locking parity",
           "wsp15": {
-            "complexity": 4,
+            "complexity": 3,
             "importance": 4,
             "deferability": 3,
             "impact": 3,
-            "total": 14,
+            "total": 13,
             "priority": "P1"
           },
-          "state": "selected_next_source_scope_after_qualification_closure",
-          "dependency": "Existing R24 fixed acceptance, disposable SQLite fixtures, independent verifier and exact-source tests before merge; no live finance",
-          "scope": "Existing task_pipeline/sqlite_adapter and tests; same v2 schema; non-SQLite fail closed before effects"
+          "state": "deferred_qualification",
+          "dependency": "Actual PostgreSQL runtime/admission not established; SQLite-only rejection now explicit"
         },
         {
           "task": "LinkedIn dry-run boundary qualification",
@@ -1988,31 +2065,18 @@
             "priority": "P1"
           },
           "state": "separate_owner_scope",
-          "dependency": "Existing owner reconciliation; no live social effects"
+          "dependency": "Owner reconciliation; no social effects"
         }
       ],
-      "selected_next": "SQLite atomic payout initiation and exact retry source repair",
-      "wsp15": {
-        "complexity": 4,
-        "importance": 4,
-        "deferability": 3,
-        "impact": 3,
-        "total": 14,
-        "priority": "P1"
-      },
-      "selection_reason": "Qualification makes a concrete one-backend existing-owner repair executable at14/P1. It advances R24 reward correctness without manufacturing native production authority; tied/source-unspecified or externally owned work does not displace it.",
-      "resolved": "13/P1 transaction/compatibility qualification; publication remains subject to exact checks",
-      "still_open": "Persistent role authority, backend parity, funded settlement, native worker/verifier admission, independent RSI retention"
+      "selected_next": "Persistent verifier/treasury caller-authority qualification",
+      "selection_reason": "Atomic pending consistency is now locally proved; authentication is a distinct concrete prerequisite with existing source/test evidence and higher eligible15/P1 score. Qualify before changing authority, with no live grants.",
+      "resolved": "Local SQLite atomic initiation/replay14/P1; exact publication closure remains required",
+      "still_open": "Persistent role authority, PostgreSQL parity, settlement, native admission, independent RSI retention"
     },
-    "dispatchable": false,
-    "retained_improvement_proven": false,
-    "qualification_evidence": {
-      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-contract\\payout-transaction-qualification.json",
-      "sha256": "55623e99a0ebb94e6dd883b5a4e84b7d3258af61c52d8fe42ec489622d8ea759",
-      "source_protocol_bindings": 19,
-      "prior_witness_source_bindings_unchanged": 16,
-      "new_product_execution": false,
-      "independent_final_docs_review": "required before commit/publication"
+    "independent_review": {
+      "path": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-atomic\\independent-review.json",
+      "sha256": "4c0191fec627bdd28cb12b39a270b8a06081ad343c4e3fd1a8540858a1b3d562",
+      "verdict": "ACCEPT_SCOPED_SQLITE_PAYOUT_SOURCE_AND_REGRESSIONS"
     }
   }
 }
