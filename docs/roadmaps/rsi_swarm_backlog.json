@@ -1854,7 +1854,7 @@
     "section": "current_observation.post_sprint_reobservation",
     "base_commit": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
     "selected_action": "AmIBot-public-alias-discovery-contract",
-    "status": "contract_qualified_document_review_publication_pending",
+    "status": "contract_reviewed_publication_blocked_at_recorded_head",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1865,17 +1865,18 @@
       "impact": 2,
       "total": 10,
       "priority": "P2"
-    }
+    },
+    "publication_head": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a"
   },
   "current_observation": {
-    "observation_id": "amibot_public_discovery_alias_contract_20260921",
-    "observed_at": "2026-09-21T00:40:12.065506+00:00",
+    "observation_id": "amibot_alias_contract_publication_reconciliation_20260921",
+    "observed_at": "2026-09-21T01:29:10.934565+00:00",
     "base_commit": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
     "role": "coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "previous_observation": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "contract_qualified_document_review_publication_pending",
+    "previous_observation": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "contract_reviewed_publication_blocked_at_recorded_head",
     "selected_task": "AmIBot-public-alias-discovery-contract",
     "wsp15": {
       "complexity": 3,
@@ -1924,12 +1925,13 @@
       }
     ],
     "retrieval": {
+      "receipt": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-alias-plan-0928\\holo-closure-1026.json",
+      "sha256": "d6ece7393e3e40c97bef424dffbbbce48ee3b5e90c7599368f0cdb5b4b3804f4",
       "ok": true,
       "freshness": "UNKNOWN",
       "index_gap_detected": true,
-      "authority": "workspace_head lexical bundle, no overlay",
-      "semantic_failure": "Prior HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH preserved; unchanged failed probe not repeated; no reindex",
-      "evaluation": "Direct must-include artifacts and path dedup reduce noise; current source outranks stale phase1 routing/projector prose. Missing module artifacts stay explicit."
+      "authority": "Exact d9251a9b workspace-head lexical evidence; no source overlay. Reused unchanged source bindings.",
+      "evaluation": "Narrow must-include roadmap/dispatch artifacts; no new semantic authority, duplicate module, missing new code owner or need for reindex. Historical phase1 prose remains source-subordinate."
     },
     "closure_reconciliation": {
       "pr1839": {
@@ -1957,22 +1959,21 @@
       "accounting": {
         "merged_since_20260909": 145,
         "closed_without_merge": 21,
-        "open": 98,
-        "method": "Prior paginated baseline plus verified owned closures through1839; current98peer heads unchanged, not fresh full-history pagination."
+        "open": 99,
+        "method": "Prior paginated baseline plus verified owned closures through1839; current98peer heads unchanged, not fresh full-history pagination.",
+        "peer_open": 98,
+        "owned_open": 1
       }
     },
     "execution_scope": {
       "writes": [
         "ROADMAP.md",
         "ModLog.md",
-        "docs/roadmaps/rsi_swarm_backlog.json",
-        "modules/foundups/detect_ai/ROADMAP.md",
-        "modules/foundups/detect_ai/ModLog.md"
+        "docs/roadmaps/rsi_swarm_backlog.json"
       ],
       "source_writes": false,
       "tests_executed": 0,
-      "runtime_dispatch": false,
-      "adjacent_read_refinement": "One raw registry loader inspection; retains dict fields, no typed propagation repair. No further owner expansion."
+      "runtime_dispatch": false
     },
     "findings": {
       "contract_owner": "modules/foundups/detect_ai/ROADMAP.md#public-discovery-alias-contract--2026-09-21",
@@ -2303,29 +2304,25 @@
     "validation": {
       "method": "static current-source/document/JSON/hash checks and independent source review",
       "tests_executed": 0,
-      "document_review": "pending",
+      "document_review": "Prior exact five-file d9251a9b candidate ACCEPT; this three-file status delta needs independent review and fresh candidate checks.",
       "production_changes": false
     },
     "effort_cost": {
-      "scope": "One bounded static contract across ten mapped owners plus one justified adjacent loader; five existing planning/log outputs.",
+      "scope": "Three existing documentation files; static validation and independent delta review only. No model/provider/runtime calls; no measured token cost claimed.",
       "provider_calls": 0,
       "worker_runtime_jobs": 0,
-      "tokens_cost": "Not metered; no invented savings or autonomous-build percentage."
+      "tokens_cost": "Not metered."
     },
     "manual_rationale": "Protocol/identity compatibility adjudication uses coordinator and independent source review. No qualified local Qwen/Gemma job/runtime binding is supplied by this plan; no agent execution result is invented.",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-alias-plan-0928",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-publication-reconcile-1026",
     "evidence_sha256": {
-      "preflight.json": "1f4693a5571bcfe0a60f3760131998c2a2d6f62f8b65487ba8487dad937a50f5",
-      "holo-lexical.json": "ed2ccd51c24a3f424b96fd5b059885c9bdc6aaeae9801a16be1efd9d9fb88525",
-      "shared-scope-refresh.json": "de66ceee9e9a996055a1f15bb6b7c2728c828b28d5cfb14dd68525bb710303dd",
-      "peer1792-schema-diff.json": "c8cd851b8d657cd084a197284e1b4fdffa09f4c4fea7292d0c63d82cd773f853",
-      "alias-contract-review.json": "5e145f8f24db56c8dfdcf14637731dc95b55d6d23625189f18e3ec0b839eebcd"
+      "preflight.json": "0d51eeda8b4f25622dcf45d0773795fac26fa243002e49c8548c9810ba995c83"
     },
     "ownership": {
       "peer_heads": 98,
       "branch_refs": 664,
       "worktrees": 157,
-      "shared_preserved": true,
+      "shared_preserved": "Tracked HEAD and six pre-bound file states unchanged; overall status changed during concurrent work. No shared writes. Fresh scope reconciliation required before merge.",
       "scope_overlaps": [
         {
           "number": 782,
@@ -2365,11 +2362,12 @@
           ]
         }
       ],
-      "schema_overlap": "PR1792 adds optional brand_context_path only; future alias hunk is distinct, preserve/recheck it. No registry data writes."
+      "schema_overlap": "PR1792 adds optional brand_context_path only; future alias hunk is distinct, preserve/recheck it. No registry data writes.",
+      "shared_full_status_changed": true
     },
     "post_sprint_reobservation": {
       "selection_rule": "Refresh after contract review/closure; preserve higher aggregate scores and external/runtime dependencies. No automatic runner-up or signed admission.",
-      "selection_basis": "Current contract removes alias ambiguity; one coherent source child is finite and reusable. Independent scoring lowers initial proposal12 to10/P2 because ordinary display-name discovery already exists. Higher aggregate runtime/host/ownership dependencies remain; no distinct newly verified critical repair identified in unchanged scoped evidence.",
+      "selection_basis": "WSP15 re-observation retains all51 canonical scores. WSP97 retains the current owned10/P2 contract closure before dependent source execution. Persist its exact hosted failure rather than duplicate implementation/plans or weaken gates; no newly demonstrated independent owned repair in unchanged scope.",
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
@@ -3022,8 +3020,8 @@
           },
           "score": 10,
           "priority": "P2",
-          "state": "contract_qualified_document_publication_pending",
-          "next_step": "Finite existing-owner canonical alias contract specified; independent review/publication remains separate from source implementation and activation.",
+          "state": "independent_contract_review_accepted_publication_blocked_recorded_head",
+          "next_step": "Record exact hosted mismatch; reconcile aggregate CodeQL on latest candidate and ownership. Merge only after every required check SUCCESS; do not repeat unsupported managed rerun.",
           "rationale": [
             "C3: reconcile canonical tenant identity, projection allowlist/schema and browser path resolution without crossing the member gate.",
             "I3: the requested AmIBot discovery identity remains unresolved despite canonical registration; the existing generic shell can supply a reusable contract owner.",
@@ -3042,8 +3040,8 @@
           },
           "score": 10,
           "priority": "P2",
-          "state": "conditional_source_after_contract_closure",
-          "next_step": "Implement optional public_discovery_alias in existing schema/projector/shell with actual-code synthetic tests; preserve production registry/catalog/manifest. Fresh source/owner checks before work.",
+          "state": "dependent_on_owned_pr1840_closure",
+          "next_step": "Finite source/test packet remains qualified; first reconcile owned contract PR. Fresh main/owner/validation evidence before source execution.",
           "rationale": [
             "C4: cross-language parsing, canonical identity, collision and visibility checks require careful coordination.",
             "I2: optional explicit alias; canonical display-name discovery already exists.",
@@ -3154,7 +3152,209 @@
           "Test failure, missing behavioral evidence, out-of-scope effect"
         ]
       },
-      "packet_status": "Planning artifact only; M=exec describes the proposed local source task, not admitted WRE/model/runtime or promotion authority."
-    }
+      "packet_status": "Planning artifact only; M=exec describes the proposed local source task, not admitted WRE/model/runtime or promotion authority.",
+      "publication_blocker": "Aggregate CodeQL neutral at d9251a9b; existing four uploads match main metadata, but GitHub cannot compare two configurations. Managed rerun unsupported. Need successful exact-head aggregate or new actionable hosted diagnostic."
+    },
+    "publication_observation": {
+      "head": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+      "pr": 1840,
+      "state": "OPEN",
+      "checks": [
+        {
+          "name": "CodeQL",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "neutral",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/runs/106179471631",
+          "output": {
+            "title": "2 configurations not found",
+            "summary": "**Warning**: Code scanning cannot determine the alerts introduced by this pull request, because 2 configurations present on `refs/heads/main` were not found:\n\n### Default setup\n\n* :question:&nbsp;&nbsp;`/language:javascript-typescript`\n* :question:&nbsp;&nbsp;`/language:python`\n\n\n[View all branch alerts](/FOUNDUPS/Foundups-Agent/security/code-scanning?query=pr%3A1840+tool%3ACodeQL+is%3Aopen).",
+            "text": null,
+            "annotations_count": 0,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179471631/annotations"
+          }
+        },
+        {
+          "name": "holoindex_freshness",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349736",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349736/annotations"
+          }
+        },
+        {
+          "name": "test (3.12)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349686",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349686/annotations"
+          }
+        },
+        {
+          "name": "lint",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349684",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349684/annotations"
+          }
+        },
+        {
+          "name": "redteam observation (report-only)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349666",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349666/annotations"
+          }
+        },
+        {
+          "name": "security",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349577",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349577/annotations"
+          }
+        },
+        {
+          "name": "Analyze (python)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349214",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349214/annotations"
+          }
+        },
+        {
+          "name": "Analyze (actions)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349128",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349128/annotations"
+          }
+        },
+        {
+          "name": "Analyze (javascript-typescript)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349110",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349110/annotations"
+          }
+        },
+        {
+          "name": "Analyze (rust)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349050",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349050/annotations"
+          }
+        }
+      ],
+      "analysis_configuration_comparison": [
+        {
+          "category": "/language:actions",
+          "pr_analysis_id": 1808240769,
+          "main_analysis_id": 1808131808,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        },
+        {
+          "category": "/language:rust",
+          "pr_analysis_id": 1808240764,
+          "main_analysis_id": 1808131854,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        },
+        {
+          "category": "/language:javascript-typescript",
+          "pr_analysis_id": 1808241973,
+          "main_analysis_id": 1808132332,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        },
+        {
+          "category": "/language:python",
+          "pr_analysis_id": 1808243511,
+          "main_analysis_id": 1808144919,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        }
+      ],
+      "rerun_failure": "Previous gh run rerun35548722884 refused: This workflow run cannot be retried. Not repeated.",
+      "boundary": "No successful aggregate verdict or merge inferred from matching uploads, individual job success or mergeStateStatus=CLEAN. No source/check configuration change.",
+      "documentation_followup": "This required canonical closure-status update is substantive evidence maintenance, not a claim that a new commit repairs CodeQL. The revised exact head must pass checks independently."
+    },
+    "prior_evidence_location": "O:/Foundups-Agent-audits/20260921-rsi-amibot-alias-plan-0928"
   }
 }
