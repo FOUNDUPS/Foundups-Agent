@@ -910,7 +910,7 @@
       poc_landing_status: true, lightpaper_url: true, website_url: true,
       poc_url: true, app_url: true, github_url: true, docs_url: true,
       screenshot_url: true, public_summary: true, portfolio_priority: true,
-      portfolio_ready: true, is_dual_identity: true
+      portfolio_ready: true, is_dual_identity: true, public_discovery_alias: true
     };
 
     // Human-readable labels for poc_landing_status (the public readiness field).
@@ -953,7 +953,8 @@
       return;
     }
 
-    var foundupId = decodeURIComponent(match[1]);
+    var foundupId = match[1];
+    var resolvedDiscoveryId = null;
     // Capture subpath (forward-compat indicator only).
     var subpathMatch = path.match(/^\/f\/[^\/]+\/(.+)$/);
     var subpath = subpathMatch ? subpathMatch[1] : null;
@@ -969,6 +970,13 @@
       return;
     }
 
+    try {
+      foundupId = decodeURIComponent(foundupId);
+    } catch (err) {
+      renderNotFound('FoundUp not found', 'Invalid discovery address.');
+      return;
+    }
+
     fetch(PUBLIC_CATALOG_URL)
       .then(function(r) {
         if (!r.ok) throw new Error('Catalog fetch failed');
@@ -977,7 +985,7 @@
       .then(function(projection) {
         // Scope-free public projection: { entities: [...] }
         var items = projectionEntities(projection);
-        var item = items.find(function(i) { return i.foundup_id === foundupId; });
+        var item = resolveDiscoveryEntry(items);
         if (!item) {
           renderNotFound('FoundUp not found', 'The FoundUp "' + esc(foundupId) + '" does not exist in the catalog.');
           return;
@@ -986,6 +994,7 @@
         // READ-ONLY public discovery: landing only. App mount / shell handoff
         // is a gated participation surface and is NOT served from the public
         // /f/ projection path (no entry_url field exists in the allowlist).
+        resolvedDiscoveryId = item.foundup_id;
         renderEntry(item);
         populateConciergeContext(item);
       })
@@ -993,6 +1002,35 @@
         console.error('Catalog load error:', err);
         renderNotFound('Error', 'Failed to load FoundUp catalog.');
       });
+
+    // Aliases select a canonical landing only; they never become tenant identity.
+    function resolveDiscoveryEntry(items) {
+      var canonical = new Map();
+      var aliases = new Map();
+      items.forEach(function(item) {
+        if (canonical.has(item.foundup_id)) throw new Error('Ambiguous canonical ID');
+        canonical.set(item.foundup_id, item);
+      });
+      items.forEach(function(item) {
+        if (!Object.prototype.hasOwnProperty.call(item, 'public_discovery_alias')) return;
+        var alias = item.public_discovery_alias;
+        if (!discoverySlug(alias) || !discoverySlug(item.foundup_id) ||
+            ['portfolio_candidate', 'portfolio_ready', 'portfolio_featured'].indexOf(item.portfolio_status) < 0 ||
+            canonical.has(alias) || aliases.has(alias)) throw new Error('Invalid discovery alias');
+        aliases.set(alias, item);
+      });
+      if (canonical.has(foundupId)) return canonical.get(foundupId);
+      if (!discoverySlug(foundupId) || !/^\/f\/[^/]+\/?$/.test(path)) return null;
+      var selected = aliases.get(foundupId);
+      if (!selected) return null;
+      window.history.replaceState(null, '', '/f/' + selected.foundup_id);
+      foundupId = selected.foundup_id;
+      return selected;
+    }
+
+    function discoverySlug(value) {
+      return typeof value === 'string' && value.length > 0 && !/[^a-z0-9_]/.test(value);
+    }
 
     // Defense-in-depth: strip any field NOT on the public allowlist from a
     // projection entry before the renderer ever sees it. The projection is
@@ -1474,7 +1512,7 @@
 
     function getEntryContext() {
       return {
-        foundupId: foundupId,
+        foundupId: resolvedDiscoveryId,
         subpath: subpath,
         item: currentItem,
         conciergeOpen: conciergeOpen

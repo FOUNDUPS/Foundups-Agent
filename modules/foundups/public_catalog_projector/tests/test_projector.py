@@ -315,6 +315,101 @@ def test_projection_path_never_reads_member_runtime_catalog():
 # --- CLI fail-closed semantics --------------------------------------------
 
 
+@pytest.mark.parametrize("alias", ["amibot", "constructor", "__proto__", "a_12"])
+@pytest.mark.parametrize("visibility", ["discoverable", "listed", "promoted"])
+def test_explicit_visible_alias_round_trip(alias, visibility):
+    registry = _registry()
+    registry["entities"][0].update(public_discovery_alias=alias, public_surface_status=visibility)
+    projection = generate_projection(registry)
+    assert projection["entities"][0]["public_discovery_alias"] == alias
+    assert validate_projection(projection, registry).is_safe
+
+
+@pytest.mark.parametrize("visibility", [None, "hidden", "unrecognized"])
+def test_alias_visibility_does_not_change_legacy_canonical_projection(visibility):
+    registry = _registry()
+    before = generate_projection(registry)
+    registry["entities"][0].update(public_discovery_alias="amibot", public_surface_status=visibility)
+    assert generate_projection(registry) == before
+    assert validate_projection(before, registry).is_safe
+
+
+@pytest.mark.parametrize("alias", [None, "", 1, True, [], {}, "Upper", "two words", "a-b",
+                                  "a/b", "a\\b", "%61", "a\n", "é", "a?b", "a#b"])
+def test_alias_malformed_rejected_even_when_hidden(alias):
+    registry = _registry()
+    clean = generate_projection(registry)
+    registry["entities"][-1]["public_discovery_alias"] = alias
+    with pytest.raises(SourceError, match="public_discovery_alias"):
+        generate_projection(registry)
+    with pytest.raises(SourceError, match="public_discovery_alias"):
+        validate_projection(clean, registry)
+
+
+@pytest.mark.parametrize("alias", ["alpha", "hidden", "holoindex_prod_01"])
+def test_alias_cannot_claim_any_canonical_id(alias):
+    registry = _registry()
+    registry["entities"][0].update(public_discovery_alias=alias, public_surface_status="listed")
+    with pytest.raises(SourceError, match="collides"):
+        generate_projection(registry)
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_hidden_alias_reserves_name_before_filtering(reverse):
+    registry = _registry()
+    registry["entities"][0]["public_discovery_alias"] = "same_alias"
+    registry["entities"][-1]["public_discovery_alias"] = "same_alias"
+    if reverse:
+        registry["entities"].reverse()
+    with pytest.raises(SourceError, match="collides"):
+        generate_projection(registry)
+
+
+@pytest.mark.parametrize("change", ["omit", "null", "different", "hidden", "absent"])
+def test_alias_validator_checks_presence_and_value(change):
+    registry = _registry()
+    entry = registry["entities"][0]
+    entry.update(public_discovery_alias="amibot", public_surface_status="listed")
+    projection = generate_projection(registry)
+    item = projection["entities"][0]
+    if change == "omit":
+        del item["public_discovery_alias"]
+    elif change == "hidden":
+        entry["public_surface_status"] = "hidden"
+    elif change == "absent":
+        del entry["public_discovery_alias"]
+        item["public_discovery_alias"] = None
+    else:
+        item["public_discovery_alias"] = None if change == "null" else "other"
+    report = validate_projection(projection, registry)
+    assert not report.is_safe
+    assert any(v.rule_id == "B_alias" for v in report.violations)
+
+
+def test_hidden_eligible_alias_omitted_ineligible_entity_stays_excluded():
+    registry = _registry()
+    registry["entities"][-1].update(public_discovery_alias="hidden_alias", public_surface_status="listed")
+    assert all(e["foundup_id"] != "hidden" for e in generate_projection(registry)["entities"])
+
+
+@pytest.mark.parametrize("fid", ["bad/name", "bad\n", None, "alpha"])
+def test_alias_rejects_invalid_or_duplicate_target_identity(fid):
+    registry = _registry()
+    registry["entities"][1].update(foundup_id=fid, public_discovery_alias="amibot")
+    with pytest.raises(SourceError, match="canonical"):
+        generate_projection(registry)
+
+
+@pytest.mark.parametrize("alias,valid", [("amibot", True), ("__proto__", True), ("", False),
+                                       (None, False), (1, False), ("A", False), ("a\n", False),
+                                       ("a/b", False), ("%61", False)])
+def test_registry_alias_schema_enforces_exact_slug(alias, valid):
+    from jsonschema import Draft202012Validator
+    schema = json.loads((find_repo_root() / "modules/foundups/foundup_registry.schema.json").read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema["$defs"]["RegistryEntry"]["properties"]["public_discovery_alias"])
+    assert validator.is_valid(alias) is valid
+
+
 def test_cli_check_exit_0_against_real_repo():
     result = subprocess.run(
         [sys.executable, "-m", "modules.foundups.public_catalog_projector", "--check"],

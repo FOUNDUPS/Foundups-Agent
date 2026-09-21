@@ -6,11 +6,11 @@ Technical decisions and primary sources: [chat/PWA/safety research](docs/CHAT_PW
 
 ## Public discovery alias contract — 2026-09-21
 
-**Decision, specified only:** preserve canonical `detect_ai`, `/f/detect_ai`,
+**Contract merged in PR1840; generic source capability under validation:** preserve canonical `detect_ai`, `/f/detect_ai`,
 `/f/detect_ai/app` and `idb_detect_ai`. Under WSP104 sections3/7/9, an alias is
 shell-owned pre-entry discovery input, never a second FoundUp or tenant route
 family. Canonicalization must finish before tenant landing/context rendering.
-This10/P2 contract does not change WSP104 or implement/activate `/f/amibot`.
+The10/P2 source slice implements optional alias handling with synthetic fixtures; it does not register an AmIBot alias or activate `/f/amibot`. Local and independent replay each pass271overlapping cases; candidate CI remains pending. WSP104 is unchanged.
 
 The existing shell already searches display names and emits canonical ID links.
 That is sufficient for ordinary AmIBot discovery after separate listing approval,

@@ -12,6 +12,8 @@ Route behavior:
 import json
 import os
 import re
+import shutil
+import subprocess
 from html.parser import HTMLParser
 import pytest
 
@@ -69,17 +71,18 @@ class _InlineScripts(HTMLParser):
             self.scripts[-1] += data
 
 
-def _landing_script():
-    """Inspect executable inline code, excluding full-line documentation comments.
-
-    Historical catalog names and retired mount CSS remain in the HTML. They
-    must not satisfy current runtime contract checks merely by being present.
-    """
+def _raw_landing_script():
+    """Extract the actual sole inline owner without rewriting its JavaScript."""
     parser = _InlineScripts()
     parser.feed(_read("../f/index.html"))
     parser.close()
     assert len(parser.scripts) == 1, "Expected the canonical inline route owner"
-    return re.sub(r"(?m)^\s*//[^\n]*$", "", parser.scripts[0])
+    return parser.scripts[0]
+
+
+def _landing_script():
+    """Keep documentation comments from satisfying static runtime assertions."""
+    return re.sub(r"(?m)^\s*//[^\n]*$", "", _raw_landing_script())
 
 
 def _app_gate():
@@ -477,3 +480,281 @@ class TestPublicProjectionHandling:
         assert "Object.prototype.hasOwnProperty.call(entity, k)" in script
         assert "PUBLIC_FIELD_ALLOWLIST[k] === true" in script
         assert "resolvedUrl" not in script
+
+
+_NODE_ROUTE_VM = r"""
+const {runInNewContext} = require('node:vm');
+const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
+const events = [], fetches = [], forbidden = [], errors = [];
+let address = new URL(input.path + (input.search || '') + (input.hash || ''),
+  'https://shell.invalid');
+let sandbox;
+function record(kind, target, value) {
+  const context = sandbox && sandbox.entryRedDog && sandbox.entryRedDog.getContext();
+  events.push({kind, target, value, pathname: address.pathname,
+    contextId: context ? context.foundupId : null,
+    itemId: context && context.item ? context.item.foundup_id : null});
+}
+function element(id) {
+  let html = '';
+  return {id, style: {}, children: [], value: '',
+    classList: {toggle() {}, remove() {}, add() {}},
+    addEventListener() {}, scrollIntoView() {}, querySelectorAll() { return []; },
+    querySelector() { return null; },
+    appendChild(child) { this.children.push(child); }, insertAdjacentHTML() {},
+    set innerHTML(value) { html = String(value); record('html', id, html); },
+    get innerHTML() { return html; },
+    set textContent(value) {
+      html = String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    },
+    set href(value) { record('link', id, value); }
+  };
+}
+const ids = ['entryContent', 'entryRedDog', 'conciergeSheet', 'conciergeScrim',
+  'conciergeContextBody', 'entryBriefingBody', 'entryRecsBody',
+  'showcaseSearch', 'showcaseReadiness', 'showcaseGrid'];
+const nodes = Object.fromEntries(ids.map(id => [id, element(id)]));
+const location = {
+  get pathname() { return address.pathname; }, get search() { return address.search; },
+  get hash() { return address.hash; }, get origin() { return address.origin; },
+  get href() { return address.href; },
+  set href(value) { record('navigate', 'location', value); address = new URL(value, address); }
+};
+const document = {
+  getElementById(id) { if (!nodes[id]) throw new Error('Unexpected DOM id: ' + id); return nodes[id]; },
+  createElement(tag) {
+    if (tag === 'iframe' || tag === 'script') {
+      forbidden.push('element:' + tag); throw new Error('Forbidden active element');
+    }
+    return element('created:' + tag);
+  },
+  createTextNode(text) { return {textContent: String(text)}; },
+  addEventListener() {}, querySelector() { return null; },
+  set title(value) { record('title', 'document', value); }
+};
+const history = {replaceState(_state, _title, value) {
+  record('history', 'replaceState', value);
+  if (input.history === 'throw') throw new Error('Synthetic history rejection');
+  const next = new URL(value, address);
+  if (next.origin !== address.origin) throw new Error('Cross-origin replacement');
+  address = next;
+}};
+async function run() {
+  sandbox = {document, location, URL, URLSearchParams,
+    console: {error(...args) { errors.push(args.map(String).join(' ')); }},
+    fetch(url) {
+      fetches.push(url);
+      if (url !== '/f/public_catalog.json') {
+        forbidden.push('fetch:' + url); return Promise.reject(new Error('Forbidden fetch'));
+      }
+      if (input.pending_fetch) return new Promise(() => {});
+      if (input.fetch_fail) return Promise.reject(new Error('Synthetic unavailable catalog'));
+      return Promise.resolve({ok: true, json: () => Promise.resolve(input.projection)});
+    }
+  };
+  sandbox.window = sandbox;
+  if (input.history !== 'missing') sandbox.history = history;
+  runInNewContext(input.script, sandbox, {filename: 'actual-f-inline.js', timeout: 500,
+    contextCodeGeneration: {strings: false, wasm: false}});
+  // Real Promise callbacks run after the IIFE initializes its local state.
+  await new Promise(resolve => setImmediate(resolve));
+  const context = sandbox.entryRedDog ? sandbox.entryRedDog.getContext() : null;
+  process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context,
+    pathname: address.pathname, search: address.search, hash: address.hash,
+    html: Object.fromEntries(ids.map(id => [id, nodes[id].innerHTML]))}));
+}
+run().catch(error => { console.error(error.stack); process.exitCode = 1; });
+"""
+
+
+def _public_entity(**overrides):
+    item = {"foundup_id": "synthetic_001", "display_name": "Synthetic discovery",
+            "portfolio_status": "portfolio_candidate", "poc_landing_status": "discoverable_only"}
+    item.update(overrides)
+    return item
+
+
+def _landing_vm(tmp_path, path, entities=None, **overrides):
+    """Run only the real inline owner with synthetic DOM, history and fetch."""
+    node = "C:/Program Files/nodejs/node.exe" if os.name == "nt" else shutil.which("node")
+    assert node and os.path.isfile(node), "Node is required for route behavior coverage"
+    request = {"script": _raw_landing_script(), "path": path,
+               "projection": {"entities": entities if entities is not None else [_public_entity()]}}
+    request.update(overrides)
+    env = {k: v for k, v in os.environ.items()
+           if k.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "PATHEXT"}}
+    env.update(TEMP=str(tmp_path), TMP=str(tmp_path), HOME=str(tmp_path), USERPROFILE=str(tmp_path))
+    proc = subprocess.run([node, "--unhandled-rejections=strict", "-e", _NODE_ROUTE_VM],
+                          input=json.dumps(request), capture_output=True, text=True,
+                          encoding="utf-8", timeout=10, cwd=tmp_path, env=env)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    result = json.loads(proc.stdout)
+    assert result["forbidden"] == [], result
+    return result
+
+
+def _assert_no_tenant_render(result):
+    assert not any(e["kind"] == "html" and "entry-hero" in e["value"]
+                   for e in result["events"])
+    assert not any(e["kind"] == "html" and e["target"] == "conciergeContextBody"
+                   for e in result["events"])
+    if result["context"] is not None:
+        assert result["context"]["item"] is None
+        assert result["context"]["foundupId"] is None
+
+
+def _assert_canonical_render(result, canonical, *, replaced):
+    context = result["context"]
+    assert context["foundupId"] == canonical and context["item"]["foundup_id"] == canonical
+    assert "Canonical: /f/" + canonical in result["html"]["entryContent"]
+    renders = [i for i, e in enumerate(result["events"]) if e["kind"] == "html"
+               and ("entry-hero" in e["value"] or e["target"] == "conciergeContextBody")]
+    assert len(renders) >= 2, result
+    for index in renders:
+        event = result["events"][index]
+        assert event["pathname"] == "/f/" + canonical
+        assert event["contextId"] == canonical
+    histories = [i for i, e in enumerate(result["events"]) if e["kind"] == "history"]
+    if replaced:
+        assert len(histories) == 1 and histories[0] < min(renders)
+        assert result["events"][histories[0]]["value"] == "/f/" + canonical
+    else:
+        assert histories == []
+    assert not any(e["kind"] == "navigate" for e in result["events"])
+    assert result["fetches"] == ["/f/public_catalog.json"]
+
+
+@pytest.mark.parametrize("shape", ["entities", "items", "array"])
+def test_vm_legacy_canonical_identity_and_projection_shapes(tmp_path, shape):
+    public = _public_entity()
+    projection = [dict(public, entry_url="/private", creator="private-principal")]
+    result = _landing_vm(tmp_path, "/f/synthetic_001", search="?devMall=1", hash="#keep",
+                         projection=projection if shape == "array" else {shape: projection})
+    _assert_canonical_render(result, "synthetic_001", replaced=False)
+    assert result["context"]["item"] == public
+    assert result["search"] == "?devMall=1" and result["hash"] == "#keep"
+    assert "private-principal" not in result["html"]["entryContent"]
+
+
+@pytest.mark.parametrize("canonical,alias", [
+    ("synthetic_001", "friendly"), ("canonical", "constructor"),
+    ("canonical", "__proto__"), ("canonical", "prototype"),
+    ("__proto__", "friendly"), ("constructor", "friendly"), ("canonical", "a" * 65),
+])
+@pytest.mark.parametrize("suffix", ["", "/"])
+def test_vm_alias_canonicalizes_before_render_and_context(tmp_path, canonical, alias, suffix):
+    item = _public_entity(foundup_id=canonical, public_discovery_alias=alias)
+    result = _landing_vm(tmp_path, "/f/" + alias + suffix, [item],
+                         search="?id=other&next=https://elsewhere.invalid", hash="#other")
+    _assert_canonical_render(result, canonical, replaced=True)
+    assert result["pathname"] == "/f/" + canonical
+    assert result["search"] == result["hash"] == ""
+    assert result["context"]["item"] == item
+
+
+def test_vm_alias_single_decode_and_canonical_render_bytes(tmp_path):
+    item = _public_entity(public_discovery_alias="friendly")
+    canonical = _landing_vm(tmp_path, "/f/synthetic_001", [item])
+    alias = _landing_vm(tmp_path, "/f/%66riendly", [item])
+    _assert_canonical_render(alias, "synthetic_001", replaced=True)
+    assert alias["html"] == canonical["html"]
+    assert alias["context"] == canonical["context"]
+
+
+@pytest.mark.parametrize("token", ["synthetic_001", "friendly", "unknown"])
+@pytest.mark.parametrize("suffix", ["app", "app/jobs/1"])
+@pytest.mark.parametrize("fetch_fail", [False, True])
+def test_vm_app_handoff_precedes_even_failed_catalog(tmp_path, token, suffix, fetch_fail):
+    result = _landing_vm(tmp_path, "/f/" + token + "/" + suffix,
+                         [_public_entity(public_discovery_alias="friendly")],
+                         fetch_fail=fetch_fail, search="?devMall=1")
+    assert result["fetches"] == [] and result["context"] is None
+    assert result["pathname"] == "/member/" and result["search"] == "?devMall=1"
+    assert result["events"] == [{"kind": "navigate", "target": "location",
+                                  "value": "/member/?devMall=1", "pathname": "/f/" + token + "/" + suffix,
+                                  "contextId": None, "itemId": None}]
+
+
+@pytest.mark.parametrize("path", [
+    "/f/unknown", "/f/Friendly", "/f/friendly/other", "/f/friendly/application",
+    "/f/friendly//", "/f/friendly%2fapp", "/f/friendly%5c", "/f/friendly%25",
+    "/f/friendly%252f", "/f/%", "/f/%GG", "/f/%E0%A4%A",
+    "/f/friendly%0A", "/f/friendly%0D", "/f/friendly%20",
+])
+def test_vm_invalid_alias_paths_do_not_publish_tenant(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(public_discovery_alias="friendly")])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] in {"history", "navigate"} for e in result["events"])
+
+
+@pytest.mark.parametrize("bad_alias", [
+    "", None, False, 0, [], {}, "Friendly", "two words", "a/b", "a\\b", "a%2fb",
+    "caf\u00e9", "friendly\n", "friendly\r", "friendly\t", "friendly\r\n",
+])
+def test_vm_malformed_projection_alias_rejects_before_canonical_render(tmp_path, bad_alias):
+    result = _landing_vm(tmp_path, "/f/synthetic_001", [_public_entity(public_discovery_alias=bad_alias)])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("status", ["not_portfolio", "missing", None, "", "portfolio", "PORTFOLIO_READY"])
+def test_vm_alias_ineligible_or_missing_portfolio_status_is_rejected(tmp_path, status):
+    item = _public_entity(public_discovery_alias="friendly", portfolio_status=status)
+    if status == "missing":
+        del item["portfolio_status"]
+    result = _landing_vm(tmp_path, "/f/friendly", [item])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("status", ["not_portfolio", "missing", None])
+def test_vm_no_alias_keeps_legacy_canonical_status_handling(tmp_path, status):
+    item = _public_entity(portfolio_status=status)
+    if status == "missing":
+        del item["portfolio_status"]
+    result = _landing_vm(tmp_path, "/f/synthetic_001", [item])
+    _assert_canonical_render(result, "synthetic_001", replaced=False)
+
+
+@pytest.mark.parametrize("case", ["duplicate_alias", "canonical_collision", "self_collision", "duplicate_target"])
+def test_vm_ambiguous_projection_alias_is_not_first_match(tmp_path, case):
+    first = _public_entity(public_discovery_alias="friendly")
+    second = _public_entity(foundup_id="second")
+    if case == "duplicate_alias":
+        second["public_discovery_alias"] = "friendly"
+    elif case == "canonical_collision":
+        second["foundup_id"] = "friendly"
+    elif case == "self_collision":
+        first["public_discovery_alias"] = first["foundup_id"]
+    else:
+        second["foundup_id"] = first["foundup_id"]
+    path = "/f/synthetic_001" if case == "self_collision" else "/f/friendly"
+    result = _landing_vm(tmp_path, path, [first, second])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("history", ["missing", "throw"])
+def test_vm_failed_alias_history_cannot_render_or_publish_context(tmp_path, history):
+    result = _landing_vm(tmp_path, "/f/friendly", [_public_entity(public_discovery_alias="friendly")],
+                         history=history)
+    _assert_no_tenant_render(result)
+    assert result["pathname"] == "/f/friendly"
+    assert not any(e["kind"] == "navigate" for e in result["events"])
+
+
+@pytest.mark.parametrize("path", ["/f/synthetic_001", "/f/friendly"])
+def test_vm_failed_catalog_does_not_publish_tenant(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(public_discovery_alias="friendly")], fetch_fail=True)
+    _assert_no_tenant_render(result)
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("path", ["/f/synthetic_001", "/f/friendly"])
+def test_vm_pending_catalog_exposes_no_unverified_identity(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(public_discovery_alias="friendly")], pending_fetch=True)
+    _assert_no_tenant_render(result)
+    assert result["context"] is not None
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["events"] == [] and result["errors"] == []

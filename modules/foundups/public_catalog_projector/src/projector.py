@@ -40,6 +40,8 @@ the explicit artifact-emit step. Validation never writes.
 from __future__ import annotations
 
 import json
+import re
+from collections import Counter
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -74,6 +76,7 @@ MEMBER_RUNTIME_CATALOG_PATH = Path("public/member/mall-video-catalog.json")
 #   poc_url / app_url   <- poc_url / app_url
 PUBLIC_ALLOWLIST: Tuple[str, ...] = (
     "foundup_id",
+    "public_discovery_alias",
     "display_name",
     "mission",
     "pain",
@@ -277,6 +280,51 @@ def load_registry(repo_root: Path, registry_path: Optional[Path] = None) -> Dict
 # --- Generator -------------------------------------------------------------
 
 
+def _validate_alias_reservations(registry: Dict[str, Any]) -> None:
+    """Reserve aliases before filtering, including hidden and ineligible IDs."""
+    entries = registry["entities"]
+    identities = Counter(e.get("foundup_id") for e in entries)
+    reserved = set(identities)
+    for entry in entries:
+        if "public_discovery_alias" not in entry:
+            continue
+        alias = entry["public_discovery_alias"]
+        fid = entry.get("foundup_id")
+        if not isinstance(alias, str) or re.fullmatch(r"[a-z0-9_]+", alias) is None:
+            raise SourceError("Invalid public_discovery_alias")
+        if not isinstance(fid, str) or re.fullmatch(r"[a-z0-9_]+", fid) is None:
+            raise SourceError("Alias requires a canonical slug")
+        if alias in reserved:
+            raise SourceError("public_discovery_alias collides with a reserved slug")
+        if identities[fid] != 1:
+            raise SourceError("Alias requires a unique canonical ID")
+        reserved.add(alias)
+
+
+def _visible_alias(entry: Dict[str, Any]) -> Optional[str]:
+    """Alias visibility is stricter than legacy canonical projection eligibility."""
+    if (entry.get("portfolio_status") in PORTFOLIO_ELIGIBLE_STATUSES
+            and entry.get("public_surface_status") in {"discoverable", "listed", "promoted"}):
+        return entry.get("public_discovery_alias")
+    return None
+
+
+def rule_alias_projection(projection: Dict[str, Any], registry: Dict[str, Any]) -> List[Violation]:
+    """Validate global reservations and exact optional alias presence/value."""
+    _validate_alias_reservations(registry)
+    out: List[Violation] = []
+    reg = _index_registry(registry)
+    for entity in projection["entities"]:
+        expected = _visible_alias(reg.get(entity.get("foundup_id"), {}))
+        present = "public_discovery_alias" in entity
+        actual = entity.get("public_discovery_alias")
+        if present != (expected is not None) or actual != expected:
+            out.append(Violation("B_alias", "error", entity.get("foundup_id", "<missing>"),
+                                 "public_discovery_alias", expected, actual,
+                                 "Alias presence or value differs from visible registry projection"))
+    return out
+
+
 def _project_entry(registry_entry: Dict[str, Any]) -> Dict[str, Any]:
     """Project ONE registry entry to a scope-free public catalog entry.
 
@@ -298,6 +346,10 @@ def _project_entry(registry_entry: Dict[str, Any]) -> Dict[str, Any]:
         if key in registry_entry and registry_entry[key] is not None:
             out[key] = registry_entry[key]
 
+    alias = _visible_alias(registry_entry)
+    if alias is not None:
+        out["public_discovery_alias"] = alias
+
     # Derived public flag (mirrors portfolio projection C4 convention).
     if out.get("foundup_id") == "holoindex_prod_01":
         out["is_dual_identity"] = True
@@ -312,6 +364,7 @@ def generate_projection(registry: Dict[str, Any]) -> Dict[str, Any]:
     and sorts by ``portfolio_priority`` (nulls last) then ``foundup_id`` for a
     deterministic, diff-stable artifact.
     """
+    _validate_alias_reservations(registry)
     entries: List[Dict[str, Any]] = []
     for reg_entry in registry["entities"]:
         if reg_entry.get("portfolio_status") in PORTFOLIO_ELIGIBLE_STATUSES:
@@ -345,6 +398,8 @@ def _index_registry(registry: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
 
 def _expected_projection_value(reg_entry: Dict[str, Any], key: str) -> Any:
     """The value the projection SHOULD carry for ``key`` given the registry."""
+    if key == "public_discovery_alias":
+        return _visible_alias(reg_entry)
     if key in REGISTRY_PROJECTED_FIELDS:
         if key == "foundup_id":
             return reg_entry.get("foundup_id")
@@ -488,6 +543,8 @@ def validate_projection(
         raise SourceError("Projection 'entities' must be a JSON array")
 
     report = ValidationReport()
+    for v in rule_alias_projection(projection, registry):
+        report.add(v)
     for v in rule_A_allowlist_only(projection):
         report.add(v)
     for v in rule_B_derived_from_registry(projection, registry):

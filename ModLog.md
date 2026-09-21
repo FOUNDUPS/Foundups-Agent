@@ -1,3 +1,10 @@
+## 2026-09-21: Implement optional canonical discovery aliases
+
+- WSP00/15/22/50/62/97/99/104; C4/I2/D2/Impact2=10/P2. PR1840 and both main workflows passed; fresh98peer heads and16 source bindings reconciled.
+- Reuse existing schema, projector and public shell. Validate global slug reservations before filtering; project only eligible explicitly visible aliases; canonicalize URL and identity before render/context. Preserve member app gating before catalog retrieval.
+- Extend existing tests with synthetic schema/projector cases and actual inline JavaScript under a mocked browser. Independent source review caught and corrected missing shell portfolio eligibility before final review. Local271 and independent271overlapping cases pass; speculative context IDs also remain null until resolution. Exact candidate CI remains pending in the canonical backlog; no production data/manifest, runtime/provider or deployment changes.
+- Retain all26 original packets and51 score histories. Retrieval first returned the shared-root overlay and was rejected; corrected owned adapter binds f83edabc3 with UNKNOWN freshness/index gap, no semantic CURRENT claim or reindex. Missing canonical projector TestModLog added under WSP97, existing member TestModLog reused.
+
 ## 2026-09-21: Reconcile PR1840 hosted publication evidence
 
 - WSP00/15/22/50/97: retain the owned10/P2 alias contract and its accepted source/test scope. PR1840 head d9251a9b has nine successful checks, but aggregate CodeQL is neutral: two main configurations reportedly missing. All four exact-head analysis uploads exist and match main configuration metadata; that does not substitute for the aggregate verdict.
