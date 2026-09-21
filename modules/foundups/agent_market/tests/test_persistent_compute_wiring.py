@@ -10,6 +10,7 @@ from threading import Barrier
 
 import pytest
 from sqlalchemy import delete, event, insert, select, update
+from sqlalchemy.exc import InvalidRequestError
 
 from modules.foundups.agent_market.src.exceptions import AgentMarketError, PermissionDeniedError
 from modules.foundups.agent_market.src.models import (
@@ -115,7 +116,9 @@ def test_task_pipeline_enforces_and_debits_each_step(adapter):
 def _ready_payout(adapter, suffix="1", *, fund=True):
     adapter.compute_access_enforced = True
     adapter.compute_default_credits = 0
-    adapter.create_foundup(_foundup(f"f_{suffix}"))
+    foundup = _foundup(f"f_{suffix}")
+    foundup.token_symbol = f"FUP{suffix}"
+    adapter.create_foundup(foundup)
     task = Task(
         task_id=f"task_{suffix}", foundup_id=f"f_{suffix}", title="bounded task",
         description="disposable initiation", acceptance_criteria=["audited"],
@@ -470,4 +473,76 @@ def test_non_sqlite_rejects_before_session_or_compute_attribute_access(adapter, 
         with pytest.raises(AgentMarketError):
             pipeline.trigger_payout(task.task_id, "treasury_1")
     assert calls == []
+    assert _database_snapshot(adapter) == before
+
+
+def test_other_foundup_event_cannot_hide_target_scoped_wrong_reason_debit(adapter):
+    pipeline, target = _ready_payout(adapter)
+    _, other = _ready_payout(adapter, "2", fund=False)
+    payout = pipeline.trigger_payout(other.task_id, "treasury_1")
+    _assert_initiation(adapter, other, payout)
+    recorded = adapter.query_events(task_id=other.task_id, event_type="payout.initiated")[0]
+    linked = [row for row in _rows(adapter, "compute_ledger_entries")
+              if row["event_id"] == recorded.event_id]
+    assert len(linked) == 1
+    _change_row(adapter, "compute_ledger_entries", "entry_id", linked[0]["entry_id"],
+                foundup_id=target.foundup_id, reason="wrong")
+    before = _database_snapshot(adapter)
+    with pytest.raises(AgentMarketError):
+        pipeline.trigger_payout(target.task_id, "treasury_1")
+    assert _database_snapshot(adapter) == before
+
+
+def test_lost_response_after_commit_reopens_without_second_initiation(adapter):
+    pipeline, task = _ready_payout(adapter)
+    staged, committed = [], []
+    lost_response = RuntimeError("injected lost response after payout commit")
+
+    def mark_payout(conn, cursor, statement, parameters, context, executemany):
+        if statement.lower().replace('"', '').lstrip().startswith("insert into payouts"):
+            staged.append(True)
+
+    def interrupt_response(session):
+        if staged and not committed:
+            committed.append(True)
+            raise lost_response
+
+    event.listen(adapter.engine, "after_cursor_execute", mark_payout)
+    event.listen(adapter._SessionFactory, "after_commit", interrupt_response)
+    try:
+        with pytest.raises((RuntimeError, InvalidRequestError)) as raised:
+            pipeline.trigger_payout(task.task_id, "treasury_1")
+    finally:
+        event.remove(adapter._SessionFactory, "after_commit", interrupt_response)
+        event.remove(adapter.engine, "after_cursor_execute", mark_payout)
+    assert staged == committed == [True]
+    assert any(error is lost_response for error in (
+        raised.value, raised.value.__cause__, raised.value.__context__,
+    ))
+    assert len(_rows(adapter, "payouts")) == 1
+    payout = adapter.get_payout(_rows(adapter, "payouts")[0]["payout_id"])
+    _assert_initiation(adapter, task, payout)
+    before = _database_snapshot(adapter)
+    adapter.close()
+    reopened = SQLiteAdapter(adapter.db_path)
+    try:
+        assert PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1") == payout
+        _assert_initiation(reopened, task, payout)
+        assert _database_snapshot(reopened) == before
+    finally:
+        reopened.close()
+
+
+def test_task_cannot_substitute_another_valid_initiation_pointer(adapter):
+    pipeline, target = _ready_payout(adapter)
+    _, other = _ready_payout(adapter, "2", fund=False)
+    target_payout = pipeline.trigger_payout(target.task_id, "treasury_1")
+    other_payout = pipeline.trigger_payout(other.task_id, "treasury_1")
+    _assert_initiation(adapter, target, target_payout)
+    _assert_initiation(adapter, other, other_payout)
+    assert target_payout.payout_id != other_payout.payout_id
+    _change_row(adapter, "tasks", "task_id", target.task_id, payout_id=other_payout.payout_id)
+    before = _database_snapshot(adapter)
+    with pytest.raises(AgentMarketError):
+        pipeline.trigger_payout(target.task_id, "treasury_1")
     assert _database_snapshot(adapter) == before
