@@ -52,7 +52,7 @@ and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remo
 ## Repository accounting and resumed RSI — 2026-09-21
 
 The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
-`3d298ea6688c10a60dd1fc4b4b227e28afd389db`, including PR1315 Pillow repair and PR1844 GotJunk qualification and PR1375 Functions integration and PR783 root protobuf integration and PR1378 Clerk integration and PR1843 Clerk candidate qualification and PR1842 dependency-owner qualification and PR1841 alias capability and PR1840 alias contract and PR1839 prototype qualification and PR1838 consumer isolation and PR1837 receipt-fixture closure and PR1836 dry-run qualification and PR1834 build-route qualification and PR1833 planning-DAG closure and PR1832 route-test closure, PR1751 registry onboarding, PR1831 accounting/cache closure and PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+`91261a63870426e9e216791c841a0275f10d9a14`, including PR1374 node-forge repair and PR1315 Pillow repair and PR1844 GotJunk qualification and PR1375 Functions integration and PR783 root protobuf integration and PR1378 Clerk integration and PR1843 Clerk candidate qualification and PR1842 dependency-owner qualification and PR1841 alias capability and PR1840 alias contract and PR1839 prototype qualification and PR1838 consumer isolation and PR1837 receipt-fixture closure and PR1836 dry-run qualification and PR1834 build-route qualification and PR1833 planning-DAG closure and PR1832 route-test closure, PR1751 registry onboarding, PR1831 accounting/cache closure and PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
 exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
 passed, as did both PR1803 main workflows and all three observed PR1804 main
 workflows. PR1805 passed all ten exact-head checks and both later main workflows.
@@ -63,7 +63,7 @@ Both subsequent PR1810 main workflows now pass. The protected ticker change is p
 The preceding full-audit snapshot (September 9 UTC onward) recorded136 merged PRs and21
 closed without merge; its98 peer heads were reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
 same historical inventory recorded14 drafts and15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
-Preceding paginated REST inventory plus verified PR1836/1837/1838/1839/1840/1841/1842/1843/1378/783/1375/1844/1315 closures accounts for154 merged/21 closed without merge;94 surviving peer heads remain unchanged after PR1315 closure. The preceding snapshot had13 drafts/14 with failing checks. PR1835 remains separately owned architecture documentation. Both PR1834 main workflows passed. These observations are not an atomic snapshot;
+Preceding paginated REST inventory plus verified PR1836/1837/1838/1839/1840/1841/1842/1843/1378/783/1375/1844/1315/1374 closures accounts for155 merged/21 closed without merge;93 surviving peer heads remain unchanged after PR1374 closure. The preceding snapshot had13 drafts/14 with failing checks. PR1835 remains separately owned architecture documentation. Both PR1834 main workflows passed. These observations are not an atomic snapshot;
 reported green checks alone do not establish current merge or runtime authority.
 R19 qualification preserves two earlier hosted runs with 42 passing observations
 each, XML creation and parsing, but zero artifacts because the configured action
@@ -73,7 +73,7 @@ Final candidate checks passed; report-only gate activation stays separate.
 The original 102 heads, check summaries and 107 merge identities are retained in the
 [existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
 under `repository_pr_accounting_20260920`; exact Git references in the backlog preserve the
-intervening113-merge/15-closed refresh and subsequent closures. Current reconciliation binds94 peer heads; older check summaries are historical.
+intervening113-merge/15-closed refresh and subsequent closures. Current reconciliation binds93 peer heads; older check summaries are historical.
 
 | Work observed | Reconciliation and next action |
 |---|---|
@@ -86,20 +86,21 @@ intervening113-merge/15-closed refresh and subsequent closures. Current reconcil
 | PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
 | AmIBot | Registry, route tests, planning DAG and source-route qualification closed in PR1751/1832/1833/1834, with final PR/main checks passed. PR1838 merged the13/P1 dry-run isolation repair after245 local/independent overlapping cases and ten exact-head checks; PR1841 closes optional generic alias source capability (271 locally/independently overlapping cases; both main workflows passed). Live authoring/admission, AmIBot visibility and POC remain open. |
 | Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
-| Dependency work | Pillow1315 merged; all ten PR checks and three main workflows passed, alert118fixed. Four critical alerts remain constrained by existing owners/authority. Functions node-forge15/P1 repair reuses1374: one record changed,298preserved. Strict isolated install and paired six-case Firebase PEM-consumer checks pass on Node24; original metadata-report failure preserved and repaired without changing criteria. Node20, missing tracked handler, advisory exploits and deployment remain unverified. Exact four-file final review/publication/CI pending. Next15/P1 existing grpc-js1365 owner qualification; other dependency owners stay separate. |
-| Local branches/worktrees | 664 branch refs and 157 registered worktrees (2026-09-21 checkpoint) after the owned checkpoint branch was created are inventory, not proof of active work. No branch was deleted or peer checkout changed. |
+| Dependency work | Functions node-forge1374 merged after independent review and ten exact-head checks: one record repaired, 298 preserved; paired six-case Firebase PEM checks pass. Original diagnostic failure, Node20/app/advisory-exploit/deployment limits retained. Pillow1315 and its three main workflows passed;118fixed. Postmerge node-forge/main observations remain separately recorded. Next source candidate is existing grpc-js1365 qualification15/P1, after requested daily-work/hygiene accounting. |
+| Local branches/worktrees | Dated 2026-09-21 14:08–14:09 UTC metadata audit: 157 registered worktrees, 121 clean / 36 dirty, and 673 local branches. The final 14:17 UTC check observed 674 branches after concurrent YouTube work. No removal qualified; ignored state and ownership holds remain. Counts are snapshots, not proof of safe retirement. |
 
-**Daily activity belongs in RSI as scoped evidence.** Reuse R25's consented,
-same-FoundUp proposal path and existing WSP15/admission/verified-outcome owners.
-Store a task summary, source lineage, test/review outcome and accepted repair;
-a conversational reply or nonempty model response is not a verified improvement.
-The [R25 source qualification](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20)
-shows why signed personal architect context and structural learning candidates
-cannot yet supply a consented FoundUp feedback proposal. Current OpenClaw conversation memory records previews under its own weaker outcome
-criterion. The governed retention sink still requires an activation capability,
-and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not ingest
-raw conversations automatically or claim that merged Codex work was autonomously
-executed and retained by WRE.
+## Daily work and repository hygiene — 2026-09-21
+
+Gmail and LinkedIn are existing workflows and candidate RSI inputs, with distinct completion states:
+
+- Gmail draft discipline and the [contact ledger](modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md) are merged through PR1643/1813; PR1786 supplies operational wrappers. Keep private correspondence in its existing Gmail/CRM owner. The registry marks the ledger prototype; skill text is not production admission or verified learning.
+- LinkedIn has an adapter and skill wrappers. `linkedin_agentic_reply` is prototype and `linkedin_engagement` is unregistered. Static inspection found conflicting nested dry-run handling and an unguarded `like_post` branch. A fake-only regression/repair qualification is 13/P1; no live effect was tested. Reconcile the existing `docs/linkedin-message-first-20260915` branch before duplicating its six-path policy work. Preserve open owners PR1645/1659.
+- New main-owned contact/Mosh Pit/Fukui wrappers are absent from the older dirty shared checkout. Use their existing clean-main context rather than copying skills or switching that active checkout. Existing Mosh Pit candidate logging and the documented R25 contract describe the intended learning path. The positive feedback-to-proposal handoff and current-state consumer remain unqualified; WRE typed receipts, independent verification and promotion gates remain required.
+- The read-only snapshot found 157 worktrees: 121 clean / 36 dirty, with no missing or locked registrations. A transient shared index lock was observed and preserved. Three inspected clean, main-reachable candidates retain ignored files, including learning databases; owner release is unproven. No worktree or branch was removed. Historical print-only cleanup lists are not current removal authority.
+
+Follow the [daily-work and closure discipline](docs/operations/RSI_SWARM_DISPATCH.md#daily-work-intake-and-repository-closure). Exact source/PR/metadata receipts and scored follow-ups are in the existing backlog's current observation. These are documented integration gaps, not a claim that self-healing or retained production RSI is complete.
+
+**Daily activity belongs in RSI as scoped evidence.** Follow R25's consented, same-FoundUp proposal contract and reuse existing WSP15/admission/verified-outcome owners. Store a task summary, source lineage, test/review outcome and accepted repair; a conversational reply or nonempty model response is not a verified improvement. The [R25 source qualification](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20) shows why signed personal architect context and structural learning candidates cannot yet supply a consented FoundUp feedback proposal. Current OpenClaw conversation memory records previews under its own weaker outcome criterion. The governed retention sink still requires an activation capability, and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not ingest raw conversations automatically or claim that merged Codex work was autonomously executed and retained by WRE.
 
 **PC execution:** this session can run local Windows commands. The September20
 06:07 UTC metadata refresh found native OpenClaw 2026.5.2 and registered WSL distros;

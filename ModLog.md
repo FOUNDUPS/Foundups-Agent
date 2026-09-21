@@ -1,3 +1,10 @@
+## 2026-09-21: Reconcile daily-work skills and worktree closure into RSI
+
+- WSP 00/15/22/50/95/97: requested 15/P1 accounting reuses existing Gmail/LinkedIn/WRE/R25 owners and records source, registered prototype and verified runtime boundaries. No mailbox access or social writes.
+- Gmail PRs #1643/#1813 and operational wrappers #1786 already merged; old shared context lacks newer wrappers. Preserve open #1645/#1659 owners and the existing LinkedIn message-first branch. Add 13/P1 fake-only LinkedIn dry-run qualification and 13/P1 existing cleanup-guard qualification; no new module/skill/contact store.
+- 157 worktrees inspected: 121 clean / 36 dirty at the dated snapshot. No removals: inspected retired-looking candidates contain ignored state and lack current release evidence. Existing runbook now requires ownership, preservation of ignored state, exact PR/main/CI closure and re-observation.
+- Interrupted node-forge #1374 repair completed under independent review and exact-head gates, preserving concurrent YouTube ModLog work. This documentation candidate awaits its own review/publication; production RSI and retained learning remain unproven.
+
 ## 2026-09-21: Qualify existing Functions node-forge repair
 
 - WSP00/15/22/50/97; C3/I4/D4/Impact4=15/P1. Pillow1315 closure/all three main workflows verified; alert118fixed.94peerheads unchanged; nine Functions-lock owners reconciled.

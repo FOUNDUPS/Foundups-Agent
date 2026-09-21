@@ -75,6 +75,20 @@ The [dated baseline](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) preser
 The [AmIBot experiment](../../ROADMAP.md#amibot-autonomous-production-experiment--2026-09-15) remains at G0: hidden registry/intake merged in PR1751 (`f7307291`, all three main workflows passed); explicit M2M profile/signing, provider fidelity and seed API input qualified locally; runtime admission remains open.
 Explicit proposal-plan admission and receipt-to-seed consistency are locally qualified through the merged handoff work. The current backlog records remaining context/child fidelity, runtime admission and AmIBot gates, exact validation and fresh main workflow status. Use its re-scored action rather than the historical18/P0 parent as an automatic assignment. No planning checkpoint grants ingress or runtime authority.
 
+## Daily-work intake and repository closure
+
+For Gmail, LinkedIn and other day-to-day work, resolve the current task workspace and existing main-owned Skillz before acting. A skill available on main may be absent from an older shared checkout; use the existing path in a reconciled clean work context. Do not switch a dirty shared checkout or create duplicate skills/contact databases to fix visibility.
+
+Record only bounded task intent, source/skill revision, owner, outcome and evidence references. Keep private correspondence and contacts with the existing authorized Gmail/CRM owner; do not ingest mailbox bodies automatically into repository memory. Use existing Mosh Pit candidate logging and the documented R25 contract for reusable observations. Do not infer that the positive feedback-to-proposal handoff, host approval or current-state consumer is implemented or qualified. A draft, simulation, preview, nonempty response or AgentDB row labelled posted does not establish a live effect. WRE admission, typed effect receipts, independent validation and retained-learning acceptance remain separate gates.
+
+Before closing each work item:
+
+1. Reconcile its exact owned branch/worktree, source scope, local validation, PR head, CI and current main. Finish/review/merge authorized completed work; explicitly preserve blocked or owner-dependent work. Never stage a shared checkout wholesale.
+2. Leave this session's changes committed on the owned branch or record a precise recoverable interruption. After a verified merge, record the merge identity and remaining runtime limits; remove completed obligations from the current queue while preserving history.
+3. Audit worktree registration, current ownership, pending work, merge reachability and both ordinary and ignored files. Clean Git status alone is insufficient: ignored credentials, databases, learned patterns and artifacts may still be unique. Read metadata only until content access is needed and authorized.
+4. Retire a worktree only after its work is preserved, its owner has released it, and unique local state is accounted for. Verify its resolved path, recheck immediately, and use Git's normal worktree removal; never force-remove dirty/unknown state, reset other work, or treat historical cleanup allowlists as current authority. Locked/unknown/changed candidates remain held with the changed prerequisite recorded.
+5. Re-observe and apply WSP15/97. Extend existing cleanup/closeout tooling when a verified gap exists; do not add a second scheduler or mistake repository hygiene for proven autonomous runtime repair.
+
 ## Production-line operating model
 
 Use a **hybrid production line**: qualification → admitted ticket → one worker or bounded team → evidence synthesis → independent audit → governed acceptance → reward eligibility → confirmed settlement. A swarm may self-organize only inside a separately admitted team profile. The existing filename is retained for link compatibility. See the [hybrid decision and current RedDog assessment](../architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md).
