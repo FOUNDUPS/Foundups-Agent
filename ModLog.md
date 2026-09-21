@@ -1,3 +1,10 @@
+## 2026-09-21: Resolve the AmIBot public discovery alias contract
+
+- WSP00/15/22/50/97/99/104;10/P2 static contract follows verified PR1839 closure (ten PR checks and both main workflows passed). Existing canonical display-name discovery works; literal /f/amibot needs a generic shell-owned pre-entry alias.
+- Specify one explicit optional public_discovery_alias, global collision checks, visibility-qualified projection and canonical URL/ID before rendering. Preserve app membership-before-fetch and all tenant identities. Raw registry loader already preserves optional fields; no duplicate typed loader or new identity is needed.
+- Separate next source capability: C4/I2/D2/Impact2=10/P2, synthetic data/actual-code oracles, five existing source/schema/test owners. No production registry/catalog/manifest change or public/runtime activation; no tests/product imports/model/provider execution in this planning slice.
+- Independent review and exact source/ownership/evidence bindings are in the canonical backlog. Preserve old score history and original26packets; no new module or skill. Shared checkout and externally owned RedDog/YUMORI/eSingularity/AutoPost work remain untouched.
+
 ## 2026-09-21: Qualify the existing FoundUp genesis prototype
 
 - WSP 00/15/22/50/95/97/109; static qualification C3/I3/D2/Impact2 = 10/P2 after PR1838 merged its exact reviewed tree. The previous repair's245 overlapping local/independent cases and ten exact-head checks passed; its main workflows are tracked separately.

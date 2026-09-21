@@ -4,6 +4,72 @@ Status: planning_reference; SPECIFIED_NOT_IMPLEMENTED; TOKEN_DEFERRED.
 Display name: AmIBot. Tagline: Can you detect AI? Stable internal ID: `detect_ai`.
 Technical decisions and primary sources: [chat/PWA/safety research](docs/CHAT_PWA_SAFETY_RESEARCH.md).
 
+## Public discovery alias contract — 2026-09-21
+
+**Decision, specified only:** preserve canonical `detect_ai`, `/f/detect_ai`,
+`/f/detect_ai/app` and `idb_detect_ai`. Under WSP104 sections3/7/9, an alias is
+shell-owned pre-entry discovery input, never a second FoundUp or tenant route
+family. Canonicalization must finish before tenant landing/context rendering.
+This10/P2 contract does not change WSP104 or implement/activate `/f/amibot`.
+
+The existing shell already searches display names and emits canonical ID links.
+That is sufficient for ordinary AmIBot discovery after separate listing approval,
+but does not fulfill012's literal `/f/amibot` request. Renaming `detect_ai`, adding
+a second registry entry, deriving an alias from prose/display names, or mounting
+an app under an alias would break the stable identity boundary.
+
+| Existing owner | Finite follow-on contract |
+|---|---|
+| [Registry schema](../foundup_registry.schema.json) | Optional explicit `public_discovery_alias`: one lowercase slug matching `^[a-z0-9_]+$`, with no inferred alias. Absence preserves legacy behavior; empty/null/non-string/invalid values reject. No implicit normalization or alias chain. |
+| [Projector](../public_catalog_projector/src/projector.py) | Validate reservations across ALL registry IDs and supplied aliases before filtering; reject canonical/self/other-alias collisions. Emit the optional alias only for portfolio-eligible entries whose public_surface_status is explicitly discoverable/listed/promoted. Missing/hidden status emits no alias. Validate exact derived values and omissions through existing validation paths. |
+| [Public shell](../../../public/f/index.html) | Preserve the app/deep-app membership handoff BEFORE catalog fetch. Resolve an alias only for its exact landing root, optionally one trailing slash; reject other alias subpaths. Decode once, reject malformed/encoded separators, validate projection ambiguity, and use only a single eligible canonical target. |
+| Shell canonicalization | On alias success, use same-origin `history.replaceState` to `/f/{canonical_id}` before assigning canonical foundupId and calling renderEntry/populateConciergeContext. Drop alias search/hash; never use them as identity/redirect targets. If canonicalization fails, render no tenant. No network redirect, alias app mount, tenant-specific rewrite, member-catalog read or alternative cache/storage namespace. |
+| [Existing projector tests](../public_catalog_projector/tests/test_projector.py) and [route tests](../../../public/member/tests/test_route_contract_bridge.py) | Extend synthetic fixtures and execute actual parser/resolver code in an isolated browser/JS harness. Static substring assertions alone cannot prove alias identity or gate order. Keep no-transitional-redirect and canonical-URL requirements; do not weaken them to pass. |
+
+**Visibility precision:** the existing projector filters portfolio_status only;
+it does not independently filter public_surface_status. The additional explicit
+visibility check applies to alias emission, not a silent rewrite of legacy
+canonical projection policy. Current hidden/not_portfolio `detect_ai` remains
+absent. Alias support alone cannot publish AmIBot or build its application.
+
+**Required oracles:** legacy no-alias projection/output unchanged; a valid
+synthetic alias resolves once to its canonical ID in URL, rendered label and
+concierge context; canonical and alias collisions (including hidden IDs), empty,
+null, duplicate, encoded-separator, malformed and unknown inputs fail closed;
+hidden/missing-visibility/ineligible targets expose no alias; canonical/alias
+app and deep-app paths reach the existing member gate before any fetch; failed
+history replacement does not render; no member reads, remote fetches or real
+registry writes in the fixture. Schema accepts/rejects the same alias grammar.
+
+**Next source slice:** C4/I2/D2/Impact2 = **10/P2** for one reusable optional alias
+capability in the five linked source/schema/test owners. Complexity reflects
+cross-language identity and validation; importance/impact stay2 because current
+display-name discovery exists and production data remains unchanged. Add no new
+module, skill, identity, scheduler or fixture-only copy of the resolver. The raw
+[registry loader](../src/foundup_registry_loader.py) already retains optional
+fields as dictionaries; it needs no alias indexing or authorization change.
+
+PR1792's schema overlap adds only brand_context_path; preserve that independent
+hunk and refresh ownership before source work. PR802/1792/1822 registry changes
+remain external; no production registry/catalog/manifest edits belong to this
+slice. Runtime admission, independent application verification, public listing,
+deployment and actual phone acceptance remain separate gates. The source task
+is finite and needs no further generic planning pass unless fresh evidence changes.
+If actual-inline JS tests add process capability, use the existing test-registry
+generator/check and name only the affected derived record; do not leave metadata
+stale. New functions stay<=50lines; local executable additions are bounded to100
+lines each in the inherited oversized shell/projector, without unrelated rewrites.
+
+PR1839's prototype qualification merged as `f0fa051a`; all ten PR checks and both
+main workflows passed. This contract uses static reads/JSON/hash checks and an
+independent source review, not tests or a live worker execution. One adjacent
+read-only loader inspection corrected an assumption about typed field storage.
+The lexical Holo bundle binds current main with UNKNOWN freshness/index gap;
+older routing/projector phase1 prose is stale against current source. Missing
+module test/memory readmes were recorded without creating placeholders.
+Evidence, ranked comparison and the executable-scope candidate are attached to
+[the existing RSI backlog](../../../docs/roadmaps/rsi_swarm_backlog.json).
+
 ## Layered delivery
 
 | Layer | Deliverable | Required gate |
@@ -54,10 +120,10 @@ Reconcile `/f/amibot` through the canonical shell owner before publication.
 
 System prioritization stays in the [root RSI roadmap](../../../ROADMAP.md) and
 existing backlog. The historical14/P1 registry integration is closed; this
-package-only repair is closed. Current15/P1 existing-module route qualification
+package-only repair is closed. Closed15/P1 existing-module route qualification
 confirms WRE consumer -> WRE executor, a fresh dry-run default and blocked live
 authoring; unqualified build/extract can block before simulation; the older extraction helper is not this route. Existing ContextBundle
 preview attachment is implemented. See the package for exact owner/test limits,
-validation-only model admission and the unqualified consumer/singleton dry-run
-promise. No build, runtime bootstrap, model inference, device acceptance or
+validation-only model admission. PR1838 separately closes consumer/singleton
+force-dry isolation with245 overlapping local/independent cases and passing CI. No build, runtime bootstrap, model inference, device acceptance or
 deployment is claimed. Re-observe and rescore after closure.
