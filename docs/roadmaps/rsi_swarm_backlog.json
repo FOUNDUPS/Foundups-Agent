@@ -1852,15 +1852,15 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "542518584ddaf153022b7ca75cfc918ec4df01c3",
-    "selected_action": "AcousticLab-Pillow-existing-PR-integration",
+    "base_commit": "3d298ea6688c10a60dd1fc4b4b227e28afd389db",
+    "selected_action": "Functions-node-forge-existing-PR-integration",
     "status": "local_integration_pending_final_review_and_existing_pr_publication",
     "wsp15": {
       "complexity": 3,
-      "importance": 3,
+      "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 13,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "requires_fresh_reobservation_after_closure": true,
@@ -1868,110 +1868,122 @@
     "observation_path": "current_observation"
   },
   "current_observation": {
-    "observation_id": "rsi-pillow-existing-pr-integration-20260921-1926",
-    "observed_at": "2026-09-21T10:45:35.199393+00:00",
-    "base_commit": "542518584ddaf153022b7ca75cfc918ec4df01c3",
+    "observation_id": "rsi-functions-forge-existing-pr-integration-20260921-2023",
+    "observed_at": "2026-09-21T11:35:58.494080+00:00",
+    "base_commit": "3d298ea6688c10a60dd1fc4b4b227e28afd389db",
     "previous_observation": {
-      "git_ref": "542518584ddaf153022b7ca75cfc918ec4df01c3:docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_id": "rsi-gotjunk-protobuf-isolated-qualification-20260921-1828"
+      "git_ref": "3d298ea6688c10a60dd1fc4b4b227e28afd389db:docs/roadmaps/rsi_swarm_backlog.json",
+      "observation_id": "rsi-pillow-existing-pr-integration-20260921-1926"
     },
     "role": "architect/coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "AcousticLab-Pillow-existing-PR-integration",
+    "selected_task": "Functions-node-forge-existing-PR-integration",
     "wsp15": {
       "complexity": 3,
-      "importance": 3,
+      "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 13,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "status": "local_integration_pending_final_review_and_existing_pr_publication",
     "parent_task": "Dependency-security-reconciliation",
-    "selection_basis": "GotJunk qualification1844 closed with both main workflows success;95 peer heads unchanged, product promotion still blocked. Re-score bounded Pillow existing-owner/compatibility qualification C3/I3/D4/Impact3=13/P1 as highest eligible concrete work. Higher rows remain runtime/admission/deployment/externally owned or completed qualifications. Independently reviewed narrow package evidence supports finishing this owned repair; subsequently discovered15/P1 node-forge is queued for fresh qualification after closure, not bundled.",
+    "selection_basis": "Owned Pillow1315 closure confirmed, all main workflows passed and alert118fixed.94 peer heads unchanged. Four current high node-forge alerts and exact existing1374 owner justify bounded C3/I4/D4/Impact4=15/P1 source/compatibility qualification. Higher aggregate/runtime/product items retain unchanged blocked or external ownership dependencies. Independent qualification accepts preparing the exact one-record repair; no broader runtime claim.",
     "closure_reconciliation": {
-      "pr1844": "Verified merged at 542518584ddaf153022b7ca75cfc918ec4df01c3; ten prior PR checks and both now observed main workflows passed. GotJunk product source/PR1358 untouched; deployment authority still required.",
-      "history": "26 original packets and61 prior ranked rows preserved. Verified1844 advances historical merged accounting to153;21 closed without merge.95 open peer heads observed unchanged;1315 closure not yet claimed."
+      "pr1315": "Verified merged at 3d298ea6688c10a60dd1fc4b4b227e28afd389db; ten PR checks and all three main workflows succeeded. Pillow118fixed; full application/Linux3.11 constraints retained.",
+      "history": "26 original packets and63 prior ranked rows preserved. Verified1315 advances historical accounting to154merged/21closed without merge.94openpeerheads unchanged before current publication."
     },
     "execution_scope": {
       "files": [
-        "modules/platform_integration/acoustic_lab/requirements.txt",
-        "modules/platform_integration/acoustic_lab/ModLog.md",
+        "functions/package-lock.json",
         "ROADMAP.md",
         "ModLog.md",
         "docs/roadmaps/rsi_swarm_backlog.json"
       ],
-      "existing_pr": 1315,
-      "branch": "agent/rsi-pillow-qualification-20260921",
-      "plane": "Routine reversible repository dependency repair; no WRE/provider/service/runtime admission.",
-      "authority": "Fresh same-repo existing bot owner and worktree reconciliation, final independent exact-five-file review, normal fast-forward; exact-head CI and current-base merge-tree gates before any owned merge. No force, sibling closure, service or deployment.",
-      "protected": "Shared checkout, seven sibling requirements pin owners, active RedDog/YUMORI/eSingularity and separate AutoPost preserved."
+      "existing_pr": 1374,
+      "branch": "agent/rsi-functions-forge-20260921",
+      "plane": "Routine reversible repository lock repair; no WRE/model/provider/service/runtime admission.",
+      "authority": "Fresh same-repository bot-owner/worktree reconciliation, exact-candidate independent review, normal fast-forward only and exact-head CI/current-main/merge-tree gates before owned merge. No force or sibling closure.",
+      "protected": "Shared checkout, eight other Functions-lock PR owners, active RedDog/YUMORI/eSingularity and separate AutoPost preserved."
     },
     "retrieval": {
       "mode": "Governed owner lexical bundle",
       "result": "ok=true; freshness=UNKNOWN; index_gap_detected=true",
-      "noise_ordering": "Four bounded hits with existing module README/INTERFACE/ROADMAP/ModLog/requirements must-included, then exact source/owner and deployment contracts.",
-      "missing_artifacts": "NAVIGATION lacked Acoustic Lab hit; README deployment_architecture link absent. Existing docs/tests inspected without scaffolding unrelated artifacts.",
-      "freshness": "Bind exact source and current peers. UNKNOWN lexical result is not semanticCURRENT; prior authority-root/head mismatch remains with maintenance owner.",
-      "duplication": "Reuse existing1315 one-pin delta and isolated package fixture; no new module, skill, scheduler or requirements family."
+      "noise_ordering": "Bounded4hits plus must-include Functions manifest/lock/firebase config and root README. Then exact installed Firebase consumer and sibling-lock deltas.",
+      "missing_artifacts": "Functions contains only package.json and lock; no trackedindex.js/module tests/docs. NAVIGATION has no Functions hit; use existing root records, do not scaffold missing handler.",
+      "freshness": "Exact Git and current owner/installed bindings; not semanticCURRENT. Do not repeat unresolved semantic authority mismatch or reindex.",
+      "duplication": "Reuse existing1374 record, prior isolated install/hook harness and actual Firebase constructor. Preserve protobuf/UTF8 repair and eight sibling pin owners."
     },
     "validation": {
-      "host": "Windows CPython3.12.10",
-      "full_graph_baseline_exit": 1,
-      "full_graph_candidate_exit": 1,
-      "full_graph_stderr_identical": true,
-      "full_graph_blocker": "No matching distribution found for lru-dict<1.3.0,>=1.1.6 from existing web3==6.15.0 under binary-only resolution. Later graph constraints remain unknown.",
-      "full_graph_command": "Exact argv in resolution.json and baseline-resolution.json: isolated pip install --dry-run --ignore-installed --only-binary=:all: against https://pypi.org/simple; original logs preserved, no source-build fallback.",
-      "isolated_package_install_exit": 0,
-      "package_only_cases": 6,
-      "package_probe": "python -I -S -B pillow_probe.py; only external target imported; trusted synthetic in-memory images.",
-      "installed_record_hashes_independently_verified": 122,
+      "strict_resolution_exit": 0,
+      "strict_install_exit": 0,
+      "scripts_disabled": true,
+      "host_node": "24.11.1",
+      "configured_node": "20",
+      "node20_verified": false,
+      "engine_warning": "EBADENGINE retained; target not exercised or overridden.",
+      "changed_records": 1,
+      "unchanged_records": 298,
+      "consumer": "firebase-admin12.7.0 ServiceAccountCredential -> privateKeyFromPem; declared^1.3.1 permits1.4.0.",
+      "paired_cases": {
+        "baseline1.3.3": 6,
+        "candidate1.4.0": 6
+      },
+      "oracles": "PKCS1/PKCS8 parsing preserves RSA modulus/exponent; real Firebase constructor accepts both explicit in-memory fixtures; malformed PEM/missing project rejected with exact invalid-credential reason.",
       "network_subprocess_hook_attempts": 0,
-      "hooks_are_os_confinement": false,
-      "python_floor": "Pillow metadata>=3.10 fits documented3.11+; metadata is not Linux3.11 execution.",
-      "direct_consumers": "No direct PIL/ImageMath import/use in15 tracked module Python files; future visualization use documented. Not proof of global disuse.",
-      "application_tests_run": false,
-      "linux_python311_verified": false,
-      "deployment_verified": false,
-      "remote": "Prior1844main workflows succeeded; new1315 candidate not yet published/CI-verified. GitHub alert118 still open at observation.",
-      "limits": "No full dependency closure, Linux3.11, app/audio/browser, RPC/provider, production, hostile-image exploit or deployment claim."
+      "hook_limit": "JS named hooks, not OS confinement; no key/token output or app/auth/network operation.",
+      "original_failure": "Original baseline exited1 at final metadata report: firebase-admin/package.json is not exported. Original probe/log/result preserved. Only reporting changed to explicit installed metadata read; acceptance oracles unchanged; rerun paired6cases passed.",
+      "advisory_limit": "Upstream and stored advisories name1.4.0 patch; actual four exploit boundaries NOT tested. Version coverage is distinct from compatibility and deployed reachability.",
+      "remote": "Prior1315 all3main workflows passed and118fixed; new1374 not yet published/CI verified. Alerts45/46/47/48 open at observation.",
+      "limits": "No Node20, missing tracked handler, Firebase authentication/RPC/app, advisory exploit or deployment acceptance."
     },
     "source_bindings": {
-      "modules/platform_integration/acoustic_lab/requirements.txt": {
-        "git_blob": "e887322a98cfd8a8852595f318f6333070eeccf3",
-        "sha256_lf": "9debfb4b31bef9b94207640d24ecccd754fee7fbc242f68afd3e544be1b6fbdb"
+      "functions/package.json": {
+        "git_blob": "7c4112aec5214d5f0f510d38ed363715cb67d39a",
+        "sha256_lf": "e7878197c4f6de7e8d937a1e811137dd833a70f0deaec8d15fcd9747b5a4182b"
+      },
+      "functions/package-lock.json": {
+        "git_blob": "d48cb45fd3357978888df30944341532f2c1318b",
+        "sha256_lf": "f63cdf76dbf021ec8cec750c0337508b281ee8f5199607b0097160846ec2fa9c"
+      },
+      "firebase.json": {
+        "git_blob": "2de865edddf5a6f979f08625048dff842538069a",
+        "sha256_lf": "d8770271ca4c81a83a034141b9e615d1703ecfadd1d047fdd1b7adbb98844edc"
       }
     },
     "evidence_sha256": {
-      "preflight.json": "e718ebb4e6a08df00cbba0e1e5cb53b00213bf9201ff42c3d6f628f1c2d5358f",
-      "pr1844-closure.json": "5df28e46589f88dae6b67d0ac1b23b6360ecbe873c30bfdf8895641ed835a745",
-      "pr1844-main-workflows.json": "0519228453844baecd445b802f63a8d9f8ed821a4e1d5700fa65f6e68fca979c",
-      "pr1315-before.json": "3ec993b8294c395fbba711a3e89f55fb964b1f29cef07365d881181b28eea9bc",
-      "open-prs.json": "480f1a90b903553fdc09ac6c0d7b2c5ab7dedf303994c9580c0134eded1d22c9",
-      "shared-before.json": "d8e7214bc9bb7b0d3cd8c39c24286630fb2433a1ca3a52fcdf5b549968656eaf",
-      "holo-owned-lexical.json": "f8542e53cb822b3acada132489a3d40f156ff5272a5a2408ebd4c272f6c737f0",
-      "independent-owner-review.json": "432dfc8007c3a221cd5db3da70db8b57e8cde9cd2b0a50b0453ec326683d70c2",
-      "qualification-review.json": "c0b766c3a0d2d03ed87fa3992352cf76813297cd61998189adff066222d5a013",
-      "resolution.json": "f06b0c64b69ffc61b3f315a6fd0b5ad41e0f23267ec648a62108f8c47ad4c0ff",
-      "resolution.stderr": "6e26e91832c82c4b118fede831255626352181b05765790b32885ba1f9f7f946",
-      "baseline-resolution.json": "b09dc599d8095e7f69a0a45ea71d910946c62725e300106b7766901c5f60d571",
-      "baseline-resolution.stderr": "6e26e91832c82c4b118fede831255626352181b05765790b32885ba1f9f7f946",
-      "pillow-install.json": "af63b6eaf26552844b3684ebd67f0466a112635bf165b4ab7cd99233e56be697",
-      "pillow-install-report.json": "e8b5cc77b7416316f5224cc0decf1abd6a9c73297346700a581601e5650e163b",
-      "pillow-probe.json": "2ec07a285d0b772ef98fc8641c017f4ea8332cdca4ff9c58acb8553f00d8b502",
-      "pillow-probe.stdout": "759d849dd0c46d53b379725c550b54f2166774d5b44ec65f08f982f2d2fb9c9b",
-      "pillow_probe.py": "b5dab1a2e1b287b0dcd7e87e5484e013cbd6e219b934ef49ea0fc618ac494349",
-      "requirements-baseline.txt": "9d40eba32214137e487820a8422f3f32a93862dab948796ce72c1840d375e2f9",
-      "requirements-candidate.txt": "9debfb4b31bef9b94207640d24ecccd754fee7fbc242f68afd3e544be1b6fbdb",
-      "integration.json": "3f81d373b690e0a1d448764d02210efc4722dacc4e938b417df1ffd03f1794c1",
-      "functions-remaining-high-summary.json": "168c6b4fefee55c0a1c0fea702b06cdf2c7288b57734af223ce01f0b47ad0481"
+      "preflight.json": "abf3df5ab34b169e0e52aaf1a9598b42d09a713e0cba2d5564bbda63f84aa0b1",
+      "pr1315-closure.json": "8d0b0137414bf6f9a03567257ec0e8976b2d04abb91f3ff720629c4f900ea563",
+      "pr1315-main-workflows.json": "cfdc2eec164b056caf52e62793cda6e22d201ddc3a13a34b4fcd59fd64fa4a4f",
+      "pr1374-before.json": "b9034f5105d1c4aa9e5066964e7d8933b307e423b68408acdfcb96a0f3d522d8",
+      "open-prs.json": "7e9087d26ac829b34430e13ce1f6bcd0a08d892e203f6db67dec12b03c255256",
+      "shared-before.json": "ce11ef0e59332add368b4414f4813f6ce900e23b8334d746bc7221c49c1aa484",
+      "selected-alerts-before.json": "18c10d09d6de57ab4e54c06902f746855c20e98f91dfd79e77cea164700cb75d",
+      "holo-owned-lexical.json": "1f728fbf4e48a18d57a3316e6ccf84639b0cda5fd516ecdf5936eb44b8af0485",
+      "independent-owner-review.json": "bf730a1a76e9519500b4a2155a455804e87f7d254e8bcb041bd41fb46a041d5e",
+      "qualification-review.json": "44cd213b1db067bc198358ebca418b8f6703b34a7fd059ef446640b73d42cb25",
+      "candidate-resolution.json": "7d1d1dd1444b54b8dfc52104900b06547e8674ec6438c001de46147c99acf930",
+      "npm-dry.json": "4facd4bb02060b3c46ebb2fda766279023db33aafb5ecdc4855f1afa22720c9a",
+      "npm-dry.stderr": "eb8cd394d27cbf2c705523f12ee67d279b07f75dbf46d2cd06ad79513526c0bf",
+      "npm-ci.json": "ff261167dad7d7877a23449b0e36385a2c1b63c8193d5f4f7efcd689eb507667",
+      "npm-ci.stderr": "54431bc5428741dc347b769d66b572235606fda149b40c5be1eed5e096bfe981",
+      "baseline-compatibility.json": "5e3e035a9e54831ff48e338fc8217a089fb6ef0c496b037c8ee3760419ca658e",
+      "candidate-compatibility.json": "e80ce479a08058100dec4308f95d424d964b8009794185388030012e2e5bda67",
+      "compatibility.cjs": "9bb577a68e586fdb70e934412834ee1e14418ba253923070f8e0b2cca9b5c3ae",
+      "fixture-provenance.json": "b4ca9d82d3e09275368d3a69d2cce14834c3b8657e6b00e27b93cb89e2efda8e",
+      "original-baseline-compatibility.json": "a205e40455ef83ca242234ea1cc4de2a98fe51fd7ebbba93510b62dd61d83b4a",
+      "original-baseline-compatibility.stderr": "698ecee9b386a31fb8fdc41a125a68b75ed029372ce96f7e4093afc1600371e9",
+      "original-compatibility.cjs": "812ae6fb9772afadbcbbf4ae6e77b3c3bae9e9e743627ba9c479312dd828364f",
+      "integration.json": "9e74fc3ffe98416b80c6bea6e5691b21a76140ffcd50c784e3e835c07f37346a",
+      "remaining-functions-ranking.json": "7982e0444f8c28f70dd958505997937b1eb5aa033a52e4d5d070d283fe3ffd0c"
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023",
     "effort_cost": {
       "provider_calls": 0,
-      "installs": "One external Pillow-only wheel target; no shared environment install. Two bounded whole-manifest dry-runs both failed and remain evidence.",
-      "cost_unavailable": "Chat/reviewer token cost not measured."
+      "installs": "One external disposable candidate with scripts disabled; baseline exact prior graph reused.",
+      "verification": "Six same consumer cases per graph; independent evidence audit. Original metadata error preserved.",
+      "cost_unavailable": "Chat/reviewer total token cost unmeasured."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2116,7 +2128,7 @@
           "score": 17,
           "priority": "P0",
           "state": "partial_four_prior_alerts_fixed_gotjunk_promotion_blocked",
-          "next_step": "Four prior alerts fixed. Exact existing Pillow1315 pin repair is locally prepared with six package-only checks and independently accepted limits; finish owned repair before next Functions node-forge qualification. Five critical alerts remain open at observation, including Pillow118; do not preclaim closure. GotJunk deployment, MCP runtime and Chroma patch constraints remain."
+          "next_step": "Pillow118 fixed after1315 and all three main workflows passed; four critical alerts remain externally constrained. Current node-forge1374 repair changes one Functions record, with isolated install and paired consumer qualification.82high alerts observed, four node-forge alerts still open before publication. Next grpc-js owner qualification15/P1; preserve remaining owners and runtime gates."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -2377,16 +2389,59 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "eligible_after_owned_pillow_sprint_closure",
+          "state": "bounded_consumer_qualification_complete",
           "evidence": [
             "functions/package-lock.json",
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1374",
             "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\functions-remaining-high-summary.json"
           ],
-          "score_rationale": "C3 crypto dependency and shared-lock owner/compatibility qualification; I4/D4 four current high alerts in shared Functions graph; Impact4 runtime-classified package. Actual deployed exposure and exploitability are unestablished. Finish the already-owned Pillow repair coherently before switching lanes.",
+          "score_rationale": "Historical C3/I4/D4/Impact4=15/P1 qualification completed on the exact existing1374 candidate; current source integration is separately selected.",
           "effort_cost": "Bounded owner/source qualification using existing isolated dependency tools; no provider calls or production tests.",
-          "dependencies": "Fresh1374 peer, sibling lock-owner, source/runtime and policy reconciliation. Preserve prior Node20 and missing tracked handler limits; no other owner acquired.",
-          "next_step": "Reobserve exact1374 delta and four node-forge alerts45/46/47/48, reconcile all current Functions lock owners, then qualify smallest existing repair and acceptance contract before editing. No broad updates or cloud/runtime execution."
+          "dependencies": "Current owner/consumer and isolated environment qualification fulfilled; Node20/advisory exploits/app/deployment remain unverified and are not prerequisites for this bounded source acceptance.",
+          "next_step": "One-record candidate resolves/installs; six actual Firebase PEM-consumer cases pass on baseline1.3.3 and candidate1.4.0 under Node24. Original metadata-report failure preserved and correction independently assessed. Finish separate source integration; Node20/advisory exploits/deployment unverified."
+        },
+        {
+          "task": "Functions-node-forge-existing-PR-integration",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "local_integration_pending_final_review_and_existing_pr_publication",
+          "evidence": [
+            "functions/package-lock.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1374",
+            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\qualification-review.json",
+            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\integration.json"
+          ],
+          "score_rationale": "C3 dependency/consumer compatibility; I4/D4 four current high advisories in shared Functions graph; Impact4 bounded shared dependency benefit. Finish independently qualified existing repair without bundling other lock owners.",
+          "effort_cost": "Bounded owner/source qualification using existing isolated dependency tools; no provider calls or production tests.",
+          "dependencies": "Final independent candidate review and current publication/CI gates. No cloud/runtime admission.",
+          "next_step": "Review exact four-file candidate, publish normal fast-forward into existing1374, then require exact-head CI and current-base/merge-tree/shared-owner gates before owned merge."
+        },
+        {
+          "task": "Functions-grpc-existing-repair-qualification",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "eligible_after_owned_forge_sprint_closure",
+          "evidence": [
+            "functions/package-lock.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1365",
+            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\remaining-functions-ranking.json"
+          ],
+          "score_rationale": "C3 shared RPC transport/consumer and owner qualification; I4/D4 two current high alerts68/69; Impact4 shared Firestore/google-gax transport. Actual live exposure unestablished. Highest remaining concrete qualified-scope candidate versus13/P1 XML,12/P2 parser/pattern/encoding and9/P3 cookie tasks.",
+          "effort_cost": "Existing lock/owner tools and bounded transport fixtures; reuse current installed graph and exact source where applicable before new installs/model work.",
+          "dependencies": "Fresh existing1365, sibling-owner/source/acceptance reconciliation; Node20/missing handler limits preserved. No runtime or deployment permission.",
+          "next_step": "Reobserve1365 and alerts68/69; identify actual consumers and smallest bounded acceptance contract before any lock edit or execution. Never start live RPC/cloud services for qualification."
         },
         {
           "task": "protected-foundup-work",
@@ -2675,10 +2730,10 @@
             "O:\\Foundups-Agent-audits\\20260921-rsi-gotjunk-protobuf-1828\\remaining-critical-summary.json",
             "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/source-findings.json"
           ],
-          "next_step": "Independent review accepts preparing exact PR1315 pin repair: six isolated Pillow checks pass; baseline and candidate whole-manifest resolution both fail identically on Windows CPython3.12 lru-dict wheel availability. This is not full application/Linux3.11 qualification.",
-          "score_rationale": "C3 Python major-version compatibility with adjacent pinned scientific/web dependencies; I3 non-core module degradation; D4 known critical declared dependency; Impact3 bounded module benefit. Highest currently eligible remaining concrete qualification: higher rows retain runtime/authority/owner dependencies or completed qualification.",
+          "next_step": "Bounded package qualification fulfilled and exact source repair closed through1315. Preserve baseline/candidate full-manifest failures and unresolved Linux3.11/application validation; do not repeat unchanged probes or reacquire1315.",
+          "score_rationale": "Historical C3/I3/D4/Impact3=13/P1 bounded qualification, now closed through1315; not a current selection.",
           "effort_cost": "Bounded source/metadata and existing tests first; isolated package validation only when qualified; no provider calls.",
-          "dependencies": "Fresh1315/other same-manifest owner and environment reconciliation before execution. Current selection does not acquire their branches."
+          "dependencies": "Prior owner and narrow compatibility gates fulfilled. Full dependency/Linux3.11/application acceptance remains a separate unresolved environment boundary."
         },
         {
           "task": "AcousticLab-Pillow-existing-PR-integration",
@@ -2690,7 +2745,7 @@
           },
           "score": 13,
           "priority": "P1",
-          "state": "local_integration_pending_final_review_and_existing_pr_publication",
+          "state": "closed_pr1315_exact_reviewed_tree",
           "evidence": [
             "modules/platform_integration/acoustic_lab/requirements.txt",
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1315",
@@ -2698,10 +2753,10 @@
             "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\integration.json",
             "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\pillow-probe.json"
           ],
-          "next_step": "Review five scoped files and publication/closure guards; preserve failed whole-manifest checks, publish normal fast-forward to existing1315, require exact-head checks and current-base merge-tree/ownership before owned merge.",
-          "score_rationale": "C3 major-version compatibility qualification; I3 non-core module debt; D4 critical declared dependency; Impact3 bounded benefit. Finish this independently qualified, already-owned13/P1 repair before switching to newly discovered15/P1 Functions node-forge qualification.",
+          "next_step": "Ten PR checks and all three main workflows passed; alert118fixed. Both full-manifest resolution failures and Linux3.11/app limits remain explicit.",
+          "score_rationale": "Historical C3/I3/D4/Impact3=13/P1 source integration completed in1315; no pending publication obligation.",
           "effort_cost": "Bounded source/metadata and existing tests first; isolated package validation only when qualified; no provider calls.",
-          "dependencies": "Final independent exact-candidate review and CI; no deployment or full-environment authority inferred."
+          "dependencies": "Final independent review, normal publication, exact-head CI and merge gates fulfilled; all three main workflows subsequently passed. Linux3.11/application limits remain separate."
         },
         {
           "task": "AutoResearcher-report-completeness",
@@ -2876,8 +2931,158 @@
           ]
         }
       ],
-      "selected_next": "Functions-node-forge-existing-repair-qualification",
-      "selection_basis": "After owned13/P1 closes, fresh high-alert evidence supports Functions node-forge qualification15/P1. Higher rows remain blocked/externally owned or aggregate scopes. Recheck all scores/owners after actual closure."
+      "additional_dependency_comparison": [
+        {
+          "package": "@grpc/grpc-js",
+          "pr": 1365,
+          "head": "29c537b2bccdcbd9e38ee8c8fc5f5b5cd289e035",
+          "alerts": [
+            69,
+            68
+          ],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "consumers": {
+            "node_modules/google-gax": "^1.10.9"
+          },
+          "rationale": "Shared Firestore/google-gax RPC transport, two current high alerts; qualify existing patch in same already-characterized Functions graph. No live RPC or deployed exposure proven.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "body-parser",
+          "pr": 1316,
+          "head": "37f0b69bb7f03f6ae3b0326d3d6d67edbb91dc98",
+          "alerts": [],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "consumers": {
+            "node_modules/express": "~1.20.3"
+          },
+          "rationale": "Existing HTTP parser update without a currently observed high alert in this manifest. Coupled Express-owner reconciliation and actual entry relevance required; no urgency inferred from package name.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "fast-xml-parser",
+          "pr": 1373,
+          "head": "6ebc0a2242369fe406f0fd3bd0bd7207e4df0588",
+          "alerts": [
+            44
+          ],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "consumers": {
+            "node_modules/@google-cloud/storage": "^5.3.4"
+          },
+          "rationale": "Transitive parser owner has adjacent builder dependency; exact consumer reachability requires qualification.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "fast-xml-builder",
+          "pr": 1372,
+          "head": "34a85024a36b8f7776d8055d5fad4bf4a4269312",
+          "alerts": [
+            54
+          ],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "consumers": {
+            "node_modules/fast-xml-parser": "^1.0.0"
+          },
+          "rationale": "Related XML serialization owner; reconcile parser owner before independent promotion.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "brace-expansion",
+          "pr": 1456,
+          "head": "bde3740f65a9d26c6bae7e649317ede8a8a8e5f0",
+          "alerts": [
+            298,
+            282,
+            253
+          ],
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "consumers": {
+            "node_modules/minimatch": "^2.0.2"
+          },
+          "rationale": "Bounded pattern-expansion dependency patch; runtime relevance must be qualified.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "form-data",
+          "pr": 1344,
+          "head": "12eb04ca0c3ca21cfcea7e344051c8164a8d62ea",
+          "alerts": [
+            194
+          ],
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "consumers": {
+            "node_modules/@types/request": "^2.5.5"
+          },
+          "rationale": "Bounded request-encoding dependency patch; actual call sites need qualification.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "js-cookie",
+          "pr": 1367,
+          "head": "18b9ce7527bc601006464eca3c55b76d641e8497",
+          "alerts": [
+            66
+          ],
+          "wsp15": {
+            "complexity": 2,
+            "importance": 2,
+            "deferability": 3,
+            "impact": 2
+          },
+          "score": 9,
+          "priority": "P3",
+          "consumers": {
+            "node_modules/js-beautify": "^3.0.5"
+          },
+          "rationale": "Cookie utility under server Functions graph; browser applicability unestablished.",
+          "state": "candidate_owner_qualification_only"
+        }
+      ],
+      "selected_next": "Functions-grpc-existing-repair-qualification",
+      "selection_basis": "Select grpc-js15/P1 over remaining bounded13/P1 XML,12/P2 parser/pattern/encoding and9/P3 cookie qualifications after owned forge closes. Two observed high transport alerts and existing same-graph owner; actual current owner/consumer compatibility still requires fresh qualification. Reobserve after actual closure."
     },
     "dispatchable": false,
     "retained_improvement_proven": false
