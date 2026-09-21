@@ -6,6 +6,161 @@
 
 ---
 
+## RSI and WRE supervision contract — 2026-09-22
+
+**Current source baseline:** `3c45509c0716cbac403d3309ea4d8a03ab13a2d2`.
+**Status:** source-grounded integration requirements; runtime qualification remains open.
+This section is the current supervision map linked by the [system roadmap](../ROADMAP.md).
+It extends R18 capacity and R23 sustained operations across R06–R19/R24;
+it creates no new scheduler, runtime schema, monitor module or executable authority.
+The older inventory below records 2025 architecture and proposals, not current
+runtime verification or permission for direct event-triggered effects.
+
+012 uses **Digital Autonomous Agent Monitor** for this cross-layer function.
+[WSP 91](../WSP_framework/src/WSP_91_DAEMON_Observability_Protocol.md) historically
+expands DAEMON as Domain Autonomous Entity MONitoring. Preserve that history and
+existing `dae_daemon` names; the requested function composes existing owners.
+
+### Existing owners and actual gaps
+
+Paths below are relative to the repository root. Source/test inventory is not a
+passing test claim. This documentation sprint did not import or start these services.
+
+| Responsibility | Existing owner | Current boundary / required qualification |
+|---|---|---|
+| Lifecycle events, registry, snapshots | `modules/infrastructure/dae_daemon/src/{dae_daemon,dae_registry,dae_adapter,dae_observer}.py` | Reuse CentralDAEmon. State, heartbeat, event cursor and runtime view exist; they do not prove task progress, durable admission or accepted output. |
+| Durable event evidence | `modules/infrastructure/dae_daemon/src/event_store.py` | `write` appends JSONL before SQLite insertion. Its sequence-collision retry calls `self.write` while holding a non-reentrant lock. Static loss/parity/deadlock risks need bounded negative tests, not an assertion of observed production failure. `_next_sequence_id` refreshes the DB; force a real collision rather than assume serial writers collide. |
+| Event acknowledgment | `modules/infrastructure/dae_daemon/src/dae_registry.py::_emit` | Ignores the store write result before notifying listeners. Qualify failed persistence, duplicate identity and listener acknowledgment before using notifications as durable evidence. |
+| Launch, stop and detach | `modules/infrastructure/dae_daemon/src/dae_launch_broker.py`, `killswitch.py` | `stop_dae` reports STOPPED after the stop callable returns without confirming worker exit. Registry `disable` changes a flag. Import-failure count resets before the start callable; qualify repeated callable ImportError. No global restart/kill authority follows from a monitor alert. |
+| Observation effects | `modules/infrastructure/dae_daemon/src/dae_observer.py::_get_runtime_status` | Lazy broker retrieval can create its heartbeat thread. Read-side APIs are not yet proved effect-free; use source inspection/disposable fixtures until side effects are qualified. Missing runtime data must remain unknown. |
+| Admission, claims, leases, assurance | `modules/infrastructure/database/src/agent_db.py` and current OpenClaw supervisor | Existing signed-worker lease/heartbeat/recovery owners remain authoritative. CentralDAEmon does not grant work or override expiry/quarantine. Reserve independent verifier capacity. |
+| RSI self-audit and native supervisor | `modules/infrastructure/wre_core/src/daemon_self_audit_loop.py`; `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` | Audit scan exceptions are swallowed/logged without a distinct health projection; zero events cannot prove a successful scan. A broker heartbeat for a live thread cannot prove useful progress. Preserve native valve reason codes and absent effect lease. |
+| Skill outcomes and bounded advice | WRE `pattern_memory.py`, `libido_monitor.py`, existing monitor/AI Overseer owners | Reuse outcome storage and existing sensors. Proposed variants, confidence and local logs are not independent acceptance, activation or retained improvement. No verified generic small-model supervisor pool is established here. |
+| Telemetry intake and pressure | `modules/ai_intelligence/ai_overseer/src/{mcp_integration,holo_telemetry_monitor,ai_overseer}.py` | Queue, file reads and dedupe set are unbounded; critical-module to WRE mapping remains TODO. Qualify overload, rotation, failed enqueue and replay before scaling. Existing code and diagnostic callers are not proof of a running production consumer. |
+| Worker execution and rewards | Current OpenClaw/Hermes contracts; FAM `task_pipeline.py` and persistent adapter | Correlate artifacts and verdicts with current authority. PR1852 locally qualifies atomic SQLite pending initiation; pending is not paid, authenticated role authority or native RSI proof. |
+
+The [daemon tests index](../modules/infrastructure/dae_daemon/tests/README.md)
+contains coverage targets that exceed the present test inventory. Launch broker,
+observer, adapter, schemas and runtime-emitter test files exist; no dedicated
+central event-store test file was found in that directory. This is a retrieval
+finding, not proof that no related tests exist elsewhere. Search cross-module
+fixtures before adding tests. The [WRE roadmap](../modules/infrastructure/wre_core/ROADMAP.md)
+records the narrower verified per-counter SQLite handle repair separately.
+
+### A monitor is required beside every execution layer
+
+Before promoting a layer, bind its existing producer, consumer and control owner
+and independently test the following contract. These are acceptance requirements,
+not newly implemented fields or a blanket claim that all owners support them.
+
+1. **Identity and freshness:** correlate existing FoundUp, ticket/job, attempt,
+   parent/dependency, role, source/runtime/profile generation, lease and artifact
+   identifiers. Bind control request/acknowledgment and verifier/activation/rollback
+   receipts. Record event sequence, observation age and observation error explicitly.
+   Reuse existing identities; qualify missing mappings before extending a schema.
+2. **Progress:** report heartbeat age separately from last verified progress,
+   stage deadline and lease validity. A live thread may be stalled. Absent data,
+   stale data, failed scan and a successful scan with zero findings are distinct.
+3. **Control truth:** distinguish desired state, request accepted, effect observed,
+   effect confirmed and failure/unknown. Disable is not stop; a kill request is not
+   confirmed exit. Require bounded timeout and owner-specific confirmation, with
+   idempotency/replay handling. A process ID alone is not durable worker identity.
+4. **Evidence integrity:** distinguish inserted, exact duplicate, conflicting
+   duplicate and rejected/failed persistence. A listener notification is not a
+   storage receipt. Qualify collision, partial write, crash/reopen, retry, cursor
+   gaps, ordering and durability; never silently manufacture success after loss.
+   Preserve volatile emergency/killswitch notification under its existing authority
+   while labeling it separately from durable acknowledgment. Best-effort
+   `runtime_emitter.py` JSONL diagnostics are a different contract from the store.
+5. **Capacity and cost:** bound queued/admitted/running work, parent/child fanout,
+   retries, token/spend/time limits and verifier backlog separately. Unknown cost
+   stays unknown, not zero. Apply backpressure before exhausting verification or
+   audit storage; expose dropped/coalesced observations and lag.
+6. **Quality and learning:** preserve independent verdict, fixed test oracle,
+   rejected output, activation capability, rollback result and later retained-use
+   evidence. Completion, acceptance, promotion, retention and reward settlement
+   are separate facts. Monitor alerts must never change evaluation criteria.
+
+Deterministic checks run first: authorization/scope/lease, deadlines, replay,
+budget, persistence acknowledgment, test verdict and confirmed control outcomes.
+Optional small-model agents can classify ambiguous alerts, summarize redacted
+evidence and propose an existing WSP15 ticket. They cannot grant admission, change
+the evaluator, promote their repairs, issue payments or restart other workers.
+Use bounded shared capacity or sharding only after qualification, not one model
+process per worker. Predeclare accuracy, false alarms, latency and cost acceptance;
+fall back to deterministic unknown/hold when the model is absent or unreliable.
+
+The existing [Unicode monitor prototype](../.agents/skills/unicode_daemon_monitor_prototype/SKILL.md)
+is YouTube-specific and declares `evals: []`. Its restart and announcement examples
+are not an approved general RSI controller. Evaluate only relevant detection
+patterns in isolation; do not execute its live commands as part of this plan.
+WSP48 edge/Gemma proposal contracts likewise do not prove a deployed supervisor.
+
+### Authority, privacy and monitor failure
+
+Monitoring is an observation/control view over existing WRE/AgentDB and launch
+owners. It is not another queue for effects. Advisory proposals re-enter normal
+admission and independent verification. Each actual control needs current owner,
+scope, generation, budget, expiry and recovery policy; the monitor cannot sign its
+own authority. Keep requested control distinct from its eventual acknowledgment.
+
+Use allowlisted summaries, opaque correlation IDs, reason codes and evidence
+references. Do not copy secrets, raw private Gmail/LinkedIn correspondence or
+hidden model reasoning into telemetry. Preserve FoundUp/tenant isolation, bounded
+retention and access controls. Critical control/audit evidence cannot be silently
+sampled away; storage pressure must surface before new admission is authorized.
+
+The monitor itself needs a bounded, independent host/process/lease health check
+and alerts with delivery acknowledgment. Check scan freshness, store failures,
+queue lag and telemetry delivery separately from target health. Do not build an
+infinite chain of model watchers. A monitoring failure should inhibit new work
+under a qualified owner policy; running work follows its bounded lease and existing
+cancellation owner. It must not trigger blind global kills or service restarts.
+
+### Layered implementation and scale gates
+
+| Layer | Smallest next proof | Gate before advancing |
+|---|---|---|
+| 0: evidence foundation | Qualify the existing central event-store collision/partial-write/acknowledgment paths in disposable fixtures; confirm observation effects and missing-data semantics. | Reproducible baseline, fixed negative oracles, independent review; repair only the proven owner defect. No live services. |
+| 1: one component | Bind one existing ticket lifecycle to fresh progress, lease and control outcomes; test scan failure, stalled thread, stale heartbeat and lost acknowledgment. | Read/control scopes proven; confirmed stop/cancel/recovery; no authority invented by projection. |
+| 2: one admitted ticket | Existing WRE → OpenClaw/Hermes → independent verifier → authorized outcome/retention chain. | Native trust anchors and effect lease satisfied; complete correlated receipts and bounded failure/recovery. Simulation alone cannot pass native admission. |
+| 3: two, then ten workers | Isolated lanes, dependency/fanout limits, duplicate claims, stale owner, saturation and verifier reservation. | Measured queue/store/verifier throughput and cost, bounded retries, fault recovery and no ownership collisions. No automatic doubling. |
+| 4: one hundred, then one thousand | Qualify partitioned observation and bounded shared advisory capacity using existing scheduling owners. | Predeclared capacity/latency/error/spend limits and independent sustained-run evidence. Agent count is not demonstrated capacity. |
+
+Build the monitoring contract **alongside each layer, before its promotion**, not
+after the thousand-agent launch. Component fault qualification can proceed now;
+native execution remains blocked by its own authority/runtime prerequisites.
+Do not automatically execute RSI cycles from `main.py` or convert a startup report
+into admission. Follow the existing WRE launch/evaluation sequence.
+
+**Layer handoff checklist:** exact owner and source; scoped work order; fixed test
+oracle and negative cases; producer/consumer correlation; progress/freshness and
+control confirmation; authority/privacy boundary; rollback and monitor-failure
+behavior; independent result; next action in the existing roadmap/ModLog/backlog.
+No layer is operationally complete merely because its happy-path test passes.
+
+### Current WSP15 selection and WSP97 disposition
+
+The architecture reconciliation is C3/I4/D4/Impact4 = **15/P1**. It closes a planning
+gap by extending this map and existing R18/R23 obligations, not by claiming the
+runtime is fixed. The next source-bound event-store/ack qualification is
+C3/I4/D4/Impact4 = **15/P1**: durable truthful evidence is a prerequisite for the requested
+monitoring/control proof and reusable across workers. This is a qualification
+priority, not evidence of a live incident or permission to change persistence.
+
+The native ticket remains **18/P0 blocked** by current trust anchors/absent effect
+lease. Persistent role/caller-authority qualification remains **15/P1 outstanding**;
+PostgreSQL parity **13/P1** remains separately unqualified; LinkedIn **13/P1** is
+separately owned. Re-observe all candidates after this sprint. Do not simply take
+the old second-ranked item or revive the old unified event-queue proposal below.
+
+---
+
+## Historical architecture inventory and proposals — 2025-12-03
+
+The following material is preserved for lineage. Revalidate its owners, test
+claims and event-effect proposals against the current contract above before use.
+
 ## Overview
 
 This document maps all daemons in the Foundups-Agent ecosystem, their capabilities, and event-driven orchestration patterns.

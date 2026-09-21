@@ -1,3 +1,10 @@
+## 2026-09-22: Reconcile scalable RSI monitoring and confirmed controls
+
+- WSP00/10/15/22/50/77/91/97; source/document reconciliation C3/I4/D4/Impact4=15/P1. Extend the existing daemon architecture map and R18/R23 obligations; no new monitor, scheduler, packet, skill or runtime schema.
+- Distinguish heartbeat/progress, requested/confirmed control, durable acknowledgment and independent acceptance/retention. Static event-store collision/partial-write, registry acknowledgment, scan-health and stop-confirmation findings remain unqualified runtime gaps.
+- Build supervision beside each layer before promotion; existing WRE/AgentDB retain authority, small-model advice requires bounded evaluation, and 1→2→10→100→1000 capacity requires measured independent gates. Prototype YouTube restart/announcement instructions are not executed.
+- Prior PR1852 closure is reconciled in the backlog; next evidence-integrity qualification15/P1 precedes role15/P1, while native18/P0 remains blocked. This sprint changes documentation only; exact validation/review/publication evidence is recorded separately, with no live activation or retained RSI claim.
+
 ## 2026-09-22: Repair atomic pending rewards in the existing production-line owner
 
 - WSP00/10/11/15/22/50/62/97; C4/I4/D3/Impact3=14/P1. PR1851 qualification and main checks/cleanup closed. Extend only existing FAM adapter/pipeline/test owners; no new module, ledger or schema.

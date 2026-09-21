@@ -1,5 +1,12 @@
 # dae_daemon ModLog
 
+## 2026-09-22: Reconcile scalable RSI monitoring and confirmed controls
+
+- WSP00/10/15/22/50/77/91/97; source/document reconciliation C3/I4/D4/Impact4=15/P1. Extend the existing daemon architecture map and R18/R23 obligations; no new monitor, scheduler, packet, skill or runtime schema.
+- Distinguish heartbeat/progress, requested/confirmed control, durable acknowledgment and independent acceptance/retention. Static event-store collision/partial-write, registry acknowledgment, scan-health and stop-confirmation findings remain unqualified runtime gaps.
+- Build supervision beside each layer before promotion; existing WRE/AgentDB retain authority, small-model advice requires bounded evaluation, and 1→2→10→100→1000 capacity requires measured independent gates. Prototype YouTube restart/announcement instructions are not executed.
+- Prior PR1852 closure is reconciled in the backlog; next evidence-integrity qualification15/P1 precedes role15/P1, while native18/P0 remains blocked. This sprint changes documentation only; exact validation/review/publication evidence is recorded separately, with no live activation or retained RSI claim.
+
 ## V1.2.5 - WSP 97 Circuit Breaker for Import Failures (2026-03-22)
 
 **What**: Added circuit breaker pattern to stop crash loops from import-time failures.

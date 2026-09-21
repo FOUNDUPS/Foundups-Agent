@@ -23,7 +23,7 @@ Read only the entry table and selected packet before retrieving its module conte
 | Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution); packet order is not an automatic assignment |
 | AmIBot autonomous production experiment | [G0 readiness, dependency gates and metrics](#amibot-autonomous-production-experiment--2026-09-15) — controlled failure; no build jobs admitted |
 | RSI at launch and cycle budgets | [Existing WRE launch/evaluation sequence](modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15) — staged plan, not enabled runtime |
-| Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
+| Supervision, controls, cost and dispatch | [RSI/WRE monitor layer](docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22); [production-line dispatch](docs/operations/RSI_SWARM_DISPATCH.md) — qualify evidence and confirmed effects before scaling |
 | Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
 | Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
 | Feedback implementation packet | [R25: consented 012/RedDog feedback into tickets](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) |

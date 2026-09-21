@@ -108,7 +108,7 @@ FAM currently exposes `open → claimed → submitted → verified → paid`; th
 | FoundUps Fusion | Provider adapter for principal/panel model work through the admitted OpenRouter route. A panel result is candidate content, not independent acceptance. |
 | Local Nemotron | Evaluation-only topology proposer via LM Studio. It proposes compact candidate model lists; deterministic admission and held-out evaluation own the next step. It cannot select production models or promote itself. |
 | AI Gateway | Catalog, selection/evaluation evidence, promotion evidence and verified provider/model/topology binding at use time. It resolves the approved route; a provider name is insufficient. |
-| WRE / AgentDB | Work admission, durable claims, scope, evidence and lifecycle. Reuse these owners; do not build a second scheduler. |
+| WRE / AgentDB / CentralDAEmon | WRE/AgentDB own admission, claims and authority; CentralDAEmon provides the existing lifecycle/observation surface. Follow the [monitor and control gates](../DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22); heartbeat is not progress and registry disable is not confirmed stop. No second scheduler. |
 | OpenClaw / Hermes | OpenClaw supervises admitted jobs; the currently accepted Hermes profile handles one bounded native leaf and returns artifacts/lifecycle evidence. |
 | Independent verifier / promoter | Verify outcomes and authorize activation under separate authority. Neither a model's confidence nor Fusion agreement replaces this. |
 
