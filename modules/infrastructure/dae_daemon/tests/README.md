@@ -9,6 +9,24 @@ Tests follow the 8-layer architecture — each layer tested independently before
 | `test_schemas.py` | 0 | Enum values, dataclass serialization round-trips, deterministic IDs |
 | Integration tests | 0-7 | Run via manual scripts (pytest has eth_typing conflict on Windows) |
 
+## Focused event-store regressions — 2026-09-22
+
+The nine `test_event_store_*` functions in `test_dae_observer.py` use disposable
+SQLite/JSONL storage and a fail-fast wrapper around a real Lock. They cover collision
+recovery, retry budgets0–4, unrelated SQLite/unique errors, duplicate no-op, lock
+release and preserved write order. Partial-write/parity failure remains an expected
+limitation, not a repaired contract. No daemon or live service is started by these cases.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest modules/infrastructure/dae_daemon/tests/test_dae_observer.py -k test_event_store_ -q -o addopts= -p no:cacheprovider
+```
+
+Result:9passed,3deselected, two plugin-configuration warnings. Existing observer
+tests are deliberately outside this bounded run. Candidate production-lock process
+replay is not claimed; broader witness review was blocked by automatic screening.
+Full crash recovery, concurrent writers and registry acknowledgment need separate qualification.
+
 ## Running Tests
 
 ```bash

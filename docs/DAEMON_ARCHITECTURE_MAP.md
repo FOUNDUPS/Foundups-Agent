@@ -8,8 +8,8 @@
 
 ## RSI and WRE supervision contract — 2026-09-22
 
-**Current source baseline:** `3c45509c0716cbac403d3309ea4d8a03ab13a2d2`.
-**Status:** source-grounded integration requirements; runtime qualification remains open.
+**Audit baseline:** `3c45509c0716cbac403d3309ea4d8a03ab13a2d2`; retry repair base `9103ec35d50495fd37690e48e442025372fac6e5`.
+**Status:** sequence-collision source repair locally validated; broader runtime qualification remains open.
 This section is the current supervision map linked by the [system roadmap](../ROADMAP.md).
 It extends R18 capacity and R23 sustained operations across R06–R19/R24;
 it creates no new scheduler, runtime schema, monitor module or executable authority.
@@ -24,12 +24,12 @@ existing `dae_daemon` names; the requested function composes existing owners.
 ### Existing owners and actual gaps
 
 Paths below are relative to the repository root. Source/test inventory is not a
-passing test claim. This documentation sprint did not import or start these services.
+passing test claim. The initial map was documentation-only; the bounded retry checkpoint below adds disposable event-store tests without starting services.
 
 | Responsibility | Existing owner | Current boundary / required qualification |
 |---|---|---|
 | Lifecycle events, registry, snapshots | `modules/infrastructure/dae_daemon/src/{dae_daemon,dae_registry,dae_adapter,dae_observer}.py` | Reuse CentralDAEmon. State, heartbeat, event cursor and runtime view exist; they do not prove task progress, durable admission or accepted output. |
-| Durable event evidence | `modules/infrastructure/dae_daemon/src/event_store.py` | `write` appends JSONL before SQLite insertion. Its sequence-collision retry calls `self.write` while holding a non-reentrant lock. Static loss/parity/deadlock risks need bounded negative tests, not an assertion of observed production failure. `_next_sequence_id` refreshes the DB; force a real collision rather than assume serial writers collide. |
+| Durable event evidence | `modules/infrastructure/dae_daemon/src/event_store.py` | `write` still appends JSONL before SQLite. Disposable baseline reproduced its recursive lock deadlock; bounded retry now stays within one lock acquisition and nine fixed regressions pass. Failed attempts can still leave extra JSONL records. Atomicity, crash/reopen, cross-process ordering and durable caller acknowledgment remain unqualified; no observed production incident is claimed. |
 | Event acknowledgment | `modules/infrastructure/dae_daemon/src/dae_registry.py::_emit` | Ignores the store write result before notifying listeners. Qualify failed persistence, duplicate identity and listener acknowledgment before using notifications as durable evidence. |
 | Launch, stop and detach | `modules/infrastructure/dae_daemon/src/dae_launch_broker.py`, `killswitch.py` | `stop_dae` reports STOPPED after the stop callable returns without confirming worker exit. Registry `disable` changes a flag. Import-failure count resets before the start callable; qualify repeated callable ImportError. No global restart/kill authority follows from a monitor alert. |
 | Observation effects | `modules/infrastructure/dae_daemon/src/dae_observer.py::_get_runtime_status` | Lazy broker retrieval can create its heartbeat thread. Read-side APIs are not yet proved effect-free; use source inspection/disposable fixtures until side effects are qualified. Missing runtime data must remain unknown. |
@@ -41,10 +41,11 @@ passing test claim. This documentation sprint did not import or start these serv
 
 The [daemon tests index](../modules/infrastructure/dae_daemon/tests/README.md)
 contains coverage targets that exceed the present test inventory. Launch broker,
-observer, adapter, schemas and runtime-emitter test files exist; no dedicated
-central event-store test file was found in that directory. This is a retrieval
-finding, not proof that no related tests exist elsewhere. Search cross-module
-fixtures before adding tests. The [WRE roadmap](../modules/infrastructure/wre_core/ROADMAP.md)
+observer, adapter, schemas and runtime-emitter test files exist. The retry sprint
+extends the existing observer test file with nine store regressions; it creates no
+parallel test owner. Original observer tests were not run in this bounded slice.
+The candidate process-witness review was blocked by automatic screening, so only
+ordinary source review/unit replay is claimed for the repair. Broader proof remains open. The [WRE roadmap](../modules/infrastructure/wre_core/ROADMAP.md)
 records the narrower verified per-counter SQLite handle repair separately.
 
 ### A monitor is required beside every execution layer
@@ -141,12 +142,13 @@ No layer is operationally complete merely because its happy-path test passes.
 
 ### Current WSP15 selection and WSP97 disposition
 
-The architecture reconciliation is C3/I4/D4/Impact4 = **15/P1**. It closes a planning
-gap by extending this map and existing R18/R23 obligations, not by claiming the
-runtime is fixed. The next source-bound event-store/ack qualification is
-C3/I4/D4/Impact4 = **15/P1**: durable truthful evidence is a prerequisite for the requested
-monitoring/control proof and reusable across workers. This is a qualification
-priority, not evidence of a live incident or permission to change persistence.
+The architecture reconciliation is closed in PR1853. The existing retry-method
+repair is C3/I4/D4/Impact4 = **15/P1**, with fixed baseline failures, independent
+source review and bounded local tests; exact publication status is in the backlog.
+Re-observation selects authoritative-store/recovery/acknowledgment qualification
+at **15/P1** before any persistence redesign. Partial writes are now demonstrated
+in disposable fixtures; volatile emergency listeners must remain available even
+when durable storage fails. No full monitoring/runtime completion is claimed.
 
 The native ticket remains **18/P0 blocked** by current trust anchors/absent effect
 lease. Persistent role/caller-authority qualification remains **15/P1 outstanding**;

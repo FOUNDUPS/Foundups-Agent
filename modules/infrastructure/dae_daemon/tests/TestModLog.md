@@ -1,5 +1,13 @@
 # dae_daemon TestModLog
 
+## 2026-09-22: Fixed sequence-collision regression oracles
+
+- Reuse `test_dae_observer.py`; nine new standalone cases, original three observer methods unchanged.
+- Before repair:5pass/4fail under the frozen baseline runner; a separate real-lock collision witness timed out with recursive acquisition observed and its own child termination confirmed. Partial-write and volatile-listener witnesses characterized remaining defects.
+- After repair: ordinary focused pytest9pass/3deselected, two configuration warnings; test IDs and assertions unchanged. Independent ordinary replay is recorded in the backlog, not added as unique test count.
+- The broader candidate process-witness harness remains paused after automatic screening blocked review. No candidate actual-lock subprocess, crash-recovery, cross-process concurrency or live-runtime proof is claimed.
+- Acceptance covers the existing retry method only; parity failures after failed attempts remain deliberate test assertions and an open durability obligation.
+
 ## V1.4.0 - Runtime Emitter Tests (2026-03-27)
 
 **File**: `test_runtime_emitter.py`

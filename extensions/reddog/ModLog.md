@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-09-22 - Event-store retry backend binding
+
+- Refresh the existing event-store member and both digest pins to `b5fd49e4592cf2814da481d42d254df4bd8ef36b897576018b789b4f291bed95`. Membership remains1,400; API/version, package caps and installed runtime are unchanged.
+- Eight generator tests,15fast groups and deterministic67-file/950,440-byte package pass. Only the existing sequence-collision retry owner changed; no installed extension/provider update or durable-store claim.
+- Exact publication/verification is tracked in the canonical RSI backlog. WSP15/22/50/62/84/97.
+
 ## 2026-09-20 - Hermes rejection-evidence backend binding
 
 - Refresh the existing manifest's Hermes lifecycle member and both digest pins to `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. All 1,400 members, API/version and extension behavior remain unchanged.

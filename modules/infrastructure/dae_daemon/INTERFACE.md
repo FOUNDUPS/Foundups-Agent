@@ -42,6 +42,19 @@ from modules.infrastructure.dae_daemon.src.schemas import (
 )
 ```
 
+### DAEEventStore.write
+
+`write(event: DAEEvent, _retry: int = 0) -> Tuple[bool, str]` keeps its existing
+success `(True, "ok")`, duplicate `(False, "duplicate: <key>")` and error
+`(False, "error: <details>")` results. By default, a SQLite sequence collision
+gets at most four attempts within one lock acquisition. Other errors do not retry.
+The internal `_retry` counter and duplicate behavior are unchanged.
+
+JSONL still precedes SQLite: a failed attempt can leave an extra JSONL record.
+This method does not promise atomic dual-store durability, exact-versus-conflicting
+duplicate classification, or durable acknowledgment through registry listeners.
+Those limitations remain explicit in the system supervision map.
+
 ## Data Persistence
 
 - JSONL: `modules/infrastructure/dae_daemon/memory/dae_events.jsonl`
