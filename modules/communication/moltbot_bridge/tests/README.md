@@ -1,3 +1,7 @@
+## Registered lifecycle consumption — 2026-09-22
+
+The existing lifecycle-generation-race suite owns producer identity and registered-consumer adversarial cases, reusing admission fixtures. Run it with admission, signer-generation and queue-use-time suites plus `test_handshake_modules_follow_wsp62_boundaries`; keep identical baseline/candidate selection. Verify early rejection preserves handles, valid owned mismatches spend them, and public dispatch cannot substitute ownership. Use the externally guarded disposable runner linked by the root backlog; no live signer/provider proof is implied.
+
 ## Signer lifecycle identity provenance — 2026-09-22
 
 Reuse the lifecycle-admission and lifecycle-generation-race suites plus the existing signer-generation and queue-use-time suites. Preserve identity fields/digests, reject malformed matching identities, and retain foreign-capability, replay, expiry and generation checks. Use disposable generation/SQLite fixtures and fake health/OS observations; no live signer or gate admission is proved. Exact isolated commands, guard limits and 50-case baseline versus 64-case connected results are bound in the root RSI backlog.

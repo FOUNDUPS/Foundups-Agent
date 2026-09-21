@@ -1,3 +1,9 @@
+## 2026-09-22: Registered consumer and preserved producer regressions
+
+- Existing admission/race owners preserve all original definitions/assertions/parameterization, relocating19 producer identity cases by fixture-alias-only adjustment. Add37 consumer cases covering hostile/fabricated/subclass boundaries, public dispatch substitution, malformed/incorrect identities, foreign ownership, audit data, replay, expiry and generation drift.
+- Run the same four connected suites plus the existing handshake WSP62 structural guard: baseline65pass/37fail; candidate102pass. Original703-line test debt becomes656; race suite322 and source674. No cap exemption, new file or skipped required case.
+- Exact source/runner/XML, effect guards and independent review are in the root backlog. Synthetic OS/health/signing fixtures and confined temporary SQLite/Git are not live signer or OS sandbox evidence.
+
 ## 2026-09-22: Lifecycle receipt identity regressions
 
 - Extend the existing lifecycle test owner: two preserved-field/digest cases, sixteen malformed matching identity cases including exact-string subclasses, and one same-generation foreign-boundary rejection. Assert default identities and all existing false authority flags.

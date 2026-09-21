@@ -1852,121 +1852,139 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "2cdda856cf53744b143da58c347ceaa2c171bcc1",
-    "selected_action": "R06-lifecycle-receipt-provenance",
-    "status": "independently_verified_source_candidate_pending_publication",
+    "base_commit": "86ade204da2d80ed5972678ecb881c6c2478e3c9",
+    "selected_action": "R06-registered-lifecycle-consumer",
+    "status": "source_scope_independently_validated_publication_requires_exact_head_checks",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 14,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-signer-provenance-20260922",
+    "observation_id": "rsi-lifecycle-consumer-20260922",
     "observed_at": "2026-09-22 JST",
-    "base_commit": "2cdda856cf53744b143da58c347ceaa2c171bcc1",
+    "base_commit": "86ade204da2d80ed5972678ecb881c6c2478e3c9",
     "previous_observation": {
-      "observation_id": "rsi-ticket-canary-20260922",
-      "git_reference": "2cdda856cf53744b143da58c347ceaa2c171bcc1:docs/roadmaps/rsi_swarm_backlog.json"
+      "observation_id": "rsi-signer-provenance-20260922",
+      "git_reference": "86ade204da2d80ed5972678ecb881c6c2478e3c9:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "role": "coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Preserve validated requester/profile identity in the existing signer lifecycle audit receipt",
+    "selected_task": "Consume registered lifecycle proof and correlate exact requester/profile identity",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 14,
+      "total": 15,
       "priority": "P1"
     },
-    "status": "independently_verified_source_candidate_pending_publication",
-    "selection_basis": "15/P1 producer/consumer qualification identified an existing producer gap. Its bounded source repair is C2/I4/D4/Impact4=14/P1: six lines and no new owner; required before safe requester/profile correlation at the later consumer. R24 18/P0 and consumer15/P1 remain blocked; existing payout repair13/P1 is lower-ranked. No unrelated cleanup bundled.",
+    "status": "source_scope_independently_validated_publication_requires_exact_head_checks",
+    "selection_basis": "Fresh source confirms producer1849 closed and consumer absent.15/P1 consumer is eligible over blocked18/P0 native ticket and13/P1 payout repair. Restore related producer-test size regression through the same identity-test consolidation; no coverage removed or cap exception.",
+    "effort_cost_verification": {
+      "effort": "One owner API plus behavior-preserving wrapper consolidation and two existing test owners",
+      "cost": "Local deterministic fake-only tests and scoped independent agent review; no model/provider/runtime activation",
+      "verification": "Identical baseline/candidate selection, adversarial ownership/identity/freshness cases, original assertion preservation, existing WSP62 guard, packaging and exact-head CI"
+    },
     "closure_reconciliation": {
-      "pr": 1847,
-      "merged_commit": "5b99915e3f85b529a8dd82efe87d875f6c4c5cdf",
-      "main_ci": 35619916854,
-      "main_codeql": 35619915278,
+      "pr": 1849,
+      "merged_commit": "86ade204da2d80ed5972678ecb881c6c2478e3c9",
+      "main_ci": 35626530966,
+      "main_codeql": 35626530548,
       "both_main_workflows": "completed/success",
-      "fresh_main": "2cdda856cf53744b143da58c347ceaa2c171bcc1",
-      "intervening_change": "Separately owned YUMORI language fix1846; six disjoint paths preserved"
+      "owned_previous_worktree": "removed after evidence archive",
+      "owned_previous_local_branches_removed": 3,
+      "peer_heads": "92 unchanged"
     },
     "retrieval": {
       "semantic": "Reuse unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; shared root still0c81418fe94a7786cfd55f01e138ddc5d510583d. No repeat failed probe/reindex.",
       "fallback": "Actual WSP00/15/97, current root/backlog, lifecycle source/tests/interface/journals and prior54-path trust-anchor map; exact source hashes rechecked.",
-      "noise": "Broad lifecycle search includes unrelated CABR; narrowed to exact signer owner.",
-      "ordering": "Current producer and registered boundary before consumer integration.",
+      "noise": "Broad historical lifecycle/cap searches include unrelated work; narrow to exact signer owner, two existing test owners and canonical interface.",
+      "ordering": "Closed producer1849 -> registered consumer -> later resident correlation; current source precedes historical memory.",
       "missing_artifacts": "Module memory/README.md and requirements.txt absent; no replacement files created. Native authority/runtime remains unqualified.",
-      "staleness": "Disjoint main advancement inspected; source unchanged at selection.",
-      "duplication": "Reuse sole receipt constructor and payload. No module, skill, consumer, orchestration or authority framework added."
+      "staleness": "Fresh main86ade204;92peer PR heads unchanged. Prior Holo failure is historical fallback context at unchanged shared root, not a new CURRENT retrieval claim.",
+      "duplication": "Consolidate existing forwarding/validation wrappers and relocate existing identity cases; no new module, skill, scheduler, registry or roadmap."
     },
     "execution_scope": [
-      "existing lifecycle receipt dataclass, binding checks and payload",
-      "existing lifecycle test owner",
-      "required module interface/journals/test docs and canonical system selection"
+      "existing lifecycle admission owner",
+      "existing admission and generation-race tests",
+      "existing canonical roadmap/backlog and required interface/journals/test docs"
     ],
     "source_repair": {
-      "lines_added": 6,
+      "api": "consume_verified_external_signer_lifecycle_admission(boundary, capability, *, requester_principal_id, signer_profile_id)",
       "source_lines": 674,
-      "fields": [
-        "requester_principal_id",
-        "signer_profile_id"
-      ],
-      "contract": "Exact nonblank configured strings, exact-string health identities and existing equality; preserve both fields before existing digest computation. Receipt IDs now bind identity.",
-      "compatibility": "Required new audit receipt fields; no tracked production deserializer/positional constructor found. No decoder/migration for older receipts. Digest algorithm unchanged.",
-      "authority": "Audit receipt remains forgeable data outside its registered boundary; all three authority flags false, all seven resident blockers and missing effect lease unchanged."
+      "contract": "Capture canonical registry and exact boundary type; reject malformed expected identities before lookup; use registry consumer directly, then correlate sealed identities. Valid owned mismatch spends handle; foreign boundary/malformed expected identities do not spend original.",
+      "reuse": "Combine existing method forwarders and inline validation-only admission wrapper before existing payload projection; digest and owned consumption semantics retained.",
+      "authority": "All receipt flags false; no resident resolver wiring, blocker removal, effect lease, service startup or hostile-code-in-process boundary claim."
     },
-    "autonomous_worker_boundary": "0102 performed the small exact-contract repair with independent agent qualification/review. No admitted Qwen/Gemma or native OpenClaw/Hermes worker run is claimed.",
+    "autonomous_worker_boundary": "0102 authors scoped source; separate worker authors tests and separate verifier reviews/replays. This is repository work, not an admitted native OpenClaw/Hermes ticket.",
     "validation": {
-      "initial_harness": {
-        "tests": 50,
-        "passed": 2,
-        "failures": 48,
-        "reason": "Guard incorrectly rejected confined read-only SQLite file URIs; no product failure claim"
-      },
       "baseline": {
-        "tests": 50,
-        "passed": 34,
-        "failures": 16,
-        "reason": "Two missing receipt fields and14 absent malformed-identity rejections"
+        "tests": 102,
+        "failures": 37,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 65
       },
       "candidate": {
-        "tests": 64,
-        "passed": 64,
+        "tests": 102,
         "failures": 0,
-        "skipped": 0
+        "errors": 0,
+        "skipped": 0,
+        "passed": 102
       },
-      "selection_difference": "Two exact-string subclass cases and default-field assertions were added after the red baseline; candidate includes three connected suites. Do not present identical red/green sets.",
-      "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -I -B O:/Foundups-Agent-audits/20260922-rsi-signer-provenance/run_local.py candidate",
-      "limits": "Synthetic signing/generation/OS/health fixtures;58 denied pytest-style symlink attempts,5 exact disposable Git setup commands,495 SQLite opens confined to run root. Python guards are not OS confinement; no live signer/provider/lease.",
+      "identical_selection": true,
+      "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -I -B O:/Foundups-Agent-audits/20260922-rsi-lifecycle-consumer/run_local.py candidate",
+      "effect_diagnostics": {
+        "denied_pytest_symlinks": 95,
+        "disposable_git_commands": 5,
+        "confined_sqlite_opens": 912
+      },
+      "limits": [
+        "Fake transports and synthetic authority/key fixtures; no live ticket/provider proof.",
+        "Python audit hooks and exact Git command restriction are not OS sandboxing.",
+        "Only package initializer and stdlib platform hostname lookup substituted externally."
+      ],
+      "test_consolidation": "37 new consumer cases;19 existing producer identity cases relocated with AST/assertion/parameterization preservation. Existing admission test703->656, race96->322. Existing22file WSP62 guard included; no exception.",
       "packaging": {
+        "backend_manifest_generator": "--write succeeded",
         "runtime_files": 1400,
         "manifest_digest": "bc3c14ffee1b71169283b8f2ba5cdea377d7d9aca3b8572b4d401610aa187367",
-        "manifest_membership_and_pins": "unchanged after generator --write; lifecycle owner is not in current backend closure",
-        "test_registry": "current1651/quarantined269; generate_test_registry.py --check passed"
+        "git_blob_unchanged": "c4ef278470388495e405dd56fe78686527ef9bd5",
+        "lifecycle_source_membership": "not in current backend closure; no membership or pins added",
+        "test_registry": "--check succeeded; total1651/quarantined269"
       },
       "independent": {
-        "connected_passed": 64,
-        "overlaps_author_cases": true,
-        "additional_health_only_subclass_negatives_passed": 2,
-        "review": "independent-review.json",
-        "verdict": "ACCEPT_PRODUCER_ONLY_PROVENANCE_REPAIR"
+        "passed": 102,
+        "failed": 0,
+        "skipped": 0,
+        "overlaps_author": true,
+        "exact_test_ids_match": true,
+        "loaded_source_bindings_checked": 295,
+        "whitespace_only_finalization": "Removed one final blank line after runs; exact tested bytes reconstructed and AST unchanged",
+        "receipt": "independent-review.json"
       }
     },
-    "artifact_root": "O:/Foundups-Agent-audits/20260922-rsi-signer-provenance",
+    "artifact_root": "O:/Foundups-Agent-audits/20260922-rsi-lifecycle-consumer",
     "evidence_sha256": {
-      "baseline/receipt.json": "f4e61bc16e23eb195ef93f60bb5d5691ef1624bc63ec323c8ada8bc755acbd4a",
-      "baseline/run_local.py": "7dfd1e668e54e4c361d701b0d04542b826aae31ad91c6c396971c305e49bb06c",
-      "baseline-v2/receipt.json": "bf31809e54b218281242deacad2ea11f7054dff29b51358681b0a24ca4a414d9",
-      "candidate/receipt.json": "946d9c226ead64e89184f6c4e939f6a8d2d2f3a2552fe16dc79994048aeb3c37",
-      "run_local.py": "de6c5e2ba0e9cb2ec6215405cbea5b943fbcf590e253ac67317efe3c3ca07421",
-      "independent-review.json": "96b2872b7cf19cba559f6a533fbde04a1ba4ff263d26f6defe9e5ada4093ebd8"
+      "baseline/receipt.json": "a9c21d6a00d2d5d05b86fd0704d64b1b2d16fd5209748d76d5c1b7e461cf71d1",
+      "candidate/receipt.json": "d4d39a72c645f6e2a91bfc11fb6ac5e638bf7a4cc009365657e2e4a6b659a869",
+      "run_local.py": "5d45ae6cfe3e5e16dbdb51e0c4323ad56c72caad35dc1f58a2cf1905cf3392c8",
+      "test-author-edit.json": "0607d3dcee614750dcd94d6a296e8676cc1e47cb2a5e9e99cb1515d05534bb0c",
+      "inherited-size-debt.json": "8c07c46fb9198115e2ac4e3081005d3b0c7ddb0257716e67dc098134722570bb",
+      "independent-preflight-review.json": "cd4ec1dcba7e2e968d2f5cf6d97d7642164c82fe0c4ff9f21883999012c071bd",
+      "independent-review.json": "48cdfe7c7e2d479f3211fe5902bfa5b9fcad8bc659d0846af6f0c7abba6cbefd",
+      "independent/receipt.json": "793570a2a0bf32cf0c510dd68efb0f5cfb87de78338947e61128555c1d6741b7",
+      "independent-static-preservation.json": "419ebc294e1eca3965d17e7ace88011960220516327a118f96995183943196ce",
+      "trailing-newline-normalization.json": "8b29e4221564f16b09df51d02a1567c98c764b33fab832e3710279fbc8d18765",
+      "packaging.json": "1b322de1ca6a79e32a08b92784cafcbfaa2782ac490f84c7041a81a0a3e69261"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -1981,10 +1999,10 @@
             "priority": "P0"
           },
           "state": "blocked",
-          "dependency": "Unmet native trust anchors, registered consumption, verifier and reward correctness"
+          "dependency": "Seven resident trust anchors, authenticated production dependencies, independent verifier and reward correctness; no effect-use lease"
         },
         {
-          "task": "Registered lifecycle-boundary consumption and exact requester/profile correlation",
+          "task": "Qualify resident use-time correlation of registered lifecycle proof",
           "wsp15": {
             "complexity": 3,
             "importance": 4,
@@ -1993,8 +2011,8 @@
             "total": 15,
             "priority": "P1"
           },
-          "state": "next_qualification_after_source_closure",
-          "next_step": "Use existing registry-owned boundary; reject arbitrary Protocol.consume receipts, foreign/stale/replayed capabilities and wrong identities. Only its peer-handshake reason may become eligible later; other six reasons/lease remain."
+          "state": "next_source_contract_qualification",
+          "dependency": "Merge and independently validate this consumer; derive expected identities and manifest/run/session bindings from authenticated selected work; preserve six other reasons and absent lease"
         },
         {
           "task": "Persistent payout atomic initiation and truthful state",
@@ -2007,7 +2025,7 @@
             "priority": "P1"
           },
           "state": "reproduced_outstanding",
-          "dependency": "Qualify existing SQLite transaction/idempotency owner; retain prior two failures as acceptance negatives"
+          "dependency": "Qualify existing SQLite transaction/idempotency owner using retained interruption/reopen witnesses"
         },
         {
           "task": "LinkedIn dry-run boundary qualification",
@@ -2020,10 +2038,10 @@
             "priority": "P1"
           },
           "state": "separate_owner_scope",
-          "dependency": "Existing owner reconciliation; no live social effects"
+          "dependency": "Owner reconciliation; no live social effects"
         }
       ],
-      "selected_next": "Registered lifecycle-boundary consumption and exact requester/profile correlation"
+      "selected_next": "Qualify resident use-time correlation of registered lifecycle proof"
     },
     "dispatchable": false,
     "retained_improvement_proven": false
