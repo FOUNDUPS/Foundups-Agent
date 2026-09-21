@@ -10,7 +10,7 @@ from threading import Barrier
 
 import pytest
 from sqlalchemy import delete, event, insert, select, update
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError, OperationalError
 
 from modules.foundups.agent_market.src.exceptions import AgentMarketError, PermissionDeniedError
 from modules.foundups.agent_market.src.models import (
@@ -546,3 +546,36 @@ def test_task_cannot_substitute_another_valid_initiation_pointer(adapter):
     with pytest.raises(AgentMarketError):
         pipeline.trigger_payout(target.task_id, "treasury_1")
     assert _database_snapshot(adapter) == before
+
+
+def test_busy_writer_rejects_without_fallback_then_retries_after_release(adapter):
+    pipeline, task = _ready_payout(adapter)
+    blocker = SQLiteAdapter(adapter.db_path)
+    before, observed = _database_snapshot(adapter), []
+
+    def no_wait(dbapi_connection, connection_record, connection_proxy):
+        cursor = dbapi_connection.cursor()
+        try:
+            cursor.execute("PRAGMA busy_timeout=0")
+            observed.append(cursor.execute("PRAGMA busy_timeout").fetchone()[0])
+        finally:
+            cursor.close()
+
+    event.listen(adapter.engine, "checkout", no_wait)
+    try:
+        with blocker.engine.connect() as lock:
+            lock.exec_driver_sql("BEGIN IMMEDIATE")
+            try:
+                with pytest.raises(OperationalError, match="locked"):
+                    pipeline.trigger_payout(task.task_id, "treasury_1")
+                assert observed and set(observed) == {0}
+                assert _database_snapshot(adapter) == before
+            finally:
+                lock.rollback()
+    finally:
+        event.remove(adapter.engine, "checkout", no_wait)
+        blocker.close()
+    assert _database_snapshot(adapter) == before
+    payout = pipeline.trigger_payout(task.task_id, "treasury_1")
+    _assert_initiation(adapter, task, payout)
+    assert adapter.get_wallet("treasury_1")["credit_balance"] == 19
