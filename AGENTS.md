@@ -225,6 +225,15 @@ $env:PYTHONDONTWRITEBYTECODE = "1"
 - Add concrete examples from session
 - Each session makes agents smarter
 
+### Step 8: Close the Owned Work — WSP 10
+
+- Do not report ordinary success while the requested outcome, pull request, required deployment, or agent-owned temporary lane remains unfinished.
+- Finish authorized work through validation, commit, push, required checks, merge, deployment, live verification, and cleanup when those stages are part of the request or owning workflow.
+- A pending check or deployment is not terminal. Stay with it until success, failure, or an explicit external blocker.
+- If blocked, preserve a recoverable checkpoint or remove only the owned partial work, then name the exact blocker and retained state.
+- Before the final response, inspect every worktree created for the task. Remove clean, merged, disposable owned worktrees and temporary build staging; never reset, clean, move, or delete an unowned or ambiguous dirty lane.
+- Report repository merge, production deployment, live verification, and cleanup as separate evidence. See WSP 10, Section 6.
+
 ## [ALERT] ANTI-VIBECODING
 
 **VIOLATIONS**:

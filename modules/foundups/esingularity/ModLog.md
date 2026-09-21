@@ -1,5 +1,12 @@
 # Project eSingularity ModLog
 
+## 2026-09-22 — YUMORI.me language repair merged, published, and verified
+
+- Squash-merged PR #1846 as `2cdda856cf53744b143da58c347ceaa2c171bcc1` after both `CI` and `Validate eSingularity` passed.
+- Published the reconciled latest frontend as Sites version 53 from source `26c102d49bb089a303947fb117b21847aae4277e`; deployment `appgdep_6ab15310f1588191a7c810441f300fed` succeeded at `https://esingularity-ai.undaodu.chatgpt.site` without overwriting the newer package, JHR, or asset-registry changes already on GitHub main.
+- Fresh cache-busted browser verification on `https://yumori.me/` exercised the visible selector in Japanese, English, and Portuguese. The rendered movement body, canonical JOIN action, localized selector label, and document language all changed correctly (`ja`, `en`, `pt-BR`). Japanese was restored as the selected state after verification.
+- Publication and live verification close the source-only status in the preceding repair entry. WSP 10/22/34/50/97; no DNS, forwarding, form, ticker payload, eSingularity homepage content, or unrelated worker lane changed.
+
 ## 2026-09-21 — Repair YUMORI.me English and Portuguese switching
 
 - WSP 15 allocation receipt: complexity 2, importance 5, deferability 5, impact 4 = 16 / P0. The public selector visibly changed language state without translating the movement page, so this was a current production-path defect that could not be deferred.

@@ -37,6 +37,16 @@ def test_agents_projection_changes_only_header_and_adds_notice() -> None:
     assert target_lines[2:] == source_lines[1:]
 
 
+def test_completion_gate_is_projected_to_agents() -> None:
+    canonical = projection.CLAUDE_INSTRUCTIONS.read_text(encoding="utf-8")
+    projected = projection.AGENTS_INSTRUCTIONS.read_text(encoding="utf-8")
+
+    required_rule = "Do not report ordinary success while the requested outcome"
+    assert required_rule in canonical
+    assert required_rule in projected
+    assert "never reset, clean, move, or delete an unowned" in canonical
+
+
 def test_skill_projection_is_exact_and_excludes_metadata() -> None:
     expected = projection.canonical_skill_files()
     actual = {

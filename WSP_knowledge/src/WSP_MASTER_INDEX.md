@@ -73,7 +73,7 @@ Core protocols that establish the fundamental architecture and principles.
 | WSP 7 | Test-Validated Commit Protocol | Active | Git commit workflow with test validation | WSP 6, WSP 34 | Version control, commit process |
 | WSP 8 | LLME WSP Rating System | Active | LLME triplet rating system (A-B-C format) integrated with WSP 25/44 semantic foundation | WSP 25, WSP 37, WSP 15 | Module lifecycle assessment within unified framework |
 | WSP 9 | Project Configuration Standard | Active | Project configuration and setup standards | WSP 1, WSP 11 | Project initialization, configuration |
-| WSP 10 | State Save Protocol | Active | State persistence and recovery mechanisms | WSP 2, WSP 60 | State management, persistence |
+| WSP 10 | State Save and Work Closure Protocol | Active | Git-native state preservation, terminal completion/blocker evidence, and safe cleanup of agent-owned lanes | WSP 2, WSP 34, WSP 60, WSP 77, WSP 97 | State management, recovery, completion, worktree cleanup |
 | WSP 11 | WRE Standard Command Protocol | Active | Interface definition and command standards | WSP 1, WSP 49 | API design, interface specification |
 | WSP 12 | Dependency Management | Active | Module dependency declaration and management | WSP 11, WSP 13 | Package management, dependencies |
 | WSP 13 | AGENTIC SYSTEM | Active | **CANONICAL FOUNDATION** for ALL agentic protocols - unifies WSP 27/36/38/39/54/73/74/76/77/80 | WSP 27, 36, 38, 39, 54, 73, 74, 76, 77, 80 | Master agentic foundation tying all agent WSPs together |
