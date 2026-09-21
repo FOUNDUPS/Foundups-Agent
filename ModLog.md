@@ -1,3 +1,10 @@
+## 2026-09-21: Integrate qualified Clerk dependency repair through existing PR lineage
+
+- WSP00/15/22/50/97; C3/I4/D4/Impact4=15/P1. PR1843 and both main workflows passed;98peerheads unchanged. Independent ownership review accepts bounded adoption of unassigned Dependabot1378, subject to renewed remote and final-review gates.
+- Merge current main with exact existing1378head in the owned worktree. Resolve only two known manifest conflicts using independently qualified bytes: Clerk6.39.3; preserve Next16.3.5, sharp0.35.4 and444other lock records. No replacement PR or peer-history rewrite.
+- Reuse exact prior isolated strict install; rerun source TypeScript and18installed-matcher checks successfully with source/tool/manifest bindings. Repeated18cases overlap prior coverage. Preserve preflight UTF-8 decoding failure and expected merge-conflict receipt.
+- Five-file candidate awaits final independent review, normal fast-forward publication and exact-head CI. No installed runtime, actual auth/build/server/deployment or alert closure. Re-score next14/P1 root protobuf783 qualification; preserve aggregate17/P0 and product/runtime boundaries.
+
 ## 2026-09-21: Qualify the existing Clerk repair against current main
 
 - WSP00/12/15/22/50/97; C3/I4/D4/Impact4=15/P1. PR1842 and both main workflows passed;98 peer heads unchanged. Reuse PR1378, not a new dependency implementation.
