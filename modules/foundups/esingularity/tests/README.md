@@ -9,6 +9,7 @@ The test suite verifies the monorepo and public-presentation contracts:
 - existing public routes remain present in source;
 - exactly one presentation notification is added to the existing ticker;
 - the Japanese canonical source has ten slides with complete derived language states;
+- the YUMORI movement page keeps Japanese as its source language and has complete English and Portuguese selector copy;
 - floor allocation, COG DC ownership, economics labels, timed controls, assets, and outreach provenance remain truth-bound;
 - the `/future` source remains valid UTF-8 and free of the superseded speculative capacity schedule.
 
@@ -25,7 +26,7 @@ The regression boundary protects two independent concerns:
 | Test surface | Contract protected |
 | --- | --- |
 | `test_domain_routing.mjs` | YUMORI.me/www root internally selects `/yumori`; eSingularity.ai is excluded and keeps the filesystem homepage |
-| `test_yumori_national_landing.py` | The YUMORI page remains the join-first WHY/WHAT/HOW movement funnel with five committee actions and the 1,000-person target |
+| `test_yumori_national_landing.py` | The YUMORI page remains the join-first WHY/WHAT/HOW movement funnel with five committee actions, the 1,000-person target, and complete Japanese → English/Portuguese selector coverage |
 
 Passing only one side is insufficient: correct routing to the wrong page is still a production failure, and correct page content without hostname routing is not deployed behavior.
 

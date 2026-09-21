@@ -1,5 +1,15 @@
 # Project eSingularity ModLog
 
+## 2026-09-21 — Repair YUMORI.me English and Portuguese switching
+
+- WSP 15 allocation receipt: complexity 2, importance 5, deferability 5, impact 4 = 16 / P0. The public selector visibly changed language state without translating the movement page, so this was a current production-path defect that could not be deferred.
+- WSP 00/50/97 evidence pass: the canonical awakening script could not import `torch`; the documented tracker fallback opened the gate with detector witness absent. Semantic HoloIndex retrieval was rejected by a missing generation binding; the clean-head lexical bundle was accepted only as degraded, unknown-freshness context and was cross-checked against the exact selector, page, tests, recent path history, and production DOM.
+- Root cause: the restored join-first YUMORI page postdated the shared translation dictionary. Its Japanese source strings were never registered, so English/Portuguese selection updated `html.lang`, `?lang=`, local storage, and the ticker but left nearly all movement copy in Japanese.
+- Kept the existing shared language engine and added complete movement-page English and Portuguese copy for visible headings, body text, actions, captions, and image alternatives. Preserved Japanese as the canonical source and corrected the participation label to the governed `JOIN YUMORI.me / 湯守になる` brand.
+- Reused `tests/test_yumori_national_landing.py` under the WSP 97 test-inventory gate and updated the module test memory. No eSingularity homepage, RSI surface, ticker payload, routing rule, form destination, or deployment configuration changed.
+- Fresh validation: 27 dependency-free test functions passed across the landing, ticker, and shared frontend contracts; all 18 Node hostname-routing tests passed; focused ESLint completed with zero errors and the two existing `<img>` optimization warnings. `tsc --noEmit` remains red only on the pre-existing manifest-purpose values and six duplicate translation keys present on `origin/main`. Vinext build made no progress beyond client-reference analysis during a bounded two-minute run and was interrupted; no build-success claim is made.
+- Publication status: source repair and separate PR only; no production deployment claimed by this entry.
+
 ## 2026-09-20 — YUMORI.me correspondence parent rebuilt on current main
 
 - Rebuilt the bounded correspondence/contact-ledger capability from stale PR #1793 without carrying its older branch history forward.

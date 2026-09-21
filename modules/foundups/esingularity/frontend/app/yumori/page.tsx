@@ -22,7 +22,7 @@ const title = { fontSize:'clamp(2.2rem,6vw,5rem)', lineHeight:1.03, letterSpacin
 const body = { fontSize:'clamp(1rem,1.7vw,1.25rem)', lineHeight:1.85, maxWidth:850 } as const;
 
 function Join({ dark=false }: { dark?: boolean }) {
-  return <a href={FORM_URL} target="_blank" rel="noreferrer" style={dark ? darkJoin : join}>JOIN YUMORI / 湯守になる ↗</a>;
+  return <a href={FORM_URL} target="_blank" rel="noreferrer" style={dark ? darkJoin : join}>JOIN YUMORI.me / 湯守になる ↗</a>;
 }
 export default function YumoriPage() {
   return <main className="yumori-page" style={{ background:'#0b0d0c', color:'#f4f1e8', minHeight:'100vh', fontFamily:'system-ui,sans-serif' }}>
