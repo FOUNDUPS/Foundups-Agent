@@ -97,6 +97,84 @@ The local checkpoint passed 200 contract tests with two real-child cases exclude
 Those tests are not a real admitted worker,
 authenticated independent product verification, production reward or retained RSI.
 
+### Persistent reward initiation contract — 2026-09-22
+
+Qualification at `745b9ca7883f2e292e1146e7b3c9a177ec0981e5`; **planned repair, not implemented**.
+PR1850 and its main CI/CodeQL checks are closed; its owned lane was retired.
+Current source and retained independently reviewed SQLite witnesses still show
+an unconfirmed `PAID` label and two payouts/debits after interruption and retry.
+The qualification scores C3/I4/D3/Impact3 = **13/P1**. The resulting bounded
+SQLite source repair scores C4/I4/D3/Impact3 = **14/P1**, separately from blocked
+18/P0 native execution. These planning scores confer no payment authority.
+
+**Existing owners and smallest change:** `PersistentTaskPipeline.trigger_payout`
+delegates to one initiation operation in `persistence/sqlite_adapter.py`, using
+its existing session/ORM rows, wallet helper, compute policy and event records.
+Factor session-taking policy/debit helpers for reuse; keep ordinary public CRUD
+behavior unchanged. Do not compose public CRUD calls that commit independently,
+introduce ambient shared sessions, add a payment ledger, or modify settlement.
+
+The repair's fixed acceptance contract is:
+
+1. Start the SQLite write transaction before reading task or wallet state. Check
+   the task's exact FoundUp, assignee, reward, proof and approved verification
+   bindings inside it. Hold wallet updates in that same transaction, including
+   when two payout operations charge the same actor. This is not a concurrency
+   repair for unrelated debit/rebate/plan writers. No nested commit may escape.
+2. Atomically persist payout initiation, task linkage, compute debit (if required)
+   and the correlated initiation event. Reuse the ledger's `event_id` and existing
+   event payload for task/proof/verification/actor correlation; a compute debit is
+   a compute-access charge, not the contributor reward. Preserve current policy:
+   disabled enforcement still reports configured costs; it does not mean free use.
+3. A pending result is `Task.VERIFIED` with its bound `Payout.INITIATED`, no payment
+   reference and no `paid_at`. No new enum is required. `PAID`, settlement and
+   `payout.completed` remain outside this initiation operation. The in-memory
+   completed-payment simulation remains unchanged; CABR must not count pending
+   initiation as paid completion.
+4. An exact retry returns the same complete, persisted initiation without another
+   payout, debit or event. Validate original actor and task/proof/verification/
+   recipient/amount/event bindings before this no-effect return. Changed or
+   incomplete identity is an error, not permission to create another entitlement.
+   Match the persisted cost snapshot and exact linked-ledger cardinality (zero
+   cost means zero debits); do not re-rate or re-admit an already committed
+   initiation using today's compute policy.
+5. Roll back every write if any pre-commit step fails. Reopen after a committed
+   result and lost response must recover the same receipt. Multiple payouts,
+   orphaned payouts, missing/conflicting lineage, or legacy `PAID` plus `INITIATED`
+   fail closed before debit; no automatic deletion, relabeling, refund or migration
+   may manufacture historical evidence. Also reject relevant legacy trigger-payout
+   debit/event residue across all actors in the FoundUp when linkage is absent
+   or ambiguous; changing the retry actor cannot bypass the hold. Missing FoundUp
+   scope is also held for reconciliation rather than guessed irrelevant,
+   even if the requested task has no payout yet: the old debit committed first.
+   Do not guess which task incurred it. This conservative hold can block otherwise
+   fresh tasks until separate reconciliation. Scan complete relevant history,
+   not a default limited ledger/event page. Preserve all historical records.
+6. First scope is SQLite only. Reject other dialects before compute or payout
+   effects, session creation or compute-attribute access. `PostgresAdapter`
+   inherits methods but omits compute-policy attributes
+   in its constructor; mocked factory routing is not PostgreSQL behavior proof.
+   PostgreSQL support requires its own initialization parity, task/wallet lock
+   design and actual backend tests. Do not send SQLite locking SQL to that backend.
+
+**Compatibility and validation:** use the existing v2 columns and enum values;
+no schema migration or unique index is assumed necessary for this bounded
+pipeline transaction. Direct low-level CRUD remains outside its idempotency
+claim. Extend `test_persistent_compute_wiring.py` and existing persistence tests
+with fresh/reopened retry, each failure boundary, two independent SQLite writers,
+shared-wallet contention, mismatched/rejected proof, ambiguous legacy rows
+(including debit-only interruption, changed retry actor and missing scope),
+compute denial and pre-effect non-SQLite rejection. Preserve in-memory lifecycle,
+schema/migration, factory and CABR consumer regressions. Fix test oracles before
+implementation; exception injection is not power-loss/durability proof.
+
+The adapter's inherited1154-line file and oversized class require WSP62 review:
+consolidate existing helpers, keep new functions bounded, record exact before/after
+debt and remediation, and do not add an exemption or parallel module to hide growth.
+Source acceptance still requires independent tests/review and exact-head CI.
+Persistent role authentication, funded settlement, native worker admission and
+verified RSI retention remain separate unresolved requirements.
+
 ### Capacity gates: one ticket before one thousand agents
 
 Each increase requires a fresh admitted profile and measured acceptance, not a

@@ -1,5 +1,14 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-09-22 - Persistent payout transaction qualification (planned repair)
+
+- WSP00/10/11/15/22/50/62/97; qualification13/P1, separately scored source repair14/P1.
+- Current `trigger_payout` sets PAID for INITIATED and commits compute debit/payout/task/event separately. Prior exact-source SQLite interruption/reopen witnesses remain accepted; their two duplicate payouts/debits are failures, not delivered rewards.
+- Existing-owner repair contract is in [R24](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22): one SQLite write transaction, exact same-actor retry with persisted lineage, pending VERIFIED+INITIATED, no duplicate debit/event, rollback before commit, rejection of ambiguous legacy rows.
+- Reuse existing session/wallet/policy/ORM/event owners and v2 schema. Preserve configured charges even with enforcement disabled. PostgreSQL initialization lacks compute-policy fields; first repair must reject non-SQLite before effects, with backend parity/proof tracked separately.
+- No code, migration, test oracle, payment or runtime change. Existing test owners define the next repair's failure/concurrency/consumer acceptance; inherited adapter size needs bounded consolidation and WSP62 delta review. Persistent role authentication and settlement remain unproven.
+
+
 ## 2026-03-15 - Access/Subscription FAMEventTypes (WSP 103)
 
 ### WSP References

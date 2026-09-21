@@ -1,3 +1,10 @@
+## 2026-09-22: Qualify atomic persistent reward initiation
+
+- WSP00/10/15/22/50/62/97; bounded qualification C3/I4/D3/Impact3=13/P1. PR1850 merged at745b9ca78 with all final checks and main CI/CodeQL successful; owned worktree/branches/staging retired, evidence preserved.92 peer heads unchanged.
+- Existing FAM SQLite sessions commit debit, payout, task and event separately. Retained independently reviewed interruption/reopen witnesses and exact source hashes remain valid; no redundant witness run or runtime activation.
+- Extend the existing R24 packet with one adapter-owned transaction, exact replay identity/event/debit linkage, VERIFIED+INITIATED pending truth, rollback/legacy failure rules and existing-test acceptance. SQLite-only first scope rejects other dialects before effects; PostgreSQL constructor parity/backend proof remains separate. No source or schema change in this qualification.
+- Re-score the concrete SQLite repair C4/I4/D3/Impact3=14/P1. Native ticket18/P0 and resident production provenance remain blocked; LinkedIn13/P1 stays separately owned. Current backlog records the ranked decision and evidence. No live reward, role-authentication, settlement or retained RSI claim.
+
 ## 2026-09-22: Registered signer lifecycle consumer
 
 - WSP00/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. PR1849 is closed on main with both workflows successful and its owned lane retired.92 peer heads unchanged.
