@@ -1984,7 +1984,8 @@
       "independent/receipt.json": "793570a2a0bf32cf0c510dd68efb0f5cfb87de78338947e61128555c1d6741b7",
       "independent-static-preservation.json": "419ebc294e1eca3965d17e7ace88011960220516327a118f96995183943196ce",
       "trailing-newline-normalization.json": "8b29e4221564f16b09df51d02a1567c98c764b33fab832e3710279fbc8d18765",
-      "packaging.json": "1b322de1ca6a79e32a08b92784cafcbfaa2782ac490f84c7041a81a0a3e69261"
+      "packaging.json": "1b322de1ca6a79e32a08b92784cafcbfaa2782ac490f84c7041a81a0a3e69261",
+      "next-resident-correlation-qualification.json": "67525aeac3bd75ebf7a07d811ba5f69d7a323a3ec998bf61a76a16081cfa172c"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2011,8 +2012,8 @@
             "total": 15,
             "priority": "P1"
           },
-          "state": "next_source_contract_qualification",
-          "dependency": "Merge and independently validate this consumer; derive expected identities and manifest/run/session bindings from authenticated selected work; preserve six other reasons and absent lease"
+          "state": "blocked_after_contract_qualification",
+          "dependency": "No production lifecycle factory caller or admitted OS-policy boundary; injected observer/healthcheck/clock provenance and exact signer-profile selection are not authenticated. Consumer success alone cannot remove the peer-handshake reason."
         },
         {
           "task": "Persistent payout atomic initiation and truthful state",
@@ -2024,8 +2025,9 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "reproduced_outstanding",
-          "dependency": "Qualify existing SQLite transaction/idempotency owner using retained interruption/reopen witnesses"
+          "state": "selected_next_bounded_qualification",
+          "dependency": "Qualify existing SQLite transaction/idempotency owner using retained interruption/reopen witnesses",
+          "next_step": "Qualify atomic initiation, retry identity and truthful task/payout state in the existing task_pipeline/sqlite_adapter/models owners; preserve both accepted interruption/reopen witnesses and use disposable state only."
         },
         {
           "task": "LinkedIn dry-run boundary qualification",
@@ -2041,7 +2043,10 @@
           "dependency": "Owner reconciliation; no live social effects"
         }
       ],
-      "selected_next": "Qualify resident use-time correlation of registered lifecycle proof"
+      "selected_next": "Persistent payout transaction/idempotency qualification",
+      "selection_reason": "The15/P1 resident correlation qualification discovered a genuine production dependency gap; its reason-removal patch is not executable. Existing13/P1 payout correctness has an accepted concrete witness and three unchanged core Git blobs. It wins over the tied separately owned LinkedIn scope; no guessed authority framework is added.",
+      "qualification_receipt": "next-resident-correlation-qualification.json",
+      "resolved_qualification": "Exact current requester/manifest/run/session sources mapped; production OS-policy/dependency provenance and exact profile supply remain prerequisites."
     },
     "dispatchable": false,
     "retained_improvement_proven": false
