@@ -1852,15 +1852,15 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c",
-    "selected_action": "Clerk-existing-PR-current-base-integration",
-    "status": "local_integration_verified_pending_independent_review_and_publication",
+    "base_commit": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8",
+    "selected_action": "Root-protobuf-existing-PR-current-base-integration",
+    "status": "local_integration_pending_final_independent_review_and_publication",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 4,
-      "total": 15,
+      "impact": 3,
+      "total": 14,
       "priority": "P1"
     },
     "requires_fresh_reobservation_after_closure": true,
@@ -1868,130 +1868,185 @@
     "observation_path": "current_observation"
   },
   "current_observation": {
-    "observation_id": "rsi-clerk-existing-pr-integration-20260921-1514",
-    "observed_at": "2026-09-21T06:22:06.476471+00:00",
-    "base_commit": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c",
+    "observation_id": "rsi-root-protobuf-existing-pr-integration-20260921-1606",
+    "observed_at": "2026-09-21T07:21:58.734767+00:00",
+    "base_commit": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8",
     "previous_observation": {
-      "git_ref": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c:docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_id": "rsi-clerk-current-base-qualification-20260921-1415"
+      "git_ref": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8:docs/roadmaps/rsi_swarm_backlog.json",
+      "observation_id": "rsi-clerk-existing-pr-integration-20260921-1514"
     },
     "role": "architect/coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Clerk-existing-PR-current-base-integration",
+    "selected_task": "Root-protobuf-existing-PR-current-base-integration",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 4,
-      "total": 15,
+      "impact": 3,
+      "total": 14,
       "priority": "P1"
     },
-    "status": "local_integration_verified_pending_independent_review_and_publication",
+    "status": "local_integration_pending_final_independent_review_and_publication",
     "parent_task": "Dependency-security-reconciliation",
     "parent_scope_score": "17/P0",
-    "selection_basis": "Fresh main only adds prior qualification documents; 98 peer heads unchanged, no Clerk path changes. Existing bot PR has no assignee, reviews, comments or registered matching worktree. 15/P1 integration is executable locally; higher-score rows retain runtime/admission, product-owner or aggregate dependencies. Retain exact previous source qualification and avoid duplicate PR.",
+    "selection_basis": "Observed97unchanged peerheads and both1378main workflows passed. Root qualification14/P1 was highest eligible bounded action. After independent provenance, strict isolated install and explicit failed-oracle adjudication, finish the same owned root repair through existing783lineage before changing lanes; record separate functions15/P1 candidate for postclosure selection.",
     "closure_reconciliation": {
-      "pr1843": "Merged exact reviewed tree at b68ee8c794daa58ecf5e4f9e68909b097d794b1c; both main workflows success; bounded candidate qualification closed.",
-      "history": "Retain26original packets and54prior score rows. Fresh inventory98peerheads unchanged before existing PR adoption. No new full-history accounting claim."
+      "pr1378": "Merged at b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8; both main workflows success; GitHub critical alerts22/23fixed. No installed/deployed app proof.",
+      "root_qualification": "Six exact peer records/344preserved. Strict dry-run/candidate install and baseline install passed. Original12case suite fails on both;11trusted checks completed before unchanged Buffer reader clamping violates an unsupported oracle assumption. Independent characterization supports narrow compatibility only.",
+      "history": "26original packets and55prior rows preserved.97open peers freshly observed; no new full-history audit."
     },
     "execution_scope": {
-      "plane": "Local repository dependency integration, not WRE/admitted runtime execution or prototype security_scan auto-remediation.",
       "files": [
+        "package-lock.json",
         "ROADMAP.md",
         "ModLog.md",
-        "docs/roadmaps/rsi_swarm_backlog.json",
-        "clerk-nextjs/package.json",
-        "clerk-nextjs/package-lock.json"
+        "docs/roadmaps/rsi_swarm_backlog.json"
       ],
-      "existing_pr": 1378,
-      "branch": "agent/rsi-clerk-existing-pr-integration-20260921",
-      "authority": "Standing routine reversible work covers owned local integration and validated normal fast-forward of existing unassigned bot branch; fresh independent review and exact-head checks gate any owned merge. No force push, sibling closure, production activation or deployment.",
-      "shared": "Preserve shared checkout and scoped source hashes; no YUMORI/eSingularity/AutoPost/product changes."
+      "existing_pr": 783,
+      "branch": "agent/rsi-protobuf-current-base-qualification-20260921",
+      "plane": "Routine reversible root dependency integration with independent review and existing branch lineage; no WRE/runtime/provider or security_scan execution.",
+      "authority": "Normal fast-forward adoption requires same-repo unassigned unchanged bot head and no active matching worktree. Exact reviewed head/checks/ownership gate owned merge; no force push, sibling closure, deployment or installed runtime mutation.",
+      "shared": "Shared checkout, functions/GotJunk locks, YUMORI/eSingularity, RedDog and RemoteAutoPost unchanged."
     },
     "retrieval": {
-      "query": "holo-request.json",
-      "result": "ok=true; lexical only; freshness=UNKNOWN; index_gap_detected=true",
-      "noise": "Bounded four-result owner query; avoid broad archived history.",
-      "ordering": "Exact manifests/middleware/README first, then current-base contracts and bound receipts.",
-      "missing_artifacts": "No Clerk module ROADMAP/INTERFACE/ModLog or tests/script; use existing root canonical docs and isolated compiler/matcher checks. No duplicate framework.",
-      "staleness": "Direct source/manifest hashes verified. Reuse prior strict install only at identical candidate/tool/source scope; no semantic CURRENT claim or repeated failed semantic probe.",
-      "duplication": "Reuse PR1378; preserve same-path siblings and broader1762. No replacement PR."
+      "mode": "governed owner lexical bundle",
+      "result": "ok=true, freshness=UNKNOWN, index_gap_detected=true",
+      "noise": "Four bounded owner results plus required root manifests/README/roadmap; no broad archived dump.",
+      "ordering": "Current lock/tree and parent chain first; exact historical exposure/owner bindings reused only where unchanged.",
+      "missing_artifacts": "Root package has no test script; no existing scoped protobuf fixture found. Disposable trusted-schema/gRPC fixture used, no new repository module/test framework.",
+      "staleness": "No semanticCURRENT or repeated failed semantic probe; currentGit and exact source prove narrower scope.",
+      "duplication": "Existing783 owns root parent update;785utf8 change covered by effective delta but no sibling closure.1351/1350/1317root overlaps are distinct. Functions1375 and GotJunk1358 separate."
     },
     "ownership": {
-      "before": "pr1378-before.json",
-      "independent_review": "independent-owner-review.json",
-      "peers_before": 98,
-      "active_worktrees": "worktrees.txt",
-      "gate": "Refresh same-repo branch identity/head and ownership before a normal fast-forward publication."
+      "peer_count": 97,
+      "peer_heads_unchanged": true,
+      "evidence": "pr783-before.json/open-prs.json/worktrees.txt",
+      "review": "independent-provenance-review.json",
+      "publication_gate": "Refresh exact same-repo branch, no new assignee/review/comment/worktree and current main before normal push."
     },
     "findings": {
-      "base": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c",
-      "peer": "d4dded5d47a995442fbed7363067d51e00c3608f",
-      "merge_parent": "d4dded5d47a995442fbed7363067d51e00c3608f",
-      "manifest_sha256": {
-        "clerk-nextjs/package-lock.json": "d2da91d67e60f6ae0929826dd309e21cd42f4ea72205cd8b3ce1343731f86406",
-        "clerk-nextjs/package.json": "c6cd0c92e56d2a3530076372d6602d8947504a13fccc365ab2bf99da28e34e57"
+      "base": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8",
+      "peer": "2383d10da33960c32b40ba845737b0db2dca49af",
+      "tree": "bccc9120f586428cdf0d597b8ac7aa670bd7d449",
+      "merge_base": "9f047fff69d1b9f7d68bc137b634837c803d4b70",
+      "candidate_path": "O:\\Foundups-Agent-audits\\20260921-rsi-protobuf-qualification-1606\\candidate",
+      "candidate_sha256": {
+        "package.json": "f7d2720b58bd26c9c7b8f5a2a1d6f6de36ecb2bc9d1214c73e50eafcfbc1df3d",
+        "package-lock.json": "2d5daabfb1bee2eb7e048d5ada7bdea0e5a5df89d8f09e1804ff364d15a7392d"
       },
-      "qualified_candidate_exact_bytes": true,
-      "changed_records": [
-        "",
-        "node_modules/@clerk/backend",
-        "node_modules/@clerk/clerk-react",
-        "node_modules/@clerk/nextjs",
-        "node_modules/@clerk/shared",
-        "node_modules/@clerk/types",
-        "node_modules/js-cookie"
-      ],
-      "unchanged_records": 444,
-      "main_next": "16.3.5",
-      "main_sharp": "0.35.4",
-      "new_clerk": "6.39.3",
-      "unrelated_source_changed": false,
-      "peer_lineage_preserved": true,
-      "installed_runtime_changed": false
+      "changed_records": {
+        "node_modules/@protobufjs/codegen": {
+          "old": "2.0.4",
+          "new": "2.0.5",
+          "equals_peer": true
+        },
+        "node_modules/@protobufjs/eventemitter": {
+          "old": "1.1.0",
+          "new": "1.1.1",
+          "equals_peer": true
+        },
+        "node_modules/@protobufjs/fetch": {
+          "old": "1.1.0",
+          "new": "1.1.1",
+          "equals_peer": true
+        },
+        "node_modules/@protobufjs/inquire": {
+          "old": "1.1.0",
+          "new": "1.1.2",
+          "equals_peer": true
+        },
+        "node_modules/@protobufjs/utf8": {
+          "old": "1.1.0",
+          "new": "1.1.1",
+          "equals_peer": true
+        },
+        "node_modules/protobufjs": {
+          "old": "7.5.4",
+          "new": "7.6.3",
+          "equals_peer": true
+        }
+      },
+      "changed_count": 6,
+      "unchanged_records": 344,
+      "root_manifest_unchanged": true,
+      "websocket_driver_preserved": "0.7.5",
+      "repository_mutated": false
     },
     "validation": {
-      "source": "source-validation.json",
-      "typecheck": "exit0 rerun on identical source and installed candidate",
-      "matcher": "18 synthetic actual-installed matcher cases pass; repeats overlap earlier18",
-      "strict_install": "Reuse independently reviewed exact candidate install from prior sprint, scripts disabled; no new install.",
-      "review": "Final five-file independent review pending.",
-      "remote": "New integration head not yet published or checked. Prior1843main workflows success.",
-      "limits": "No actual credentialed auth, advisory bypass, app build/server, deployment or alert closure proof."
+      "strict_candidate_dry_run": "exit0; no node_modules",
+      "strict_candidate_install": {
+        "exit_code": 0,
+        "seconds": 17.84,
+        "scripts_disabled": true
+      },
+      "baseline_install": {
+        "exit_code": 0,
+        "seconds": 9.64,
+        "scripts_disabled": true
+      },
+      "original_frozen_suite": {
+        "candidate_exit": 1,
+        "baseline_exit": 1,
+        "status": "FAILED on both; never relabeled passed",
+        "checks_completed_before_failure": 11,
+        "failed_check": "Expected exception for truncated Node Buffer string",
+        "probe_unchanged": true
+      },
+      "separate_characterization": {
+        "exit_code": 0,
+        "observations": 6,
+        "outcome": "Both versions decode truncated Buffer/gRPC text a; both reject Uint8Array with RangeError. This documents existing behavior, not safety."
+      },
+      "independent_adjudication": "Invalid universal rejection oracle for inspected library contract; narrow trusted-schema compatibility accepted. No silently waived downstream strict-wire requirement, retained RSI gain or vulnerability-exploit proof.",
+      "source_identity": "Exact canonical Git blobs and normalizedLF match qualified candidate; rawCRLF assertion failure preserved.",
+      "remote": "New integrated head not yet published/checked; prior1378main workflows success.",
+      "limits": "No service/application/Firebase connection, strict malformed-wire validation, attacker-schema exploit, installed runtime or deployment proof. Root alert170 remains open at observation."
     },
     "source_bindings": {
-      "clerk-nextjs/package-lock.json": "d2da91d67e60f6ae0929826dd309e21cd42f4ea72205cd8b3ce1343731f86406",
-      "clerk-nextjs/package.json": "c6cd0c92e56d2a3530076372d6602d8947504a13fccc365ab2bf99da28e34e57",
-      "clerk-nextjs/src/app/globals.css": "94d307fb925a3264dd331975b5e17170b1d887f361669cf839bdf37cc7a40db8",
-      "clerk-nextjs/src/app/layout.tsx": "eeb494003724782fbc3cd44f755aedf0b9b5613acb40d990daf70319d134fb75",
-      "clerk-nextjs/src/app/legal/alpha-nda/page.tsx": "8e1c0e2e2e02316993e57790dda706f7069fd9a693bd89833a41f4b3bec26896",
-      "clerk-nextjs/src/app/legal/terms-of-access/page.tsx": "2a1587ac36d516a7097bffa969329724fe80e564881a0a847333709189e92d76",
-      "clerk-nextjs/src/app/member/page.tsx": "ba8d61cf1ec28a4a2efce9548d60ac89eda9172c3c3f4a4bcb3d609123cb85eb",
-      "clerk-nextjs/src/app/page.tsx": "39aacf076b1d0fd2095a2c2a98729982de417e8de5df6c9d3613358391af0631",
-      "clerk-nextjs/src/middleware.ts": "864e82c5fcbcf0dc3322a62f437a52d97e9cda2623c1ddd61083c3671293c489",
-      "clerk-nextjs/tsconfig.json": "dbacf04aa5f38c1ce4b0f030fbb84e5adff19306fb785b2e4aafef9c58705658"
+      "package.json": {
+        "git_blob": "2ffffb421f5f98fb297fdcae903ce97d8ba2a643",
+        "sha256_lf": "f7d2720b58bd26c9c7b8f5a2a1d6f6de36ecb2bc9d1214c73e50eafcfbc1df3d"
+      },
+      "package-lock.json": {
+        "git_blob": "dc6dbba14095f2fb600febb64124cc2ce8908257",
+        "sha256_lf": "2d5daabfb1bee2eb7e048d5ada7bdea0e5a5df89d8f09e1804ff364d15a7392d"
+      }
     },
     "evidence_sha256": {
-      "preflight.json": "853c92b61720af4e973c1532ffcae49d7e74a6106eecb46fd428622a64cf30d7",
-      "preflight-failure.json": "905af7fd83293e4185a550a8fb0feb17ed2e3cf030ad1085b1cdb4b99f003af5",
-      "open-prs.json": "4ca62314258d0a9718067312b0706ba19abbddd6fdb1df4d6b07d796a2f4d7f1",
-      "pr1378-before.json": "8bc41a05450a0dafa8bc85fd3249c6af559f9a6ee0dd474aea84383e743d0d1b",
-      "shared-before.json": "709779440647b9e610d68c9e3d78e3de373d834499cb40b63447bf9dd5fa3b00",
-      "pr1843-main-workflows.json": "6ee1b6e21f2e893281874796ef78b20ea6f52198b21244d8aeb447d2cf9c1522",
-      "holo-owned-lexical.json": "890e4757eea811d8e5df0ed90006ff360e1ea3a39f4bd08daa714c7e76d25dc0",
-      "independent-owner-review.json": "1aba5a792d21184b189884a6a62c24946cf22da7b3bf4f61f2b269c15f6573ce",
-      "merge-attempt.json": "cb3ddf012a6cbf587e21af5f0df53eb8c8f841e008b4f0427a8e08f09ba68c42",
-      "integration.json": "0eb12553a419508e86b246d2fb44cae5ece1e954d46f158b0c530c5b0e972f03",
-      "source-validation.json": "ca526e900a684ad1dce159386eefc34fe97ba37cb57405a5c5fe151e1f158b37"
+      "preflight.json": "824adc5e4b21cfbe24c7012e32abf3af383e64425f886dcf928cd83c8bbb2cb0",
+      "preflight-failure.json": "9dd7004e2bd4176c1435bc795a24294db0d92ebef16d68296ac376ed6734a71a",
+      "open-prs.json": "b618366b9e69470fec23964fd2db3bb36ef4da6fd8a65df4b833ec6c5cc66987",
+      "pr783-before.json": "9dbfb690652f546d0f1d98b5e34f9f94842e395eecea938798260836eb245a44",
+      "shared-before.json": "b18e45fdb9adb18fa14e131ff4c5440e30dd75c31d87063a3f399e357768a97f",
+      "pr1378-main-workflows.json": "7b6fa49af40877af3655ea979e275c2dcc7d3131be75dc103307b60c09a54619",
+      "selected-alerts-before.json": "4a7cd9e8ad359ebf50d18b81f3da06b37f114a75cd80a8e9b1cef47fa42807e0",
+      "holo-owned-lexical.json": "655213c85bc737d62f97c25139df09da2353463eb8e0eca953ed3e6da75b4042",
+      "merge-tree.json": "7ee6a6393e07d442118ab122a0d0289b70c6d18e4d5892fd5d0a93c32f2f871c",
+      "candidate-resolution.json": "98a2d25cb6a09b93d54984917d781fcf6d840a58813e66a29288376fd041b3d2",
+      "independent-provenance-review.json": "4260891fdaa955fe42d85f238bc132db9599bd77da6695ad96cefd498009cde3",
+      "npm-dry.json": "243278e081e2913b636853d29fb52a78a43e432da8e86395f9a9b40d4a2d2604",
+      "npm-ci.json": "fabce7f9a0a4e4899c1a891c3a20123bc74ebdef33d77cf1cffb0238198a4e6d",
+      "compatibility.json": "37fb88de3b05527d95455540381b05072a92b471fd525a57c2b97e94fe340d03",
+      "compatibility.stderr": "030dcf0b13903d24ab433a1ed9789c5b8fc9559a7e8a32231ad351256a673b53",
+      "compatibility.cjs": "a5bff7cb66661cb45b71b6fce0508240f5ea5d074f39757af3689554f2573833",
+      "fixture.proto": "1fc6147982c26fbf9f27ad8ec0c74773c96fdb368604e6b32f435ca5aed78381",
+      "baseline-npm.json": "a2dbc452a666419dd4f04b28cc830203df6b53c9b3083e58699f93bc33fcfbe2",
+      "baseline-compatibility.json": "c76d946921337711847071f845ba19d5ffe906e195bfd16d6ca880e67cab7df4",
+      "baseline-compatibility.stderr": "ae4fc354ecfec2da18b78462f0ba8e89cd8f316cf4cf26992be300ed7335677f",
+      "malformed-diagnostic.json": "e09d3fb0615f238a73d3ff06a12e69a1f72cdd33278cc86c39fce087a417a3a4",
+      "malformed-diagnostic.cjs": "3f28176aaa43c7ff68343414dc173026c4ede7a9f0d6cdffbd6bcadf73891518",
+      "independent-malformed-contract-review.json": "1e48d82d9fe5c1ec8ee520c22ef02103d69dd22227d5ac482333af0d6b00f587",
+      "qualification-decision.json": "23953960a1e187324671d5c06a6e4d4c08836e87f30117ab0c95179534eda61d",
+      "integration-failure.json": "a38675f75cd5c3c6242c62dc1203fea853864c7233143db590aaa4aaab2e8ae5",
+      "integration.json": "80617902b98d01ad253cdeba60ddfd1339adf9b702a719125b86698afcd61cfd"
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-clerk-integration-1514",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-protobuf-qualification-1606",
     "effort_cost": {
       "provider_calls": 0,
-      "new_installs": 0,
-      "network": "Read-only GitHub/Git before publication; no app network.",
-      "verification": "Exact manifest/source/tool bindings,18synthetic matcher and typecheck reruns, independent final review.",
-      "total_token_cost": "Unavailable; no zero-cost claim."
+      "installs": "Two isolated roots, lifecycle scripts disabled; same cache, no repository node_modules.",
+      "verification": "Strictnpm, fixed wire vectors,11trusted/gRPC checks completed, originalnegativefailure preserved, separate6reader observations and independentreview.",
+      "cost_unavailable": "Total chat worker cost unavailable."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2136,7 +2191,7 @@
           "score": 17,
           "priority": "P0",
           "state": "partial_critical_manifest_owner_qualification_complete",
-          "next_step": "Clerk existing-PR integration is locally validated, pending independent review and publication. Aggregate17/P0 stays open. Next eligible dependency slice is existing root protobuf PR783 current-base qualification; preserve functions/GotJunk and other owners."
+          "next_step": "Clerk1378 merged and alerts22/23fixed; rootprotobuf783 integration locally prepared with bounded compatibility and preserved oracle failure. Complete owned root scope, then qualify existing functions protobuf owner/lock; GotJunk/Pillow and other manifests remain distinct."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -2304,8 +2359,31 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "local_integration_verified_pending_independent_review_and_existing_pr_publication",
-          "next_step": "Review five scoped files, fast-forward existing PR1378 only after renewed ownership/ancestry gate, then require exact-head checks before eligible owned merge. No live authentication/build/deployment or alert closure inferred."
+          "state": "closed_pr1378_repository_integration",
+          "next_step": "Merged exact reviewed tree; both main workflows passed. GitHub alerts22/23 fixed. Installed/deployed/auth state unverified."
+        },
+        {
+          "task": "Functions-protobuf-repair-owner-qualification",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "eligible_after_owned_root_sprint_closure",
+          "evidence": [
+            "functions/package-lock.json",
+            "firebase.json",
+            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1375"
+          ],
+          "next_step": "Reobserve functions manifest and existing1375 utf8 owner. Its utf8-only update leaves protobufjs7.5.4; identify smallest current-base parent-package repair preserving sibling progress, dependency closure and actual package entry/build owner. Qualify in disposable evidence before repository changes; no functions deployment, product runtime or duplicate owner assumption.",
+          "score_rationale": "C3 transitive lock/owner and missing entry source; I4/D4 known critical dependency remains; Impact4 runtime-classified functions dependency vs root development-only scope. Complete current owned14/P1 sprint before switching lanes.",
+          "effort_cost": "Existing lock/owner qualification and focused offline checks; no paid-model/provider/runtime admission.",
+          "dependencies": "Finish currently owned root sprint; refresh source, entry/runtime meaning and existing PR ownership.",
+          "separate_scope": "GotJunk frontend and protected product/AutoPost owners remain separate."
         },
         {
           "task": "protected-foundup-work",
@@ -2382,16 +2460,30 @@
           },
           "score": 14,
           "priority": "P1",
-          "state": "eligible_after_clerk_integration_closure",
+          "state": "bounded_qualification_complete_with_preserved_invalid_oracle_failure",
           "evidence": [
             "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json",
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/783",
             "package-lock.json"
           ],
-          "next_step": "Reobserve PR783 and current-main root lock. Reconcile its protobufjs7.6.3/utf8 changes while preserving current websocket-driver0.7.5 and other records. Qualify strict lock resolution and bounded trusted-schema compatibility in disposable evidence before source integration. No duplicate root PR, mass update, product runtime or advisory closure claim.",
+          "next_step": "Original12case suiteFAILED on both baseline/candidate;11trusted checks completed; source/6characterizations explain unchanged Buffer-specific clamping. No strict malformed wire validation claim. Continue same owned root repair only within documented compatibility scope.",
           "score_rationale": "C3: stale lock lineage and transitive closure need careful integration. I4/D4: known critical advisory requires remediation progress. Impact3: root development dependency only; functions/GotJunk runtime locks stay separate.",
           "effort_cost": "One existing lock delta and focused deterministic compatibility; no paid model admission needed.",
           "dependencies": "Current Clerk sprint closure; fresh root ownership and exact-source/runtime bindings."
+        },
+        {
+          "task": "Root-protobuf-existing-PR-current-base-integration",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "local_integration_pending_final_independent_review_and_publication",
+          "next_step": "Final four-file independent review, fresh existing783ownership and normal fast-forward only; exact-head checks gate any owned merge. Preserve original12case FAILED on baseline/candidate, completed11trusted cases and reader-characterization limits.",
+          "score_rationale": "C3 existing lock/lineage and validation limits; I4/D4 known root advisory requires remediation; Impact3 development dependency scope, no product runtime."
         },
         {
           "task": "R25-A consented local daily-work proposal",
@@ -2736,8 +2828,8 @@
           ]
         }
       ],
-      "selected_next": "Root-protobuf-existing-PR-current-base-qualification",
-      "selection_basis": "After gated Clerk closure, select14/P1 existing root protobuf qualification: remaining higher rows are blocked, externally owned, closed bounded scopes or aggregate contracts without a qualified new source slice. Root development dependency is narrower than runtime functions/GotJunk. Refresh all prerequisites again before execution."
+      "selected_next": "Functions-protobuf-repair-owner-qualification",
+      "selection_basis": "After owned root publication/closure,15/P1 functions parent-package qualification is highest newly eligible bounded step under17/P0 security parent. Fresh owner/source/entry evidence required; main/peer or gate changes force rescore."
     },
     "dispatchable": false,
     "retained_improvement_proven": false

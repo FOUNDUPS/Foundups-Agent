@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify and integrate existing root protobuf repair
+
+- WSP00/15/22/50/97; root scope C3/I4/D4/Impact3=14/P1. Clerk1378 and both main workflows passed; GitHub alerts22/23fixed.97other peer heads unchanged. Reuse root783 lineage without a replacement PR.
+- Clean current-main merge changes six protobuf records, preserving344 including websocket-driver0.7.5 and existing Firebase/TypeScript progress. Strict isolated candidate and baseline npm installs pass with lifecycle scripts disabled; root manifest and repository node_modules unchanged.
+- Preserve the frozen12-case compatibility suiteFAILED on7.5.4 and7.6.3:11trusted-schema/gRPC checks complete, then expected truncated-Buffer rejection fails. Separate6observations and source review show unchanged Buffer clamping, genericUint8Array rejection and loader behavior. Independent adjudication accepts only narrow trusted-schema compatibility; no12pass, strict-wire safety or retained RSI gain claim.
+- Local root-lock integration plus three canonical docs awaits final independent review, normal fast-forward existing783 and exact-head checks. Preserve workflow-response and CRLF validation failures. No deployed/runtime/product change; re-score next15/P1 functions parent-package owner qualification after this owned sprint closes.
+
 ## 2026-09-21: Integrate qualified Clerk dependency repair through existing PR lineage
 
 - WSP00/15/22/50/97; C3/I4/D4/Impact4=15/P1. PR1843 and both main workflows passed;98peerheads unchanged. Independent ownership review accepts bounded adoption of unassigned Dependabot1378, subject to renewed remote and final-review gates.
