@@ -370,7 +370,7 @@ Those integrations, process recovery and R11-B–F remain open.
 
 **Observed boundary:** Worker assurance reservation/recovery tests are lower-level reuse evidence. They do not qualify arbitrary team fanout or aggregate provider/token limits.
 
-**Required next evidence:** Bind parent/child limits, aggregate spend/time, fairness/backpressure and reserved verifier capacity before admitting a larger worker/team profile.
+**Required next evidence:** Bind parent/child limits, aggregate spend/time, fairness/backpressure and reserved verifier capacity before admitting a larger worker/team profile. Apply the [cross-layer monitor gates](../DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22): measured progress, truthful cost/unknowns, audit-store health and bounded advisory capacity before each concurrency increase.
 
 ### R19 — CI / test-evidence owner
 
@@ -430,7 +430,7 @@ Those integrations, process recovery and R11-B–F remain open.
 
 **Observed boundary:** No sustained multi-generation operational proof is established by this audit. Individual successful checks and locally stored variations cannot fill this row.
 
-**Required next evidence:** Predeclare duration/workload, correctness, cost, rollback and intervention limits, then demonstrate retained benefit across repeated governed generations. Independent longitudinal acceptance is still to be supplied.
+**Required next evidence:** Predeclare duration/workload, correctness, cost, rollback and intervention limits, then demonstrate retained benefit across repeated governed generations. Independent longitudinal acceptance is still to be supplied. The [current supervision map](../DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22) reuses CentralDAEmon/WRE owners and identifies unqualified persistence acknowledgment, scan health and confirmed control outcomes; a dashboard cannot substitute for these proofs.
 
 ### R24 — FAM / qualification / ticket / audit / settlement owners
 

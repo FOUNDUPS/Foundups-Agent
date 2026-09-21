@@ -300,6 +300,28 @@ Continue parity-proven decomposition in later focused slices:
 - separate selection, evolution proposals, and telemetry;
 - keep every new module/function below WSP 62 thresholds.
 
+## Cross-layer RSI monitoring and controls — 2026-09-22
+
+Use the existing [daemon architecture map](../../../docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22)
+as the supervision contract, not a second roadmap or scheduler. WRE/AgentDB keep
+admission/claim/lease authority; CentralDAEmon supplies its existing observation
+surface. R18 capacity and R23 sustained operation now require truthful progress,
+freshness, persistence acknowledgment, confirmed control outcomes and monitor health.
+
+Sequence: qualify central event-store collision/partial-write/ack behavior in
+disposable fixtures (15/P1), then repair only confirmed existing-owner defects;
+bind one component and admitted ticket; prove two/ten workers with verifier capacity;
+only then qualify hundred/thousand-agent throughput and bounded advisory supervision.
+Read-side broker initialization, scan errors and stop confirmation are still open.
+Small-model watchers are advisory candidates with fixed evaluations, not authorized
+controllers. Startup status must not automatically admit RSI work or double cycles.
+
+This is a source/document audit, not a new live test. The per-counter repair below
+remains its own narrower result. Native18/P0 is blocked; persistent role15/P1 remains
+outstanding. Re-score after closure; no production services or protected FoundUps
+are test fixtures for this layer. Each component handoff carries its existing
+owner, oracle, telemetry/control consumer, rollback and independent evidence.
+
 ## Daemon counter memory lifetime — 2026-09-20
 
 The 13/P1 qualifier merged in PR1807. On unchanged source, its independent

@@ -89,7 +89,8 @@ Runtime supervision intent:
 - `tail <dae>` -> recent DAEmon event stream for that DAE
 - `status <dae> live` -> registry state + runtime status + recent event tail
 - `watch <dae> since <sequence>` -> cursor-based incremental follow from a known event id
-- The event store remains the source of truth; the observer is read-only
+- The event store is the intended lifecycle ledger; persistence acknowledgment/parity still need qualification. The observer is read-side, but lazy broker lookup can create a heartbeat thread; it is not proved effect-free.
+- Follow the [current RSI/WRE supervision contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22). Registry disable is not confirmed worker stop; heartbeat is not task progress. No runtime repair or execution authority is implied by this map.
 - Example supervisory surfaces:
   - `status openclaw live`
   - `status openclaw supervisor live`
