@@ -12,7 +12,48 @@ const languages: Array<{ id: Language; label: string }> = [
   { id: 'pt', label: 'Português' },
 ];
 
+const languageSelectionLabels: Record<Language, string> = {
+  ja: '言語を選択',
+  en: 'Language selection',
+  pt: 'Seleção de idioma',
+};
+
 const copy: Record<string, [string, string]> = {
+  // YUMORI.me movement page. Japanese remains the canonical source language.
+  'YUMORI.me / 湯守': ['YUMORI.me / Community guardians', 'YUMORI.me / Guardiões da comunidade'],
+  'I am a guardian.': ['I am a guardian.', 'Sou um guardião.'],
+  '日本の地域を守り、地域のAIをつくる。': ['Protect Japan’s communities. Build community-owned AI.', 'Proteger as comunidades do Japão. Criar uma IA que pertença à comunidade.'],
+  '田園と地域の小規模AI計算基盤を組み合わせた再生構想': ['Regeneration concept combining farmland with small-scale community AI compute', 'Conceito de regeneração que combina áreas rurais com computação de IA comunitária de pequena escala'],
+  '地域の未来を、地域でつくる。': ['Build the community’s future within the community.', 'Construir o futuro da comunidade dentro da própria comunidade.'],
+  '再生構想のイメージ・実在の完成施設ではありません': ['Concept image · Not a photograph of a completed facility', 'Imagem conceitual · Não é uma fotografia de uma instalação concluída'],
+  '湯守は、本来、湯と場所を守る人。YUMORI.meは、その考えを地域へ広げます。AIインフラは必要です。しかし、土地・電力・知識・文化の未来を、地域の外だけで決めさせない。知る。守る。そして別の形をつくる。': ['A yumori traditionally protects the hot spring and the place around it. YUMORI.me extends that idea to the whole community. AI infrastructure is necessary, but decisions about the future of our land, power, knowledge, and culture should not be made only from outside the region. Understand what is coming. Protect what matters. Build a community-owned alternative.', 'Tradicionalmente, um yumori protege as águas termais e o lugar ao seu redor. O YUMORI.me amplia essa ideia para toda a comunidade. A infraestrutura de IA é necessária, mas as decisões sobre o futuro da terra, da energia, do conhecimento e da cultura não devem ser tomadas apenas fora da região. Compreender o que está chegando. Proteger o que importa. Construir uma alternativa que pertença à comunidade.'],
+  'JOIN YUMORI.me / 湯守になる ↗': ['JOIN YUMORI.me / Become a community guardian ↗', 'PARTICIPE DO YUMORI.me / Torne-se um guardião da comunidade ↗'],
+  '準備委員会の最初の目標：1,000人。1,000人に達した段階で、全国運動を支える正式な組織化を検討します。': ['The preparatory committee’s first goal is 1,000 members. When we reach 1,000, we will consider forming a formal organization to support a nationwide movement.', 'A primeira meta do comitê preparatório é reunir 1.000 membros. Ao alcançar esse número, avaliaremos a criação de uma organização formal para apoiar um movimento nacional.'],
+  '01 / WHY — KNOW WHAT IS COMING': ['01 / WHY — KNOW WHAT IS COMING', '01 / POR QUÊ — ENTENDA O QUE ESTÁ CHEGANDO'],
+  'ハイパースケールは、': ['Hyperscale is about more than', 'A hiperescala envolve muito mais'],
+  '建物一棟の話ではない。': ['a single building.', 'do que um único edifício.'],
+  '千葉・印西では巨大データセンターの集積が、電力、土地、景観、騒音、都市計画、地域との共存の問題になっています。米国ではさらに先の巨大集積をすでに経験しています。日本は、その結果を見てから動く必要はありません。': ['In Inzai, Chiba, clusters of enormous data centers are raising questions about electricity, land, landscape, noise, urban planning, and coexistence with the community. The United States has already experienced even larger concentrations. Japan does not need to wait for the consequences before acting.', 'Em Inzai, na província de Chiba, a concentração de enormes data centers levanta questões sobre energia, uso da terra, paisagem, ruído, planejamento urbano e convivência com a comunidade. Os Estados Unidos já vivenciaram concentrações ainda maiores. O Japão não precisa esperar pelas consequências para agir.'],
+  'YUMORIはデータセンターそのものに反対する運動ではありません。地域が、巨大投資の後ではなく': ['YUMORI is not a movement against data centers themselves. It is a movement for communities to make choices ', 'O YUMORI não é um movimento contra os data centers em si. É um movimento para que as comunidades possam fazer escolhas '],
+  '前に': ['before', 'antes'],
+  '選択できるようにする運動です。': ['—not after massive investments have already arrived.', '—e não depois que grandes investimentos já tiverem chegado.'],
+  'JAPAN HYPERSCALER REPORTを読む →': ['Read the Japan Hyperscaler Report →', 'Leia o Japan Hyperscaler Report →'],
+  '印西の大規模データセンター開発地': ['Large-scale data-center development site in Inzai', 'Área de desenvolvimento de data centers de grande escala em Inzai'],
+  'DPDC印西パーク開発地。画像出典: R.E.port。': ['DPDC Inzai Park development site. Image: R.E.port.', 'Área de desenvolvimento do DPDC Inzai Park. Imagem: R.E.port.'],
+  '02 / WHAT — REUSE BEFORE DEMOLITION': ['02 / WHAT — REUSE BEFORE DEMOLITION', '02 / O QUÊ — REUTILIZAR ANTES DE DEMOLIR'],
+  '壊す前に調べる。': ['Investigate before demolishing.', 'Investigar antes de demolir.'],
+  '地域の建物を、地域のAIインフラへ。': ['Turn community buildings into community AI infrastructure.', 'Transformar edifícios comunitários em infraestrutura de IA da comunidade.'],
+  'YUMORI.meは、旧すかっとランド九頭竜を守る活動から始まりました。使える可能性のある公共施設、工場、ホテル、倉庫、温浴施設を、解体費を払って消す前に、構造・電力・光回線・冷却・排熱利用を調べる。成立する場所では、解体費を生産的な再生投資へ変えられないか検証します。': ['YUMORI.me began with the effort to protect the former Sukatto Land Kuzuryu. Before paying to demolish public facilities, factories, hotels, warehouses, or bathing facilities that may still be usable, investigate their structure, power, fiber connectivity, cooling, and potential heat reuse. Where reuse is viable, test whether demolition spending can become productive regeneration investment instead.', 'O YUMORI.me nasceu do esforço para proteger o antigo Sukatto Land Kuzuryu. Antes de pagar pela demolição de instalações públicas, fábricas, hotéis, armazéns ou espaços termais que ainda possam ser aproveitados, é preciso avaliar estrutura, energia, conexão por fibra, resfriamento e possível reaproveitamento de calor. Onde a reutilização for viável, queremos testar se o gasto com demolição pode se transformar em investimento produtivo de regeneração.'],
+  'COG DC — Community-Owned Green Data Center': ['COG DC — Community-Owned Green Data Center', 'COG DC — Data Center Verde de Propriedade Comunitária'],
+  'は、1MWから始め、地域需要に合わせて5→10→20MWへ育てる構想です。計算力の第一用途は輸出ではなく、地域の学校、大学、農業、病院、自治体、ものづくり、企業です。用途別のオープンソースモデルを使い、地域のデータだけでなく、農業の経験、工程、教材、方言、歴史、文化的記憶を含む「地域の知」を地域で扱える選択肢をつくります。': [' is envisioned to start at 1 MW and grow to 5, 10, and 20 MW in step with local demand. Its first purpose is not to export computing power, but to serve local schools, universities, agriculture, hospitals, municipalities, manufacturers, and businesses. With purpose-built open-source models, communities gain the option to manage not only local data but also regional knowledge—including agricultural experience, work processes, teaching materials, dialects, history, and cultural memory—within the region.', ' foi concebido para começar com 1 MW e crescer para 5, 10 e 20 MW de acordo com a demanda local. Seu primeiro objetivo não é exportar capacidade computacional, mas atender escolas, universidades, agricultura, hospitais, municípios, indústrias e empresas da região. Com modelos de código aberto voltados a cada finalidade, a comunidade ganha a opção de administrar na própria região não apenas seus dados, mas também o conhecimento local — incluindo experiência agrícola, processos de trabalho, materiais didáticos, dialetos, história e memória cultural.'],
+  '03 / HOW — TURN COMPUTE INTO REVITALIZATION': ['03 / HOW — TURN COMPUTE INTO REVITALIZATION', '03 / COMO — TRANSFORMAR COMPUTAÇÃO EM REVITALIZAÇÃO'],
+  'データセンターを箱で終わらせない。': ['Do not let a data center remain just a box.', 'Não deixar que um data center seja apenas uma caixa.'],
+  '地域再生のハブにする。': ['Make it a hub for regional regeneration.', 'Transformá-lo em um centro de regeneração regional.'],
+  'COG DCの隣にEducational Singularity Labを置く。学生が地域の計算資源で学び、研究し、地域課題を解く。FoundUpsと地域企業が試作し、起業する。回収可能な熱は、温浴、暖房、農業、融雪など、その地域に合う用途を技術検証する。': ['Place an Educational Singularity Lab beside the COG DC. Students can learn and conduct research with local computing resources while solving local problems. FoundUps and regional businesses can prototype and launch ventures. Recoverable heat can be tested for locally appropriate uses such as bathing, heating, agriculture, and snow melting.', 'Instalar um Educational Singularity Lab ao lado do COG DC. Estudantes poderão aprender e pesquisar com recursos computacionais locais enquanto resolvem desafios da região. FoundUps e empresas locais poderão criar protótipos e lançar novos negócios. O calor recuperável será testado em usos adequados à região, como banhos termais, aquecimento, agricultura e derretimento de neve.'],
+  'そして方法そのものをエージェントで反復可能にします。候補施設 → 構造 → 電力 → 光回線 → 熱需要 → 地域の計算需要 → 規制 → 資金 → ステークホルダー → 1MW実証 → 拡張。福井で学んだ方法を、次の地域が最初から使えるようにする。': ['Then make the method itself repeatable with agents: candidate facility → structure → power → fiber connectivity → heat demand → local compute demand → regulation → funding → stakeholders → 1 MW demonstration → expansion. What Fukui learns can become a starting point for the next community.', 'Depois, tornar o próprio método replicável com agentes: instalação candidata → estrutura → energia → conexão por fibra → demanda de calor → demanda computacional local → regulamentação → financiamento → partes interessadas → demonstração de 1 MW → expansão. O que Fukui aprender poderá servir como ponto de partida para a próxima comunidade.'],
+  'eSingularity / 福井の実証を見る →': ['eSingularity / See the Fukui demonstration project →', 'eSingularity / Veja o projeto de demonstração de Fukui →'],
+  'ACT / 1,000 YUMORI': ['ACT / 1,000 YUMORI', 'AÇÃO / 1.000 YUMORI'],
+  '地域を守る人が、地域の未来を決める。': ['The people who protect a community should shape its future.', 'Quem protege uma comunidade deve ajudar a definir seu futuro.'],
+  '準備委員会に参加する。JHRを読む。地域の人に知らせる。議員・市長・県議・国会議員に「ハイパースケールが来る前に地域のAIインフラ政策を議論してほしい」と伝える。福井だけの運動ではありません。': ['Join the preparatory committee. Read the JHR. Tell people in your community. Ask city councilors, the mayor, prefectural assembly members, and national legislators to discuss local AI-infrastructure policy before hyperscale development arrives. This movement is not only for Fukui.', 'Participe do comitê preparatório. Leia o JHR. Conte às pessoas da sua comunidade. Peça a vereadores, ao prefeito, a deputados provinciais e a parlamentares nacionais que debatam uma política local de infraestrutura de IA antes da chegada da hiperescala. Este movimento não é apenas de Fukui.'],
   "JHR・最新レポート": ["JHR · Latest report", "JHR · Relatório atual"],
   "コンピュートで、": ["Can compute…", "A computação pode…"],
   "温泉を救えるか。": ["Save an onsen?", "Salvar um onsen?"],
@@ -707,7 +748,7 @@ export default function LanguageSwitcher() {
   }
 
   const controls = (
-    <div className="language-switcher" data-language-switcher aria-label="Language selection">
+    <div className="language-switcher" data-language-switcher aria-label={languageSelectionLabels[language]}>
       {languages.map((item) => (
         <button key={item.id} type="button" onClick={() => choose(item.id)} aria-label={item.label} aria-pressed={language === item.id} title={item.label}>
           <span className={`flag-icon flag-${item.id}`} aria-hidden="true" />

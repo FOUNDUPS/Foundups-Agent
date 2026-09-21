@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-21 — YUMORI.me English and Portuguese language switch
+
+- Reproduced the production defect: selecting English changed `html.lang`, the URL, and the multilingual ticker, while the restored YUMORI movement-page body remained Japanese because its source strings were absent from the shared language dictionary.
+- Extended `test_yumori_national_landing.py` in place; no parallel test file was created. The regression requires the existing query/local-storage language state, `pt-BR` document language, the canonical `JOIN YUMORI.me` label, and representative Japanese-source copy with both English and Portuguese translations.
+- Fresh results: 27 dependency-free landing/ticker/shared-contract functions passed, all 18 Node hostname-routing tests passed, and focused ESLint completed with zero errors plus two existing `<img>` warnings. Full `pytest` was unavailable. `tsc --noEmit` retained only the documented baseline manifest and duplicate-key errors; the bounded Vinext build was interrupted after remaining in client-reference analysis for two minutes.
+
 ## 2026-09-20 — YUMORI.me correspondence registration and voice contracts
 
 - Extended the existing operational-skill contract test for the `yumori_contact_ledger` WRE entry, canonical Skillz file, thin projections, 0102 proxy voice, third-person monk boundary, default signature, and recursive-learning marker.
