@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify existing Functions node-forge repair
+
+- WSP00/15/22/50/97; C3/I4/D4/Impact4=15/P1. Pillow1315 closure/all three main workflows verified; alert118fixed.94peerheads unchanged; nine Functions-lock owners reconciled.
+- Reuse exact1374 node-forge1.3.3 ->1.4.0 record, preserving298other records including prior protobuf/UTF8 repair. Strict isolated resolution/install passed with scripts disabled; Node20 engine warning retained on Node24.
+- Same six actual Firebase PEM-consumer checks pass on baseline/candidate with in-memory disposable keys and zero hook attempts. Original baseline metadata-report failure preserved; only unexported package.json reporting path corrected. No criteria weakened; independent qualification reviewed both outcomes. No tokens, app initialization, RPC or four-advisory exploit proof.
+- Four-file candidate awaits final independent review, existing1374 normal fast-forward and exact-head/current-base gates. Node20/missing handler/deployment remain unverified. Fresh remaining dependency comparison selects grpc-js1365 qualification15/P1 after closure; no active runtime or separate product work acquired.
+
 ## 2026-09-21: Qualify existing Acoustic Lab Pillow repair
 
 - WSP00/15/22/50/97; C3/I3/D4/Impact3=13/P1. PR1844 and both main workflows verified complete;95 peer heads unchanged. Existing1315 contributes only Pillow10.1.0 ->12.3.0; seven other same-manifest owners remain separate.
