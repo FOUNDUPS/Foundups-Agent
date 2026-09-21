@@ -1,3 +1,10 @@
+## 2026-09-22: Preserve signer receipt provenance before resident consumption
+
+- WSP00/11/15/22/50/62/97; C2/I4/D4/Impact4=14/P1 after current-source qualification. PR1847 and both main workflows passed; fresh main's disjoint YUMORI1846 change is preserved.
+- Six lines in the existing lifecycle owner retain requester/profile strings inside the audit digest and reject malformed matching identities. Source674lines; no new module/consumer or gate clearance. Required receipt fields and changed digest identity documented in the existing interface.
+- Corrected50-case baseline34pass/16fail; connected candidate64pass. Initial48 guard failures remain distinct; subclass cases were added after baseline. Manifest1400members/digest/pins and registry1651/269 stay unchanged. Exact independent evidence and closure are in current_observation of the canonical backlog.
+- Next qualification is registered-boundary consumption with exact identity correlation. R24, reward defects, all seven resident blockers and absent effect lease remain open; no live activation or retained RSI claim.
+
 ## 2026-09-22: Test the existing RSI ticket and reward boundaries
 
 - WSP 00/15/22/26/29/50/97: prioritize the requested native OpenClaw/Hermes production line. Bounded checkpoint C3/I4/D4/Impact4 = 15/P1; integrated R24 remains blocked at 18/P0. PR1365 is merged and both main workflows passed.

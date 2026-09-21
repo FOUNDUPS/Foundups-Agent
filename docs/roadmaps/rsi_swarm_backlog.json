@@ -1852,113 +1852,126 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "baa719d9a6de5ec74026e6a94f48827d5f2885c0",
-    "selected_action": "R24-native-ticket-and-reward-checkpoint",
-    "status": "readiness_local_checkpoint_complete_live_dispatch_blocked",
+    "base_commit": "2cdda856cf53744b143da58c347ceaa2c171bcc1",
+    "selected_action": "R06-lifecycle-receipt-provenance",
+    "status": "independently_verified_source_candidate_pending_publication",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-ticket-canary-20260922",
+    "observation_id": "rsi-signer-provenance-20260922",
     "observed_at": "2026-09-22 JST",
-    "base_commit": "baa719d9a6de5ec74026e6a94f48827d5f2885c0",
+    "base_commit": "2cdda856cf53744b143da58c347ceaa2c171bcc1",
     "previous_observation": {
-      "observation_id": "rsi-functions-grpc-20260921",
-      "git_reference": "baa719d9a6de5ec74026e6a94f48827d5f2885c0:docs/roadmaps/rsi_swarm_backlog.json"
+      "observation_id": "rsi-ticket-canary-20260922",
+      "git_reference": "2cdda856cf53744b143da58c347ceaa2c171bcc1:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "role": "coordinator",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Qualify the existing native ticket and disposable reward boundary before expanding agent capacity",
+    "selected_task": "Preserve validated requester/profile identity in the existing signer lifecycle audit receipt",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
-    "status": "readiness_local_checkpoint_complete_live_dispatch_blocked",
-    "selection_basis": "C3: cross-owner source/fixture qualification; I4: prerequisite for usable ticket production; D4: needed next to qualify the explicitly requested first real ticket; Impact4: reusable launch boundary. The full R24 18/P0 outcome is blocked. Execute its bounded checkpoint, not unrelated LinkedIn work by inherited queue position.",
-    "execution_scope": [
-      "existing native OpenClaw/Hermes/WRE contract tests with synthetic authority/provider fixtures",
-      "disposable persistent FAM reward-state witness",
-      "existing roadmap/backlog/ModLog only; no runtime source patch or production activation"
-    ],
+    "status": "independently_verified_source_candidate_pending_publication",
+    "selection_basis": "15/P1 producer/consumer qualification identified an existing producer gap. Its bounded source repair is C2/I4/D4/Impact4=14/P1: six lines and no new owner; required before safe requester/profile correlation at the later consumer. R24 18/P0 and consumer15/P1 remain blocked; existing payout repair13/P1 is lower-ranked. No unrelated cleanup bundled.",
     "closure_reconciliation": {
-      "pr": 1365,
-      "merged_commit": "baa719d9a6de5ec74026e6a94f48827d5f2885c0",
-      "ci_run": 35616474134,
-      "push_main_run": 35616473330,
+      "pr": 1847,
+      "merged_commit": "5b99915e3f85b529a8dd82efe87d875f6c4c5cdf",
+      "main_ci": 35619916854,
+      "main_codeql": 35619915278,
       "both_main_workflows": "completed/success",
-      "source_change": "one existing Functions lock record, qualified previously",
-      "protected_external_work": "Remote autopost, active shared RedDog/YouTube/YUMORI/eSingularity and other peer heads preserved"
+      "fresh_main": "2cdda856cf53744b143da58c347ceaa2c171bcc1",
+      "intervening_change": "Separately owned YUMORI language fix1846; six disjoint paths preserved"
     },
     "retrieval": {
-      "semantic": "Previously observed HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; no unchanged probe/reindex repeated",
-      "fallback": "Current Git source, canonical WSP15/97/26/29, R24 packet and exact module/test owners",
-      "noise": "Generic OpenClaw grant-fundraising skill is unrelated to execution grants",
-      "ordering": "Canonical packet and native provider owners before legacy executor examples",
-      "missing_artifacts": "Current live Hermes/provider/signing evidence unavailable; fixture state is not host state",
-      "staleness": "Historical R02/roadmap claims checked against pinned source",
-      "duplication": "Existing lease issuer, handler, AgentDB, FAM and R18 coordinator; no new orchestrator/ledger/skill"
+      "semantic": "Reuse unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; shared root still0c81418fe94a7786cfd55f01e138ddc5d510583d. No repeat failed probe/reindex.",
+      "fallback": "Actual WSP00/15/97, current root/backlog, lifecycle source/tests/interface/journals and prior54-path trust-anchor map; exact source hashes rechecked.",
+      "noise": "Broad lifecycle search includes unrelated CABR; narrowed to exact signer owner.",
+      "ordering": "Current producer and registered boundary before consumer integration.",
+      "missing_artifacts": "Module memory/README.md and requirements.txt absent; no replacement files created. Native authority/runtime remains unqualified.",
+      "staleness": "Disjoint main advancement inspected; source unchanged at selection.",
+      "duplication": "Reuse sole receipt constructor and payload. No module, skill, consumer, orchestration or authority framework added."
     },
-    "runtime_metadata": {
-      "openclaw_package_version": "2026.5.2",
-      "evidence": "Windows npm package.json, metadata only; no command/runtime started",
-      "hermes": "Not found on Windows PATH; WSL installation/provider binding not assessed"
-    },
-    "source_findings": {
-      "native_gate": "Use-time resolver retains seven non-generation trust-anchor reasons and returns authoritative_use_lease=None",
-      "reusable_issuer": "ExternalSignerAuthoritativeUseLeaseIssuer exists; final executor-plan and accepted valve-decision digests are available after valve acceptance, not in the earlier resolver",
-      "reward": "PersistentTaskPipeline marks Task.PAID while Payout.INITIATED lacks reference/paid_at; no connected settlement confirmer found",
-      "reward_caution": "Do not just remove PAID: random payout IDs and separate transactions require task-bound atomic idempotency before retry/restart claims",
-      "cabr": "WSP26/29: benefit validation and treasury-flow allocation, not mint authority; CABR distribution gating is not payout authorization",
-      "identity": "Persistent compute charging does not authenticate verifier/treasury roles; AgentProfile tags alone do not qualify an external worker"
-    },
-    "validation": {
-      "status": "local_contract_checks_passed_reward_correctness_failed",
-      "native_contract_tests": {
-        "tests": 200,
-        "failures": 0,
-        "errors": 0,
-        "skipped": 0,
-        "passed": 200
-      },
-      "exact_real_child_cases_deselected": [
-        "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py::test_system_transport_bounds_output_and_confirms_process_termination",
-        "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py::test_system_transport_bounds_time_and_confirms_process_termination"
+    "execution_scope": [
+      "existing lifecycle receipt dataclass, binding checks and payload",
+      "existing lifecycle test owner",
+      "required module interface/journals/test docs and canonical system selection"
+    ],
+    "source_repair": {
+      "lines_added": 6,
+      "source_lines": 674,
+      "fields": [
+        "requester_principal_id",
+        "signer_profile_id"
       ],
-      "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -I -B O:/Foundups-Agent-audits/20260922-rsi-ticket-canary/run_independent_local.py independent-local-v1",
-      "details": "Exact pytest args, loaded source hashes, 10 allowlisted disposable Git setup commands and 34 disposable SQLite opens are in independent-local-v1/receipt.json. Synthetic signing/current-generation fixtures, in-memory connector and fake native transports are not live worker or peer evidence. Unrelated package initializer bypassed. Python effect guards are diagnostic restrictions, not OS sandbox proof.",
-      "live_native_worker_run": false,
-      "production_reward": false,
-      "reward_witness": {
-        "receipt": "disposable-reward/author-witness-v3/receipt.json",
-        "execution_summary": "reward-witness-execution.json",
-        "cases": 2,
-        "outcome": "DEFECTS_REPRODUCED",
-        "exit_code": 2,
-        "normal": "PAID task plus INITIATED payout with no confirmation persists after reopen; ordinary sequential retry rejects",
-        "interruption": "Exception after committed payout before task update leaves VERIFIED/no pointer; reopen/retry produces two INITIATED payouts and two synthetic compute debits",
-        "limits": "Real FAM/SQLite, synthetic identities/20-credit fixture plans, four disposable DB connections, source hashes stable. Injected Python exception plus connection reopening, not physical crash/disk-loss proof; no real payment or authenticated verifier proof. V1 inert namespace and V2 local hostname guard stops retained; V3 platform.machine fixed to qualified AMD64.",
-        "correctness_passed": false
-      },
-      "native_contract_test_limits": "112 pytest-style symlink attempts denied and preserved; origin source-inferred; two plugin-config warnings. Package initializer bypass and Python guards do not prove OS-level containment."
+      "contract": "Exact nonblank configured strings, exact-string health identities and existing equality; preserve both fields before existing digest computation. Receipt IDs now bind identity.",
+      "compatibility": "Required new audit receipt fields; no tracked production deserializer/positional constructor found. No decoder/migration for older receipts. Digest algorithm unchanged.",
+      "authority": "Audit receipt remains forgeable data outside its registered boundary; all three authority flags false, all seven resident blockers and missing effect lease unchanged."
     },
-    "artifact_root": "O:/Foundups-Agent-audits/20260922-rsi-ticket-canary",
+    "autonomous_worker_boundary": "0102 performed the small exact-contract repair with independent agent qualification/review. No admitted Qwen/Gemma or native OpenClaw/Hermes worker run is claimed.",
+    "validation": {
+      "initial_harness": {
+        "tests": 50,
+        "passed": 2,
+        "failures": 48,
+        "reason": "Guard incorrectly rejected confined read-only SQLite file URIs; no product failure claim"
+      },
+      "baseline": {
+        "tests": 50,
+        "passed": 34,
+        "failures": 16,
+        "reason": "Two missing receipt fields and14 absent malformed-identity rejections"
+      },
+      "candidate": {
+        "tests": 64,
+        "passed": 64,
+        "failures": 0,
+        "skipped": 0
+      },
+      "selection_difference": "Two exact-string subclass cases and default-field assertions were added after the red baseline; candidate includes three connected suites. Do not present identical red/green sets.",
+      "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -I -B O:/Foundups-Agent-audits/20260922-rsi-signer-provenance/run_local.py candidate",
+      "limits": "Synthetic signing/generation/OS/health fixtures;58 denied pytest-style symlink attempts,5 exact disposable Git setup commands,495 SQLite opens confined to run root. Python guards are not OS confinement; no live signer/provider/lease.",
+      "packaging": {
+        "runtime_files": 1400,
+        "manifest_digest": "bc3c14ffee1b71169283b8f2ba5cdea377d7d9aca3b8572b4d401610aa187367",
+        "manifest_membership_and_pins": "unchanged after generator --write; lifecycle owner is not in current backend closure",
+        "test_registry": "current1651/quarantined269; generate_test_registry.py --check passed"
+      },
+      "independent": {
+        "connected_passed": 64,
+        "overlaps_author_cases": true,
+        "additional_health_only_subclass_negatives_passed": 2,
+        "review": "independent-review.json",
+        "verdict": "ACCEPT_PRODUCER_ONLY_PROVENANCE_REPAIR"
+      }
+    },
+    "artifact_root": "O:/Foundups-Agent-audits/20260922-rsi-signer-provenance",
+    "evidence_sha256": {
+      "baseline/receipt.json": "f4e61bc16e23eb195ef93f60bb5d5691ef1624bc63ec323c8ada8bc755acbd4a",
+      "baseline/run_local.py": "7dfd1e668e54e4c361d701b0d04542b826aae31ad91c6c396971c305e49bb06c",
+      "baseline-v2/receipt.json": "bf31809e54b218281242deacad2ea11f7054dff29b51358681b0a24ca4a414d9",
+      "candidate/receipt.json": "946d9c226ead64e89184f6c4e939f6a8d2d2f3a2552fe16dc79994048aeb3c37",
+      "run_local.py": "de6c5e2ba0e9cb2ec6215405cbea5b943fbcf590e253ac67317efe3c3ca07421",
+      "independent-review.json": "96b2872b7cf19cba559f6a533fbde04a1ba4ff263d26f6defe9e5ada4093ebd8"
+    },
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
-          "task": "R24 real native ticket with independent verification and simulated entitlement",
+          "task": "One real native ticket with independent audit and simulated entitlement",
           "wsp15": {
             "complexity": 4,
             "importance": 5,
@@ -1968,10 +1981,10 @@
             "priority": "P0"
           },
           "state": "blocked",
-          "blocker": "Native trust-anchor acceptance/lease handoff; independent verification; truthful idempotent reward accounting"
+          "dependency": "Unmet native trust anchors, registered consumption, verifier and reward correctness"
         },
         {
-          "task": "Qualify existing seven trust-anchor producer/consumer bindings and post-acceptance issuer seam",
+          "task": "Registered lifecycle-boundary consumption and exact requester/profile correlation",
           "wsp15": {
             "complexity": 3,
             "importance": 4,
@@ -1980,24 +1993,11 @@
             "total": 15,
             "priority": "P1"
           },
-          "state": "next_executable_qualification",
-          "next_step": "Use current owners and negative fixtures; bind exact accepted decision and executor plan. No blocker-string removal or locally forged lease."
+          "state": "next_qualification_after_source_closure",
+          "next_step": "Use existing registry-owned boundary; reject arbitrary Protocol.consume receipts, foreign/stale/replayed capabilities and wrong identities. Only its peer-handshake reason may become eligible later; other six reasons/lease remain."
         },
         {
-          "task": "Increase to 2, 10, 100 and 1000 agents",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 4,
-            "deferability": 2,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "blocked",
-          "blocker": "First native ticket and R18 measured concurrency/assurance budgets; contributor onboarding and reward reconciliation"
-        },
-        {
-          "task": "Persistent payout initiation/reopen/interruption witness then atomic state repair",
+          "task": "Persistent payout atomic initiation and truthful state",
           "wsp15": {
             "complexity": 3,
             "importance": 4,
@@ -2006,8 +2006,8 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "witness_complete_defects_reproduced_repair_outstanding",
-          "next_step": "Qualify existing SQLite transaction/idempotency owner for atomic single initiation and truthful state; preserve both observed failures as acceptance negatives."
+          "state": "reproduced_outstanding",
+          "dependency": "Qualify existing SQLite transaction/idempotency owner; retain prior two failures as acceptance negatives"
         },
         {
           "task": "LinkedIn dry-run boundary qualification",
@@ -2019,42 +2019,13 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "outstanding_separate_scope",
-          "blocker": "Reconcile existing owner before work; not the next RSI ticket-path step"
+          "state": "separate_owner_scope",
+          "dependency": "Existing owner reconciliation; no live social effects"
         }
       ],
-      "selected_next": "Qualify existing seven trust-anchor producer/consumer bindings and post-acceptance issuer seam",
-      "selection_basis": "Highest-value currently executable predecessor of the requested real-ticket test. Re-observe after checkpoint; no automatic capacity increase."
+      "selected_next": "Registered lifecycle-boundary consumption and exact requester/profile correlation"
     },
     "dispatchable": false,
-    "retained_improvement_proven": false,
-    "source_bindings": {
-      "runtime_audit": "runtime-path-audit.json",
-      "reward_audit": "reward-path-audit.json",
-      "test_receipt": "independent-local-v1/receipt.json",
-      "reward_witness": "disposable-reward/author-witness-v3/receipt.json"
-    },
-    "evidence_sha256": {
-      "runtime-path-audit.json": "a5628442ddcff2149ee201a35c0d2b7e56afbf7615e5f9d6c6f9f6861d896b35",
-      "reward-path-audit.json": "cbe6f423b58473c3454abef61a7bd99a84fa5ef19661668f153d770987f951ef",
-      "independent-local-v1/receipt.json": "789c011e96d14e35a23b3b53f07a413b8611b36c95b3e88bcc6f5d8ff66810c9",
-      "run_independent_local.py": "5d818956f5bfd6a399cb6811e8d6b0635015ee6f6b3a6a999bdbd4487321502c",
-      "independent-test-qualification.json": "8b6b9d348ba042ecb12a19b311e4809a3ef39f604c194275003aaad9446a1188",
-      "disposable-reward/author-witness-v3/receipt.json": "ee5cd5bda89e6acbbd8147e7d660120c50475c521e09847b1dc995263f52ecf0",
-      "disposable-reward/reward-persistence-witness-v3.py": "6b691d87fdc76fd128f682388d38f0703d45a9fa317a2fa6bfcbf62d8380131c",
-      "reward-witness-execution.json": "1682997096598ecc701745cf80b6cf0288d1ab486a9f29dabb5a6b13c07b61c3"
-    },
-    "experiment_metrics": {
-      "live_work_orders": 0,
-      "live_native_worker_jobs": 0,
-      "live_verifier_jobs": 0,
-      "production_rewards": 0,
-      "local_contract_tests_passed": 200,
-      "capacity_load_tested": false,
-      "retained_improvements_accepted": 0,
-      "live_provider_cost": "not incurred by these fake-provider tests; Codex coordination cost not measured",
-      "local_reward_cases": 2,
-      "reward_correctness_failures_reproduced": 2
-    }
+    "retained_improvement_proven": false
   }
 }

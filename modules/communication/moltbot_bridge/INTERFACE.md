@@ -333,7 +333,7 @@ against that signer-owned binding, configured key, fingerprint, epoch, and
 kernel-attested requester. The response carries a second, domain-separated
 signature covering its audit metadata and acceptance attestations. A matching
 public-key string or serialized `peer_handshake_verified` flag is not
-authority. `reddog_current_generation_manifest_launch_selection.py` now
+authority. `ExternalSignerLifecycleAdmissionReceipt` preserves exact nonblank string `requester_principal_id` and `signer_profile_id` from the matching healthcheck in its digest-bound audit payload; receipt IDs change with either identity. These are required fields, not an authorization or a decoder for older receipts. Registered-boundary consumption at the resident gate remains separate. `reddog_current_generation_manifest_launch_selection.py` now
 supplies the verifier-only selection boundary for an externally managed signer:
 it reads the authenticated durable generation, ignores caller manifest data,
 verifies the content-addressed manifest with the canonical Ed25519 backend,

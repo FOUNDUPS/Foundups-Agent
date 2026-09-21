@@ -1,3 +1,9 @@
+## 2026-09-22: Lifecycle receipt identity regressions
+
+- Extend the existing lifecycle test owner: two preserved-field/digest cases, sixteen malformed matching identity cases including exact-string subclasses, and one same-generation foreign-boundary rejection. Assert default identities and all existing false authority flags.
+- Initial 50-case run: 48 guard failures/2 pass because confined read-only SQLite URIs were not recognized. Corrected unchanged-source run: 34 pass/16 product regressions. Final 64-case connected selection includes two subsequently added subclass cases and three adjacent suites; all pass. These are not identical red/green selections.
+- Preserve source/runner/XML hashes and effect diagnostics externally, referenced by the root backlog. Disposable signed-generation fixtures, fake health/OS observation and bounded Git setup do not establish a live peer handshake or effect lease.
+
 ## Call-local skill-safety regression evidence — 2026-09-21
 
 - Extend the two existing safety/boundary suites: legacy Boolean plus literal detail mode, nested publication, policy drift, RESEARCH, four callback-stable projections and malformed pair rejection before downstream work. Preserve original assertions, module docstrings and import capabilities.

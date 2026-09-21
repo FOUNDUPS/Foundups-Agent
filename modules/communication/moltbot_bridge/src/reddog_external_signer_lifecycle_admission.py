@@ -72,6 +72,8 @@ class ExternalSignerLifecycleAdmissionReceipt:
     socket_inode: int
     handshake_request_digest: str
     handshake_response_digest: str
+    requester_principal_id: str
+    signer_profile_id: str
     admitted_at_epoch: int
     admitted_monotonic_ns: int
     handshake_expires_at: int
@@ -566,6 +568,8 @@ def _admission_bindings_valid(
             health.config_path == selected["config_path"],
             health.config_digest == selected["config_digest"],
             health.socket_path == observation.socket_path,
+            all(type(v) is str and v.strip() for v in (requester_principal_id, signer_profile_id)),
+            type(health.requester_principal_id) is type(health.signer_profile_id) is str,
             health.requester_principal_id == requester_principal_id,
             health.signer_profile_id == signer_profile_id,
             is_sha256(health.request_digest),
@@ -603,6 +607,8 @@ def _admission_payload(
         "socket_inode": observation.socket_inode,
         "handshake_request_digest": str(health.request_digest),
         "handshake_response_digest": str(health.response_digest),
+        "requester_principal_id": health.requester_principal_id,
+        "signer_profile_id": health.signer_profile_id,
         "admitted_at_epoch": admitted_at_epoch,
         "admitted_monotonic_ns": admitted_monotonic_ns,
         "handshake_expires_at": health.peer_handshake_expires_at,
