@@ -1852,15 +1852,15 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8",
-    "selected_action": "Root-protobuf-existing-PR-current-base-integration",
-    "status": "local_integration_pending_final_independent_review_and_publication",
+    "base_commit": "95ba7b92484c87f24165db1e053e27aac98ac892",
+    "selected_action": "Functions-protobuf-existing-PR-integration",
+    "status": "local_integration_pending_independent_review_and_publication",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 14,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "requires_fresh_reobservation_after_closure": true,
@@ -1868,145 +1868,179 @@
     "observation_path": "current_observation"
   },
   "current_observation": {
-    "observation_id": "rsi-root-protobuf-existing-pr-integration-20260921-1606",
-    "observed_at": "2026-09-21T07:21:58.734767+00:00",
-    "base_commit": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8",
+    "observation_id": "rsi-functions-protobuf-existing-pr-integration-20260921-1702",
+    "observed_at": "2026-09-21T08:12:15.381809+00:00",
+    "base_commit": "95ba7b92484c87f24165db1e053e27aac98ac892",
     "previous_observation": {
-      "git_ref": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8:docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_id": "rsi-clerk-existing-pr-integration-20260921-1514"
+      "git_ref": "95ba7b92484c87f24165db1e053e27aac98ac892:docs/roadmaps/rsi_swarm_backlog.json",
+      "observation_id": "rsi-root-protobuf-existing-pr-integration-20260921-1606"
     },
     "role": "architect/coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Root-protobuf-existing-PR-current-base-integration",
+    "selected_task": "Functions-protobuf-existing-PR-integration",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 14,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
-    "status": "local_integration_pending_final_independent_review_and_publication",
+    "status": "local_integration_pending_independent_review_and_publication",
     "parent_task": "Dependency-security-reconciliation",
     "parent_scope_score": "17/P0",
-    "selection_basis": "Observed97unchanged peerheads and both1378main workflows passed. Root qualification14/P1 was highest eligible bounded action. After independent provenance, strict isolated install and explicit failed-oracle adjudication, finish the same owned root repair through existing783lineage before changing lanes; record separate functions15/P1 candidate for postclosure selection.",
+    "selection_basis": "Root783closure and alert170fixed;96remaining peers unchanged. Functions15/P1 owner/lock qualification is highest eligible bounded work under17/P0 aggregate; higher scores retain runtime/admission/product-owner constraints. Existing1375 supplies utf8-only repair, parent staysaffected. No active product/runtime adoption. Independent owner audit and bounded install/fixture evidence permit completing this same owned15/P1 repair; no deployment readiness inferred.",
     "closure_reconciliation": {
-      "pr1378": "Merged at b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8; both main workflows success; GitHub critical alerts22/23fixed. No installed/deployed app proof.",
-      "root_qualification": "Six exact peer records/344preserved. Strict dry-run/candidate install and baseline install passed. Original12case suite fails on both;11trusted checks completed before unchanged Buffer reader clamping violates an unsupported oracle assumption. Independent characterization supports narrow compatibility only.",
-      "history": "26original packets and55prior rows preserved.97open peers freshly observed; no new full-history audit."
+      "root783": "Merged at 95ba7b92484c87f24165db1e053e27aac98ac892; both main workflows success and GitHub rootalert170fixed. Preserve original failed malformed oracle and runtime limits.",
+      "functions_owner": "Ten exact lock owners reconciled;1375supplies utf81.1.2 but not parent fix. No active matching branch/detached peer worktree, assignee, review or comment observed.",
+      "history": "26original packets/57prior ranked rows preserved;96fresh peerheads unchanged. Historical merged count advanced only by verified783closure."
     },
     "execution_scope": {
       "files": [
-        "package-lock.json",
+        "functions/package-lock.json",
         "ROADMAP.md",
         "ModLog.md",
         "docs/roadmaps/rsi_swarm_backlog.json"
       ],
-      "existing_pr": 783,
-      "branch": "agent/rsi-protobuf-current-base-qualification-20260921",
-      "plane": "Routine reversible root dependency integration with independent review and existing branch lineage; no WRE/runtime/provider or security_scan execution.",
-      "authority": "Normal fast-forward adoption requires same-repo unassigned unchanged bot head and no active matching worktree. Exact reviewed head/checks/ownership gate owned merge; no force push, sibling closure, deployment or installed runtime mutation.",
-      "shared": "Shared checkout, functions/GotJunk locks, YUMORI/eSingularity, RedDog and RemoteAutoPost unchanged."
+      "existing_pr": 1375,
+      "branch": "agent/rsi-functions-protobuf-qualification-20260921",
+      "plane": "Routine reversible repository lock repair; no WRE, provider, service or security_scan execution.",
+      "authority": "Fresh same-repo bot-head/owner/worktree gates, independent exact-four-file review and normal fast-forward only. Disclose expanded parent repair in existing PR metadata. Exact-head checks/current-base merge-tree gates before any owned merge. No force/sibling closure or deployment.",
+      "protected": "Shared checkout and all direct manifests/firebase runtime configuration, GotJunk/product/RedDog/YUMORI/eSingularity/AutoPost state unchanged."
     },
     "retrieval": {
-      "mode": "governed owner lexical bundle",
-      "result": "ok=true, freshness=UNKNOWN, index_gap_detected=true",
-      "noise": "Four bounded owner results plus required root manifests/README/roadmap; no broad archived dump.",
-      "ordering": "Current lock/tree and parent chain first; exact historical exposure/owner bindings reused only where unchanged.",
-      "missing_artifacts": "Root package has no test script; no existing scoped protobuf fixture found. Disposable trusted-schema/gRPC fixture used, no new repository module/test framework.",
-      "staleness": "No semanticCURRENT or repeated failed semantic probe; currentGit and exact source prove narrower scope.",
-      "duplication": "Existing783 owns root parent update;785utf8 change covered by effective delta but no sibling closure.1351/1350/1317root overlaps are distinct. Functions1375 and GotJunk1358 separate."
+      "mode": "Governed owner lexical bundle",
+      "result": "ok=true; freshness=UNKNOWN; index_gap_detected=true",
+      "noise_ordering": "Four bounded hits with functions manifests/firebase/README required first; then exact owner delta and unchanged prior exposure bindings.",
+      "missing_artifacts": "Only functions/package.json and lock tracked. No trackedindex.js, module README/INTERFACE/ROADMAP/ModLog or tests. Use existing root planning docs; do not scaffold a handler.",
+      "freshness": "Exact current Git/source and peer hashes, not semanticCURRENT; do not repeat prior failed semantic probe.",
+      "duplication": "Reuse1375lineage and root783package metadata with runtime flags preserved. Nine other functions owner deltas remain separate."
     },
     "ownership": {
-      "peer_count": 97,
+      "open_peer_count": 96,
       "peer_heads_unchanged": true,
-      "evidence": "pr783-before.json/open-prs.json/worktrees.txt",
-      "review": "independent-provenance-review.json",
-      "publication_gate": "Refresh exact same-repo branch, no new assignee/review/comment/worktree and current main before normal push."
+      "evidence": "open-prs.json/pr1375-before.json/worktrees.txt",
+      "review": "independent-owner-review.json"
     },
     "findings": {
-      "base": "b6fd2f4bf06a4dbeb694d8b9ce734559a91abcc8",
-      "peer": "2383d10da33960c32b40ba845737b0db2dca49af",
-      "tree": "bccc9120f586428cdf0d597b8ac7aa670bd7d449",
-      "merge_base": "9f047fff69d1b9f7d68bc137b634837c803d4b70",
-      "candidate_path": "O:\\Foundups-Agent-audits\\20260921-rsi-protobuf-qualification-1606\\candidate",
+      "base": "95ba7b92484c87f24165db1e053e27aac98ac892",
+      "peer": "363c83dfb7f5b23aa76a1c43f83f259616c715be",
+      "peer_merge_tree": "88de3d5be7ae2ee305d93cba0624d1d4a8e0adb9",
+      "candidate_path": "O:\\Foundups-Agent-audits\\20260921-rsi-functions-protobuf-1702\\candidate",
       "candidate_sha256": {
-        "package.json": "f7d2720b58bd26c9c7b8f5a2a1d6f6de36ecb2bc9d1214c73e50eafcfbc1df3d",
-        "package-lock.json": "2d5daabfb1bee2eb7e048d5ada7bdea0e5a5df89d8f09e1804ff364d15a7392d"
+        "package.json": "e7878197c4f6de7e8d937a1e811137dd833a70f0deaec8d15fcd9747b5a4182b",
+        "package-lock.json": "b0dc8972b4252952c8fd503fd89ab713311737378aa0e2c8b74a123e9856f767"
       },
       "changed_records": {
+        "node_modules/protobufjs": {
+          "old_version": "7.5.4",
+          "new_version": "7.6.3",
+          "source": "merged root783 metadata with Functions dependency flags preserved",
+          "runtime_flag_preserved": {
+            "dev": null,
+            "optional": null,
+            "devOptional": null,
+            "peer": null
+          }
+        },
         "node_modules/@protobufjs/codegen": {
-          "old": "2.0.4",
-          "new": "2.0.5",
-          "equals_peer": true
+          "old_version": "2.0.4",
+          "new_version": "2.0.5",
+          "source": "merged root783 metadata with Functions dependency flags preserved",
+          "runtime_flag_preserved": {
+            "dev": null,
+            "optional": null,
+            "devOptional": null,
+            "peer": null
+          }
         },
         "node_modules/@protobufjs/eventemitter": {
-          "old": "1.1.0",
-          "new": "1.1.1",
-          "equals_peer": true
+          "old_version": "1.1.0",
+          "new_version": "1.1.1",
+          "source": "merged root783 metadata with Functions dependency flags preserved",
+          "runtime_flag_preserved": {
+            "dev": null,
+            "optional": null,
+            "devOptional": null,
+            "peer": null
+          }
         },
         "node_modules/@protobufjs/fetch": {
-          "old": "1.1.0",
-          "new": "1.1.1",
-          "equals_peer": true
+          "old_version": "1.1.0",
+          "new_version": "1.1.1",
+          "source": "merged root783 metadata with Functions dependency flags preserved",
+          "runtime_flag_preserved": {
+            "dev": null,
+            "optional": null,
+            "devOptional": null,
+            "peer": null
+          }
         },
         "node_modules/@protobufjs/inquire": {
-          "old": "1.1.0",
-          "new": "1.1.2",
-          "equals_peer": true
+          "old_version": "1.1.0",
+          "new_version": "1.1.2",
+          "source": "merged root783 metadata with Functions dependency flags preserved",
+          "runtime_flag_preserved": {
+            "dev": null,
+            "optional": null,
+            "devOptional": null,
+            "peer": null
+          }
         },
         "node_modules/@protobufjs/utf8": {
-          "old": "1.1.0",
-          "new": "1.1.1",
-          "equals_peer": true
-        },
-        "node_modules/protobufjs": {
-          "old": "7.5.4",
-          "new": "7.6.3",
-          "equals_peer": true
+          "old_version": "1.1.0",
+          "new_version": "1.1.2",
+          "source": "exact1375peer",
+          "runtime_flag_preserved": {
+            "dev": null,
+            "optional": null,
+            "devOptional": null,
+            "peer": null
+          }
         }
       },
       "changed_count": 6,
-      "unchanged_records": 344,
-      "root_manifest_unchanged": true,
-      "websocket_driver_preserved": "0.7.5",
-      "repository_mutated": false
+      "unchanged_records": 293,
+      "direct_manifest_unchanged": true,
+      "runtime_flags_preserved": true,
+      "utf8_peer_preserved": "1.1.2",
+      "new_protobuf": "7.6.3",
+      "repository_mutated": false,
+      "configured_node": "20",
+      "validation_host_node": "24.11.1",
+      "missing_entry": "functions/index.js absent from current tracked source; no app/deployment readiness claim"
     },
     "validation": {
-      "strict_candidate_dry_run": "exit0; no node_modules",
-      "strict_candidate_install": {
-        "exit_code": 0,
-        "seconds": 17.84,
-        "scripts_disabled": true
-      },
-      "baseline_install": {
-        "exit_code": 0,
-        "seconds": 9.64,
-        "scripts_disabled": true
-      },
-      "original_frozen_suite": {
-        "candidate_exit": 1,
-        "baseline_exit": 1,
-        "status": "FAILED on both; never relabeled passed",
-        "checks_completed_before_failure": 11,
-        "failed_check": "Expected exception for truncated Node Buffer string",
-        "probe_unchanged": true
-      },
-      "separate_characterization": {
-        "exit_code": 0,
-        "observations": 6,
-        "outcome": "Both versions decode truncated Buffer/gRPC text a; both reject Uint8Array with RangeError. This documents existing behavior, not safety."
-      },
-      "independent_adjudication": "Invalid universal rejection oracle for inspected library contract; narrow trusted-schema compatibility accepted. No silently waived downstream strict-wire requirement, retained RSI gain or vulnerability-exploit proof.",
-      "source_identity": "Exact canonical Git blobs and normalizedLF match qualified candidate; rawCRLF assertion failure preserved.",
-      "remote": "New integrated head not yet published/checked; prior1378main workflows success.",
-      "limits": "No service/application/Firebase connection, strict malformed-wire validation, attacker-schema exploit, installed runtime or deployment proof. Root alert170 remains open at observation."
+      "strict_dry_run_exit": 0,
+      "strict_install_exit": 0,
+      "install_seconds": 6.14,
+      "scripts_disabled": true,
+      "host_node": "24.11.1",
+      "configured_node": "20",
+      "node20_verified": false,
+      "npm_engine_warning": "EBADENGINE preserved; no engine config or strict-policy override",
+      "trusted_schema_cases": 11,
+      "trusted_suite_exit": 0,
+      "hook_attempts": [],
+      "hook_limit": "Named hooks only, not OS confinement. Separate isolated sanitized child environment.",
+      "fixture_reuse": "Explicit11case trusted-schema/gRPC scope derived from prior independently adjudicated contract before execution. Prior root12case originalFAILED remains unchanged; no repeated/relabeled malformed-rejection proof.",
+      "handler": "functions/index.js absent from tracked source; no handler/build/Firebase runtime test",
+      "remote": "Prior783main workflows passed; new1375head not yet published/checked. Functionsalert52 open at observation.",
+      "limits": "No Node20 acceptance, malformed-wire guarantee, attacker-schema exploit test, deployed/runtime/provider proof."
     },
     "source_bindings": {
-      "package.json": {
-        "git_blob": "2ffffb421f5f98fb297fdcae903ce97d8ba2a643",
-        "sha256_lf": "f7d2720b58bd26c9c7b8f5a2a1d6f6de36ecb2bc9d1214c73e50eafcfbc1df3d"
+      "functions/package.json": {
+        "git_blob": "7c4112aec5214d5f0f510d38ed363715cb67d39a",
+        "sha256_lf": "e7878197c4f6de7e8d937a1e811137dd833a70f0deaec8d15fcd9747b5a4182b"
+      },
+      "functions/package-lock.json": {
+        "git_blob": "d5eb497ed4b63892557ac8095bea246c49e9b759",
+        "sha256_lf": "84d9e1079c72c66cc4c11f2f5786561cc6fd4cd038dc815c19b7a6c87957cf77"
+      },
+      "firebase.json": {
+        "git_blob": "2de865edddf5a6f979f08625048dff842538069a",
+        "sha256_lf": "d8770271ca4c81a83a034141b9e615d1703ecfadd1d047fdd1b7adbb98844edc"
       },
       "package-lock.json": {
         "git_blob": "dc6dbba14095f2fb600febb64124cc2ce8908257",
@@ -2014,39 +2048,35 @@
       }
     },
     "evidence_sha256": {
-      "preflight.json": "824adc5e4b21cfbe24c7012e32abf3af383e64425f886dcf928cd83c8bbb2cb0",
-      "preflight-failure.json": "9dd7004e2bd4176c1435bc795a24294db0d92ebef16d68296ac376ed6734a71a",
-      "open-prs.json": "b618366b9e69470fec23964fd2db3bb36ef4da6fd8a65df4b833ec6c5cc66987",
-      "pr783-before.json": "9dbfb690652f546d0f1d98b5e34f9f94842e395eecea938798260836eb245a44",
-      "shared-before.json": "b18e45fdb9adb18fa14e131ff4c5440e30dd75c31d87063a3f399e357768a97f",
-      "pr1378-main-workflows.json": "7b6fa49af40877af3655ea979e275c2dcc7d3131be75dc103307b60c09a54619",
-      "selected-alerts-before.json": "4a7cd9e8ad359ebf50d18b81f3da06b37f114a75cd80a8e9b1cef47fa42807e0",
-      "holo-owned-lexical.json": "655213c85bc737d62f97c25139df09da2353463eb8e0eca953ed3e6da75b4042",
-      "merge-tree.json": "7ee6a6393e07d442118ab122a0d0289b70c6d18e4d5892fd5d0a93c32f2f871c",
-      "candidate-resolution.json": "98a2d25cb6a09b93d54984917d781fcf6d840a58813e66a29288376fd041b3d2",
-      "independent-provenance-review.json": "4260891fdaa955fe42d85f238bc132db9599bd77da6695ad96cefd498009cde3",
-      "npm-dry.json": "243278e081e2913b636853d29fb52a78a43e432da8e86395f9a9b40d4a2d2604",
-      "npm-ci.json": "fabce7f9a0a4e4899c1a891c3a20123bc74ebdef33d77cf1cffb0238198a4e6d",
-      "compatibility.json": "37fb88de3b05527d95455540381b05072a92b471fd525a57c2b97e94fe340d03",
-      "compatibility.stderr": "030dcf0b13903d24ab433a1ed9789c5b8fc9559a7e8a32231ad351256a673b53",
-      "compatibility.cjs": "a5bff7cb66661cb45b71b6fce0508240f5ea5d074f39757af3689554f2573833",
+      "preflight.json": "2283bda12d135b2726cc5f6ec1bcd421f7abb52ccffd210c1ddd0389e4a63c6f",
+      "preflight-failure.json": "91bf9e1bc55f3e3f2b574c613571972ce3b84e9545bc6ec5ba075b747436d923",
+      "open-prs.json": "305e5b3dd0a39e72a41dd5f4ab664172ae337e8b6d50122c1722b9cbbd16ce99",
+      "pr1375-before.json": "e8434738e5e041811bf8cd7f99fd4ae696d9e0a43c15c6b654d99aa1d920f7b2",
+      "shared-before.json": "ab2ccb5498faa5a1913a11d68dfe14dec7975b22df6f2f0e363bea5e8b8875dc",
+      "pr783-main-workflows.json": "ac48094ada0f1d78a2f6ddd6079cefae47864ad94bedeb50d507d65e7d2825f3",
+      "selected-alerts-before.json": "3708f728cea7fa792077f33a6e745fa00c5ef0a3318a8e680d57b58c72964c4e",
+      "holo-owned-lexical.json": "9893ac86cddd4780c6d7a29eaf24004a8fe08337feb5c18a0d2e0eb93ce0f04d",
+      "merge-tree.json": "637f2f39056111330cc4ccea313069a3b4aa4b626333da48d249498a58644535",
+      "independent-owner-review.json": "5d021d84589d7dbf9289a2af78c825b3140ce7fc143fd18d9520134959822255",
+      "candidate-resolution.json": "25041936edf2a168fc45149b3394ec18e079c78b0460f51aca84e5939068a6f5",
+      "npm-dry.json": "c4e9925484e89af095d0db8129b9e174183fdc33f7c7997a9ba4c91df178e6b4",
+      "npm-dry.stderr": "eb8cd394d27cbf2c705523f12ee67d279b07f75dbf46d2cd06ad79513526c0bf",
+      "npm-ci.json": "89c1bab1c53aa8cedf169debbc8250f611cb4e51f2650e41cd2f2657fe305293",
+      "npm-ci.stderr": "54431bc5428741dc347b769d66b572235606fda149b40c5be1eed5e096bfe981",
+      "compatibility.json": "ee787f5b54fa1fb7165095824e3e1bb14a2700c10fcc60a0f7559e984568ce5b",
+      "compatibility.cjs": "224a86b31a04e8256976f39c6e3d11a7c39d45fb54eda1ffdedfd7d3007599f5",
       "fixture.proto": "1fc6147982c26fbf9f27ad8ec0c74773c96fdb368604e6b32f435ca5aed78381",
-      "baseline-npm.json": "a2dbc452a666419dd4f04b28cc830203df6b53c9b3083e58699f93bc33fcfbe2",
-      "baseline-compatibility.json": "c76d946921337711847071f845ba19d5ffe906e195bfd16d6ca880e67cab7df4",
-      "baseline-compatibility.stderr": "ae4fc354ecfec2da18b78462f0ba8e89cd8f316cf4cf26992be300ed7335677f",
-      "malformed-diagnostic.json": "e09d3fb0615f238a73d3ff06a12e69a1f72cdd33278cc86c39fce087a417a3a4",
-      "malformed-diagnostic.cjs": "3f28176aaa43c7ff68343414dc173026c4ede7a9f0d6cdffbd6bcadf73891518",
-      "independent-malformed-contract-review.json": "1e48d82d9fe5c1ec8ee520c22ef02103d69dd22227d5ac482333af0d6b00f587",
-      "qualification-decision.json": "23953960a1e187324671d5c06a6e4d4c08836e87f30117ab0c95179534eda61d",
-      "integration-failure.json": "a38675f75cd5c3c6242c62dc1203fea853864c7233143db590aaa4aaab2e8ae5",
-      "integration.json": "80617902b98d01ad253cdeba60ddfd1339adf9b702a719125b86698afcd61cfd"
+      "fixture-provenance.json": "264fea34140be1b58dd9eb47c287f35fb6c29ce5e7db40aa3c31113a91f69261",
+      "qualification-decision.json": "d8e473f6d39f25036fdbc39034e09ca69c0fa1f4d411850f8c5eb00f7a224f86",
+      "local-merge.json": "83c9db65c397e5f5cdaaa1d5b3e1e52ac75f81a6f2de165e5838d77db7d75164",
+      "integration.json": "20a9665e6b3818f483521fdf3698a67b99a0a4da474288ec783863fae424fc02"
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-protobuf-qualification-1606",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-functions-protobuf-1702",
     "effort_cost": {
       "provider_calls": 0,
-      "installs": "Two isolated roots, lifecycle scripts disabled; same cache, no repository node_modules.",
-      "verification": "Strictnpm, fixed wire vectors,11trusted/gRPC checks completed, originalnegativefailure preserved, separate6reader observations and independentreview.",
-      "cost_unavailable": "Total chat worker cost unavailable."
+      "new_installs": "One external isolated functions candidate, scripts disabled; no repository node_modules.",
+      "verification": "Reuse11trusted schema checks, exact record/provenance checks, independent review; Node20target remains distinct.",
+      "cost_unavailable": "Total chat/worker cost not measured."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2191,7 +2221,7 @@
           "score": 17,
           "priority": "P0",
           "state": "partial_critical_manifest_owner_qualification_complete",
-          "next_step": "Clerk1378 merged and alerts22/23fixed; rootprotobuf783 integration locally prepared with bounded compatibility and preserved oracle failure. Complete owned root scope, then qualify existing functions protobuf owner/lock; GotJunk/Pillow and other manifests remain distinct."
+          "next_step": "Clerk22/23 and rootprotobuf170 GitHub alerts fixed after merged1378/783. Functions six-record parent+utf8 candidate is locally validated onNode24 with293records preserved; finish current owned15/P1 repair before next15/P1 GotJunk owner qualification. Aggregate17/P0 and other manifests remain open."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -2372,18 +2402,53 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "eligible_after_owned_root_sprint_closure",
+          "state": "bounded_owner_and_node24_lock_qualification_complete",
           "evidence": [
             "functions/package-lock.json",
             "firebase.json",
             "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json",
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1375"
           ],
-          "next_step": "Reobserve functions manifest and existing1375 utf8 owner. Its utf8-only update leaves protobufjs7.5.4; identify smallest current-base parent-package repair preserving sibling progress, dependency closure and actual package entry/build owner. Qualify in disposable evidence before repository changes; no functions deployment, product runtime or duplicate owner assumption.",
-          "score_rationale": "C3 transitive lock/owner and missing entry source; I4/D4 known critical dependency remains; Impact4 runtime-classified functions dependency vs root development-only scope. Complete current owned14/P1 sprint before switching lanes.",
+          "next_step": "Ten owners reconciled;6record repair preserves293 and runtime flags. StrictNode24install and11scopedtrusted checks passed; Node20target and absent trackedindex.js handler remain unverified. Continue same owned lock repair only; no runtime/deployment acceptance.",
+          "score_rationale": "C3 transitive lock/owner and missing entry source; I4/D4 critical dependency repair; Impact4 runtime-classified Functions dependency versus root development-only scope. The preceding root repair (14/P1) closed in PR #783 before this completed qualification; finish the separately scored Functions integration next.",
           "effort_cost": "Existing lock/owner qualification and focused offline checks; no paid-model/provider/runtime admission.",
-          "dependencies": "Finish currently owned root sprint; refresh source, entry/runtime meaning and existing PR ownership.",
+          "dependencies": "Fulfilled for bounded qualification: PR #783 root repair closed, source and ten lock owners reconciled, Node 24 validation passed. Configured Node 20 and the absent tracked handler remain explicit runtime limits; final Functions integration review/publication is separately tracked.",
           "separate_scope": "GotJunk frontend and protected product/AutoPost owners remain separate."
+        },
+        {
+          "task": "Functions-protobuf-existing-PR-integration",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "local_integration_pending_independent_review_and_existing_pr_publication",
+          "next_step": "Review four scoped files and publication gates, disclose parent-package addition to existing1375title/body, publish normal fast-forward, then require exact-head checks for owned merge. Node20, tracked handler and cloud/deployment remain unverified.",
+          "score_rationale": "C3 transitive metadata/ownership; I4/D4 critical parent dependency; Impact4 runtime-classified functions lock. Source-only improvement, not production activation."
+        },
+        {
+          "task": "GotJunk-protobuf-repair-owner-qualification",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "eligible_after_owned_functions_sprint_closure",
+          "evidence": [
+            "modules/foundups/gotjunk/frontend/package-lock.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1358",
+            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json"
+          ],
+          "next_step": "Reobserve current GotJunk product/lock ownership before any edit. Existing1358utf8-only update retains protobuf7.5.4; qualify smallest parent repair, preserve other owner deltas, and determine actual build/bundle/runtime relevance. Use isolated evidence; no live product/deployment or broad dependency sweep.",
+          "score_rationale": "C3 frontend transitive graph and fourteen historical lock owners; I4/D4 known critical manifest debt; Impact4 runtime-classified dependency, with actual browser exposure explicitly unestablished. Finish already-owned equal-score functions repair first.",
+          "effort_cost": "Existing lock/owner and build-contract qualification, deterministic reuse before new tests/model work.",
+          "dependencies": "Finish current functions sprint and reconcile current product ownership; no transfer from another active lane implied."
         },
         {
           "task": "protected-foundup-work",
@@ -2481,8 +2546,8 @@
           },
           "score": 14,
           "priority": "P1",
-          "state": "local_integration_pending_final_independent_review_and_publication",
-          "next_step": "Final four-file independent review, fresh existing783ownership and normal fast-forward only; exact-head checks gate any owned merge. Preserve original12case FAILED on baseline/candidate, completed11trusted cases and reader-characterization limits.",
+          "state": "closed_pr783_root_repository_integration",
+          "next_step": "Merged reviewed tree; both main workflows passed and rootalert170fixed. Retain original frozen failed oracle and narrow compatibility limits; no deployed/runtime proof.",
           "score_rationale": "C3 existing lock/lineage and validation limits; I4/D4 known root advisory requires remediation; Impact3 development dependency scope, no product runtime."
         },
         {
@@ -2828,8 +2893,8 @@
           ]
         }
       ],
-      "selected_next": "Functions-protobuf-repair-owner-qualification",
-      "selection_basis": "After owned root publication/closure,15/P1 functions parent-package qualification is highest newly eligible bounded step under17/P0 security parent. Fresh owner/source/entry evidence required; main/peer or gate changes force rescore."
+      "selected_next": "GotJunk-protobuf-repair-owner-qualification",
+      "selection_basis": "After current owned15/P1 closes, select remaining15/P1 GotJunk parent-package owner qualification under17/P0 dependency parent; actual product ownership/build exposure must be refreshed. Higher rows retain admission/product/aggregate constraints."
     },
     "dispatchable": false,
     "retained_improvement_proven": false
