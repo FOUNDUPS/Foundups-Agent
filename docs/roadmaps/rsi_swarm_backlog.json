@@ -1856,9 +1856,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "3c45509c0716cbac403d3309ea4d8a03ab13a2d2",
-    "selected_action": "R18-R23-existing-supervision-contract",
-    "status": "static_validation_passed_publication_checks_pending",
+    "base_commit": "9103ec35d50495fd37690e48e442025372fac6e5",
+    "selected_action": "R18-R23-event-store-collision-retry",
+    "status": "independent_local_validation_passed_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1871,17 +1871,17 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-monitor-controls-20260922",
-    "observed_at": "2026-09-21T21:53:20.156682+00:00",
-    "base_commit": "3c45509c0716cbac403d3309ea4d8a03ab13a2d2",
+    "observation_id": "rsi-event-store-20260922",
+    "observed_at": "2026-09-21T22:46:36.881315+00:00",
+    "base_commit": "9103ec35d50495fd37690e48e442025372fac6e5",
     "previous_observation": {
-      "observation_id": "rsi-payout-atomic-20260922",
-      "git_reference": "3c45509c0716cbac403d3309ea4d8a03ab13a2d2:docs/roadmaps/rsi_swarm_backlog.json"
+      "observation_id": "rsi-monitor-controls-20260922",
+      "git_reference": "9103ec35d50495fd37690e48e442025372fac6e5:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "role": "coordinator",
     "origin": "external_principal",
     "principal_ref": "012",
-    "selected_task": "Reconcile existing RSI/WRE monitoring owners and layered control acceptance",
+    "selected_task": "Remove proven central event-store sequence-collision deadlock in the existing write method",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1890,46 +1890,61 @@
       "total": 15,
       "priority": "P1"
     },
-    "status": "static_validation_passed_publication_checks_pending",
-    "selection_basis": "012 requested a scalable cross-layer monitor audit. Reuse existing owners and make their missing acceptance gates explicit before runtime changes; no parallel monitor/module.",
+    "status": "independent_local_validation_passed_publication_pending",
+    "selection_basis": "Existing supervision evidence integrity is the upstream15/P1 dependency; native18/P0 remains blocked. No module/store/scheduler duplication.",
     "retrieval": {
-      "noise": "Historical daemon claims and module tests coverage targets exceed current verified scope",
-      "ordering": "WSP00/97/15 then NAVIGATION owners, current source/contracts, tests and existing roadmaps",
-      "missing": "Central dae_daemon ROADMAP and dedicated event-store test file absent; search cross-module tests before creating",
-      "staleness": "Shared root0c81418 retains HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; unchanged failure not retried, no reindex; exact-source fallback at pinned clean main",
-      "duplication": "Extend existing architecture map/R18/R23; no new packet, skill, module or scheduler"
+      "noise": "Historical bootstrap shelf and old test pass counts are not current execution evidence",
+      "ordering": "WSP00 gate, WSP97/15/62, current Git, NAVIGATION, module interface/readme/tests/log, exact owner and adjacent FAM pattern",
+      "missing": "No dae_daemon ROADMAP or dedicated persistence test owner; reuse existing observer test file",
+      "staleness": "Shared root still0c81418; known HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH unchanged, no repeated query/reindex; exact-source fallback only",
+      "duplication": "Existing event_store.write owns retry; no module, new store, scheduler or skill needed"
     },
     "closure_reconciliation": {
-      "pr": 1852,
-      "merge": "3c45509c0716cbac403d3309ea4d8a03ab13a2d2",
-      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-payout-atomic\\final-accounting.json",
-      "sha256": "27330d2a4e50d8f2e00c3ed5595bfced3a7a56059423b379d5e491fde6b32c78",
+      "pr": 1853,
+      "merge": "9103ec35d50495fd37690e48e442025372fac6e5",
+      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\final-accounting.json",
+      "sha256": "27c3c08ef2f74a3c0381eb2edc84e134f4f899ad87a7d050667729f571b6ceea",
       "state": "complete",
       "main_workflows": [
         {
           "conclusion": "success",
-          "databaseId": 35656712201,
-          "headSha": "3c45509c0716cbac403d3309ea4d8a03ab13a2d2",
+          "databaseId": 35660777905,
+          "headSha": "9103ec35d50495fd37690e48e442025372fac6e5",
           "status": "completed",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35656712201",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35660777905",
           "workflowName": "CI"
         },
         {
           "conclusion": "success",
-          "databaseId": 35656711673,
-          "headSha": "3c45509c0716cbac403d3309ea4d8a03ab13a2d2",
+          "databaseId": 35660777164,
+          "headSha": "9103ec35d50495fd37690e48e442025372fac6e5",
           "status": "completed",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35656711673",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35660777164",
           "workflowName": "CodeQL"
         }
       ],
       "owned_lane": "retired; ignored state and recovery bundle preserved"
     },
     "contract": "docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22",
-    "validation_boundary": "Documentation/static source audit only; no product imports, runtime tests, service starts, provider dispatch, domain/payment/token effects or authority changes",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store",
     "dispatchable": false,
     "retained_improvement_proven": false,
+    "validation": {
+      "baseline": "Actual-lock collision deadline hit; recursive write stack/partial stores observed, own child terminated. Frozen regressions5passed/4failed. Partial-write, duplicate, volatile notification and listener-isolation characterization retained.",
+      "candidate": "Ordinary focused pytest9passed/3deselected, two plugin-configuration warnings. Same nine fixed test IDs/assertions; fail-fast Lock wrapper. Original three daemon observer methods unchanged and not run.",
+      "limits": "Candidate process witness not run: automatic screening blocked two broader reviews. That harness remains paused. Narrow source/unit review does not override screening or prove candidate actual-lock subprocess/cross-process/crash recovery.",
+      "packaging": "Manifest1400same members, one member digest plus two pins;8generator tests,15fast groups and67file/950440byte package pass. Test registry1651/269 unchanged.",
+      "independent": "Independent ordinary replay9passed/3deselected, same nine cases; source hashes match static review. Initial9fixture-setup errors preserved, missing external parent created before rerun; no source/test/oracle changes. Not18unique tests.",
+      "no_claims": [
+        "atomic dual-store durability",
+        "registry durable acknowledgment",
+        "native runtime admission",
+        "production effects",
+        "reward settlement",
+        "retained RSI improvement"
+      ]
+    },
+    "size_debt": "event_store332→333/class310→311; write32; observer tests288. Existing mirrored WSP module logs own cohesive persistence/recovery review before further growth.",
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
@@ -1946,7 +1961,7 @@
           "dependency": "Seven resident trust anchors/absent effect lease and independently admitted production provenance"
         },
         {
-          "task": "Qualify existing central event-store collision, partial-write and persistence acknowledgment",
+          "task": "Qualify authoritative event persistence, recovery and caller acknowledgment",
           "wsp15": {
             "complexity": 3,
             "importance": 4,
@@ -1956,8 +1971,8 @@
             "priority": "P1"
           },
           "state": "eligible_bounded_qualification",
-          "evidence": "event_store.py::write; dae_registry.py::_emit; source-bound audit only, no observed live failure",
-          "next_step": "Find cross-module fixtures, freeze deterministic collision/partial-write/dedupe/ack oracles, constrain storage to disposable paths and bound any blocked-thread/child test; independent review before repair"
+          "evidence": "Disposable partial-write/volatile-listener baseline; nine fixed store regressions preserve known JSONL divergence",
+          "next_step": "Map current JSONL readers, SQLite authority/recovery and registry consumers; freeze crash/reopen/idempotency/ack oracles before extending existing owner. Preserve volatile emergency notification; no live DB."
         },
         {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
@@ -2014,40 +2029,41 @@
           "dependency": "Owner reconciliation; no social effects"
         }
       ],
-      "selected_next": "Existing central event-store evidence-integrity qualification",
-      "selection_reason": "Evidence/ack correctness wins the15/P1 tie by the requested supervision scope and its upstream dependency for requested component supervision and concurrency proof; qualify static risks before repair. Native18/P0 is blocked; role15/P1 remains open.",
-      "resolved": "Planning ownership/acceptance gap; PR1852 publication and cleanup fully reconciled",
-      "still_open": "All newly identified runtime gaps, native admission, persistent role authority, sustained capacity and independently retained benefit"
-    },
-    "audit_receipts": {
-      "daemon-owner-audit.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\daemon-owner-audit.json",
-        "sha256": "2e6679aaa9ac3e7ca2c1926cefdb89315bb4acc3198b7e4dfa2fe9a3c1f2c6cf",
-        "scope": "static source/contract audit; no runtime test result"
-      },
-      "wre-monitor-audit.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\wre-monitor-audit.json",
-        "sha256": "c2f3261cbb6b95ba7a808a00c67cf838c134f7e369a5bf9f3f6d17fd9236ff16",
-        "scope": "static source/contract audit; no runtime test result"
-      },
-      "independent-monitor-contract-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\independent-monitor-contract-review.json",
-        "sha256": "4200ef06bd4646d33e04ed74da795d1a295d1ba82e535f4f75ab95363b89f9c7",
-        "scope": "static source/contract audit; no runtime test result"
-      }
-    },
-    "local_validation": {
-      "command": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\validate_docs.py",
-      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\candidate-validation.json",
-      "scope": "10 existing documentation files; 26 planning packets retained; 12 local links/anchors; canonical numeric scores; prior PR1852 closure; diff/line budgets",
-      "runtime_tests_run": false,
-      "initial_validator_correction": "Normalize CRLF before preserved-history comparison; no repository content changed for the validator correction",
-      "independent_final_document_review": "Required before publication; exact candidate blobs recorded in external final-docs-review.json"
+      "selected_next": "Authoritative event persistence/recovery/acknowledgment qualification15/P1",
+      "selection_reason": "Proven fixture-level partial writes are upstream of trustworthy supervision and win the15/P1 tie over persistent roles. This is qualification, not authority to redesign persistence. Re-observe after closure.",
+      "resolved": "Recursive lock retry defect locally repaired; PR1853 publication/main checks/owned cleanup reconciled",
+      "still_open": "Partial writes, conflict classification, crash recovery, native authority, persistent roles, confirmed controls, sustained capacity and independent retained benefit"
     },
     "effort_cost_verification": {
-      "effort": "One architecture/documentation slice; existing owners audited in three read-only lanes",
-      "cost": "No live provider/model dispatch; orchestration token/cost not measured",
-      "verification": "Exact-source receipts, local document validators, independent final review, exact-head PR checks, main workflows and owned-lane closure"
+      "effort": "One existing method, reused test owner, required digest/docs; no new module",
+      "cost": "No provider/model/runtime dispatch; orchestration token/cost not measured",
+      "verification": "Fixed regression oracles, independent source/unit review, exact-head checks, main workflows and owned cleanup required"
+    },
+    "audit_receipts": {
+      "selection.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\selection.json",
+        "sha256": "894bd0fd868a944338513e568de7201c92b0a2ad23fb1729498683908fb751fa"
+      },
+      "source-only-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\source-only-review.json",
+        "sha256": "cc20f81de93fdc7c9fb90d9913b00a898ab23f5f93ccf01d85f4251f21e891e9"
+      },
+      "independent-unit-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\independent-unit-review.json",
+        "sha256": "0cfa3fb29e631d201ce07a3d0e1c2288a3424ba3d11aa5d63f4b717c2e8c32d1"
+      },
+      "focused-unit-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\focused-unit-tests.xml",
+        "sha256": "d650bae88ef13b3c61814db9a878ca6e2628e2edb70819999b055e5742981bba"
+      },
+      "independent-unit-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\independent-unit-tests.xml",
+        "sha256": "c031a1fb1f349deee0c2b029c3bc78f10393f92009932c9bbe742f6983ba572e"
+      },
+      "disposable/baseline-all/receipt.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\disposable\\baseline-all\\receipt.json",
+        "sha256": "d3f0d71db3ba96151e2168cdcd45217920291f5e5610dd8406746c6afe853b6b"
+      }
     }
   }
 }

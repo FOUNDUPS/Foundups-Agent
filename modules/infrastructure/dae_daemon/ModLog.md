@@ -1,5 +1,14 @@
 # dae_daemon ModLog
 
+## 2026-09-22: Remove event-store sequence-collision deadlock
+
+- WSP00/10/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. Extend only the existing `DAEEventStore.write` owner and observer test file; no new module, scheduler or persistence schema.
+- Disposable baseline reproduced recursive non-reentrant lock acquisition under a real sequence collision. The same nine fixed regression oracles gave5pass/4fail before repair and9pass after. Retry now stays inside one lock acquisition, preserving retry budgets, tuple results, dedupe and JSONL-before-SQLite ordering.
+- Ordinary focused pytest9pass/3deselected; independent verification and exact-head publication are separately recorded in the canonical RSI backlog. The three existing observer methods remain unchanged and were not run. Two pytest configuration warnings reflect disabled plugin autoload.
+- Broader candidate process-witness review was blocked by automatic screening; that harness remains paused. Ordinary source review/unit validation is a narrower evidence path, not a screening override or candidate production-lock replay claim.
+- JSONL partial/duplicate attempts and volatile registry notifications remain observed gaps. No atomic durability, registry acknowledgment, native admission, reward settlement, service activation or retained RSI improvement is claimed.
+- Source332→333lines/class310→311; write32lines. Inherited class-size review debt remains open in the mirrored WSP module log; qualify cohesive persistence/recovery ownership before further growth.
+
 ## 2026-09-22: Reconcile scalable RSI monitoring and confirmed controls
 
 - WSP00/10/15/22/50/77/91/97; source/document reconciliation C3/I4/D4/Impact4=15/P1. Extend the existing daemon architecture map and R18/R23 obligations; no new monitor, scheduler, packet, skill or runtime schema.

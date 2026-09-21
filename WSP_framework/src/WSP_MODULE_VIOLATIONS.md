@@ -1,5 +1,12 @@
 # WSP Module Violations Log
 
+## Central event-store class review debt — 2026-09-22 (OPEN)
+
+- Owner: dae_daemon maintainers / R18-R23 coordinator. Base `9103ec35d50495fd37690e48e442025372fac6e5`.
+- `modules/infrastructure/dae_daemon/src/event_store.py`:332→333lines; cohesive class310→311, above200-line review threshold; retry method31→32, below50. Existing observer tests106→288; all new functions below50.
+- Small bounded retry removes proven lock recursion without changing store ownership or splitting unrelated code. The +1line class growth is explicit inherited debt, not an exemption or resolved compliance.
+- Remediation before further store growth: qualify authoritative persistence/recovery and query ownership under the existing daemon architecture map; then separately evaluate cohesive extraction. Do not duplicate the store or compress unrelated code to hide size.
+
 ## FAM persistent initiation size debt — 2026-09-22 (OPEN)
 
 - Owner: FoundUps Agent Market maintainers / R24 coordinator.

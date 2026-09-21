@@ -2388,7 +2388,7 @@
     "modules/infrastructure/dae_daemon/src/dae_launch_broker.py": "cb5e9ff2f1cd4d34062f4490b5db65da74a565c7e198121fe80014faa915bab8",
     "modules/infrastructure/dae_daemon/src/dae_observer.py": "413193e7f39f7908d70bfff4bdbf361e17e58f8b16140d4af5a92ceaf2d0f77e",
     "modules/infrastructure/dae_daemon/src/dae_registry.py": "1eb5a48ef46be61e2a044ad72b720f5b54b3f253275c067690fff59ffa0f2cb1",
-    "modules/infrastructure/dae_daemon/src/event_store.py": "cfc84b529a3e982b6d280c6c67fcf0654a0c071ba90313338194b62368ce3530",
+    "modules/infrastructure/dae_daemon/src/event_store.py": "f4f037b302b9b0f8292cad0f1147d103c7eb758a1c94400f74f6f139f393b9ea",
     "modules/infrastructure/dae_daemon/src/killswitch.py": "efe5250b3f5ee2795d2bccc3747baa1bfe507517fb26b6e8bb58101f80466fec",
     "modules/infrastructure/dae_daemon/src/runtime_emitter.py": "99052298affacdc90bd47944869cf36e15f859b3789936ee19c2482267b988f5",
     "modules/infrastructure/dae_daemon/src/schemas.py": "d6b094a8e78c5dfeac3c0aa96736f4351fa838be2e48aa2fe299da6247f00e12",
