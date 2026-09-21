@@ -52,6 +52,8 @@
 - **2025-10-06 13:27:26**: WSP Documentation Guardian performed ASCII remediation on 162 files
 # WSP Framework ModLog
 
+- **2026-09-22**: **WSP 10 Terminal Work Closure Gate** - Added a mandatory `complete` versus `blocked` terminal state for every agent-owned slice. Ordinary success now requires finishing authorized validation, PR/merge, publication, live verification, and cleanup stages instead of handing an open PR or pending deployment back to 012. Added explicit owned-worktree inventory and cleanup evidence while preserving all unowned or ambiguous dirty lanes. WSP 15: C2/I5/D5/Impact4 = 16/P0. Updated the canonical 0102 instructions, generated Codex projection, master-index mirrors, and projection regression coverage. Slice: WSP10_TERMINAL_WORK_CLOSURE_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_AND_CONTRACT_TEST, NO_RUNTIME_CHANGE. (WSP 10/15/22/34/50/64/81/97 applied)
+
 - **2026-08-26**: **RedDog/0102 Canonical Architecture Alignment** - Reworked
   WSP 73 into the current RedDog identity, conversation, Memex, model-routing,
   OpenClaw/WRE/Hermes, p.fMALL/phone, and phased authority contract; corrected
