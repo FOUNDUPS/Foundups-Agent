@@ -1,3 +1,7 @@
+## Signer lifecycle identity provenance — 2026-09-22
+
+Reuse the lifecycle-admission and lifecycle-generation-race suites plus the existing signer-generation and queue-use-time suites. Preserve identity fields/digests, reject malformed matching identities, and retain foreign-capability, replay, expiry and generation checks. Use disposable generation/SQLite fixtures and fake health/OS observations; no live signer or gate admission is proved. Exact isolated commands, guard limits and 50-case baseline versus 64-case connected results are bound in the root RSI backlog.
+
 ## Call-local skill-safety regression evidence — 2026-09-21
 
 - Extend the two existing safety/boundary suites: legacy Boolean plus literal detail mode, nested publication, policy drift, RESEARCH, four callback-stable projections and malformed pair rejection before downstream work. Preserve original assertions, module docstrings and import capabilities.

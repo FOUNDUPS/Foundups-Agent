@@ -1,3 +1,10 @@
+## 2026-09-22: Preserve signer identity in lifecycle audit receipts
+
+- WSP00/11/15/22/50/62/97; bounded producer repair C2/I4/D4/Impact4=14/P1 after 15/P1 contract qualification. Extend the existing receipt/payload with requester and signer profile; reject matching malformed configured/health identities. No new module, consumer or authority.
+- Corrected baseline: 34 pass/16 failures across 50 cases; initial 48 failures were a confined SQLite URI guard mismatch and remain separate. Candidate: 64 connected passes, including two additional exact-string subclass cases and generation/replay/valve regression coverage. Source is 674 lines.
+- Backend manifest regeneration preserves its 1,400 members and digest; this lifecycle owner is not yet in that bridge closure. No packaging membership or pins added to imply admission. Independent evidence and final closure live in the canonical RSI backlog.
+- All receipt authority flags remain false; all seven resident blockers and absent effect lease remain. Next: qualify registered-boundary consumption with exact requester/profile correlation before any gate change.
+
 ## 2026-09-21: Close optional wardrobe cache qualification
 
 - WSP00/15/22/50/62/84/97/99: independently reviewed existing scanner, manifest and WRE cache; retain rescanning. Four-file bundle identity is not recursive scanner coverage; no measured optimization benefit or source slice qualified.
