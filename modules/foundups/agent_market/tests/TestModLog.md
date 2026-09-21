@@ -1,5 +1,14 @@
 # TestModLog - tests
 
+## 2026-09-22 - Persistent initiation failure, replay and contention regression
+
+- Corrected fixed selection: baseline 79 passed/41 failed; candidate and independent replay each 120 passed, zero errors/skips/guard denials or source drift. Independent replay covers the same case IDs, not another 120 unique cases.
+- Ten connected existing suites: persistent_compute_wiring, persistence, sqlite_adapter, migrations, repository_factory, compute_access, task_lifecycle, schemas, permissions, cabr_hooks. Original three wiring cases retained; added56cases in that same owner. Real disposable SQLite, two independent adapters, actual post-write and post-commit exceptions, bounded lock contention; no live provider/payment or OS sandbox claim.
+- Initial116-case runs (79pass/37fail baseline;114pass/2fail candidate) retained. Distinct synthetic token symbols repair setup only. Four additional reviewer/contract cases fixed before corrected baseline/candidate comparison. No tests deselected or skipped.
+- Runner actual flags -I/-B; plugin/cache disabled; writes/SQLite confined to owned temporary area; network/subprocess/production DB denied. Python audit hooks constrain these known tests, not hostile native code. Two existing asyncio config warnings do not imply async-plugin coverage. No process-death/power-loss claim.
+- Evidence: `O:/Foundups-Agent-audits/20260922-rsi-payout-atomic/{baseline-corrected,candidate-corrected,independent-final}/receipt.json`. Product source stayed fixed across corrected candidate/independent runs; receipts bind source, test IDs, outputs and guard events.
+
+
 ## 2026-02-16 (Cross-module concatenated validation - identity-anchor hardened)
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; .\.venv\Scripts\python.exe -m pytest modules/communication/moltbot_bridge/tests modules/foundups/agent_market/tests modules/foundups/simulator/tests -q`
 - Status: PASS

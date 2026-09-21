@@ -23,21 +23,30 @@ Ship contract-complete, testable infrastructure for tokenized Foundup launch and
 - [x] Tests pass in CI/local.
 - [x] Contracts are stable enough for OpenClaw/WRE integration.
 
-## Persistent reward correctness — qualified 2026-09-22
+## Persistent reward correctness — implementation 2026-09-22
 
-Current source still has non-atomic initiation and premature PAID labeling. The
-historical tranche checkboxes below are component evidence, not proof of reward
-retry safety, authorization or settlement. [R24 repair contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22)
-qualifies the existing-owner SQLite repair at14/P1 after13/P1 source/consumer review.
+The existing SQLite adapter now owns atomic pending initiation and exact retry.
+The historical tranche checkboxes below remain component evidence, not proof of
+production authorization or settlement. [R24 repair contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22)
+defines the local14/P1 repair and its independent validation boundary.
 
 - [x] Bind prior failure witnesses to current source; map transaction, compute and event owners.
 - [x] Fix acceptance for pending state, exact retry, rollback, concurrent writers and legacy rejection.
-- [ ] Implement and independently verify one SQLite initiation transaction in existing owners.
+- [x] Implement and independently verify one SQLite initiation transaction in existing owners (120 connected local cases; production roles/settlement excluded).
 - [ ] Qualify PostgreSQL compute initialization and actual backend locking before support claims.
 - [ ] Independently admit persistent roles and settlement; compute payment is not authorization.
 
-No new schema, module or live effect is authorized by this plan. Preserve the
-in-memory completed-payment simulation and distinguish it from persistent initiation.
+WSP62 task-budget reconciliation: the proposed1154-line adapter no-growth target
+was not met. Complete historical-scope and immutable replay checks require1330
+lines (+176); its class shrinks875→816 and the pipeline446→400/class405→359.
+New functions are at most40lines. Retain1330 as this owner's no-growth ceiling
+pending a separately scoped cohesion/decomposition review before further growth.
+The adapter remains in the critical review window; this is no protocol exemption
+or claim that inherited oversized classes/functions are clean. Avoid unrelated
+CRUD compression or a duplicate module merely to conceal this debt.
+
+This repair changes no schema, adds no module and activates no live effect. The
+in-memory completed-payment simulation remains distinct from persistent initiation.
 
 ## Prototype (Current)
 ### Goal

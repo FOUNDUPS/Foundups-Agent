@@ -18,11 +18,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional
 
-from sqlalchemy import JSON, Boolean, DateTime, Enum, Index, Integer, String, Text, create_engine, event
+from sqlalchemy import JSON, Boolean, DateTime, Enum, Index, Integer, String, Text, create_engine, event, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-from ..exceptions import NotFoundError, PermissionDeniedError, ValidationError
+from ..exceptions import InvalidStateTransitionError, NotFoundError, PermissionDeniedError, ValidationError
 from .migrations import LATEST_SCHEMA_VERSION, MigrationManager
 from ..models import (
     AgentProfile,
@@ -275,6 +275,241 @@ class ComputeSessionRow(Base):
     credits_debited: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     proof_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+
+
+def _compute_decision(adapter, sess, actor_id, capability, foundup_id):
+    """Evaluate the existing compute policy using the caller's transaction."""
+    required = max(0, int(adapter.compute_meter_costs.get(capability, 0)))
+    wallet = adapter._ensure_wallet_row(sess, actor_id)
+    plan = sess.get(ComputePlanRow, actor_id)
+    tier = plan.tier if plan else "scout"
+    available = int(wallet.credit_balance)
+    allowed, reason = True, "ok"
+    if not adapter.compute_access_enforced or required <= 0:
+        reason = "access not enforced" if not adapter.compute_access_enforced else "unmetered capability"
+    elif plan is None or plan.status != "active":
+        allowed, reason = False, "active compute plan required"
+    elif tier == "scout":
+        allowed, reason = False, "tier 'scout' cannot execute metered capabilities"
+    elif available < required:
+        allowed, reason = False, "insufficient compute credits"
+    return {
+        "allowed": allowed, "reason": reason, "required_credits": required,
+        "available_credits": available, "tier": tier, "capability": capability,
+        "foundup_id": foundup_id,
+    }
+
+
+def _debit_in_session(adapter, sess, actor_id, amount, reason, foundup_id, event_id=None):
+    """Stage the ordinary debit, optionally linked to an initiation event."""
+    now = adapter._now_utc()
+    wallet = adapter._ensure_wallet_row(sess, actor_id)
+    if int(wallet.credit_balance) < int(amount):
+        raise PermissionDeniedError(
+            f"insufficient compute credits (available={wallet.credit_balance}, requested={amount})"
+        )
+    wallet.credit_balance -= int(amount)
+    wallet.updated_at = now
+    entry = ComputeLedgerEntryRow(
+        entry_id=adapter._next_id("cc"), actor_id=actor_id, foundup_id=foundup_id,
+        entry_type="debit", amount=int(amount), rail="metered_execution",
+        reason=reason, payment_ref=None, event_id=event_id, created_at=now,
+    )
+    sess.add(entry)
+    return {
+        "entry_id": entry.entry_id, "actor_id": actor_id, "entry_type": entry.entry_type,
+        "amount": int(entry.amount), "reason": entry.reason, "foundup_id": foundup_id,
+        "credit_balance": int(wallet.credit_balance),
+    }
+
+
+def _payout_require(condition, reason):
+    if not condition:
+        raise ValidationError(f"Payout initiation requires reconciliation: {reason}")
+
+
+def _payout_text(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _payout_identity(sess, task):
+    """Snapshot existing proof/verification bindings, not settlement authority."""
+    if task.status != TaskStatus.VERIFIED:
+        raise InvalidStateTransitionError("Payout initiation requires VERIFIED task")
+    _payout_require(all(_payout_text(value) for value in (
+        task.task_id, task.foundup_id, task.assignee_id, task.proof_id, task.verification_id,
+    )), "missing task identity")
+    _payout_require(sess.get(FoundupRow, task.foundup_id) is not None, "missing FoundUp")
+    _payout_require(type(task.reward_amount) is int and task.reward_amount > 0, "invalid reward")
+    proof = sess.get(ProofRow, task.proof_id)
+    verification = sess.get(VerificationRow, task.verification_id)
+    _payout_require(proof is not None and verification is not None, "missing proof/verification")
+    _payout_require(proof.task_id == task.task_id and proof.submitter_id == task.assignee_id,
+                    "proof does not bind task and recipient")
+    _payout_require(verification.task_id == task.task_id and verification.approved is True,
+                    "verification does not approve task")
+    _payout_require(all(_payout_text(value) for value in (
+        proof.artifact_uri, proof.artifact_hash, verification.verifier_id, verification.reason,
+    )), "incomplete proof/verification")
+    return {
+        "initiation_version": 1, "foundup_id": task.foundup_id, "task_id": task.task_id,
+        "proof_id": proof.proof_id, "verification_id": verification.verification_id,
+        "recipient_id": task.assignee_id, "amount": task.reward_amount,
+        "proof_snapshot": {
+            "submitter_id": proof.submitter_id, "artifact_uri": proof.artifact_uri,
+            "artifact_hash": proof.artifact_hash, "notes": proof.notes,
+            "submitted_at": proof.submitted_at.isoformat(),
+        },
+        "verification_snapshot": {
+            "verifier_id": verification.verifier_id, "approved": verification.approved,
+            "reason": verification.reason, "verified_at": verification.verified_at.isoformat(),
+        },
+    }
+
+
+def _payout_reference_scopes(sess, refs):
+    """Follow supplied identities before classifying a record as unrelated."""
+    scopes = []
+    for model, identity in refs:
+        if not _payout_text(identity):
+            scopes.append(None)
+            continue
+        row = sess.get(model, identity)
+        if row is not None and model is not TaskRow:
+            row = sess.get(TaskRow, row.task_id)
+        scopes.append(row.foundup_id if row is not None else None)
+    return scopes
+
+
+def _payout_event_scopes(sess, event_row):
+    scopes, refs = [event_row.foundup_id], []
+    payload = event_row.payload
+    if not isinstance(payload, dict):
+        return scopes + [None]
+    if "foundup_id" in payload:
+        scopes.append(payload["foundup_id"])
+    for field, model in (("task_id", TaskRow), ("proof_id", ProofRow),
+                         ("payout_id", PayoutRow), ("verification_id", VerificationRow)):
+        value = getattr(event_row, field, None)
+        if value is not None:
+            refs.append((model, value))
+        if field in payload:
+            refs.append((model, payload[field]))
+    return scopes + _payout_reference_scopes(sess, refs)
+
+
+def _payout_scope_requires_check(sess, foundup_id, scopes):
+    if any(not _payout_text(scope) or sess.get(FoundupRow, scope) is None for scope in scopes):
+        return True
+    return len(set(scopes)) != 1 or foundup_id in scopes
+
+
+def _payout_event_mentions(event_row, task_id, payout_id):
+    payload = event_row.payload if isinstance(event_row.payload, dict) else {}
+    return (event_row.task_id == task_id or event_row.payout_id == payout_id
+            or payload.get("task_id") == task_id or payload.get("payout_id") == payout_id)
+
+
+def _validate_pending_payout(sess, event_row, events, payouts, ledger):
+    """Require complete durable identity, including every linked ledger row."""
+    _payout_require(event_row.event_type == "payout.initiated" and _payout_text(event_row.event_id)
+                    and _payout_text(event_row.actor_id),
+                    "invalid initiation event")
+    task = sess.get(TaskRow, event_row.task_id) if _payout_text(event_row.task_id) else None
+    _payout_require(task is not None, "event has no task")
+    identity = _payout_identity(sess, task)
+    rows = [row for row in payouts if row.task_id == task.task_id]
+    _payout_require(len(rows) == 1, "missing or duplicate payouts")
+    payout = rows[0]
+    _payout_require(_payout_text(payout.payout_id)
+                    and task.payout_id == payout.payout_id == event_row.payout_id,
+                    "unbound payout")
+    _payout_require(payout.status == PayoutStatus.INITIATED and payout.reference is None
+                    and payout.paid_at is None, "not an unsettled initiation")
+    _payout_require(payout.recipient_id == task.assignee_id and payout.amount == task.reward_amount,
+                    "payout recipient/amount mismatch")
+    _payout_require(event_row.foundup_id == task.foundup_id and event_row.proof_id == task.proof_id,
+                    "event scope/proof mismatch")
+    payload = event_row.payload
+    _payout_require(isinstance(payload, dict), "invalid event payload")
+    cost = payload.get("required_credits")
+    _payout_require(type(cost) is int and cost >= 0, "missing historical compute cost")
+    expected = dict(identity, payout_id=payout.payout_id, required_credits=cost)
+    _payout_require(payload == expected and type(payload.get("amount")) is int
+                    and type(payload.get("initiation_version")) is int
+                    and payload["verification_snapshot"]["approved"] is True,
+                    "event identity changed or incomplete")
+    _payout_require(sum(_payout_event_mentions(row, task.task_id, payout.payout_id)
+                        for row in events) == 1, "duplicate or conflicting initiation events")
+    debits = [row for row in ledger if row.event_id == event_row.event_id]
+    _payout_require(len(debits) == (1 if cost else 0), "historical debit cardinality mismatch")
+    for debit in debits:
+        _payout_require(debit.actor_id == event_row.actor_id and debit.foundup_id == task.foundup_id
+                        and debit.entry_type == "debit" and debit.reason == "trigger_payout"
+                        and debit.rail == "metered_execution" and debit.payment_ref is None
+                        and type(debit.amount) is int and debit.amount == cost,
+                        "historical debit identity mismatch")
+    return payout
+
+
+def _payout_history(sess, foundup_id):
+    """Check complete relevant history; missing scope holds across FoundUps."""
+    all_events = {row.event_id: row for row in sess.query(EventRecordRow).all()}
+    ledger, payouts = sess.query(ComputeLedgerEntryRow).all(), sess.query(PayoutRow).all()
+    referenced = {row.event_id for row in ledger if row.reason == "trigger_payout"}
+    events = [row for row in all_events.values() if row.event_id in referenced
+              or row.event_type.startswith("payout.") or row.payout_id is not None
+              or isinstance(row.payload, dict) and "payout_id" in row.payload]
+    checked = {}
+    for event_row in events:
+        scopes = _payout_event_scopes(sess, event_row)
+        scopes += [row.foundup_id for row in ledger if row.event_id == event_row.event_id]
+        if _payout_scope_requires_check(sess, foundup_id, scopes):
+            payout = _validate_pending_payout(sess, event_row, events, payouts, ledger)
+            checked[payout.payout_id] = event_row
+    event_ids = {row.event_id for row in events}
+    for debit in ledger:
+        if debit.reason != "trigger_payout" and debit.event_id not in event_ids:
+            continue
+        event_row = all_events.get(debit.event_id)
+        scopes = [debit.foundup_id]
+        if debit.event_id is not None:
+            scopes += _payout_event_scopes(sess, event_row) if event_row is not None else [None]
+        if _payout_scope_requires_check(sess, foundup_id, scopes):
+            _payout_require(event_row is not None and event_row.payout_id in checked,
+                            "ambiguous legacy debit residue")
+    for payout in payouts:
+        scopes = _payout_reference_scopes(sess, [(TaskRow, payout.task_id)])
+        if _payout_scope_requires_check(sess, foundup_id, scopes):
+            _payout_require(payout.payout_id in checked, "orphaned or legacy payout")
+    return checked
+
+
+def _stage_payout(adapter, sess, task, actor_id, identity):
+    decision = _compute_decision(adapter, sess, actor_id, "payout.trigger", task.foundup_id)
+    if not decision["allowed"]:
+        raise PermissionDeniedError(str(decision["reason"]))
+    cost, event_id = decision["required_credits"], adapter._next_id("evt")
+    payout = PayoutRow(
+        payout_id=adapter._next_id("pay"), task_id=task.task_id, recipient_id=task.assignee_id,
+        amount=task.reward_amount, status=PayoutStatus.INITIATED, reference=None, paid_at=None,
+    )
+    if cost > 0:
+        _debit_in_session(adapter, sess, actor_id, cost, "trigger_payout", task.foundup_id, event_id)
+    task.payout_id = payout.payout_id
+    sess.add(payout)
+    sess.add(EventRecordRow(
+        event_id=event_id, event_type="payout.initiated", actor_id=actor_id,
+        payload=dict(identity, payout_id=payout.payout_id, required_credits=cost),
+        foundup_id=task.foundup_id, task_id=task.task_id, proof_id=task.proof_id,
+        payout_id=payout.payout_id, timestamp=adapter._now_utc(),
+    ))
+    return payout
+
+
+def _payout_value(row):
+    return Payout(payout_id=row.payout_id, task_id=row.task_id, recipient_id=row.recipient_id,
+                  amount=row.amount, status=row.status, reference=row.reference, paid_at=row.paid_at)
 
 
 class SQLiteAdapter:
@@ -612,6 +847,34 @@ class SQLiteAdapter:
             row.paid_at = payout.paid_at
         return self.get_payout(payout.payout_id)
 
+    def initiate_payout(self, task_id: str, actor_id: str) -> Payout:
+        """Atomically record an unsettled SQLite initiation or its exact retry.
+
+        The write fence covers this operation, not unrelated wallet writers.
+        No treasury role or external settlement authority is conferred here.
+        """
+        if self.engine.dialect.name != "sqlite":
+            raise ValidationError("Atomic payout initiation supports SQLite only")
+        _payout_require(_payout_text(task_id) and _payout_text(actor_id), "missing caller identity")
+        with self.session() as sess:
+            sess.execute(text("BEGIN IMMEDIATE"))
+            task = sess.get(TaskRow, task_id)
+            if task is None:
+                raise NotFoundError(f"Task not found: {task_id}")
+            identity = _payout_identity(sess, task)
+            checked = _payout_history(sess, task.foundup_id)
+            rows = sess.query(PayoutRow).filter(PayoutRow.task_id == task_id).all()
+            if task.payout_id is not None:
+                event_row = checked.get(task.payout_id)
+                _payout_require(len(rows) == 1 and rows[0].payout_id == task.payout_id
+                                and event_row is not None and event_row.task_id == task_id
+                                and event_row.actor_id == actor_id,
+                                "retry actor or payout identity mismatch")
+                return _payout_value(rows[0])
+            _payout_require(not rows, "unbound task payout")
+            payout = _stage_payout(self, sess, task, actor_id, identity)
+            return _payout_value(payout)
+
     # --- EventRecord CRUD ---
 
     def create_event(self, event: EventRecord) -> EventRecord:
@@ -896,66 +1159,8 @@ class SQLiteAdapter:
         foundup_id: Optional[str] = None,
     ) -> Dict[str, object]:
         """Return allow/deny decision for capability execution."""
-        required = max(0, int(self.compute_meter_costs.get(capability, 0)))
         with self.session() as sess:
-            wallet = self._ensure_wallet_row(sess, actor_id)
-            plan = sess.get(ComputePlanRow, actor_id)
-            tier = plan.tier if plan else "scout"
-            available = int(wallet.credit_balance)
-
-            if not self.compute_access_enforced or required <= 0:
-                return {
-                    "allowed": True,
-                    "reason": "access not enforced" if not self.compute_access_enforced else "unmetered capability",
-                    "required_credits": required,
-                    "available_credits": available,
-                    "tier": tier,
-                    "capability": capability,
-                    "foundup_id": foundup_id,
-                }
-
-            if plan is None or plan.status != "active":
-                return {
-                    "allowed": False,
-                    "reason": "active compute plan required",
-                    "required_credits": required,
-                    "available_credits": available,
-                    "tier": tier,
-                    "capability": capability,
-                    "foundup_id": foundup_id,
-                }
-
-            if tier == "scout":
-                return {
-                    "allowed": False,
-                    "reason": "tier 'scout' cannot execute metered capabilities",
-                    "required_credits": required,
-                    "available_credits": available,
-                    "tier": tier,
-                    "capability": capability,
-                    "foundup_id": foundup_id,
-                }
-
-            if available < required:
-                return {
-                    "allowed": False,
-                    "reason": "insufficient compute credits",
-                    "required_credits": required,
-                    "available_credits": available,
-                    "tier": tier,
-                    "capability": capability,
-                    "foundup_id": foundup_id,
-                }
-
-            return {
-                "allowed": True,
-                "reason": "ok",
-                "required_credits": required,
-                "available_credits": available,
-                "tier": tier,
-                "capability": capability,
-                "foundup_id": foundup_id,
-            }
+            return _compute_decision(self, sess, actor_id, capability, foundup_id)
 
     def purchase_credits(
         self,
@@ -1014,37 +1219,8 @@ class SQLiteAdapter:
         if not reason:
             raise ValidationError("reason is required")
 
-        now = self._now_utc()
         with self.session() as sess:
-            wallet = self._ensure_wallet_row(sess, actor_id)
-            if int(wallet.credit_balance) < int(amount):
-                raise PermissionDeniedError(
-                    f"insufficient compute credits (available={wallet.credit_balance}, requested={amount})"
-                )
-            wallet.credit_balance -= int(amount)
-            wallet.updated_at = now
-            entry = ComputeLedgerEntryRow(
-                entry_id=self._next_id("cc"),
-                actor_id=actor_id,
-                foundup_id=foundup_id,
-                entry_type="debit",
-                amount=int(amount),
-                rail="metered_execution",
-                reason=reason,
-                payment_ref=None,
-                event_id=None,
-                created_at=now,
-            )
-            sess.add(entry)
-            return {
-                "entry_id": entry.entry_id,
-                "actor_id": actor_id,
-                "entry_type": entry.entry_type,
-                "amount": int(entry.amount),
-                "reason": entry.reason,
-                "foundup_id": foundup_id,
-                "credit_balance": int(wallet.credit_balance),
-            }
+            return _debit_in_session(self, sess, actor_id, amount, reason, foundup_id)
 
     def rebate_credits(self, actor_id: str, amount: int, reason: str) -> Dict[str, object]:
         """Rebate credits into wallet."""
