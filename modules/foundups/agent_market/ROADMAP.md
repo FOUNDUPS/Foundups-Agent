@@ -23,6 +23,22 @@ Ship contract-complete, testable infrastructure for tokenized Foundup launch and
 - [x] Tests pass in CI/local.
 - [x] Contracts are stable enough for OpenClaw/WRE integration.
 
+## Persistent reward correctness — qualified 2026-09-22
+
+Current source still has non-atomic initiation and premature PAID labeling. The
+historical tranche checkboxes below are component evidence, not proof of reward
+retry safety, authorization or settlement. [R24 repair contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22)
+qualifies the existing-owner SQLite repair at14/P1 after13/P1 source/consumer review.
+
+- [x] Bind prior failure witnesses to current source; map transaction, compute and event owners.
+- [x] Fix acceptance for pending state, exact retry, rollback, concurrent writers and legacy rejection.
+- [ ] Implement and independently verify one SQLite initiation transaction in existing owners.
+- [ ] Qualify PostgreSQL compute initialization and actual backend locking before support claims.
+- [ ] Independently admit persistent roles and settlement; compute payment is not authorization.
+
+No new schema, module or live effect is authorized by this plan. Preserve the
+in-memory completed-payment simulation and distinguish it from persistent initiation.
+
 ## Prototype (Current)
 ### Goal
 Integrate real persistence and one chain adapter while keeping chain-agnostic interface.
