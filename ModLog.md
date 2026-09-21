@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify and integrate Functions protobuf parent repair
+
+- WSP 00/15/22/50/97; C3/I4/D4/Impact4 = 15/P1. PR #783 merged and both main workflows passed; GitHub alert #170 is fixed. The 96 remaining peer heads are unchanged; ten Functions lock owners were reconciled independently.
+- Reuse PR #1375's UTF-8 1.1.2 lineage; add protobufjs 7.6.3 and four matching helpers from reviewed root metadata, preserving Functions runtime flags. Six records change and 293 are preserved; the direct manifest, Firebase configuration and all other locks are unchanged.
+- Strict isolated npm resolution/install and 11 explicitly scoped trusted-schema/gRPC checks pass on Node 24.11.1. Preserve EBADENGINE for configured Node 20 and the absent tracked index.js handler; target runtime, build and deployment remain unverified. The prior root 12-case malformed-oracle failure remains unchanged; its invalid assertion is excluded from this narrower suite under the independently adjudicated contract.
+- The four-file candidate awaits final independent review, disclosure of the parent repair in PR #1375's title/body, normal fast-forward and exact-head checks. The empty workflow-list failure is preserved; direct run-endpoint checks establish prior main success. After owned closure, re-evaluate GotJunk parent-package owner qualification (15/P1); no active product/runtime scope is acquired.
+
 ## 2026-09-21: Qualify and integrate existing root protobuf repair
 
 - WSP00/15/22/50/97; root scope C3/I4/D4/Impact3=14/P1. Clerk1378 and both main workflows passed; GitHub alerts22/23fixed.97other peer heads unchanged. Reuse root783 lineage without a replacement PR.
