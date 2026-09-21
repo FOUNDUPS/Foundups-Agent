@@ -1,5 +1,13 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-09-21: Qualify existing Acoustic Lab Pillow repair
+
+- WSP00/15/22/50/97; C3/I3/D4/Impact3=13/P1. PR1844 and both main workflows verified complete;95 peer heads unchanged. Existing1315 contributes only Pillow10.1.0 ->12.3.0; seven other same-manifest owners remain separate.
+- Six isolated Pillow checks pass on Windows CPython3.12.10; reviewer verified122 installed RECORD hashes. Both whole-manifest binary-only dry-runs FAIL identically on existing Web3/lru-dict wheel availability. Preserve the failures; no full dependency, app or Linux3.11 acceptance claim.
+- Independent qualification permits preparing the exact pin repair. Five-file candidate awaits final independent review, normal fast-forward to1315 and exact-head CI/current-base gates. No runtime, RPC, audio collection or deployment. Canonical backlog retains exact commands, evidence hashes and limits.
+- Re-observation discovered four high Functions node-forge alerts; select existing1374 owner/compatibility qualification15/P1 after this owned repair closes. GotJunk deployment, MCP runtime and AmIBot admission remain separate dependencies.
+
+
 ## Chronological Module Evolution
 
 ### Phase 1: Proof-of-Concept Implementation
