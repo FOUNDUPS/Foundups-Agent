@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify the existing Functions gRPC crash repair
+
+- WSP 00/15/22/50/97; C3/I4/D4/Impact4 = 15/P1. PR #1845 and both main workflows passed. Reconciled all 93 peer heads and the existing unassigned #1365 owner; seven sibling Functions lock updates remain separate.
+- Reuse the exact gRPC 1.14.4 record; preserve 298 other records, direct manifest, protobuf/UTF8/forge repairs and active shared state. Strict isolated npm install passed with lifecycle scripts disabled. Node 24 host retains the Node 20 target warning.
+- Same fixed offline fixture: 13 normal consumer/framing/limit cases pass on each version, with five matching wire hashes. Four vulnerable baseline failures remain recorded; the patched version passes all four security cases. No live RPC, auth, application or deployment. EventEmitter checks are not real HTTP/2; private server decompression is source-reviewed only.
+- Independent qualification accepted; exact source/docs candidate awaits final review/publication/CI. Existing roadmap/backlog updated; after closure, fresh WSP 15 comparison selects LinkedIn dry-run boundary qualification at 13/P1. This is repository convergence, not retained autonomous RSI proof.
+
 ## 2026-09-21: Reconcile daily-work skills and worktree closure into RSI
 
 - WSP 00/15/22/50/95/97: requested 15/P1 accounting reuses existing Gmail/LinkedIn/WRE/R25 owners and records source, registered prototype and verified runtime boundaries. No mailbox access or social writes.

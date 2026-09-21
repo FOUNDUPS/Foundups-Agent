@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "91261a63870426e9e216791c841a0275f10d9a14",
-    "selected_action": "Daily-work-and-worktree-RSI-accounting",
-    "status": "audit_complete_documentation_pending_review_publication",
+    "base_commit": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
+    "selected_action": "Functions-grpc-existing-PR-integration",
+    "status": "qualified_source_candidate_pending_final_review_publication",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1867,17 +1867,17 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-daily-work-hygiene-20260921-2302",
-    "observed_at": "2026-09-21T14:23:38.138612+00:00",
-    "base_commit": "91261a63870426e9e216791c841a0275f10d9a14",
+    "observation_id": "rsi-functions-grpc-20260921",
+    "observed_at": "2026-09-21T14:56:01.624646+00:00",
+    "base_commit": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
     "previous_observation": {
-      "git_ref": "91261a63870426e9e216791c841a0275f10d9a14:docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_id": "rsi-functions-forge-existing-pr-integration-20260921-2023"
+      "git_ref": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c:docs/roadmaps/rsi_swarm_backlog.json",
+      "observation_id": "rsi-daily-work-hygiene-20260921-2302"
     },
     "role": "architect/coordinator",
     "origin": "external_principal",
     "principal_ref": "012",
-    "selected_task": "Daily-work-and-worktree-RSI-accounting",
+    "selected_task": "Functions-grpc-existing-PR-integration",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1886,78 +1886,153 @@
       "total": 15,
       "priority": "P1"
     },
-    "status": "audit_complete_documentation_pending_review_publication",
-    "selection_basis": "C3 cross-skill/receipt/branch ownership reconciliation; I4 current work visibility; D4 principal-requested resumed work and interrupted sprint; Impact4 avoids duplicate work and false closure across active lanes. Completes explicitly requested accounting at equal priority before next dependency qualification.",
+    "status": "qualified_source_candidate_pending_final_review_publication",
+    "selection_basis": "C3 exact existing PR lineage and shared RPC consumer preservation; I4/D4 two current high crash advisories; Impact4 existing Firestore/google-gax transport. Qualification closes the concrete prerequisites; no live exposure inferred.",
     "execution_scope": {
       "files": [
+        "functions/package-lock.json",
         "ROADMAP.md",
         "ModLog.md",
-        "docs/roadmaps/rsi_swarm_backlog.json",
-        "docs/operations/RSI_SWARM_DISPATCH.md"
+        "docs/roadmaps/rsi_swarm_backlog.json"
       ],
-      "branch": "agent/rsi-daily-work-hygiene-20260921",
-      "plane": "Documentation and repository accounting only; no runtime, mailbox, post, registration or worktree removal.",
-      "protected": "Shared dirty product/YouTube/voice/OpenClaw checkout, all peer PRs, ignored learning state and Remote AutoPost unchanged."
+      "branch": "agent/rsi-functions-grpc-20260921",
+      "plane": "Isolated repository dependency qualification; no live RPC, app, services or deployment.",
+      "existing_pr": 1365,
+      "peer": "29c537b2bccdcbd9e38ee8c8fc5f5b5cd289e035",
+      "protected": "Shared active checkout, ignored shared handler, sibling PRs, live services/accounts and Remote AutoPost retain their owners."
     },
     "closure_reconciliation": {
-      "pr1374": {
-        "headRefOid": "b600ca61cfb019039d28bc252dfd367b6e8995d6",
-        "mergeCommit": {
-          "oid": "91261a63870426e9e216791c841a0275f10d9a14"
-        },
-        "mergedAt": "2026-09-21T14:22:25Z",
-        "number": 1374,
+      "pr1845": {
         "state": "MERGED",
-        "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1374"
+        "merge": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
+        "exact_head_checks": 10,
+        "main_workflows": [
+          {
+            "conclusion": "success",
+            "databaseId": 35613209730,
+            "headSha": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
+            "name": "CI",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "databaseId": 35613208655,
+            "headSha": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
+            "name": "Push on main",
+            "status": "completed"
+          }
+        ]
       },
-      "exact_head_checks": 10,
-      "prior_closure_receipt": "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\closure-reobservation.json",
-      "history": "26original packets/65prior score rows preserved; verified1374 advances historical accounting to155merged/21closed without merge.93peerheads remain unchanged.",
-      "shared_drift": "Interrupted candidate preserved; independently reconciled one concurrent YouTube ModLog entry before publication, keeping immutable original evidence."
+      "prior_forge": "1374 exact tree merged; alerts45\u201348 subsequently observed fixed and both main workflows passed in preceding final-accounting receipt.",
+      "accounting": "26 original packets and70 prior ranked rows preserved;156 historical merges/21 closed without merge after1845.93 open peer heads unchanged before this candidate. No worktree retirement."
     },
     "retrieval": {
-      "mode": "Governed lexical owner query",
-      "result": "ok=true; freshness=UNKNOWN; index_gap_detected=true",
-      "noise_ordering": "Broad query returned generic wardrobe/core entries; targeted current-main skill and adapter reads supplied missing Gmail/LinkedIn evidence.",
-      "freshness": "Source-bound audit receipts and fresh Git/PR/worktree metadata, not semanticCURRENT.",
-      "missing_artifacts": "LinkedIn message-first remote branch has no observed PR; newer operational wrappers absent from older shared checkout.",
-      "duplication": "Reuse merged1643/1786/1813 skills, existing adapter/registry/AgentDB/PatternMemory/R25 and existing cleanup scripts. No new contact store, skill or scheduler."
+      "bootstrap": "WSP00 awakening and tracker --check --strict --json passed in owned checkout this turn; tool output retained in thread. Role architect/coordinator, origin external_principal, principal012.",
+      "query": "Functions grpc-js dependency security PR1365 existing repair qualification consumer tests",
+      "holo_result": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
+        "workspace_repo_head_sha": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "no_holoindex_reindex_performed": true,
+        "no_authority_worktree_mutation_performed": true
+      },
+      "noise_ordering": "No accepted semantic results; exact current Git/PR/lock and installed consumer source retrieved in known ownership order.",
+      "missing": "Legacy Functions surface has no tracked application entry or module README/INTERFACE; existing root roadmap/firebase/direct manifest and prior qualified dependency harness are the actual owners, not fabricated stubs.",
+      "staleness": "All source claims pinned to fresh main/peer or separately bound installed graph. Failed owner query stays with existing R00/R03/WRE maintenance path.",
+      "duplication": "Reuse existing PR1365, prior strict npm isolation and review/publication guards. No new repo module/skill.",
+      "worker_choice": "Deterministic dependency resolution and source/fixture review are needed; Qwen/Gemma model inference does not establish package consumer correctness. Independent scoped verifier lanes provide review without activating shared runtimes."
     },
-    "integration_findings": {
-      "gmail": "Draft discipline1643 and correspondence ledger1813 are on main; live Gmail/CRM remains owning state. Contact ledger0.6.0 registered as prototype, not admitted production learning.",
-      "linkedin": "Existing adapter and skills; linkedin_agentic_reply prototype, linkedin_engagement unregistered. Static nested dry_run/like_post contradiction requires fake-only regression; no live test occurred.",
-      "skills": "Three newer main wrappers absent from older dirty shared checkout; use existing clean-main paths/context without switching or copying into shared work.",
-      "learning": "Existing Mosh Pit candidate logging plus the documented R25 contract; positive feedback-to-proposal handoff/current-state consumer unqualified. Typed verified effect/outcome and admission gates still required. Legacy simulated AgentDB posted record is not browser verification.",
-      "peer_work": "Preserve open draft1645 and failing-test1659. Reconcile existing six-path docs/linkedin-message-first-20260915 branch before any new policy document.",
-      "worktrees": {
-        "snapshot_count": 157,
-        "counts": {
-          "CLEAN": 121,
-          "DIRTY": 36,
-          "MISSING": 0,
-          "UNKNOWN": 0
-        },
-        "removals_performed": 0,
-        "limit": "Clean status alone does not prove safe retirement. Three inspected main-reachable candidates retain ignored state and lack release evidence; preserve."
+    "source_bindings": {
+      "functions/package.json": {
+        "git_blob": "7c4112aec5214d5f0f510d38ed363715cb67d39a",
+        "sha256_lf": "e7878197c4f6de7e8d937a1e811137dd833a70f0deaec8d15fcd9747b5a4182b"
+      },
+      "functions/package-lock.json": {
+        "git_blob": "b125d8a9e0a1bee11b33a2b8546e988bde54b376",
+        "sha256_lf": "2d8aa1bf47d3d97b29ab4195c366eeab31180eff2405a756844a9ea4d6213e42"
+      },
+      "firebase.json": {
+        "git_blob": "2de865edddf5a6f979f08625048dff842538069a",
+        "sha256_lf": "d8770271ca4c81a83a034141b9e615d1703ecfadd1d047fdd1b7adbb98844edc"
       }
     },
     "validation": {
-      "docs_only": true,
-      "runtime_tests": false,
-      "mailbox_read": false,
-      "messages_sent": false,
-      "worktree_removals": 0,
-      "branch_deletions": 0,
-      "limitations": "Read-only current surface/metadata audit, not whole-system operational certification; branch/CI snapshots are dated and ownership must be refreshed."
+      "fixture_sha256": "2373613cd3477a2d3d2f213ada2efaaed6661aa906620bd74103392886fc0dd2",
+      "paired_normal_cases_each": 13,
+      "normal_wire_hashes_equal": 5,
+      "baseline_vulnerability_failures": {
+        "malformed-gzip": "unhandled error Z_DATA_ERROR; exit1",
+        "malformed-deflate": "unhandled error Z_DATA_ERROR; exit1",
+        "server-stream": "fixed no-throw assertion fails; exit1",
+        "server-channelz": "fixed no-throw assertion fails; exit1"
+      },
+      "candidate_security_cases_passed": 4,
+      "candidate_cases_total": 17,
+      "same_fixed_assertions": true,
+      "source_proof": "Actual installed google-gax Firestore schema/serializers, CompressionFilter and Server prototype early-return methods; synthetic bounded input only.",
+      "limits": "Node24 host, not Node20. Named effect hooks are not OS confinement. Zero attempts established only on successful runs; native baseline crashes lack a final hook summary. EventEmitter fixture is not actual HTTP2 ingress. Private server decompression implementation is source-reviewed only. No live RPC/auth/app/deployment or retained RSI proof.",
+      "evidence_sha256": {
+        "baseline-compatibility.json": "32fd0da5f5311b7110d56ea4edcd451e23be257f28e715bed9df12a660893afe",
+        "baseline-malformed-gzip.json": "9402fa55877b5b6c059a753434bb3c7ea9b6438137ca7997fbff0ec7c4821710",
+        "baseline-malformed-deflate.json": "7195ff18b68f6c9296b5d713ea8e794ff8d2dffc0402012e7a043a5be049937e",
+        "baseline-server-stream.json": "c65e01ed26cb18736b7c2b3774b7f5aad9ff5e5cfb911464bae7bf74ec46bee5",
+        "baseline-server-channelz.json": "135abecc50b56cc4fc05013062014ef20ae608fdc43d4a7ea88fe877db0bcc38",
+        "candidate-compatibility.json": "490d68e18fc94fd93bd26a0f8b72d5a46ac180c3eb473e7f95c3a1826bee0cfc",
+        "candidate-malformed-gzip.json": "181564a037d9423ccf9d1df73fe5ef2cf75a40d29cc61464f75c51fdbdd4dae3",
+        "candidate-malformed-deflate.json": "01fd2852e2c1000fd847e444436682da619e8ccc996696851ecd2d1fb7ed988a",
+        "candidate-server-stream.json": "e01e7175aa70d32eb63333078ecb7c3dd969f4607adc33aa5defe84443c3b928",
+        "candidate-server-channelz.json": "ef111e3a27a8a779bc5ece2a74efa8b2b08d00461e75495cb544aa9245bb6407"
+      },
+      "strict_isolated_npm_ci": true,
+      "node20_verified": false,
+      "actual_http2_verified": false,
+      "private_server_decompressor_verified": false,
+      "app_or_deployment_verified": false,
+      "shared_ignored_handler_historical_equality_verified": false
+    },
+    "repair": {
+      "package": "@grpc/grpc-js",
+      "before": "1.14.3",
+      "candidate": "1.14.4",
+      "changed_records": 1,
+      "preserved_records": 298,
+      "preserved_prior_repairs": [
+        "protobufjs7.6.3",
+        "@protobufjs/utf81.1.2",
+        "node-forge1.4.0"
+      ],
+      "alert_ids": [
+        68,
+        69
+      ],
+      "advisories": [
+        "GHSA-99f4-grh7-6pcq",
+        "GHSA-5375-pq7m-f5r2"
+      ],
+      "tests_are_external_local_qualification": true,
+      "source_ci_regression_or_retained_rsi_proof": false
     },
     "evidence_sha256": {
-      "gmail-linkedin-audit.json": "5da55fbcbe5bd2e13490a543871052e0b28c78ed95295c1665c58ccb40f7683c",
-      "worktree-audit.json": "2eba4ec82ad97d7d44410c55083b5b0dbfc74649131eca55f58d751d61e95fef",
-      "worktree-inventory.json": "46e3005cf40d9565599da579df5e8e172b73ba2217d9de21f8da91f7ce73ab65",
-      "holo-retrieval.json": "2f1479aaf8998b99471ca58abddf6523971cba14debabedde5f730efdc7bcfee",
-      "bootstrap-gate.json": "30a07a4bbd93e834008be419cc3e8838b673c6d79c2a43a79e5fab722ee1a49e"
+      "independent-owner-review.json": "161d2b622c20dc424c78043b26f2d2312aaca8d3e4fbc01f48ddee38569c5d2c",
+      "acceptance-audit.json": "30c169efbb359e65503d1cb8c543c1713465acb5b8f25e1aa52853e85aadc23b",
+      "qualification-review.json": "2a8aecff6324596cdae8b0461d919c4f2627fe52eb6dc58e52b520f400373025",
+      "candidate-resolution.json": "dcfad5b3a4bde2c293d062c3bea901b01df94e467c9b6934aed9e160521dfe06",
+      "npm-dry.json": "d048014c4aaa5528688c23c71f5a3ca40293ebd057ddab9bd67b24cd1f22d08b",
+      "npm-ci.json": "9f5f2580a44f476485c34a8ac16068ec6d008f76b2716189a784a758869af1fe",
+      "compatibility.cjs": "2373613cd3477a2d3d2f213ada2efaaed6661aa906620bd74103392886fc0dd2",
+      "test_candidate.py": "331723a2345452fd3459e16b6d278dd21ac1b0abed025c3c6f407e5e800dd15a",
+      "verify_results.py": "4aee6e917ede51b42a72b952ae69de67503064efabd72ab2964f6e0547b205fa",
+      "verified-results.json": "03114c386ef62048cfde4cdf97211f77ac6bea8588f23f3a57b48d5c3001a9f8",
+      "paired-execution.json": "496849f8606e6be1311ef5e75a76c8877bb50e3e5ac6a93bd1ff1b7d2fa633bc",
+      "remaining-ranking.json": "272681e83a91d4cf3e64da9f815b5c3d6c105a2805046ffc086181b14c6f8b5f",
+      "retrieval-evaluation.json": "1ceee12d9d662eb3ca4c1b3a38bafdb65085fe4bf6b245f2cf8764f97a31726c",
+      "previous-main-workflows-completed.json": "67a46ab6d588636a592dc0ef710f223963e283d5e8d94f5b40581d89a2118962",
+      "shared-before.json": "1b19f8e5980d21e3c88a3ee43e22b8b9e657661a34e1137c2fb5c733d8c4bc9e"
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-resume-2302",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-functions-grpc",
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
@@ -2100,8 +2175,8 @@
           },
           "score": 17,
           "priority": "P0",
-          "state": "partial_four_prior_alerts_fixed_gotjunk_promotion_blocked",
-          "next_step": "Pillow1315 and Functions node-forge1374 repository repairs merged. Node-forge alert/main-run refresh recorded in prior closure receipt; no installed production remediation inferred. Continue existing grpc-js1365 owner qualification15/P1 after this requested daily-work accounting closes; other product/runtime owners retained."
+          "state": "partial_grpc_source_qualified_other_owners_retained",
+          "next_step": "Pillow1315 and node-forge1374 merged with passing main workflows; forge alerts45\u201348 fixed. Existing grpc1365 source integration pending final gates for open alerts68/69. Remaining XML13/P1 ties stay recorded; higher product/deployment owners preserved."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -2405,7 +2480,7 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "eligible_after_owned_forge_sprint_closure",
+          "state": "bounded_offline_qualification_complete",
           "evidence": [
             "functions/package-lock.json",
             "https://github.com/FOUNDUPS/Foundups-Agent/pull/1365",
@@ -2413,8 +2488,8 @@
           ],
           "score_rationale": "C3 shared RPC transport/consumer and owner qualification; I4/D4 two current high alerts68/69; Impact4 shared Firestore/google-gax transport. Actual live exposure unestablished. Highest remaining concrete qualified-scope candidate versus13/P1 XML,12/P2 parser/pattern/encoding and9/P3 cookie tasks.",
           "effort_cost": "Existing lock/owner tools and bounded transport fixtures; reuse current installed graph and exact source where applicable before new installs/model work.",
-          "dependencies": "Fresh existing1365, sibling-owner/source/acceptance reconciliation; Node20/missing handler limits preserved. No runtime or deployment permission.",
-          "next_step": "Reobserve1365 and alerts68/69; identify actual consumers and smallest bounded acceptance contract before any lock edit or execution. Never start live RPC/cloud services for qualification."
+          "dependencies": "Ownership/consumer/fixture qualification completed; Node20, real HTTP2, private server decompressor, app and deployment remain unverified.",
+          "next_step": "Exact existing1365 one-record candidate qualified by strict isolated install,13 paired normal cases and four fixed crash-path cases. Baseline failures retained; final source integration/review/publication/CI gates remain separate."
         },
         {
           "task": "Daily-work-and-worktree-RSI-accounting",
@@ -2426,15 +2501,36 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "audit_complete_documentation_pending_review_publication",
+          "state": "closed_pr1845_exact_reviewed_documentation",
           "evidence": [
             "O:\\Foundups-Agent-audits\\20260921-rsi-resume-2302\\gmail-linkedin-audit.json",
             "O:\\Foundups-Agent-audits\\20260921-rsi-resume-2302\\worktree-audit.json"
           ],
           "score_rationale": "C3 cross-skill/receipt/branch ownership reconciliation; I4 current work visibility; D4 principal-requested resumed work and interrupted sprint; Impact4 avoids duplicate work and false closure across active lanes. Completes explicitly requested accounting at equal priority before next dependency qualification.",
-          "dependencies": "Docs review and exact-head publication gates; no mailbox or runtime admission required.",
-          "next_step": "Publish existing roadmap/backlog/runbook/ModLog reconciliation; keep all unfinished/ignored/private state with its owner.",
+          "dependencies": "Documentation review, publication, exact-head merge and both main workflows fulfilled through PR1845; remaining source qualifications have separate owners.",
+          "next_step": "Four existing documents merged as7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c after ten PR checks; both main workflows passed. Recorded LinkedIn/skill/retirement qualifications remain separate.",
           "effort_cost": "Two read-only scoped audits, existing Git metadata and skill/receipt owners; no model runtime or mailbox calls."
+        },
+        {
+          "task": "Functions-grpc-existing-PR-integration",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "state": "qualified_source_candidate_pending_final_review_publication",
+          "evidence": [
+            "functions/package-lock.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1365",
+            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-grpc\\qualification-review.json"
+          ],
+          "score_rationale": "C3 exact existing PR lineage and shared RPC consumer preservation; I4/D4 two current high crash advisories; Impact4 existing Firestore/google-gax transport. Qualification closes the concrete prerequisites; no live exposure inferred.",
+          "dependencies": "Independent final four-file review, unchanged current base/peer/shared scope, normal fast-forward publication and exact-head CI/merge gates.",
+          "next_step": "Finish exact qualified one-record source repair through existing1365; preserve298other lock records and all sibling owners.",
+          "effort_cost": "Reuse existing PR, strict npm isolation, source-bound offline fixtures and exact-tree closure. No paid model runtime or cloud service."
         },
         {
           "task": "protected-foundup-work",
@@ -3019,19 +3115,160 @@
           ]
         }
       ],
-      "selected_next": "Functions-grpc-existing-repair-qualification",
-      "selection_basis": "Requested15/P1 accounting closes first. Existing grpc15/P1 remains highest eligible scored source qualification; new LinkedIn/cleanup13P1 and context/branch12/11P2 tasks are recorded, not silently promoted. Higher runtime/product rows remain blocked/externally owned. Reobserve exact current state at dispatch."
+      "additional_dependency_comparison": [
+        {
+          "package": "@grpc/grpc-js",
+          "pr": 1365,
+          "head": "29c537b2bccdcbd9e38ee8c8fc5f5b5cd289e035",
+          "alerts": [
+            69,
+            68
+          ],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4
+          },
+          "score": 15,
+          "priority": "P1",
+          "consumers": {
+            "node_modules/google-gax": "^1.10.9"
+          },
+          "rationale": "Shared Firestore/google-gax transport with two current high alerts. Exact existing patch now qualified by isolated install and paired offline consumer/crash checks; final review/publication/CI pending. No live RPC or deployed exposure proven.",
+          "state": "qualified_source_candidate_pending_final_review_publication"
+        },
+        {
+          "package": "body-parser",
+          "pr": 1316,
+          "head": "37f0b69bb7f03f6ae3b0326d3d6d67edbb91dc98",
+          "alerts": [],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "consumers": {
+            "node_modules/express": "~1.20.3"
+          },
+          "rationale": "Existing HTTP parser update without a currently observed high alert in this manifest. Coupled Express-owner reconciliation and actual entry relevance required; no urgency inferred from package name.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "fast-xml-parser",
+          "pr": 1373,
+          "head": "6ebc0a2242369fe406f0fd3bd0bd7207e4df0588",
+          "alerts": [
+            44
+          ],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "consumers": {
+            "node_modules/@google-cloud/storage": "^5.3.4"
+          },
+          "rationale": "Transitive parser owner has adjacent builder dependency; exact consumer reachability requires qualification.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "fast-xml-builder",
+          "pr": 1372,
+          "head": "34a85024a36b8f7776d8055d5fad4bf4a4269312",
+          "alerts": [
+            54
+          ],
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 13,
+          "priority": "P1",
+          "consumers": {
+            "node_modules/fast-xml-parser": "^1.0.0"
+          },
+          "rationale": "Related XML serialization owner; reconcile parser owner before independent promotion.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "brace-expansion",
+          "pr": 1456,
+          "head": "bde3740f65a9d26c6bae7e649317ede8a8a8e5f0",
+          "alerts": [
+            298,
+            282,
+            253
+          ],
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "consumers": {
+            "node_modules/minimatch": "^2.0.2"
+          },
+          "rationale": "Bounded pattern-expansion dependency patch; runtime relevance must be qualified.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "form-data",
+          "pr": 1344,
+          "head": "12eb04ca0c3ca21cfcea7e344051c8164a8d62ea",
+          "alerts": [
+            194
+          ],
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 12,
+          "priority": "P2",
+          "consumers": {
+            "node_modules/@types/request": "^2.5.5"
+          },
+          "rationale": "Bounded request-encoding dependency patch; actual call sites need qualification.",
+          "state": "candidate_owner_qualification_only"
+        },
+        {
+          "package": "js-cookie",
+          "pr": 1367,
+          "head": "18b9ce7527bc601006464eca3c55b76d641e8497",
+          "alerts": [
+            66
+          ],
+          "wsp15": {
+            "complexity": 2,
+            "importance": 2,
+            "deferability": 3,
+            "impact": 2
+          },
+          "score": 9,
+          "priority": "P3",
+          "consumers": {
+            "node_modules/js-beautify": "^3.0.5"
+          },
+          "rationale": "Cookie utility under server Functions graph; browser applicability unestablished.",
+          "state": "candidate_owner_qualification_only"
+        }
+      ],
+      "selected_next": "LinkedIn-dry-run-boundary-qualification",
+      "selection_basis": "After grpc15/P1 closes, LinkedIn and cleanup/XML candidates are13/P1. LinkedIn has a concrete existing outer/nested dry-run contradiction directly affecting the requested daily-work integration; fake-only qualification is smaller and more relevant to RSI effect boundaries than XML reachability or broad retirement guards. Fresh ownership/import-isolation gate still applies. Higher existing runtime/product/aggregate rows retain documented prerequisite or external owner constraints."
     },
     "dispatchable": false,
-    "retained_improvement_proven": false,
-    "integration_source_refs": [
-      "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md",
-      "modules/infrastructure/wre_core/src/registered_skill_executor.py",
-      "modules/infrastructure/wre_core/src/pattern_memory.py",
-      "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-      "https://github.com/FOUNDUPS/Foundups-Agent/pull/1643",
-      "https://github.com/FOUNDUPS/Foundups-Agent/pull/1786",
-      "https://github.com/FOUNDUPS/Foundups-Agent/pull/1813"
-    ]
+    "retained_improvement_proven": false
   }
 }
