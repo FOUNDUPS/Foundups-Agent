@@ -22635,7 +22635,9 @@
       "owner": "public",
       "suite_class": "operational",
       "shard_id": "public-operational",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "operational",
       "collectable": false,
       "timeout_s": 900,

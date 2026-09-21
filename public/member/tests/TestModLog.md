@@ -1,3 +1,13 @@
+## 2026-09-21 | Optional public discovery alias behavior (local and independent replay passed)
+
+Extend test_route_contract_bridge.py with the actual inline JavaScript in an isolated Node VM,
+synthetic Promise-based catalog responses and ordered history/render/context observations.
+Final author replay:128 passed; exact base HTML:62 failed/66 passed, with zero forbidden effects.
+The 48 existing cases remain intact;80 new cases cover aliases, paths, ambiguity, eligibility,
+failed history/catalog and membership-before-fetch. Pending/rejected discovery exports a null
+identity; successful canonical identity is preserved. Independent three-owner replay passed271overlapping cases, including these128; CI remains separate.
+No real browser/authentication, external scripts, network, provider or tenant runtime is exercised.
+
 # TestModLog — public/member/tests/
 
 ## 2026-09-21 | Public discovery / participation route contract reconciliation
