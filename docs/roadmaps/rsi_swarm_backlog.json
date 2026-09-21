@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
-    "selected_action": "FoundUp-genesis-prototype-compatibility-qualification",
-    "status": "static_qualification_accepted_document_review_publication_pending",
+    "base_commit": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
+    "selected_action": "AmIBot-public-alias-discovery-contract",
+    "status": "contract_reviewed_publication_blocked_at_recorded_head",
     "requires_fresh_reobservation_after_closure": true,
     "dispatchable": false,
     "observation_path": "current_observation",
@@ -1865,18 +1865,19 @@
       "impact": 2,
       "total": 10,
       "priority": "P2"
-    }
+    },
+    "publication_head": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a"
   },
   "current_observation": {
-    "observation_id": "genesis_prototype_compatibility_qualification_20260921",
-    "observed_at": "2026-09-20T23:34:25.340339+00:00",
-    "base_commit": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
+    "observation_id": "amibot_alias_contract_publication_reconciliation_20260921",
+    "observed_at": "2026-09-21T01:29:10.934565+00:00",
+    "base_commit": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
     "role": "coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "previous_observation": "49f878ffa0ed3677b31537fab6f578a1f426cd2b:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "status": "static_qualification_accepted_document_review_publication_pending",
-    "selected_task": "FoundUp-genesis-prototype-compatibility-qualification",
+    "previous_observation": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "status": "contract_reviewed_publication_blocked_at_recorded_head",
+    "selected_task": "AmIBot-public-alias-discovery-contract",
     "wsp15": {
       "complexity": 3,
       "importance": 3,
@@ -1885,214 +1886,488 @@
       "total": 10,
       "priority": "P2"
     },
-    "selection_basis": [
-      "C3: reconcile three existing contracts (registry loader, scanner bundle evidence and typed intake artifacts) with distinct truth boundaries.",
-      "I3: reusable intake readiness is suboptimal without an exact local compatibility/evaluation contract; it does not itself supply an authoring engine.",
-      "D2: declarative detect_ai registration exists and forced-dry defect is repaired, so prototype qualification can be delayed several cycles without a live incident.",
-      "Impact2: a concrete missing-evidence and guarded-fixture seam has limited direct effect; preserve the15/P1 aggregate wardrobe admission score as history, do not inherit it."
-    ],
+    "selection_basis": {
+      "complexity": 3,
+      "importance": 3,
+      "deferability": 2,
+      "impact": 2,
+      "total": 10,
+      "priority": "P2"
+    },
     "comparisons": [
       {
-        "task": "AmIBot-public-route-identity",
-        "historical_score": 14,
-        "finding": "No current98-peer path overlap on public/f/index.html or projector/test owner. A generic externally blocked-route-owner claim is unsupported. Local alias planning is permissible, but exact-ID lookup receives a projection that excludes hidden/not_portfolio detect_ai, so an alias alone does not create a visible entry or authoring capability. Keep canonical identity and membership gate; qualify alias/discovery separately before any source/publication change.",
-        "evidence": [
-          "public/f/index.html:956-982",
-          "modules/foundups/public_catalog_projector/src/projector.py:308-318",
-          "modules/foundups/foundup_registry.json: detect_ai",
-          "modules/foundups/detect_ai/foundup_manifest.json:18-29"
-        ]
+        "task": "FoundUp-genesis-prototype-compatibility-qualification",
+        "score": 10,
+        "result": "Closed PR1839 and both main workflows successful. No new loader/scanner defect or duplicate generic fixture justified."
+      },
+      {
+        "task": "AmIBot-public-alias-discovery-contract",
+        "score": 10,
+        "result": "Current finite plan resolves shell selector versus tenant namespace, explicit representation, validation and actual-code oracles. Document publication remains pending; no source capability yet."
+      },
+      {
+        "task": "Public-discovery-canonical-alias-capability",
+        "score": 10,
+        "result": "New optional source child C4/I2/D2/Impact2; eligible after current closure/fresh ownership. Ordinary display-name discovery exists but does not fulfill literal alias. No new planning cycle required without changed evidence."
+      },
+      {
+        "task": "FoundUp-genesis-wardrobe-admission / AmIBot-package-admission / native-worker-verification",
+        "result": "Higher aggregate scores retained. Current signed runtime/model and held-out/promotion artifacts remain incomplete; no new runtime admission inferred from alias or local documentation work."
+      },
+      {
+        "task": "R25 / Hermes child / RedDog owners",
+        "result": "Existing host/producer/ownership dependencies preserved at unchanged source scope; no newly qualified repair in current static inspection."
       },
       {
         "task": "Dependency-security-reconciliation",
-        "historical_score": 17,
-        "finding": "Aggregate alert triage/active owner dependencies remain; this bounded source review found no newly scoped exposure repair. Do not equate aggregate severity counts to a qualified patch."
-      },
-      {
-        "task": "M2M/R25/runtime-admission parents",
-        "finding": "Retain previously source-qualified missing accepted-child input/delivery, external host approval and signed runtime receipts; isolated prototype study does not require those grants."
-      },
-      {
-        "task": "AutoResearcher recovery / OpenClaw cache",
-        "finding": "Closed witnesses/retain-rescan qualification are not new executable work; no new recovery caller or measured cache benefit identified."
+        "score": 17,
+        "result": "Existing dependency owners and exposure triage remain. Aggregate alert count is not a new exact owned exploitable-path finding; not declared universally blocked."
       }
     ],
     "retrieval": {
-      "ok": false,
+      "receipt": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-alias-plan-0928\\holo-closure-1026.json",
+      "sha256": "d6ece7393e3e40c97bef424dffbbbce48ee3b5e90c7599368f0cdb5b4b3804f4",
+      "ok": true,
       "freshness": "UNKNOWN",
       "index_gap_detected": true,
-      "authority": null,
-      "noise": "Source-bound exact owners and nearest docs selected; broad module historical Qwen/Gemma claims are not runtime proof.",
-      "ordering": "WSP00/15/97 and exact PR closure, Holo navigation, module docs, actual typed builder/validator/gate/test source, independent loader/scanner qualification.",
-      "missing_artifacts": {
-        "README.md": {
-          "exists": true
-        },
-        "INTERFACE.md": {
-          "exists": true
-        },
-        "ROADMAP.md": {
-          "exists": true
-        },
-        "ModLog.md": {
-          "exists": true
-        },
-        "tests/README.md": {
-          "exists": true
-        },
-        "tests/TestModLog.md": {
-          "exists": true
-        },
-        "memory/README.md": {
-          "exists": false
-        },
-        "requirements.txt": {
-          "exists": true
-        }
-      },
-      "staleness": "Holo UNKNOWN/index gap cannot certify semantic freshness; exact current Git blobs govern. No test pass claim in this static slice.",
-      "duplication": "Existing programmatic intake/tests and distributed prototype retained; no new skill/module/parser or generic fixture.",
-      "semantic_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
-      "lexical": {
-        "ok": true,
-        "freshness": "UNKNOWN",
-        "index_gap_detected": true,
-        "bundle_authority": {
-          "evidence_authority": "workspace_head",
-          "repo_head_sha": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
-          "repo_root_digest": "sha256:40d60ad71436d43150e37a6d118fa2066a806f876c8f4c85e97c0cb2de85dcb2",
-          "workspace_overlay_present": false
-        }
-      },
-      "maintenance_owner": "Existing governed Holo WRE/CI maintenance path; no inline reindex/startup"
+      "authority": "Exact d9251a9b workspace-head lexical evidence; no source overlay. Reused unchanged source bindings.",
+      "evaluation": "Narrow must-include roadmap/dispatch artifacts; no new semantic authority, duplicate module, missing new code owner or need for reindex. Historical phase1 prose remains source-subordinate."
     },
     "closure_reconciliation": {
-      "pr1838": {
-        "merge": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
-        "exact_reviewed_tree": "509783c9d5a4512cbb334aac2c9b366ad1f3a631",
-        "pr_checks": "10 SUCCESS",
-        "main_workflows_at_closure": [
-          {
-            "conclusion": "",
-            "databaseId": 35544604443,
-            "headSha": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
-            "status": "in_progress",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35544604443",
-            "workflowName": "CI"
-          },
-          {
-            "conclusion": "",
-            "databaseId": 35544604335,
-            "headSha": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
-            "status": "in_progress",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35544604335",
-            "workflowName": "CodeQL"
-          }
-        ],
-        "prior_pause": "Earlier merge-authority question resolved by this heartbeat explicitly permitting checked, ownership-reconciled owned PR merges; no runtime authority added.",
-        "main_workflows_current": [
+      "pr1839": {
+        "merge": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
+        "exact_head_checks": "10 SUCCESS",
+        "main_workflows": [
           {
             "conclusion": "success",
-            "databaseId": 35544604443,
-            "headSha": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
+            "databaseId": 35546138409,
+            "headSha": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
             "status": "completed",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35544604443",
-            "workflowName": "CI"
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35546138409",
+            "workflowName": "CodeQL"
           },
           {
             "conclusion": "success",
-            "databaseId": 35544604335,
-            "headSha": "49f878ffa0ed3677b31537fab6f578a1f426cd2b",
+            "databaseId": 35546138262,
+            "headSha": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
             "status": "completed",
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35544604335",
-            "workflowName": "CodeQL"
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35546138262",
+            "workflowName": "CI"
           }
         ]
       },
       "accounting": {
-        "merged_since_20260909": 144,
+        "merged_since_20260909": 145,
         "closed_without_merge": 21,
-        "open": 98,
-        "method": "Prior paginated REST baseline plus verified PR1836/1837/1838 closures; exact98-head refresh, not fresh full-history pagination."
-      },
-      "original_packets": 26,
-      "candidate_histories": 50
+        "open": 99,
+        "method": "Prior paginated baseline plus verified owned closures through1839; current98peer heads unchanged, not fresh full-history pagination.",
+        "peer_open": 98,
+        "owned_open": 1
+      }
     },
     "execution_scope": {
-      "plane": "Static source qualification and canonical planning/log documentation only",
-      "allowed_paths": [
-        "ModLog.md",
+      "writes": [
         "ROADMAP.md",
-        "docs/roadmaps/rsi_swarm_backlog.json",
-        "modules/ai_intelligence/ai_overseer/ModLog.md",
-        "modules/ai_intelligence/ai_overseer/ROADMAP.md"
+        "ModLog.md",
+        "docs/roadmaps/rsi_swarm_backlog.json"
       ],
-      "read_scope_refinement": "Static inspection followed two existing adjacent owners omitted from the initial eleven-path plan: the actual lazy OpenClaw gate and skill_manifest_guard helper, needed to establish namespace-input and missing-manifest behavior. These narrow read-only checks add no execution scope.",
-      "invariants": [
-        "No production/test/skill/registry/manifest mutation or new module/skill",
-        "No product imports, tests, scanner subprocess, provider/model/runtime activation",
-        "Preserve prototype state, detect_ai identity, hidden state and all admission gates",
-        "Canonical skill-registry paths owned by PR1645/1792 remain read-only",
-        "Shared checkout, active RedDog/YUMORI/eSingularity and Remote AutoPost preserved"
-      ]
+      "source_writes": false,
+      "tests_executed": 0,
+      "runtime_dispatch": false
     },
-    "findings": [
-      {
-        "boundary": "Instruction document vs executable skill",
-        "source": "skillz/foundup_genesis_intake/SKILLz.md:1-31,142-161",
-        "finding": "Prototype instruction artifact; empty evals; described follow-on scaffold/manifest/catalog/build sequence is not an executable workflow or independent outcome evidence."
+    "findings": {
+      "contract_owner": "modules/foundups/detect_ai/ROADMAP.md#public-discovery-alias-contract--2026-09-21",
+      "independent_contract_review": {
+        "observed_utc": "2026-09-21T00:38:26.814027+00:00",
+        "verdict": "FINITE_OPTIONAL_ALIAS_CAPABILITY_QUALIFIED",
+        "head": "f0fa051a34c4a5531d29d21525089e84a9d8c1ad",
+        "branch": "agent/rsi-amibot-alias-plan-20260921",
+        "blockers": [],
+        "wsp104_decision": {
+          "conclusion": "A shell-owned discovery selector can fit the present namespace contract if canonicalization completes before any tenant landing render or context publication. An alias is not a new FoundUp identity, tenant-owned family or app route.",
+          "basis": "WSP104 gives the shell /f/ management and discovery, while each tenant owns one canonical /f/{foundup_id} family. Keep the canonical visible path and internal identity at the entry boundary.",
+          "interpretation_limit": "This is a qualified interpretation of existing ownership/invariants, not an explicit alias clause already implemented in WSP104. Record the selector-versus-tenant-family distinction in the existing contract docs; no protocol weakening or external runtime authority is required. Rendering and retaining /f/amibot as an alternate tenant entry is not the selected design."
+        },
+        "strongest_alternative": {
+          "choice": "Existing display_name discovery with canonical /f/detect_ai links",
+          "evidence": [
+            "public/f/index.html:1104-1107",
+            "public/f/index.html:1181",
+            "public/f/index.html:1235-1250"
+          ],
+          "assessment": "Already searches display name/summary/id and renders AmIBot from display_name for eligible entries; no alias/schema change is necessary for brand-name discovery. It does not satisfy the requested literal /f/amibot selector. Both alternatives leave detect_ai undiscoverable today because it is not_portfolio.",
+          "priority_effect": "Alias capability is helpful and limited, not core-function restoration or a live incident."
+        },
+        "current_facts": [
+          "Shell decodes the requested ID and matches exact projected foundup_id. It has no alias lookup today.",
+          "Parsed foundupId is reused in the canonical route display and concierge context; matching an alias without replacing that state would propagate the wrong identity.",
+          "Projector currently selects solely by portfolio_status. It does NOT independently filter public_surface_status. detect_ai is excluded by not_portfolio; do not claim a current universal hidden guard.",
+          "Registry has18 entries/one detect_ai; public catalog has4/no detect_ai. Existing manifest /f/detect_ai and idb_detect_ai stay unchanged.",
+          "Schema has no alias property; public allowlists/passthrough omit aliases. public_url_or_route is not a typed alias reservation.",
+          "Adjacent registry loader retains raw dictionaries, indexes only foundup_id and returns the raw registry. It has no RegistryEntry dataclass or field-drop normalization. No loader change is needed, and aliases must never enter its scope-ID index."
+        ],
+        "representation": {
+          "owner": "modules/foundups/foundup_registry.schema.json: RegistryEntry.properties",
+          "field": "public_discovery_alias",
+          "shape": "One optional nonempty lowercase ASCII slug string matching ^[a-z0-9_]+$; omission means no alias. Reject explicit empty/null/non-string, whitespace, separators, percent syntax and uppercase rather than coercing or case-folding.",
+          "no_inference": "Never infer from display_name, public_url_or_route, prose or a manifest prefix. No alias array, separate module, standalone alias file or duplicate entity is required.",
+          "data_boundary": "Do not add this field to current production registry records or regenerate a changed catalog in this capability slice. Synthetic fixtures exercise presence; absent current fields preserve bytes and behavior."
+        },
+        "validation_contract": [
+          "Projector owns alias reservation validation over every registry entity BEFORE portfolio filtering: reject malformed aliases, duplicate aliases and any collision with any canonical foundup_id, including self, hidden and non-eligible entries. Do not resolve collisions by order or first match.",
+          "Alias emission requires BOTH existing portfolio eligibility and explicit public_surface_status in discoverable/listed/promoted. Hidden or missing/unknown visibility suppresses alias emission while leaving the old canonical entity eligibility rules unchanged.",
+          "Keep projection validation independently fail-closed: reject injected/non-derived aliases and alias drift. Reuse a small alias-validation helper from generation and validation rather than duplicating rules; preserve existing ValidationReport API.",
+          "Public sanitizer admits only the new explicit field. Shell rejects malformed/ambiguous aliases and visible alias/canonical collisions before lookup; full-registry hidden collision assurance remains the projector validation responsibility, not a fabricated browser guarantee."
+        ],
+        "shell_contract": [
+          "Preserve the existing app/app-deep-link branch BEFORE any catalog fetch. Alias /app requests get that same member handoff; do not add app alias resolution, app mounting or storage/runtime scopes.",
+          "Alias lookup is available only for exact /f/{alias} with optional one trailing slash. Reject alias /other and other deeper paths; do not reinterpret legacy canonical deep-path behavior as part of this change.",
+          "Use exactly one URL-segment decode, retaining current canonical behavior; malformed percent input and decoded slash/backslash/percent/non-slug tokens must never reach alias render. Double-encoded separator must not be decoded a second time.",
+          "Resolve exactly one eligible projected alias to its canonical item. Before renderEntry or populateConciergeContext, call history.replaceState with a constructed same-origin /f/{canonical foundup_id} path and set the local foundupId to that canonical ID. Never take a replacement URL from data. Alias canonicalization drops query/hash rather than using them as identity inputs; canonical no-alias requests keep existing behavior.",
+          "If history canonicalization is unavailable or throws, stop landing render/context publication and show the existing failure/not-found surface. No shared-ID fallback and no alias under canonical labeling.",
+          "Keep current canonical routes free of automatic /member/foundup.html redirects. Existing no-location.replace assertions are not behavioral proof: explicitly test canonical no-op versus alias history replacement, ordering and failure. Do not merely evade a source-string assertion."
+        ],
+        "next_source_child": {
+          "selected_task": "Public-discovery-canonical-alias-capability",
+          "dimensions": {
+            "complexity": 4,
+            "importance": 2,
+            "deferability": 2,
+            "impact": 2
+          },
+          "wsp15": {
+            "complexity": 4,
+            "importance": 2,
+            "deferability": 2,
+            "impact": 2,
+            "total": 10,
+            "priority": "P2"
+          },
+          "score": 10,
+          "priority": "P2",
+          "state": "finite_optional_source_test_slice_qualified_after_current_plan_closure_and_fresh_owner_reconciliation",
+          "rationale": [
+            "C4: cross-language optional field, global collision, path normalization, canonical context and member-before-fetch invariants require careful coordinated change.",
+            "I2: canonical display-name discovery already exists; aliases are helpful rather than a missing core identity mechanism.",
+            "D2: hidden/unbuilt AmIBot and no current alias data permit several release cycles of deferral.",
+            "Impact2: synthetic reusable capability adds no current public entry, authoring, runtime worker or activation. Proposed12/P2 was not inherited."
+          ],
+          "coherent_source_test_scope": [
+            "modules/foundups/foundup_registry.schema.json",
+            "modules/foundups/public_catalog_projector/src/projector.py",
+            "public/f/index.html",
+            "modules/foundups/public_catalog_projector/tests/test_projector.py",
+            "public/member/tests/test_route_contract_bridge.py"
+          ],
+          "split_decision": "Implement one coherent optional capability across schema/projector/shell and existing two tests. A projection-only increment would leave the requested end-to-end contract incomplete and does not warrant another planning sprint.",
+          "preserved_paths": [
+            "modules/foundups/foundup_registry.json",
+            "public/f/public_catalog.json",
+            "modules/foundups/detect_ai/foundup_manifest.json",
+            "modules/foundups/src/foundup_registry_loader.py"
+          ],
+          "ownership": "Current coordinator evidence identifies schema PR1792 additive brand_context_path hunk. Preserve it and re-observe exact head/effective diff before edits; path overlap alone is not a runtime or blanket ownership blockade. Registry PR802/1792/1822 data is read-only.",
+          "packaging": "Before source execution, coordinator must name required existing docs/generated artifacts in its packet. If permanent actual-inline Node VM tests add a subprocess capability to the existing route test, use canonical test-registry generation/check for only that owner; do not silently leave derived metadata stale. No new tracked harness/module is needed.",
+          "budgets": {
+            "projector_py_baseline_lines": 531,
+            "projector_inherited_largest_function_lines": 51,
+            "shell_html_baseline_lines": 1504,
+            "projector_test_baseline_lines": 358,
+            "projector_test_inherited_fixture_lines": 61,
+            "route_test_baseline_lines": 479,
+            "rule": "New functions <=50 lines; avoid growing inherited oversized functions or unrelated compression. Treat the1504-line shell as an inherited oversized owner and explicitly record a localized budget before implementation; no replacement module merely to evade a cap."
+          }
+        },
+        "positive_oracles": [
+          "Absent alias fields: current committed projection bytes and canonical routing/member handoff unchanged.",
+          "Synthetic visible/portfolio-eligible canonical+alias entry: projection passes, canonical path does not canonicalize, alias and alias/ canonicalize once before rendering; render and concierge see canonical ID.",
+          "Canonical display-name filtering remains unchanged and never derives a route alias."
+        ],
+        "negative_oracles": [
+          "Empty/null/non-string/case/percent/separator alias shape; self/cross-canonical/duplicate alias collisions across all entries including hidden/noneligible; malformed reservations fail before filtering.",
+          "Hidden/not_portfolio alias stays unprojected; hidden but portfolio-eligible canonical behavior stays legacy while its alias is omitted. Unknown/missing visibility also cannot emit an alias.",
+          "Forged/drifted alias in projection, malformed shell alias or ambiguous visible mapping rejects; no first-match resolution.",
+          "Unknown alias and alias non-app deep path do not canonicalize or render a landing; /app and /app/deep hand off to member before fetch, including alias-shaped segments.",
+          "Malformed and double-encoded URL sequences do not acquire an alias; replacement uses only validated canonical slug and same-origin /f/ prefix.",
+          "replaceState exception/unavailability stops landing/context; actual rendering and canonical context order is observed against the existing inline source, not a copied resolver model."
+        ],
+        "validation_design": {
+          "projector": "Extend existing synthetic registry fixture and pure generation/validation tests; retain all legacy/leak/drift/nonmutation/current-artifact cases.",
+          "shell": "Reuse current HTMLParser extraction of actual inline source. Run reviewed Node VM with fake DOM/fetch/history and inert external scripts, asserting calls, canonical state, order and negative effects; permanent controls belong in the existing route test owner. No browser auth or real network claim.",
+          "not_executed": true
+        },
+        "retrieval_notes": {
+          "unchanged_prior_bindings": 12,
+          "adjacent_refinement": "Coordinator authorized one extra read-only loader owner beyond ten mapped inputs; corrected earlier unverified typed-dataclass assumption.",
+          "missing": "Projector tests/README.md is absent; no placeholder created.",
+          "staleness": "Projector README Phase1 rationale and routing-model implementation table predate the now-wired scope-free public shell. Actual source governs; historical ModLog is not rewritten as current runtime truth.",
+          "navigation_only": "Current coordinator Holo evidence remains navigation; this lane ran no retrieval/bootstrap/runtime call."
+        },
+        "source_bindings": [
+          {
+            "path": "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md",
+            "lines": "21-26;75-106;112-169;243-286;290-301",
+            "git_blob": "3f6e459f344591879490f836c49ce7f5e96bf5f9",
+            "sha256_raw": "2606bb6fe81032a205f1652eb13c777d0d6aadaa9260e3933599d48f86b3ec00",
+            "sha256_lf": "35b2e90756b853037f142cf8d3dccc606457f17d992b6ffbb909ccc480472e4d",
+            "line_count": 447
+          },
+          {
+            "path": "public/f/index.html",
+            "lines": "895-914;925-1022;1104-1107;1181;1235-1250;1475-1480",
+            "git_blob": "2267d6afc68d65d983d0f329bbab90e545f17ba6",
+            "sha256_raw": "c93aa56a886c42371bcc69fa68533449c2655779dea8c1018b4f81a5c04d7fe5",
+            "sha256_lf": "efefb19457a7249602a3ab75e53c4311aedeea454aad76dc6c312e4a29cbedd2",
+            "line_count": 1504
+          },
+          {
+            "path": "public/f/public_catalog.json",
+            "lines": "entities: four current records, no detect_ai",
+            "git_blob": "47d162e14ab282b5083381707c755e98b4536bdc",
+            "sha256_raw": "e983d5e7e9bb139ec3e63ed2635fb3d49783f63ec1f82191e64316d1639d3296",
+            "sha256_lf": "1e6a5115be11ef361f3e72eb420b6e559924eecfc7388648f25ef99dbbcb6fff",
+            "line_count": 71
+          },
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "lines": "detect_ai: hidden/not_portfolio; one of18 entries",
+            "git_blob": "76940113b14cf707794ae379e7d38f4a9fb6c989",
+            "sha256_raw": "14742eb9805f13313519f4b75548818adf0b85d430473513064a05e19bb33c59",
+            "sha256_lf": "f7cf6a86b040f7400e32747af006507cd9515ac25692d1dbf33290195fd1567a",
+            "line_count": 735
+          },
+          {
+            "path": "modules/foundups/foundup_registry.schema.json",
+            "lines": "151-169;299-302; no explicit alias property",
+            "git_blob": "5882df51bf047641dab0a80940aadb690124e9a8",
+            "sha256_raw": "1698cf577f9d92f9d9bcd4a6b9624d87f55483b521b4ee9b6941d99d9abc424a",
+            "sha256_lf": "808dc709cd0a8d4499ef40c0840872cf97faf815db930206e090a7e8f315c80c",
+            "line_count": 375
+          },
+          {
+            "path": "modules/foundups/detect_ai/foundup_manifest.json",
+            "lines": "3;16-20;29",
+            "git_blob": "5056493eec270f32e8441af916f755b7d43ad108",
+            "sha256_raw": "aa1541bc41012ea95f3d5812974e0df5a5baf4f1d3f6b3a423a19b8b07726485",
+            "sha256_lf": "5f1148ba3ad80cfb5d4ecb9f37dd08b1c09aed82dea140b66f670ab65a7cb0ad",
+            "line_count": 30
+          },
+          {
+            "path": "modules/foundups/detect_ai/README.md",
+            "lines": "22-34;47-56",
+            "git_blob": "202c89f33881ba2cd95c8535527b1853f0aba6b3",
+            "sha256_raw": "dce37bb5f97086f39b6f0507414443d6c68a30b66e39700f2b358089712eb1a1",
+            "sha256_lf": "2f4daf099c3bbbda74cad5ca224984cec6d5a96847675d6140398934b2bb33da",
+            "line_count": 81
+          },
+          {
+            "path": "modules/foundups/public_catalog_projector/src/projector.py",
+            "lines": "75-135;262-274;280-335;359-473;477-512",
+            "git_blob": "a44a490662b12fb9560b9ff695bb7a5f5ce792e2",
+            "sha256_raw": "b176182283bcf17b4ffeeedd969a895f1d68e09b360f2451b8de4146357ac8ce",
+            "sha256_lf": "8a4e7e76cbcb37cc2e927b45c89ad6c8318358f186e5614d27e51b1c6dbf47f0",
+            "line_count": 531,
+            "largest_functions": [
+              {
+                "span": 51,
+                "name": "rule_B_derived_from_registry",
+                "line": 392
+              },
+              {
+                "span": 35,
+                "name": "validate_projection",
+                "line": 477
+              }
+            ]
+          },
+          {
+            "path": "modules/foundups/public_catalog_projector/INTERFACE.md",
+            "lines": "1-45",
+            "git_blob": "421d2c0f34f8e674042c6b8147220c92d585aaa1",
+            "sha256_raw": "f6b8af74b6a7aa1d418563d83850f9abd3c121b86082a3c5c5d83033cec2a7c6",
+            "sha256_lf": "41e2e47327672b9767b2711677b887cdb356347925f443360fedf5b4dfd13291",
+            "line_count": 45
+          },
+          {
+            "path": "modules/foundups/public_catalog_projector/tests/test_projector.py",
+            "lines": "42-102;108-250;263-311;318-358",
+            "git_blob": "d3379371c4c134d4fa66296b135ff76d707e6cd4",
+            "sha256_raw": "3c9ed9f1c5e5bb356745f15d2371e50f21b735508df702c13c6e685796da1f11",
+            "sha256_lf": "02d3b10df3e41c496c7cd9b7ab0b42f86f58d01480278c64ddc58f6080333eb3",
+            "line_count": 358,
+            "largest_functions": [
+              {
+                "span": 61,
+                "name": "_registry",
+                "line": 42
+              },
+              {
+                "span": 20,
+                "name": "test_cli_exit_2_when_registry_missing",
+                "line": 339
+              }
+            ]
+          },
+          {
+            "path": "public/member/tests/test_route_contract_bridge.py",
+            "lines": "49-81;197-247;298-328;465-479",
+            "git_blob": "ef9109201d2fb61f60d23f71c861ca86298fb1e1",
+            "sha256_raw": "16172f0b145d7ebd93030714fe7877ee03c044f5da7e14f98e7a76aa48b2aceb",
+            "sha256_lf": "b81cfab252cefad2dac0880d7217e95c7927e33c148562b960e470d3726a5e68",
+            "line_count": 479,
+            "largest_functions": [
+              {
+                "span": 19,
+                "name": "test_gotjunk_no_entry_url_until_frame_compatible",
+                "line": 393
+              },
+              {
+                "span": 15,
+                "name": "test_kosei_has_entry_url",
+                "line": 436
+              }
+            ]
+          },
+          {
+            "path": "modules/foundups/src/foundup_registry_loader.py",
+            "lines": "50-89;91-103;127-129;141-168",
+            "git_blob": "19d6357c4b18c90264e1538d23b857e457458848",
+            "sha256_raw": "310d1f1afbdf43081e8d4f0a11229f816fd010fdb9773ab2941c6e4b1c3c8820",
+            "sha256_lf": "613f491b5173cc042b7fc7efed4db2e1ee7d708991805262ce11b260bd715ad6",
+            "line_count": 219,
+            "largest_functions": [
+              {
+                "span": 40,
+                "name": "__init__",
+                "line": 50
+              },
+              {
+                "span": 14,
+                "name": "load_registry",
+                "line": 155
+              }
+            ]
+          },
+          {
+            "path": "modules/foundups/public_catalog_projector/README.md",
+            "lines": "7-17;25-37;58-64",
+            "git_blob": "0ecbfa1e4d1e880b290ba1dc0bd5364db3938e78",
+            "sha256_raw": "1358ad0d13d068aae5e50ea5ef8e00c674298bdab16fc68263d7bb691bbeebfe",
+            "sha256_lf": "f7cde6f4baa667ea9bb8b6b937bf47f4fc01bbcce92944e825a5ecc31138466b",
+            "line_count": 57
+          },
+          {
+            "path": "modules/foundups/public_catalog_projector/ModLog.md",
+            "lines": "Phase1 historical entry",
+            "git_blob": "d642d26bc99bfa602e8fa895367dd2db2d27ce53",
+            "sha256_raw": "82069dc9594cd70f768c7ca5b4f54f6b4cb5a12335be87abfe7d65ae7725a255",
+            "sha256_lf": "62061b178b28ca875979b49b20b1397d217918064398e948cb6f51c18eccb9c7",
+            "line_count": 38
+          },
+          {
+            "path": "modules/foundups/docs/PFMALL_ROUTING_DISCOVERY_MODEL.md",
+            "lines": "11-32;50-80;142-161",
+            "git_blob": "445b697917c601811da083677cace71af3680b6d",
+            "sha256_raw": "700540757ed4d650a909093b594c2314586a3ae1e728773a0e4ff441675270e0",
+            "sha256_lf": "e1605a8fd68a314e17b9902490dd32d50ff444d208ec50aa32250c5f8f6ef63d",
+            "line_count": 355
+          },
+          {
+            "path": "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+            "lines": "43-130",
+            "git_blob": "1364165b54eb78dc3e230f316c23a52664e07f5f",
+            "sha256_raw": "706239210fa0404f0f72d3b3c0f06fa3c371262d7d498546d63810d14d09b8d9",
+            "sha256_lf": "cf096245470f3f800ae87b10b532daaa7eec36d95e424c144941f232485f7503",
+            "line_count": 207
+          }
+        ],
+        "evidence_refs": {
+          "prior_packet": {
+            "path": "O:\\Foundups-Agent-audits\\20260921-rsi-genesis-qualification-0823\\next-selection.json",
+            "sha256": "4fafdf04381c51582b61bc0aa04efc44057dc0244dd16f2f6c9981c2041817bb"
+          },
+          "preflight": {
+            "path": "O:\\Foundups-Agent-audits\\20260921-rsi-amibot-alias-plan-0928\\preflight.json",
+            "sha256": "1f4693a5571bcfe0a60f3760131998c2a2d6f62f8b65487ba8487dad937a50f5"
+          }
+        },
+        "limits": [
+          "Static source/AST/Git review only: no tests, product imports, scanner, provider/model/service/DB or network calls and no repository edits.",
+          "This receipt qualifies a finite optional capability, not a live AmIBot alias, deployment, membership qualification or autonomous authoring proof.",
+          "Missing alias support is a requested feature, not a demonstrated security incident. Hidden and canonical-name alternatives remain valid."
+        ]
       },
-      {
-        "boundary": "Structured normalization vs principal prose",
-        "source": "src/foundup_genesis/intake_packet_builder.py:21-26,134-179,232-289; tests/test_intake_packet_builder.py:79-106",
-        "finding": "Recognized key:value scalars and four-field acceptance lines build a typed draft. Empty/unrecognized prose produces no envelope. No free-form researcher or model is called; new LLM/parser would duplicate the intended upstream normalization role unless separately qualified."
-      },
-      {
-        "boundary": "Draft defaults and authority",
-        "source": "src/foundup_genesis/intake_packet_builder.py:182-215,218-229,251-289",
-        "finding": "IDEA_ONLY default, external_repo_requested=False, requested_by=012/created_by=0102 labels; only lazy gate evaluation occurs. These labels and gate_passed do not authorize commander/build/registry effects."
-      },
-      {
-        "boundary": "Structural validation",
-        "source": "src/foundup_genesis/validator.py:236-397; envelope.py:251-280",
-        "finding": "Validates namespace format, reserved/injected existing IDs, lifecycle/binding, criteria, display fields and evidence presence for implementation markers; strict mode turns warnings into errors. It updates the local envelope validation fields. Evidence-string presence is not verified implementation quality."
-      },
-      {
-        "boundary": "New identity vs existing AmIBot",
-        "source": "src/foundup_genesis/validator.py:221-234,261-272; tests/test_foundup_genesis_validator.py:291-304; moltbot_bridge/src/openclaw_foundup_orchestrator.py:402-417",
-        "finding": "Duplicate IDs reject only against supplied existing_ids. The default lazy gate supplies strict_mode but not a current registry inventory. Do not claim fresh namespace occupancy is checked, or blindly inject new-identity rejection into an existing-foundup build. detect_ai remains the one existing AmIBot identity."
-      },
-      {
-        "boundary": "Actual gate, not skill dispatch",
-        "source": "moltbot_bridge/src/openclaw_foundup_orchestrator.py:435-539,816-825; src/foundup_genesis/intake_packet_builder.py:218-229",
-        "finding": "The builder calls the existing programmatic gate. It does not load/invoke foundup_genesis_intake, generate WSP109 document packets, register, scaffold or independently evaluate a skill. A prototype compatibility experiment must label those separations."
-      }
-    ],
-    "readiness_missing": [
-      "Canonical executable-skill registry entry and exact bundle manifest/admission artifacts are absent; absence does not prohibit static/local prototype study.",
-      "Independent held-out task outcome/security/regression evidence, exact runtime/model/tool binding, promotion receipt, rollback and lineage remain missing for production admission.",
-      "A demonstrated principal-prose to complete WSP109 packet path cannot be inferred from the structured builder or Skillz document."
-    ],
+      "normative_decision": "Shell-owned pre-entry alias resolves/canonicalizes before rendering; no second tenant route family or WSP104 amendment. Specified, not implemented.",
+      "current_visibility": "Projector currently filters portfolio_status only; alias visibility guard is proposed, not existing. detect_ai remains hidden/not_portfolio and excluded.",
+      "loader": "Raw dict retention already preserves optional fields; no loader or authorization change."
+    },
     "validation": {
-      "local": "Source/AST/JSON and exact source-binding inspection only; no tests executed in this plan-only slice. Prior245-case evidence belongs to PR1838, not this qualification.",
-      "independent": "Registry/scanner source qualification accepted as missing artifacts with no demonstrated source defect; proposed generic fixtures declined as duplicate coverage. Next narrow alias/discovery plan independently scored10/P2. Final exact five-document review pending.",
-      "remote": "PR1838 ten exact-head checks and both main workflows SUCCESS; reviewed tree merged. Current documentation candidate not yet published.",
-      "test_decision": "Existing tests cover generic shape/path/scanner/intake mechanics; do not add redundant tests merely to reassert implementation."
+      "method": "static current-source/document/JSON/hash checks and independent source review",
+      "tests_executed": 0,
+      "document_review": "Prior exact five-file d9251a9b candidate ACCEPT; this three-file status delta needs independent review and fresh candidate checks.",
+      "production_changes": false
     },
-    "effort_cost": "Bounded read-only contract inspection and required existing docs; no provider spend observed, model token cost unmetered.",
-    "manual_rationale": "Static deterministic contract/source inspection does not require an admitted Qwen/Gemma runtime or provider call.",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-genesis-qualification-0823",
+    "effort_cost": {
+      "scope": "Three existing documentation files; static validation and independent delta review only. No model/provider/runtime calls; no measured token cost claimed.",
+      "provider_calls": 0,
+      "worker_runtime_jobs": 0,
+      "tokens_cost": "Not metered."
+    },
+    "manual_rationale": "Protocol/identity compatibility adjudication uses coordinator and independent source review. No qualified local Qwen/Gemma job/runtime binding is supplied by this plan; no agent execution result is invented.",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-publication-reconcile-1026",
     "evidence_sha256": {
-      "premerge.json": "b2be6523e75238254da2b85b400c3a07272086aed33bab85df17a43c450f24ca",
-      "closure-reobservation.json": "e005ec70fa06857193d5d1e9bea2b375aef2370fcd170ecd0eaf4c69748ed0a3",
-      "holo-query.json": "89c9b56c66da604ef06fa022fdad5b7d1f7ddc23227a9de115b5345a64dbadff",
-      "holo-lexical.json": "38788691208bb8c3caa98248bd2b8d4f8d0d35186bc2a4fcc92c9c04ff3b3014",
-      "intake-qualification.json": "876d58baf764edcffbec8857e8bfc25a38b0574339fa232ccc8f0165d243d81a",
-      "registry-scanner-qualification.json": "cce5468c7ffb3786b1071e36b52383df8e1071ee0d352291d0582876ae066834",
-      "next-selection.json": "4fafdf04381c51582b61bc0aa04efc44057dc0244dd16f2f6c9981c2041817bb",
-      "ownership-refresh.json": "b0996a7a7f08c7d094eb294db755fda6023dca39ba3751a392fa5031c62704a3"
+      "preflight.json": "0d51eeda8b4f25622dcf45d0773795fac26fa243002e49c8548c9810ba995c83"
+    },
+    "ownership": {
+      "peer_heads": 98,
+      "branch_refs": 664,
+      "worktrees": 157,
+      "shared_preserved": "Tracked HEAD and six pre-bound file states unchanged; overall status changed during concurrent work. No shared writes. Fresh scope reconciliation required before merge.",
+      "scope_overlaps": [
+        {
+          "number": 782,
+          "head": "b8b90afbab605c396054a8171f7c4ae2399fb2c5",
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "number": 802,
+          "head": "de63ab95aab0ca11247cf2620cb4bc559bbce16c",
+          "paths": [
+            "ModLog.md",
+            "modules/foundups/foundup_registry.json"
+          ]
+        },
+        {
+          "number": 1648,
+          "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "number": 1792,
+          "head": "09d0ad70f6a91f9e9690ee796bf594cb50bb8631",
+          "paths": [
+            "modules/foundups/foundup_registry.json",
+            "modules/foundups/foundup_registry.schema.json"
+          ]
+        },
+        {
+          "number": 1822,
+          "head": "663f0e17566a4e613a6b419456239e02f156923d",
+          "paths": [
+            "modules/foundups/foundup_registry.json"
+          ]
+        }
+      ],
+      "schema_overlap": "PR1792 adds optional brand_context_path only; future alias hunk is distinct, preserve/recheck it. No registry data writes.",
+      "shared_full_status_changed": true
     },
     "post_sprint_reobservation": {
+      "selection_rule": "Refresh after contract review/closure; preserve higher aggregate scores and external/runtime dependencies. No automatic runner-up or signed admission.",
+      "selection_basis": "WSP15 re-observation retains all51 canonical scores. WSP97 retains the current owned10/P2 contract closure before dependent source execution. Persist its exact hosted failure rather than duplicate implementation/plans or weaken gates; no newly demonstrated independent owned repair in unchanged scope.",
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
@@ -2716,8 +2991,8 @@
           },
           "score": 10,
           "priority": "P2",
-          "state": "qualification_accepted_document_publication_pending",
-          "next_step": "Static compatibility matrix complete: missing artifacts/evaluation, no demonstrated loader/scanner defect. Existing generic fixtures already cover mechanisms; no duplicate tests. Complete documentation closure then re-observe.",
+          "state": "closed_pr1839_exact_reviewed_documentation_tree",
+          "next_step": "Static matrix and independent review closed; ten exact-head checks and both main workflows pass. No duplicate generic loader/scanner fixtures.",
           "rationale": "Moderate three-contract reconciliation, useful reusable genesis readiness, deferrable because detect_ai already exists, limited impact without authoring capability. Independently scored; aggregate admission retains15/P1."
         },
         {
@@ -2745,83 +3020,70 @@
           },
           "score": 10,
           "priority": "P2",
-          "state": "conditional_next_local_contract_after_qualification_closure",
-          "next_step": "Execute the finite M=plan packet; close with one concrete existing-owner contract and separate implementation score, or a precise WSP104/schema decision. No source or activation work is granted by this receipt.",
+          "state": "independent_contract_review_accepted_publication_blocked_recorded_head",
+          "next_step": "Record exact hosted mismatch; reconcile aggregate CodeQL on latest candidate and ownership. Merge only after every required check SUCCESS; do not repeat unsupported managed rerun.",
           "rationale": [
             "C3: reconcile canonical tenant identity, projection allowlist/schema and browser path resolution without crossing the member gate.",
             "I3: the requested AmIBot discovery identity remains unresolved despite canonical registration; the existing generic shell can supply a reusable contract owner.",
             "D2: hidden/not_portfolio and unbuilt status mean no active service incident; this contract can wait several releases.",
             "Impact2: a local contract removes ambiguity but does not expose AmIBot, author an app or admit autonomous workers."
           ]
+        },
+        {
+          "task": "Public-discovery-canonical-alias-capability",
+          "parent": "AmIBot-public-route-identity",
+          "wsp15": {
+            "complexity": 4,
+            "importance": 2,
+            "deferability": 2,
+            "impact": 2
+          },
+          "score": 10,
+          "priority": "P2",
+          "state": "dependent_on_owned_pr1840_closure",
+          "next_step": "Finite source/test packet remains qualified; first reconcile owned contract PR. Fresh main/owner/validation evidence before source execution.",
+          "rationale": [
+            "C4: cross-language parsing, canonical identity, collision and visibility checks require careful coordination.",
+            "I2: optional explicit alias; canonical display-name discovery already exists.",
+            "D2: hidden/unbuilt fixture, no active service incident.",
+            "Impact2: reusable discovery capability but current public data and runtime remain unchanged."
+          ]
         }
       ],
-      "selection_basis": "Qualification found missing readiness artifacts, not a source defect; generic new fixtures duplicate existing tests. Separately scoped10/P2 alias/discovery contract is now the highest concrete eligible next plan. Preserve14/P1 parent history, hidden/not_portfolio state, canonical detect_ai and membership gate. WSP104 alias semantics require an explicit compatibility decision; no representation or source activation is assumed.",
-      "selection_rule": "Reapply WSP15/97 after review/closure, refresh exact ownership/source/CI; no automatic runner-up or runtime admission.",
       "provisional_next_action": {
-        "task": "AmIBot-public-alias-discovery-contract",
+        "task": "Public-discovery-canonical-alias-capability",
         "parent": "AmIBot-public-route-identity",
         "wsp15": {
-          "complexity": 3,
-          "importance": 3,
+          "complexity": 4,
+          "importance": 2,
           "deferability": 2,
           "impact": 2
         },
         "score": 10,
         "priority": "P2",
-        "state": "conditional_next_local_contract_after_qualification_closure",
-        "next_step": "Execute the finite M=plan packet; close with one concrete existing-owner contract and separate implementation score, or a precise WSP104/schema decision. No source or activation work is granted by this receipt.",
+        "state": "conditional_source_after_contract_closure",
+        "next_step": "Implement optional public_discovery_alias in existing schema/projector/shell with actual-code synthetic tests; preserve production registry/catalog/manifest. Fresh source/owner checks before work.",
         "rationale": [
-          "C3: reconcile canonical tenant identity, projection allowlist/schema and browser path resolution without crossing the member gate.",
-          "I3: the requested AmIBot discovery identity remains unresolved despite canonical registration; the existing generic shell can supply a reusable contract owner.",
-          "D2: hidden/not_portfolio and unbuilt status mean no active service incident; this contract can wait several releases.",
-          "Impact2: a local contract removes ambiguity but does not expose AmIBot, author an app or admit autonomous workers."
+          "C4: cross-language parsing, canonical identity, collision and visibility checks require careful coordination.",
+          "I2: optional explicit alias; canonical display-name discovery already exists.",
+          "D2: hidden/unbuilt fixture, no active service incident.",
+          "Impact2: reusable discovery capability but current public data and runtime remain unchanged."
         ]
       },
-      "comparison": [
-        {
-          "task": "FoundUp-genesis-prototype-compatibility-qualification",
-          "score": 10,
-          "result": "Current plan closes the matrix. Additional generic loader/scanner fixture tests duplicate existing coverage; no distinct defect justifies another source/test sprint."
-        },
-        {
-          "task": "FoundUp-genesis-wardrobe-admission",
-          "historical_score": 15,
-          "result": "Admission remains aggregate partial evidence work; missing canonical registration/held-out/runtime/rollback artifacts do not create a source defect or prohibit local development."
-        },
-        {
-          "task": "OpenClaw cache / AutoResearcher recovery",
-          "result": "Prior safe-rescan and abrupt-exit qualifications already closed. No new measured benefit or existing recovery consumer was identified; do not repeat planning."
-        },
-        {
-          "task": "M2M/Hermes child, R25 and active RedDog owners",
-          "result": "Previously source-bound producer/host/admission and external ownership dependencies retained. No new executable local slice was established in this bounded selection."
-        },
-        {
-          "task": "Dependency-security-reconciliation",
-          "historical_score": 17,
-          "result": "Retain exposure/owner triage as aggregate; current static scope did not establish a new exact owned security repair. It is not declared universally blocked."
-        }
-      ],
-      "proposed_oracles": [
-        "Legacy canonical IDs and projections without aliases keep current behavior.",
-        "If an explicit alias representation is qualified, a synthetic eligible alias resolves to exactly its canonical entity; duplicate/colliding/unknown/invalid aliases fail closed and never create an entity.",
-        "Hidden/not_portfolio entries remain absent and unreachable by discovery alias. No display-name/URL/prose-derived alias; no member catalog reads.",
-        "App and nested app paths still hand off to the member gate before fetching the public projection; no embedded tenant app or authentication claim.",
-        "Canonical URL/display/redirect behavior must be decided against WSP104 and current tests before implementation; a future isolated behavioral fixture must exercise actual parser/projector code."
-      ],
-      "provisional_next_plan": {
+      "provisional_next_packet": {
         "schema": "0102_m2m_v1",
         "ROLE": "worker",
         "ORIGIN": "internal_handoff",
         "PRINCIPAL_REF": "012",
-        "L": "QA",
-        "S": "Existing-owner AmIBot discovery alias and canonical route identity contract",
-        "M": "plan",
-        "T": "RSI-AMIBOT-PUBLIC-ALIAS-DISCOVERY-CONTRACT-20260921",
-        "A": "After current qualification closure and fresh owner/head checks, decide one minimal reusable alias/discovery contract against WSP104 and existing shell/projector/schema/tests. Produce an exact follow-on source/test scope and oracles, or the precise normative decision preventing it; do not implement or activate a route.",
+        "L": "A",
+        "S": "Optional shell-owned public discovery alias in existing schema/projector/shell and tests",
+        "M": "exec",
+        "T": "RSI-PUBLIC-DISCOVERY-CANONICAL-ALIAS-20260921",
+        "A": "Implement the qualified optional alias contract with synthetic registry/projection fixtures and actual-code route oracles; canonicalize before rendering and preserve app membership-before-fetch.",
         "R": [
           0,
           15,
+          22,
           50,
           62,
           97,
@@ -2829,44 +3091,48 @@
           104
         ],
         "I": {
-          "read_paths": [
-            "public/f/index.html",
-            "public/f/public_catalog.json",
-            "modules/foundups/foundup_registry.json",
+          "allowed_paths": [
             "modules/foundups/foundup_registry.schema.json",
-            "modules/foundups/detect_ai/foundup_manifest.json",
-            "modules/foundups/detect_ai/README.md",
             "modules/foundups/public_catalog_projector/src/projector.py",
-            "modules/foundups/public_catalog_projector/INTERFACE.md",
+            "public/f/index.html",
             "modules/foundups/public_catalog_projector/tests/test_projector.py",
-            "public/member/tests/test_route_contract_bridge.py"
-          ],
-          "write_paths": [
+            "public/member/tests/test_route_contract_bridge.py",
+            "WSP_knowledge/WSP_Test_Registry.json",
+            "modules/foundups/public_catalog_projector/README.md",
+            "modules/foundups/public_catalog_projector/INTERFACE.md",
+            "modules/foundups/public_catalog_projector/ModLog.md",
+            "modules/foundups/detect_ai/ROADMAP.md",
+            "modules/foundups/detect_ai/ModLog.md",
             "ROADMAP.md",
             "ModLog.md",
-            "docs/roadmaps/rsi_swarm_backlog.json",
-            "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
-            "modules/foundups/detect_ai/ROADMAP.md",
-            "modules/foundups/detect_ai/ModLog.md"
+            "docs/roadmaps/rsi_swarm_backlog.json"
           ],
-          "runtime_dispatch": false,
+          "denied_paths": [
+            "modules/foundups/foundup_registry.json",
+            "public/f/public_catalog.json",
+            "modules/foundups/detect_ai/foundup_manifest.json",
+            "public/member/mall-video-catalog.json",
+            "WSP_framework/src/",
+            "modules/foundups/esingularity/",
+            "extensions/reddog/"
+          ],
           "dependencies": [
-            "Verified closure of current prototype qualification and fresh main/peer/shared reobservation; previous no-overlap evidence does not grant future exclusive ownership.",
-            "Read WSP104 and nearest existing module contracts; decide alias semantics explicitly before selecting a representation."
+            "Current contract closure; fresh exact main/peer/shared reconciliation",
+            "Preserve PR1792 brand_context_path addition and peer registry changes; no blanket ownership block based on path alone",
+            "Qualify local isolated JS/browser test harness before invoking actual route code; no network or resident services"
           ],
           "invariants": [
-            "Preserve canonical detect_ai, /f/detect_ai, idb_detect_ai, hidden/not_portfolio state and registry entity count. No second FoundUp or alias-derived identity.",
-            "Preserve app/deep-link membership handoff before catalog fetch; public discovery never reads member tenant data.",
-            "No source/test/registry/catalog/manifest/protocol writes, new module/skill/schema file, runtime/model/provider/DB calls, deployment or activation in this plan.",
-            "Do not derive aliases from display names, prose or URLs, or hardcode AmIBot in a generic shell. Do not assume WSP104 already authorizes a second /f/ family."
-          ],
-          "budgets": [
-            "At most10 mapped source/test/data owners plus applicable existing docs/WSPs; bounded static read/AST/hash work only.",
-            "At most6 existing planning/log files and180 added narrative lines excluding exact archival; root ROADMAP stays<=1000. No tests/product imports in this plan."
+            "One optional explicit public_discovery_alias; absent preserves old outputs, malformed/collision fails closed before filtering",
+            "Aliases only for eligible explicitly visible entries; no alias inferred from display name/URL/prose; no new FoundUp or authorization key",
+            "Exact landing alias only; canonical URL via history.replaceState and foundupId before rendering/context; failure renders no tenant",
+            "Canonical/alias app and deep-app handoff precedes catalog fetch; no member data or new route family",
+            "If actual-inline JS tests change process classification, regenerate/check WSP_knowledge/WSP_Test_Registry.json through existing generator; restrict metadata delta to affected owner/required derived metadata",
+            "New functions <=50 lines; localized <=100 added executable lines in inherited1504-line shell and <=100 in531-line projector, excluding tests/docs. Do not grow inherited oversized functions or add replacement modules to evade caps; re-scope on evidence if exceeded",
+            "No production data/manifest, provider/model, worker runtime, activation, deployment, secret or token effects"
           ],
           "wsp15": {
-            "complexity": 3,
-            "importance": 3,
+            "complexity": 4,
+            "importance": 2,
             "deferability": 2,
             "impact": 2,
             "total": 10,
@@ -2874,96 +3140,221 @@
           }
         },
         "O": [
-          "Source-bound decision on alias versus canonical entry, explicit representation and validation ownership; no ambiguous second namespace.",
-          "Finite existing-owner implementation/test scope with canonical/alias/unknown/collision/hidden controls and unchanged app membership ordering; if blocked, name the exact normative or schema dependency.",
-          "Preserve all49 prior scores/history and26 original packets; append only this qualified child, producing50 current histories. Record no current activation or implementation."
+          "Minimal reusable capability in existing owners, no new module or skill",
+          "Synthetic negative controls and actual-code route tests; unchanged no-alias real projection and registry/manifest bytes",
+          "Independent exact-candidate review, required logs and accurate local/CI receipts"
         ],
         "F": [
-          "Scope/peer ownership conflict",
-          "Alias leaks hidden entities or bypasses membership",
-          "Invented alias authority, duplicate identity or changed canonical namespace",
-          "No bounded source/test contract or precise blocking decision at end of plan"
+          "Unresolved ownership or dependency",
+          "Ambiguous/colliding alias or hidden exposure",
+          "Alias identity survives canonicalization into renderer/context/storage",
+          "Membership gate bypass or member catalog read",
+          "Test failure, missing behavioral evidence, out-of-scope effect"
         ]
       },
-      "provisional_next_plan_status": "Planning only; not an admitted executable work order or runtime/promotion grant."
+      "packet_status": "Planning artifact only; M=exec describes the proposed local source task, not admitted WRE/model/runtime or promotion authority.",
+      "publication_blocker": "Aggregate CodeQL neutral at d9251a9b; existing four uploads match main metadata, but GitHub cannot compare two configurations. Managed rerun unsupported. Need successful exact-head aggregate or new actionable hosted diagnostic."
     },
-    "registry_scanner_findings": [
-      {
-        "boundary": "canonical loader",
-        "status": "NOT_REGISTERED",
-        "evidence": [
-          "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:314-316",
-          "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:373-375",
-          "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
-        ],
-        "result": "load_skill/resolve_skill_file rejects absent name with ValueError: Skill not found in registry: foundup_genesis_intake, before loading the instruction text. A same-name discovery fallback is deliberately unavailable."
-      },
-      {
-        "boundary": "prototype hygiene",
-        "status": "FORMAT_COMPATIBLE_NOT_ADMISSION",
-        "evidence": [
-          "modules/ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md:2-15",
-          "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:495-555"
-        ],
-        "result": "workflow is a valid category. Empty evals is not a prototype hygiene rejection; missing production evals is only a loader warning. Loader text/hygiene success cannot substitute for WSP95 production evidence."
-      },
-      {
-        "boundary": "default bundle manifest",
-        "status": "ARTIFACT_MISSING",
-        "evidence": [
-          "modules/infrastructure/wre_core/src/skill_manifest_guard.py:87-97",
-          "modules/communication/moltbot_bridge/src/skill_safety_guard.py:132-161",
-          "modules/communication/moltbot_bridge/src/skill_safety_guard.py:276-291"
-        ],
-        "result": "No local SKILL_MANIFEST.json exists. With required/enforced defaults and no alternate manifest override, preflight returns passed=false/exit_code=3 before locating or invoking the scanner. Its available=true field does not establish scanner installation."
-      },
-      {
-        "boundary": "SKILLz scan compatibility",
-        "status": "EXISTING_SUPPORT",
-        "evidence": [
-          "modules/communication/moltbot_bridge/src/skill_safety_guard.py:111-129",
-          "modules/infrastructure/wre_core/src/skill_manifest_guard.py:42-46",
-          "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py:271-312"
-        ],
-        "result": "Existing command construction selects scan with --skill-file SKILLz.md. Manifest collection already includes this filename. No format or subprocess adapter repair is demonstrated."
-      },
-      {
-        "boundary": "evaluation and promotion",
-        "status": "MISSING_INDEPENDENT_EVIDENCE",
-        "evidence": [
-          "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md:54-73",
-          "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md:88-98"
-        ],
-        "result": "Prototype documentation and fake scanner fixtures prove neither held-out behavior nor production safety. Exact digest, independent held-out and security/regression evidence, runtime/model/tool binding, explicit promotion, rollback and immutable role lineage remain distinct requirements."
-      }
-    ],
-    "ownership": {
-      "refreshed_peer_heads": 98,
-      "source_inventory_reused_at_unchanged_heads": true,
-      "overlap": [
+    "publication_observation": {
+      "head": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+      "pr": 1840,
+      "state": "OPEN",
+      "checks": [
         {
-          "number": 782,
-          "head": "b8b90afbab605c396054a8171f7c4ae2399fb2c5",
-          "paths": [
-            "ModLog.md"
-          ]
+          "name": "CodeQL",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "neutral",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/runs/106179471631",
+          "output": {
+            "title": "2 configurations not found",
+            "summary": "**Warning**: Code scanning cannot determine the alerts introduced by this pull request, because 2 configurations present on `refs/heads/main` were not found:\n\n### Default setup\n\n* :question:&nbsp;&nbsp;`/language:javascript-typescript`\n* :question:&nbsp;&nbsp;`/language:python`\n\n\n[View all branch alerts](/FOUNDUPS/Foundups-Agent/security/code-scanning?query=pr%3A1840+tool%3ACodeQL+is%3Aopen).",
+            "text": null,
+            "annotations_count": 0,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179471631/annotations"
+          }
         },
         {
-          "number": 802,
-          "head": "de63ab95aab0ca11247cf2620cb4bc559bbce16c",
-          "paths": [
-            "ModLog.md"
-          ]
+          "name": "holoindex_freshness",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349736",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349736/annotations"
+          }
         },
         {
-          "number": 1648,
-          "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
-          "paths": [
-            "ModLog.md"
-          ]
+          "name": "test (3.12)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349686",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349686/annotations"
+          }
+        },
+        {
+          "name": "lint",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349684",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349684/annotations"
+          }
+        },
+        {
+          "name": "redteam observation (report-only)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349666",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349666/annotations"
+          }
+        },
+        {
+          "name": "security",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548723951/job/106179349577",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349577/annotations"
+          }
+        },
+        {
+          "name": "Analyze (python)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349214",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349214/annotations"
+          }
+        },
+        {
+          "name": "Analyze (actions)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349128",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349128/annotations"
+          }
+        },
+        {
+          "name": "Analyze (javascript-typescript)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349110",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349110/annotations"
+          }
+        },
+        {
+          "name": "Analyze (rust)",
+          "head_sha": "d9251a9b2466f9b2c77d65cb9be016e607d0b44a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35548722884/job/106179349050",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 1,
+            "annotations_url": "https://api.github.com/repos/FOUNDUPS/Foundups-Agent/check-runs/106179349050/annotations"
+          }
         }
       ],
-      "limits": "Only root ModLog overlaps historical peer paths; prepend current entry and preserve all old bytes. No peer source or registry write."
-    }
+      "analysis_configuration_comparison": [
+        {
+          "category": "/language:actions",
+          "pr_analysis_id": 1808240769,
+          "main_analysis_id": 1808131808,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        },
+        {
+          "category": "/language:rust",
+          "pr_analysis_id": 1808240764,
+          "main_analysis_id": 1808131854,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        },
+        {
+          "category": "/language:javascript-typescript",
+          "pr_analysis_id": 1808241973,
+          "main_analysis_id": 1808132332,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        },
+        {
+          "category": "/language:python",
+          "pr_analysis_id": 1808243511,
+          "main_analysis_id": 1808144919,
+          "configuration_fields_identical": [
+            "category",
+            "analysis_key",
+            "environment",
+            "tool"
+          ],
+          "pr_ref": "refs/pull/1840/head"
+        }
+      ],
+      "rerun_failure": "Previous gh run rerun35548722884 refused: This workflow run cannot be retried. Not repeated.",
+      "boundary": "No successful aggregate verdict or merge inferred from matching uploads, individual job success or mergeStateStatus=CLEAN. No source/check configuration change.",
+      "documentation_followup": "This required canonical closure-status update is substantive evidence maintenance, not a claim that a new commit repairs CodeQL. The revised exact head must pass checks independently."
+    },
+    "prior_evidence_location": "O:/Foundups-Agent-audits/20260921-rsi-amibot-alias-plan-0928"
   }
 }
