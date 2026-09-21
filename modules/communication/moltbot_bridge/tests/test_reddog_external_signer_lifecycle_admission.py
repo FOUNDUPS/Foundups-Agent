@@ -355,55 +355,8 @@ def test_exact_generation_os_and_handshake_issue_one_shot_capability(tmp_path) -
         boundary.consume(capability)
 
 
-@pytest.mark.parametrize(
-    ("field", "identity"),
-    [("requester_principal_id", "github:second"), ("signer_profile_id", "review-signer")],
-)
-def test_consumed_receipt_preserves_and_hashes_selected_identity(tmp_path, field, identity):
-    boundary, selection, *_ = _boundary(
-        tmp_path, **{field: identity}, health_changes={field: identity}
-    )
-    receipt = boundary.consume(boundary.admit(selection))
-    payload = receipt.to_dict()
-    assert payload[field] == identity
-    receipt_id = payload.pop("receipt_id")
-    for name in ("authority_granted", "valve_unlocked", "effect_capability_issued"):
-        assert payload.pop(name) is False
-    assert receipt_id == _mapping_digest(payload)
-    payload[field] = "different-identity"
-    assert receipt_id != _mapping_digest(payload)
-    with pytest.raises(ExternalSignerLifecycleAdmissionError):
-        boundary.consume(receipt)
-
-
 class _IdentityString(str):
     pass
-
-
-@pytest.mark.parametrize("field", ["requester_principal_id", "signer_profile_id"])
-@pytest.mark.parametrize("identity", [None, "", "  ", 1, True, [], {}, _IdentityString("derived")])
-def test_matching_malformed_config_and_handshake_identity_rejects(tmp_path, field, identity):
-    boundary, selection, *_ = _boundary(
-        tmp_path, **{field: identity}, health_changes={field: identity}
-    )
-    with pytest.raises(ExternalSignerLifecycleAdmissionError):
-        boundary.admit(selection)
-
-
-def test_same_generation_other_boundary_cannot_consume_identity_capability(tmp_path):
-    left = tmp_path / "left"
-    right = tmp_path / "right"
-    left.mkdir()
-    right.mkdir()
-    first, selected, *_ = _boundary(left)
-    second, _, *_ = _boundary(
-        right, requester_principal_id="github:second",
-        health_changes={"requester_principal_id": "github:second"},
-    )
-    capability = first.admit(selected)
-    with pytest.raises(ExternalSignerLifecycleAdmissionError):
-        second.consume(capability)
-    assert first.consume(capability).generation == 1
 
 
 def test_lifecycle_boundary_cannot_be_retargeted_after_construction(

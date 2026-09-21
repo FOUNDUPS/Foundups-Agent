@@ -1,3 +1,10 @@
+## 2026-09-22: Registered signer lifecycle consumer
+
+- WSP00/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. PR1849 is closed on main with both workflows successful and its owned lane retired.92 peer heads unchanged.
+- Extend the existing lifecycle owner with captured registry/exact-type consumption and exact requester/profile correlation. Preserve one-shot, foreign-owner, expiry, generation and false authority flags; consolidate existing forwarding/validation wrappers. No new owner, resident gate change or effect lease.
+- Identical connected selection: baseline65pass/37fail; candidate102pass.37 new adversarial cases;19 existing producer identity cases relocated unchanged into the existing race suite, restoring the existing675-line test guard. Source674/admission tests656/race tests322 lines.
+- Packaging/registry, independent review and exact closure are recorded in the canonical backlog. Resident correlation qualification found missing production OS-policy/dependency provenance and exact profile supply; no reason-removal patch is qualified. Re-score selects existing payout transaction/idempotency qualification13/P1 next; seven trust-anchor reasons/lease remain unchanged. No live RSI or retained-learning claim.
+
 ## 2026-09-22: Preserve signer receipt provenance before resident consumption
 
 - WSP00/11/15/22/50/62/97; C2/I4/D4/Impact4=14/P1 after current-source qualification. PR1847 and both main workflows passed; fresh main's disjoint YUMORI1846 change is preserved.
