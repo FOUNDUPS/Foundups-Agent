@@ -55,6 +55,16 @@ This method does not promise atomic dual-store durability, exact-versus-conflict
 duplicate classification, or durable acknowledgment through registry listeners.
 Those limitations remain explicit in the system supervision map.
 
+### Persistence result boundaries
+
+- SQLite is the current query/dedupe record authority. Reopen loads its sequence state; it does not reconstruct SQLite from JSONL.
+- JSONL records append attempts before SQLite. A false result may leave JSONL-only data; an exception after commit can also return false with a readable SQLite row.
+- Exact and conflicting dedupe inputs currently share the duplicate result. Neither a false tuple nor `verify_parity()` establishes row absence or content agreement.
+- `DAERegistry.report_event` reports local acceptance for a registered DAE, not durable storage. On a returned store failure listeners still run; a raised store exception currently prevents notification. Preserve this distinction when extending the existing emergency path.
+- The existing WRE `event_store_verified` result is SQLite-only. Seven additional characterization cases qualify six boundaries without changing any public API or runtime behavior.
+
+See the [system persistence qualification](../../../docs/DAEMON_ARCHITECTURE_MAP.md#persistence-and-acknowledgment-qualification--2026-09-22) for the evidence boundary and stronger future acceptance requirements.
+
 ## Data Persistence
 
 - JSONL: `modules/infrastructure/dae_daemon/memory/dae_events.jsonl`

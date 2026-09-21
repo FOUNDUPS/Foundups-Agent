@@ -1,5 +1,14 @@
 # dae_daemon ModLog
 
+## 2026-09-22: Qualify persistence and acknowledgment boundaries
+
+- WSP00/10/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. Existing observer test owner gains seven ordinary characterizations of six boundaries; no production source, schema or callback policy changes.
+- Sixteen selected cases pass locally and independently, with original nine retry functions and three observer methods unchanged. Three observer methods deselected; two configuration warnings. Same cases overlap across runs.
+- Distinguish SQLite record truth, JSONL attempt history, ambiguous false results, unclassified duplicate conflicts, count-only parity and volatile registry acceptance. Returned store failure preserves existing listeners; raised store exception does not. Emergency spies have no live effects.
+- WRE/FAM comparison remains source evidence. Future repairs require stronger declared acceptance on fixed fault inputs; characterization is not permission to retain defective behavior or call the system durable.
+- Coordinator, worker and verifier each completed explicit WSP00 bootstrap/gate with separate evidence before their work. This is repository bootstrap evidence, not an unmeasured model capability claim.
+- PR1854 merge/main checks and owned worktree retirement are reconciled; its three temporary directories remain policy-blocked and untouched. Current publication/closure and re-scoring belong to the canonical backlog.
+
 ## 2026-09-22: Remove event-store sequence-collision deadlock
 
 - WSP00/10/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. Extend only the existing `DAEEventStore.write` owner and observer test file; no new module, scheduler or persistence schema.

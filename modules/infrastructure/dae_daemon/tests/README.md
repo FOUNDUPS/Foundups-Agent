@@ -27,6 +27,19 @@ tests are deliberately outside this bounded run. Candidate production-lock proce
 replay is not claimed; broader witness review was blocked by automatic screening.
 Full crash recovery, concurrent writers and registry acknowledgment need separate qualification.
 
+## Persistence characterization — 2026-09-22
+
+Seven additional cases in the same test file cover six boundaries: append failure, partial-write
+reopen/retry, post-commit error, conflicting dedupe input, false-positive count
+parity, and returned/raised storage failure with inert emergency spies. Run these
+with the nine retry regressions using the exact selection recorded in TestModLog.
+Result:16passed,3deselected locally and independently (overlapping cases).
+
+These are current-behavior characterizations, not acceptance of the defects as a
+future contract. Keep fault inputs fixed when proposing a repair, independently
+review its stronger oracle, and retain the historical result. No daemon is started,
+no real kill action occurs, and WRE/FAM comparisons are static only.
+
 ## Running Tests
 
 ```bash
