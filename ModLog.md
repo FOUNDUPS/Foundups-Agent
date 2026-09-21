@@ -1,3 +1,11 @@
+## 2026-09-22: Test the existing RSI ticket and reward boundaries
+
+- WSP 00/15/22/26/29/50/97: prioritize the requested native OpenClaw/Hermes production line. Bounded checkpoint C3/I4/D4/Impact4 = 15/P1; integrated R24 remains blocked at 18/P0. PR1365 is merged and both main workflows passed.
+- Reuse the existing external signer lease issuer, execution handler, WRE/AgentDB and FAM owners. Seven non-generation trust anchors and missing resident lease prevent a live ticket. Issuer connection belongs after accepted valve/executor-plan binding, not in the earlier resolver.
+- Persistent FAM reports a paid task for an initiated payout; removing the task label alone would not establish atomic idempotency. Qualify disposable initiation/reopen/interruption behavior before source repair. CABR distribution gates and compute charges do not authorize settlement or authenticate worker/verifier roles.
+- Local native contract checkpoint: 200 pass, two real-child cases excluded; synthetic authorities/providers only. Disposable persistent FAM witness reproduces two correctness defects, including duplicate initiation/debits after injected interruption and reopen/retry. Exact source hashes, fixture substitutions, guard limits and prior harness stops are retained; no passing reward claim.
+- Existing R24 packet now defines evidence gates for 1, 2, 10, 100 and 1,000 agents and distinct worker/verifier capacity. Exact local results/substitutions and next owner qualification are recorded in the backlog. No live worker, reward transfer, runtime upgrade, production activation or retained RSI claim.
+
 ## 2026-09-21: Qualify the existing Functions gRPC crash repair
 
 - WSP 00/15/22/50/97; C3/I4/D4/Impact4 = 15/P1. PR #1845 and both main workflows passed. Reconciled all 93 peer heads and the existing unassigned #1365 owner; seven sibling Functions lock updates remain separate.

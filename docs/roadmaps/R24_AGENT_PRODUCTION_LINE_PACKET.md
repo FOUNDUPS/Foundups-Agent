@@ -56,6 +56,67 @@ Observed source: the documentation integration base `eb2994f5d1530d9f086e2f2265c
 
 ## Ticket and qualification requirements
 
+### Current execution checkpoint — 2026-09-22
+
+012's priority is to prove the existing OpenClaw/Hermes ticket path, then grow
+measured capacity. Source checkpoint: `baa719d9a6de5ec74026e6a94f48827d5f2885c0`.
+This supersedes the previous selection of unrelated LinkedIn qualification; that
+work remains outstanding with its existing owner. Integrated R24 is still unproven.
+
+- **Native execution:** `GovernedValveUseTimeAuthorityResolver.resolve()` retains
+  seven non-generation trust-anchor blockers even when the three current-generation
+  checks pass. It also returns no authoritative-use lease. A signed work order or
+  passing fake-provider test cannot open this boundary.
+- **Reuse, not another orchestrator:** `ExternalSignerAuthoritativeUseLeaseIssuer`
+  already exists. Its exact worktree effect requires both the executor-plan digest
+  and accepted valve-decision digest. The potential connection is the existing
+  execution handler's post-acceptance, pre-registry-issuance seam; the earlier
+  resolver lacks those final bindings. First qualify the missing trust-anchor
+  producer/consumer evidence. Never clear blocker strings or issue a local substitute
+  lease to make a canary pass.
+- **Reward accounting:** the persistent FAM pipeline still sets `Task.PAID` after
+  creating an `INITIATED` payout with no reference or payment time. Simply retaining
+  `VERIFIED` would permit another initiation attempt: generated payout IDs and
+  separate writes do not establish atomic, idempotent entitlement. R24-D must
+  reconcile that existing transaction/state contract before R24-C claims correct
+  restart/replay behavior. No wired settlement confirmer was found in this route.
+  A disposable real-SQLite witness now reproduces both problems: the unconfirmed
+  paid label survives reopening; an exception after payout commit but before task
+  update followed by reopen/retry creates two initiated payouts and two fixture
+  compute debits. This is a failed correctness gate, not successful reward delivery.
+  Persistent compute charging also does not authenticate verifier or treasury
+  roles; permission tests for the in-memory market do not prove this separate path.
+- **Economic hooks:** WSP 26 distinguishes compute award (`ca`), reward (`cr`) and
+  dividend (`cd`). WSP 29 makes CABR a flow/allocation gate after proof of benefit,
+  not permission to mint. Keep contributor entitlement separate from provider
+  compute charges, and simulated accounting separate from funded settlement.
+
+Current commands, observed results, fixture substitutions and source bindings are
+recorded in `current_observation` of [the existing backlog](rsi_swarm_backlog.json).
+The local checkpoint passed 200 contract tests with two real-child cases excluded.
+Those tests are not a real admitted worker,
+authenticated independent product verification, production reward or retained RSI.
+
+### Capacity gates: one ticket before one thousand agents
+
+Each increase requires a fresh admitted profile and measured acceptance, not a
+timer or automatic doubling of cycle count. Use the existing R18 coordinator and
+AgentDB claim owner. Agent population, simultaneous writers and verifier capacity
+are different quantities; report all three.
+
+| Target | Evidence required before advancing |
+|---|---|
+| 1 worker plus separate verifier | One real native ticket, exact artifact, independent outcome decision, bounded cost/time, replay-safe simulated entitlement and verified retention. Rejected work cannot report success or receive author entitlement. |
+| 2 independent workers | Disjoint owned workspaces; one durable claimant per ticket; reserved verifier capacity; cancellation, retry and crash recovery without duplicate effects or entitlements. |
+| 10 workers | Measured queue latency, verification backlog, budget/backpressure, provider failure and restart recovery; compare useful accepted output per compute against the smaller run. |
+| 100 workers | Load-test existing admission/storage/queue owners, contributor identity isolation, fairness and audit throughput; bound aggregate resources and preserve full receipt correlation. |
+| 1,000 connected agents | Qualify staged cohorts and enforce a separately measured concurrency cap; no automatic right to execute or earn from connection alone. Verify sustained accepted throughput, recovery and settlement reconciliation before a capacity claim. |
+
+External participation additionally requires authenticated identity, runtime-bound
+qualification, agreed contribution/review terms and an authorized accounting owner.
+Retain failures and verifier rejections. A second ticket must demonstrate that a
+validated retained improvement helps under fixed criteria before calling the loop RSI.
+
 The compiler must map these requirements into existing admitted contracts, identifying any actual missing field rather than creating a new unsigned authority schema:
 
 - Ticket ID, FoundUp/principal scope, objective, exact inputs/source and dependencies.

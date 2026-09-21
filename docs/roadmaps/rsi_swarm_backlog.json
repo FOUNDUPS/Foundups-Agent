@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
-    "selected_action": "Functions-grpc-existing-PR-integration",
-    "status": "qualified_source_candidate_pending_final_review_publication",
+    "base_commit": "baa719d9a6de5ec74026e6a94f48827d5f2885c0",
+    "selected_action": "R24-native-ticket-and-reward-checkpoint",
+    "status": "readiness_local_checkpoint_complete_live_dispatch_blocked",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1867,17 +1867,17 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-functions-grpc-20260921",
-    "observed_at": "2026-09-21T14:56:01.624646+00:00",
-    "base_commit": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
+    "observation_id": "rsi-ticket-canary-20260922",
+    "observed_at": "2026-09-22 JST",
+    "base_commit": "baa719d9a6de5ec74026e6a94f48827d5f2885c0",
     "previous_observation": {
-      "git_ref": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c:docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_id": "rsi-daily-work-hygiene-20260921-2302"
+      "observation_id": "rsi-functions-grpc-20260921",
+      "git_reference": "baa719d9a6de5ec74026e6a94f48827d5f2885c0:docs/roadmaps/rsi_swarm_backlog.json"
     },
-    "role": "architect/coordinator",
+    "role": "coordinator",
     "origin": "external_principal",
     "principal_ref": "012",
-    "selected_task": "Functions-grpc-existing-PR-integration",
+    "selected_task": "Qualify the existing native ticket and disposable reward boundary before expanding agent capacity",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1886,1389 +1886,175 @@
       "total": 15,
       "priority": "P1"
     },
-    "status": "qualified_source_candidate_pending_final_review_publication",
-    "selection_basis": "C3 exact existing PR lineage and shared RPC consumer preservation; I4/D4 two current high crash advisories; Impact4 existing Firestore/google-gax transport. Qualification closes the concrete prerequisites; no live exposure inferred.",
-    "execution_scope": {
-      "files": [
-        "functions/package-lock.json",
-        "ROADMAP.md",
-        "ModLog.md",
-        "docs/roadmaps/rsi_swarm_backlog.json"
-      ],
-      "branch": "agent/rsi-functions-grpc-20260921",
-      "plane": "Isolated repository dependency qualification; no live RPC, app, services or deployment.",
-      "existing_pr": 1365,
-      "peer": "29c537b2bccdcbd9e38ee8c8fc5f5b5cd289e035",
-      "protected": "Shared active checkout, ignored shared handler, sibling PRs, live services/accounts and Remote AutoPost retain their owners."
-    },
+    "status": "readiness_local_checkpoint_complete_live_dispatch_blocked",
+    "selection_basis": "C3: cross-owner source/fixture qualification; I4: prerequisite for usable ticket production; D4: needed next to qualify the explicitly requested first real ticket; Impact4: reusable launch boundary. The full R24 18/P0 outcome is blocked. Execute its bounded checkpoint, not unrelated LinkedIn work by inherited queue position.",
+    "execution_scope": [
+      "existing native OpenClaw/Hermes/WRE contract tests with synthetic authority/provider fixtures",
+      "disposable persistent FAM reward-state witness",
+      "existing roadmap/backlog/ModLog only; no runtime source patch or production activation"
+    ],
     "closure_reconciliation": {
-      "pr1845": {
-        "state": "MERGED",
-        "merge": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
-        "exact_head_checks": 10,
-        "main_workflows": [
-          {
-            "conclusion": "success",
-            "databaseId": 35613209730,
-            "headSha": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
-            "name": "CI",
-            "status": "completed"
-          },
-          {
-            "conclusion": "success",
-            "databaseId": 35613208655,
-            "headSha": "7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c",
-            "name": "Push on main",
-            "status": "completed"
-          }
-        ]
-      },
-      "prior_forge": "1374 exact tree merged; alerts45\u201348 subsequently observed fixed and both main workflows passed in preceding final-accounting receipt.",
-      "accounting": "26 original packets and70 prior ranked rows preserved;156 historical merges/21 closed without merge after1845.93 open peer heads unchanged before this candidate. No worktree retirement."
+      "pr": 1365,
+      "merged_commit": "baa719d9a6de5ec74026e6a94f48827d5f2885c0",
+      "ci_run": 35616474134,
+      "push_main_run": 35616473330,
+      "both_main_workflows": "completed/success",
+      "source_change": "one existing Functions lock record, qualified previously",
+      "protected_external_work": "Remote autopost, active shared RedDog/YouTube/YUMORI/eSingularity and other peer heads preserved"
     },
     "retrieval": {
-      "bootstrap": "WSP00 awakening and tracker --check --strict --json passed in owned checkout this turn; tool output retained in thread. Role architect/coordinator, origin external_principal, principal012.",
-      "query": "Functions grpc-js dependency security PR1365 existing repair qualification consumer tests",
-      "holo_result": {
-        "ok": false,
-        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
-        "freshness": "UNKNOWN",
-        "index_gap_detected": true,
-        "authority_repo_head_sha": "5326080d583625aebbc230242117fb7fcf0044a6",
-        "workspace_repo_head_sha": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
-        "no_holoindex_reindex_performed": true,
-        "no_authority_worktree_mutation_performed": true
-      },
-      "noise_ordering": "No accepted semantic results; exact current Git/PR/lock and installed consumer source retrieved in known ownership order.",
-      "missing": "Legacy Functions surface has no tracked application entry or module README/INTERFACE; existing root roadmap/firebase/direct manifest and prior qualified dependency harness are the actual owners, not fabricated stubs.",
-      "staleness": "All source claims pinned to fresh main/peer or separately bound installed graph. Failed owner query stays with existing R00/R03/WRE maintenance path.",
-      "duplication": "Reuse existing PR1365, prior strict npm isolation and review/publication guards. No new repo module/skill.",
-      "worker_choice": "Deterministic dependency resolution and source/fixture review are needed; Qwen/Gemma model inference does not establish package consumer correctness. Independent scoped verifier lanes provide review without activating shared runtimes."
+      "semantic": "Previously observed HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; no unchanged probe/reindex repeated",
+      "fallback": "Current Git source, canonical WSP15/97/26/29, R24 packet and exact module/test owners",
+      "noise": "Generic OpenClaw grant-fundraising skill is unrelated to execution grants",
+      "ordering": "Canonical packet and native provider owners before legacy executor examples",
+      "missing_artifacts": "Current live Hermes/provider/signing evidence unavailable; fixture state is not host state",
+      "staleness": "Historical R02/roadmap claims checked against pinned source",
+      "duplication": "Existing lease issuer, handler, AgentDB, FAM and R18 coordinator; no new orchestrator/ledger/skill"
     },
-    "source_bindings": {
-      "functions/package.json": {
-        "git_blob": "7c4112aec5214d5f0f510d38ed363715cb67d39a",
-        "sha256_lf": "e7878197c4f6de7e8d937a1e811137dd833a70f0deaec8d15fcd9747b5a4182b"
-      },
-      "functions/package-lock.json": {
-        "git_blob": "b125d8a9e0a1bee11b33a2b8546e988bde54b376",
-        "sha256_lf": "2d8aa1bf47d3d97b29ab4195c366eeab31180eff2405a756844a9ea4d6213e42"
-      },
-      "firebase.json": {
-        "git_blob": "2de865edddf5a6f979f08625048dff842538069a",
-        "sha256_lf": "d8770271ca4c81a83a034141b9e615d1703ecfadd1d047fdd1b7adbb98844edc"
-      }
+    "runtime_metadata": {
+      "openclaw_package_version": "2026.5.2",
+      "evidence": "Windows npm package.json, metadata only; no command/runtime started",
+      "hermes": "Not found on Windows PATH; WSL installation/provider binding not assessed"
+    },
+    "source_findings": {
+      "native_gate": "Use-time resolver retains seven non-generation trust-anchor reasons and returns authoritative_use_lease=None",
+      "reusable_issuer": "ExternalSignerAuthoritativeUseLeaseIssuer exists; final executor-plan and accepted valve-decision digests are available after valve acceptance, not in the earlier resolver",
+      "reward": "PersistentTaskPipeline marks Task.PAID while Payout.INITIATED lacks reference/paid_at; no connected settlement confirmer found",
+      "reward_caution": "Do not just remove PAID: random payout IDs and separate transactions require task-bound atomic idempotency before retry/restart claims",
+      "cabr": "WSP26/29: benefit validation and treasury-flow allocation, not mint authority; CABR distribution gating is not payout authorization",
+      "identity": "Persistent compute charging does not authenticate verifier/treasury roles; AgentProfile tags alone do not qualify an external worker"
     },
     "validation": {
-      "fixture_sha256": "2373613cd3477a2d3d2f213ada2efaaed6661aa906620bd74103392886fc0dd2",
-      "paired_normal_cases_each": 13,
-      "normal_wire_hashes_equal": 5,
-      "baseline_vulnerability_failures": {
-        "malformed-gzip": "unhandled error Z_DATA_ERROR; exit1",
-        "malformed-deflate": "unhandled error Z_DATA_ERROR; exit1",
-        "server-stream": "fixed no-throw assertion fails; exit1",
-        "server-channelz": "fixed no-throw assertion fails; exit1"
+      "status": "local_contract_checks_passed_reward_correctness_failed",
+      "native_contract_tests": {
+        "tests": 200,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 200
       },
-      "candidate_security_cases_passed": 4,
-      "candidate_cases_total": 17,
-      "same_fixed_assertions": true,
-      "source_proof": "Actual installed google-gax Firestore schema/serializers, CompressionFilter and Server prototype early-return methods; synthetic bounded input only.",
-      "limits": "Node24 host, not Node20. Named effect hooks are not OS confinement. Zero attempts established only on successful runs; native baseline crashes lack a final hook summary. EventEmitter fixture is not actual HTTP2 ingress. Private server decompression implementation is source-reviewed only. No live RPC/auth/app/deployment or retained RSI proof.",
-      "evidence_sha256": {
-        "baseline-compatibility.json": "32fd0da5f5311b7110d56ea4edcd451e23be257f28e715bed9df12a660893afe",
-        "baseline-malformed-gzip.json": "9402fa55877b5b6c059a753434bb3c7ea9b6438137ca7997fbff0ec7c4821710",
-        "baseline-malformed-deflate.json": "7195ff18b68f6c9296b5d713ea8e794ff8d2dffc0402012e7a043a5be049937e",
-        "baseline-server-stream.json": "c65e01ed26cb18736b7c2b3774b7f5aad9ff5e5cfb911464bae7bf74ec46bee5",
-        "baseline-server-channelz.json": "135abecc50b56cc4fc05013062014ef20ae608fdc43d4a7ea88fe877db0bcc38",
-        "candidate-compatibility.json": "490d68e18fc94fd93bd26a0f8b72d5a46ac180c3eb473e7f95c3a1826bee0cfc",
-        "candidate-malformed-gzip.json": "181564a037d9423ccf9d1df73fe5ef2cf75a40d29cc61464f75c51fdbdd4dae3",
-        "candidate-malformed-deflate.json": "01fd2852e2c1000fd847e444436682da619e8ccc996696851ecd2d1fb7ed988a",
-        "candidate-server-stream.json": "e01e7175aa70d32eb63333078ecb7c3dd969f4607adc33aa5defe84443c3b928",
-        "candidate-server-channelz.json": "ef111e3a27a8a779bc5ece2a74efa8b2b08d00461e75495cb544aa9245bb6407"
+      "exact_real_child_cases_deselected": [
+        "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py::test_system_transport_bounds_output_and_confirms_process_termination",
+        "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py::test_system_transport_bounds_time_and_confirms_process_termination"
+      ],
+      "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -I -B O:/Foundups-Agent-audits/20260922-rsi-ticket-canary/run_independent_local.py independent-local-v1",
+      "details": "Exact pytest args, loaded source hashes, 10 allowlisted disposable Git setup commands and 34 disposable SQLite opens are in independent-local-v1/receipt.json. Synthetic signing/current-generation fixtures, in-memory connector and fake native transports are not live worker or peer evidence. Unrelated package initializer bypassed. Python effect guards are diagnostic restrictions, not OS sandbox proof.",
+      "live_native_worker_run": false,
+      "production_reward": false,
+      "reward_witness": {
+        "receipt": "disposable-reward/author-witness-v3/receipt.json",
+        "execution_summary": "reward-witness-execution.json",
+        "cases": 2,
+        "outcome": "DEFECTS_REPRODUCED",
+        "exit_code": 2,
+        "normal": "PAID task plus INITIATED payout with no confirmation persists after reopen; ordinary sequential retry rejects",
+        "interruption": "Exception after committed payout before task update leaves VERIFIED/no pointer; reopen/retry produces two INITIATED payouts and two synthetic compute debits",
+        "limits": "Real FAM/SQLite, synthetic identities/20-credit fixture plans, four disposable DB connections, source hashes stable. Injected Python exception plus connection reopening, not physical crash/disk-loss proof; no real payment or authenticated verifier proof. V1 inert namespace and V2 local hostname guard stops retained; V3 platform.machine fixed to qualified AMD64.",
+        "correctness_passed": false
       },
-      "strict_isolated_npm_ci": true,
-      "node20_verified": false,
-      "actual_http2_verified": false,
-      "private_server_decompressor_verified": false,
-      "app_or_deployment_verified": false,
-      "shared_ignored_handler_historical_equality_verified": false
+      "native_contract_test_limits": "112 pytest-style symlink attempts denied and preserved; origin source-inferred; two plugin-config warnings. Package initializer bypass and Python guards do not prove OS-level containment."
     },
-    "repair": {
-      "package": "@grpc/grpc-js",
-      "before": "1.14.3",
-      "candidate": "1.14.4",
-      "changed_records": 1,
-      "preserved_records": 298,
-      "preserved_prior_repairs": [
-        "protobufjs7.6.3",
-        "@protobufjs/utf81.1.2",
-        "node-forge1.4.0"
-      ],
-      "alert_ids": [
-        68,
-        69
-      ],
-      "advisories": [
-        "GHSA-99f4-grh7-6pcq",
-        "GHSA-5375-pq7m-f5r2"
-      ],
-      "tests_are_external_local_qualification": true,
-      "source_ci_regression_or_retained_rsi_proof": false
-    },
-    "evidence_sha256": {
-      "independent-owner-review.json": "161d2b622c20dc424c78043b26f2d2312aaca8d3e4fbc01f48ddee38569c5d2c",
-      "acceptance-audit.json": "30c169efbb359e65503d1cb8c543c1713465acb5b8f25e1aa52853e85aadc23b",
-      "qualification-review.json": "2a8aecff6324596cdae8b0461d919c4f2627fe52eb6dc58e52b520f400373025",
-      "candidate-resolution.json": "dcfad5b3a4bde2c293d062c3bea901b01df94e467c9b6934aed9e160521dfe06",
-      "npm-dry.json": "d048014c4aaa5528688c23c71f5a3ca40293ebd057ddab9bd67b24cd1f22d08b",
-      "npm-ci.json": "9f5f2580a44f476485c34a8ac16068ec6d008f76b2716189a784a758869af1fe",
-      "compatibility.cjs": "2373613cd3477a2d3d2f213ada2efaaed6661aa906620bd74103392886fc0dd2",
-      "test_candidate.py": "331723a2345452fd3459e16b6d278dd21ac1b0abed025c3c6f407e5e800dd15a",
-      "verify_results.py": "4aee6e917ede51b42a72b952ae69de67503064efabd72ab2964f6e0547b205fa",
-      "verified-results.json": "03114c386ef62048cfde4cdf97211f77ac6bea8588f23f3a57b48d5c3001a9f8",
-      "paired-execution.json": "496849f8606e6be1311ef5e75a76c8877bb50e3e5ac6a93bd1ff1b7d2fa633bc",
-      "remaining-ranking.json": "272681e83a91d4cf3e64da9f815b5c3d6c105a2805046ffc086181b14c6f8b5f",
-      "retrieval-evaluation.json": "1ceee12d9d662eb3ca4c1b3a38bafdb65085fe4bf6b245f2cf8764f97a31726c",
-      "previous-main-workflows-completed.json": "67a46ab6d588636a592dc0ef710f223963e283d5e8d94f5b40581d89a2118962",
-      "shared-before.json": "1b19f8e5980d21e3c88a3ee43e22b8b9e657661a34e1137c2fb5c733d8c4bc9e"
-    },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-functions-grpc",
+    "artifact_root": "O:/Foundups-Agent-audits/20260922-rsi-ticket-canary",
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
-          "task": "RedDog-extension-decomposition",
+          "task": "R24 real native ticket with independent verification and simulated entitlement",
           "wsp15": {
-            "complexity": 5,
-            "importance": 5,
-            "deferability": 5,
-            "impact": 5
-          },
-          "score": 20,
-          "priority": "P0",
-          "state": "external_owner",
-          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
-        },
-        {
-          "task": "independent-execution-verification-promotion",
-          "wsp15": {
-            "complexity": 5,
+            "complexity": 4,
             "importance": 5,
             "deferability": 4,
-            "impact": 5
+            "impact": 5,
+            "total": 18,
+            "priority": "P0"
           },
-          "score": 19,
-          "priority": "P0",
           "state": "blocked",
-          "next_step": "Independent runtime admission absent"
+          "blocker": "Native trust-anchor acceptance/lease handoff; independent verification; truthful idempotent reward accounting"
         },
         {
-          "task": "current-semantic-retrieval",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 5,
-            "impact": 5
-          },
-          "score": 19,
-          "priority": "P0",
-          "state": "blocked",
-          "next_step": "Prior authority-root/head mismatch remains unresolved. This sprint requested a lexical owner bundle only: UNKNOWN freshness/index gap, not a newly repeated semantic failure. Preserve the existing maintenance owner; no reindex."
-        },
-        {
-          "task": "RedDog-backend-closure-consolidation",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 5,
-            "impact": 5
-          },
-          "score": 19,
-          "priority": "P0",
-          "state": "external_owner",
-          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
-        },
-        {
-          "task": "RedDog-conversation-durable-adapters",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 5,
-            "impact": 5
-          },
-          "score": 19,
-          "priority": "P0",
-          "state": "external_owner",
-          "next_step": "Preserve the separately owned RedDog product/audit lane; this RSI change does not acquire its work."
-        },
-        {
-          "task": "integrated-mcp-qualification",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 4,
-            "impact": 5
-          },
-          "score": 18,
-          "priority": "P0",
-          "state": "blocked",
-          "next_step": "Existing PRs 1525/1526 and current runtime owner; local preflight already complete"
-        },
-        {
-          "task": "wre-openclaw-hermes-worker",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 4,
-            "impact": 5
-          },
-          "score": 18,
-          "priority": "P0",
-          "state": "blocked",
-          "next_step": "Current signed job/model/runtime admission absent"
-        },
-        {
-          "task": "chroma-deployment",
+          "task": "Qualify existing seven trust-anchor producer/consumer bindings and post-acceptance issuer seam",
           "wsp15": {
             "complexity": 3,
-            "importance": 5,
+            "importance": 4,
             "deferability": 4,
-            "impact": 5
+            "impact": 4,
+            "total": 15,
+            "priority": "P1"
           },
-          "score": 17,
-          "priority": "P0",
-          "state": "blocked",
-          "next_step": "Current deployment owner and runtime qualification"
+          "state": "next_executable_qualification",
+          "next_step": "Use current owners and negative fixtures; bind exact accepted decision and executor plan. No blocker-string removal or locally forged lease."
         },
         {
-          "task": "AmIBot-package-admission",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 5,
-            "deferability": 5,
-            "impact": 4
-          },
-          "score": 17,
-          "priority": "P0",
-          "state": "blocked",
-          "next_step": "Preserve detect_ai lineage; accept current package revision, assign disjoint paths, bind current WRE job/model/runtime/verification receipts before G1."
-        },
-        {
-          "task": "FoundUp-genesis-conversation-lineage",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 17,
-          "priority": "P0",
-          "state": "commander_data_handoff_closed_remaining_public_entitlement_unqualified",
-          "next_step": "PR1799 closes commander metadata handoff. Public draft authentication has no commander/scaffold entitlement contract; keep remaining17/P0 authority dependency distinct."
-        },
-        {
-          "task": "Dependency-security-reconciliation",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 5,
-            "deferability": 4,
-            "impact": 5
-          },
-          "score": 17,
-          "priority": "P0",
-          "state": "partial_grpc_source_qualified_other_owners_retained",
-          "next_step": "Pillow1315 and node-forge1374 merged with passing main workflows; forge alerts45\u201348 fixed. Existing grpc1365 source integration pending final gates for open alerts68/69. Remaining XML13/P1 ties stay recorded; higher product/deployment owners preserved."
-        },
-        {
-          "task": "R11-B-memory-acceptance-contract",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 5,
-            "deferability": 3,
-            "impact": 4
-          },
-          "score": 16,
-          "priority": "P0",
-          "state": "partial_transaction_dependency",
-          "next_step": "Contract trace reuses canonical_pattern_memory_admission_identity. Current signing/protected-use contracts do not yet bind the memory transaction; resolve existing WRE write authorization and independently bound participant before enabling or implementing its acceptance path. Do not invent a replacement grant from metadata."
-        },
-        {
-          "task": "authenticated-response-read",
+          "task": "Increase to 2, 10, 100 and 1000 agents",
           "wsp15": {
             "complexity": 4,
             "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 16,
-          "priority": "P0",
-          "state": "blocked",
-          "next_step": "012 reader-policy question remains unanswered"
-        },
-        {
-          "task": "AmIBot-registry-prerequisite",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 5,
-            "impact": 4
-          },
-          "score": 16,
-          "priority": "P0",
-          "state": "closed_pr1751_metadata_only",
-          "next_step": "Metadata scope merged1751 with all main workflows successful. Generic alias source capability separately closed1841; runtime/build and actual AmIBot public visibility remain open."
-        },
-        {
-          "task": "M2M-canonical-envelope-qualification",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "parent_partial_context_closed_child_input_and_lifecycle_gaps",
-          "next_step": "Raw prepared-context repair is closed. Preserve full child-input and detached-delivery gaps; separately qualified stop-receipt correction does not close them."
-        },
-        {
-          "task": "OpenClaw-content-bound-cache-qualification",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "qualification_closed_retain_rescan_implementation_deferred",
-          "next_step": "Keep current rescanning. Reopen optional cache only with measured workload benefit and complete scanner/wardrobe/policy/use-time identity; no source slice qualified."
-        },
-        {
-          "task": "AmIBot-public-route-contract-drift",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1832_test_contract_only",
-          "next_step": "Retain48pass/independent controls and CodeQL correction; both main workflows passed. No repeated repair."
-        },
-        {
-          "task": "FoundUp-genesis-wardrobe-admission",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "partial_dependency",
-          "next_step": "Preserve aggregate15/P1 admission dependency. Existing foundup_genesis_intake remains prototype with empty evals and no canonical registry admission. PR1839 closed local prototype compatibility qualification; do not repeat it. Exact held-out/runtime/rollback evidence under WSP95 remains necessary for production admission."
-        },
-        {
-          "task": "AmIBot-work-package-scope-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_planning_only_pr1833",
-          "next_step": "Preserve13-order graph repair; G0 interface/runtime/verification and exact file scope qualification remain separate."
-        },
-        {
-          "task": "AmIBot-existing-module-build-route-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1834_documentation_only",
-          "next_step": "Exact reviewed documentation tree merged; all ten PR checks and both main workflows passed. Preserve source-route findings; do not repeat the qualification."
-        },
-        {
-          "task": "FoundUp-consumer-dry-run-isolation-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1836_documentation_and_witness",
-          "next_step": "Exact reviewed seven-file tree merged; all ten PR checks passed. Preserve8case/2mismatch limits; source repair separately13/P1."
-        },
-        {
-          "task": "Critical-dependency-owner-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1842_exact_reviewed_tree",
-          "next_step": "Both main workflows35562118053/35562117913 SUCCESS; no repeat source/owner inventory."
-        },
-        {
-          "task": "Clerk-existing-repair-current-base-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1843_isolated_candidate_qualification",
-          "next_step": "Preserve bound validation; qualification merged and both main workflows passed."
-        },
-        {
-          "task": "Clerk-existing-PR-current-base-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1378_repository_integration",
-          "next_step": "Merged exact reviewed tree; both main workflows passed. GitHub alerts22/23 fixed. Installed/deployed/auth state unverified."
-        },
-        {
-          "task": "Functions-protobuf-repair-owner-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "bounded_owner_and_node24_lock_qualification_complete",
-          "evidence": [
-            "functions/package-lock.json",
-            "firebase.json",
-            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1375"
-          ],
-          "next_step": "Bounded qualification and integration closed in PR #1375; ten PR checks and both main workflows passed. Node20/handler/deployment limits remain separate.",
-          "score_rationale": "C3 transitive metadata/ownership; I4/D4 critical dependency; Impact4 runtime-classified lock. Historical score retained for completed qualification; no longer eligible work.",
-          "effort_cost": "Existing lock/owner qualification and focused offline checks; no paid-model/provider/runtime admission.",
-          "dependencies": "Root783 and Functions1375 dependencies fulfilled; no outstanding source integration for this qualified scope.",
-          "separate_scope": "GotJunk frontend and protected product/AutoPost owners remain separate."
-        },
-        {
-          "task": "Functions-protobuf-existing-PR-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1375_functions_repository_integration",
-          "next_step": "Exact reviewed tree merged; all ten PR checks and both main workflows passed, GitHub alert52 fixed. Node20 and absent tracked handler remain unverified runtime/deployment limits.",
-          "score_rationale": "C3 transitive metadata/ownership; I4/D4 critical parent dependency; Impact4 runtime-classified functions lock. Source-only improvement, not production activation."
-        },
-        {
-          "task": "GotJunk-protobuf-repair-owner-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1844_isolated_qualification",
-          "evidence": [
-            "modules/foundups/gotjunk/frontend/package-lock.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1358",
-            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json"
-          ],
-          "next_step": "Three root planning files merged;10 PR checks and both main workflows passed. Product lock/PR1358 unchanged; separate integration15/P1 remains blocked by deployment-owner authority.",
-          "score_rationale": "C3 transitive frontend/owner/build qualification; I4/D4 critical declared dependency; Impact4 runtime-classified manifest. Qualification completed; actual browser exploitability was not established.",
-          "effort_cost": "Existing lock/owner and build-contract qualification, deterministic reuse before new tests/model work.",
-          "dependencies": "Functions1375 closed and current15 product PRs/14 lock owners reconciled. Remaining integration requires deployment-owner authority and acceptance appropriate to Node20/live product."
-        },
-        {
-          "task": "GotJunk-protobuf-source-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "blocked_deployment_owner_authority_required",
-          "evidence": [
-            ".github/workflows/deploy-gotjunk.yml",
-            "modules/foundups/gotjunk/cloudbuild.yaml",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1358",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-gotjunk-protobuf-1828\\candidate-resolution.json"
-          ],
-          "next_step": "Preserve exact six-record candidate and existing1358 lineage. Before any module change reaches main, obtain current deployment-owner authority and refresh source/owner/candidate acceptance; configured Node20 and live acceptance remain unverified. Never bypass or disable deployment workflow to fit this sprint.",
-          "score_rationale": "C3 reviewed dependency integration plus deployment coupling; I4/D4 critical manifest debt; Impact4 product dependency. Score does not grant production authority.",
-          "effort_cost": "Candidate already resolves, builds on Node24 and passes11 scoped checks; Node20/deployment acceptance and current owner coordination add verification burden.",
-          "dependencies": "Explicit authority for automatic Cloud Run side effect, current product owner and target-environment acceptance."
-        },
-        {
-          "task": "Functions-node-forge-existing-repair-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "bounded_consumer_qualification_complete",
-          "evidence": [
-            "functions/package-lock.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1374",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\functions-remaining-high-summary.json"
-          ],
-          "score_rationale": "Historical C3/I4/D4/Impact4=15/P1 qualification completed on the exact existing1374 candidate; current source integration is separately selected.",
-          "effort_cost": "Bounded owner/source qualification using existing isolated dependency tools; no provider calls or production tests.",
-          "dependencies": "Current owner/consumer and isolated environment qualification fulfilled; Node20/advisory exploits/app/deployment remain unverified and are not prerequisites for this bounded source acceptance.",
-          "next_step": "Qualification and exact source repair closed through1374. Preserve Node20/app/advisory exploit/deployment limits; do not repeat unchanged paired consumer tests."
-        },
-        {
-          "task": "Functions-node-forge-existing-PR-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1374_exact_reviewed_tree",
-          "evidence": [
-            "functions/package-lock.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1374",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\qualification-review.json",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\integration.json"
-          ],
-          "score_rationale": "C3 dependency/consumer compatibility; I4/D4 four current high advisories in shared Functions graph; Impact4 bounded shared dependency benefit. Finish independently qualified existing repair without bundling other lock owners.",
-          "effort_cost": "Bounded owner/source qualification using existing isolated dependency tools; no provider calls or production tests.",
-          "dependencies": "Independent review, normal publication and exact-head merge gates fulfilled; inspect subsequent main workflows separately.",
-          "next_step": "Exact reviewed tree merged after ten PR checks; paired six consumer cases and original metadata failure retained. Node20/app/advisory exploit/deployment limits remain."
-        },
-        {
-          "task": "Functions-grpc-existing-repair-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "bounded_offline_qualification_complete",
-          "evidence": [
-            "functions/package-lock.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1365",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-forge-2023\\remaining-functions-ranking.json"
-          ],
-          "score_rationale": "C3 shared RPC transport/consumer and owner qualification; I4/D4 two current high alerts68/69; Impact4 shared Firestore/google-gax transport. Actual live exposure unestablished. Highest remaining concrete qualified-scope candidate versus13/P1 XML,12/P2 parser/pattern/encoding and9/P3 cookie tasks.",
-          "effort_cost": "Existing lock/owner tools and bounded transport fixtures; reuse current installed graph and exact source where applicable before new installs/model work.",
-          "dependencies": "Ownership/consumer/fixture qualification completed; Node20, real HTTP2, private server decompressor, app and deployment remain unverified.",
-          "next_step": "Exact existing1365 one-record candidate qualified by strict isolated install,13 paired normal cases and four fixed crash-path cases. Baseline failures retained; final source integration/review/publication/CI gates remain separate."
-        },
-        {
-          "task": "Daily-work-and-worktree-RSI-accounting",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "closed_pr1845_exact_reviewed_documentation",
-          "evidence": [
-            "O:\\Foundups-Agent-audits\\20260921-rsi-resume-2302\\gmail-linkedin-audit.json",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-resume-2302\\worktree-audit.json"
-          ],
-          "score_rationale": "C3 cross-skill/receipt/branch ownership reconciliation; I4 current work visibility; D4 principal-requested resumed work and interrupted sprint; Impact4 avoids duplicate work and false closure across active lanes. Completes explicitly requested accounting at equal priority before next dependency qualification.",
-          "dependencies": "Documentation review, publication, exact-head merge and both main workflows fulfilled through PR1845; remaining source qualifications have separate owners.",
-          "next_step": "Four existing documents merged as7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c after ten PR checks; both main workflows passed. Recorded LinkedIn/skill/retirement qualifications remain separate.",
-          "effort_cost": "Two read-only scoped audits, existing Git metadata and skill/receipt owners; no model runtime or mailbox calls."
-        },
-        {
-          "task": "Functions-grpc-existing-PR-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "state": "qualified_source_candidate_pending_final_review_publication",
-          "evidence": [
-            "functions/package-lock.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1365",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-functions-grpc\\qualification-review.json"
-          ],
-          "score_rationale": "C3 exact existing PR lineage and shared RPC consumer preservation; I4/D4 two current high crash advisories; Impact4 existing Firestore/google-gax transport. Qualification closes the concrete prerequisites; no live exposure inferred.",
-          "dependencies": "Independent final four-file review, unchanged current base/peer/shared scope, normal fast-forward publication and exact-head CI/merge gates.",
-          "next_step": "Finish exact qualified one-record source repair through existing1365; preserve298other lock records and all sibling owners.",
-          "effort_cost": "Reuse existing PR, strict npm isolation, source-bound offline fixtures and exact-tree closure. No paid model runtime or cloud service."
-        },
-        {
-          "task": "protected-foundup-work",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "external",
-          "next_step": "Preserve peer-owned YUMORI/eSingularity and Remote-owned AutoPost. PR1751 and its three main workflows passed; its former eSingularity CI failure is closed and no longer a blocker."
-        },
-        {
-          "task": "PatternMemory-worker-lifecycle-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "partial_daemon_counter_lifetime_closed_pr1810",
-          "next_step": "Daemon per-counter lifetime closed; other consumers, actual shutdown/restart, transaction acceptance and retained benefit remain separately unqualified."
-        },
-        {
-          "task": "AmIBot-public-route-identity",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "partial_visibility_and_activation_dependencies",
-          "next_step": "PR1841 closes generic canonical discovery aliases and both main workflows pass. detect_ai remains hidden/not_portfolio and absent from public projection; no AmIBot alias value, visible entry, build or POC was activated. Reconcile public-surface owner and admission before activation; do not repeat exact-ID/alias source qualification."
-        },
-        {
-          "task": "FoundUp-validation-fixture-reconciliation",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "closed_pr1801",
-          "next_step": "No remaining fixture work; preserve independent/local/remote evidence and fail-closed source."
-        },
-        {
-          "task": "Hermes-runs-delegation-lifecycle-compatibility",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "lifecycle_qualification_closed_pr1818_delivery_gap_remains",
-          "next_step": "Preserve input/result/cancellation gaps and existing event gates. Qualify explicit same-run synchronous/cancel/result producer support before changing transport or successful-result acceptance."
-        },
-        {
-          "task": "Root-protobuf-existing-PR-current-base-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "bounded_qualification_complete_with_preserved_invalid_oracle_failure",
-          "evidence": [
-            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/783",
-            "package-lock.json"
-          ],
-          "next_step": "Original12case suiteFAILED on both baseline/candidate;11trusted checks completed; source/6characterizations explain unchanged Buffer-specific clamping. No strict malformed wire validation claim. Continue same owned root repair only within documented compatibility scope.",
-          "score_rationale": "C3: stale lock lineage and transitive closure need careful integration. I4/D4: known critical advisory requires remediation progress. Impact3: root development dependency only; functions/GotJunk runtime locks stay separate.",
-          "effort_cost": "One existing lock delta and focused deterministic compatibility; no paid model admission needed.",
-          "dependencies": "Current Clerk sprint closure; fresh root ownership and exact-source/runtime bindings."
-        },
-        {
-          "task": "Root-protobuf-existing-PR-current-base-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 14,
-          "priority": "P1",
-          "state": "closed_pr783_root_repository_integration",
-          "next_step": "Merged reviewed tree; both main workflows passed and rootalert170fixed. Retain original frozen failed oracle and narrow compatibility limits; no deployed/runtime proof.",
-          "score_rationale": "C3 existing lock/lineage and validation limits; I4/D4 known root advisory requires remediation; Impact3 development dependency scope, no product runtime."
-        },
-        {
-          "task": "R25-A consented local daily-work proposal",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "parent_partial_approval_design_qualified_host_consumer_unimplemented",
-          "next_step": "Preserve compatibility and approval-owner findings; wait for exact externally owned host and matching consumer contract before a source slice."
-        },
-        {
-          "task": "auto-researcher-process-durability",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "parent_partial_prior_qualification_and_witness_closed_recovery_contract_still_unqualified",
-          "next_step": "Do not repeat PR1827/1828. Resume a distinct recovery-policy qualification when an explicit existing caller/owned recovery use case is identified; bind durable baseline, current ownership/quiescence and idempotent target effects together. No automatic restore/resume/delete is presently authorized."
-        },
-        {
-          "task": "R19-redteam-artifact-delivery",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "bounded_delivery_repair_closed_pr1814",
-          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step."
-        },
-        {
-          "task": "WSL-advisory-cold-start-contract",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1805",
-          "next_step": "No remaining planning-slice work; preserve exact merge, reviewed nine blobs,25 existing tests and seven injected witnesses. Source repair remains separately qualified12/P2."
-        },
-        {
-          "task": "DaemonSelfAudit-PatternMemory-lifecycle-contract",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1807",
-          "next_step": "No remaining work in the closed qualifier. Preserve accepted defect evidence and execute only the separately scored source packet after fresh observation."
-        },
-        {
-          "task": "DaemonSelfAudit-per-counter-memory-ownership",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1810",
-          "next_step": "No remaining source work in this counter-lifetime slice; preserve accepted evidence and separately qualify other consumers or runtime concerns."
-        },
-        {
-          "task": "R19-explicit-report-file-upload",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "bounded_delivery_repair_closed_pr1814",
-          "next_step": "Preserve run-bound artifact evidence; no remaining repair in this upload step."
-        },
-        {
-          "task": "M2M-governed-context-binding-contract",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1815",
-          "next_step": "No remaining qualification work; preserve accepted contract and execute only the separately scored source packet after fresh observation."
-        },
-        {
-          "task": "M2M-prepared-context-digest",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1816",
-          "next_step": "No remaining context repair; preserve validated ingress binding and qualify actual native-child input evidence separately."
-        },
-        {
-          "task": "Hermes-native-child-input-evidence-contract",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "qualification_closed_pr1817_full_input_gap_remains",
-          "next_step": "Preserve the unsupported complete child-input evidence boundary. Lifecycle qualification is now complete; the distinct parent-only rejection-evidence correction is next. Full input/delivery repair still requires an adequate producer contract."
-        },
-        {
-          "task": "R25-feedback-approval-owner-contract",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "qualification_closed_pr1826_host_consumer_dependency_retained",
-          "next_step": "Resume source qualification only after the external conversation host owner supplies a typed exact-summary approval/withdrawal handoff and matching existing-owner pre-projection consumer, with version creation/migration and current revocation/retry contracts."
-        },
-        {
-          "task": "Hermes-parent-only-rejection-effect-evidence",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "repair_closed_pr1819",
-          "next_step": "Preserve truthful rejection receipts and successful acceptance gates. Follow independently scored existing-owner work; do not infer runtime readiness or retention."
-        },
-        {
-          "task": "FoundUp-consumer-force-dry-isolation-repair",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1838_exact_reviewed_tree",
-          "next_step": "245 local/independent overlapping cases and ten exact-head checks pass; exact reviewed tree merged. Runtime/provider admission and native confinement remain separate.",
-          "rationale": "Moderate cross-instance/callback compatibility complexity; critical isolation limitation; next-release urgency and significant internal benefit. Live delegation is already blocked, so this is not a production incident or an inherited 15-point investigation score."
-        },
-        {
-          "task": "AcousticLab-Pillow-existing-repair-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "bounded_package_qualification_complete_full_graph_unresolved",
-          "evidence": [
-            "modules/platform_integration/acoustic_lab/requirements.txt",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1315",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-gotjunk-protobuf-1828\\remaining-critical-summary.json",
-            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/source-findings.json"
-          ],
-          "next_step": "Bounded package qualification fulfilled and exact source repair closed through1315. Preserve baseline/candidate full-manifest failures and unresolved Linux3.11/application validation; do not repeat unchanged probes or reacquire1315.",
-          "score_rationale": "Historical C3/I3/D4/Impact3=13/P1 bounded qualification, now closed through1315; not a current selection.",
-          "effort_cost": "Bounded source/metadata and existing tests first; isolated package validation only when qualified; no provider calls.",
-          "dependencies": "Prior owner and narrow compatibility gates fulfilled. Full dependency/Linux3.11/application acceptance remains a separate unresolved environment boundary."
-        },
-        {
-          "task": "AcousticLab-Pillow-existing-PR-integration",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "closed_pr1315_exact_reviewed_tree",
-          "evidence": [
-            "modules/platform_integration/acoustic_lab/requirements.txt",
-            "https://github.com/FOUNDUPS/Foundups-Agent/pull/1315",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\qualification-review.json",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\integration.json",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-pillow-qualification-1926\\pillow-probe.json"
-          ],
-          "next_step": "Ten PR checks and all three main workflows passed; alert118fixed. Both full-manifest resolution failures and Linux3.11/app limits remain explicit.",
-          "score_rationale": "Historical C3/I3/D4/Impact3=13/P1 source integration completed in1315; no pending publication obligation.",
-          "effort_cost": "Bounded source/metadata and existing tests first; isolated package validation only when qualified; no provider calls.",
-          "dependencies": "Final independent review, normal publication, exact-head CI and merge gates fulfilled; all three main workflows subsequently passed. Linux3.11/application limits remain separate."
-        },
-        {
-          "task": "LinkedIn-dry-run-boundary-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "outstanding_requires_fresh_owner_reconciliation",
-          "evidence": [
-            "O:/Foundups-Agent-audits/20260921-rsi-resume-2302/gmail-linkedin-audit.json",
-            "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py",
-            "modules/communication/moltbot_bridge/src/linkedin_social_adapter.py",
-            "modules/communication/moltbot_bridge/tests/test_linkedin_social_adapter.py"
-          ],
-          "score_rationale": "Concrete contradictory no-effect contract on an existing reusable path; moderate cross-wrapper/adapter work, significant protection before daily-work use, no observed live incident or emergency.",
-          "next_step": "First add fake-only contradictory outer/nested dry_run and like_post-no-mutation regression using existing test_linkedin_social_adapter.py or nearest existing executor test owner after import-isolation review; repair only the existing wrapper/adapter gate if reproduced. No browser attachment, recipients, credential access, registration or promotion.",
-          "dependencies": "Reuse existing main/branch/skill owner; preserve live accounts and current shared work. No skill registration or promotion implied.",
-          "effort_cost": "Source-bound audit available; deterministic fake-only checks or existing context reuse before provider work.",
-          "acceptance": [
-            "default/explicit true cannot reach mutating fake methods, including nested false contradiction",
-            "explicit authorized false compatibility remains distinguishable",
-            "read-only/draft outcomes stay separate from actual-effect evidence",
-            "existing runtime admission remains fail-closed; no fabricated effect receipts"
-          ],
-          "qualification_limit": "No regression executed in this audit; fresh exact-head peer path check and harness/import review are prerequisites to implementation, not an invented runtime-authority block."
-        },
-        {
-          "task": "Worktree-retirement-guard-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "state": "outstanding_existing_tool_qualification",
-          "evidence": [
-            "scripts/worktree_cleanup_phase1_dryrun.ps1",
-            "scripts/worktree_removal_execution_phase1_dryrun.ps1",
-            "O:\\Foundups-Agent-audits\\20260921-rsi-resume-2302\\worktree-audit.json"
-          ],
-          "score_rationale": "Coordinator tool-guard qualification rescore, distinct from the auditor 12/P2 preservation-and-release task: C3 fresh ownership/ignored-state and historical-script reconciliation; I4 preservation of concurrent work; D3 no observed deletion incident; Impact3 bounded hygiene improvement.",
-          "next_step": "Qualify existing print-only scripts against synthetic clean/dirty/ignored/unknown-owner fixtures; prevent stale allowlists/expected dirtiness from becoming actionable removal suggestions. Reuse before extending; no real-tree deletion test.",
-          "dependencies": "Fresh exact source and applicable cleanup owner; no force/reset/prune or database removal.",
-          "effort_cost": "Small deterministic report-only contract first; no new cleanup service or model dispatch."
-        },
-        {
-          "task": "AutoResearcher-report-completeness",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "state": "proposal_text_identity_closed_pr1803_remaining_contracts_unqualified",
-          "next_step": "No next report source slice was newly qualified by this bounded review; retain exact program/evaluated-byte/provenance and reader distinctions without inferring authority."
-        },
-        {
-          "task": "OpenClaw-invocation-diagnostic-attribution",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "state": "parent_partial_call_local_repair_closed_pr1830",
-          "next_step": "Retain broader parent boundaries; no unresolved work in the merged call-local repair."
-        },
-        {
-          "task": "WSL-advisory-explicit-command-opt-in",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "state": "closed_pr1806",
-          "next_step": "No remaining local source work. Preserve exact merge,18 reviewed blobs,43 focused/four connected and independent43 overlap/18 probes plus corrected backend manifest validation. Actual runtime execution remains separately admitted."
-        },
-        {
-          "task": "auto-researcher-process-recovery-oracle-contract",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "state": "qualification_closed_pr1827",
-          "next_step": "Preserve exact completed static contract; missing checkpoint/reader requirements are already recorded, not a new defect witness."
-        },
-        {
-          "task": "LinkedIn-message-first-branch-reconciliation",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "state": "outstanding_requires_fresh_owner_reconciliation",
-          "evidence": [
-            "O:/Foundups-Agent-audits/20260921-rsi-resume-2302/gmail-linkedin-audit.json",
-            "origin/docs/linkedin-message-first-20260915",
-            "modules/platform_integration/linkedin_agent/README.md",
-            "modules/platform_integration/linkedin_agent/ROADMAP.md",
-            "modules/platform_integration/linkedin_agent/ModLog.md"
-          ],
-          "score_rationale": "Existing authored policy work is not in main and prevents duplicate planning. Reconcile six existing paths and preserve current code truth; not a claim executors comply.",
-          "next_step": "Existing authored policy work is not in main and prevents duplicate planning. Reconcile six existing paths and preserve current code truth; not a claim executors comply.",
-          "dependencies": "Reuse existing main/branch/skill owner; preserve live accounts and current shared work. No skill registration or promotion implied.",
-          "effort_cost": "Source-bound audit available; deterministic fake-only checks or existing context reuse before provider work."
-        },
-        {
-          "task": "Detect-AI-WSP109-intake",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 11,
-          "priority": "P2",
-          "state": "closed_pr1751_metadata_only",
-          "next_step": "Metadata scope merged1751 with all main workflows successful; runtime/build/route alias remain separate."
-        },
-        {
-          "task": "Current-main-operational-skill-visibility",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 11,
-          "priority": "P2",
-          "state": "outstanding_requires_fresh_owner_reconciliation",
-          "evidence": [
-            "O:/Foundups-Agent-audits/20260921-rsi-resume-2302/gmail-linkedin-audit.json",
-            ".agents/skills/yumori-contact-ledger/SKILL.md",
-            ".agents/skills/yumori-moshpit/SKILL.md",
-            ".agents/skills/fukui-city-procedure/SKILL.md"
-          ],
-          "score_rationale": "Skill text already exists; active shared workspace is older and dirty. Explicit existing path/context reuse is lower cost than duplicate installation or broad checkout mutation.",
-          "next_step": "Skill text already exists; active shared workspace is older and dirty. Explicit existing path/context reuse is lower cost than duplicate installation or broad checkout mutation.",
-          "dependencies": "Reuse existing main/branch/skill owner; preserve live accounts and current shared work. No skill registration or promotion implied.",
-          "effort_cost": "Source-bound audit available; deterministic fake-only checks or existing context reuse before provider work."
-        },
-        {
-          "task": "auto-researcher-abrupt-exit-diagnostic-witness",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
             "deferability": 2,
-            "impact": 2
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
           },
-          "score": 10,
-          "priority": "P2",
-          "state": "witness_closed_pr1828",
-          "next_step": "Preserve known controlled exit/byte observations and all limitations; no rerun or new process harness."
+          "state": "blocked",
+          "blocker": "First native ticket and R18 measured concurrency/assurance budgets; contributor onboarding and reward reconciliation"
         },
         {
-          "task": "OpenClaw-call-local-skill-safety-diagnostic-contract",
+          "task": "Persistent payout initiation/reopen/interruption witness then atomic state repair",
           "wsp15": {
             "complexity": 3,
-            "importance": 3,
-            "deferability": 2,
-            "impact": 2
-          },
-          "score": 10,
-          "priority": "P2",
-          "state": "contract_closed_pr1829",
-          "next_step": "Preserve completed contract and source repair; do not repeat either closure."
-        },
-        {
-          "task": "OpenClaw-call-local-skill-safety-diagnostic-repair",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 2,
-            "impact": 2
-          },
-          "score": 10,
-          "priority": "P2",
-          "state": "repair_closed_pr1830",
-          "next_step": "Completed and merged; retain exact validation limits. Do not repeat source repair."
-        },
-        {
-          "task": "FoundUp-genesis-prototype-compatibility-qualification",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 2,
-            "impact": 2
-          },
-          "score": 10,
-          "priority": "P2",
-          "state": "closed_pr1839_exact_reviewed_documentation_tree",
-          "next_step": "Static matrix and independent review closed; ten exact-head checks and both main workflows pass. No duplicate generic loader/scanner fixtures.",
-          "rationale": "Moderate three-contract reconciliation, useful reusable genesis readiness, deferrable because detect_ai already exists, limited impact without authoring capability. Independently scored; aggregate admission retains15/P1."
-        },
-        {
-          "task": "WRE-core-receipt-fixture-reconciliation",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
+            "importance": 4,
             "deferability": 3,
-            "impact": 2
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
           },
-          "score": 10,
-          "priority": "P2",
-          "state": "closed_pr1837",
-          "next_step": "Exact merged tree with ten successful PR checks and both main workflows successful;174 connected and independent overlapping tests passed.",
-          "rationale": "Simple existing-helper adaptation; important trustworthy regression oracle; near-term prerequisite to selected13/P1 repair; limited test-evidence impact, no runtime capability."
+          "state": "witness_complete_defects_reproduced_repair_outstanding",
+          "next_step": "Qualify existing SQLite transaction/idempotency owner for atomic single initiation and truthful state; preserve both observed failures as acceptance negatives."
         },
         {
-          "task": "AmIBot-public-alias-discovery-contract",
-          "parent": "AmIBot-public-route-identity",
+          "task": "LinkedIn dry-run boundary qualification",
           "wsp15": {
             "complexity": 3,
-            "importance": 3,
-            "deferability": 2,
-            "impact": 2
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
           },
-          "score": 10,
-          "priority": "P2",
-          "state": "closed_pr1840_exact_reviewed_tree",
-          "next_step": "Reviewed contract merged f83edabc3; all ten PR checks and both main workflows succeeded. No remaining contract work.",
-          "rationale": [
-            "C3: reconcile canonical tenant identity, projection allowlist/schema and browser path resolution without crossing the member gate.",
-            "I3: the requested AmIBot discovery identity remains unresolved despite canonical registration; the existing generic shell can supply a reusable contract owner.",
-            "D2: hidden/not_portfolio and unbuilt status mean no active service incident; this contract can wait several releases.",
-            "Impact2: a local contract removes ambiguity but does not expose AmIBot, author an app or admit autonomous workers."
-          ]
-        },
-        {
-          "task": "Public-discovery-canonical-alias-capability",
-          "parent": "AmIBot-public-route-identity",
-          "wsp15": {
-            "complexity": 4,
-            "importance": 2,
-            "deferability": 2,
-            "impact": 2
-          },
-          "score": 10,
-          "priority": "P2",
-          "state": "closed_pr1841_exact_reviewed_tree",
-          "next_step": "PR1841 merge b6512495; ten exact-head checks passed in closure receipt, both main workflows35556957708/35556957670 SUCCESS. No public activation or AmIBot build.",
-          "rationale": [
-            "C4: cross-language parsing, canonical identity, collision and visibility checks require careful coordination.",
-            "I2: optional explicit alias; canonical display-name discovery already exists.",
-            "D2: hidden/unbuilt fixture, no active service incident.",
-            "Impact2: reusable discovery capability but current public data and runtime remain unchanged."
-          ]
+          "state": "outstanding_separate_scope",
+          "blocker": "Reconcile existing owner before work; not the next RSI ticket-path step"
         }
       ],
-      "additional_dependency_comparison": [
-        {
-          "package": "@grpc/grpc-js",
-          "pr": 1365,
-          "head": "29c537b2bccdcbd9e38ee8c8fc5f5b5cd289e035",
-          "alerts": [
-            69,
-            68
-          ],
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4
-          },
-          "score": 15,
-          "priority": "P1",
-          "consumers": {
-            "node_modules/google-gax": "^1.10.9"
-          },
-          "rationale": "Shared Firestore/google-gax transport with two current high alerts. Exact existing patch now qualified by isolated install and paired offline consumer/crash checks; final review/publication/CI pending. No live RPC or deployed exposure proven.",
-          "state": "qualified_source_candidate_pending_final_review_publication"
-        },
-        {
-          "package": "body-parser",
-          "pr": 1316,
-          "head": "37f0b69bb7f03f6ae3b0326d3d6d67edbb91dc98",
-          "alerts": [],
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "consumers": {
-            "node_modules/express": "~1.20.3"
-          },
-          "rationale": "Existing HTTP parser update without a currently observed high alert in this manifest. Coupled Express-owner reconciliation and actual entry relevance required; no urgency inferred from package name.",
-          "state": "candidate_owner_qualification_only"
-        },
-        {
-          "package": "fast-xml-parser",
-          "pr": 1373,
-          "head": "6ebc0a2242369fe406f0fd3bd0bd7207e4df0588",
-          "alerts": [
-            44
-          ],
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "consumers": {
-            "node_modules/@google-cloud/storage": "^5.3.4"
-          },
-          "rationale": "Transitive parser owner has adjacent builder dependency; exact consumer reachability requires qualification.",
-          "state": "candidate_owner_qualification_only"
-        },
-        {
-          "package": "fast-xml-builder",
-          "pr": 1372,
-          "head": "34a85024a36b8f7776d8055d5fad4bf4a4269312",
-          "alerts": [
-            54
-          ],
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 13,
-          "priority": "P1",
-          "consumers": {
-            "node_modules/fast-xml-parser": "^1.0.0"
-          },
-          "rationale": "Related XML serialization owner; reconcile parser owner before independent promotion.",
-          "state": "candidate_owner_qualification_only"
-        },
-        {
-          "package": "brace-expansion",
-          "pr": 1456,
-          "head": "bde3740f65a9d26c6bae7e649317ede8a8a8e5f0",
-          "alerts": [
-            298,
-            282,
-            253
-          ],
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "consumers": {
-            "node_modules/minimatch": "^2.0.2"
-          },
-          "rationale": "Bounded pattern-expansion dependency patch; runtime relevance must be qualified.",
-          "state": "candidate_owner_qualification_only"
-        },
-        {
-          "package": "form-data",
-          "pr": 1344,
-          "head": "12eb04ca0c3ca21cfcea7e344051c8164a8d62ea",
-          "alerts": [
-            194
-          ],
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 4,
-            "impact": 3
-          },
-          "score": 12,
-          "priority": "P2",
-          "consumers": {
-            "node_modules/@types/request": "^2.5.5"
-          },
-          "rationale": "Bounded request-encoding dependency patch; actual call sites need qualification.",
-          "state": "candidate_owner_qualification_only"
-        },
-        {
-          "package": "js-cookie",
-          "pr": 1367,
-          "head": "18b9ce7527bc601006464eca3c55b76d641e8497",
-          "alerts": [
-            66
-          ],
-          "wsp15": {
-            "complexity": 2,
-            "importance": 2,
-            "deferability": 3,
-            "impact": 2
-          },
-          "score": 9,
-          "priority": "P3",
-          "consumers": {
-            "node_modules/js-beautify": "^3.0.5"
-          },
-          "rationale": "Cookie utility under server Functions graph; browser applicability unestablished.",
-          "state": "candidate_owner_qualification_only"
-        }
-      ],
-      "selected_next": "LinkedIn-dry-run-boundary-qualification",
-      "selection_basis": "After grpc15/P1 closes, LinkedIn and cleanup/XML candidates are13/P1. LinkedIn has a concrete existing outer/nested dry-run contradiction directly affecting the requested daily-work integration; fake-only qualification is smaller and more relevant to RSI effect boundaries than XML reachability or broad retirement guards. Fresh ownership/import-isolation gate still applies. Higher existing runtime/product/aggregate rows retain documented prerequisite or external owner constraints."
+      "selected_next": "Qualify existing seven trust-anchor producer/consumer bindings and post-acceptance issuer seam",
+      "selection_basis": "Highest-value currently executable predecessor of the requested real-ticket test. Re-observe after checkpoint; no automatic capacity increase."
     },
     "dispatchable": false,
-    "retained_improvement_proven": false
+    "retained_improvement_proven": false,
+    "source_bindings": {
+      "runtime_audit": "runtime-path-audit.json",
+      "reward_audit": "reward-path-audit.json",
+      "test_receipt": "independent-local-v1/receipt.json",
+      "reward_witness": "disposable-reward/author-witness-v3/receipt.json"
+    },
+    "evidence_sha256": {
+      "runtime-path-audit.json": "a5628442ddcff2149ee201a35c0d2b7e56afbf7615e5f9d6c6f9f6861d896b35",
+      "reward-path-audit.json": "cbe6f423b58473c3454abef61a7bd99a84fa5ef19661668f153d770987f951ef",
+      "independent-local-v1/receipt.json": "789c011e96d14e35a23b3b53f07a413b8611b36c95b3e88bcc6f5d8ff66810c9",
+      "run_independent_local.py": "5d818956f5bfd6a399cb6811e8d6b0635015ee6f6b3a6a999bdbd4487321502c",
+      "independent-test-qualification.json": "8b6b9d348ba042ecb12a19b311e4809a3ef39f604c194275003aaad9446a1188",
+      "disposable-reward/author-witness-v3/receipt.json": "ee5cd5bda89e6acbbd8147e7d660120c50475c521e09847b1dc995263f52ecf0",
+      "disposable-reward/reward-persistence-witness-v3.py": "6b691d87fdc76fd128f682388d38f0703d45a9fa317a2fa6bfcbf62d8380131c",
+      "reward-witness-execution.json": "1682997096598ecc701745cf80b6cf0288d1ab486a9f29dabb5a6b13c07b61c3"
+    },
+    "experiment_metrics": {
+      "live_work_orders": 0,
+      "live_native_worker_jobs": 0,
+      "live_verifier_jobs": 0,
+      "production_rewards": 0,
+      "local_contract_tests_passed": 200,
+      "capacity_load_tested": false,
+      "retained_improvements_accepted": 0,
+      "live_provider_cost": "not incurred by these fake-provider tests; Codex coordination cost not measured",
+      "local_reward_cases": 2,
+      "reward_correctness_failures_reproduced": 2
+    }
   }
 }
