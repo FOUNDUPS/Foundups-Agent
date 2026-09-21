@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify the existing Clerk repair against current main
+
+- WSP00/12/15/22/50/97; C3/I4/D4/Impact4=15/P1. PR1842 and both main workflows passed;98 peer heads unchanged. Reuse PR1378, not a new dependency implementation.
+- Two-way patch and Git three-way merge conflict only on adjacent root Clerk/Next declarations in both manifests. Resolve only disposable evidence to Clerk6.39.3 plus mainNext16.3.5; preserve sharp0.35.4 and444 unrelated lock records. Six updated package records cover existing1384/1380/1379/1381 deltas; PR1762 broader scope stays separate.
+- Sanitized isolated npm strict dry-run/install (scripts disabled) and source TypeScript check pass.18 installed matcher cases pass with zero recorded forbidden effects. Preserve the initial delta-comparison and case-sensitivity test-oracle errors; neither is a product repair or retained RSI gain.
+- No repository dependency/runtime, peer branch/PR, alert, credentialed auth, app/server/build or deployment changed. Existing canonical backlog binds the candidate, evidence limits, independent review and next scoped existing-PR integration; all26packets and53prior scores retained.
+
 ## 2026-09-21: Reconcile critical dependency exposure and existing repair owners
 
 - WSP00/12/15/22/50/97; bounded C3/I4/D4/Impact4=15/P1 qualification advances the existing17/P0 security parent. PR1841 is merged as b6512495 with both main workflows successful;98 peer heads remain unchanged.
