@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify GotJunk dependency repair and preserve deployment boundary
+
+- WSP 00/15/22/50/97; C3/I4/D4/Impact4 = 15/P1. Functions PR #1375 closed with ten PR checks, both main workflows passed and alert #52 fixed. The remaining 95 peer heads are unchanged.
+- Independently reconciled 15 GotJunk product PRs and 14 frontend lock owners. A scratch repair reuses PR #1358's UTF-8 update plus reviewed protobufjs 7.6.3 metadata: six records changed, 266 preserved. Strict resolution/install, the stock Vite build and 11 scoped library checks pass on Node 24. No product source or dependency file was edited.
+- Actual workflow inspection found automatic Cloud Run deployment on any GotJunk module push to main. Promotion requires deployment-owner authority; leave the workflow and PR #1358 unchanged. Node 20, browser/device acceptance and live exposure remain unverified. Build warnings and the prior invalid malformed-wire oracle failure remain preserved.
+- Root-only roadmap/backlog closure awaits independent review and CI. Re-observation distinguishes this completed qualification from blocked integration; five critical alerts remain. Select Acoustic Lab's existing Pillow repair owner/compatibility qualification (13/P1), while preserving already-qualified MCP/runtime boundaries and concurrent product work.
+
 ## 2026-09-21: Qualify and integrate Functions protobuf parent repair
 
 - WSP 00/15/22/50/97; C3/I4/D4/Impact4 = 15/P1. PR #783 merged and both main workflows passed; GitHub alert #170 is fixed. The 96 remaining peer heads are unchanged; ten Functions lock owners were reconciled independently.
