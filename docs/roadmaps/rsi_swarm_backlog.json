@@ -1852,9 +1852,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "section": "current_observation.post_sprint_reobservation",
-    "base_commit": "40c34dd65be630702fbfc006d25d091c9a68efd7",
-    "selected_action": "Clerk-existing-repair-current-base-qualification",
-    "status": "independently_verified_local_qualification_pending_publication",
+    "base_commit": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c",
+    "selected_action": "Clerk-existing-PR-current-base-integration",
+    "status": "local_integration_verified_pending_independent_review_and_publication",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1868,14 +1868,17 @@
     "observation_path": "current_observation"
   },
   "current_observation": {
-    "observation_id": "rsi-clerk-current-base-qualification-20260921-1415",
-    "observed_at": "2026-09-21T05:32:22.293685+00:00",
-    "base_commit": "40c34dd65be630702fbfc006d25d091c9a68efd7",
-    "previous_observation": "40c34dd65be630702fbfc006d25d091c9a68efd7:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
-    "role": "coordinator",
+    "observation_id": "rsi-clerk-existing-pr-integration-20260921-1514",
+    "observed_at": "2026-09-21T06:22:06.476471+00:00",
+    "base_commit": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c",
+    "previous_observation": {
+      "git_ref": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c:docs/roadmaps/rsi_swarm_backlog.json",
+      "observation_id": "rsi-clerk-current-base-qualification-20260921-1415"
+    },
+    "role": "architect/coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Clerk-existing-repair-current-base-qualification",
+    "selected_task": "Clerk-existing-PR-current-base-integration",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1884,207 +1887,113 @@
       "total": 15,
       "priority": "P1"
     },
-    "status": "independently_verified_local_qualification_pending_publication",
+    "status": "local_integration_verified_pending_independent_review_and_publication",
     "parent_task": "Dependency-security-reconciliation",
-    "parent_scope_score": 17,
-    "selection_basis": "Fresh base differs from prior only3ownedplanningfiles;98 peer heads identical. Previous bounded security qualification closed with main workflows successful. Current15/P1 existing-Clerk qualification retains strongest direct application path and known combined repair over unproven protobuf schema exposure/Pillow affectedAPI absence. Higher parent/runtime/owner rows have no newly eligible admission or dependency change. No numeric score confers authority.",
+    "parent_scope_score": "17/P0",
+    "selection_basis": "Fresh main only adds prior qualification documents; 98 peer heads unchanged, no Clerk path changes. Existing bot PR has no assignee, reviews, comments or registered matching worktree. 15/P1 integration is executable locally; higher-score rows retain runtime/admission, product-owner or aggregate dependencies. Retain exact previous source qualification and avoid duplicate PR.",
     "closure_reconciliation": {
-      "pr": 1842,
-      "merge": "40c34dd65be630702fbfc006d25d091c9a68efd7",
-      "head": "61946a403c7bc320bea6e114bb10d3013a83fdef",
-      "main_workflows": {
-        "35562118053": "SUCCESS",
-        "35562117913": "SUCCESS"
-      },
-      "exact_head_checks": "10 SUCCESS at prior bound closure",
-      "prior_closure_receipt": "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/closure-reobservation.json",
-      "main_workflow_evidence": "pr1842-main-workflows.json"
+      "pr1843": "Merged exact reviewed tree at b68ee8c794daa58ecf5e4f9e68909b097d794b1c; both main workflows success; bounded candidate qualification closed.",
+      "history": "Retain26original packets and54prior score rows. Fresh inventory98peerheads unchanged before existing PR adoption. No new full-history accounting claim."
     },
     "execution_scope": {
-      "allowed_paths": [
+      "plane": "Local repository dependency integration, not WRE/admitted runtime execution or prototype security_scan auto-remediation.",
+      "files": [
         "ROADMAP.md",
         "ModLog.md",
-        "docs/roadmaps/rsi_swarm_backlog.json"
+        "docs/roadmaps/rsi_swarm_backlog.json",
+        "clerk-nextjs/package.json",
+        "clerk-nextjs/package-lock.json"
       ],
-      "external_scope": "Disposable evidence candidate2manifests, public npm cache, copied8source/config files, type/matcher probes; no repository node_modules or dependency edits.",
-      "denied_effects": [
-        "peer PR/branch changes",
-        "alert dismissal",
-        "provider/model",
-        "application server",
-        "credentialed auth",
-        "production build/deployment",
-        "WRE admission"
-      ],
-      "dispatchable": false
+      "existing_pr": 1378,
+      "branch": "agent/rsi-clerk-existing-pr-integration-20260921",
+      "authority": "Standing routine reversible work covers owned local integration and validated normal fast-forward of existing unassigned bot branch; fresh independent review and exact-head checks gate any owned merge. No force push, sibling closure, production activation or deployment.",
+      "shared": "Preserve shared checkout and scoped source hashes; no YUMORI/eSingularity/AutoPost/product changes."
     },
     "retrieval": {
-      "result": {
-        "ok": true,
-        "freshness": "UNKNOWN",
-        "index_gap_detected": true,
-        "workspace_repo_head_sha": "40c34dd65be630702fbfc006d25d091c9a68efd7",
-        "workspace_overlay_present": false
-      },
-      "noise": "Bounded must-include Clerk docs/manifests/source; no repeated repository audit.",
-      "ordering": "WSP/queue/closure then owner source, exact peer patch, conflict records, dependency compatibility and source type/matcher checks.",
-      "missing": "Clerk has no tracked tests/test script/module ModLog/INTERFACE/ROADMAP. Requested security-dependencies-once and security-validation-once workflows absent on main; they belong to broader peerPR1762. No duplicate workflow/test framework introduced.",
-      "staleness": "UNKNOWN/index gap is workspace source evidence, not semantic CURRENT. Prior semantic failure not retried. Prior advisory/source exposure proof reused only at unchanged bound source.",
-      "duplication": "Existing1378 contains changed Clerk/cookie records of1384/1380/1379/1381; no authority to close siblings from record subsumption alone."
+      "query": "holo-request.json",
+      "result": "ok=true; lexical only; freshness=UNKNOWN; index_gap_detected=true",
+      "noise": "Bounded four-result owner query; avoid broad archived history.",
+      "ordering": "Exact manifests/middleware/README first, then current-base contracts and bound receipts.",
+      "missing_artifacts": "No Clerk module ROADMAP/INTERFACE/ModLog or tests/script; use existing root canonical docs and isolated compiler/matcher checks. No duplicate framework.",
+      "staleness": "Direct source/manifest hashes verified. Reuse prior strict install only at identical candidate/tool/source scope; no semantic CURRENT claim or repeated failed semantic probe.",
+      "duplication": "Reuse PR1378; preserve same-path siblings and broader1762. No replacement PR."
     },
     "ownership": {
-      "peer_heads": 98,
-      "peer_heads_unchanged": true,
-      "open_pr_evidence": "open-prs.json",
-      "shared_scope_evidence": "shared-before.json",
-      "clerk_owner": "Existing PR1378 d4dded5d47a995442fbed7363067d51e00c3608f; no branch mutation this sprint.",
-      "broader_owner": "PR1762 remains separate eSingularity/workflow scope. Its eslint-config-next16.3.4 intent remains absent from main16.1.6; no blanket completion or adoption claim.",
-      "worktrees_evidence": "worktrees.txt"
+      "before": "pr1378-before.json",
+      "independent_review": "independent-owner-review.json",
+      "peers_before": 98,
+      "active_worktrees": "worktrees.txt",
+      "gate": "Refresh same-repo branch identity/head and ownership before a normal fast-forward publication."
     },
     "findings": {
-      "patch_application": "Two-way git apply --check fails on both manifests. Normal git merge-tree also returns conflicts, each solely adjacent root Clerk/Next declarations. Both failures preserved; conflicted tree never checked out.",
-      "isolated_resolution": {
-        "base": "40c34dd65be630702fbfc006d25d091c9a68efd7",
-        "peer": "d4dded5d47a995442fbed7363067d51e00c3608f",
-        "merge_base": "2ccb6c1ecf0b38b1975f3ad9b663e97b87bf6c75",
-        "conflicted_tree": "bf978c19bb24114f9699d8017329f0e3bbcaaa5b",
-        "candidate_path": "O:\\Foundups-Agent-audits\\20260921-rsi-clerk-qualification-1415\\candidate\\clerk-nextjs",
-        "resolution": {
-          "package.json": {
-            "sha256": "c6cd0c92e56d2a3530076372d6602d8947504a13fccc365ab2bf99da28e34e57",
-            "conflicts_resolved": 1,
-            "resolution": "Retain current Next16.3.5; apply existing PR1378 Clerk^6.39.3. Nonconflict records from Git three-way merge."
-          },
-          "package-lock.json": {
-            "sha256": "d2da91d67e60f6ae0929826dd309e21cd42f4ea72205cd8b3ce1343731f86406",
-            "conflicts_resolved": 1,
-            "resolution": "Retain current Next16.3.5; apply existing PR1378 Clerk^6.39.3. Nonconflict records from Git three-way merge."
-          }
-        },
-        "changed_records": [
-          "",
-          "node_modules/@clerk/backend",
-          "node_modules/@clerk/clerk-react",
-          "node_modules/@clerk/nextjs",
-          "node_modules/@clerk/shared",
-          "node_modules/@clerk/types",
-          "node_modules/js-cookie"
-        ],
-        "unchanged_records_verified": 444,
-        "candidate_sha256": {
-          "package.json": "c6cd0c92e56d2a3530076372d6602d8947504a13fccc365ab2bf99da28e34e57",
-          "package-lock.json": "d2da91d67e60f6ae0929826dd309e21cd42f4ea72205cd8b3ce1343731f86406"
-        },
-        "versions": {
-          "@clerk/nextjs": "6.39.3",
-          "@clerk/backend": "2.33.6",
-          "@clerk/clerk-react": "5.61.9",
-          "@clerk/shared": "3.47.8",
-          "@clerk/types": "4.101.26",
-          "js-cookie": "3.0.7",
-          "next": "16.3.5",
-          "sharp": "0.35.4",
-          "@next/env": "16.3.5",
-          "@swc/helpers": "0.5.23",
-          "postcss": "8.5.23"
-        },
-        "repository_mutated": false,
-        "manual_resolution_isolated": true
+      "base": "b68ee8c794daa58ecf5e4f9e68909b097d794b1c",
+      "peer": "d4dded5d47a995442fbed7363067d51e00c3608f",
+      "merge_parent": "d4dded5d47a995442fbed7363067d51e00c3608f",
+      "manifest_sha256": {
+        "clerk-nextjs/package-lock.json": "d2da91d67e60f6ae0929826dd309e21cd42f4ea72205cd8b3ce1343731f86406",
+        "clerk-nextjs/package.json": "c6cd0c92e56d2a3530076372d6602d8947504a13fccc365ab2bf99da28e34e57"
       },
-      "subsumed_peer_changes": [
-        1384,
-        1380,
-        1379,
-        1381
+      "qualified_candidate_exact_bytes": true,
+      "changed_records": [
+        "",
+        "node_modules/@clerk/backend",
+        "node_modules/@clerk/clerk-react",
+        "node_modules/@clerk/nextjs",
+        "node_modules/@clerk/shared",
+        "node_modules/@clerk/types",
+        "node_modules/js-cookie"
       ],
-      "subsumption_limit": "Changed lock records are covered by1378; ownership, CI, full PR disposition and security alert closure remain separate.",
-      "acceptance_gap": "No current Clerk-specific test script or CI target. App/auth/real NextRequest/build/device/deployment acceptance remains unverified. next/font/google means build is not an inert typecheck.",
-      "prior_exposure": "Preserve prior9alert/7manifest qualification at exact predecessor source; no fresh total-alert inventory or deployed-exploit conclusion in this slice."
+      "unchanged_records": 444,
+      "main_next": "16.3.5",
+      "main_sharp": "0.35.4",
+      "new_clerk": "6.39.3",
+      "unrelated_source_changed": false,
+      "peer_lineage_preserved": true,
+      "installed_runtime_changed": false
     },
     "validation": {
-      "status": "local_qualification_and_independent_replay_passed_final_document_review_required",
-      "strict_npm_dry_run": "exit0; no node_modules created",
-      "isolated_npm_ci": {
-        "exit_code": 0,
-        "seconds": 44.92,
-        "lifecycle_scripts_disabled": true,
-        "strict_peer_deps": true,
-        "candidate_hashes_unchanged": true
-      },
-      "typescript": {
-        "exit_code": 0,
-        "copied_source_files": 8,
-        "no_emit": true,
-        "incremental": false
-      },
-      "installed_matcher": {
-        "passed_cases": 18,
-        "forbidden_effect_attempts": 0,
-        "scope": "Actual installed createRouteMatcher with synthetic pathname input; broad/case-insensitive patterns, no auth.protect/currentUser or advisory-bypass proof."
-      },
-      "preserved_failures": {
-        "patch": "two-way and three-way conflicts",
-        "delta_oracle": "Initial merge-base26records != current-main7records; corrected exact7whitelist with every other main record preserved, not product repair.",
-        "matcher_oracle": {
-          "original_failure": "/MEMBER was expected false; actual true",
-          "evidence": "node_modules/@clerk/shared/dist/runtime/pathToRegexp-DNM_UlMK.js:178 defaults regex flags to i; createRouteMatcher supplies no sensitive override.",
-          "initial_failure_file": "matcher-initial.stderr",
-          "classification": "Incorrect case-sensitivity test assumption; not evidence of a product repair or RSI gain."
-        }
-      },
-      "remote_ci": "New owned documentation candidate not yet published; prior1842main workflows passed. No new peer1378CI or remote compatibility claim.",
-      "independent_matcher": "Independent18-case replay overlaps author18, not36unique; zero recorded named-hook attempts, not OS-level confinement.",
-      "final_document_review": {
-        "receipt": "O:\\Foundups-Agent-audits\\20260921-rsi-clerk-qualification-1415\\candidate-review.json",
-        "requirement": "Must bind final three blobs before commit/publication; no self-referential hash in this document."
-      }
+      "source": "source-validation.json",
+      "typecheck": "exit0 rerun on identical source and installed candidate",
+      "matcher": "18 synthetic actual-installed matcher cases pass; repeats overlap earlier18",
+      "strict_install": "Reuse independently reviewed exact candidate install from prior sprint, scripts disabled; no new install.",
+      "review": "Final five-file independent review pending.",
+      "remote": "New integration head not yet published or checked. Prior1843main workflows success.",
+      "limits": "No actual credentialed auth, advisory bypass, app build/server, deployment or alert closure proof."
     },
     "source_bindings": {
-      "clerk-nextjs/package.json": "e04848ea749e5b603d04ea1d1b6505ff09fb3f17ee2c248bc70800cbe15c9464",
-      "clerk-nextjs/package-lock.json": "5a94048da4112d430089092c275a7322c0c33088b04cf0da7abf4ba6248cfe10",
-      "clerk-nextjs/README.md": "3b3ed71ebf50e973209bc634f6849e8ecf235a6c0686c285e1f36af5caa1c2cc",
-      "clerk-nextjs/next.config.ts": "a972c4f0ffa6dd714e7909b02d1ac19d2f2fe3d01f191efd2c5054bd6f142ec1",
-      "clerk-nextjs/eslint.config.mjs": "275a07c13fc7c83a652efcfa9fb6a207c451a2f5088e6793415ce44281285720",
-      "clerk-nextjs/tsconfig.json": "dbacf04aa5f38c1ce4b0f030fbb84e5adff19306fb785b2e4aafef9c58705658",
+      "clerk-nextjs/package-lock.json": "d2da91d67e60f6ae0929826dd309e21cd42f4ea72205cd8b3ce1343731f86406",
+      "clerk-nextjs/package.json": "c6cd0c92e56d2a3530076372d6602d8947504a13fccc365ab2bf99da28e34e57",
       "clerk-nextjs/src/app/globals.css": "94d307fb925a3264dd331975b5e17170b1d887f361669cf839bdf37cc7a40db8",
       "clerk-nextjs/src/app/layout.tsx": "eeb494003724782fbc3cd44f755aedf0b9b5613acb40d990daf70319d134fb75",
       "clerk-nextjs/src/app/legal/alpha-nda/page.tsx": "8e1c0e2e2e02316993e57790dda706f7069fd9a693bd89833a41f4b3bec26896",
       "clerk-nextjs/src/app/legal/terms-of-access/page.tsx": "2a1587ac36d516a7097bffa969329724fe80e564881a0a847333709189e92d76",
       "clerk-nextjs/src/app/member/page.tsx": "ba8d61cf1ec28a4a2efce9548d60ac89eda9172c3c3f4a4bcb3d609123cb85eb",
       "clerk-nextjs/src/app/page.tsx": "39aacf076b1d0fd2095a2c2a98729982de417e8de5df6c9d3613358391af0631",
-      "clerk-nextjs/src/middleware.ts": "864e82c5fcbcf0dc3322a62f437a52d97e9cda2623c1ddd61083c3671293c489"
+      "clerk-nextjs/src/middleware.ts": "864e82c5fcbcf0dc3322a62f437a52d97e9cda2623c1ddd61083c3671293c489",
+      "clerk-nextjs/tsconfig.json": "dbacf04aa5f38c1ce4b0f030fbb84e5adff19306fb785b2e4aafef9c58705658"
     },
     "evidence_sha256": {
-      "preflight.json": "e750adfef5a116a88d060e158c479c25edd4ee1ed584a5b0cc2fef8f3a96e2d1",
-      "open-prs.json": "9e7788430a142656eaf00141d807c2d44848c8aaca020e87d7043d2f4635ac27",
-      "shared-before.json": "11c8392cc2124dbc1c526b92c6086700932118f09c38124e187e899d00390aec",
-      "holo-owned-lexical.json": "2619e269ba312506c8515569aabafb10847fac7fb8c7d25d2f4c36c956ab1677",
-      "pr1378-application.json": "6c470a10c958e2b025b33feba982aa2dbd56fdd2ff2fe9d4707e051b7e4582a1",
-      "pr1378-three-way.json": "aba8c10b233493cd6eac6e00931a7334b16a2a793a2dce979f646639b271f3d2",
-      "pr1378.patch": "e009db38be22d2ed3ab2e755c01f35dd3196db65633e16126a1a2bcaea0c236b",
-      "owner-reconciliation.json": "28f833a25166937435251f7e777d78e7376f5d823fab8d20d240dd8987402d54",
-      "candidate-resolution.json": "db60568653378bd106511a36df8d45bf27a8c00da7edc535837474a24864361d",
-      "candidate-provenance-review.json": "1dafb2d85f03fcaa183b729dd2774253b3f0820ced1fd3a5656f1877e104bde6",
-      "npm-ci-dry-run.json": "bc2fa0e44c82684a6b34fcae908763cef29fd6869a0ef732f8ecdc9023209a07",
-      "npm-ci.json": "f5254d9380169b9ac6767a15b3f844f1a04c00d00e8d9c6487cd573cb62e4f2d",
-      "tsc.json": "213513b1a37937dfe459218a3b4171780831506920c8a87a703ce9d7393ef2d4",
-      "matcher.json": "caabdb6aa37c39299b11b111ec8533d39c1f5ea769a8fb896b1c838f3eb18d9a",
-      "matcher.cjs": "1aa1ed5c0e0986251000567fea29c77fbc95d5d8f5ae46634113b306b13e1566",
-      "matcher-initial.stderr": "c6934eecb4b2d66cb8bf3214268a818c6b267a84134f992ad4b760ac2c99a22a",
-      "authoring-failure.json": "e2819cf8b840462f30eff66450e3186043917916492b171b72a20445d613c3b1",
-      "independent-matcher-review.json": "b32c4f499a2fb1345500de53a4380beca72ad524828b26442b27930c0e9c56bb",
-      "pr1842-main-workflows.json": "0a0400fc6beba97768938cc3d6abe6abe3e561f716cd6d829d61204f7a5a49c6"
+      "preflight.json": "853c92b61720af4e973c1532ffcae49d7e74a6106eecb46fd428622a64cf30d7",
+      "preflight-failure.json": "905af7fd83293e4185a550a8fb0feb17ed2e3cf030ad1085b1cdb4b99f003af5",
+      "open-prs.json": "4ca62314258d0a9718067312b0706ba19abbddd6fdb1df4d6b07d796a2f4d7f1",
+      "pr1378-before.json": "8bc41a05450a0dafa8bc85fd3249c6af559f9a6ee0dd474aea84383e743d0d1b",
+      "shared-before.json": "709779440647b9e610d68c9e3d78e3de373d834499cb40b63447bf9dd5fa3b00",
+      "pr1843-main-workflows.json": "6ee1b6e21f2e893281874796ef78b20ea6f52198b21244d8aeb447d2cf9c1522",
+      "holo-owned-lexical.json": "890e4757eea811d8e5df0ed90006ff360e1ea3a39f4bd08daa714c7e76d25dc0",
+      "independent-owner-review.json": "1aba5a792d21184b189884a6a62c24946cf22da7b3bf4f61f2b269c15f6573ce",
+      "merge-attempt.json": "cb3ddf012a6cbf587e21af5f0df53eb8c8f841e008b4f0427a8e08f09ba68c42",
+      "integration.json": "0eb12553a419508e86b246d2fb44cae5ece1e954d46f158b0c530c5b0e972f03",
+      "source-validation.json": "ca526e900a684ad1dce159386eefc34fe97ba37cb57405a5c5fe151e1f158b37"
     },
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-clerk-qualification-1415",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260921-rsi-clerk-integration-1514",
     "effort_cost": {
-      "scope": "Two isolated manifest resolutions; one npm dry-run/install; one source typecheck;18matcher cases;three canonical planning docs.",
       "provider_calls": 0,
-      "secrets_inherited": false,
-      "network": "Public npm registry metadata/tarballs, no audit submission.",
-      "cost_unavailable": "Chat worker cost telemetry unavailable; no zero-total-cost claim."
+      "new_installs": 0,
+      "network": "Read-only GitHub/Git before publication; no app network.",
+      "verification": "Exact manifest/source/tool bindings,18synthetic matcher and typecheck reruns, independent final review.",
+      "total_token_cost": "Unavailable; no zero-cost claim."
     },
     "post_sprint_reobservation": {
-      "selection_rule": "Refresh all53prior rows at unchanged source/peer scope, preserve scores and close bounded qualification only after independent publication. Add one15/P1 integration child.",
       "ranked_candidates": [
         {
           "task": "RedDog-extension-decomposition",
@@ -2227,7 +2136,7 @@
           "score": 17,
           "priority": "P0",
           "state": "partial_critical_manifest_owner_qualification_complete",
-          "next_step": "Aggregate17/P0 remains open. Existing Clerk1378 current-base candidate qualified locally while preserving Next16.3.5/sharp0.35.4; four sibling lock changes subsumed. Continue through scoped existing-PR integration, not a duplicate patch or repeat inventory. Other manifests retain their exact prior exposure/owner limits."
+          "next_step": "Clerk existing-PR integration is locally validated, pending independent review and publication. Aggregate17/P0 stays open. Next eligible dependency slice is existing root protobuf PR783 current-base qualification; preserve functions/GotJunk and other owners."
         },
         {
           "task": "R11-B-memory-acceptance-contract",
@@ -2382,8 +2291,8 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "independently_verified_candidate_pending_document_publication",
-          "next_step": "Two manifest conflicts resolved only in disposable evidence. Strict npm dry-run/install and typecheck pass;18 installed matcher cases pass. Finish independent review/owned documentation closure; no peer branch or repository dependency edits."
+          "state": "closed_pr1843_isolated_candidate_qualification",
+          "next_step": "Preserve bound validation; qualification merged and both main workflows passed."
         },
         {
           "task": "Clerk-existing-PR-current-base-integration",
@@ -2395,8 +2304,8 @@
           },
           "score": 15,
           "priority": "P1",
-          "state": "eligible_local_repair_existing_pr_reconciliation_required",
-          "next_step": "Re-observe exact main/PR1378 ownership and reviews; use qualified two-manifest resolution through the existing PR lineage, preserving unrelated main and PR1762 intent. Reconcile branch ownership before remote mutation; no duplicate replacement PR by default. Bind final source/validation, independent review and fresh exact-head checks before any authorized promotion. No auth/build/deployment proof inferred."
+          "state": "local_integration_verified_pending_independent_review_and_existing_pr_publication",
+          "next_step": "Review five scoped files, fast-forward existing PR1378 only after renewed ownership/ancestry gate, then require exact-head checks before eligible owned merge. No live authentication/build/deployment or alert closure inferred."
         },
         {
           "task": "protected-foundup-work",
@@ -2462,6 +2371,27 @@
           "priority": "P1",
           "state": "lifecycle_qualification_closed_pr1818_delivery_gap_remains",
           "next_step": "Preserve input/result/cancellation gaps and existing event gates. Qualify explicit same-run synchronous/cancel/result producer support before changing transport or successful-result acceptance."
+        },
+        {
+          "task": "Root-protobuf-existing-PR-current-base-qualification",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3
+          },
+          "score": 14,
+          "priority": "P1",
+          "state": "eligible_after_clerk_integration_closure",
+          "evidence": [
+            "O:/Foundups-Agent-audits/20260921-rsi-security-owner-1322/protobuf-owner-exposure-review.json",
+            "https://github.com/FOUNDUPS/Foundups-Agent/pull/783",
+            "package-lock.json"
+          ],
+          "next_step": "Reobserve PR783 and current-main root lock. Reconcile its protobufjs7.6.3/utf8 changes while preserving current websocket-driver0.7.5 and other records. Qualify strict lock resolution and bounded trusted-schema compatibility in disposable evidence before source integration. No duplicate root PR, mass update, product runtime or advisory closure claim.",
+          "score_rationale": "C3: stale lock lineage and transitive closure need careful integration. I4/D4: known critical advisory requires remediation progress. Impact3: root development dependency only; functions/GotJunk runtime locks stay separate.",
+          "effort_cost": "One existing lock delta and focused deterministic compatibility; no paid model admission needed.",
+          "dependencies": "Current Clerk sprint closure; fresh root ownership and exact-source/runtime bindings."
         },
         {
           "task": "R25-A consented local daily-work proposal",
@@ -2806,8 +2736,8 @@
           ]
         }
       ],
-      "selected_next": "Clerk-existing-PR-current-base-integration",
-      "selection_basis": "New deterministic conflict resolution/install/type/matcher evidence makes the existing-Clerk integration the next15/P1 action. It preserves current framework/transitives and consolidates existing repair lineage. Higher runtime/semantic/admission and external product work remain separately constrained; no score grants peer merge authority."
+      "selected_next": "Root-protobuf-existing-PR-current-base-qualification",
+      "selection_basis": "After gated Clerk closure, select14/P1 existing root protobuf qualification: remaining higher rows are blocked, externally owned, closed bounded scopes or aggregate contracts without a qualified new source slice. Root development dependency is narrower than runtime functions/GotJunk. Refresh all prerequisites again before execution."
     },
     "dispatchable": false,
     "retained_improvement_proven": false
