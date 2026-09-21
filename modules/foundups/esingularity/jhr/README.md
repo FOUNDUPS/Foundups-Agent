@@ -55,3 +55,9 @@ Routine repetition, vendor marketing, duplicate stories, and weakly sourced clai
 - WSP_97 evidence references.
 
 The runtime is designed to be called from FoundUps startup/orchestration without blocking the interactive CLI. Public publishing remains fail-closed until the source and publication adapters are connected and verified.
+
+## Japan AI infrastructure flow ledger
+
+`data/japan_ai_infrastructure_flows.json` is the official-source seed for YUMORI's Japan infrastructure dependency analysis. It records directed asset, compute, technology, network, government-program and heat-reuse relationships. Unknown monetary amounts remain `null`; the ledger is deliberately incomplete and must not be represented as a market-wide map.
+
+The calculation lives in `../src/yumori_economic_model.py`. JHR owns evidence/provenance; the YUMORI Economic Model owns project calculations. Neither surface converts a relationship into YUMORI revenue, committed financing, or a public bubble claim.

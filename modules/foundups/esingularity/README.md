@@ -63,6 +63,12 @@ The current public journey is deliberately simple. The existing hero is followed
 
 The financial models, engineering research, and source audits support the public claims but are not the main public experience.
 
+## YUMORI Economic Model
+
+The repository-owned calculation authority is [the YUMORI Economic Model](docs/YUMORI_ECONOMIC_MODEL.md), implemented in `src/yumori_economic_model.py`. It reproduces the current FIN.YUMORI functional workbook, adds demand-capped onsen heat-recovery math, and analyzes a sourced Japan AI-infrastructure flow ledger under `jhr/data/`.
+
+This is YUMORI project finance and regional-impact analysis, **not ROC** and not the generic FoundUps token/economic simulator. Unawarded grants never reduce the base financing need; tariff, demand, pricing, heat, debt and vendor inputs retain their `VERIFY` / `MODEL ONLY` boundaries.
+
 ## Grants, subsidies, and PPP support
 
 Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `FIN — YUMORI Phase 1 Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
@@ -109,10 +115,11 @@ modules/foundups/esingularity/
 │   └── app/reports/jhr/    # Public Japan Hyperscaler Report route
 ├── jhr/                    # Japan Hyperscaler Report research + publish gate
 │   ├── src/                # Significance and truth-boundary logic
+│   ├── data/               # Official-source Japan infrastructure flow ledger
 │   ├── scripts/            # Launch adapter
 │   ├── reports/            # Verified reference reports
 │   └── tests/              # Publish/no-publish gate tests
-├── src/                    # Stable FoundUp identity contract
+├── src/                    # FoundUp identity + YUMORI calculation authority
 ├── tests/                  # Manifest, registry, route, and hosting checks
 ├── docs/                   # Migration, architecture, Drive index, grant and evidence records
 ├── memory/                 # WSP 60 module memory documentation
@@ -132,6 +139,12 @@ npm ci
 npm run lint
 npm run build
 npm run dev -- --host 127.0.0.1
+```
+
+YUMORI economic model:
+
+```powershell
+python -m pytest modules/foundups/esingularity/tests/test_yumori_economic_model.py -q
 ```
 
 JHR assessment only:

@@ -1,5 +1,15 @@
 # Project eSingularity ModLog
 
+## 2026-09-20 — YUMORI Economic Model and Japan infrastructure ledger
+
+- Added the repository-owned YUMORI project-finance calculation authority under the existing eSingularity FoundUp; it does not use the generic FoundUps token/ROC simulator.
+- Reproduced the current FIN.YUMORI five-year formulas for compute revenue, electricity, Opex, debt service, FCFE, NPV, IRR, payback and DSCR while keeping unawarded grants outside base funding.
+- Added an engineering replacement path for the workbook's fixed heat-value placeholders: recoverable heat is reduced by delivery efficiency and capped by actual thermal demand before any value or avoided emissions are counted.
+- Adapted the three reproducible network indicators from ai-circular-economy.com into a 50%-coverage dependency diagnostic and explicitly omitted the three manual market judgements, bubble bands and investment conclusion.
+- Added a 13-flow, official-source Japan seed ledger through JHR, including adaptive reuse at Osaka Sakai, distributed GPU/Watt-Bit relationships, and Tokyo's bathing/district-heat demonstration. Undisclosed amounts remain null and do not enter YUMORI revenue or funding.
+- WSP 50/84: searched the existing eSingularity/JHR and FoundUps simulator surfaces first; placed the engine in the YUMORI/eSingularity module and reused JHR for evidence rather than creating a parallel FoundUp economics module.
+- WSP 97: defaults are workbook-parity scenarios, not forecasts, bids, contracts, awards, returns promises, or proof of Sukatto Land feasibility.
+
 ## 2026-09-20 — YUMORI.me correspondence parent rebuilt on current main
 
 - Rebuilt the bounded correspondence/contact-ledger capability from stale PR #1793 without carrying its older branch history forward.
