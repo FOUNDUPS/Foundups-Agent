@@ -16,23 +16,26 @@ Browser action testing uses:
 | `test_action_router.py` | Router logic tests |
 | `test_youtube_actions.py` | YouTube action tests |
 | `test_linkedin_actions.py` | LinkedIn action tests |
-| `test_linkedin_connection_policy.py` | Ten inert current-behavior qualification cases; four legacy constructor tests separate |
+| `test_linkedin_connection_policy.py` | Seventeen frozen policy-preview/compatibility cases; four legacy constructor tests separate |
 | `test_x_actions.py` | X action tests |
 | `test_autonomous_gemini_heart.py` | Gemini Vision element detection with existing Chrome |
 | `test_final_autonomous_gemini.py` | Gemini Vision standalone infrastructure test |
 | `test_gemini_studio_heart.py` | Gemini Vision YouTube Studio heart button test |
 | `test_gemini_js_click.py` | Gemini Vision JavaScript click injection test |
 
-## Connection qualification scope — 2026-09-22
+## Connection preview validation — 2026-09-22
 
-The ten new cases qualify current request-history/pending/simulation behavior;
-they deliberately describe the pre-repair state, not safe preview acceptance.
-Use the frozen inert runner referenced by the canonical RSI backlog receipt.
-It isolates eager parent imports, bypasses the real constructor and selects
-only these cases; ordinary whole-folder collection is not that qualification.
-Four original constructor-using cases are unchanged and excluded. Both primary
-and independent runs pass the same ten case IDs. See the
-[current and prospective contract](../../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-qualification--2026-09-22).
+PR1869's ten cases qualified the pre-repair mutation. The prospective dry-run
+oracles now replace those obsolete mutation expectations in the same owner.
+The frozen17-case matrix covers allow/deny supplied/extracted metadata,
+repeated previews with empty/pending/connected/quota state, fake-live click and
+policy-denial controls, and missing/unavailable early errors. Baseline12fail/5pass
+becomes17pass locally and independently; four original constructor tests stay
+unchanged/excluded and two disabled-plugin configuration warnings remain.
+The reviewed inert runner in the canonical backlog isolates eager imports,
+bypasses construction and forbids preview manager/send simulation calls.
+Whole-folder collection is not this bounded qualification. See the
+[contract](../../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22).
 
 ## Running Tests
 

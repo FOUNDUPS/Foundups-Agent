@@ -1,3 +1,9 @@
+## 2026-09-22: Connection policy-only preview repair
+
+- WSP00/10/15/22/50/62/84/97;12/P2. Reuse policy evaluation before request mutation; both allow/deny previews preserve bookkeeping and omit request status. Browser access remains separate.
+- Frozen17 cases: baseline12fail/5pass; repaired and independent17pass. Four original constructor tests unchanged/excluded, two known warnings per run; fake-live controls preserved.
+- Same-file result projection reduces method194→171, class2718→2695, file2827→2826. No new module. Backend digest/pins refreshed without adding runtime members or updating services.
+
 ## 2026-09-22: RSI connection preview qualification
 
 - WSP00/15/22/50/62/84/97; 12/P2. Extend the existing browser-actions test owner; ten current-behavior cases pass locally and independently. Four original tests unchanged/deselected; no production source change.

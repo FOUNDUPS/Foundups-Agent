@@ -19,10 +19,10 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ## Current bounded checkpoint — 2026-09-22
 
-Connection dry-run qualification: ten inert cases pass locally and independently;
-production behavior is unchanged. Next 12/P2 is policy preview without request
-bookkeeping mutation, using the existing evaluator. Browser access remains a
-separate boundary. [Evidence and repair contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-qualification--2026-09-22).
+Policy-only connection preview repair12/P2 passes17 frozen cases locally and
+independently (baseline12fail/5pass); no request bookkeeping or simulation for
+dry-run allow/deny. Browser access remains separate. The root backlog owns the
+rescored next action. [Contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22).
 
 The sprint map below is historical planning: source such as `action_router.py`
 already exists. Its unchecked boxes are not a verified current completion audit.

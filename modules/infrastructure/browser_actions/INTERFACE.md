@@ -127,6 +127,16 @@ class YouTubeActions:
 
 ### LinkedInActions
 
+`send_connection_request(..., dry_run=True)` previews the existing role policy
+after navigation/metadata retrieval, before request bookkeeping or simulation.
+Its `LinkedInActionResult.details` contains `dry_run`, `policy_reason`,
+`matched_allow`, `matched_deny`, `profile`; it omits `request_status`. Allowed
+policy returns success, denied policy returns failure. Neither certifies quota,
+deduplication or authority. Constructor/browser access remains separate.
+Missing-metadata/manager early errors retain their existing shapes. Explicit
+live calls retain their existing request-status/results contract.
+See [verified scope](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22).
+
 ```python
 class LinkedInActions:
     """LinkedIn browser automation actions."""

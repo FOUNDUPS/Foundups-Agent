@@ -48,6 +48,7 @@ Browser Actions provides a unified interface for platform-specific browser autom
 - `navigate_to_video(video_id)` → Selenium
 
 ### LinkedIn (`linkedin_actions.py`)
+- `send_connection_request(..., dry_run=True)` → policy preview without request bookkeeping or simulation; navigation/metadata access still occurs. See the [interface](INTERFACE.md#linkedinactions) for fields and limits.
 - `post_to_company(company_id, text)` → Selenium (known DOM)
 - `comment_on_post(post_id, text)` → Selenium
 - `like_post(post_id)` → Selenium
