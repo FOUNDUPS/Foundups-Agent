@@ -1,7 +1,7 @@
 ---
 name: linkedin_engagement
-description: Master LinkedIn activity router for full operations or scoped messages, connections, groups, feed, newsletters, publishing and continuity; retains the WRE bridge
-version: 1.2.0
+description: Master LinkedIn activity router for full operations or scoped messages, connections, groups, feed, dedicated FoundUps ROC and JHR newsletters, publishing and continuity; retains the WRE bridge
+version: 1.3.0
 author: 0102
 agents: [qwen]
 dependencies: [linkedin_social_adapter, browser_actions, wre_core]

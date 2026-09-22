@@ -1,5 +1,9 @@
 ﻿# LinkedIn Agent Test Module Log
 
+## 2026-09-22 — Dedicated newsletter routing contracts
+
+Extended the existing offline activity-skill contract test (no new test file) to require separate FoundUps, ROC and JHR newsletter children, master/router links and lane-specific fail-closed evidence. This remains documentation validation only; it does not certify a live series or publish an edition.
+
 ## 2026-09-22 — Offline activity-skill contracts
 
 Added seven stdlib-only checks for existing-master ownership, resolving local links, narrow scope and authority, composer-history/unknown-send recovery, independent membership decisions, all three newsletter stages and private continuity/PR closure. Direct test run: 7 passed. Independent fixture walkthrough covered approved unchanged/duplicate/unknown sends, full-cycle newsletter states and discussion-only scope. No live executor imported or side-effecting UI test run; these checks do not establish runtime safety.

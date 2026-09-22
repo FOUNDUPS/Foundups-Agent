@@ -17,6 +17,10 @@ The existing `skillz/linkedin_engagement/SKILLz.md` is the instruction entrypoin
 **WSP Compliance:** WSP 1, WSP 3, WSP 11, WSP 30, WSP 42, WSP 53
 
 ### Related Skills
+- **LinkedIn Newsletter Router** (`modules/platform_integration/linkedin_agent/skillz/linkedin_newsletters/`)
+  - Routes a full audit or named publication without merging editorial identities
+  - Dedicated children: `linkedin_foundups_newsletter`, `linkedin_roc_newsletter`, `linkedin_jhr_newsletter`
+  - Instruction contracts only; live publisher/series verification and exact publication authority still apply
 - **LinkedIn Company Poster** (`modules/ai_intelligence/ai_overseer/skillz/linkedin_company_poster/`)
   - CLI posting to FoundUps company page (1263645)
   - Signature: `0102🦞 #FoundUps #pAVS #0102`

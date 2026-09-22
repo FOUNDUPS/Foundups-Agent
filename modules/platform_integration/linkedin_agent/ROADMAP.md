@@ -2,7 +2,7 @@
 
 ## 2026-09-22 activity routing status
 
-- Instruction-level master and activity children: implemented; see [routing](docs/LINKEDIN_ACTIVITY_ROUTING.md).
+- Instruction-level master and activity children: implemented; see [routing](docs/LINKEDIN_ACTIVITY_ROUTING.md). Newsletter routing now has dedicated FoundUps, ROC and JHR child skills under one LinkedIn/newsletter master.
 - Existing moderation/news owners reused with researched message-first membership and reviewed Good/Bad/Ugly discussion.
 - Legacy runtime safety (nested dry-run, direct action guards, simulated messaging, persistent deduplication): not certified by this documentation work. Do not launch unattended live jobs.
 - Historical daily news quotas and identity-like loops below are implementation history, not current operating authority.
