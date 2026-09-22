@@ -63,6 +63,34 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI invitation acknowledgment qualification — 2026-09-23
+
+At main `aca14b3e`, production code is unchanged. Seven new fixed cases plus
+the existing17 inert compatibility cases pass locally and independently; four
+legacy constructor tests remain unchanged/excluded. Fake routing, constructor
+bypass and simulation controls establish Python results, not actual delivery.
+
+Observed: Connect=True and Send=False without a note still reports success and
+increments `connections_sent`; the source allows direct-connect UI variants,
+so absence of Send is ambiguous. With a note, the method attempts Send before
+Add a note and typing, then attempts Send again whenever Add succeeds. Failed
+typing does not prevent that final Send or reported success. A successful first
+Send followed by a failed final Send reports failure despite the earlier action.
+Pending/history/simulation occur before these UI calls; neither pending status
+nor the counter proves external delivery or inclusion of the requested note.
+
+Next bounded repair contract: for nonempty requested notes, omit the premature
+explicit Send, require successful Add and typing before the sole explicit final
+Send, and credit success only for the completed requested sequence. Represent
+unattempted Send as `None`; keep generic failure errors. Preserve no-message fallback, policy/dry-run behavior and existing manager bookkeeping.
+Connect may itself send in some UI variants: this proposed repair cannot promise
+that no invitation escaped or establish delivery truth. UI verification and
+bookkeeping redesign are separate work; no live browser/account action is admitted.
+
+This qualification closes the finite observation only. Production repair, native
+WRE admission, OpenClaw/Hermes update readiness and retained RSI remain separate.
+The canonical backlog binds source, tests, receipts and the rescored next action.
+
 ### RSI connection policy preview — 2026-09-22
 
 The browser owner now returns a policy-only preview after metadata retrieval

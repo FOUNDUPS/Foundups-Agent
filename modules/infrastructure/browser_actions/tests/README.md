@@ -16,12 +16,23 @@ Browser action testing uses:
 | `test_action_router.py` | Router logic tests |
 | `test_youtube_actions.py` | YouTube action tests |
 | `test_linkedin_actions.py` | LinkedIn action tests |
-| `test_linkedin_connection_policy.py` | Seventeen frozen policy-preview/compatibility cases; four legacy constructor tests separate |
+| `test_linkedin_connection_policy.py` | Seven acknowledgment plus17 preserved inert compatibility cases; four legacy constructor tests separate |
 | `test_x_actions.py` | X action tests |
 | `test_autonomous_gemini_heart.py` | Gemini Vision element detection with existing Chrome |
 | `test_final_autonomous_gemini.py` | Gemini Vision standalone infrastructure test |
 | `test_gemini_studio_heart.py` | Gemini Vision YouTube Studio heart button test |
 | `test_gemini_js_click.py` | Gemini Vision JavaScript click injection test |
+
+## Invitation acknowledgment qualification — 2026-09-23
+
+The frozen24-case run selects `test_connection_ack_`, `test_connection_preview_`,
+`test_connection_current_` and `test_connection_live_`; four constructor tests stay
+excluded. Both runs pass24 with two disabled-plugin config warnings. Scripted
+first/final Send results reuse the inert fixture and preserve all prior ASTs.
+Exact payload/driver ordering, results, pending/history and counter controls
+characterize current behavior; passing does not certify correct delivery.
+Use the hash-bound isolated runner/XML in the canonical RSI backlog. See the
+[observations and prospective repair](../../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-invitation-acknowledgment-qualification--2026-09-23).
 
 ## Connection preview validation — 2026-09-22
 

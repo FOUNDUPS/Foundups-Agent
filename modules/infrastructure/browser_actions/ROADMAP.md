@@ -17,12 +17,13 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ---
 
-## Current bounded checkpoint — 2026-09-22
+## Current bounded checkpoint — 2026-09-23
 
-Policy-only connection preview repair12/P2 passes17 frozen cases locally and
-independently (baseline12fail/5pass); no request bookkeeping or simulation for
-dry-run allow/deny. Browser access remains separate. The root backlog owns the
-rescored next action. [Contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22).
+Acknowledgment qualification11/P2 passes24 fixed inert cases locally and
+independently; production unchanged. Requested notes currently follow an initial
+Send, and failed typing can still report success. Next12/P2 repairs only the
+requested-note sequence. No-message variants/bookkeeping stay separate.
+[Contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-invitation-acknowledgment-qualification--2026-09-23).
 
 The sprint map below is historical planning: source such as `action_router.py`
 already exists. Its unchecked boxes are not a verified current completion audit.
