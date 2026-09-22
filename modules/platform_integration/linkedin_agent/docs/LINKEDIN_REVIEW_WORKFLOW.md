@@ -63,6 +63,54 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI dry-run boundary qualification — 2026-09-22
+
+Baseline `03f7279685040c4794762abe71e41f2cd22e7980`; WSP15 C3/I4/D3/Impact3
+=13/P1. PR1863/1865 merged the instruction contracts and the previous owner
+finished its lane. They did not repair runtime guards. Fresh scoped PR/worktree
+reconciliation makes this finite, fake-only qualification eligible for RSI.
+
+| Existing owner | Current behavior to preserve as evidence | Required future safety result |
+|---|---|---|
+| `skillz/linkedin_engagement/executor.py::execute` | Outer default/true uses `setdefault`, so nested `dry_run=false` survives. Explicit outer false overwrites the nested value. | Outer default/true must dominate nested values for write actions; do not mutate the caller's task/params. Explicit live behavior remains a separate authorization concern. |
+| `moltbot_bridge/src/linkedin_social_adapter.py::execute_linkedin_action`, direct `like_post`/`like_reply` | Explicit dry-run still reaches the action method. | Dry-run returns a clearly marked preview before importing or constructing browser actions, with no write, provider or runtime callback. |
+| Same adapter, non-agentic `reply_post` | Its dry-run guard suppresses the reply method, but construction occurs first. | Retain this as a limited positive control; it does not prove constructor-free operation. |
+| `browser_actions/src/linkedin_actions.py::LinkedInActions.__init__` | Writes browser environment variables and creates router/policy dependencies. | A fake write-method count of zero must not be represented as proof that the real constructor is safe. |
+
+Tests reuse the existing bridge adapter test file with an injected browser-module
+replacement, observable constructor/write/close counters and synchronous wrapper
+calls outside an active event loop. They characterize current behavior; a pass
+can confirm a missing guard. The independent zero-construction/zero-write oracle
+above is the future repair criterion, not a currently passing production claim.
+No real LinkedIn module constructor, account, provider or WRE job is executed.
+Observed:11 cases pass locally and in a separate independent replay; original18
+class tests are unchanged/deselected. Both runs have two disabled-plugin
+configuration warnings, with zero failures/errors/skips. These are the same11
+cases, not22 independent behaviors.
+
+The next source packet is C3/I4/D3/Impact4 = **14/P1**, subject to fresh owner
+reconciliation after closure. Keep the existing owners and distinguish direct
+like previews from agentic routing. `like_post` currently ignores `agentic=true`;
+it must still receive the direct preview guard. Preserve actual delegated
+`like_reply` routing. Preserve supplied post IDs,
+fallback `index_<n>`, current integer normalization, stripped reply text and the
+missing-reply rejection. Keep pure browser-port validation before the preview;
+do not normalize malformed parameter types into accepted values. A valid preview
+must report `dry_run: true`, target ID/index and reply text where relevant;
+it must not fabricate a posted result or call `close` without construction.
+Preserve live result projection, exceptions/close and
+existing omitted-flag behavior until separately qualified. A false dry-run flag
+does not itself authorize a social action.
+
+Do not broaden this result to all thirteen actions: agentic drafting, group
+posting, connections, Digital Twin routes, non-Boolean wrapper inputs, active
+event-loop fallback and live caller admission remain separate qualifications.
+The inherited executor/adapter methods exceed WSP62 function limits; a source
+repair must shrink/split within their existing files and record remaining debt,
+rather than grow those methods or create another social adapter. Exact tests,
+source bindings, independent review and fresh selection are in the
+[canonical RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+
 A bounded HoloIndex owner query on 2026-09-15 used lexical retrieval. Its freshness was UNKNOWN and protocol ranking was noisy; direct bounded inspection resolved this module and the existing moderation/news skills. This is not evidence of semantic-index freshness.
 
 Documentation acceptance: existing skill identities remain; references resolve; message send and membership approval are independent; weekly news cannot auto-publish; claims require primary sources; private data stays out of shared knowledge. Runtime end-to-end tests remain a separate safety task.

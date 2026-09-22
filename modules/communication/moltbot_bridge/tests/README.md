@@ -1,3 +1,22 @@
+## LinkedIn dry-run qualification — 2026-09-22
+
+Select the11 standalone `test_linkedin_dry_run_characterizes_` cases in
+`test_linkedin_social_adapter.py`; original18 class tests are unchanged and
+deselected for this bounded run. Run synchronously with plugin autoload disabled,
+`-B`, `-o addopts=`, no pytest cache and a unique external temporary directory.
+Before collection, supply an inert `moltbot_bridge.src` namespace with its real
+source path, avoiding the eager OpenClaw/webhook package initializer. Each test
+injects the exact lazy browser module with inert constructor/action/close spies.
+The reviewed runner and exact invocation are bound in the root RSI backlog.
+
+These tests deliberately characterize missing guards: nested false survives
+outer default/true; direct likes reach fake writes despite dry-run. Reply preview
+suppresses writes only after construction. Passing does not certify production
+safety. The existing LinkedIn review workflow declares a separate future oracle:
+direct-like preview before browser import/construction and zero writes. A source
+repair must explicitly evolve affected characterization expectations against that
+contract; never preserve unsafe behavior merely to keep the tests green.
+
 ## Registered lifecycle consumption — 2026-09-22
 
 The existing lifecycle-generation-race suite owns producer identity and registered-consumer adversarial cases, reusing admission fixtures. Run it with admission, signer-generation and queue-use-time suites plus `test_handshake_modules_follow_wsp62_boundaries`; keep identical baseline/candidate selection. Verify early rejection preserves handles, valid owned mismatches spend them, and public dispatch cannot substitute ownership. Use the externally guarded disposable runner linked by the root backlog; no live signer/provider proof is implied.

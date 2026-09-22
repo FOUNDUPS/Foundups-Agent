@@ -320,5 +320,178 @@ class TestLinkedInSocialAdapter(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result["planned_replies"][0]["agentic_requested"])
 
 
+# Current-behavior characterization, not dry-run safety acceptance. These cases
+# deliberately record fake writes that the separately declared future contract
+# must prevent. No real browser module or action client is used.
+def _linkedin_dry_run_characterization(task, *, direct=False, forwarding=False):
+    import asyncio
+    import sys
+    from contextlib import nullcontext
+    from copy import deepcopy
+    from types import ModuleType, SimpleNamespace
+    from unittest.mock import Mock
+
+    before = deepcopy(task)
+    fake_result = SimpleNamespace(success=True, to_dict=lambda: {"success": True})
+    client = SimpleNamespace(
+        like_post=AsyncMock(return_value=fake_result),
+        like_and_reply=AsyncMock(return_value=fake_result),
+        reply_to_post=AsyncMock(return_value=fake_result),
+        read_feed=AsyncMock(return_value=[{"post_id": "synthetic_post"}]),
+        close=Mock(),
+    )
+    factory = Mock(return_value=client)
+    module_name = "modules.infrastructure.browser_actions.src.linkedin_actions"
+    browser = ModuleType(module_name)
+    browser.LinkedInActions = factory
+    adapter = sys.modules[execute_linkedin_action.__module__]
+    recorder = AsyncMock(return_value={"success": True}) if forwarding else None
+    replacement = (
+        patch.object(adapter, "execute_linkedin_action", new=recorder)
+        if forwarding else nullcontext()
+    )
+    with patch.dict(sys.modules, {module_name: browser}), replacement:
+        if direct:
+            result = asyncio.run(execute_linkedin_action(task["action"], task["params"]))
+        else:
+            from modules.platform_integration.linkedin_agent.skillz.linkedin_engagement.executor import execute
+
+            result = execute(task)
+    assert task == before
+    assert result["success"] is True
+    return result, factory, client, recorder
+
+
+def _assert_linkedin_characterized_callbacks(factory, client, *, constructed, writes):
+    assert factory.call_count == constructed
+    assert client.close.call_count == constructed
+    assert sum(action.await_count for action in (
+        client.like_post, client.like_and_reply, client.reply_to_post,
+    )) == writes
+
+
+def _assert_linkedin_characterized_forwarding(task, expected):
+    result, factory, client, recorder = _linkedin_dry_run_characterization(
+        task, forwarding=True,
+    )
+    recorder.assert_awaited_once_with(task["action"], expected)
+    assert recorder.await_args.args[1] is not task["params"]
+    assert result["params"] == expected
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=0, writes=0)
+    client.read_feed.assert_not_awaited()
+
+
+def test_linkedin_dry_run_characterizes_default_nested_false_forwarding():
+    task = {"action": "reply_post", "params": {"dry_run": "false", "reply_text": "Synthetic reply"}}
+    _assert_linkedin_characterized_forwarding(task, dict(task["params"]))
+
+
+def test_linkedin_dry_run_characterizes_true_nested_false_forwarding():
+    task = {
+        "action": "reply_post", "dry_run": True,
+        "params": {"dry_run": "false", "reply_text": "Synthetic reply"},
+    }
+    _assert_linkedin_characterized_forwarding(task, dict(task["params"]))
+
+
+def test_linkedin_dry_run_characterizes_true_adds_missing_nested_flag():
+    task = {"action": "reply_post", "dry_run": True, "params": {"reply_text": "Synthetic reply"}}
+    _assert_linkedin_characterized_forwarding(
+        task, {"reply_text": "Synthetic reply", "dry_run": "true"},
+    )
+
+
+def test_linkedin_dry_run_characterizes_false_overrides_nested_true():
+    task = {
+        "action": "reply_post", "dry_run": False,
+        "params": {"dry_run": "true", "reply_text": "Synthetic reply"},
+    }
+    _assert_linkedin_characterized_forwarding(
+        task, {"reply_text": "Synthetic reply", "dry_run": "false"},
+    )
+
+
+def test_linkedin_dry_run_characterizes_read_control_without_added_flag():
+    task = {"action": "read_feed", "params": {"max_posts": "2"}}
+    result, factory, client, _ = _linkedin_dry_run_characterization(task)
+    assert result["params"] == {"max_posts": "2"}
+    assert result["params"] is not task["params"]
+    assert result["result"]["posts"] == [{"post_id": "synthetic_post"}]
+    client.read_feed.assert_awaited_once_with(max_posts=2)
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=0)
+
+
+def test_linkedin_dry_run_characterizes_direct_like_post_fake_write():
+    task = {"action": "like_post", "params": {"post_index": "2", "dry_run": "true"}}
+    result, factory, client, _ = _linkedin_dry_run_characterization(task, direct=True)
+    assert result["action"] == "like_post"
+    client.like_post.assert_awaited_once_with(post_id="index_2", post_index=2)
+    client.read_feed.assert_not_awaited()
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+
+
+def test_linkedin_dry_run_characterizes_direct_like_reply_fake_write():
+    task = {
+        "action": "like_reply",
+        "params": {"post_index": "2", "dry_run": "true", "reply_text": "Synthetic reply"},
+    }
+    result, factory, client, _ = _linkedin_dry_run_characterization(task, direct=True)
+    assert result["action"] == "like_reply"
+    client.like_and_reply.assert_awaited_once_with(
+        post_id="index_2", post_index=2, reply_text="Synthetic reply",
+    )
+    client.read_feed.assert_not_awaited()
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+
+
+def test_linkedin_dry_run_characterizes_reply_guard_after_construction():
+    task = {
+        "action": "reply_post",
+        "params": {"post_index": "2", "dry_run": "true", "reply_text": "Synthetic reply"},
+    }
+    result, factory, client, _ = _linkedin_dry_run_characterization(task, direct=True)
+    assert result["dry_run"] is True
+    assert result["agentic_requested"] is False
+    assert result["reply_text"] == "Synthetic reply"
+    client.read_feed.assert_not_awaited()
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=0)
+
+
+def test_linkedin_dry_run_characterizes_wrapper_conflict_reaching_fake_reply():
+    task = {
+        "action": "reply_post",
+        "params": {"post_index": "2", "dry_run": "false", "reply_text": "Synthetic reply"},
+    }
+    result, factory, client, _ = _linkedin_dry_run_characterization(task)
+    assert result["params"]["dry_run"] == "false"
+    client.reply_to_post.assert_awaited_once_with(
+        post_id="index_2", post_index=2, reply_text="Synthetic reply",
+    )
+    client.read_feed.assert_not_awaited()
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+
+
+def test_linkedin_dry_run_characterizes_wrapper_reply_preview_control():
+    task = {
+        "action": "reply_post", "dry_run": True,
+        "params": {"post_index": "2", "reply_text": "Synthetic reply"},
+    }
+    result, factory, client, _ = _linkedin_dry_run_characterization(task)
+    assert result["params"]["dry_run"] == "true"
+    assert result["result"]["dry_run"] is True
+    assert result["result"]["agentic_requested"] is False
+    client.read_feed.assert_not_awaited()
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=0)
+
+
+def test_linkedin_dry_run_characterizes_wrapper_true_reaching_fake_like():
+    task = {"action": "like_post", "dry_run": True, "params": {"post_index": "2"}}
+    result, factory, client, _ = _linkedin_dry_run_characterization(task)
+    assert result["params"]["dry_run"] == "true"
+    client.like_post.assert_awaited_once_with(post_id="index_2", post_index=2)
+    client.read_feed.assert_not_awaited()
+    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

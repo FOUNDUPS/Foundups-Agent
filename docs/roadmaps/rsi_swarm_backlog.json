@@ -1856,9 +1856,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "7ff0ccde76414caaefaefdd29e6d7b21ff2abf79",
-    "selected_action": "R07-runtime-expectation-contract",
-    "status": "independent_local_qualification_passed_publication_pending",
+    "base_commit": "03f7279685040c4794762abe71e41f2cd22e7980",
+    "selected_action": "R07-linkedin-dry-run-qualification",
+    "status": "independent_local_characterization_passed_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1871,15 +1871,15 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T06:53:27.566867+00:00",
-    "base": "7ff0ccde76414caaefaefdd29e6d7b21ff2abf79",
-    "origin": "external_principal",
+    "utc": "2026-09-22T08:16:36.611590+00:00",
+    "base": "03f7279685040c4794762abe71e41f2cd22e7980",
+    "origin": "autonomous_trigger",
     "role": "architect",
     "principal_ref": "012",
-    "observation_id": "R07-runtime-expectation-contract-20260922",
-    "prior_observation": "7ff0ccde76414caaefaefdd29e6d7b21ff2abf79:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "observation_id": "R07-linkedin-dry-run-qualification-20260922",
+    "prior_observation": "03f7279685040c4794762abe71e41f2cd22e7980:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
     "selected": {
-      "task": "Qualify exact promoted-model expectation projection from existing AI Gateway persisted signed binding into dependency-launcher compatibility supply",
+      "task": "LinkedIn dry-run boundary qualification",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1888,46 +1888,41 @@
         "total": 13,
         "priority": "P1"
       },
-      "state": "selected_contract_qualification",
-      "source": "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py::compose_runtime_compatibility_evidence",
-      "next_step": "Bind exact three promoted expectation slots to existing AI Gateway signed runtime binding/use-time verification; freeze one cross-owner source packet and synthetic positive/negative compatibility matrix. Preserve integrity-only v1 and leave software installer/update authority unqualified."
+      "state": "selected_fake_only_qualification",
+      "dependency": "Old separate-owner hold reconciled: PR1863/1865 merged; 93 open-PR path scan has no overlap, no LinkedIn local branch/worktree, relevant shared tracked paths clean, app owner idle/completed.",
+      "next_step": "Freeze existing-owner finite wrapper/adapter characterization plus prospective zero-construction/write acceptance; execute only fake actions before proposing scoped repair."
     },
     "previous_closed": {
-      "pr": 1861,
-      "merge": "bac7513caefc2255a386b3c5f9e1e9260162a143",
-      "reviewed_head": "fe2c9fd38a54b0944b4fbb0bbe5d302ee1232bd6",
-      "pr_checks_passed": 10,
-      "main_ci": 35692735101,
-      "main_codeql": 35692734967,
-      "owned_lane_retired": true,
-      "source": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1861",
-      "temporary_staging": "retained under inherited deletion-policy block"
+      "pr": 1864,
+      "merge": "c9ad61cc49f4dc8348123cf0802a2debcc9506fc",
+      "all10_pr_checks": "success",
+      "main_ci": 35697963121,
+      "main_codeql": 35697962263,
+      "owned_lane_retired": true
     },
-    "selection_reason": "Fresh main PR1862 advances video-indexer/packaging, not this source contract. Existing signed-model verifier and compatibility supplier expose a bounded13/P1 qualification. Native18 and FAM14 require unresolved trust/domain input, LinkedIn13 has a separate owner, PostgreSQL13 lacks qualified runtime. This reusable contract advances runtime maintenance ahead of observer11; no exhaustive global ranking claim.",
+    "selection_reason": "Fresh priority scan changed ownership, so previous next observer11 is not automatic. LinkedIn13 now unblocked for fake-only qualification and directly affects WRE ticket dry-run evidence. Native18/FAM14 remain trust/domain blocked, PostgreSQL13 runtime unqualified, runtime13 contract already closed. New LinkedIn documentation is not runtime safety proof.",
     "retrieval": {
-      "method": "Exact Git source/docs, NAVIGATION and targeted rg; prior field-map reused only after current blob rebind",
-      "holo": "Prior unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH on protected shared checkout; no repeated failed query, reindex or alternate authority claim",
-      "noise": "Root history is large; selected packet and bounded chunks used",
-      "ordering": "WSP00 bootstrap/gate, WSP15/97, current root/dispatch, module and test docs, exact source",
-      "missing": "Explicit slot mapping, backend software identity and projected-evidence consumer absent",
-      "staleness": "Historical briefings non-authoritative; remote PR1861 merge and exact-base CI refreshed",
-      "duplication": "Existing INTERFACE/ROADMAP/test docs extended; no new module, skill, scheduler or planning packet"
+      "method": "Exact Git/NAVIGATION/targeted rg, current module/test docs, 93 open-PR path inventory and bounded app owner status",
+      "holo": "Unchanged shared root0c81418 retains known HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; no unchanged failed probe or reindex repeated. Fallback is source-bound, not fresh semantic evidence.",
+      "noise": "Large root/bridge docs chunked; only selected surfaces retrieved",
+      "ordering": "WSP00 activation/gate then WSP15/97, root/dispatch, module/test owners",
+      "missing": "dae_daemon ROADMAP and memory README absent; no substitute files created; observer work deferred",
+      "staleness": "Historical briefings non-authoritative; prior observer10source bindings match; LinkedIn1863/1865 owner state refreshed",
+      "duplication": "Reuse existing LinkedIn wrapper/adapter/test owner; no module/skill/registry activation."
     },
-    "effort_cost": "Bounded docs/contract qualification plus existing deterministic49-case test replay; no paid provider calls or software updates.",
-    "manual_reason": "Existing Qwen/Gemma analysis cannot choose an absent signed owner mapping or prove cross-owner API semantics. 0102 source audit, deterministic fixtures and separate verifier used; no invented model runtime/budget claim.",
-    "contract": "modules/infrastructure/dependency_launcher/INTERFACE.md#signed-expectation-projection-contract--qualification-2026-09-22",
-    "acceptance_matrix": "modules/infrastructure/dependency_launcher/tests/README.md#signed-expectation-projection-acceptance-matrix",
-    "owner_decisions": [
-      "AI Gateway ModelRuntimeBindingPolicy and WRE supply producer: explicit versioned task/surface/role/model/provider mapping, immutable binding and selection identity; existing policy has no slot field.",
-      "Dependency-launcher installed-inventory/supply owner: typed backend artifact provenance and verifier; MODEL/PANEL authority does not cover engine binaries.",
-      "AI Gateway verifier and advisory consumer: private capability disposal or qualified capability-free API, current-time/key revalidation at projection; no borrowed dispatch authority."
-    ],
+    "cost_effort": "Small deterministic local fixtures and separate review, no paid provider/browser calls; source repair not bundled before qualification.",
+    "manual_reason": "Qwen/Gemma role summaries cannot establish these specific call boundaries. 0102 inspection plus deterministic fakes and independent reviewer qualify them without activating a model/service.",
+    "contract": "modules/platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-boundary-qualification--2026-09-22",
+    "qualification_matrix": {
+      "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\test-qualification-contract.json",
+      "sha256": "70af5ae131ea9ccdc7d9e79b5acd98e7af52542aa0313207a94ae778521dbbe7"
+    },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
       "sha256": "2d14e57e89ad2b210c66d7f01e77b54ec002615354758482f66c63068d3d9b51",
       "linkedin": {
         "owner": "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py",
-        "state": "13/P1; separate owner must be reconciled; dry-run conflict/like_post guards remain source gaps; registered prototype is not retention proof"
+        "state": "PR1863/1865 instruction owners closed;11 fake-only characterizations independently pass and confirm production dry-run gaps. Focused14/P1 repair selected; no live effects or retained-learning proof."
       },
       "gmail": {
         "owner": "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md",
@@ -1948,48 +1943,89 @@
       "reuse": "R25 feedback, R24 product validation, R07 native readiness, R18/R23 operations; preserve26packets and existing skills/modules"
     },
     "validation": {
-      "existing_owner_cases": 49,
-      "primary_pass": 49,
+      "new_cases": 11,
+      "primary_pass": 11,
+      "independent_pass_same_cases": 11,
       "failures": 0,
       "errors": 0,
       "skips": 0,
-      "warnings": 2,
-      "independent": "49 passed; same cases, zero failures/errors/skips, two disabled-plugin config warnings",
-      "tests_changed": false,
+      "warnings_per_run": 2,
+      "legacy_deselected": 18,
+      "original_18_class_unchanged": true,
+      "new_max_function_lines": 37,
+      "test_file_lines": 497,
+      "inherited_test_class_lines": 305,
       "production_source_changed": false,
-      "cross_owner_projection": "not implemented; fixed matrix is prospective",
-      "signature_fixture": "Deterministic signatures through actual canonical verification path; not production cryptographic proof",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract",
-      "primary_junit_sha256": "4cb70cc2a2e25eb296256992b6dc1389e383dd4113aa2a34b2c34fa61e05c3f5",
-      "independent_junit_sha256": "0e2c3de184026ef6ec776b6b01f35d2afb44c0e3d4342d2e5ca845726a4848c9"
+      "interpretation": "Passing characterization confirms current gaps; no repaired dry-run or real-constructor safety claim.",
+      "runner": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\run_linkedin_tests.py",
+        "sha256": "2d5f1d9e424721ecd89163f2a22a6a5a93c85d2dd59134236afbef4191a0f7dd"
+      },
+      "primary_xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\primary-tests.xml",
+        "sha256": "66829fa33c8a7cfa418b5a3e6562636080772e3ccc63dd593be4eb56c9ed1350"
+      },
+      "independent_xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\independent-tests.xml",
+        "sha256": "58f0700e9eb73294ff23cc07a65ce9e06c52b27e654cfe1daa2098a881f3be65"
+      },
+      "registry": "--check passed:1655 tracked test files,269 quarantined; unchanged canonical registry",
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup"
     },
     "wsp00_gates": [
       {
         "role": "architect",
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\wsp00-gate.json",
-        "sha256": "c4949c94f2dcd90220d024fd7f19f6e6d20e95d571524b70998e7d6a38df475e"
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\wsp00-gate.json",
+        "sha256": "706f6a9726217f31b81f0711315abe80288647f8e6f716b18680606030490a94"
       },
       {
         "role": "worker",
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\runtime-author-wsp00-gate.json",
-        "sha256": "7a39041b7e1b607b9677574c6c286b2b566a58174aacd458e1bf161e74b0d7ca"
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\author-wsp00-gate.json",
+        "sha256": "b355b628d671588ae4785d02421a6866353aabc1c86526d31e1ac95cef55d780"
       },
       {
         "role": "verifier",
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\verifier-wsp00-gate.json",
-        "sha256": "a497d39c93667072dbad5357681af6e7cb7f35fab30280a31da309c2de63c888"
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\verifier-wsp00-gate.json",
+        "sha256": "5d1a8b1b89b4c0ce39c1efc340bf7df8c919a1a493a4a1208b95c571a5388774"
       }
     ],
-    "implementation_state": "Existing v1 serialization and INTEGRITY_ONLY/NOT_READY unchanged. No installer/backend/source authentication, slot mapping or runtime activation implemented.",
-    "publication_state": "independent local qualification passed; exact final candidate and hosted checks pending",
-    "boundaries": [
-      "No provider, WSL/version command, installed/running/latest version assertion, runtime update, canary, rollback, admission, FoundUp activation, message, wallet or payout.",
-      "MyBot/Mind Horizon aliases unresolved; known AmIBot and Memory Horizon records remain distinct.",
-      "LinkedIn/Gmail/AutoPost/YUMORI and active RedDog owners remain protected.",
-      "Temporary test staging retained; inherited automatic approval review rejected deletion; no workaround or retry."
+    "reviews": {
+      "author-eligibility-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\author-eligibility-review.json",
+        "sha256": "0ac5568e1c2fd5d79ce9596d3ca44f7e47a900c40a27494ce35ba55780cab29f"
+      },
+      "independent-linkedin-scope-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\independent-linkedin-scope-review.json",
+        "sha256": "cca0d12f5ab9a6475f21b92f19d4385873caa42ff70a0f184ed078d19eeadff5"
+      },
+      "preexecution-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\preexecution-review.json",
+        "sha256": "2ecebaed2d108ac0f948f642a741518d90cd42f86c40afbccd06c35b016443a9"
+      },
+      "next-source-contract-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\next-source-contract-review.json",
+        "sha256": "b7af3b9374336246eedd70cbfd32f2b5f8c496742025f9aec2173847f74a6ad9"
+      }
+    },
+    "source_bindings": {
+      "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py": "92a08c2cfaf595f3ed58a1cfb9e094a250f2ca34",
+      "modules/communication/moltbot_bridge/src/linkedin_social_adapter.py": "b865503ec3442f2e7be14430237f346f52696f95",
+      "modules/infrastructure/browser_actions/src/linkedin_actions.py": "d249184a432289564e5deaee33f78384b5bd0c10",
+      "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
+      "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/__init__.py": "c83db838a77ab6f9abf31af6aa3405e4983ebe99",
+      "modules/communication/moltbot_bridge/src/__init__.py": "166eed840b776b8987f82f4a5e605cba9092e407",
+      "modules/communication/moltbot_bridge/tests/test_linkedin_social_adapter.py": "ad18a99040a8ae03206c0415168fc541b16fe448"
+    },
+    "bounds": [
+      "No real LinkedIn browser module, constructor, account, message, like, provider, WRE execution or default database.",
+      "Synchronous wrapper tests outside active event loops; no ThreadPoolExecutor fallback.",
+      "No source/runtime edits during qualification; prospective safety gates distinct from current behavior assertions.",
+      "Other FoundUps/AutoPost/YUMORI/active RedDog/YouTube lanes preserved.",
+      "Prior staging deletion rejection retained without retry."
     ],
     "post_sprint_reobservation": {
-      "utc": "2026-09-22T06:57:47.783798+00:00",
+      "utc": "2026-09-22T08:16:36.610501+00:00",
+      "base": "03f7279685040c4794762abe71e41f2cd22e7980",
       "ranked_candidates": [
         {
           "task": "One native admitted ticket, independent audit and simulated entitlement",
@@ -2019,6 +2055,21 @@
           "next_step": "Resolve named FAM ingress and mapping from existing signed authority to domain actions; do not repeat the completed source audit or introduce role-string authorization"
         },
         {
+          "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "selected_after_qualification_close_and_fresh_owner_recheck",
+          "source": "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py; modules/communication/moltbot_bridge/src/linkedin_social_adapter.py",
+          "next_step": "Enforce copied outer default/true write flags; preview direct like_post/like_reply before browser import/construction. Preserve explicit false/read/agentic routing and live result/error/close compatibility; add fixed independent negative/positive oracles. Shrink inherited large methods within existing owners.",
+          "dependency": "Close current qualification publication and recheck exact source/owners; no live social authority inferred."
+        },
+        {
           "task": "Qualify PostgreSQL compute initialization and locking parity",
           "wsp15": {
             "complexity": 3,
@@ -2041,8 +2092,9 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "separate_owner_scope",
-          "dependency": "Owner reconciliation; no social effects"
+          "state": "local_independent_qualification_complete_publication_pending",
+          "dependency": "Old separate-owner hold reconciled: PR1863/1865 merged; 93 open-PR path scan has no overlap, no LinkedIn local branch/worktree, relevant shared tracked paths clean, app owner idle/completed.",
+          "next_step": "Close publication; execute separately scoped14/P1 repair after fresh source/ownership check."
         },
         {
           "task": "Qualify exact promoted-model expectation projection from existing AI Gateway persisted signed binding into dependency-launcher compatibility supply",
@@ -2054,9 +2106,9 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "qualification_complete_implementation_depends_on_named_owner_mapping",
+          "state": "closed_PR1864_projection_implementation_depends_on_named_mapping",
           "source": "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py::compose_runtime_compatibility_evidence",
-          "next_step": "Close publication; implement only after explicit slot policy, backend provenance and observer verification API decisions. Do not repeat this qualification."
+          "next_step": "Do not repeat qualification; resolve exact slot policy/backend provenance and verifier consumer decisions."
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -2109,33 +2161,41 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "eligible_bounded_repair_after_contract_publication",
+          "state": "eligible_but_outranked_after_LinkedIn_owner_reconciliation",
           "dependency": "Observer-only no-create lookup is bounded; adapter read commands also eagerly acquire daemon and broker, so whole-command effect-free claims require separate ingress change and tests.",
           "next_step": "Extend existing broker singleton owner with noncreating lookup; use it in DAEObserver._get_runtime_status. Fixed inert absent/present/error cases forbid constructor/thread start. Preserve creating getter and treat default observer/adapter ingress effects separately.",
           "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
         }
       ],
       "selected_next": {
-        "task": "Remove broker creation from existing observer runtime lookup",
+        "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
         "wsp15": {
-          "complexity": 2,
-          "importance": 3,
+          "complexity": 3,
+          "importance": 4,
           "deferability": 3,
-          "impact": 3,
-          "total": 11,
-          "priority": "P2"
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
         },
-        "state": "eligible_bounded_repair_after_contract_publication",
-        "dependency": "Observer-only no-create lookup is bounded; adapter read commands also eagerly acquire daemon and broker, so whole-command effect-free claims require separate ingress change and tests.",
-        "next_step": "Extend existing broker singleton owner with noncreating lookup; use it in DAEObserver._get_runtime_status. Fixed inert absent/present/error cases forbid constructor/thread start. Preserve creating getter and treat default observer/adapter ingress effects separately.",
-        "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
+        "state": "selected_after_qualification_close_and_fresh_owner_recheck",
+        "source": "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py; modules/communication/moltbot_bridge/src/linkedin_social_adapter.py",
+        "next_step": "Enforce copied outer default/true write flags; preview direct like_post/like_reply before browser import/construction. Preserve explicit false/read/agentic routing and live result/error/close compatibility; add fixed independent negative/positive oracles. Shrink inherited large methods within existing owners.",
+        "dependency": "Close current qualification publication and recheck exact source/owners; no live social authority inferred."
       },
       "source_bindings": {
-        "modules/infrastructure/dae_daemon/src/dae_observer.py": "b628235482e23689008518f5145116f7b1e1e5e8",
-        "modules/infrastructure/dae_daemon/src/dae_launch_broker.py": "2094a738fa281372a5d89989637222ca34ef656f",
-        "modules/infrastructure/dae_daemon/tests/test_dae_observer.py": "bacd319bbd0c316c12eb3d0780167e50720c202f"
+        "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py": "92a08c2cfaf595f3ed58a1cfb9e094a250f2ca34",
+        "modules/communication/moltbot_bridge/src/linkedin_social_adapter.py": "b865503ec3442f2e7be14430237f346f52696f95",
+        "modules/infrastructure/browser_actions/src/linkedin_actions.py": "d249184a432289564e5deaee33f78384b5bd0c10",
+        "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
+        "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/__init__.py": "c83db838a77ab6f9abf31af6aa3405e4983ebe99",
+        "modules/communication/moltbot_bridge/src/__init__.py": "166eed840b776b8987f82f4a5e605cba9092e407",
+        "modules/communication/moltbot_bridge/tests/test_linkedin_social_adapter.py": "ad18a99040a8ae03206c0415168fc541b16fe448"
       },
-      "selection_reason": "Runtime13 qualification is complete with precise mapping/provenance/API dependencies; no repeat audit. Native18/FAM14, PostgreSQL13 and LinkedIn13 retain dependencies/ownership. Observer11 beats tied WRE decomposition11 because current status lookup demonstrably creates broker/heartbeat while decomposition is conditional on future scanner growth. Repair only this lookup; default observer and adapter ingress remain separate.",
+      "selection_reason": "Two owner contracts plus early constructor isolation require moderate care; preventing requested dry-run from invoking direct outbound action is critical and has material effect beyond flag forwarding. Bounded direct routes, unproven live exposure and separate agentic/broader routes keep urgency3. Not copied from13/P1 characterization score. Native18/FAM14 remain blocked; PostgreSQL13 unqualified; prior runtime13 qualification closed. Direct social dry-run repair14 outranks observer11 after ownership reconciliation; no global exhaustive ranking claim.",
+      "repair_contract": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-observer-lookup\\next-source-contract-review.json",
+        "sha256": "b7af3b9374336246eedd70cbfd32f2b5f8c496742025f9aec2173847f74a6ad9"
+      },
       "still_open": [
         "Explicit general/code slot policy and backend software-provenance decisions before signed projection.",
         "Fresh trust/policy acquisition and private capability disposal at the projection boundary.",
@@ -2146,31 +2206,6 @@
         "Inherited temporary test-staging deletion rejection retained; no retry."
       ]
     },
-    "reviews": {
-      "independent-test-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\independent-test-review.json",
-        "sha256": "5ae8d44f414065f7dee671ae3e6235646041156cdf09fd2da70b95098012ea0f"
-      },
-      "independent-contract-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\independent-contract-review.json",
-        "sha256": "4da92810d6cd0c2745d8f7237e38beca2e1fd66e10611ab567732e8469aac5a9"
-      }
-    },
-    "source_bindings": {
-      "modules/ai_intelligence/ai_gateway/tests/test_model_runtime_binding_security.py": "74bdff0704a7ffbed5c0db96d1f90e1605c0c966",
-      "modules/infrastructure/dependency_launcher/tests/test_runtime_compatibility_evidence_supplier.py": "1820246bb3b150d8da7c1a135e202b998242de03",
-      "modules/infrastructure/dependency_launcher/tests/test_runtime_compatibility_receipt.py": "48c218bf864fa56af136aa7a551bfc1547583679",
-      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding.py": "0426c474568fdaa048e6384519afb3b6fc0a4690",
-      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_capability.py": "16247cf561a8964224c26f8615cb45fac2cf5068",
-      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_use_time_verifier.py": "12344f19ccacd15b370a501dbc5a7c0ddd45bf5e",
-      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_evidence_verifier.py": "8d101fd9d41ea75fc5c1a69395efd431f5caab2d",
-      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_verified_admission.py": "6afed48961742cc44b83a4ae19af519c13f9ece1",
-      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_input_rehydration.py": "a306e6be9f700f705289dc916a5b0979a6a33e14",
-      "modules/ai_intelligence/ai_gateway/src/model_signed_evidence.py": "92868989510c026a6bc33cc43195932b68784e66",
-      "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py": "14746a9d02251896639dbf74752eddf204748494",
-      "modules/infrastructure/dependency_launcher/src/runtime_compatibility_receipt.py": "84d567f983bf706ad65d6f28fe7c27e34aaf3b8c",
-      "modules/infrastructure/dependency_launcher/src/runtime_compatibility_preflight.py": "850b0b36d1cf7919af037d059dcc15d6793612a7",
-      "scripts/refresh_openclaw_ecosystem_watchlist.py": "4d9b89aa4974280b9be258e6e3fb0b38fbe678f0"
-    }
+    "closure": "Current publication remains pending in this candidate. Exact PR head/checks/merge/tree/main workflows and owned-lane retirement must be verified in external receipts/PR readback; do not claim them from this document."
   }
 }

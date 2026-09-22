@@ -1,3 +1,9 @@
+## 2026-09-22: RSI LinkedIn dry-run boundary qualification
+
+- WSP00/10/15/22/50/62/84/97/99; qualification13/P1 after PR1863/1865 owner reconciliation. Existing adapter tests characterize wrapper flag conflicts and direct-like write callbacks using inert actions. Production guards are unchanged.
+- Existing LinkedIn review contract declares separate future zero-import/construction/write acceptance and a focused14/P1 repair. No duplicate module, skill or planning packet; broader social routes and runtime maintenance remain separate.
+- Exact local/independent results, closure and re-scoring belong to the [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). Characterization passes do not establish safe live execution or retained RSI learning.
+
 ## 2026-09-22: RSI runtime expectation contract qualification
 
 - WSP00/15/22/50/62/84/97/99;13/P1. Existing dependency-launcher documentation

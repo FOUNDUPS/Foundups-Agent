@@ -1,3 +1,9 @@
+## 2026-09-22: RSI dry-run qualification and repair contract
+
+- WSP00/15/22/50/62/97; reconcile merged instruction owners PR1863/1865 before extending the existing review workflow. Fake-only qualification13/P1 does not change the executor or admit social actions.
+- Wrapper outer default/true can preserve nested false; direct like routes can invoke writes despite dry-run. Constructor effects remain separate from write suppression. Tests live in the existing bridge adapter test owner.
+- [Review contract](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-boundary-qualification--2026-09-22) fixes the next14/P1 wrapper/direct-preview repair and same-file decomposition requirement. Canonical root backlog records exact validation/closure; broader routes are not certified.
+
 ﻿# LinkedIn Agent - Module Change Log
 
 ## 2026-09-22 — Dedicated FoundUps, ROC and JHR newsletter skills

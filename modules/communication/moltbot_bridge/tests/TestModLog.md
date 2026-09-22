@@ -1,3 +1,9 @@
+## 2026-09-22: LinkedIn dry-run fixed characterization matrix
+
+- Add11 standalone synchronous cases with exact lazy browser-module replacement; constructor, write and close counters make the current unsafe behavior observable. Input task/params deep equality is preserved.
+- Original18 tests/class remain unchanged and deselected. Current forwarding and fake-write assertions are distinct from the prospective zero-import/construction/write safety oracle.
+- No live browser/account/provider invocation. Exact primary/independent XML, selected cases and warnings are recorded in the root RSI backlog; results qualify only this finite fixture matrix.
+
 ## 2026-09-22: Registered consumer and preserved producer regressions
 
 - Existing admission/race owners preserve all original definitions/assertions/parameterization, relocating19 producer identity cases by fixture-alias-only adjustment. Add37 consumer cases covering hostile/fabricated/subclass boundaries, public dispatch substitution, malformed/incorrect identities, foreign ownership, audit data, replay, expiry and generation drift.
