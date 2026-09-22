@@ -1,5 +1,13 @@
 ﻿# LinkedIn Agent - Module Change Log
 
+## 2026-09-22 — Dedicated FoundUps, ROC and JHR newsletter skills
+
+- Split the combined newsletter editorial contract into three owned instruction skills while retaining `linkedin_newsletters` as the master newsletter router.
+- FoundUps / Eat the Startup now grounds editions in verified Foundups-Agent implementation and normalizes a contextually clear “BoundUps” request without inventing a brand or series.
+- ROC now retrieves PR #202 and current economic sources, requires fresh evidence for volatile claims, and fails closed because the publishing map does not identify a verified ROC newsletter series.
+- JHR now binds LinkedIn work to the canonical eSingularity JHR source/provenance and significance gate, including a valid `NO_REPORT` outcome.
+- Added explicit routes from the LinkedIn master. Instruction-only change; no newsletter created, renamed, published or scheduled.
+
 ## 2026-09-22 — Master LinkedIn activity routing and scoped child contracts
 
 - Reused `linkedin_engagement` as master; added instruction-only inbox, connections, notifications, newsletters, publishing, outreach and continuity children. Full cycle and narrow commands have distinct scope.

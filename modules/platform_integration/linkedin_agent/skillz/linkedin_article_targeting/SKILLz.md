@@ -16,7 +16,7 @@ evals: []
 ---
 # LinkedIn Article Targeting Skill
 
-Read [master activity routing](../../docs/LINKEDIN_ACTIVITY_ROUTING.md). The map is historical discovery evidence: verify current page/entity IDs, names (including eSingularity.ai), newsletter identity and author before editing/publishing. Route newsletter work to `linkedin_newsletters` and mutations/schedules to `linkedin_publishing`. Never infer a rename from desired branding or choose the first autocomplete entity without identity verification.
+Read [master activity routing](../../docs/LINKEDIN_ACTIVITY_ROUTING.md). The map is historical discovery evidence: verify current page/entity IDs, names (including eSingularity.ai), newsletter identity and author before editing/publishing. Route newsletter work through `linkedin_newsletters` to its dedicated FoundUps, ROC or JHR child; route mutations/schedules to `linkedin_publishing`. Never infer a rename from desired branding or choose the first autocomplete entity without identity verification. The current map does not establish a ROC newsletter series.
 
 Use this skill when 0102 needs to answer:
 

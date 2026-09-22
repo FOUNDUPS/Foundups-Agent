@@ -10,8 +10,9 @@ ROOT = MODULE.parents[2]
 CHILDREN = (
     "linkedin_inbox", "linkedin_connections", "linkedin_notifications",
     "linkedin_group_moderation", "openclaw_group_news", "linkedin_agentic_reply",
-    "linkedin_newsletters", "linkedin_publishing", "linkedin_article_targeting",
-    "linkedin_outreach", "linkedin_continuity",
+    "linkedin_newsletters", "linkedin_foundups_newsletter",
+    "linkedin_roc_newsletter", "linkedin_jhr_newsletter", "linkedin_publishing",
+    "linkedin_article_targeting", "linkedin_outreach", "linkedin_continuity",
 )
 
 
@@ -74,8 +75,18 @@ class ActivitySkillContracts(unittest.TestCase):
 
     def test_all_three_newsletter_lanes_and_verified_states(self):
         news = self.text("skillz/linkedin_newsletters/SKILLz.md")
-        for term in ("Eat the Startup", "Japan Hyperscaler Report", "Return on Compute",
-                     "VERIFIED_LIVE", "SCHEDULED_VERIFIED", "draft exists"):
+        routes = {
+            "linkedin_foundups_newsletter": ("Eat the Startup", "BoundUps", "Foundups-Agent"),
+            "linkedin_roc_newsletter": ("Return on Compute", "PR #202", "BLOCKED_IDENTITY"),
+            "linkedin_jhr_newsletter": ("Japan Hyperscaler Report", "NO_REPORT", "7505133867079536640"),
+        }
+        for skill, terms in routes.items():
+            self.assertIn(f"../{skill}/SKILLz.md", news)
+            lane = self.text(f"skillz/{skill}/SKILLz.md")
+            for term in terms:
+                with self.subTest(skill=skill, term=term):
+                    self.assertIn(term, lane)
+        for term in ("VERIFIED_LIVE", "SCHEDULED_VERIFIED", "draft exists"):
             self.assertIn(term, news)
 
     def test_continuity_privacy_and_safe_pr_closure(self):

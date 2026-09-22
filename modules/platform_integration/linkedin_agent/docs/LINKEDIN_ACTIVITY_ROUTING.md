@@ -15,7 +15,10 @@ not a new executor, daemon, or certification of legacy automation.
 | Review OpenClaw members / pending posts | [linkedin_group_moderation](../skillz/linkedin_group_moderation/SKILLz.md) | Membership and moderation queues |
 | Good, Bad and Ugly / group news | [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) | Research and group discussion; no membership changes |
 | Feed / ROC engagement / reply to a post | [linkedin_agentic_reply](../skillz/linkedin_agentic_reply/SKILLz.md) | Read post and relevant replies; contextual engagement |
-| FoundUps / JHR / ROC newsletter | [linkedin_newsletters](../skillz/linkedin_newsletters/SKILLz.md) | Named lane; all three only when requested/full cycle |
+| Newsletter audit / all newsletters | [linkedin_newsletters](../skillz/linkedin_newsletters/SKILLz.md) | Router; all three lanes only when requested/full cycle |
+| FoundUps / Eat the Startup / contextually clear “BoundUps” | [linkedin_foundups_newsletter](../skillz/linkedin_foundups_newsletter/SKILLz.md) | Foundups-Agent implementation and founder benefit |
+| ROC / Return on Compute newsletter | [linkedin_roc_newsletter](../skillz/linkedin_roc_newsletter/SKILLz.md) | Personal compute-economics lane; live series identity required |
+| Japan Hyperscaler Report / JHR | [linkedin_jhr_newsletter](../skillz/linkedin_jhr_newsletter/SKILLz.md) | Significance-gated Japan infrastructure reporting |
 | Publish / schedule / page update / article maintenance | [linkedin_publishing](../skillz/linkedin_publishing/SKILLz.md) | Exact publisher, content, timing and verification |
 | Where should this article go? | [linkedin_article_targeting](../skillz/linkedin_article_targeting/SKILLz.md) | Historical map plus live identity verification |
 | Strategic outreach / subscribers | [linkedin_outreach](../skillz/linkedin_outreach/SKILLz.md) | Researched, bounded relevant recipients |
@@ -85,8 +88,9 @@ exact identity, not the first autocomplete suggestion.
 
 - Reused: engagement master/bridge, agentic reply, article targeting, group
   moderation and group news. Carried forward the unmerged message-first policy.
-- Added instruction-only gaps: inbox, connections, notifications, three-lane
-  newsletters, publishing/scheduling, outreach and continuity.
+- Added instruction-only gaps: inbox, connections, notifications, newsletter
+  router plus dedicated FoundUps/ROC/JHR lanes, publishing/scheduling, outreach
+  and continuity.
 - Existing browser post hunter is discovery only; engagement poster and company
   poster remain legacy action helpers subject to the master approval contract.
 - `src/SKILLz.md` is a git-to-social prototype, not the master. Do not execute it

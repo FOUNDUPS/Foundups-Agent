@@ -2,6 +2,8 @@
 
 [Master LinkedIn activity router](docs/LINKEDIN_ACTIVITY_ROUTING.md): full-cycle or scoped jobs through the existing engagement skill, dedicated inbox/connections/notifications/newsletters/publishing/outreach/continuity children, and reused group/feed/targeting owners. Instruction coverage is not unattended-runtime certification.
 
+The newsletter router has independent FoundUps / Eat the Startup, ROC / Return on Compute, and Japan Hyperscaler Report skills. Each retains its own corpus, destination discovery and completion state; a combined audit does not collapse them into one publication.
+
 [LinkedIn review workflow](docs/LINKEDIN_REVIEW_WORKFLOW.md): wsp00/01/02 routing, inbox-first triage, message-before-approval membership, and the Good/Bad/Ugly automation discussion. Updated skill contracts do not certify legacy live executors.
 
 ## [U+1F300] WSP Protocol Compliance Framework

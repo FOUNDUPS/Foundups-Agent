@@ -1,7 +1,7 @@
 ---
 name: linkedin_newsletters
-description: Audit and advance separate FoundUps, Japan Hyperscaler Report and Return on Compute newsletter lanes
-version: 1.0.0
+description: Master LinkedIn newsletter router that dispatches FoundUps Eat the Startup, ROC Return on Compute and Japan Hyperscaler Report to separate lane skills
+version: 1.1.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -9,17 +9,27 @@ promotion_state: prototype
 category: workflow
 evals: []
 ---
-# LinkedIn newsletters
+# LinkedIn newsletter router
 
 Read the [master routing contract](../../docs/LINKEDIN_ACTIVITY_ROUTING.md).
 Use [article targeting](../linkedin_article_targeting/SKILLz.md) and current live
-publisher/series identity, never a guessed newsletter URL or historic count.
+publisher/series identity, never a guessed newsletter URL or historic count. Select
+one or all of these dedicated lanes:
 
-| Lane | Evidence and editorial boundary |
-| --- | --- |
-| FoundUps / Eat the Startup | Current repository work, Foundups-Agent, WSP/Skillz and operational lessons; distinguish merged implementation, prototype and proposal |
-| Japan Hyperscaler Report / JHR | Primary evidence for Japan infrastructure, regional compute, power, grid and heat; analytical reporting, not automatic campaign advocacy |
-| ROC / Return on Compute | Personal compute-economics lane; inspect prior ROC articles and unfinished drafts, including historical PR #202 context when relevant |
+| Request | Dedicated skill | Boundary |
+| --- | --- | --- |
+| FoundUps, Eat the Startup, or contextually clear “BoundUps” | [linkedin_foundups_newsletter](../linkedin_foundups_newsletter/SKILLz.md) | Verified Foundups-Agent implementation translated into founder benefit |
+| ROC or Return on Compute | [linkedin_roc_newsletter](../linkedin_roc_newsletter/SKILLz.md) | Personal compute-economics corpus and current evidence |
+| Japan Hyperscaler Report or JHR | [linkedin_jhr_newsletter](../linkedin_jhr_newsletter/SKILLz.md) | Significance-gated Japan infrastructure reporting |
+
+A named newsletter request loads only its lane. A full LinkedIn/newsletter audit
+loads all three and reports each independently. “BoundUps” is not a canonical
+identity; normalize it to FoundUps only when context is clear, never create a new
+series. Each lane may produce `NO_ACTION`, and JHR may produce `NO_REPORT`.
+“Run [newsletter]” means inspect live state and evidence, then advance to the next
+truthful stage allowed by current authority; it never implies publish, schedule,
+series creation or a language choice. Report the missing choice only when it blocks
+the next requested stage.
 
 For each selected lane inspect latest issue, published subjects, drafts, subscriber
 state and schedules; label unavailable surfaces. A full cycle covers all three.
