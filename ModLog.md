@@ -1,3 +1,9 @@
+## 2026-09-22: Noncreating observer runtime lookup
+
+- WSP00/6/10/15/22/49/50/62/97; C2/I3/D3/Impact3=11/P2. Extend existing broker singleton with a noncreating accessor, used only by observer runtime lookup. Capture under singleton lock, invoke status after release; no new scheduler/module.
+- Baseline4fail/4pass; repaired and independent8pass on identical frozen cases;19 original cases unchanged and not selected. Finite absent/present/replacement/error and creating-getter compatibility controls; no real service, broker/daemon construction, default database or provider.
+- Existing creating/reset functions and broker class remain unchanged. Default observer/adapter ingress still has effects; no global isolation, live runtime readiness or retained RSI claim. Exact source, package, review and publication evidence belongs to the canonical RSI backlog.
+
 ## 2026-09-22: Connection policy-only preview repair
 
 - WSP00/10/15/22/50/62/84/97;12/P2. Reuse policy evaluation before request mutation; both allow/deny previews preserve bookkeeping and omit request status. Browser access remains separate.

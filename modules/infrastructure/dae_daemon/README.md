@@ -26,6 +26,13 @@ This extends the existing broker and preserves the separate Holo exit poll.
 The inherited class does not grow; every new/touched function stays within50lines.
 Live termination, universal race safety and runtime upgrade admission remain open.
 
+## Observer lookup repair — 2026-09-22
+
+Status lookup now uses the existing broker, returning empty runtime data if
+absent, without creating its heartbeat thread. See the [lookup contract](INTERFACE.md#observer-runtime-lookup).
+Eight frozen cases pass locally and independently. Default observer construction
+and adapter acquisition remain separate effects; this is not whole-command isolation.
+
 ## Architecture
 
 ```
@@ -118,7 +125,7 @@ Runtime supervision intent:
 - `tail <dae>` -> recent DAEmon event stream for that DAE
 - `status <dae> live` -> registry state + runtime status + recent event tail
 - `watch <dae> since <sequence>` -> cursor-based incremental follow from a known event id
-- The event store is the intended lifecycle ledger. Sequence-collision retries now use one lock acquisition, with nine focused regression tests; JSONL partial writes/parity and registry persistence acknowledgment remain open. The observer is read-side, but lazy broker lookup can create a heartbeat thread; it is not proved effect-free.
+- The event store is the intended lifecycle ledger. Sequence-collision retries now use one lock acquisition, with nine focused regression tests; JSONL partial writes/parity and registry persistence acknowledgment remain open. Observer runtime lookup no longer creates a broker; default observer construction and runtime-adapter acquisition are not proved effect-free.
 - Follow the [current RSI/WRE supervision contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22). Registry disable is not confirmed worker stop; heartbeat is not task progress. No runtime repair or execution authority is implied by this map.
 - Example supervisory surfaces:
   - `status openclaw live`

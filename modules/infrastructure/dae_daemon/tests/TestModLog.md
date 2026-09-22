@@ -1,3 +1,9 @@
+## 2026-09-22: Noncreating observer runtime lookup
+
+- WSP00/6/10/15/22/49/50/62/97; C2/I3/D3/Impact3=11/P2. Extend existing broker singleton with a noncreating accessor, used only by observer runtime lookup. Capture under singleton lock, invoke status after release; no new scheduler/module.
+- Baseline4fail/4pass; repaired and independent8pass on identical frozen cases;19 original cases unchanged and not selected. Finite absent/present/replacement/error and creating-getter compatibility controls; no real service, broker/daemon construction, default database or provider.
+- Existing creating/reset functions and broker class remain unchanged. Default observer/adapter ingress still has effects; no global isolation, live runtime readiness or retained RSI claim. Exact source, package, review and publication evidence belongs to the canonical RSI backlog.
+
 ## 2026-09-22: Truthful broker stop acknowledgment
 
 - WSP00/10/15/22/49/50/62/91/97; C3/I3/D3/Impact3=12/P2. The existing broker distinguishes accepted stop requests from observed worker exit, binds the active handle's hook and rejects changed ownership across callbacks.

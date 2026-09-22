@@ -471,3 +471,202 @@ def test_event_store_characterizes_raised_failure_skips_registry_listeners(tmp_p
     assert attempted[0].event_type == DAEEventType.SECURITY_VIOLATION
     assert notified == []
     assert list(tmp_path.iterdir()) == []
+
+
+# Focused noncreating runtime-lookup acceptance; no daemon lifecycle execution.
+from unittest.mock import Mock
+
+
+class _ObserverLookupLock(_RejectNestedLock):
+    def __init__(self):
+        super().__init__()
+        self.entries = self.exits = 0
+
+    def __enter__(self):
+        super().__enter__()
+        self.entries += 1
+        return self
+
+    def __exit__(self, *exc):
+        super().__exit__(*exc)
+        self.exits += 1
+
+
+def _observer_runtime_daemon():
+    record = {"sequence_id": 7, "event_id": "synthetic-event", "event_type": "action_performed",
+              "dae_id": "observer-test", "actor_id": "fixture", "timestamp": 123.0,
+              "payload": {"summary": "synthetic action"}}
+    event = SimpleNamespace(**record)
+    event.event_type = DAEEventType.ACTION_PERFORMED
+    registration = SimpleNamespace(dae_name="Synthetic DAE", domain="infrastructure",
+        state=SimpleNamespace(value="registered"), enabled=True, pid=None,
+        heartbeat_interval_sec=30.0, last_heartbeat=0)
+    daemon = SimpleNamespace(registry=SimpleNamespace(get=Mock(return_value=registration)),
+        event_store=SimpleNamespace(query_recent=Mock(return_value=[event]),
+                                    get_latest_sequence_id=Mock(return_value=9)))
+    return daemon, record
+
+
+def _observer_runtime_fixture(monkeypatch):
+    from modules.infrastructure.dae_daemon.src import dae_launch_broker as broker
+    from modules.infrastructure.dae_daemon.src import dae_observer as owner
+
+    lock = _ObserverLookupLock()
+    effects = []
+    for target, name in ((CentralDAEmon, "__init__"), (DAEEventStore, "__init__"),
+                         (DAERegistry, "__init__"), (broker.DAELaunchBroker, "__init__"),
+                         (owner.DAEObserver, "__init__"), (threading.Thread, "__init__"),
+                         (threading.Thread, "start")):
+        spy = Mock(name=target.__name__ + "." + name,
+                   side_effect=AssertionError("real runtime effect forbidden"))
+        monkeypatch.setattr(target, name, spy)
+        effects.append(spy)
+    creator = Mock(wraps=broker.get_dae_launch_broker)
+    monkeypatch.setattr(broker, "get_dae_launch_broker", creator)
+    monkeypatch.setattr(broker, "_broker_lock", lock)
+    monkeypatch.setattr(broker, "_launch_broker", None)
+    observer = object.__new__(owner.DAEObserver)
+    observer._daemon, record = _observer_runtime_daemon()
+    return SimpleNamespace(broker=broker, observer=observer, lock=lock, effects=effects,
+                           creator=creator, record=record)
+
+
+def _observer_runtime_projection(state, snapshot, runtime):
+    assert snapshot == {"registered": True, "dae_id": "observer-test",
+        "dae_name": "Synthetic DAE", "domain": "infrastructure", "state": "registered",
+        "enabled": True, "pid": None, "heartbeat_interval_sec": 30.0,
+        "last_heartbeat_age_sec": None, "runtime": runtime, "latest_sequence_id": 9,
+        "next_cursor": 7, "recent_events": [state.record], "last_event": state.record,
+        "last_action": state.record}
+    state.observer._daemon.registry.get.assert_called_once_with("observer-test")
+    state.observer._daemon.event_store.query_recent.assert_called_once_with(
+        dae_id="observer-test", event_type=None, limit=3)
+    state.observer._daemon.event_store.get_latest_sequence_id.assert_called_once_with()
+
+
+def _observer_runtime_no_effects(state):
+    assert [spy.call_count for spy in state.effects] == [0] * len(state.effects)
+    assert state.lock.entries == state.lock.exits
+    assert not state.lock.lock.locked()
+
+
+def test_observer_runtime_absent_never_creates_broker(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    snapshot = state.observer.get_live_status("observer-test", limit=3)
+    _observer_runtime_projection(state, snapshot, {})
+    assert state.broker._launch_broker is None
+    assert (state.creator.call_count, [spy.call_count for spy in state.effects]) == (
+        0, [0] * len(state.effects))
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_present_preserves_status_outside_singleton_lock(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    runtime = {"registered": True, "thread_alive": True, "marker": "preserved"}
+
+    def status(dae_id):
+        assert dae_id == "observer-test" and not state.lock.lock.locked()
+        with state.lock:
+            return runtime
+
+    status_spy = Mock(side_effect=status)
+    current = SimpleNamespace(get_runtime_status=status_spy)
+    state.broker._launch_broker = current
+    snapshot = state.observer.get_live_status("observer-test", limit=3)
+    _observer_runtime_projection(state, snapshot, runtime)
+    status_spy.assert_called_once_with("observer-test")
+    assert state.broker._launch_broker is current and state.lock.entries == 2
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_status_error_does_not_retry_or_create(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    status = Mock(side_effect=RuntimeError("synthetic status failure"))
+    current = SimpleNamespace(get_runtime_status=status)
+    state.broker._launch_broker = current
+    assert state.observer._get_runtime_status("observer-test") == {}
+    status.assert_called_once_with("observer-test")
+    assert state.broker._launch_broker is current and state.lock.entries == 1
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_lookup_observes_each_current_singleton(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    first = SimpleNamespace(get_runtime_status=Mock(return_value={"marker": "A"}))
+    second = SimpleNamespace(get_runtime_status=Mock(return_value={"marker": "B"}))
+    for current, expected in ((None, {}), (first, {"marker": "A"}),
+                              (second, {"marker": "B"}), (None, {})):
+        state.broker._launch_broker = current
+        assert state.observer._get_runtime_status("observer-test") == expected
+        assert state.broker._launch_broker is current
+    first.get_runtime_status.assert_called_once_with("observer-test")
+    second.get_runtime_status.assert_called_once_with("observer-test")
+    assert state.creator.call_count == 0 and state.lock.entries == 4
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_existing_accessor_is_noncreating(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    accessor = getattr(state.broker, "get_existing_dae_launch_broker", None)
+    assert callable(accessor), "noncreating accessor is not implemented"
+    assert accessor() is None
+    current = SimpleNamespace(get_runtime_status=Mock(), stop=Mock())
+    state.broker._launch_broker = current
+    assert accessor() is current and state.broker._launch_broker is current
+    current.get_runtime_status.assert_not_called()
+    current.stop.assert_not_called()
+    assert state.creator.call_count == 0 and state.lock.entries == 2
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_creator_getter_preserves_singleton_contract(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    first, second, expected = object(), object(), object()
+    received = []
+
+    def factory(daemon):
+        assert state.lock.lock.locked()
+        received.append(daemon)
+        return expected
+
+    monkeypatch.setattr(state.broker, "DAELaunchBroker", factory)
+    assert state.broker.get_dae_launch_broker(daemon=first) is expected
+    assert state.broker.get_dae_launch_broker(daemon=second) is expected
+    assert received == [first] and state.broker._launch_broker is expected
+    assert state.lock.entries == 2
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_creator_failure_releases_lock_without_publication(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    failure, expected = RuntimeError("synthetic creator failure"), object()
+    factory = Mock(side_effect=[failure, expected])
+    monkeypatch.setattr(state.broker, "DAELaunchBroker", factory)
+    try:
+        state.broker.get_dae_launch_broker()
+    except RuntimeError as observed:
+        assert observed is failure
+    else:
+        raise AssertionError("creator failure must propagate")
+    assert state.broker._launch_broker is None and state.lock.entries == 1
+    _observer_runtime_no_effects(state)
+    assert state.broker.get_dae_launch_broker() is expected
+    assert state.broker._launch_broker is expected and factory.call_count == 2
+    assert state.lock.entries == 2
+    _observer_runtime_no_effects(state)
+
+
+def test_observer_runtime_lookup_error_does_not_retry_or_create(monkeypatch):
+    state = _observer_runtime_fixture(monkeypatch)
+    current = SimpleNamespace(get_runtime_status=Mock())
+    state.broker._launch_broker = current
+    accessor = Mock(side_effect=RuntimeError("synthetic lookup failure"))
+    creator = Mock(side_effect=AssertionError("creating getter forbidden"))
+    monkeypatch.setattr(state.broker, "get_existing_dae_launch_broker", accessor, raising=False)
+    monkeypatch.setattr(state.broker, "get_dae_launch_broker", creator)
+    assert state.observer._get_runtime_status("observer-test") == {}
+    accessor.assert_called_once_with()
+    creator.assert_not_called()
+    current.get_runtime_status.assert_not_called()
+    assert state.broker._launch_broker is current
+    _observer_runtime_no_effects(state)
