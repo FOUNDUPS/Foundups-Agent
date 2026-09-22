@@ -1,3 +1,9 @@
+## 2026-09-23: Resident final-receipt transition controls
+
+- WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary integration test owner with16 direct in-memory receipt/preceding-plan controls; production, shared fixtures and all original definitions remain unchanged.
+- Fixed21 cases pass locally and independently:16 new structural success/rejection controls plus five existing callback/chain checks. Canonical receipt IDs, real frozen plan projections and exact rejection tuples expose previously unreachable receipt mutations; input state remains unchanged. These are component predicates, not authentic execution, planner-produced acceptance, native admission or retained learning.
+- PR1879 generation/readiness qualification is closed. Current ownership/source evidence and re-scored next work are in the canonical backlog. Registry remains current1656/quarantined269. AmIBot is still undispatched; no runtime/provider changes.
+
 ## 2026-09-23: Core generation evidence and resident readiness contract
 
 - WSP00/15/22/34/50/62/97; C3/I4/D4/Impact4=15/P1. Extended the existing use-time test owner with seven cross-owner controls; production, shared fixtures and all original definitions are unchanged.

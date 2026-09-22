@@ -213,17 +213,17 @@ and a complete repository RSI cycle are different units.
 
 ### Current core canary test checkpoint — 2026-09-23
 
-PR1877 closed the deferred-callback qualification. The next core contract now
-passes11 frozen cases locally and independently: real use-time collection and
-resident readiness retain distinct diagnostics. Accepted typed generation evidence
-removes only three use-time reasons; seven other anchors and no effect lease
-remain. Readiness retains its own generation/peer blockers with no supplier calls.
-The minimal fixture retains independent binding errors while signature acceptance
-still triggers collection. This is characterized acquisition, not a source repair.
-Production, shared fixtures and existing tests are unchanged; no native or retained
-RSI claim. AmIBot remains registered/undispatched, Memory Horizon separately owned.
-The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) binds exact
-source, synthetic evidence, current ownership and the freshly scored next action.
+PR1877 callback/chain and PR1879 generation/readiness qualifications are closed.
+The next13/P1 final-receipt contract passes21 fixed cases locally and independently:
+16 new direct structural receipt/preceding-plan controls plus five existing checks.
+The canonical ID producer, frozen plan projections, exact blockers and nonmutation
+checks expose receipt paths not reached through blocked integration callbacks.
+Production and shared fixtures remain unchanged. Structural acceptance is not
+authenticated or planner-produced execution; remaining PatternMemory/readback
+and lineage evidence are separate. Native admission and retained RSI are unproven.
+AmIBot remains registered/undispatched; Memory Horizon remains separately owned.
+The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) binds current
+source, ownership, exact tests, independent evidence and the freshly scored next step.
 
 ### Bounded campaign and report acceptance
 

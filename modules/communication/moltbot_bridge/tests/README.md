@@ -1,17 +1,17 @@
 ## Resident canary evidence reachability — 2026-09-23
 
-PR1877 qualified 15 canary cases: two zero-callback witnesses and three direct
-chain-validator controls preserve the existing tests and expose deferred mutations.
-The existing test_reddog_signer_current_generation_use_time_binding.py now adds
-seven cross-owner rows; all11 cases pass locally and independently. The real
-collector/resolver/readiness path uses controlled signed/generation verifier results.
-Accepted typed generation evidence removes only three use-time reasons; seven
-other anchors and no effect lease remain. Readiness keeps its three generation
-reasons and peer blocker, with no additional verifier/clock calls. Independent
-binding errors remain in the minimal fixture; its supplier acquisition is observed,
-not repaired. Exact cases/source hashes and receipts are in the root RSI backlog.
-This proves neither native admission, authenticated freshness/replay, retained RSI
-nor OS sandboxing. Existing lower-layer coverage is preserved.
+PR1877 closed15 callback/chain controls; PR1879 closed11 generation/readiness
+cases. The current final-receipt qualification adds16 direct in-memory cases
+to test_reddog_resident_live_canary_integration.py, with all originals preserved.
+The fixed21-case run includes five earlier callback/chain controls. Local and
+independent runs pass the same cases. A canonical receipt-ID producer and frozen
+plan projections exercise structural success, missing/old/malformed receipts,
+envelope/revision/transition mismatches and preceding-plan preconditions.
+Exact blockers and input nonmutation are asserted. These pure predicates do not
+prove authenticated execution or planner-produced acceptance. Existing outer
+readiness gates remain blocked; PatternMemory readback/lineage cases are separate.
+Source hashes, run receipts and next ranking are in the root RSI backlog.
+No native admission, retained RSI, provider execution or OS sandboxing is claimed.
 
 ## RSI adapter acquisition and LinkedIn previews
 
