@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Video Indexing Action Surface (SKILLz/ACTION SURFACE) - Phase 1.
+Video Indexing Action Surface (SKILLz/ACTION SURFACE).
 
 A typed, reusable capability surface for video indexing so the CLI menu,
 OpenClaw/WRE, Hermes/Kanban, or any 0102 agent can invoke the SAME governed
@@ -13,7 +13,7 @@ Model (WSP 27 / WSP 80 / WSP 95):
     heartbeat= observability (existing telemetry, not owned here)
     scheduler= artifact CONSUMER (NOT the owner of indexing)
 
-BOUNDARY (HARD - Phase 1):
+BOUNDARY (HARD):
     - This surface may DESCRIBE and ROUTE an action.
     - It MUST NOT carry credentials, gate-pass state, or self-authorize live
       mutation. 0102 ATTACHES to an already-authenticated browser session via
@@ -32,9 +32,9 @@ WSP Compliance:
     WSP 84: Code Reuse (reuses StudioAskIndexer + VideoIndexStore; no new store)
     WSP 91: DAE Observability
 
-Phase 1 IMPLEMENTS: video_index.studio_ask.single_video
-Phase 1 REGISTERS (NOT wired -> Phase 2): channel_cycle, daemon_cycle,
-    gemini_api.single_video, whisper.local_transcript,
+IMPLEMENTS: Studio Ask single_video, channel_cycle, bounded daemon_cycle, and
+    the Move2Japan/UnDaoDu/FoundUps portfolio_cycle.
+REGISTERS ONLY: gemini_api.single_video, whisper.local_transcript,
     shorts_scheduler.consume_video_index
 """
 
@@ -44,7 +44,7 @@ import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -69,19 +69,17 @@ class VideoIndexAction:
     """
     Typed action IDs for the video indexing action surface.
 
-    IMPLEMENTED this phase:
-        STUDIO_ASK_SINGLE_VIDEO
-
-    REGISTERED as IDs but NOT wired this phase (-> raise NotImplementedError or
-    return a 'not_implemented' result). Phase 1 does NOT import Gemini/scheduler.
+    Studio Ask single-video, channel, bounded-daemon, and portfolio actions are
+    implemented. Gemini API, local Whisper, and scheduler-consumer IDs remain
+    registered-only and return ``not_implemented``.
     """
 
-    # IMPLEMENTED (Phase 1): bounded single-video Studio Ask index test.
+    # IMPLEMENTED: Studio Ask execution paths.
     STUDIO_ASK_SINGLE_VIDEO = "video_index.studio_ask.single_video"
 
-    # REGISTERED ONLY (Phase 2+): not wired this phase.
     STUDIO_ASK_CHANNEL_CYCLE = "video_index.studio_ask.channel_cycle"
     STUDIO_ASK_DAEMON_CYCLE = "video_index.studio_ask.daemon_cycle"
+    STUDIO_ASK_PORTFOLIO_CYCLE = "video_index.studio_ask.portfolio_cycle"
     GEMINI_API_SINGLE_VIDEO = "video_index.gemini_api.single_video"
     WHISPER_LOCAL_TRANSCRIPT = "video_index.whisper.local_transcript"
     SHORTS_SCHEDULER_CONSUME = "shorts_scheduler.consume_video_index"
@@ -92,6 +90,7 @@ ALL_ACTION_IDS = (
     VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO,
     VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE,
     VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE,
+    VideoIndexAction.STUDIO_ASK_PORTFOLIO_CYCLE,
     VideoIndexAction.GEMINI_API_SINGLE_VIDEO,
     VideoIndexAction.WHISPER_LOCAL_TRANSCRIPT,
     VideoIndexAction.SHORTS_SCHEDULER_CONSUME,
@@ -100,6 +99,9 @@ ALL_ACTION_IDS = (
 # Subset implemented (routes to real work) this phase.
 IMPLEMENTED_ACTION_IDS = (
     VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO,
+    VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE,
+    VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE,
+    VideoIndexAction.STUDIO_ASK_PORTFOLIO_CYCLE,
 )
 
 # Subset registered-but-not-wired this phase.
@@ -146,6 +148,25 @@ class StudioAskSingleVideoOutput:
     topics_count: int = 0
     saved_path: Optional[str] = None
     error: Optional[str] = None
+
+
+@dataclass
+class StudioAskChannelCycleInput:
+    """One resumable batch for one channel."""
+
+    channel_id: str
+    browser: str = "chrome"
+    max_videos: int = 10
+    force_reindex: bool = False
+
+
+@dataclass
+class StudioAskPortfolioCycleInput:
+    """One resumable batch across the three Red Dog source channels."""
+
+    channel_keys: Optional[List[str]] = None
+    max_videos_per_channel: int = 10
+    force_reindex: bool = False
 
 
 # =============================================================================
@@ -215,7 +236,7 @@ def _connect_attached_driver(browser: str):
 
 
 # =============================================================================
-# Single-video action (IMPLEMENTED this phase)
+# Studio Ask actions
 # =============================================================================
 
 async def run_studio_ask_single_video(
@@ -320,6 +341,15 @@ async def run_studio_ask_single_video(
     saved_path: Optional[str] = None
     if inp.persist:
         try:
+            if ask_result.response_sha256:
+                duplicate = StudioAskIndexer._find_duplicate_response(
+                    INDEX_ROOT, channel_key, video_id, ask_result.response_sha256,
+                )
+                if duplicate:
+                    return StudioAskSingleVideoOutput(
+                        success=False, video_id=video_id, browser=browser,
+                        error=f"duplicate_response:{duplicate}",
+                    )
             index_data = StudioAskIndexer._ask_result_to_index_data(
                 ask_result, channel_key=channel_key,
             )
@@ -343,8 +373,149 @@ async def run_studio_ask_single_video(
     )
 
 
+def _cycle_succeeded(result: Dict[str, Any]) -> bool:
+    """A completed loop is not successful when a nested pass failed or skipped."""
+    return bool(result) and not (
+        result.get("error") or result.get("skipped")
+        or any(
+            item.get("error") or item.get("pass_errors") or item.get("failed")
+            for item in (result.get("channels") or {}).values()
+        )
+    )
+
+
+async def run_studio_ask_channel_cycle(
+    inp: StudioAskChannelCycleInput,
+) -> Dict[str, Any]:
+    """Run one bounded, resumable Studio Ask batch for a channel."""
+    browser = (inp.browser or "chrome").strip().lower()
+    try:
+        port_for_browser(browser)
+    except ValueError as exc:
+        return {"success": False, "error": str(exc), "channel_id": inp.channel_id}
+
+    try:
+        driver = _connect_attached_driver(browser)
+    except Exception as exc:
+        return {
+            "success": False,
+            "error": f"browser attach failed: {exc}",
+            "channel_id": inp.channel_id,
+        }
+    if driver is None:
+        return {
+            "success": False,
+            "error": f"could not attach to {browser} session (port {BROWSER_PORTS[browser]})",
+            "channel_id": inp.channel_id,
+        }
+
+    from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import (
+        run_video_indexing_cycle,
+    )
+
+    result = await run_video_indexing_cycle(
+        driver=driver,
+        channels=[inp.channel_id],
+        max_videos_per_channel=max(1, int(inp.max_videos)),
+        browser=browser,
+        force_reindex=inp.force_reindex,
+    )
+    result["success"] = _cycle_succeeded(result)
+    result["action_id"] = VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE
+    return result
+
+
+async def run_studio_ask_portfolio_cycle(
+    inp: StudioAskPortfolioCycleInput,
+) -> Dict[str, Any]:
+    """Index Move2Japan, UnDaoDu, and FoundUps in browser-isolated batches."""
+    from modules.infrastructure.shared_utilities.youtube_channel_registry import (
+        get_channel_by_key,
+    )
+
+    requested = inp.channel_keys or ["move2japan", "undaodu", "foundups"]
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    unresolved: List[str] = []
+    for key in requested:
+        entry = get_channel_by_key(key)
+        if not entry or not entry.get("id"):
+            unresolved.append(key)
+            continue
+        browser = str((entry.get("browser") or {}).get("comment_browser") or "chrome").lower()
+        groups.setdefault(browser, []).append(entry)
+
+    browser_results: Dict[str, Any] = {}
+    total_indexed = 0
+    total_failed = 0
+    for browser, entries in groups.items():
+        try:
+            driver = _connect_attached_driver(browser)
+        except Exception as exc:
+            browser_results[browser] = {"error": f"browser attach failed: {exc}"}
+            total_failed += len(entries)
+            continue
+        if driver is None:
+            browser_results[browser] = {
+                "error": f"could not attach to {browser} session (port {BROWSER_PORTS.get(browser)})"
+            }
+            total_failed += len(entries)
+            continue
+
+        from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import (
+            run_video_indexing_cycle,
+        )
+
+        cycle = await run_video_indexing_cycle(
+            driver=driver,
+            channels=[str(entry["id"]) for entry in entries],
+            max_videos_per_channel=max(1, int(inp.max_videos_per_channel)),
+            browser=browser,
+            force_reindex=inp.force_reindex,
+        )
+        browser_results[browser] = cycle
+        total_indexed += int(cycle.get("total_indexed", 0) or 0)
+        total_failed += sum(
+            int(channel_result.get("failed", 0) or 0)
+            for channel_result in (cycle.get("channels") or {}).values()
+        )
+
+    return {
+        "success": (
+            not unresolved
+            and total_failed == 0
+            and all(_cycle_succeeded(r) for r in browser_results.values())
+        ),
+        "action_id": VideoIndexAction.STUDIO_ASK_PORTFOLIO_CYCLE,
+        "requested_channels": requested,
+        "unresolved_channels": unresolved,
+        "total_indexed": total_indexed,
+        "total_failed": total_failed,
+        "browsers": browser_results,
+    }
+
+
+async def run_studio_ask_daemon_cycle(**kwargs) -> Dict[str, Any]:
+    """Run a bounded daemon invocation; defaults to one cycle for agent safety."""
+    from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import (
+        run_indexing_daemon,
+    )
+
+    result = await run_indexing_daemon(
+        channels=kwargs.get("channels"),
+        max_videos_per_channel=max(1, int(kwargs.get("max_videos_per_channel", 10))),
+        browser=(kwargs.get("browser") or "chrome").strip().lower(),
+        interval_minutes=max(1, int(kwargs.get("interval_minutes", 60))),
+        max_cycles=max(1, int(kwargs.get("max_cycles", 1))),
+    )
+    result["success"] = bool(result.get("cycles")) and _cycle_succeeded(
+        result.get("last_result") or {}
+    )
+    result["action_id"] = VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE
+    return result
+
+
 # =============================================================================
-# Registered-only actions (NOT wired this phase)
+# Registered-only actions
 # =============================================================================
 
 def _not_implemented(action_id: str) -> Dict[str, Any]:
@@ -352,10 +523,10 @@ def _not_implemented(action_id: str) -> Dict[str, Any]:
     return {
         "action_id": action_id,
         "status": "not_implemented",
-        "phase": "Phase 2",
+        "phase": "future",
         "detail": (
-            f"Action '{action_id}' is registered as an ID but not wired in "
-            f"Phase 1. Do not route live work through it yet."
+            f"Action '{action_id}' is registered as an ID but not wired. "
+            "Do not route live work through it yet."
         ),
     }
 
@@ -374,8 +545,8 @@ async def run_action(action_id: str, **kwargs) -> Any:
             (video_id, browser, channel_id, persist) OR pass inp=<dataclass>.
             Returns StudioAskSingleVideoOutput.
 
-    REGISTERED ONLY (Phase 2 - NOT wired): returns a 'not_implemented' result
-    dict. NEVER imports Gemini/scheduler from here.
+    Studio Ask channel, portfolio, and bounded-daemon IDs are also implemented.
+    Other registered IDs return a `not_implemented` result.
 
     Unknown action IDs raise ValueError (fail-closed).
     """
@@ -389,6 +560,30 @@ async def run_action(action_id: str, **kwargs) -> Any:
                 persist=kwargs.get("persist", True),
             )
         return await run_studio_ask_single_video(inp)
+
+    if action_id == VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE:
+        inp = kwargs.get("inp")
+        if inp is None:
+            inp = StudioAskChannelCycleInput(
+                channel_id=kwargs["channel_id"],
+                browser=kwargs.get("browser", "chrome"),
+                max_videos=kwargs.get("max_videos", 10),
+                force_reindex=kwargs.get("force_reindex", False),
+            )
+        return await run_studio_ask_channel_cycle(inp)
+
+    if action_id == VideoIndexAction.STUDIO_ASK_PORTFOLIO_CYCLE:
+        inp = kwargs.get("inp")
+        if inp is None:
+            inp = StudioAskPortfolioCycleInput(
+                channel_keys=kwargs.get("channel_keys"),
+                max_videos_per_channel=kwargs.get("max_videos_per_channel", 10),
+                force_reindex=kwargs.get("force_reindex", False),
+            )
+        return await run_studio_ask_portfolio_cycle(inp)
+
+    if action_id == VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE:
+        return await run_studio_ask_daemon_cycle(**kwargs)
 
     if action_id in REGISTERED_ONLY_ACTION_IDS:
         return _not_implemented(action_id)

@@ -171,7 +171,11 @@ def _shadow_dom(driver, response_text='{"topics": ["x"], "segments": []}'):
     icon = ShadowElement(attributes={"aria-label": "spark"}, parent=driver)
     trigger = ShadowElement(parent=driver, deep_children={ASK_ICON: icon})
     prompt = ShadowElement(attributes={"aria-label": "Ask something"}, parent=driver)
-    stream = ShadowElement(text=response_text, parent=driver)
+    class Response(ShadowElement):
+        @property
+        def text(self):
+            return self._text if driver.deep_map[PROMPT_DEEP].clicked else "Hello, UnDaoDu"
+    stream = Response(text=response_text, parent=driver)
     driver.deep_map = {
         TITLE_DEEP: title,
         ASK_TRIGGER: trigger,

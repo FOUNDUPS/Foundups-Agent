@@ -11,6 +11,7 @@ WSP Compliance:
 
 Usage:
     python -m modules.ai_intelligence.video_indexer.cli --channel undaodu
+    python -m modules.ai_intelligence.video_indexer.cli --portfolio --batch-size 10
     python -m modules.ai_intelligence.video_indexer.cli --channel move2japan --video-id abc123
     python -m modules.ai_intelligence.video_indexer.cli --status
 """
@@ -42,6 +43,12 @@ Examples:
   # Index all videos for a channel
   python -m modules.ai_intelligence.video_indexer.cli --channel undaodu
 
+  # One resumable cycle across Move2Japan, UnDaoDu, and FoundUps
+  python -m modules.ai_intelligence.video_indexer.cli --portfolio --batch-size 10
+
+  # Run three bounded daemon cycles for one channel
+  python -m modules.ai_intelligence.video_indexer.cli --channel undaodu --daemon --cycles 3
+
   # Index specific video
   python -m modules.ai_intelligence.video_indexer.cli --channel move2japan --video-id abc123
 
@@ -58,6 +65,12 @@ Examples:
 
     parser.add_argument('--channel', '-c', type=str,
                         help='Channel key: move2japan, undaodu, foundups, antifafm')
+    parser.add_argument('--portfolio', action='store_true',
+                        help='Index Move2Japan, UnDaoDu, and FoundUps in one bounded cycle')
+    parser.add_argument('--daemon', action='store_true',
+                        help='Run bounded daemon cycles (requires --channel)')
+    parser.add_argument('--cycles', type=int, default=1,
+                        help='Daemon cycles (default: 1)')
     parser.add_argument('--video-id', '-v', type=str,
                         help='Specific video ID to index')
     parser.add_argument('--batch-size', '-b', type=int, default=10,
@@ -89,8 +102,8 @@ Examples:
         return list_indexed(args.channel)
 
     # Require channel for indexing
-    if not args.channel:
-        parser.error("--channel is required (or use --status)")
+    if not args.channel and not args.portfolio:
+        parser.error("--channel or --portfolio is required (or use --status)")
 
     # Execute indexing
     return run_indexing(args)
@@ -139,10 +152,37 @@ def list_indexed(channel: str):
 def run_indexing(args):
     """Execute video indexing."""
     try:
-        from modules.ai_intelligence.video_indexer.src.video_indexer import VideoIndexer
+        from modules.ai_intelligence.video_indexer.src.action_surface import (
+            StudioAskChannelCycleInput,
+            StudioAskPortfolioCycleInput,
+            StudioAskSingleVideoInput,
+            VideoIndexAction,
+            run_action,
+        )
+        from modules.infrastructure.shared_utilities.youtube_channel_registry import (
+            get_channel_by_key,
+        )
 
-        logger.info(f"[INDEX] Channel: {args.channel}")
         logger.info(f"[INDEX] Batch size: {args.batch_size}")
+
+        if args.portfolio:
+            result = asyncio.run(run_action(
+                VideoIndexAction.STUDIO_ASK_PORTFOLIO_CYCLE,
+                inp=StudioAskPortfolioCycleInput(
+                    max_videos_per_channel=args.batch_size,
+                    force_reindex=args.reindex,
+                ),
+            ))
+            print(f"\n[RESULT] Indexed: {result.get('total_indexed', 0)}")
+            print(f"[RESULT] Failed: {result.get('total_failed', 0)}")
+            return 0 if result.get("success") else 1
+
+        entry = get_channel_by_key(args.channel)
+        if not entry:
+            raise ValueError(f"Unknown channel: {args.channel}")
+        channel_id = str(entry["id"])
+        browser = str((entry.get("browser") or {}).get("comment_browser") or "chrome")
+        logger.info(f"[INDEX] Channel: {args.channel} ({channel_id})")
 
         if args.video_id:
             logger.info(f"[INDEX] Video ID: {args.video_id}")
@@ -153,26 +193,44 @@ def run_indexing(args):
         if args.skip_holoindex:
             logger.info("[INDEX] Skipping ChromaDB (JSON only)")
 
-        indexer = VideoIndexer(channel=args.channel)
-
         if args.video_id:
-            # Single video indexing
-            result = indexer.index_video(
-                video_id=args.video_id,
-                force=args.reindex
-            )
+            result = asyncio.run(run_action(
+                VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO,
+                inp=StudioAskSingleVideoInput(
+                    video_id=args.video_id,
+                    browser=browser,
+                    channel_id=channel_id,
+                    persist=True,
+                ),
+            ))
             print(f"\n[RESULT] Video indexed: {args.video_id}")
-            print(f"[RESULT] Topics: {result.get('topics', [])}")
+            print(f"[RESULT] Success: {result.success}")
+            if result.error:
+                print(f"[RESULT] Error: {result.error}")
+            return 0 if result.success else 1
+        elif args.daemon:
+            result = asyncio.run(run_action(
+                VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE,
+                channels=[channel_id],
+                browser=browser,
+                max_videos_per_channel=args.batch_size,
+                max_cycles=args.cycles,
+            ))
+            print(f"\n[RESULT] Cycles: {result.get('cycles', 0)}")
+            return 0 if result.get("success") else 1
         else:
-            # Batch indexing
-            result = indexer.index_channel(
-                batch_size=args.batch_size,
-                force=args.reindex,
-                skip_holoindex=args.skip_holoindex
-            )
-            print(f"\n[RESULT] Indexed: {result.get('indexed', 0)}")
-            print(f"[RESULT] Skipped: {result.get('skipped', 0)}")
-            print(f"[RESULT] Errors: {result.get('errors', 0)}")
+            result = asyncio.run(run_action(
+                VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE,
+                inp=StudioAskChannelCycleInput(
+                    channel_id=channel_id,
+                    browser=browser,
+                    max_videos=args.batch_size,
+                    force_reindex=args.reindex,
+                ),
+            ))
+            print(f"\n[RESULT] Indexed: {result.get('total_indexed', 0)}")
+            print(f"[RESULT] Skipped: {result.get('total_skipped', 0)}")
+            return 0 if result.get("success") else 1
 
         return 0
 

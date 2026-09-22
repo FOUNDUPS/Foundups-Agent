@@ -133,7 +133,7 @@ class TestGeminiResponseParsing:
             analyzer = GeminiVideoAnalyzer()
             analyzer.model = "gemini-2.0-flash-exp"
 
-            # Malformed JSON should still return success with raw text
+            # Malformed JSON has no usable segments and must fail closed.
             result = analyzer._parse_response(
                 raw_text="This is not JSON, just text about the video.",
                 video_id="test123",
@@ -141,7 +141,7 @@ class TestGeminiResponseParsing:
                 latency_ms=500.0,
             )
 
-            assert result.success is True  # Still success, just couldn't parse
+            assert result.success is False
             assert "This is not JSON" in result.transcript_summary
 
     def test_video_url_building(self):

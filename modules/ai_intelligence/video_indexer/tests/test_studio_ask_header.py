@@ -136,7 +136,11 @@ def _ask_studio_dom(response_text):
     header = FakeElement(attributes={"aria-label": "Ask Studio"})
     dialog = FakeElement()
     prompt_box = FakeElement(attributes={"aria-label": "Ask something"})
-    response = FakeElement(text=response_text)
+    class Response(FakeElement):
+        @property
+        def text(self):
+            return self._text if prompt_box.clicked else "Hello, UnDaoDu"
+    response = Response(text=response_text)
     return {
         'ytcp-icon-button[aria-label="Ask Studio"]': header,
         "ytcp-dialog#dialog": dialog,

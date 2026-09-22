@@ -16,6 +16,7 @@ Usage:
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -290,6 +291,12 @@ class AskResult:
     # the rich label is never lost. Equals content_category for an exact enum hit.
     content_category_raw: Optional[str] = None
     error: Optional[str] = None
+    # Identity/provenance fields used to prevent one Ask Studio answer from
+    # being persisted under several video IDs when a prior chat response remains
+    # visible in the channel-level assistant.
+    response_video_id: Optional[str] = None
+    identity_verified: bool = False
+    response_sha256: Optional[str] = None
 
 
 class StudioAskIndexer:
@@ -656,9 +663,16 @@ Give a brief category and a few mood/genre topics only.""",
         return (
             f'Analyze the video titled "{safe_title}" (video id {video_id}, '
             f"studio.youtube.com/video/{video_id}). Respond ONLY with a JSON "
-            'index: {"content_category":"...","topics":["..."],'
+            f'index: {{"source_video_id":"{video_id}",'
+            '"content_category":"...","topics":["..."],'
             '"segments":[{"time":"0:00","topic":"...","summary":"..."}]}'
         )
+
+    @staticmethod
+    def _response_sha256(response_text: str) -> str:
+        """Return a stable digest for cross-video duplicate detection."""
+        normalized = " ".join((response_text or "").split())
+        return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
     def __init__(
         self,
@@ -748,6 +762,31 @@ Give a brief category and a few mood/genre topics only.""",
         return path.exists()
 
     @staticmethod
+    def _find_duplicate_response(
+        index_root: Path,
+        channel_key: str,
+        video_id: str,
+        response_sha256: Optional[str],
+    ) -> Optional[str]:
+        """Return the other video ID owning an identical Ask response digest."""
+        if not response_sha256:
+            return None
+        channel_dir = index_root / channel_key
+        if not channel_dir.exists():
+            return None
+        for path in channel_dir.glob("*.json"):
+            if path.stem == video_id:
+                continue
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                provenance = (data.get("metadata") or {}).get("provenance") or {}
+                if provenance.get("response_sha256") == response_sha256:
+                    return str(data.get("video_id") or path.stem)
+            except Exception:
+                continue
+        return None
+
+    @staticmethod
     def _parse_timestamp(ts: str) -> Optional[float]:
         """Convert 'M:SS' or 'H:MM:SS' to seconds."""
         if not ts:
@@ -816,13 +855,26 @@ Give a brief category and a few mood/genre topics only.""",
                 # index so the rich label is never lost. None if Gemini returned no
                 # category string (parse failure / prose fallback edge).
                 "content_category_raw": ask_result.content_category_raw,
+                "provenance": {
+                    "provider": "youtube_studio_ask",
+                    "requested_video_id": ask_result.video_id,
+                    "response_video_id": ask_result.response_video_id,
+                    "identity_verified": ask_result.identity_verified,
+                    "response_sha256": ask_result.response_sha256,
+                },
+                # Ask Studio/Gemini text is an index/teacher label, not a
+                # verbatim 012 utterance. It is retrieval-eligible but must not
+                # enter SFT/DPO/voice corpora as ground truth.
+                "retrieval_eligible": True,
+                "training_eligible": False,
+                "training_exclusion_reason": "gemini_summary_not_verbatim",
             },
             gemini_summary={
                 "ask_response": ask_result.response_text or "",
                 "ask_topics": ask_result.topics or [],
                 "ask_segments": ask_result.timestamps or [],
             },
-            transcript_source="gemini",
+            transcript_source="gemini_summary",
         )
     
     # Canonical content_category enum (the 5 values the index/classifier expect).
@@ -1188,6 +1240,21 @@ Give a brief category and a few mood/genre topics only.""",
             ).strip()
         return body
 
+    def _current_extracted_answer(self, prompt: str = "") -> str:
+        """Read the answer already visible before a new prompt is submitted.
+
+        Ask Studio is channel-scoped and can retain the previous video's chat
+        response while the next edit page loads. Treating that retained JSON as
+        the new answer is the direct path to identical indices on many videos.
+        """
+        el = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
+        if el is None:
+            return ""
+        try:
+            return self._extract_answer((el.text or "").strip(), prompt)
+        except Exception:
+            return ""
+
     @classmethod
     def _is_real_answer(cls, extracted: str) -> bool:
         """
@@ -1411,6 +1478,7 @@ Give a brief category and a few mood/genre topics only.""",
         prompt: str = "",
         start_monotonic: Optional[float] = None,
         total_deadline: Optional[float] = None,
+        baseline_answer: str = "",
     ) -> str:
         """
         Scrape the Ask Studio response, EXTRACTING the real answer and waiting
@@ -1469,6 +1537,11 @@ Give a brief category and a few mood/genre topics only.""",
             # slipped past the marker set) is NOT an answer -> never stabilizes;
             # keep polling for the JSON index / substantial prose that streams
             # ~30s later. Only stabilize on a JSON block or substantial prose.
+            # A previous video's answer can remain in the channel-level chat.
+            # Ignore that exact baseline until a new answer replaces/appends it.
+            if baseline_answer and extracted == baseline_answer:
+                extracted = ""
+
             if extracted and self._is_real_answer(extracted):
                 if extracted == answer_text:
                     # Real answer unchanged since last poll -> may be done.
@@ -1959,6 +2032,7 @@ Give a brief category and a few mood/genre topics only.""",
 
             used_ask_studio = False
             ask_clicked = False
+            baseline_answer = ""
             # PRIMARY prompt: NAME the exact video (title+id+url) + request JSON.
             # Falls back to ask_prompt only if no title resolved (still id-pinned).
             primary_prompt = self._build_video_prompt(title, video_id)
@@ -2013,6 +2087,10 @@ Give a brief category and a few mood/genre topics only.""",
                 stream = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
                 if prompt_box is not None and stream is not None:
                     try:
+                        # Snapshot any retained answer BEFORE submitting. The
+                        # response scraper must not mistake it for this video's
+                        # newly generated index.
+                        baseline_answer = self._current_extracted_answer(primary_prompt)
                         # NEWLINE-SAFE human-cadence typing (no bare "\n" -> no
                         # implicit ENTER per line), then submit EXACTLY ONCE (#825).
                         self._type_prompt_human(prompt_box, primary_prompt)
@@ -2158,6 +2236,7 @@ Give a brief category and a few mood/genre topics only.""",
                     primary_prompt,
                     start_monotonic=ask_start_monotonic,
                     total_deadline=total_deadline,
+                    baseline_answer=baseline_answer,
                 )
             else:
                 # Legacy fallback: wait then scrape legacy response containers.
@@ -2239,9 +2318,36 @@ Give a brief category and a few mood/genre topics only.""",
             parsed = self._parse_ask_response(response_text)
             content_category = parsed.get("content_category", "other")
             content_category_raw = parsed.get("content_category_raw")
+            response_video_id = str(
+                parsed.get("source_video_id") or parsed.get("video_id") or ""
+            ).strip() or None
+            identity_verified = response_video_id == video_id
+
+            # When Gemini supplies an identity, it must match exactly. Missing
+            # identity remains usable for retrieval but is marked unverified;
+            # a conflicting identity is quarantined and never persisted.
+            if response_video_id is not None and not identity_verified:
+                logger.error(
+                    "[STUDIO-ASK] %s: response identity mismatch (%s); no persist",
+                    video_id,
+                    response_video_id,
+                )
+                self._cleanup_created_tabs()
+                return AskResult(
+                    video_id=video_id,
+                    title=title,
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="video_identity_mismatch",
+                    response_video_id=response_video_id,
+                    identity_verified=False,
+                    response_sha256=self._response_sha256(response_text),
+                )
             logger.info(
                 f"[STUDIO-ASK] Content category detected: {content_category}"
-                f" (raw={content_category_raw!r})"
+                f" (raw={content_category_raw!r}, identity_verified={identity_verified})"
             )
 
             # TAB CLEANUP (step 7): close any retry tabs THIS flow opened, leaving
@@ -2257,6 +2363,9 @@ Give a brief category and a few mood/genre topics only.""",
                 success=True,
                 content_category=content_category,
                 content_category_raw=content_category_raw,
+                response_video_id=response_video_id,
+                identity_verified=identity_verified,
+                response_sha256=self._response_sha256(response_text),
             )
 
         except Exception as e:
@@ -2387,36 +2496,79 @@ Give a brief category and a few mood/genre topics only.""",
             live_videos = []
             regular_videos = []
             try:
-                video_rows = self.driver.find_elements("css selector", "ytcp-video-row, tr.style-scope")
-                for row in video_rows:
+                seen_ids = set()
+                stagnant_rounds = 0
+                # Studio virtualizes long channel lists. Scan and scroll until
+                # this batch has enough NEW candidates or the DOM stops growing.
+                for _scan_round in range(40):
+                    before = len(seen_ids)
+                    video_rows = self.driver.find_elements(
+                        "css selector", "ytcp-video-row, tr.style-scope"
+                    )
+                    for row in video_rows:
+                        try:
+                            link = row.find_element("css selector", "a[href*='/video/']")
+                            href = link.get_attribute("href")
+                            vid_id = self._extract_video_id_from_url(href)
+                            if not vid_id or vid_id in seen_ids:
+                                continue
+
+                            row_text = row.text.lower()
+                            if not is_shorts_pass and ("short" in row_text or "#short" in row_text):
+                                continue
+
+                            seen_ids.add(vid_id)
+                            is_live = any(
+                                kw in row_text
+                                for kw in ["live", "streamed", "premiered", "stream"]
+                            )
+                            (live_videos if is_live else regular_videos).append(vid_id)
+                        except Exception:
+                            continue
+
+                    ordered_now = list(dict.fromkeys(live_videos + regular_videos))
+                    pending_now = ordered_now if force_reindex else [
+                        candidate_id
+                        for candidate_id in ordered_now
+                        if not self._index_exists(INDEX_ROOT, channel_key, candidate_id)
+                    ]
+                    if len(pending_now) >= max_videos:
+                        break
+
+                    stagnant_rounds = stagnant_rounds + 1 if len(seen_ids) == before else 0
+                    if stagnant_rounds >= 3:
+                        break
                     try:
-                        link = row.find_element("css selector", "a[href*='/video/']")
-                        href = link.get_attribute("href")
-                        vid_id = self._extract_video_id_from_url(href)
-                        if not vid_id:
-                            continue
-
-                        # Get row text to detect LIVE/Shorts
-                        row_text = row.text.lower()
-
-                        # Skip Shorts on the long-form (upload) pass only -- they
-                        # are indexed by the dedicated shorts pass instead.
-                        if not is_shorts_pass and ("short" in row_text or "#short" in row_text):
-                            continue
-
-                        # Detect LIVE/Premiered videos (higher priority)
-                        is_live = any(kw in row_text for kw in ["live", "streamed", "premiered", "stream"])
-
-                        if is_live:
-                            live_videos.append(vid_id)
-                        else:
-                            regular_videos.append(vid_id)
+                        self.driver.execute_script("""
+                            const candidates = [
+                                document.scrollingElement,
+                                document.querySelector('#content'),
+                                document.querySelector('ytcp-uploads-list')
+                            ].filter(Boolean);
+                            for (const el of candidates) {
+                                try { el.scrollTop = el.scrollHeight; } catch (e) {}
+                            }
+                            window.scrollTo(0, document.documentElement.scrollHeight);
+                        """)
                     except Exception:
-                        continue
+                        break
+                    await self._human_delay(1.0, 0.2)
 
-                # PRIORITY ORDER: LIVE first, then regular videos
-                video_ids = live_videos + regular_videos
-                video_ids = video_ids[:max_videos]  # Apply limit after prioritization
+                # PRIORITY ORDER: LIVE first, then regular videos. De-duplicate
+                # DOM rows, then exclude already-indexed IDs BEFORE applying the
+                # batch limit. The previous limit-first order revisited the same
+                # oldest batch forever and never advanced through the channel.
+                ordered_ids = list(dict.fromkeys(live_videos + regular_videos))
+                if force_reindex:
+                    video_ids = ordered_ids[:max_videos]
+                else:
+                    pending_ids = []
+                    for candidate_id in ordered_ids:
+                        if self._index_exists(index_root=INDEX_ROOT, channel_key=channel_key, video_id=candidate_id):
+                            skipped += 1
+                            continue
+                        pending_ids.append(candidate_id)
+                    video_ids = pending_ids[:max_videos]
 
                 if live_videos:
                     logger.info(f"[STUDIO-ASK] Found {len(live_videos)} LIVE videos (prioritized)")
@@ -2425,7 +2577,15 @@ Give a brief category and a few mood/genre topics only.""",
                 logger.warning(f"[STUDIO-ASK] Failed to get video list: {e}")
             
             if not video_ids:
-                return {"error": "No videos found", "indexed": 0}
+                return {
+                    "channel_id": channel_id,
+                    "content_type": content_type,
+                    "indexed": 0,
+                    "skipped": skipped,
+                    "failed": 0,
+                    "videos": [],
+                    "complete_for_visible_catalog": True,
+                }
             
             logger.info(f"[STUDIO-ASK] Found {len(video_ids)} videos to index")
             
@@ -2433,10 +2593,6 @@ Give a brief category and a few mood/genre topics only.""",
             index_root = INDEX_ROOT
             store = VideoIndexStore(base_path=str(index_root / channel_key))
             for vid_id in video_ids:
-                if not force_reindex and self._index_exists(index_root, channel_key, vid_id):
-                    skipped += 1
-                    logger.info(f"[STUDIO-ASK] ⏭️ {vid_id}: already indexed")
-                    continue
                 result = await self.ask_about_video(
                     vid_id, channel_entry=channel_entry, channel_id=channel_id
                 )
@@ -2444,6 +2600,22 @@ Give a brief category and a few mood/genre topics only.""",
                 
                 if result.success:
                     logger.info(f"[STUDIO-ASK] ✅ {vid_id}: {len(result.topics)} topics")
+
+                    duplicate_of = self._find_duplicate_response(
+                        index_root,
+                        channel_key,
+                        vid_id,
+                        result.response_sha256,
+                    )
+                    if duplicate_of:
+                        result.success = False
+                        result.error = f"duplicate_response:{duplicate_of}"
+                        logger.error(
+                            "[STUDIO-ASK] %s: identical response already belongs to %s; no persist",
+                            vid_id,
+                            duplicate_of,
+                        )
+                        continue
 
                     # Persist Ask results as JSON artifacts for indexing continuity
                     index_data = self._ask_result_to_index_data(
@@ -2556,6 +2728,7 @@ async def run_video_indexing_cycle(
     channels: Optional[List[str]] = None,
     max_videos_per_channel: int = 3,
     browser: str = "chrome",
+    force_reindex: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
     Run one cycle of video indexing across all channels.
@@ -2644,7 +2817,10 @@ async def run_video_indexing_cycle(
     )
 
     counts_before = _count_indexed_by_channel(INDEX_ROOT)
-    force_reindex = _consume_reindex_signal()
+    if force_reindex is None:
+        force_reindex = _consume_reindex_signal()
+    else:
+        force_reindex = bool(force_reindex)
 
     results = {}
     for channel_id in channels:
@@ -2703,13 +2879,22 @@ async def run_video_indexing_cycle(
             logger.info(f"[VIDEO-INDEX] Running Gemini analysis on {total_indexed} newly indexed videos...")
 
             for channel_id, ch_result in results.items():
+                channel_entry = get_channel_by_id(channel_id) or {}
+                channel_key = str(channel_entry.get("key") or channel_id)
                 video_ids = ch_result.get("videos", [])
                 for vid in video_ids[:max_videos_per_channel]:
                     try:
                         analysis = analyzer.analyze_video(vid)
                         if analysis.success:
-                            # Save to HoloIndex
-                            save_analysis_result(analysis, index_to_holoindex=True)
+                            # Preserve the channel's canonical Studio manifest;
+                            # attach API enrichment instead of overwriting it.
+                            save_analysis_result(
+                                analysis,
+                                output_dir=str(INDEX_ROOT),
+                                channel=channel_key,
+                                index_to_holoindex=True,
+                                merge_existing=True,
+                            )
 
                             # Generate hashtag suggestions
                             tags = suggest_hashtags(analysis)

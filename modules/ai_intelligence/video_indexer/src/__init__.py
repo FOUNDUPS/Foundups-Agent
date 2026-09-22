@@ -1,80 +1,72 @@
-"""
-Video Indexer Module - Comprehensive video content indexing for 012's YouTube channels.
+"""Video indexer public API with dependency-isolated lazy imports.
 
-WSP Compliance:
-    - WSP 49: Module Structure
-    - WSP 3: Domain Organization (ai_intelligence)
-    - WSP 72: Module Independence
-    - WSP 91: DAEMON Observability (telemetry, feature flags)
-
-Components:
-    - VideoIndexer: Main orchestrator with hardening
-    - GeminiVideoAnalyzer: Direct YouTube analysis via Gemini AI (Tier 1)
-    - AudioAnalyzer: ASR, diarization, NLP (Tier 2 fallback)
-    - VisualAnalyzer: Shot detection, faces, objects
-    - MultimodalAligner: Cross-modal moments
-    - ClipGenerator: Short-form extraction
-    - VideoIndexStore: JSON artifact storage
-    - IndexerConfig: Feature flags and automation gates
-    - IndexerTelemetry: JSONL heartbeat and breadcrumb integration
-
-Primary Use Case:
-    Live YouTube stream indexing for 012's consciousness streams.
-    Uses Gemini 2.0 Flash for direct video analysis without downloading.
+Importing a lightweight surface such as ``studio_ask_indexer`` or
+``action_surface`` must not require the optional Gemini, Whisper, OpenCV, or
+Gemma runtimes. The previous eager imports made every action fail when any one
+optional provider dependency was absent.
 """
 
-from .video_indexer import VideoIndexer, IndexResult, SearchResult, LayerResult
-from .gemini_video_analyzer import (
-    GeminiVideoAnalyzer,
-    GeminiAnalysisResult,
-    VideoSegment,
-    save_analysis_result,
-)
-from .audio_analyzer import AudioAnalyzer
-from .visual_analyzer import VisualAnalyzer, VisualResult
-from .multimodal_aligner import MultimodalAligner, MultimodalResult
-from .clip_generator import ClipGenerator, ClipGeneratorResult
-from .video_index_store import VideoIndexStore, IndexData
-from .indexer_config import IndexerConfig, get_indexer_config, reload_config
-from .indexer_telemetry import IndexerTelemetry, get_indexer_telemetry
-from .gemma_segment_classifier import (
-    GemmaSegmentClassifier,
-    SegmentClassification,
-    get_segment_classifier,
-)
+from __future__ import annotations
 
-__all__ = [
-    # Main orchestrator
-    "VideoIndexer",
-    "IndexResult",
-    "SearchResult",
-    "LayerResult",
-    # Gemini Analyzer (Tier 1 - PRIMARY)
-    "GeminiVideoAnalyzer",
-    "GeminiAnalysisResult",
-    "VideoSegment",
-    "save_analysis_result",
-    # Local Analyzers (Tier 2 fallback)
-    "AudioAnalyzer",
-    "VisualAnalyzer",
-    "VisualResult",
-    "MultimodalAligner",
-    "MultimodalResult",
-    "ClipGenerator",
-    "ClipGeneratorResult",
-    # Storage
-    "VideoIndexStore",
-    "IndexData",
-    # Hardening (WSP 91)
-    "IndexerConfig",
-    "get_indexer_config",
-    "reload_config",
-    "IndexerTelemetry",
-    "get_indexer_telemetry",
-    # Gemma Segment Classifier (Phase 9)
-    "GemmaSegmentClassifier",
-    "SegmentClassification",
-    "get_segment_classifier",
-]
+from typing import Dict, Tuple
 
-__version__ = "0.10.0"  # Gemma Segment Classifier for training data quality
+
+_EXPORTS: Dict[str, Tuple[str, str]] = {
+    "VideoIndexer": (".video_indexer", "VideoIndexer"),
+    "IndexResult": (".video_indexer", "IndexResult"),
+    "SearchResult": (".video_indexer", "SearchResult"),
+    "LayerResult": (".video_indexer", "LayerResult"),
+    "GeminiVideoAnalyzer": (".gemini_video_analyzer", "GeminiVideoAnalyzer"),
+    "GeminiAnalysisResult": (".gemini_video_analyzer", "GeminiAnalysisResult"),
+    "VideoSegment": (".gemini_video_analyzer", "VideoSegment"),
+    "save_analysis_result": (".gemini_video_analyzer", "save_analysis_result"),
+    "AudioAnalyzer": (".audio_analyzer", "AudioAnalyzer"),
+    "VisualAnalyzer": (".visual_analyzer", "VisualAnalyzer"),
+    "VisualResult": (".visual_analyzer", "VisualResult"),
+    "MultimodalAligner": (".multimodal_aligner", "MultimodalAligner"),
+    "MultimodalResult": (".multimodal_aligner", "MultimodalResult"),
+    "ClipGenerator": (".clip_generator", "ClipGenerator"),
+    "ClipGeneratorResult": (".clip_generator", "ClipGeneratorResult"),
+    "VideoIndexStore": (".video_index_store", "VideoIndexStore"),
+    "IndexData": (".video_index_store", "IndexData"),
+    "IndexerConfig": (".indexer_config", "IndexerConfig"),
+    "get_indexer_config": (".indexer_config", "get_indexer_config"),
+    "reload_config": (".indexer_config", "reload_config"),
+    "IndexerTelemetry": (".indexer_telemetry", "IndexerTelemetry"),
+    "get_indexer_telemetry": (".indexer_telemetry", "get_indexer_telemetry"),
+    "GemmaSegmentClassifier": (".gemma_segment_classifier", "GemmaSegmentClassifier"),
+    "SegmentClassification": (".gemma_segment_classifier", "SegmentClassification"),
+    "get_segment_classifier": (".gemma_segment_classifier", "get_segment_classifier"),
+}
+
+__all__ = list(_EXPORTS)
+__version__ = "0.31.0"
+
+
+def __getattr__(name: str):
+    """Lazy imports with a statically enumerable backend dependency closure."""
+    if name in ('VideoIndexer', 'IndexResult', 'SearchResult', 'LayerResult'):
+        from .video_indexer import VideoIndexer, IndexResult, SearchResult, LayerResult
+    elif name in ('GeminiVideoAnalyzer', 'GeminiAnalysisResult', 'VideoSegment', 'save_analysis_result'):
+        from .gemini_video_analyzer import GeminiVideoAnalyzer, GeminiAnalysisResult, VideoSegment, save_analysis_result
+    elif name in ('AudioAnalyzer',):
+        from .audio_analyzer import AudioAnalyzer
+    elif name in ('VisualAnalyzer', 'VisualResult'):
+        from .visual_analyzer import VisualAnalyzer, VisualResult
+    elif name in ('MultimodalAligner', 'MultimodalResult'):
+        from .multimodal_aligner import MultimodalAligner, MultimodalResult
+    elif name in ('ClipGenerator', 'ClipGeneratorResult'):
+        from .clip_generator import ClipGenerator, ClipGeneratorResult
+    elif name in ('VideoIndexStore', 'IndexData'):
+        from .video_index_store import VideoIndexStore, IndexData
+    elif name in ('IndexerConfig', 'get_indexer_config', 'reload_config'):
+        from .indexer_config import IndexerConfig, get_indexer_config, reload_config
+    elif name in ('IndexerTelemetry', 'get_indexer_telemetry'):
+        from .indexer_telemetry import IndexerTelemetry, get_indexer_telemetry
+    elif name in ('GemmaSegmentClassifier', 'SegmentClassification', 'get_segment_classifier'):
+        from .gemma_segment_classifier import GemmaSegmentClassifier, SegmentClassification, get_segment_classifier
+    else:
+        raise AttributeError(name)
+    value = locals()[name]
+    globals()[name] = value
+    return value
