@@ -7,6 +7,13 @@
 
 ## Change Log
 
+## 2026-09-23: Requested-note ordering and acknowledgment repair
+
+- WSP00/10/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Existing LinkedIn owner prepares requested notes before one explicit Send; failed Add/typing suppress Send and success credit. Unattempted Send is None. Preserve no-message fallback and manager/policy/preview behavior.
+- Frozen 23 cases: baseline 4 fail/19 pass, candidate 23 pass and independent same 23 pass; 17 compatibility controls/four legacy constructor definitions preserved, four deselected, two known warnings per run. Same-file bounded helpers reduce inherited size debt; no live delivery/browser/OS-isolation proof.
+- One backend digest and two pins refreshed; 1401 members unchanged. Eight manifest tests, 67-file package and canonical registry verified. Existing backlog records the separately scored next qualification; no native RSI or automatic runtime-upgrade claim.
+
+
 ## 2026-09-23: LinkedIn invitation acknowledgment qualification
 
 - WSP00/15/22/34/50/62/84/97; C2/I3/D3/Impact3=11/P2. Seven new finite acknowledgment cases reuse the existing inert fixture; existing17 compatibility cases and four legacy constructor definitions are preserved. Production source and backend manifest unchanged.

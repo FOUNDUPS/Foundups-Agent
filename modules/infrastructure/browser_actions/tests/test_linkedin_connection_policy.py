@@ -396,12 +396,13 @@ def test_connection_current_unavailable_manager_has_no_routes(connection_current
     assert not state.manager.connection_history and not state.manager.pending_requests
 
 
-# Current acknowledgment characterization, not a prospective delivery contract.
-# Script initial/final Send separately while retaining the existing inert fixture.
+# Requested-note ordering acceptance; local acknowledgment is not delivery proof.
+# Spare scripted replies keep baseline failures about behavior, not mock exhaustion.
 _ACK_NOTE = "Synthetic invitation note."
 _ACK_DIRECT_STEPS = ("connect", "send")
-_ACK_ADD_FAILED_STEPS = ("connect", "send", "add")
-_ACK_NOTE_STEPS = ("connect", "send", "add", "type", "send")
+_ACK_ADD_FAILED_STEPS = ("connect", "add")
+_ACK_TYPE_FAILED_STEPS = ("connect", "add", "type")
+_ACK_NOTE_STEPS = ("connect", "add", "type", "send")
 
 
 def _connection_ack_send_script(state, monkeypatch, outcomes):
@@ -434,25 +435,24 @@ def _connection_ack_calls(steps, message):
 
 
 @pytest.mark.parametrize(
-    "message,sends,add_note,typed,success,steps",
+    "message,sends,add_note,typed,send_success,send_calls,success,steps",
     [
-        pytest.param(None, (False,), None, None, True, _ACK_DIRECT_STEPS, id="no_note_missing_send"),
-        pytest.param(_ACK_NOTE, (False,), False, None, False, _ACK_ADD_FAILED_STEPS,
-                     id="add_failed_initial_send_failed"),
-        pytest.param(_ACK_NOTE, (True,), False, None, True, _ACK_ADD_FAILED_STEPS,
-                     id="add_failed_initial_send_succeeded"),
-        pytest.param(_ACK_NOTE, (False, True), True, True, True, _ACK_NOTE_STEPS,
-                     id="note_final_send_succeeded"),
-        pytest.param(_ACK_NOTE, (True, False), True, True, False, _ACK_NOTE_STEPS,
-                     id="note_final_failure_overwrites_initial_success"),
-        pytest.param(_ACK_NOTE, (False, True), True, False, True, _ACK_NOTE_STEPS,
-                     id="type_failed_final_send_succeeded"),
-        pytest.param(_ACK_NOTE, (False, False), True, False, False, _ACK_NOTE_STEPS,
-                     id="type_failed_final_send_failed"),
+        pytest.param(None, (False,), None, None, False, 1, True, _ACK_DIRECT_STEPS,
+                     id="no_note_missing_send"),
+        pytest.param("", (False,), None, None, False, 1, True, _ACK_DIRECT_STEPS,
+                     id="empty_note_missing_send"),
+        pytest.param(_ACK_NOTE, (True,), False, None, None, 0, False, _ACK_ADD_FAILED_STEPS,
+                     id="add_failure_prevents_send"),
+        pytest.param(_ACK_NOTE, (True, True), True, False, None, 0, False, _ACK_TYPE_FAILED_STEPS,
+                     id="type_failure_prevents_send"),
+        pytest.param(_ACK_NOTE, (True, True), True, True, True, 1, True, _ACK_NOTE_STEPS,
+                     id="note_single_send_succeeds"),
+        pytest.param(_ACK_NOTE, (False, False), True, True, False, 1, False, _ACK_NOTE_STEPS,
+                     id="note_single_send_fails"),
     ],
 )
-def test_connection_ack_characterizes_click_results(
-    connection_current, monkeypatch, message, sends, add_note, typed, success, steps,
+def test_connection_ack_note_sequence(
+    connection_current, monkeypatch, message, sends, add_note, typed, send_success, send_calls, success, steps,
 ):
     state = connection_current
     _connection_seed(state, "empty")
@@ -463,7 +463,7 @@ def test_connection_ack_characterizes_click_results(
     details = {
         "policy_reason": "allow role category matched", "matched_allow": ["founder"],
         "request_status": "pending", "profile": _CONNECTION_META,
-        "connect_click_success": True, "send_click_success": sends[-1],
+        "connect_click_success": True, "send_click_success": send_success,
         "add_note_success": add_note, "note_typed_success": typed,
     }
     error = None if success else "send_invitation_failed"
@@ -471,7 +471,7 @@ def test_connection_ack_characterizes_click_results(
     assert state.router.calls == _connection_ack_calls(steps, message)
     assert state.events == ["router:navigate", "policy", "manager", "policy", "simulation"] + [
         "router:click_by_description" for _ in steps]
-    assert send.call_args_list == [unittest.mock.call() for _ in sends]
+    assert send.call_args_list == [unittest.mock.call() for _ in range(send_calls)]
     _connection_pending(state)
     request = state.manager.connection_history[0]
     generated = "Hi John, I noticed your work at Tech Company and would love to connect!"
