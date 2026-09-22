@@ -1,3 +1,9 @@
+## 2026-09-22: Fixed dry-run safety and compatibility regressions
+
+- Replace the11 prior characterization expectations with54 fixed parameterized acceptance cases in the same file; original18 class AST preserved.647 lines, new functions at most31.
+- Baseline29fail/25pass contains expected product mismatches only. Identical candidate and independent selections each pass54, with18deselected, two configuration warnings and no errors/skips. No oracle edits between runs.
+- Import sentinel blocks real browser import; inert callbacks verify previews, forwarding and declared compatibility. No live account, provider, session or OS-sandbox proof. Exact evidence and next action are in the canonical root backlog.
+
 ## 2026-09-22: LinkedIn dry-run fixed characterization matrix
 
 - Add11 standalone synchronous cases with exact lazy browser-module replacement; constructor, write and close counters make the current unsafe behavior observable. Input task/params deep equality is preserved.

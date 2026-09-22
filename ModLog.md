@@ -1,3 +1,9 @@
+## 2026-09-22: RSI LinkedIn dry-run boundary repair
+
+- WSP00/10/15/22/50/62/84/97;14/P1. Existing wrapper enforces outer dry-run on copied write params; direct-like previews return before browser import/construction. Same-file helpers reduce inherited large functions.
+- Frozen54-case baseline29fail/25pass becomes54pass locally and independently; original18 tests preserved/deselected. No live social execution, runtime upgrade or retained-learning claim. Manifest/digest bindings refreshed in existing owners.
+- [Canonical backlog](docs/roadmaps/rsi_swarm_backlog.json) reconciles PR1866 closure and selects engagement-session dry-run13/P1 after this repair, with exact validation/publication boundaries.
+
 ## 2026-09-22: RSI LinkedIn dry-run boundary qualification
 
 - WSP00/10/15/22/50/62/84/97/99; qualification13/P1 after PR1863/1865 owner reconciliation. Existing adapter tests characterize wrapper flag conflicts and direct-like write callbacks using inert actions. Production guards are unchanged.

@@ -56,7 +56,7 @@ execution pipeline so that:
 
 ## Execution Contract
 
-Preflight the entire call chain before using the steps below. Known audit gap: nested `dry_run=false` can survive wrapper defaults, and some direct action routes do not enforce dry-run. Do not invoke a live route for a review-only task or treat a simulation as a verified send. In Work, use the advertised browser skill for browser interaction, not repository browser/session adapters.
+Preflight the entire call chain before using the steps below. The wrapper now enforces outer default/true over nested write flags; direct-like dry-run previews precede browser import/construction. Remaining gaps include engagement-session dry-run and other direct/agentic routes; see the existing review workflow for exact scope. Do not invoke a live route for a review-only task or treat a simulation as a verified send. In Work, use the advertised browser skill for browser interaction, not repository browser/session adapters.
 
 1. Parse task dict for `action` and `params` keys.
 2. Delegate to `execute_linkedin_action(action, params)` from adapter.

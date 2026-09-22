@@ -4,7 +4,7 @@
 
 The newsletter router has independent FoundUps / Eat the Startup, ROC / Return on Compute, and Japan Hyperscaler Report skills. Each retains its own corpus, destination discovery and completion state; a combined audit does not collapse them into one publication.
 
-[LinkedIn review workflow](docs/LINKEDIN_REVIEW_WORKFLOW.md): wsp00/01/02 routing, inbox-first triage, message-before-approval membership, and the Good/Bad/Ugly automation discussion. Updated skill contracts do not certify legacy live executors.
+[LinkedIn review workflow](docs/LINKEDIN_REVIEW_WORKFLOW.md): wsp00/01/02 routing, inbox-first triage, message-before-approval membership, and the Good/Bad/Ugly automation discussion. Updated skill contracts do not certify legacy live executors. The [scoped dry-run repair](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22) makes wrapper flags dominant and previews direct likes before browser initialization; it does not certify every route.
 
 ## [U+1F300] WSP Protocol Compliance Framework
 

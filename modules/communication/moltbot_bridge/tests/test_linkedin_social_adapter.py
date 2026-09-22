@@ -320,177 +320,327 @@ class TestLinkedInSocialAdapter(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result["planned_replies"][0]["agentic_requested"])
 
 
-# Current-behavior characterization, not dry-run safety acceptance. These cases
-# deliberately record fake writes that the separately declared future contract
-# must prevent. No real browser module or action client is used.
-def _linkedin_dry_run_characterization(task, *, direct=False, forwarding=False):
-    import asyncio
-    import sys
-    from contextlib import nullcontext
-    from copy import deepcopy
-    from types import ModuleType, SimpleNamespace
-    from unittest.mock import Mock
+# Safety acceptance replaces the prior eleven current-behavior characterizations.
+# Real package bootstrap remains excluded by the reviewed synchronous runner.
+import asyncio
+import builtins
+import sys
+from copy import deepcopy
+from types import ModuleType, SimpleNamespace
+from unittest.mock import Mock
 
-    before = deepcopy(task)
-    fake_result = SimpleNamespace(success=True, to_dict=lambda: {"success": True})
+import pytest
+
+
+@pytest.fixture
+def linkedin_inert(monkeypatch):
+    adapter = sys.modules[execute_linkedin_action.__module__]
+    module_name = "modules.infrastructure.browser_actions.src.linkedin_actions"
+    outcome = SimpleNamespace(success=True, to_dict=lambda: {"success": True})
     client = SimpleNamespace(
-        like_post=AsyncMock(return_value=fake_result),
-        like_and_reply=AsyncMock(return_value=fake_result),
-        reply_to_post=AsyncMock(return_value=fake_result),
-        read_feed=AsyncMock(return_value=[{"post_id": "synthetic_post"}]),
-        close=Mock(),
+        like_post=AsyncMock(return_value=outcome),
+        like_and_reply=AsyncMock(return_value=outcome),
+        reply_to_post=AsyncMock(return_value=outcome),
+        read_feed=AsyncMock(return_value=[{"post_id": "synthetic_post"}]), close=Mock(),
     )
     factory = Mock(return_value=client)
-    module_name = "modules.infrastructure.browser_actions.src.linkedin_actions"
-    browser = ModuleType(module_name)
-    browser.LinkedInActions = factory
-    adapter = sys.modules[execute_linkedin_action.__module__]
-    recorder = AsyncMock(return_value={"success": True}) if forwarding else None
-    replacement = (
-        patch.object(adapter, "execute_linkedin_action", new=recorder)
-        if forwarding else nullcontext()
-    )
-    with patch.dict(sys.modules, {module_name: browser}), replacement:
-        if direct:
-            result = asyncio.run(execute_linkedin_action(task["action"], task["params"]))
-        else:
-            from modules.platform_integration.linkedin_agent.skillz.linkedin_engagement.executor import execute
+    fake = ModuleType(module_name)
+    fake.LinkedInActions = factory
+    monkeypatch.setitem(sys.modules, module_name, fake)
+    agentic = AsyncMock(return_value={"success": True, "route": "inert_agentic"})
+    draft = AsyncMock(side_effect=AssertionError("unexpected provider drafting"))
+    monkeypatch.setattr(adapter, "_execute_agentic_linkedin_skill", agentic)
+    monkeypatch.setattr(adapter, "_draft_agentic_linkedin_reply", draft)
+    state = SimpleNamespace(adapter=adapter, client=client, factory=factory,
+                            agentic=agentic, draft=draft, deny_import=False, imports=[])
+    original_import = builtins.__import__
 
-            result = execute(task)
-    assert task == before
-    assert result["success"] is True
-    return result, factory, client, recorder
+    def tracked_import(name, *args, **kwargs):
+        if name == module_name:
+            state.imports.append(name)
+            if state.deny_import:
+                raise AssertionError("browser import forbidden before preview")
+        return original_import(name, *args, **kwargs)
 
-
-def _assert_linkedin_characterized_callbacks(factory, client, *, constructed, writes):
-    assert factory.call_count == constructed
-    assert client.close.call_count == constructed
-    assert sum(action.await_count for action in (
-        client.like_post, client.like_and_reply, client.reply_to_post,
-    )) == writes
+    monkeypatch.setattr(builtins, "__import__", tracked_import)
+    return state
 
 
-def _assert_linkedin_characterized_forwarding(task, expected):
-    result, factory, client, recorder = _linkedin_dry_run_characterization(
-        task, forwarding=True,
-    )
-    recorder.assert_awaited_once_with(task["action"], expected)
+def _linkedin_direct(action, params, observer=None):
+    before = deepcopy(params)
+    with pytest.raises(RuntimeError, match="no running event loop"):
+        asyncio.get_running_loop()
+    try:
+        return asyncio.run(execute_linkedin_action(action, params, observer))
+    finally:
+        assert params == before
+
+
+def _linkedin_wrapper(task):
+    from modules.platform_integration.linkedin_agent.skillz.linkedin_engagement.executor import execute
+
+    before = deepcopy(task)
+    with pytest.raises(RuntimeError, match="no running event loop"):
+        asyncio.get_running_loop()
+    try:
+        return execute(task)
+    finally:
+        assert task == before
+
+
+def _linkedin_no_effects(state):
+    assert state.imports == []
+    state.factory.assert_not_called()
+    state.client.close.assert_not_called()
+    state.agentic.assert_not_awaited()
+    state.draft.assert_not_awaited()
+    for name in ("like_post", "like_and_reply", "reply_to_post", "read_feed"):
+        getattr(state.client, name).assert_not_awaited()
+
+
+def _linkedin_preview(action, index=2, post_id="index_2"):
+    result = {"success": True, "action": action, "dry_run": True,
+              "post_id": post_id, "post_index": index}
+    if action == "like_reply":
+        result.update(reply_text="Synthetic reply", agentic_requested=False, draft=None)
+    return result
+
+
+@pytest.mark.parametrize("outer,nested", [
+    ("omitted", "false"), (True, "false"), ("omitted", False),
+    (True, False), (True, "missing"), (False, "true"),
+])
+def test_linkedin_dry_run_wrapper_precedence(linkedin_inert, monkeypatch, outer, nested):
+    task = {"action": "reply_post", "params": {"reply_text": "Synthetic reply"}}
+    if outer != "omitted":
+        task["dry_run"] = outer
+    if nested != "missing":
+        task["params"]["dry_run"] = nested
+    recorder = AsyncMock(return_value={"success": True})
+    monkeypatch.setattr(linkedin_inert.adapter, "execute_linkedin_action", recorder)
+    result = _linkedin_wrapper(task)
+    expected = {"reply_text": "Synthetic reply", "dry_run": "false" if outer is False else "true"}
+    recorder.assert_awaited_once_with("reply_post", expected)
     assert recorder.await_args.args[1] is not task["params"]
-    assert result["params"] == expected
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=0, writes=0)
-    client.read_feed.assert_not_awaited()
+    assert result["params"] == expected and result["success"] is True
+    _linkedin_no_effects(linkedin_inert)
 
 
-def test_linkedin_dry_run_characterizes_default_nested_false_forwarding():
-    task = {"action": "reply_post", "params": {"dry_run": "false", "reply_text": "Synthetic reply"}}
-    _assert_linkedin_characterized_forwarding(task, dict(task["params"]))
+@pytest.mark.parametrize("action", [
+    "like_post", "reply_post", "like_reply", "scam_reply", "scam_scan_reply",
+    "engagement_session", "connect", "digital_twin", "group_post",
+])
+def test_linkedin_dry_run_all_write_flags(linkedin_inert, monkeypatch, action):
+    recorder = AsyncMock(return_value={"success": True})
+    monkeypatch.setattr(linkedin_inert.adapter, "execute_linkedin_action", recorder)
+    result = _linkedin_wrapper({"action": action, "params": {"dry_run": "false"}})
+    recorder.assert_awaited_once_with(action, {"dry_run": "true"})
+    assert result["success"] is True
+    _linkedin_no_effects(linkedin_inert)
 
 
-def test_linkedin_dry_run_characterizes_true_nested_false_forwarding():
-    task = {
-        "action": "reply_post", "dry_run": True,
-        "params": {"dry_run": "false", "reply_text": "Synthetic reply"},
-    }
-    _assert_linkedin_characterized_forwarding(task, dict(task["params"]))
-
-
-def test_linkedin_dry_run_characterizes_true_adds_missing_nested_flag():
-    task = {"action": "reply_post", "dry_run": True, "params": {"reply_text": "Synthetic reply"}}
-    _assert_linkedin_characterized_forwarding(
-        task, {"reply_text": "Synthetic reply", "dry_run": "true"},
-    )
-
-
-def test_linkedin_dry_run_characterizes_false_overrides_nested_true():
-    task = {
-        "action": "reply_post", "dry_run": False,
-        "params": {"dry_run": "true", "reply_text": "Synthetic reply"},
-    }
-    _assert_linkedin_characterized_forwarding(
-        task, {"reply_text": "Synthetic reply", "dry_run": "false"},
-    )
-
-
-def test_linkedin_dry_run_characterizes_read_control_without_added_flag():
-    task = {"action": "read_feed", "params": {"max_posts": "2"}}
-    result, factory, client, _ = _linkedin_dry_run_characterization(task)
+def test_linkedin_dry_run_read_control(linkedin_inert):
+    result = _linkedin_wrapper({"action": "read_feed", "params": {"max_posts": "2"}})
     assert result["params"] == {"max_posts": "2"}
-    assert result["params"] is not task["params"]
     assert result["result"]["posts"] == [{"post_id": "synthetic_post"}]
-    client.read_feed.assert_awaited_once_with(max_posts=2)
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=0)
+    linkedin_inert.client.read_feed.assert_awaited_once_with(max_posts=2)
+    linkedin_inert.factory.assert_called_once()
+    linkedin_inert.client.close.assert_called_once_with()
+    for name in ("like_post", "like_and_reply", "reply_to_post"):
+        getattr(linkedin_inert.client, name).assert_not_awaited()
 
 
-def test_linkedin_dry_run_characterizes_direct_like_post_fake_write():
-    task = {"action": "like_post", "params": {"post_index": "2", "dry_run": "true"}}
-    result, factory, client, _ = _linkedin_dry_run_characterization(task, direct=True)
-    assert result["action"] == "like_post"
-    client.like_post.assert_awaited_once_with(post_id="index_2", post_index=2)
-    client.read_feed.assert_not_awaited()
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+@pytest.mark.parametrize("route", ["direct", "wrapper", "wrapper_conflict"])
+def test_linkedin_dry_run_reply_guard_after_construction(linkedin_inert, route):
+    params = {"reply_text": "Synthetic reply", "dry_run": "true"}
+    if route == "direct":
+        result = _linkedin_direct("reply_post", params)
+    else:
+        if route == "wrapper_conflict":
+            params["dry_run"] = "false"
+        result = _linkedin_wrapper({"action": "reply_post", "params": params})["result"]
+    assert result == _linkedin_preview("like_reply", index=0, post_id="index_0") | {"action": "reply_post"}
+    linkedin_inert.factory.assert_called_once()
+    linkedin_inert.client.close.assert_called_once_with()
+    linkedin_inert.client.reply_to_post.assert_not_awaited()
 
 
-def test_linkedin_dry_run_characterizes_direct_like_reply_fake_write():
-    task = {
-        "action": "like_reply",
-        "params": {"post_index": "2", "dry_run": "true", "reply_text": "Synthetic reply"},
-    }
-    result, factory, client, _ = _linkedin_dry_run_characterization(task, direct=True)
-    assert result["action"] == "like_reply"
-    client.like_and_reply.assert_awaited_once_with(
-        post_id="index_2", post_index=2, reply_text="Synthetic reply",
-    )
-    client.read_feed.assert_not_awaited()
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+@pytest.mark.parametrize("action", ["like_post", "like_reply"])
+@pytest.mark.parametrize("index,post_id,expected_index,expected_id", [
+    ("2", " explicit-id ", 2, "explicit-id"), ("invalid", " ", 0, "index_0"),
+])
+def test_linkedin_dry_run_early_preview(linkedin_inert, action, index, post_id, expected_index, expected_id):
+    linkedin_inert.deny_import = True
+    params = {"dry_run": "true", "post_index": index, "post_id": post_id,
+              "reply_text": " Synthetic reply "}
+    result = _linkedin_direct(action, params)
+    assert result == _linkedin_preview(action, expected_index, expected_id)
+    _linkedin_no_effects(linkedin_inert)
 
 
-def test_linkedin_dry_run_characterizes_reply_guard_after_construction():
-    task = {
-        "action": "reply_post",
-        "params": {"post_index": "2", "dry_run": "true", "reply_text": "Synthetic reply"},
-    }
-    result, factory, client, _ = _linkedin_dry_run_characterization(task, direct=True)
-    assert result["dry_run"] is True
-    assert result["agentic_requested"] is False
-    assert result["reply_text"] == "Synthetic reply"
-    client.read_feed.assert_not_awaited()
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=0)
+@pytest.mark.parametrize("flag", [True, " TRUE ", "yes", "on"])
+def test_linkedin_dry_run_truthy_preview(linkedin_inert, flag):
+    linkedin_inert.deny_import = True
+    result = _linkedin_direct("like_post", {"dry_run": flag, "post_index": "2", "agentic": "true"})
+    assert result == _linkedin_preview("like_post")
+    _linkedin_no_effects(linkedin_inert)
 
 
-def test_linkedin_dry_run_characterizes_wrapper_conflict_reaching_fake_reply():
-    task = {
-        "action": "reply_post",
-        "params": {"post_index": "2", "dry_run": "false", "reply_text": "Synthetic reply"},
-    }
-    result, factory, client, _ = _linkedin_dry_run_characterization(task)
-    assert result["params"]["dry_run"] == "false"
-    client.reply_to_post.assert_awaited_once_with(
-        post_id="index_2", post_index=2, reply_text="Synthetic reply",
-    )
-    client.read_feed.assert_not_awaited()
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+def test_linkedin_dry_run_missing_reply(linkedin_inert):
+    linkedin_inert.deny_import = True
+    result = _linkedin_direct("like_reply", {"dry_run": "true", "reply_text": " "})
+    assert result == {"success": False, "action": "like_reply", "error": "missing reply_text",
+                      "agentic_requested": False, "draft": None}
+    _linkedin_no_effects(linkedin_inert)
 
 
-def test_linkedin_dry_run_characterizes_wrapper_reply_preview_control():
-    task = {
-        "action": "reply_post", "dry_run": True,
-        "params": {"post_index": "2", "reply_text": "Synthetic reply"},
-    }
-    result, factory, client, _ = _linkedin_dry_run_characterization(task)
-    assert result["params"]["dry_run"] == "true"
-    assert result["result"]["dry_run"] is True
-    assert result["result"]["agentic_requested"] is False
-    client.read_feed.assert_not_awaited()
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=0)
+def test_linkedin_dry_run_agentic_route(linkedin_inert):
+    linkedin_inert.deny_import = True
+    params = {"dry_run": "true", "agentic": "true", "browser_port": "invalid"}
+    observer = object()
+    result = _linkedin_direct("like_reply", params, observer)
+    assert result == {"success": True, "route": "inert_agentic"}
+    linkedin_inert.agentic.assert_awaited_once_with("like_reply", params, observer)
+    assert linkedin_inert.agentic.await_args.args[1] is params
+    assert linkedin_inert.imports == []
+    linkedin_inert.factory.assert_not_called()
+    linkedin_inert.draft.assert_not_awaited()
 
 
-def test_linkedin_dry_run_characterizes_wrapper_true_reaching_fake_like():
-    task = {"action": "like_post", "dry_run": True, "params": {"post_index": "2"}}
-    result, factory, client, _ = _linkedin_dry_run_characterization(task)
-    assert result["params"]["dry_run"] == "true"
-    client.like_post.assert_awaited_once_with(post_id="index_2", post_index=2)
-    client.read_feed.assert_not_awaited()
-    _assert_linkedin_characterized_callbacks(factory, client, constructed=1, writes=1)
+@pytest.mark.parametrize("action", ["like_post", "like_reply"])
+def test_linkedin_dry_run_invalid_port(linkedin_inert, action):
+    linkedin_inert.deny_import = True
+    with pytest.raises(ValueError):
+        _linkedin_direct(action, {"dry_run": "true", "browser_port": "invalid", "reply_text": "reply"})
+    _linkedin_no_effects(linkedin_inert)
+
+
+@pytest.mark.parametrize("action,field", [("like_post", "post_id"), ("like_reply", "reply_text")])
+def test_linkedin_dry_run_invalid_field(linkedin_inert, action, field):
+    linkedin_inert.deny_import = True
+    with pytest.raises(AttributeError):
+        _linkedin_direct(action, {"dry_run": "true", field: None})
+    _linkedin_no_effects(linkedin_inert)
+
+
+@pytest.mark.parametrize("action", ["like_post", "like_reply"])
+def test_linkedin_dry_run_wrapper_preview(linkedin_inert, action):
+    linkedin_inert.deny_import = True
+    task = {"action": action, "dry_run": True,
+            "params": {"dry_run": "false", "post_index": "2", "reply_text": " Synthetic reply "}}
+    result = _linkedin_wrapper(task)
+    assert result["success"] is True and result["params"]["dry_run"] == "true"
+    assert result["result"] == _linkedin_preview(action)
+    _linkedin_no_effects(linkedin_inert)
+
+
+@pytest.mark.parametrize("action,method", [("like_post", "like_post"), ("like_reply", "like_and_reply")])
+@pytest.mark.parametrize("flag", ["omitted", "false"])
+def test_linkedin_dry_run_live_compatibility(linkedin_inert, action, method, flag):
+    params = {"post_index": "2", "post_id": " explicit-id ", "reply_text": " Synthetic reply ",
+              "profile": "synthetic", "browser_port": "9223"}
+    if flag != "omitted":
+        params["dry_run"] = flag
+    observer = object()
+    result = _linkedin_direct(action, params, observer)
+    expected = {"success": True, "action": action, "result": {"success": True}}
+    args = {"post_id": "explicit-id", "post_index": 2}
+    if action == "like_reply":
+        args["reply_text"] = "Synthetic reply"
+        expected.update(reply_text="Synthetic reply", agentic_requested=False, draft=None)
+    assert result == expected
+    getattr(linkedin_inert.client, method).assert_awaited_once_with(**args)
+    linkedin_inert.factory.assert_called_once_with(profile="synthetic", browser_port=9223, dom_action_observer=observer)
+    linkedin_inert.client.close.assert_called_once_with()
+    linkedin_inert.agentic.assert_not_awaited()
+    linkedin_inert.draft.assert_not_awaited()
+
+
+@pytest.mark.parametrize("action,method", [("like_post", "like_post"), ("like_reply", "like_and_reply")])
+@pytest.mark.parametrize("phase", ["constructor", "action", "close"])
+def test_linkedin_dry_run_live_errors(linkedin_inert, action, method, phase):
+    exc = RuntimeError("synthetic " + phase)
+    target = {"constructor": linkedin_inert.factory, "action": getattr(linkedin_inert.client, method),
+              "close": linkedin_inert.client.close}[phase]
+    target.side_effect = exc
+    with pytest.raises(RuntimeError) as caught:
+        _linkedin_direct(action, {"reply_text": "reply", "dry_run": "false"})
+    assert caught.value is exc
+    assert linkedin_inert.client.close.call_count == (0 if phase == "constructor" else 1)
+    assert getattr(linkedin_inert.client, method).await_count == (0 if phase == "constructor" else 1)
+
+
+def test_linkedin_dry_run_close_error_wins(linkedin_inert):
+    linkedin_inert.client.like_post.side_effect = ValueError("action")
+    exc = RuntimeError("close")
+    linkedin_inert.client.close.side_effect = exc
+    with pytest.raises(RuntimeError) as caught:
+        _linkedin_direct("like_post", {})
+    assert caught.value is exc and isinstance(caught.value.__context__, ValueError)
+    linkedin_inert.client.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize("action,error", [("", "no_action_specified"), ("NOT_SUPPORTED", "unsupported_action")])
+def test_linkedin_dry_run_wrapper_validation(linkedin_inert, monkeypatch, action, error):
+    recorder = AsyncMock(side_effect=AssertionError("unexpected delegation"))
+    monkeypatch.setattr(linkedin_inert.adapter, "execute_linkedin_action", recorder)
+    result = _linkedin_wrapper({"action": action})
+    assert result["success"] is False and result["error"] == error
+    assert result["skill"] == "linkedin_engagement" and len(result["supported"]) == 13
+    if action:
+        assert result["action"] == "not_supported"
+    else:
+        assert "action" not in result
+    recorder.assert_not_awaited()
+    _linkedin_no_effects(linkedin_inert)
+
+
+@pytest.mark.parametrize("exc,error", [(ImportError("synthetic import"), "adapter_import_failed"),
+                                      (ValueError("x" * 600), "execution_failed")])
+def test_linkedin_dry_run_wrapper_error_envelope(linkedin_inert, monkeypatch, exc, error):
+    from modules.platform_integration.linkedin_agent.skillz.linkedin_engagement import executor
+
+    monkeypatch.setattr(executor, "time", SimpleNamespace(monotonic=Mock(side_effect=[1.0, 1.125])))
+    recorder = AsyncMock(side_effect=exc)
+    monkeypatch.setattr(linkedin_inert.adapter, "execute_linkedin_action", recorder)
+    result = _linkedin_wrapper({"action": "like_post"})
+    expected = {"success": False, "skill": "linkedin_engagement", "action": "like_post",
+                "error": error, "detail": str(exc) if error == "adapter_import_failed" else str(exc)[:500]}
+    if error == "execution_failed":
+        expected["execution_time_ms"] = 125
+    assert result == expected
+    recorder.assert_awaited_once_with("like_post", {"dry_run": "true"})
+    _linkedin_no_effects(linkedin_inert)
+
+
+@pytest.mark.parametrize("payload,success", [({"success": True}, True), ({"success": False}, False), ([], False)])
+def test_linkedin_dry_run_wrapper_result_envelope(linkedin_inert, monkeypatch, payload, success):
+    from modules.platform_integration.linkedin_agent.skillz.linkedin_engagement import executor
+
+    monkeypatch.setattr(executor, "time", SimpleNamespace(monotonic=Mock(side_effect=[1.0, 1.125])))
+    recorder = AsyncMock(return_value=payload)
+    monkeypatch.setattr(linkedin_inert.adapter, "execute_linkedin_action", recorder)
+    result = _linkedin_wrapper({"action": " LIKE_POST ", "sender": "synthetic", "params": {}})
+    assert result == {"success": success, "skill": "linkedin_engagement", "action": "like_post",
+                      "sender": "synthetic", "params": {"dry_run": "true"}, "result": payload,
+                      "execution_time_ms": 125}
+    recorder.assert_awaited_once_with("like_post", {"dry_run": "true"})
+    _linkedin_no_effects(linkedin_inert)
+
+
+def test_linkedin_dry_run_wrapper_import_error(linkedin_inert, monkeypatch):
+    original_import = builtins.__import__
+
+    def failed_adapter_import(name, *args, **kwargs):
+        if name == execute_linkedin_action.__module__:
+            raise ImportError("synthetic missing adapter")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", failed_adapter_import)
+    result = _linkedin_wrapper({"action": "like_post"})
+    assert result == {"success": False, "skill": "linkedin_engagement", "action": "like_post",
+                      "error": "adapter_import_failed", "detail": "synthetic missing adapter"}
+    _linkedin_no_effects(linkedin_inert)
 
 
 if __name__ == "__main__":

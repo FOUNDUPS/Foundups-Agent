@@ -4,8 +4,8 @@
 
 - Instruction-level master and activity children: implemented; see [routing](docs/LINKEDIN_ACTIVITY_ROUTING.md). Newsletter routing now has dedicated FoundUps, ROC and JHR child skills under one LinkedIn/newsletter master.
 - Existing moderation/news owners reused with researched message-first membership and reviewed Good/Bad/Ugly discussion.
-- Legacy runtime safety (nested dry-run, direct action guards, simulated messaging, persistent deduplication): not certified by this documentation work. Do not launch unattended live jobs.
-- RSI dry-run qualification now binds the wrapper/direct-action gaps to [finite fake-only evidence and future repair criteria](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-boundary-qualification--2026-09-22). Qualification does not repair or activate these routes.
+- Legacy runtime safety (engagement-session dry-run, other direct action guards, simulated messaging, persistent deduplication) remains incomplete. The scoped wrapper/direct-like repair below does not authorize unattended live jobs.
+- RSI wrapper/direct-like dry-run repair passes54 fixed cases locally and independently; see [current contract](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22). Engagement-session dry-run remains the next13/P1 gap; this is not all-route or live-account certification.
 - Historical daily news quotas and identity-like loops below are implementation history, not current operating authority.
 
 ## Overview

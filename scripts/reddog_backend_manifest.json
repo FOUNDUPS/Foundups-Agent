@@ -1843,7 +1843,7 @@
     "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_liveness.py": "888ca1267c4810afe3128ba1ef9bc45d6117858ac2ff37f064ed8c9bf918078c",
     "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py": "30d7479faa5c2c3cc0127986846667aab2badbac889a4edce1cff8e7795eadf0",
     "modules/communication/moltbot_bridge/src/ironclaw_gateway_client.py": "c950d9f148056ce25c151e8c17bd9095a12a8c4bbfb78351d5531111cb1a8b56",
-    "modules/communication/moltbot_bridge/src/linkedin_social_adapter.py": "f3c8ff1cb03010ab4fbab10e8b3a8acfff0778bd975dfff0fb9664024daf61f4",
+    "modules/communication/moltbot_bridge/src/linkedin_social_adapter.py": "cbf3af07957a4ddb7c08f2b26bf199eaefe38fece09f7ac51f28d8248532069c",
     "modules/communication/moltbot_bridge/src/memory_nudge_engine.py": "e7e184a8871f33c436e92d23eb500a0c31978511b216d061cc1ac2c5b4f60d6a",
     "modules/communication/moltbot_bridge/src/moltbook_distribution_adapter.py": "da0b3dad2835ac68d7032a79f2f24a2c31cf454531069c3f589e9dc6d370bd34",
     "modules/communication/moltbot_bridge/src/openclaw_action_ledger.py": "7bd336027b11f63975ae6a03c6e90d15bb6a437f7497c78ceded63d36a230f90",
