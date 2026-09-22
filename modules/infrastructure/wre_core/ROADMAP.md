@@ -211,6 +211,19 @@ and a complete repository RSI cycle are different units.
 | AI Gateway model AutoResearch | Existing [benchmark and feedback contracts](../../ai_intelligence/ai_gateway/INTERFACE.md#benchmark-evidence-and-outcome-receipts) bind task family/split, model, verifier, cost and latency. | Reuse for model selection under current provider budgets/admission. A model campaign is not a generic repository editor. |
 | WRE differential tests, independent slice verifier and PatternMemory | Existing [verification and retention contracts](INTERFACE.md#outcome-recording-and-retention). Production acceptance/activation and later benefit remain incomplete. | Bind accepted evidence to the exact artifact and prove a later invocation consumes it successfully; keep write/read/promotion authorities distinct. |
 
+### Current core canary test checkpoint — 2026-09-23
+
+The resident canary's admission gate blocks its deferred evidence mutations.
+The existing integration suite now makes that boundary explicit: 15 frozen cases
+pass locally and independently, including two zero-callback witnesses and three
+real pure chain-validator checks. Production gates and source are unchanged.
+This closes a bounded coverage qualification, not the native canary or R15.
+AmIBot remains registered but undispatched. Memory Horizon is a separately owned
+open proposal in PR #1822. WRE ROC AutoResearch remains task-specific dry-run
+research; AI Gateway model campaigns/Fusion routing are distinct existing paths.
+The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) binds source,
+fixture evidence and the freshly scored core integration prerequisite.
+
 ### Bounded campaign and report acceptance
 
 1. Freeze the selected WSP-15/WSP-97 ticket, exact base/candidate, allowed paths,

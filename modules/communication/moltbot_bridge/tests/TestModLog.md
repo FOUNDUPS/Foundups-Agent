@@ -1,3 +1,9 @@
+## 2026-09-23: Core RSI canary callback and chain-evidence qualification
+
+- WSP 00/15/22/34/50/62/97; C3/I4/D4/Impact4 = 15/P1. Reused the resident canary integration suite; production and shared fixtures are unchanged.
+- Fifteen frozen cases pass locally and independently: ten existing blocked-path cases, two callback/constructor witnesses, and three direct chain-validator controls. Admission rejection leaves the runner, evidence mutations and PatternMemory constructor uncalled; schema/revision mutations are separately checked by the real pure validator. This does not prove a completed native canary or retained learning.
+- Runner qualification exposed Windows capture, logging, subprocess class/argument and extended-path compatibility failures before product assertions. Reviewed runner corrections changed no oracle; all attempts are retained. Existing roadmap/backlog records AmIBot's undispatched registry state, separately owned Memory Horizon PR #1822, and distinct WRE ROC/model AutoResearch boundaries. Registry remains current at 1,656 files / 269 quarantined.
+
 ## 2026-09-23: DAE branch-local acquisition repair
 
 - WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Existing adapter rejects unresolved/unauthorized requests before acquisition, then obtains only the required collaborator. Bounded same-file helpers preserve parser, response, callback, actor, cursor and required creating-getter semantics.

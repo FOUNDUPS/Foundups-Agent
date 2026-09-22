@@ -1,3 +1,9 @@
+## 2026-09-23: Core RSI canary callback and chain-evidence qualification
+
+- WSP 00/15/22/34/50/62/97; C3/I4/D4/Impact4 = 15/P1. Reused the resident canary integration suite; production and shared fixtures are unchanged.
+- Fifteen frozen cases pass locally and independently: ten existing blocked-path cases, two callback/constructor witnesses, and three direct chain-validator controls. Admission rejection leaves the runner, evidence mutations and PatternMemory constructor uncalled; schema/revision mutations are separately checked by the real pure validator. This does not prove a completed native canary or retained learning.
+- Runner qualification exposed Windows capture, logging, subprocess class/argument and extended-path compatibility failures before product assertions. Reviewed runner corrections changed no oracle; all attempts are retained. Existing roadmap/backlog records AmIBot's undispatched registry state, separately owned Memory Horizon PR #1822, and distinct WRE ROC/model AutoResearch boundaries. Registry remains current at 1,656 files / 269 quarantined.
+
 ## 2026-09-23: Requested-note ordering and acknowledgment repair
 
 - WSP00/10/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Existing LinkedIn owner prepares requested notes before one explicit Send; failed Add/typing suppress Send and success credit. Unattempted Send is None. Preserve no-message fallback and manager/policy/preview behavior.

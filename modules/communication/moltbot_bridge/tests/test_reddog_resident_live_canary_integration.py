@@ -201,3 +201,82 @@ def test_worktree_proof_requires_registered_git_worktree(tmp_path: Path, failure
 
     receipt = _execute(repo, runtime, chain_mutator=mutate)
     _assert_missing_anchor_block(receipt)
+
+
+@pytest.mark.parametrize("execute", [False, True], ids=["readiness-only", "execute-requested"])
+def test_blocked_canary_never_invokes_deferred_callbacks(tmp_path: Path, monkeypatch, execute: bool) -> None:
+    """Current readiness rejection does not exercise downstream mutations."""
+    from datetime import datetime
+    from unittest.mock import Mock
+
+    from modules.communication.moltbot_bridge.src import reddog_verified_pattern_memory_sink as sink
+    from modules.communication.moltbot_bridge.tests import reddog_resident_live_canary_test_support as support
+
+    repo, runtime = _roots(tmp_path)
+    support._write_pre_state(repo, runtime)
+    chain_path = runtime / "resident_queue_chain_results.json"
+    before = chain_path.read_bytes()
+    chain_mutator = Mock(side_effect=AssertionError("chain mutation must not run"))
+    pattern_mutator = Mock(side_effect=AssertionError("database mutation must not run"))
+    memory_constructor = Mock(side_effect=AssertionError("PatternMemory must not open"))
+    monkeypatch.setattr(sink, "PatternMemory", memory_constructor)
+    runner = Mock(wraps=support._runner(
+        repo, runtime, chain_mutator=chain_mutator, pattern_db_mutator=pattern_mutator
+    ))
+
+    receipt = support.run_reddog_resident_live_canary(
+        **support._kwargs(repo, runtime), execute=execute,
+        confirmation=support.LIVE_CANARY_CONFIRMATION,
+        queue_item_id=support.QUEUE_ID, control_loop_runner=runner,
+        now=lambda: datetime.fromisoformat(support.NOW),
+    )
+
+    _assert_missing_anchor_block(receipt)
+    assert receipt.status == "BLOCKED"
+    assert receipt.execution_requested is execute
+    assert receipt.execution_invoked is False
+    runner.assert_not_called()
+    chain_mutator.assert_not_called()
+    pattern_mutator.assert_not_called()
+    memory_constructor.assert_not_called()
+    assert chain_path.read_bytes() == before
+    assert not (runtime / "pattern_memory.db").exists()
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected_blockers"),
+    [
+        ("prestate", ("resident_chain_not_complete", "new_chain_store_receipt_not_observed")),
+        ("schema", ("chain_results_schema_mismatch",)),
+        ("revision", ("chain_results_revision_invalid",)),
+    ],
+    ids=["incomplete-prestate", "schema-mismatch", "revision-mismatch"],
+)
+def test_uninvoked_chain_leaf_reports_specific_blockers(tmp_path: Path, mutation: str, expected_blockers) -> None:
+    """Exercise pure chain checks without admitting or executing a canary."""
+    from modules.communication.moltbot_bridge.src import reddog_resident_live_canary_evidence as evidence
+    from modules.communication.moltbot_bridge.tests import reddog_resident_live_canary_test_support as support
+
+    repo, runtime = _roots(tmp_path)
+    state = support._write_pre_state(repo, runtime)
+    chain_path = runtime / "resident_queue_chain_results.json"
+    before = chain_path.read_bytes()
+    previous_revision = state["revision"]
+    if mutation == "schema":
+        state["schema_version"] = "wrong"
+    elif mutation == "revision":
+        state["revision"] = "sha256:" + "0" * 64
+    invocation = evidence.CanaryInvocationEvidence(
+        confirmed=False, invoked=False, blockers=("synthetic_evidence_only",),
+        control_result={}, control_receipt={}, control_receipt_id=None,
+        previous_revision=previous_revision, observed_revision=state["revision"],
+        pre_chain_receipt_ids=evidence.chain_receipt_ids(state),
+        work_state=support._snapshot(), chain_state=state,
+    )
+
+    plan, blockers = evidence._chain_evidence(invocation, support.QUEUE_ID, support.NOW)
+
+    assert blockers == expected_blockers
+    assert (plan is not None) is (mutation == "prestate")
+    assert invocation.invoked is False
+    assert chain_path.read_bytes() == before
