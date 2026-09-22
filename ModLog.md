@@ -1,3 +1,9 @@
+## 2026-09-23: GotJunk dependency qualification and RSI re-selection
+
+- WSP00/15/22/50/62/97; C2/I4/D4/Impact4=14/P1. Independent source/owner qualification binds alert103, current Firebase/gRPC/protobufjs graph and all15 dependency PRs (14 frontend, one backend). Every frontend head retains protobufjs7.5.4; no existing remediation head.
+- Generic CI is not GotJunk build evidence; all module-path main changes, including docs, trigger deployment. Keep this record in existing system owners. No product/dependency edits, installs, builds, runtime tests or deployment; static applicability limits remain explicit.
+- [Canonical backlog](docs/roadmaps/rsi_swarm_backlog.json) reconciles PR1871 closure, records bounded repair prerequisites and reselects daemon adapter acquisition qualification12/P2 while GotJunk owner/deployment coordination remains open. No new module, skill, scheduler or retained-learning claim.
+
 ## 2026-09-22: Noncreating observer runtime lookup
 
 - WSP00/6/10/15/22/49/50/62/97; C2/I3/D3/Impact3=11/P2. Extend existing broker singleton with a noncreating accessor, used only by observer runtime lookup. Capture under singleton lock, invoke status after release; no new scheduler/module.
