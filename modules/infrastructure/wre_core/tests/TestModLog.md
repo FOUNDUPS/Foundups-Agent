@@ -1,3 +1,12 @@
+## 2026-09-22: Qualify self-audit scan health projection
+
+- WSP 00/10/15/22/49/50/62/91/97; C2/I4/D4/Impact3 = 13/P1. PR1855 is merged with ten PR checks and successful main CI/CodeQL; its owned lane is retired and blocked test-staging cleanup remains explicitly separate.
+- Existing WRE test owner characterizes scanner loop liveness, swallowed input failures and the inert OpenClaw observation projection. 13 focused cases pass locally and independently; these are overlapping runs, not twice as many unique tests.
+- No production source, API, schema, test-file inventory, backend manifest or service configuration changed. All pre-existing test definitions are preserved. No daemon/thread/provider/queue/payout execution or process harness.
+- [Scan contract](../../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22) separates event count from success/coverage and specifies future status/freshness acceptance. Current tests characterize defects, not repaired behavior.
+- Existing supervisor test owner exceeds its hard size limit and was not grown. Added cases reuse the WRE test owner; candidate size and function limits are recorded in validation. No new module/skill.
+- Re-observe before repair. Native18/P0 remains blocked; FAM role investigation is complete with domain mapping14/P1 blocked; diagnostic classification12/P2 remains separate. No live RSI or retained improvement claim.
+
 ## 2026-09-21: Isolate consumer forced-dry execution
 
 - WSP 15/22/49/50/62/97; C3/I4/D3/Impact3 = 13/P1. PR1837 closed the prerequisite receipt fixture with ten PR checks and both main workflows successful.

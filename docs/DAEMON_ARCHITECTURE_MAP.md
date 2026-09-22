@@ -84,6 +84,46 @@ owner-scoped steps. Count-only parity must not be promoted into a durability gat
 FAM's success-only listener policy must not be copied into central emergency
 handling. No new store, receipt schema, service or scheduler is introduced here.
 
+### Self-audit scan qualification — 2026-09-22
+
+At `183ca279`, the existing WRE test owner qualifies the scanner and its
+OpenClaw observation consumer with 13 ordinary cases, replayed independently.
+These are the same cases in both runs. No production method or return type changed.
+
+| Existing seam | Observed boundary | Required repair acceptance |
+|---|---|---|
+| `_run` | A caught scan exception allows another finite iteration. | Liveness is separate from successful scanning; record the failed attempt. |
+| `_tail_new_lines` | Stat/read failures can return an empty list without advancing the saved offset. | Incomplete input coverage must remain failed/partial/unknown, never healthy-empty. |
+| Supervisor `_observe` | Successful zero, scan exception and absent loop share zero event count. Positive results increment the count. | Expose attempt outcome separately from findings; absence/disabled ownership must remain distinguishable. |
+
+The tests call existing methods through inert collaborators. No daemon constructor,
+background thread, full supervisor cycle, provider, queue claim or payout is run.
+They characterize defects; passing them does not repair monitoring or establish
+full input coverage, live operation or retained RSI benefit. Existing historical
+tests remain unchanged and are outside this focused execution scope.
+
+**Next repair contract:** preserve `scan_once() -> int` compatibility and existing
+admission/dispatch policy. The producer must distinguish an unattempted scan,
+an in-progress attempt, completed scan, caught failure and incomplete input read.
+The consumer must carry that result without deriving health from event count.
+Count and status must describe the same attempt even if a background scan
+interleaves; an unbound latest-status read is insufficient. Return isolated
+snapshots, retaining unknown counts if a partial scan fails after effects.
+Keep last attempt and last successful complete scan separate; a failed attempt
+must not refresh success. Define staleness with an injected clock and explicit
+owner policy, including invalid/backward time and disabled/absent ownership.
+Current code has no such time/status contract; those are future acceptance cases,
+not tests claimed to pass here. Do not substitute heartbeat for this evidence.
+
+Use the existing WRE scanner and OpenClaw consumer, preserving confinement,
+offsets and integer callers. Test faults then recovery, zero/positive complete
+scans, partial input and stale success before claiming a repair. Preserve bounded
+error metadata without raw log content. No second monitor, scheduler, authority
+service or full-cycle execution is needed. Existing oversized production owners
+require a cohesive bounded change; this qualification does not exempt new debt.
+The existing supervisor ceiling is 3419 lines, expiring 2026-09-30; verify that
+contract again before repair and preserve its owner boundary.
+
 ### A monitor is required beside every execution layer
 
 Before promoting a layer, bind its existing producer, consumer and control owner
@@ -183,8 +223,11 @@ repair is C3/I4/D4/Impact4 = **15/P1**, with fixed baseline failures, independen
 source review and bounded local tests; exact publication status is in the backlog.
 The **15/P1** persistence/ack qualification now records seven ordinary
 characterizations of six boundaries; sixteen selected cases pass with unchanged
-production code. It does not fix durability. Re-scoring selects existing persistent
-role/caller-authority qualification at **15/P1** next. The concrete WRE follow-up
+production code. It does not fix durability. That checkpoint selected persistent
+role/caller-authority qualification at **15/P1**. The later source audit completes
+that investigation and re-scores its unresolved domain mapping **14/P1**, blocked
+on a named FAM ingress and existing-authority-to-action contract. The current
+scan qualification and next repair are recorded in the backlog. The concrete WRE follow-up
 is **12/P2**: `event_store_verified` currently credits repair success and suppresses
 escalation although it verifies SQLite structure only, on a legacy opt-in path.
 Keep diagnostic evidence observable without calling it a causal repair; preserve

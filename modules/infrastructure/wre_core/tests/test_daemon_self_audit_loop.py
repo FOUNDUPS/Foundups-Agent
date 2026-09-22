@@ -748,3 +748,141 @@ def test_stop_timeout_does_not_close_active_foreign_counter(counter_memory):
     assert handle.owner != threading.get_ident()
     assert handle.close_threads == [handle.owner]
     assert _stored_counter(state) == 1
+
+
+# Characterization of current scan-health gaps, not future health acceptance.
+def test_run_characterizes_raised_scan_then_zero_continuation():
+    from unittest.mock import Mock, call
+
+    stop = SimpleNamespace(
+        is_set=Mock(side_effect=[False, False, True]), wait=Mock(return_value=False),
+    )
+    loop = SimpleNamespace(
+        _stop=stop, interval_sec=0.25,
+        scan_once=Mock(side_effect=[RuntimeError("scan failed"), 0]),
+    )
+
+    assert DaemonSelfAuditLoop._run(loop) is None
+
+    assert loop.scan_once.call_args_list == [call(), call()]
+    assert stop.is_set.call_count == 3
+    assert stop.wait.call_args_list == [call(1.0), call(1.0)]
+
+
+@pytest.mark.parametrize("existing_offset", (None, 7))
+def test_tail_characterizes_stat_error_as_empty_without_offset_change(
+    tmp_path: Path, existing_offset,
+):
+    path = tmp_path / "scan.log"
+    offsets = {} if existing_offset is None else {str(path): existing_offset}
+    loop = SimpleNamespace(_offsets=dict(offsets), repo_root=tmp_path, max_read_bytes=8)
+    target = "modules.infrastructure.wre_core.src.daemon_self_audit_loop"
+
+    with patch.object(Path, "stat", side_effect=OSError("stat unavailable")):
+        with patch(target + ".secure_read_confined_bytes") as reader:
+            assert DaemonSelfAuditLoop._tail_new_lines(loop, path) == []
+
+    reader.assert_not_called()
+    assert loop._offsets == offsets
+
+
+@pytest.mark.parametrize("error_type", (OSError, ValueError))
+@pytest.mark.parametrize("offset,read_from", ((7, 7), (30, 4)))
+def test_tail_characterizes_read_error_and_same_offset_retry(
+    tmp_path: Path, error_type, offset, read_from,
+):
+    from unittest.mock import call
+
+    path = tmp_path / "scan.log"
+    path.write_bytes(b"first\nlater\n")
+    offsets = {str(path): offset, "unrelated.log": 41}
+    loop = SimpleNamespace(_offsets=dict(offsets), repo_root=tmp_path, max_read_bytes=8)
+    target = "modules.infrastructure.wre_core.src.daemon_self_audit_loop"
+    responses = [error_type("read unavailable"), (b"tail\n", 12)]
+
+    with patch(target + ".secure_read_confined_bytes", side_effect=responses) as reader:
+        assert DaemonSelfAuditLoop._tail_new_lines(loop, path) == []
+        assert loop._offsets == offsets
+        assert DaemonSelfAuditLoop._tail_new_lines(loop, path) == ["tail"]
+
+    expected_call = call(path, allowed_root=tmp_path, offset=read_from, max_bytes=8)
+    assert reader.call_args_list == [expected_call, expected_call]
+    assert loop._offsets == {str(path): 12, "unrelated.log": 41}
+
+
+def test_tail_characterizes_successful_empty_read_records_offset(tmp_path: Path):
+    path = tmp_path / "empty.log"
+    path.write_bytes(b"")
+    loop = SimpleNamespace(_offsets={}, repo_root=tmp_path, max_read_bytes=8)
+    target = "modules.infrastructure.wre_core.src.daemon_self_audit_loop"
+
+    with patch(target + ".secure_read_confined_bytes", return_value=(b"", 0)) as reader:
+        assert DaemonSelfAuditLoop._tail_new_lines(loop, path) == []
+
+    reader.assert_called_once_with(path, allowed_root=tmp_path, offset=0, max_bytes=8)
+    assert loop._offsets == {str(path): 0}
+
+
+def _inert_scan_health_supervisor(audit_loop, *, enabled):
+    from unittest.mock import Mock
+
+    broker = SimpleNamespace(get_runtime_status=Mock(return_value={"registered": False}))
+    observer = SimpleNamespace(
+        get_live_status=Mock(return_value={"registered": False}),
+        follow_events=Mock(return_value={
+            "events": [], "next_cursor": 7, "latest_sequence_id": 7,
+        }),
+    )
+    state = SimpleNamespace(
+        _get_broker=Mock(return_value=broker),
+        _get_observer=Mock(return_value=observer),
+        _git_summary=Mock(return_value={"dirty": False}),
+        _attempts_in_window=Mock(return_value=0),
+        _observe_holoindex_postmerge=Mock(return_value=None),
+        _event_cursor=7, self_audit_enabled=enabled,
+        max_restart_attempts=2, restart_window_sec=60,
+        _self_audit_loop=audit_loop, metrics=SimpleNamespace(events_observed=11),
+    )
+    return state, broker, observer
+
+
+@pytest.mark.parametrize("mode", ("zero", "positive", "error", "absent", "disabled"))
+def test_supervisor_characterizes_scan_count_projection_without_health_status(mode):
+    from unittest.mock import Mock, call
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor
+
+    scan = Mock(return_value=3 if mode == "positive" else 0)
+    if mode == "error":
+        scan.side_effect = RuntimeError("scan failed")
+    audit_loop = None if mode in {"absent", "disabled"} else SimpleNamespace(scan_once=scan)
+    state, broker, observer = _inert_scan_health_supervisor(
+        audit_loop, enabled=mode != "disabled",
+    )
+
+    with patch.object(openclaw_supervisor, "logger") as log:
+        observation = openclaw_supervisor.OpenClawSupervisor._observe(state)
+
+    event_count = 3 if mode == "positive" else 0
+    assert observation == {
+        "openclaw_runtime": {"registered": False},
+        "supervisor_runtime": {"registered": False},
+        "openclaw_live": {"registered": False},
+        "openclaw_follow": {"events": [], "next_cursor": 7, "latest_sequence_id": 7},
+        "git": {"dirty": False}, "self_audit_enabled": mode != "disabled",
+        "restart_budget": {"max_attempts": 2, "window_sec": 60, "attempts_in_window": 0},
+        "self_audit_event_count": event_count,
+    }
+    assert state.metrics.events_observed == 11 + event_count
+    assert scan.call_args_list == ([] if audit_loop is None else [call()])
+    assert log.warning.call_count == (1 if mode == "error" else 0)
+    if mode == "error":
+        assert log.warning.call_args.args[1] is scan.side_effect
+    assert log.info.call_count == (1 if mode == "positive" else 0)
+    state._get_broker.assert_called_once_with()
+    state._get_observer.assert_called_once_with()
+    state._git_summary.assert_called_once_with()
+    state._attempts_in_window.assert_called_once_with()
+    state._observe_holoindex_postmerge.assert_called_once_with(observation)
+    assert broker.get_runtime_status.call_args_list == [call("openclaw"), call("openclaw_supervisor")]
+    observer.get_live_status.assert_called_once_with("openclaw", limit=4)
+    observer.follow_events.assert_called_once_with(dae_id="openclaw", since_sequence=7, limit=8)
