@@ -8,7 +8,6 @@ optional provider dependency was absent.
 
 from __future__ import annotations
 
-from importlib import import_module
 from typing import Dict, Tuple
 
 
@@ -45,11 +44,29 @@ __version__ = "0.31.0"
 
 
 def __getattr__(name: str):
-    """Load only the provider requested by the caller."""
-    target = _EXPORTS.get(name)
-    if target is None:
+    """Lazy imports with a statically enumerable backend dependency closure."""
+    if name in ('VideoIndexer', 'IndexResult', 'SearchResult', 'LayerResult'):
+        from .video_indexer import VideoIndexer, IndexResult, SearchResult, LayerResult
+    elif name in ('GeminiVideoAnalyzer', 'GeminiAnalysisResult', 'VideoSegment', 'save_analysis_result'):
+        from .gemini_video_analyzer import GeminiVideoAnalyzer, GeminiAnalysisResult, VideoSegment, save_analysis_result
+    elif name in ('AudioAnalyzer',):
+        from .audio_analyzer import AudioAnalyzer
+    elif name in ('VisualAnalyzer', 'VisualResult'):
+        from .visual_analyzer import VisualAnalyzer, VisualResult
+    elif name in ('MultimodalAligner', 'MultimodalResult'):
+        from .multimodal_aligner import MultimodalAligner, MultimodalResult
+    elif name in ('ClipGenerator', 'ClipGeneratorResult'):
+        from .clip_generator import ClipGenerator, ClipGeneratorResult
+    elif name in ('VideoIndexStore', 'IndexData'):
+        from .video_index_store import VideoIndexStore, IndexData
+    elif name in ('IndexerConfig', 'get_indexer_config', 'reload_config'):
+        from .indexer_config import IndexerConfig, get_indexer_config, reload_config
+    elif name in ('IndexerTelemetry', 'get_indexer_telemetry'):
+        from .indexer_telemetry import IndexerTelemetry, get_indexer_telemetry
+    elif name in ('GemmaSegmentClassifier', 'SegmentClassification', 'get_segment_classifier'):
+        from .gemma_segment_classifier import GemmaSegmentClassifier, SegmentClassification, get_segment_classifier
+    else:
         raise AttributeError(name)
-    module_name, attribute = target
-    value = getattr(import_module(module_name, __name__), attribute)
+    value = locals()[name]
     globals()[name] = value
     return value

@@ -4,6 +4,12 @@
 
 ## 2026-09-22 - Pre-merge integrity audit
 
+- CI integration closure: registered the new integrity test and regenerated the
+  RedDog backend manifest plus its digest pins. Lazy imports are now explicit
+  static imports inside `__getattr__`, preserving deferred loading while letting
+  the existing dependency-closure generator enumerate every provider. Runtime
+  closure remains 1401 files; backend compatibility contract passes.
+
 - Rebased the isolated indexing branch onto current main without the concurrent
   paperwork or RSI changes.
 - Applied duplicate-response protection to single-video persistence as well as

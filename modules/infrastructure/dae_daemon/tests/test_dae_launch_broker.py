@@ -140,7 +140,8 @@ class TestDAELaunchBroker:
         assert second["status"] == "already_running"
 
         stop_result = broker.stop_dae("loop_dae", actor_id="012")
-        assert stop_result["status"] == "stopped"
+        assert stop_result["success"] is True
+        assert stop_result["status"] in {"stopping", "stopped"}
 
 
 class _ImportStreakRegistry:
@@ -363,4 +364,286 @@ def test_import_streak_base_exception_preserves_streak_and_finally(inert_import_
     assert registry.get("first").state == DAEState.RUNNING
     assert registry.events[-1] == ("first", DAEEventType.DAE_STOPPED, {"actor_id": "012"})
     assert registry.disabled == []
+
+
+class _StopAckLock:
+    """Finite lock-depth spy; no thread or blocking primitive."""
+
+    def __init__(self):
+        self.depth = 0
+
+    def __enter__(self):
+        self.depth += 1
+
+    def __exit__(self, *args):
+        self.depth -= 1
+
+
+class _StopAckHandle:
+    def __init__(self, spec):
+        self.spec = spec
+        self.alive = True
+        self.on_alive_read = lambda: None
+
+    @property
+    def is_alive(self):
+        self.on_alive_read()
+        return self.alive
+
+
+@pytest.fixture
+def inert_stop_case(inert_import_broker):
+    broker, registry = inert_import_broker
+    spec = _import_streak_spec(broker, registry)
+    handle = _StopAckHandle(spec)
+    broker._handles["first"] = handle
+    broker._lock = _StopAckLock()
+    registry.get("first").state = DAEState.RUNNING
+    case = SimpleNamespace(broker=broker, registry=registry, spec=spec,
+                           handle=handle, callbacks={}, trace=[], after_change=None)
+    original_state, original_event = registry.set_state, registry.report_event
+
+    def stage(name):
+        assert broker._lock.depth == 0, "callbacks must run outside broker lock"
+        case.trace.append(name)
+        callback = case.callbacks.get(name)
+        if callback is not None:
+            callback()
+
+    def set_state(dae_id, state, reason):
+        assert broker._lock.depth == 0
+        original_state(dae_id, state, reason)
+        name = {DAEState.STOPPING: "request_state", DAEState.STOPPED: "completion_state"}
+        stage(name.get(state, "failed_state"))
+
+    def report_event(dae_id, event_type, payload):
+        assert broker._lock.depth == 0
+        original_event(dae_id, event_type, payload)
+        stage(payload["action_type"])
+
+    registry.set_state, registry.report_event = set_state, report_event
+    spec.stop_callable = lambda: stage("hook")
+    return case
+
+
+def _stop_ack_result(case):
+    return DAELaunchBroker.stop_dae(case.broker, "first", actor_id="stop_actor")
+
+
+def _replace_stop_owner(case, removal):
+    case.handle.alive = False
+    if removal:
+        case.broker._handles.pop("first")
+    else:
+        case.broker._handles["first"] = _StopAckHandle(case.spec)
+    case.registry.get("first").state = DAEState.RUNNING
+    case.after_change = list(case.trace)
+
+
+@pytest.mark.parametrize("exited", [False, True])
+def test_stop_ack_pending_or_observed_exit(inert_stop_case, exited):
+    case = inert_stop_case
+    case.callbacks["hook"] = lambda: setattr(case.handle, "alive", not exited)
+    result = _stop_ack_result(case)
+    status = "stopped" if exited else "stopping"
+    assert result == {"success": True, "dae_id": "first", "status": status}
+    expected = ["request_state", "stop_requested", "hook"]
+    if exited:
+        expected += ["completion_state", "stop_completed"]
+    assert case.trace == expected
+    assert case.registry.get("first").state == (DAEState.STOPPED if exited else DAEState.STOPPING)
+    assert [event[2] for event in case.registry.events] == [
+        {"action_type": action, "actor_id": "stop_actor"}
+        for action in (["stop_requested", "stop_completed"] if exited else ["stop_requested"])
+    ]
+    assert case.broker._lock.depth == 0
+
+
+@pytest.mark.parametrize("missing", ["spec", "handle", "live_worker"])
+def test_stop_ack_not_running_has_no_effects(inert_stop_case, missing):
+    case = inert_stop_case
+    if missing == "spec":
+        case.broker._specs.clear()
+    elif missing == "handle":
+        case.broker._handles.clear()
+    else:
+        case.handle.alive = False
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "not_running"}
+    assert case.trace == []
+    assert case.registry.events == case.registry.states == []
+
+
+def test_stop_ack_unsupported_has_no_effects(inert_stop_case):
+    case = inert_stop_case
+    case.spec.stop_callable = None
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "stop_unsupported"}
+    assert case.trace == []
+    assert case.registry.events == case.registry.states == []
+
+
+def test_stop_ack_hook_exception_preserves_current_owner_failure(inert_stop_case):
+    case = inert_stop_case
+
+    def fail():
+        raise RuntimeError("hook failed")
+
+    case.callbacks["hook"] = fail
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "hook failed"}
+    assert case.trace == ["request_state", "stop_requested", "hook", "failed_state"]
+    assert case.registry.states[-1] == ("first", DAEState.CRASHED, "stop_failed:hook failed")
+
+
+@pytest.mark.parametrize("error_type", [KeyboardInterrupt, SystemExit])
+def test_stop_ack_hook_base_exception_propagates(inert_stop_case, error_type):
+    case = inert_stop_case
+    error = error_type("interrupted")
+
+    def fail():
+        raise error
+
+    case.callbacks["hook"] = fail
+    with pytest.raises(error_type) as caught:
+        _stop_ack_result(case)
+    assert caught.value is error
+    assert case.trace == ["request_state", "stop_requested", "hook"]
+    assert case.registry.get("first").state == DAEState.STOPPING
+
+
+@pytest.mark.parametrize("stage", ["request_state", "stop_requested"])
+def test_stop_ack_request_reporting_exception_stays_outside_catch(inert_stop_case, stage):
+    case = inert_stop_case
+    error = RuntimeError("request reporting failed")
+
+    def fail():
+        raise error
+
+    case.callbacks[stage] = fail
+    with pytest.raises(RuntimeError) as caught:
+        _stop_ack_result(case)
+    assert caught.value is error
+    assert "hook" not in case.trace
+    assert "failed_state" not in case.trace
+
+
+@pytest.mark.parametrize("stage", ["completion_state", "stop_completed"])
+def test_stop_ack_completion_reporting_exception_stays_caught(inert_stop_case, stage):
+    case = inert_stop_case
+    case.callbacks["hook"] = lambda: setattr(case.handle, "alive", False)
+
+    def fail():
+        raise RuntimeError("completion reporting failed")
+
+    case.callbacks[stage] = fail
+    result = _stop_ack_result(case)
+    assert result == {"success": False, "dae_id": "first", "error": "completion reporting failed"}
+    assert case.registry.get("first").state == DAEState.CRASHED
+    assert case.trace[-1] == "failed_state"
+
+
+@pytest.mark.parametrize("removal", [False, True])
+@pytest.mark.parametrize("stage", ["request_state", "stop_requested", "hook", "completion_state", "stop_completed"])
+def test_stop_ack_owner_change_stops_old_owner_publication(inert_stop_case, stage, removal):
+    case = inert_stop_case
+    case.callbacks["hook"] = lambda: setattr(case.handle, "alive", False)
+    case.callbacks[stage] = lambda: _replace_stop_owner(case, removal)
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "runtime_changed"}
+    assert case.after_change is not None
+    assert case.trace == case.after_change
+    assert case.registry.get("first").state == DAEState.RUNNING
+    if stage in {"request_state", "stop_requested"}:
+        assert "hook" not in case.trace
+
+
+@pytest.mark.parametrize("removal", [False, True])
+@pytest.mark.parametrize("stage", ["hook", "completion_state", "stop_completed"])
+def test_stop_ack_superseded_exception_does_not_crash_new_owner(inert_stop_case, stage, removal):
+    case = inert_stop_case
+    case.callbacks["hook"] = lambda: setattr(case.handle, "alive", False)
+
+    def replace_then_raise():
+        _replace_stop_owner(case, removal)
+        raise RuntimeError("old owner failed")
+
+    case.callbacks[stage] = replace_then_raise
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "runtime_changed"}
+    assert case.trace == case.after_change
+    assert case.registry.get("first").state == DAEState.RUNNING
+
+
+@pytest.mark.parametrize("removal", [False, True])
+def test_stop_ack_liveness_observation_cannot_ack_replacement(inert_stop_case, removal):
+    case = inert_stop_case
+    reads = []
+
+    def change_on_second_read():
+        reads.append(None)
+        if len(reads) == 2:
+            _replace_stop_owner(case, removal)
+
+    case.handle.on_alive_read = change_on_second_read
+    result = _stop_ack_result(case)
+    assert result == {"success": False, "dae_id": "first", "error": "runtime_changed"}
+    assert len(reads) == 2
+    assert case.after_change == ["request_state", "stop_requested", "hook"]
+    assert case.trace == case.after_change
+    assert case.registry.get("first").state == DAEState.RUNNING
+
+
+@pytest.mark.parametrize("refresh", ["registration", "request_callback"])
+def test_stop_ack_binds_launched_spec_and_captured_hook(inert_stop_case, refresh):
+    case = inert_stop_case
+
+    def wrong_hook():
+        raise AssertionError("a refreshed hook must not control the captured worker")
+
+    if refresh == "registration":
+        case.broker._specs["first"] = DAELaunchSpec(
+            "first", "Future launch", "tests", lambda: None, stop_callable=wrong_hook,
+        )
+    else:
+        case.callbacks["stop_requested"] = lambda: setattr(case.spec, "stop_callable", wrong_hook)
+    assert _stop_ack_result(case) == {"success": True, "dae_id": "first", "status": "stopping"}
+    assert case.trace == ["request_state", "stop_requested", "hook"]
+
+
+@pytest.mark.parametrize("removal", [False, True])
+def test_stop_ack_initial_liveness_change_prevents_request(inert_stop_case, removal):
+    case = inert_stop_case
+    case.handle.on_alive_read = lambda: _replace_stop_owner(case, removal)
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "runtime_changed"}
+    assert case.after_change == case.trace == []
+    assert case.registry.events == case.registry.states == []
+    assert case.registry.get("first").state == DAEState.RUNNING
+
+
+@pytest.mark.parametrize("removal", [False, True])
+def test_stop_ack_failure_reporting_change_prevents_old_ack(inert_stop_case, removal):
+    case = inert_stop_case
+
+    def fail():
+        raise RuntimeError("old hook failed")
+
+    case.callbacks["hook"] = fail
+    case.callbacks["failed_state"] = lambda: _replace_stop_owner(case, removal)
+    assert _stop_ack_result(case) == {"success": False, "dae_id": "first", "error": "runtime_changed"}
+    assert case.after_change == ["request_state", "stop_requested", "hook", "failed_state"]
+    assert case.trace == case.after_change
+    assert case.registry.get("first").state == DAEState.RUNNING
+
+
+def test_stop_ack_failure_reporting_exception_propagates(inert_stop_case):
+    case = inert_stop_case
+    reporting_error = ValueError("failure reporting failed")
+
+    def hook_failed():
+        raise RuntimeError("hook failed")
+
+    def reporting_failed():
+        raise reporting_error
+
+    case.callbacks.update(hook=hook_failed, failed_state=reporting_failed)
+    with pytest.raises(ValueError) as caught:
+        _stop_ack_result(case)
+    assert caught.value is reporting_error
+    assert case.trace == ["request_state", "stop_requested", "hook", "failed_state"]
 
