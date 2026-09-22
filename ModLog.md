@@ -635,6 +635,18 @@
 
 # FoundUps Agent - Development Log
 
+## 2026-09-22 - Isolated YouTube remote command repair and prior Work audit
+
+Repaired the existing CLI/adapter, nonpersistent previews, exact-ID batch
+selection and Japanese batch transcript evidence. Focused regressions: 84
+passed. Unqualified remote requests stop before selecting old backlog.
+Retrieved the prior Work 21-clip receipt and `publish_daily_clips` provenance;
+excluded the proposed parallel publisher registration. Source export, recent
+discovery and live apply/readback integration remain pending. No YouTube
+mutations or RSI changes. See the scheduler
+[Work audit](modules/platform_integration/youtube_shorts_scheduler/docs/PRIOR_WORK_AUDIT_2026-09-22.md).
+WSP 00/11/22/50/84/95/97.
+
 ## 2026-09-15: Preserve canonical M2M instructions through local provider delivery
 
 - Extended six existing owners: detached canonical request before authority use; paired schema/prompt digest before model issuance; raw/redacted wire checks before all three adapters' effects. Reused codec, digest, profile, output and one-shot owners; no new module/skill/test file or runtime grant.

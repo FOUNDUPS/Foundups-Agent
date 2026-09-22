@@ -88,6 +88,13 @@ class VideoIndexer:
 
 ### AudioAnalyzer
 
+`AudioAnalyzer(..., language: Optional[str] = None)` detects language by default;
+pass `language="ja"` for known Japanese clips. This setting reaches both batch
+and local-file transcription. Video transcript labels come from batch evidence:
+one language code, `mixed` for multiple reported languages, or `unknown` when
+unavailable. Chunk `timestamp_sec` is retained as segment `start_time`.
+The batch factory also receives the configured output directory.
+
 ```python
 from modules.ai_intelligence.video_indexer.src.audio_analyzer import AudioAnalyzer
 

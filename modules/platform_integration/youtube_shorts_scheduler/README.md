@@ -2,6 +2,11 @@
 
 **WSP Compliant Module** - YouTube Studio automation for Shorts scheduling.
 
+Remote use: [host requirements and command receipts](docs/REMOTE_SCHEDULING.md)
+and the [existing Work skill audit](docs/PRIOR_WORK_AUDIT_2026-09-22.md).
+Start with `youtube action scheduling channel=move2japan preflight=true` through
+the existing agent adapter. A one-shot command does not require `main.py`.
+
 ## Overview
 
 Automated scheduling system for YouTube Shorts across multiple channels:

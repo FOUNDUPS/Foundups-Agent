@@ -95,7 +95,7 @@ class YouTubeShortsScheduler:
         self.dry_run = dry_run
 
         # Initialize tracker
-        self.tracker = ScheduleTracker(self.channel_id, storage_dir)
+        self.tracker = ScheduleTracker(self.channel_id, storage_dir, persist=not dry_run)
 
         # Driver and DOM (initialized on connect)
         self.driver = None
@@ -272,6 +272,7 @@ class YouTubeShortsScheduler:
         self,
         max_videos: int = 0,
         update_metadata: bool = True,
+        video_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Run a full scheduling cycle.
@@ -285,10 +286,15 @@ class YouTubeShortsScheduler:
         Args:
             max_videos: Maximum videos to process (0 = unlimited, process all)
             update_metadata: Whether to update titles/descriptions
+            video_ids: Exact recording batch in publishing order; None processes the pending queue.
 
         Returns:
             Summary dict with scheduled_count, errors, etc.
         """
+        if video_ids is not None:
+            video_ids = list(dict.fromkeys(video_ids))
+            if not video_ids:
+                raise ValueError("An explicit recording batch must contain video IDs")
         if not self.driver:
             raise RuntimeError("Not connected to browser. Call connect_browser() first.")
 
@@ -328,11 +334,16 @@ class YouTubeShortsScheduler:
             # the available slots first, then PRIVATE continues into whatever
             # remains (no per-channel budget doubling).
             for target in visibility_targets:
+                remaining = max_videos - len(results["scheduled"]) if max_videos else 0
+                if max_videos and remaining <= 0:
+                    break
+                selection = {'video_ids': video_ids} if video_ids is not None else {}
                 aborted = await self._run_visibility_pass(
                     target=target,
-                    max_videos=max_videos,
+                    max_videos=remaining,
                     update_metadata=update_metadata,
                     results=results,
+                    **selection,
                 )
                 if aborted:
                     # Navigation/filter failure for this target — stop the cycle.
@@ -348,6 +359,12 @@ class YouTubeShortsScheduler:
         results["total_errors"] = len(results["errors"])
         results["total_skipped"] = len(results["skipped"])
         results["cycle_seconds"] = round(cycle_elapsed, 1)
+        if video_ids is not None:
+            completed = {row['video_id'] for row in results['scheduled']}
+            results['requested_video_ids'] = video_ids
+            results['unresolved_video_ids'] = [vid for vid in video_ids if vid not in completed]
+            results['batch_complete'] = not results['unresolved_video_ids']
+            results['preview_scope'] = 'selected_batch' if self.dry_run else None
 
         # End-of-cycle report
         n_ok = results["total_scheduled"]
@@ -375,7 +392,7 @@ class YouTubeShortsScheduler:
 
         # Post-cycle audit: verify scheduled state matches YouTube reality
         # Enable with YT_SCHEDULER_POST_AUDIT=true (default: false — opt-in)
-        if os.getenv("YT_SCHEDULER_POST_AUDIT", "false").lower() in ("1", "true", "yes"):
+        if not self.dry_run and os.getenv("YT_SCHEDULER_POST_AUDIT", "false").lower() in ("1", "true", "yes"):
             try:
                 from .schedule_auditor import ScheduleAuditor
                 auditor = ScheduleAuditor(self.channel_key, self.driver)
@@ -503,12 +520,33 @@ class YouTubeShortsScheduler:
         logger.info(f"[SCHEDULER] Private scrape: {len(videos)} videos under PRIVATE filter")
         return videos
 
+    async def _collect_selected_rows(self, target, video_ids, results):
+        """Reuse Studio pagination to bind an exact batch before any edits."""
+        wanted = set(video_ids)
+        found = {}
+        seen_pages = set()
+        while True:
+            rows = self._scrape_videos_for_visibility(target)
+            signature = tuple(sorted(row.get('video_id', '') for row in rows))
+            if signature in seen_pages:
+                results['errors'].append({'error': 'Selected batch pagination stalled', 'visibility': target})
+                return None
+            seen_pages.add(signature)
+            for row in rows:
+                if row.get('video_id') in wanted:
+                    found[row['video_id']] = row
+            if wanted.issubset(found) or not self.dom.has_next_page():
+                return [found[vid] for vid in video_ids if vid in found]
+            self.dom.click_next_page()
+            await asyncio.sleep(1)
+
     async def _run_visibility_pass(
         self,
         target: str,
         max_videos: int,
         update_metadata: bool,
         results: Dict[str, Any],
+        video_ids: Optional[List[str]] = None,
     ) -> bool:
         """Run the navigate + continuous batch loop for ONE visibility target.
 
@@ -549,6 +587,12 @@ class YouTubeShortsScheduler:
         self.dom.set_page_size(50)
         await asyncio.sleep(1)
 
+        selected_rows = None
+        if video_ids is not None:
+            selected_rows = await self._collect_selected_rows(target, video_ids, results)
+            if selected_rows is None:
+                return True
+
         # Step 2-4: CONTINUOUS PROCESSING LOOP (2026-01-28: Added for true "until complete")
         # Process batches of videos until none remain under this filter.
         batch_num = 0
@@ -560,7 +604,7 @@ class YouTubeShortsScheduler:
                 logger.info(f"[SCHEDULER] === BATCH {batch_num} ===")
 
                 # Step 2: Get videos for this batch under the active filter.
-                unlisted = self._scrape_videos_for_visibility(target)
+                unlisted = selected_rows if selected_rows is not None else self._scrape_videos_for_visibility(target)
                 logger.info(f"[SCHEDULER] Found {len(unlisted)} {target} videos in batch {batch_num}")
 
                 if not unlisted:
@@ -580,13 +624,14 @@ class YouTubeShortsScheduler:
                             logger.warning(f"[SCHEDULER] Could not return to {target} Shorts, continuing with cached list")
                         await asyncio.sleep(2)
                         # Re-fetch after returning
-                        unlisted = self._scrape_videos_for_visibility(target)
+                        if selected_rows is None:
+                            unlisted = self._scrape_videos_for_visibility(target)
 
                 # Step 4: Process each video in this batch
                 processed = 0
                 slots_exhausted = False  # 2026-01-29: Track if slots ran out (fixes infinite loop bug)
                 # max_videos=0 means unlimited (process all)
-                videos_to_process = unlisted if max_videos == 0 else unlisted[:max_videos]
+                videos_to_process = unlisted if max_videos == 0 else unlisted[:max_videos - total_processed]
                 total_to_process = len(videos_to_process)
                 logger.info(f"[SCHEDULER] Processing {total_to_process} videos (max_videos={max_videos}, batch={batch_num})")
 
@@ -839,6 +884,11 @@ class YouTubeShortsScheduler:
                 # End of batch - navigate back to unlisted list for next batch (2026-01-28)
                 logger.info(f"[SCHEDULER] Batch {batch_num} complete: {processed} videos processed")
 
+                # An explicit recording batch is a fixed snapshot, not an open
+                # queue. Never pull in unrelated uploads or retry partial writes.
+                if selected_rows is not None:
+                    break
+
                 # 2026-01-31: Detect stale-unlisted videos (tracker says scheduled, YouTube says unlisted).
                 # If ALL videos in a batch were skipped as "already scheduled" but YouTube still
                 # shows them as unlisted, the prior scheduling action failed silently.
@@ -897,6 +947,12 @@ class YouTubeShortsScheduler:
                 # If max_videos limit reached, stop
                 if max_videos > 0 and total_processed >= max_videos:
                     logger.info(f"[SCHEDULER] Reached max_videos limit ({max_videos}), stopping")
+                    break
+
+                # Preview leaves rows unchanged. Re-reading them would mistake
+                # simulated reservations for stale tracker entries and retry.
+                if self.dry_run:
+                    results["preview_scope"] = "first_visible_batch_per_visibility"
                     break
 
                 # Navigate back to the target-visibility Shorts list for next batch
@@ -1157,7 +1213,7 @@ class YouTubeShortsScheduler:
             List of {date, time, slot_number} dicts
         """
         slots = []
-        temp_tracker = ScheduleTracker(self.channel_id)
+        temp_tracker = self.tracker.preview_copy()
 
         for i in range(count):
             slot = temp_tracker.get_next_available_slot(

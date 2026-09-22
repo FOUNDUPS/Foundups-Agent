@@ -93,6 +93,7 @@ class AudioAnalyzer:
         whisper_model: str = "base",
         enable_diarization: bool = False,  # Default off until pyannote integration
         output_dir: Optional[str] = None,
+        language: Optional[str] = None,
     ):
         """
         Initialize audio analyzer.
@@ -101,8 +102,10 @@ class AudioAnalyzer:
             whisper_model: Whisper model size ("tiny", "base", "small", "medium", "large-v3")
             enable_diarization: Enable speaker identification (requires pyannote.audio)
             output_dir: Directory for JSONL transcripts (default: memory/transcripts)
+            language: Whisper language code (e.g. "ja"), or None to detect.
         """
         self.whisper_model = whisper_model
+        self.language = language
         self.enable_diarization = enable_diarization
         self.output_dir = Path(output_dir) if output_dir else Path("memory/transcripts")
 
@@ -122,7 +125,10 @@ class AudioAnalyzer:
             from modules.communication.voice_command_ingestion.src.voice_command_ingestion import (
                 get_batch_transcriber,
             )
-            self._batch_transcriber = get_batch_transcriber(model_size=self.whisper_model)
+            self._batch_transcriber = get_batch_transcriber(
+                model_size=self.whisper_model, language=self.language,
+                output_dir=str(self.output_dir),
+            )
             logger.info(f"[AUDIO-ANALYZER] Loaded batch transcriber (model={self.whisper_model})")
             return self._batch_transcriber
         except ImportError as e:
@@ -204,7 +210,7 @@ class AudioAnalyzer:
             segments.append(
                 TranscriptSegment(
                     text=seg.text.strip() if hasattr(seg, 'text') else str(seg),
-                    start_time=getattr(seg, 'start_sec', 0),
+                    start_time=getattr(seg, 'timestamp_sec', getattr(seg, 'start_sec', 0)),
                     end_time=getattr(seg, 'end_sec', 0),
                     confidence=getattr(seg, 'confidence', 1.0),
                 )
@@ -216,11 +222,17 @@ class AudioAnalyzer:
 
         logger.info(f"[AUDIO-ANALYZER] Transcribed {len(segments)} segments ({duration:.1f}s)")
 
+        languages = {getattr(seg, 'language', 'unknown') for seg in segments_raw}
+        languages.discard('unknown')
+        languages.discard(None)
+        language = next(iter(languages)) if len(languages) == 1 else (
+            'mixed' if languages else 'unknown'
+        )
         return TranscriptResult(
             segments=segments,
             full_text=full_text,
             duration=duration,
-            language="en",  # TODO: Detect from batch transcriber
+            language=language,
         )
 
     def transcribe_file(self, audio_path: str) -> TranscriptResult:
@@ -270,6 +282,7 @@ class AudioAnalyzer:
         # Transcribe with Whisper
         result = self._whisper.transcribe(
             str(audio_path),
+            language=self.language,
             word_timestamps=True,
             verbose=False,
         )

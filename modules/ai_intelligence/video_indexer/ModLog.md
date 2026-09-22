@@ -1,5 +1,14 @@
 # Video Indexer Module - Modification Log
 
+## 2026-09-21 - Preserve Japanese transcript language and chunk positions
+
+AudioAnalyzer now passes explicit/automatic language and output directory to
+the existing batch transcriber, and language to local-file Whisper. Result
+language comes from evidence instead of a hard-coded English label. Converted
+segments use the actual `timestamp_sec` field, correcting later chunks that
+previously started at zero. Offline fakes cover Japanese/mixed/unknown labels,
+factory forwarding and offsets; real clip ASR remains unverified. WSP 11/22/84/97.
+
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
 ## V0.30.0 - Index Shorts as well as long-form (add videos/short pass) (INDEXER_SHORTS_PASS_PHASE1) (2026-06-19)
