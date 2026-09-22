@@ -1,3 +1,9 @@
+## 2026-09-23: DAE branch-local acquisition repair
+
+- WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Existing adapter rejects unresolved/unauthorized requests before acquisition, then obtains only the required collaborator. Bounded same-file helpers preserve parser, response, callback, actor, cursor and required creating-getter semantics.
+- Frozen28 regressions: baseline26fail/2pass; candidate28pass and independent same28pass; original13 definitions preserved/deselected. Inert getters and import sentinel only; no live service/provider/defaultDB or OS-isolation proof.
+- Regenerated one runtime digest and two existing pins;1401 members unchanged. Eight manifest checks,67-file package surface and canonical test registry verified. Existing roadmap/backlog/interface converge; next executable qualification is ambiguous LinkedIn acknowledgment11/P2. OpenClaw/Hermes readiness and higher-ranked authority/deployment blockers remain explicit.
+
 ## 2026-09-23: DAE adapter acquisition qualification
 
 - WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Extend the existing adapter test owner; production source unchanged, original13 definitions preserved. Matched commands acquire both collaborators before branch selection and unresolved/unauthorized rejection.

@@ -1028,9 +1028,9 @@ Routing contract:
 - `dae_runtime_adapter.py`
 - central `DAELaunchBroker`
 
-Authorization and acquisition (qualification 2026-09-23):
-- `list`/`status` are read operations; current matched commands acquire observer then broker even before unresolved-name or denied-control rejection. Fixed inert tests characterize this; whole-command effect freedom is not established.
-- `launch`/`stop` require `012` authority. Prospective repair: reject unresolved/unauthorized requests before either getter; broker-only for list/status/authorized mutations, observer-only for tail/follow/live status. Preserve required creating-getter semantics and exact responses/callbacks; [test evidence](tests/README.md#rsi-adapter-acquisition-and-linkedin-previews) does not claim the repair is implemented.
+Authorization and acquisition (repair 2026-09-23):
+- Unmatched/unresolved commands and unauthorized mutations acquire neither collaborator. `list`/`status` and authorized launch/start/run/stop acquire only broker; tail/follow/live status acquire only observer.
+- `launch`/`stop` require `012` authority. Exact responses/callbacks and required creating-getter semantics remain; [fixed regression evidence](tests/README.md#rsi-adapter-acquisition-and-linkedin-previews) passes28 after26 baseline failures. Required getters can construct runtime components, so whole-command effect freedom is not established.
 
 Resident OpenClaw contract:
 - `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
@@ -1310,7 +1310,7 @@ OpenClaw can now read the DAEmon live ledger for itself and broker-managed DAEs:
 - `status pqn research live`
 - `tail holodae`
 
-These commands request ledger reads; current adapter acquisition and default observer/broker construction may change runtime state. The inert acquisition qualification above does not certify whole-command effect freedom.
+These commands request ledger reads and acquire only the observer. Required observer construction may still change runtime state; the inert regression evidence above does not certify whole-command effect freedom.
 
 ## Skill Evolution Loop
 

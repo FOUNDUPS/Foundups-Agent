@@ -241,9 +241,8 @@ def test_follow_openclaw_uses_cursor_observer():
     assert "next_cursor=43" in result
 
 
-# Current-behavior qualification: eager acquisition is a recorded gap, not a
-# future safety requirement. The selected runner supplies an inert src package.
-_ACQUISITION_GETTERS = [call.observer(), call.broker()]
+# Branch-local acceptance: rejected requests acquire nothing; accepted requests
+# acquire only the required collaborator. The runner supplies an inert src package.
 _ACQUISITION_STATUS = {
     "registered": True,
     "state": "running",
@@ -304,19 +303,19 @@ def _probe_dae_acquisition(message, *, allow=False, absent=(), method=None, payl
     pytest.param("hello there", id="unmatched"),
     pytest.param("show pqn simulation plan", id="simulation_plan"),
 ])
-def test_dae_acquisition_characterizes_no_request(message):
+def test_dae_acquisition_no_request(message):
     response, trace = _probe_dae_acquisition(message)
     assert response == ""
     assert trace == []
 
 
-def test_dae_acquisition_characterizes_unresolved():
+def test_dae_acquisition_unresolved():
     response, trace = _probe_dae_acquisition("status unknown dae")
     assert response == (
         "I could not resolve that DAE name. Use `list launchable daes` first, then "
         "launch/status/stop by the known runtime name."
     )
-    assert trace == _ACQUISITION_GETTERS
+    assert trace == []
 
 
 @pytest.mark.parametrize("message,absent", [
@@ -324,13 +323,13 @@ def test_dae_acquisition_characterizes_unresolved():
     pytest.param("stop holodae", (), id="stop"),
     pytest.param("launch holodae", ("observer", "broker"), id="both_unavailable"),
 ])
-def test_dae_acquisition_characterizes_denied_control(message, absent):
+def test_dae_acquisition_denied_control(message, absent):
     response, trace = _probe_dae_acquisition(message, absent=absent)
     assert response == (
         "Runtime launch and stop commands require 012 authorization. "
         "Use `status <dae>` or `list launchable daes` for read-only inspection."
     )
-    assert trace == _ACQUISITION_GETTERS
+    assert trace == []
 
 
 @pytest.mark.parametrize("message,method,payload,expected,callback", [
@@ -351,10 +350,10 @@ def test_dae_acquisition_characterizes_denied_control(message, absent):
                  "DAE runtime `holodae` is not registered.",
                  call.broker_get_runtime_status("holodae"), id="status_unregistered"),
 ])
-def test_dae_acquisition_characterizes_broker_read(message, method, payload, expected, callback):
+def test_dae_acquisition_broker_read(message, method, payload, expected, callback):
     response, trace = _probe_dae_acquisition(message, method=method, payload=payload)
     assert response == expected
-    assert trace == _ACQUISITION_GETTERS + [callback]
+    assert trace == [call.broker(), callback]
 
 
 @pytest.mark.parametrize("message,method,payload,expected,callback", [
@@ -380,10 +379,10 @@ def test_dae_acquisition_characterizes_broker_read(message, method, payload, exp
                  "DAE runtime `holodae` is not registered.",
                  call.observer_get_live_status("holodae", limit=8), id="live_unregistered"),
 ])
-def test_dae_acquisition_characterizes_observer_read(message, method, payload, expected, callback):
+def test_dae_acquisition_observer_read(message, method, payload, expected, callback):
     response, trace = _probe_dae_acquisition(message, method=method, payload=payload)
     assert response == expected
-    assert trace == _ACQUISITION_GETTERS + [callback]
+    assert trace == [call.observer(), callback]
 
 
 @pytest.mark.parametrize("verb,method,payload,expected,callback", [
@@ -396,12 +395,12 @@ def test_dae_acquisition_characterizes_observer_read(message, method, payload, e
                  "DAE runtime stop `holodae` -> stopping.",
                  call.broker_stop_dae("holodae", actor_id="fixture_actor"), id="stop"),
 ])
-def test_dae_acquisition_characterizes_permitted_control(verb, method, payload, expected, callback):
+def test_dae_acquisition_permitted_control(verb, method, payload, expected, callback):
     response, trace = _probe_dae_acquisition(
         f"{verb} holodae", allow=True, method=method, payload=payload
     )
     assert response == expected
-    assert trace == _ACQUISITION_GETTERS + [callback]
+    assert trace == [call.broker(), callback]
 
 
 @pytest.mark.parametrize("message,absent,allow,expected", [
@@ -413,10 +412,11 @@ def test_dae_acquisition_characterizes_permitted_control(verb, method, payload, 
     pytest.param("follow holodae", ("observer",), False, "DAE observer is not available yet.", id="follow"),
     pytest.param("status holodae live", ("observer",), False, "DAE observer is not available yet.", id="live"),
 ])
-def test_dae_acquisition_characterizes_required_unavailable(message, absent, allow, expected):
+def test_dae_acquisition_required_unavailable(message, absent, allow, expected):
     response, trace = _probe_dae_acquisition(message, absent=absent, allow=allow)
     assert response == expected
-    assert trace == _ACQUISITION_GETTERS
+    getter = call.broker() if absent == ("broker",) else call.observer()
+    assert trace == [getter]
 
 
 @pytest.mark.parametrize("message,absent,method,payload,expected,callback", [
@@ -427,9 +427,10 @@ def test_dae_acquisition_characterizes_required_unavailable(message, absent, all
                  _ACQUISITION_TAIL_TEXT, call.observer_tail_events(dae_id="holodae", limit=8),
                  id="broker_not_required"),
 ])
-def test_dae_acquisition_characterizes_irrelevant_unavailable(
+def test_dae_acquisition_irrelevant_unavailable(
     message, absent, method, payload, expected, callback
 ):
     response, trace = _probe_dae_acquisition(message, absent=absent, method=method, payload=payload)
     assert response == expected
-    assert trace == _ACQUISITION_GETTERS + [callback]
+    getter = call.broker() if method.startswith("broker.") else call.observer()
+    assert trace == [getter, callback]
