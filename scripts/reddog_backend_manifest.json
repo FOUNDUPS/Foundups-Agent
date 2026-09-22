@@ -1797,7 +1797,7 @@
     "modules/communication/moltbot_bridge/src/__init__.py": "829e2655c44fddd7cfad36332dceeae96044a1af46212152ad80c6ee78c4a613",
     "modules/communication/moltbot_bridge/src/auto_moderator_bridge.py": "a262c5cc260f0989dde862ce3750add0671e719f6624c600f6890846cfdd502a",
     "modules/communication/moltbot_bridge/src/continuity_context.py": "15ce1bba22fe92f9acfaa42613e255746a46f8fcec9bc0b0ce83919fcd7dcc8b",
-    "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "e2942213e216defd5893b72aa750c200b3b05a2101f907980d1763de86079976",
+    "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "1814165de0a79f495077d76d7e3c503684a083e36898130355bc3873c2d2a668",
     "modules/communication/moltbot_bridge/src/fam_adapter.py": "a36457c8bf1918aa5cb65200c8881f7121da520890dc1009e60faec9d8d5bf1d",
     "modules/communication/moltbot_bridge/src/foundup_brain_current_state.py": "82f6453086a8bff9238795bc5580d427f43753b40e508081cfd405ba379f79cd",
     "modules/communication/moltbot_bridge/src/foundup_job_contract.py": "fc3fead2e3cb381b9b848b642d8ececfa73027d66dd8ca6a31a4819e26952693",

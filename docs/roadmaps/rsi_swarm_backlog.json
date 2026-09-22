@@ -1856,9 +1856,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "0260307a6b82c37b49e60aa2b034b04de867e8c8",
-    "selected_action": "R18-adapter-acquisition-qualification-20260923",
-    "status": "locally_and_independently_qualified_publication_pending",
+    "base_commit": "cf9e6a7b00c5367c028a18a83432d36afe5c68ed",
+    "selected_action": "R19-adapter-branch-repair-20260923",
+    "status": "locally_and_independently_repaired_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 3,
@@ -1871,16 +1871,16 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T16:37:01.433062+00:00",
-    "base": "0260307a6b82c37b49e60aa2b034b04de867e8c8",
+    "utc": "2026-09-22T17:42:49.895237+00:00",
+    "base": "cf9e6a7b00c5367c028a18a83432d36afe5c68ed",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "observation_id": "R18-adapter-acquisition-qualification-20260923",
-    "prior_observation": "0260307a6b82c37b49e60aa2b034b04de867e8c8:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "observation_id": "R19-adapter-branch-repair-20260923",
+    "prior_observation": "cf9e6a7b00c5367c028a18a83432d36afe5c68ed:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
     "selected": {
-      "task": "Qualify branch-scoped DAE runtime adapter acquisition and rejected-control effects",
+      "task": "Defer DAE adapter acquisition until command resolution and mutation authorization",
       "wsp15": {
         "complexity": 3,
         "importance": 3,
@@ -1889,28 +1889,28 @@
         "total": 12,
         "priority": "P2"
       },
-      "state": "locally_and_independently_qualified_publication_pending",
+      "state": "locally_and_independently_repaired_publication_pending",
       "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
-      "next_step": "Publish the independently reviewed test qualification and contract, verify exact reviewed merge/PR/main checks and retire only the owned lane.",
-      "dependency": "Finite qualification complete; publication and closure remain. Production acquisition repair is separate."
+      "dependency": "Local and independent repair validation complete; exact publication/closure remain.",
+      "next_step": "Publish exact reviewed repair, verify PR/main checks and retire only owned lane."
     },
     "previous_closed": {
-      "pr": 1872,
-      "merge": "0260307a6b82c37b49e60aa2b034b04de867e8c8",
+      "pr": 1873,
+      "merge": "cf9e6a7b00c5367c028a18a83432d36afe5c68ed",
       "main_workflows": [
         {
           "conclusion": "success",
-          "databaseId": 35748915507,
-          "headSha": "0260307a6b82c37b49e60aa2b034b04de867e8c8",
+          "databaseId": 35756175465,
+          "headSha": "cf9e6a7b00c5367c028a18a83432d36afe5c68ed",
           "status": "completed",
-          "workflowName": "CodeQL"
+          "workflowName": "CI"
         },
         {
           "conclusion": "success",
-          "databaseId": 35748913186,
-          "headSha": "0260307a6b82c37b49e60aa2b034b04de867e8c8",
+          "databaseId": 35756175445,
+          "headSha": "cf9e6a7b00c5367c028a18a83432d36afe5c68ed",
           "status": "completed",
-          "workflowName": "CI"
+          "workflowName": "CodeQL"
         }
       ],
       "owned_lane_retired": true
@@ -2112,10 +2112,25 @@
           "total": 12,
           "priority": "P2"
         },
-        "state": "selected_bounded_inert_test_qualification",
+        "state": "closed_merged_PR1873",
         "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
-        "next_step": "Freeze finite inert getter/callback traces and exact response controls in existing test_dae_runtime_adapter.py across unmatched,list/status,tail/follow/live status,denied launch/stop and authorized fake mutations. Demonstrate current eager acquisition with synthetic spies before any source repair. Preserve existing13 test definitions; explicitly control both getters and eager package imports.",
-        "dependency": "Rebind source/current ownership after current lookup closure. Existing bool gate and response formats remain authoritative; no new runtime/policy authority and no real constructors,thread,defaultDB or provider. Later repair requires separately reviewed branch contract."
+        "next_step": "Do not repeat acquisition qualification; branch-local source repair remains separate.",
+        "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
+      },
+      {
+        "task": "Defer DAE adapter acquisition until command resolution and mutation authorization",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
+        },
+        "state": "selected_fixed_tests_first_branch_repair",
+        "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
+        "dependency": "Independent branch-local contract and fixed characterization are available; rebind exact source/current ownership before repair. Existing creating getter semantics remain for required collaborator; no new permission, policy or service activation.",
+        "next_step": "Evolve these current-behavior traces against the separately declared zero-getter rejected/unresolved and one-required-getter branch contract, keeping responses/callbacks/parser/actor/cursor controls fixed. Freeze desired cases before baseline/candidate runs; use existing source/test owners and independent verifier."
       },
       {
         "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -2161,10 +2176,10 @@
         "dependency": "Current formula permits successful Connect with failed Send when no note was attempted; source also documents direct-send-on-Connect variants. No external invitation truth or automatic repair conclusion follows."
       }
     ],
-    "selection_reason": "Previous GotJunk14/P1 qualification is closed PR1872; lock repair remains blocked by existing-owner/deployment prerequisites. Native18/P0, FAM14/P1, model/PostgreSQL13/P1 and Holo/FastMCP conditions unchanged. Existing adapter acquisition qualification12/P2 is unblocked at exact source/owner, outranking ambiguous LinkedIn acknowledgment11/P2 and scanner debt. Preserve scopes and freeze inert counterexamples before later source repair.",
+    "selection_reason": "Acquisition qualification12/P2 is verified closed PR1873. GotJunk14/P1 lock repair remains owner/deployment-dependent; native18/P0, FAM14/P1, model/PostgreSQL13/P1 and Holo/FastMCP conditions remain blocked. Branch-local acquisition repair12/P2 now has an independently declared contract and finite existing28-case baseline to evolve; exact source/ownership is eligible and outranks ambiguous LinkedIn acknowledgment11/P2. Preserve existing permission/response/creating-getter semantics, no whole-runtime or live effect claim.",
     "selection_receipt": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\selection.json",
-      "sha256": "2ed05ef1dd47a7bdc82255715951e521ecdaefc66b372d93ec6fde05f49a30d5"
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\selection.json",
+      "sha256": "521e37c5a72cdcc1fdb19295af759eab43523069308876857efc22950deee6be"
     },
     "owner_reconciliation": {
       "open_prs": 93,
@@ -2178,13 +2193,13 @@
       "noise": "Bounded owner reads; historical completion and runtime claims kept separate",
       "ordering": "WSP00 bootstrap/gate, canonical WSP15/97 and dispatch, source/tests and neighboring constructors",
       "missing": "No module requirements.txt or memory/README discovered in tracked inventory; existing module docs/test owners reused",
-      "staleness": "All34 previous source bindings match current main; live PR/main checks and93 heads refreshed; four historical continuity documents unchanged",
+      "staleness": "All35 previous source bindings match current main; live PR/main checks and93 heads refreshed; four historical continuity documents unchanged",
       "duplication": "Existing adapter and13 test definitions reused; no new module, skill or scheduler"
     },
-    "cost_effort": "Finite deterministic Python tests and independent replay; no paid providers, live services, real broker/observer constructors, defaultDB or network.",
-    "verification_burden": "Fixed response/callback/acquisition matrix, original13 definitions preserved; controlled package import, ordinary unit tests only, no OS sandbox claim.",
-    "execution_plane": "Local ordinary inert unit qualification; no native WRE admission, live runtime or OS isolation claim.",
-    "manual_reason": "Reuse deterministic getter/callback spies and exact outputs with independent source/runner review; no application runtime-provider calls required.",
+    "cost_effort": "Minimal existing-file dispatch refactor with frozen baseline/candidate/independent tests; no application runtime-provider call or live services, constructors, defaultDB or network.",
+    "verification_burden": "Freeze the same28-case matrix with revised acquisition oracle before baseline/candidate; preserve13 original definitions and all response/callback inputs. Independent runner/source review, backend digest integrity and CI; ordinary tests, no OS sandbox claim.",
+    "execution_plane": "Ordinary inert Python tests; no native WRE admission, live runtime or OS isolation claim.",
+    "manual_reason": "0102 author and independent verifier repair existing command boundary using frozen deterministic getter/callback spies. No application runtime-provider calls.",
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
       "sha256": "2d14e57e89ad2b210c66d7f01e77b54ec002615354758482f66c63068d3d9b51",
@@ -2210,20 +2225,17 @@
       "maintenance_state": "INTEGRITY_ONLY/NOT_READY; source authentication, installed/running/upstream freshness, admitted canary and rollback remain unqualified. Existing supplier/watchlist is not proof of scheduled update success; no blind startup update.",
       "reuse": "R25 feedback, R24 product validation, R07 native readiness, R18/R23 operations; preserve26packets and existing skills/modules"
     },
-    "prior_dependency_qualification": {
-      "state": "closed_merged_PR1872",
-      "source": "0260307a6b82c37b49e60aa2b034b04de867e8c8:docs/roadmaps/rsi_swarm_backlog.json#current_observation.qualification",
-      "summary": "All14 frontend GotJunk dependency PR heads retain protobufjs7.5.4; alert103 not repaired. Module-path main changes deploy; separate lock repair remains owner/deployment-dependent. No repeat audit selected."
-    },
-    "qualification": {
-      "current_behavior": "Every matched request eagerly calls observer then broker before branch selection, unresolved-name rejection or mutation denial. A getter call may construct services; this matrix replaces both getters and never invokes real constructors.",
-      "coverage": "Finite unmatched/simulation-plan, unresolved name, list/status, tail/follow/live status, denied and permitted launch/start/run/stop, required/irrelevant unavailable collaborators; exact response/callback/acquisition traces. See frozen case names and source evidence.",
-      "prospective_contract": "Unmatched/unresolved/unauthorized mutation must acquire neither collaborator. List/status and authorized launch/start/run/stop acquire only broker; tail/follow/live status acquire only observer. Preserve exact parser, response, cursor, actor and callback behavior. Keep currently required creating getter semantics; noncreating read semantics and observer lifecycle redesign are separate.",
-      "claim_limit": "Passing characterizations document the eager-acquisition defect; they do not make it safe. Later source repair must explicitly evolve acquisition expectations against the declared contract, without weakening response or permission controls."
+    "repair": {
+      "behavior": "Unmatched, unresolved and unauthorized mutation requests acquire neither collaborator. List/status and authorized launch/start/run/stop acquire broker only; tail/follow/live status acquire observer only.",
+      "compatibility": "Exact parser, responses, callbacks, actor, cursor and required creating-getter semantics retained. Existing handler split into bounded same-file helpers; no new module or authority.",
+      "claim_limit": "Required getters may still construct runtime components. This repair removes unnecessary acquisition, not all whole-command effects; no live readiness or autonomous upgrade claim.",
+      "manifest": "Existing1401-member closure unchanged; regenerate only adapter digest and two existing manifest pins."
     },
     "contract": "modules/communication/moltbot_bridge/INTERFACE.md",
     "validation": {
       "fixed_cases": 28,
+      "baseline_fail": 26,
+      "baseline_pass": 2,
       "primary_pass": 28,
       "independent_same_cases_pass": 28,
       "legacy_definitions_preserved": 13,
@@ -2231,54 +2243,80 @@
       "warnings_per_run": 2,
       "warnings": "Known asyncio configuration options with plugin autoload disabled; synchronous cases only.",
       "registry": "current:1656 tracked test files,269 quarantined; registry unchanged",
-      "freeze": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\author-test-freeze.json",
-        "sha256": "19b971b0ae087462a98c01975f922a42e43d3251218235747ca792a829f4738e"
+      "manifest_tests": 8,
+      "package_files": 67,
+      "claim_limit": "Finite inert tests; no live service or OS isolation proof.",
+      "author-test-freeze.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\author-test-freeze.json",
+        "sha256": "b98adff1e63f947fa31bbf4bcd4c8b6e5f103d33ed0fa7bea8a02d10e13e4b91"
       },
-      "runner": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\run_adapter_tests.py",
-        "sha256": "3756a22051b66d28ff3d4723972f08586c7602b12cb2a277053b6804c0aaf3c9"
+      "author-source-freeze.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\author-source-freeze.json",
+        "sha256": "34e90af78cfa604175104563d3e14b5043e13ae5ad3bc9dc06fb539b4c4c7dd5"
       },
-      "primary_xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\primary-tests.xml",
-        "sha256": "10092f2acb87cf915e28012dfe976cbf77a0e787be856a9b150d8f2eb3c3e258"
+      "run_adapter_tests.py": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\run_adapter_tests.py",
+        "sha256": "bf443c467dfb14253d029dc1115ab6ce34ac5789565e63e32485bb3a0a66665e"
       },
-      "independent_xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\independent-tests.xml",
-        "sha256": "d283441075348984cef4e01ac30e51b9d6cb4e82d93c1d4a279c1c3df213c8dd"
+      "baseline-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\baseline-tests.xml",
+        "sha256": "9eb616abc9e6ac47ec74719f33451553ae657168cd948a75a16c87f50f63a6f3"
       },
-      "primary_invocation": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\primary-invocation.json",
-        "sha256": "399d18b57647ff918526957ebabcc576c3436a71273ecf38bf1cf18f6e7ea087"
+      "primary-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\primary-tests.xml",
+        "sha256": "41025e87a3f73962f48e7585272b2d145c45e499eddd20558ad9c3ae7029dbef"
       },
-      "independent_invocation": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\independent-invocation.json",
-        "sha256": "730c5bae4d34dc41ea8512d2ce2f347bf25f58389276ab9bfde2b513d4771cdf"
+      "independent-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\independent-tests.xml",
+        "sha256": "a2673edd2d134a99015d40b115f3c30146e48ae42702cfdc46e9fe6a73ba973c"
       },
-      "interpretation": "Finite ordinary Python tests only; eager bridge initializer and daemon imports forbidden; no actual runtime, OS confinement or production readiness proof."
+      "baseline-invocation.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\baseline-invocation.json",
+        "sha256": "e88f46ea22c02aa8cf4226831ed399e09bdb145f1d7063c19102640f49478f03"
+      },
+      "primary-invocation.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\primary-invocation.json",
+        "sha256": "1fc5055ea2b2ae9fef91c167c6227c5637e63ddb0b17f73b9c941bacd3e6dd8e"
+      },
+      "independent-invocation.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\independent-invocation.json",
+        "sha256": "9f2fd128d6bb190c486ea732456bd699522e716919e6e73721cdb884c94c96ff"
+      },
+      "manifest-binding.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\manifest-binding.json",
+        "sha256": "f4617ca2f1d88f94cf3dc955b9df188d3e31e27f155473361a11a524937eb2d4"
+      }
     },
     "wsp00_gates": [
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\wsp00-gate.json",
-        "sha256": "781cf4a709bfa7f0b91fcffb86f7ad4c473ee90fec561c638535ec2dacdb6ba8"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\wsp00-gate.json",
+        "sha256": "ce3af53c4adeefd6a00e181e8b4a25b5bd0b6e8cb86fdee89adb5b954873deeb"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\author-wsp00-gate.json",
-        "sha256": "cbeb45b4918480fa4390d34e17dc6fcd300ac316d47c810f3ebe37593b5afce1"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\author-wsp00-gate.json",
+        "sha256": "3192f48c8d64c80151368158efe07e58f4b78bd7bde5c99aba222ad9d4536387"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\verifier-wsp00-gate.json",
-        "sha256": "942414b2ea40bfd063d39f8d12559d0a496b68972d730a816d58efd690f77df2"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\verifier-wsp00-gate.json",
+        "sha256": "13099cf105b3b56e34da83bab08f6a8d16e4d92be47cf7e9a755a82b4dc4f983"
       }
     ],
     "reviews": {
       "preexecution-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\preexecution-review.json",
-        "sha256": "7bd55a0586c097f6e7561bcae33569349911692dd17c38ad48a347c99f7f1eea"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\preexecution-review.json",
+        "sha256": "eee33fd821024ac1454bc3bda2bcbef22a6b60841997433b0546b1d7b102cf1d"
       },
-      "independent-qualification-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition\\independent-qualification-review.json",
-        "sha256": "a8cf5138683428fffc20fbf1ebb165d07c62df76f05142dcc6b6ea5e95f972e3"
+      "baseline-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\baseline-review.json",
+        "sha256": "79de4faa80a455e26c1f2debb6291abfa1520de1c7f6e79b60b66758074ddf82"
+      },
+      "independent-repair-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\independent-repair-review.json",
+        "sha256": "59d960f79d7c5f58cb0d220da774cc24645383dbdcf5f9a321aed352a5ab8ed9"
+      },
+      "next-action-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair\\next-action-review.json",
+        "sha256": "cd2744cf142147802c4674441d31038a8ce58c8c87809c8b640b1ad4025fe697"
       }
     },
     "source_bindings": {
@@ -2294,8 +2332,8 @@
       "modules/infrastructure/dae_daemon/src/killswitch.py": "e4f6dcb8c83e1fd4966ccbcae93ae1969591faef",
       "modules/infrastructure/dae_daemon/src/schemas.py": "b186015545ed3dac16e55e877fbc066e24dc77e5",
       "modules/infrastructure/dae_daemon/tests/test_dae_observer.py": "301999b4ee1a73900e1435bce60276a9f550ca54",
-      "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "da7b0b6ee823d02e5b709193a5780040e8e4f37b",
-      "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "11f247e1c72ddc7756ed719a84fbc757b117d7ef",
+      "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "8861f07b9f3f41ee5b23fe7a4b7d5ed3938b5c3d",
+      "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "7ab28ea29fc5c2bca7814cdea901b8178d843ed4",
       "modules/communication/moltbot_bridge/src/__init__.py": "166eed840b776b8987f82f4a5e605cba9092e407",
       "modules/infrastructure/browser_actions/src/linkedin_actions.py": "842ab907354e6f88cc7cb3e1e86254f48df59784",
       "holo_index/requirements.txt": "94c4c3f3b1606a56f86cb7dfdb19075e4c150cc3",
@@ -2309,14 +2347,18 @@
       "modules/foundups/gotjunk/frontend/package.json": "24b06e3c94ea681bbba8dde877756b1730266ef6",
       "modules/foundups/gotjunk/frontend/package-lock.json": "a4c6965ba89fefeb9c15d5614ef8f6f01a8139ca",
       "modules/foundups/gotjunk/frontend/services/firebaseConfig.ts": "8082788c2db596fc1a9feabfe5b4598e274658a3",
-      "scripts/reddog_backend_manifest.json": "121adb62447fabaab2f67299f543f505ded85bde",
+      "scripts/reddog_backend_manifest.json": "705b3ef989de21d0f77d9f87e8be3d6df1a467b6",
       ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
       ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
       "modules/foundups/gotjunk/cloudbuild.yaml": "a56884616b879619509b2bd4a3480b7cae02da4c",
       "modules/foundups/gotjunk/frontend/Dockerfile": "3ad21a7fb0f30260ea84f724ecbbb9c9ec4afd8d",
       "modules/foundups/gotjunk/deployment/README.md": "0069d0043c3f5f7bd3b614ed0e771a1bbd289516",
       "modules/foundups/gotjunk/foundup_manifest.json": "6438d15d62d8b7935548ee7a7fd2477f600e2341",
-      "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+      "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "modules/infrastructure/browser_actions/tests/test_linkedin_connection_policy.py": "ee4ce83a40f323cfd0bb7d1df37ab0817883c44d",
+      "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": "9ad8bc76abc7219be4033b5819cfebf9c840694d",
+      "extensions/reddog/backend_compatibility_constants.js": "4f6626d90718f62b02c7e5ef8dafb5043189f294",
+      "scripts/tests/test_generate_reddog_backend_manifest.py": "889e36cd9af2617e01cc122247c9bab373bc6876"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2516,10 +2558,10 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1873",
           "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
-          "next_step": "Close this fixed acquisition qualification; do not repeat it. Separate source repair uses the declared branch-local contract.",
-          "dependency": "Rebind source/current ownership after current lookup closure. Existing bool gate and response formats remain authoritative; no new runtime/policy authority and no real constructors,thread,defaultDB or provider. Later repair requires separately reviewed branch contract."
+          "next_step": "Do not repeat acquisition qualification; branch-local source repair remains separate.",
+          "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
         },
         {
           "task": "Defer DAE adapter acquisition until command resolution and mutation authorization",
@@ -2531,10 +2573,10 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "selected_next_after_qualification_rebind_before_execution",
+          "state": "locally_and_independently_repaired_publication_pending",
           "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
           "dependency": "Independent branch-local contract and fixed characterization are available; rebind exact source/current ownership before repair. Existing creating getter semantics remain for required collaborator; no new permission, policy or service activation.",
-          "next_step": "Evolve these current-behavior traces against the separately declared zero-getter rejected/unresolved and one-required-getter branch contract, keeping responses/callbacks/parser/actor/cursor controls fixed. Freeze desired cases before baseline/candidate runs; use existing source/test owners and independent verifier."
+          "next_step": "Close this branch-local acquisition repair; required creating-getter behavior remains unchanged."
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -2574,33 +2616,33 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "eligible_separate_qualification_lower_tie_priority",
+          "state": "selected_next_after_repair_rebind_before_execution",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-          "next_step": "First declare a finite direct-send versus modal-send compatibility matrix using the existing fake router; qualify returned acknowledgment before changing live success/statistics.",
+          "next_step": "Qualify ambiguous Connect/Send acknowledgment in existing inert LinkedIn test owner. Distinguish direct-send variants before proposing any repair; rebind current source and ownership.",
           "dependency": "Current formula permits successful Connect with failed Send when no note was attempted; source also documents direct-send-on-Connect variants. No external invitation truth or automatic repair conclusion follows."
         }
       ],
       "selected_next": {
-        "task": "Defer DAE adapter acquisition until command resolution and mutation authorization",
+        "task": "Qualify ambiguous LinkedIn Connect/Send acknowledgment with finite fake UI outcomes",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 3,
           "deferability": 3,
           "impact": 3,
-          "total": 12,
+          "total": 11,
           "priority": "P2"
         },
-        "state": "selected_next_after_qualification_rebind_before_execution",
-        "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
-        "dependency": "Independent branch-local contract and fixed characterization are available; rebind exact source/current ownership before repair. Existing creating getter semantics remain for required collaborator; no new permission, policy or service activation.",
-        "next_step": "Evolve these current-behavior traces against the separately declared zero-getter rejected/unresolved and one-required-getter branch contract, keeping responses/callbacks/parser/actor/cursor controls fixed. Freeze desired cases before baseline/candidate runs; use existing source/test owners and independent verifier."
+        "state": "selected_next_after_repair_rebind_before_execution",
+        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+        "next_step": "Qualify ambiguous Connect/Send acknowledgment in existing inert LinkedIn test owner. Distinguish direct-send variants before proposing any repair; rebind current source and ownership.",
+        "dependency": "Current formula permits successful Connect with failed Send when no note was attempted; source also documents direct-send-on-Connect variants. No external invitation truth or automatic repair conclusion follows."
       },
-      "selection_reason": "Fresh base/owner/source evidence closes prior GotJunk qualification and now the adapter characterization. Native18/P0, FAM14/P1, GotJunk14/P1 repair and runtime/consumer-dependent13/P1 remain blocked. Branch-local acquisition repair12/P2 has observed eager-acquisition traces that conflict with the separately declared prospective oracle and is executable after fresh rebind; it outranks ambiguous LinkedIn acknowledgment11/P2. Do not change creating-getter semantics or introduce a new runtime authority."
+      "selection_reason": "Adapter qualification PR1873 and branch-local repair converge on existing owners. Native18/P0, FAM14/P1, GotJunk14/P1 and runtime/consumer13/P1 remain blocked at recorded prerequisites. Existing LinkedIn ambiguous acknowledgment11/P2 is the highest executable remaining qualification; do not assume absence of Send means failure because direct-connect variants exist."
     },
     "publication": {
       "state": "pending_exact_candidate_review_PR_checks_merge_and_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-acquisition",
-      "claims": "No push, merge or remote check pass claimed by this prepublication record."
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-adapter-branch-repair",
+      "claims": "No push, merge or remote pass claimed by this prepublication record."
     }
   }
 }

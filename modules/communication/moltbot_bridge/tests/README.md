@@ -1,15 +1,15 @@
 ## RSI adapter acquisition and LinkedIn previews
 
-`test_dae_runtime_adapter.py`: 28 fixed `test_dae_acquisition_characterizes_` cases;
-original13 unchanged/deselected. Both getters inert, eager bridge namespace replaced,
-daemon imports forbidden; both runs pass28 with two known config warnings. These document
-present behavior, not safety. See [repair contract](../INTERFACE.md) and runner/XML
-in the [RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+`test_dae_runtime_adapter.py`:28 frozen `test_dae_acquisition_` regressions;
+original13 unchanged/deselected. Baseline26fail/2pass; candidate and independent
+runs pass28, with two known config warnings each. Both getters inert, eager bridge
+namespace replaced, daemon imports forbidden. [Contract](../INTERFACE.md), hashes
+and XML are in the [RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
 
 LinkedIn preview retains54 shared plus session cases:77 pass locally/independently
 (baseline15fail/62pass); original18 preserved/deselected, two known warnings. Reuse
 existing inert fixtures/runners with disabled plugin autoload/cache, `-B`, cleared
-addopts and unique staging; this adapter runner also enforces `-I`. No live/OS proof.
+addopts and unique staging; adapter runner also enforces `-I`. No live/OS proof.
 
 ## LinkedIn dry-run repair — 2026-09-22
 
