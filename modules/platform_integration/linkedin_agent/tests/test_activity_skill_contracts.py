@@ -36,6 +36,8 @@ class ActivitySkillContracts(unittest.TestCase):
     def test_local_markdown_links_resolve(self):
         paths = [MODULE / "docs/LINKEDIN_ACTIVITY_ROUTING.md",
                  MODULE / "docs/LINKEDIN_REVIEW_WORKFLOW.md"]
+        paths += list((MODULE / "skillz/linkedin_newsletters/references").glob("*.md"))
+        paths += [MODULE / "docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md"]
         paths += [MODULE / f"skillz/{name}/SKILLz.md"
                   for name in (*CHILDREN, "linkedin_engagement")]
         paths += [ROOT / relative for relative in (

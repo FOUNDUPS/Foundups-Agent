@@ -19,7 +19,9 @@ state the correction and use **FoundUps**. Never create a BoundUps series or URL
 
 ## Source and identity gate
 
-1. Verify the live series, publisher and latest edition before editing. Historical
+1. Verify the live series, publisher and latest edition before remote editing.
+   Missing live access does not prevent authorized local research/drafting; mark
+   prior-topic coverage incomplete and placement blocked until verified. Historical
    continuity identifies “Foundups - Eat the Startup” under the FOUNDUPS® company
    page (company 1263645), but historical names, counts and URLs are not current proof.
 2. Read the latest published editions and saved/scheduled drafts to prevent topic

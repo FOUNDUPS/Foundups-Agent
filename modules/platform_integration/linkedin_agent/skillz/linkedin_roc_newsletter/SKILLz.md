@@ -1,7 +1,7 @@
 ---
 name: linkedin_roc_newsletter
 description: Research, draft, maintain and publish the personal ROC Return on Compute LinkedIn newsletter or article lane without confusing it with FoundUps engineering or JHR infrastructure reporting
-version: 1.0.0
+version: 1.1.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -54,3 +54,6 @@ Track the shared newsletter stages. Route exact approved content through
 Record which ROC definition and sources were used, counterarguments addressed and
 the next open question. No verified series identity means `BLOCKED_IDENTITY`, not
 permission to create or publish elsewhere.
+This is a delivery blocker only: continue authorized research and local drafting
+with the shared issue brief; report e.g. DRAFTED / BLOCKED_IDENTITY. Never imply
+that a drafted article was placed in a verified newsletter series.

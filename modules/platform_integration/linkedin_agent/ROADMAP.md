@@ -1,5 +1,8 @@
 # Linkedin Agent Module - Roadmap
 
+- Editorial handoff and reusable issue/new-series templates: implemented in the existing newsletter router. Next operational work: inspect live drafts/editions, then develop the selected lane; [audit evidence and backlog](docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md).
+
+
 ## 2026-09-22 activity routing status
 
 - Instruction-level master and activity children: implemented; see [routing](docs/LINKEDIN_ACTIVITY_ROUTING.md). Newsletter routing now has dedicated FoundUps, ROC and JHR child skills under one LinkedIn/newsletter master.

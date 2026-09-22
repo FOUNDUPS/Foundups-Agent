@@ -1,5 +1,9 @@
 ﻿# LinkedIn Agent Test Module Log
 
+## 2026-09-22 — Editorial workflow and template reachability
+
+Extended the existing link-validation coverage to the shared editorial workflow and bounded audit, including references to issue and new-series assets. Reused all seven offline contract cases; no new test file or runtime import. Scenario walkthrough covers audit-only incomplete coverage, ROC local drafting with unknown series, new-series ambiguity and group intelligence privacy. These are instruction checks, not live publication evidence.
+
 ## 2026-09-22 — Dedicated newsletter routing contracts
 
 Extended the existing offline activity-skill contract test (no new test file) to require separate FoundUps, ROC and JHR newsletter children, master/router links and lane-specific fail-closed evidence. This remains documentation validation only; it does not certify a live series or publish an edition.

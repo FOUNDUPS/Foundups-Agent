@@ -1,5 +1,8 @@
 # LinkedIn Agent Interface Documentation
 
+The [editorial work packet](skillz/linkedin_newsletters/references/editorial-workflow.md) is an instruction contract: request/mode, scope, continuity, evidence, target, authority, acceptance and return receipt. It is not a new Python API or runtime dispatcher.
+
+
 ## Human-directed activity routing
 
 The existing `skillz/linkedin_engagement/SKILLz.md` is the instruction entrypoint for [full or scoped LinkedIn operations](docs/LINKEDIN_ACTIVITY_ROUTING.md). Child skills describe workflows; they do not add Python APIs or certify the legacy APIs below. The wrapper now enforces outer default/true for write actions; direct-like dry-run returns a target preview before browser import/construction. [Exact result and limits](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22) distinguish preview success from a posted result. Engagement-session truthy dry-run also returns configuration before browser access; see the [session fields and limits](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-session-preview--2026-09-22). Messaging simulation, connection policy/history and broader live-action guards remain readiness gaps. A successful mock result is never a sent-message receipt.

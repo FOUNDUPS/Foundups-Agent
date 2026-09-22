@@ -1,5 +1,8 @@
 # LinkedIn Agent
 
+[Editorial orchestration and templates](skillz/linkedin_newsletters/references/editorial-workflow.md) define Red Dog → 0102 handoffs, audit versus development, revision continuity, issue briefs and new-series onboarding. See the [bounded tree audit](docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md) for coverage and remaining editorial/runtime work.
+
+
 [Master LinkedIn activity router](docs/LINKEDIN_ACTIVITY_ROUTING.md): full-cycle or scoped jobs through the existing engagement skill, dedicated inbox/connections/notifications/newsletters/publishing/outreach/continuity children, and reused group/feed/targeting owners. Instruction coverage is not unattended-runtime certification.
 
 The newsletter router has independent FoundUps / Eat the Startup, ROC / Return on Compute, and Japan Hyperscaler Report skills. Each retains its own corpus, destination discovery and completion state; a combined audit does not collapse them into one publication.

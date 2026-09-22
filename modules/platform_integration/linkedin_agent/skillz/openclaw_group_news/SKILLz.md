@@ -1,7 +1,7 @@
 ---
 name: openclaw_group_news
 description: Research and draft The Good, The Bad and The Ugly automation discussion for the OpenClaw LinkedIn group
-version: 1.1.0
+version: 1.2.0
 author: 0102
 agents: [qwen, selenium]
 dependencies: [web_search, anti_detection_poster]
@@ -21,7 +21,7 @@ Read [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md). Members
 
 ## Research
 
-1. Check urgent inbox items and moderation queues before optional content seeding. Read recent group discussions, existing drafts and scheduled/published items to avoid duplicate topics and links.
+1. For a full LinkedIn run, let the master handle urgent inbox and moderation queues before optional content seeding. A named group-news job reads only relevant group discussions, drafts and scheduled/published items; it does not open inbox or membership queues. Avoid duplicate topics and links.
 2. Choose one concrete automation theme: delegated work, persistent agents, memory, skill reuse, observability, permission boundaries, recovery, reliability or cost. Grok Bot, OpenClaw, Hermes and other systems are candidates, not a fixed mandatory brand list.
 3. Search current sources and read original documentation, release notes, repositories or primary incident reports. Record publication, event and retrieval dates separately. Headlines and search snippets are leads only.
 4. Label each claim as vendor-described, independently tested, personally observed or inferred. Do not repeat vendor claims of unique capability, security or AGI as established fact.
@@ -57,6 +57,14 @@ Propose one substantive weekly discussion as an editorial rhythm, not a quota. S
 Never assume group posts share article/newsletter scheduling support. Inspect the actual destination; obtain explicit timing/timezone and use only an authorized, verified scheduler. This skill does not create a recurring task by itself.
 
 On a later authorized review, read responses and draft evidence-backed follow-ups. Do not auto-like, DM commenters or repetitively prompt silent members. Save generalized lessons, not private member data, to reusable skills.
+
+Return public discussion intelligence through the
+[shared editorial workflow](../linkedin_newsletters/references/editorial-workflow.md):
+source/post URL, date, evidence type, lesson, candidate lane and next owner.
+Engineering lessons route to FoundUps, compute economics to ROC, Japan
+infrastructure to JHR. Deduplicate before developing a new issue; do not copy the
+group post across newsletters or expose private member replies. An audit reports
+the latest verified post, draft, unanswered questions and next action with coverage.
 
 ## Runtime status
 
