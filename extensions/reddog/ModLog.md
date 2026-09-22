@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-09-22 - Broker stop-acknowledgment backend binding
+
+- Existing broker member hash and both digest pins refreshed to `baf2e34b1d50a357692339c8489b821ed5f1f2e346c3ac87d0e5c7aa05f32098`; all1,401 members, API/version and caps unchanged.
+- Eight generator tests/check,15fast groups and deterministic67-file/950,440-byte package pass. Fixed51broker cases pass locally and independently; no installed runtime update or live RSI proof.
+- WSP15/22/49/50/62/84/97. Exact publication and next action are tracked in the canonical backlog.
+
 ## 2026-09-22 - Broker import-streak backend binding
 
 - Refresh the existing broker member and both digest pins to `52968ee67ecb7645bd21d39ce6dcbafcb578ded28f0dd7fe8db7285d6884d267`. Runtime membership remains 1,401; API/version and package caps are unchanged.

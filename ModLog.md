@@ -1,3 +1,8 @@
+## 2026-09-22: RSI stop acknowledgment and integration reconciliation
+
+- WSP00/10/15/22/49/50/62/91/97;12/P2. Broker stop completion now requires observed exit of the captured worker; fixed51cases pass locally and independently. PR1859 is merged with all PR/main checks and owned-lane retirement verified.
+- Existing [RSI backlog](docs/roadmaps/rsi_swarm_backlog.json) now binds LinkedIn/Gmail feedback ownership, FoundUp identity evidence and Hermes/OpenClaw maintenance gaps. No new module/skill/packet, runtime upgrade, messaging or product activation. Exact publication and re-scored next work remain in the current receipts.
+
 ## 2026-09-22: RSI broker import-failure counter repair
 
 - WSP00/10/15/22/49/50/62/91/97;12/P2. Repeated caught import failures now reach the existing detach threshold without erasing the streak at launch entry. No admission or scheduling authority added.

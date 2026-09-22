@@ -16,6 +16,16 @@ Remaining broker class-size debt belongs to dae_daemon maintainers: qualify
 launch/stop/heartbeat separation before future class growth. This is no exemption
 or new scheduler. Exact dimensions/publication are in the canonical RSI backlog.
 
+## Broker stop acknowledgment — 2026-09-22
+
+Stop requests now distinguish `stopping` from observed `stopped`; callers must
+not interpret hook return as worker exit. See the [contract](INTERFACE.md#broker-stop-acknowledgment).
+The active handle owns its captured stop hook, and replacement callbacks cannot
+publish later old-owner completion. 51 fixed inert cases pass locally and independently.
+This extends the existing broker and preserves the separate Holo exit poll.
+The inherited class does not grow; every new/touched function stays within50lines.
+Live termination, universal race safety and runtime upgrade admission remain open.
+
 ## Architecture
 
 ```
