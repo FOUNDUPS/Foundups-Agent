@@ -1,5 +1,10 @@
 ﻿# LinkedIn Agent Test Module Log
 
+## 2026-09-23 — Research reference validation
+
+Reused all seven offline activity-contract cases; the existing references glob validates the new research contract and source-note links from lane skills. No new test or runtime import. Independent instruction scenarios cover unsupported Gemini claims, Champion/COGDC comparison, inert RSI evidence, concurrent Docs edits, WSP 15 ordering and dialogue-training separation. All six returned the intended bounded decisions. Review identified APS/MPS wording tension and permissive dataset-builder paths; clarified the newsletter ordering exception and warned against assuming runtime eligibility enforcement. Moshpit instructions cover stable lane/issue identities and preservation of prior history.
+
+
 ## 2026-09-22 — Editorial workflow and template reachability
 
 Extended the existing link-validation coverage to the shared editorial workflow and bounded audit, including references to issue and new-series assets. Reused all seven offline contract cases; no new test file or runtime import. Scenario walkthrough covers audit-only incomplete coverage, ROC local drafting with unknown series, new-series ambiguity and group intelligence privacy. These are instruction checks, not live publication evidence.

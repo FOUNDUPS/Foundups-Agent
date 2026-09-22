@@ -1,5 +1,8 @@
 # LinkedIn Agent
 
+Research uses [lane-specific verification](skillz/linkedin_newsletters/references/research-verification.md): original sources before claims, WSP 15 editorial priorities, Google Docs collaboration and private learning records. Gemini summaries remain retrieval leads, not proof or verbatim training data.
+
+
 [Editorial orchestration and templates](skillz/linkedin_newsletters/references/editorial-workflow.md) define Red Dog → 0102 handoffs, audit versus development, revision continuity, issue briefs and new-series onboarding. See the [bounded tree audit](docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md) for coverage and remaining editorial/runtime work.
 
 
