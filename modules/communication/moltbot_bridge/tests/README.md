@@ -1,17 +1,17 @@
 ## Resident canary evidence reachability — 2026-09-23
 
-The existing test_reddog_resident_live_canary_integration.py adds five explicit
-controls while preserving every original test. The frozen 15-case selection is
-test_false_chain_evidence_cannot_complete_proof, test_blocked_canary_never_invokes_deferred_callbacks,
-and test_uninvoked_chain_leaf_reports_specific_blockers.
-Local and independent runs pass. Existing named mutation cases stop at missing
-readiness dependencies; their deferred mutations are not executed. Two witnesses
-assert zero runner/mutator/PatternMemory construction and unchanged chain bytes.
-Three direct _chain_evidence cases inspect an uninvoked prestate, wrong schema,
-and wrong revision with exact rejection reasons. The reviewed runner binds source
-hashes, disposable Git state, owned capture paths and Python-level effect guards.
-This is not an OS sandbox, full evaluator coverage, native execution or retained
-RSI. The root backlog binds exact receipts, the runner retries and next action.
+PR1877 qualified 15 canary cases: two zero-callback witnesses and three direct
+chain-validator controls preserve the existing tests and expose deferred mutations.
+The existing test_reddog_signer_current_generation_use_time_binding.py now adds
+seven cross-owner rows; all11 cases pass locally and independently. The real
+collector/resolver/readiness path uses controlled signed/generation verifier results.
+Accepted typed generation evidence removes only three use-time reasons; seven
+other anchors and no effect lease remain. Readiness keeps its three generation
+reasons and peer blocker, with no additional verifier/clock calls. Independent
+binding errors remain in the minimal fixture; its supplier acquisition is observed,
+not repaired. Exact cases/source hashes and receipts are in the root RSI backlog.
+This proves neither native admission, authenticated freshness/replay, retained RSI
+nor OS sandboxing. Existing lower-layer coverage is preserved.
 
 ## RSI adapter acquisition and LinkedIn previews
 

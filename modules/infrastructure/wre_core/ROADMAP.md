@@ -213,16 +213,17 @@ and a complete repository RSI cycle are different units.
 
 ### Current core canary test checkpoint — 2026-09-23
 
-The resident canary's admission gate blocks its deferred evidence mutations.
-The existing integration suite now makes that boundary explicit: 15 frozen cases
-pass locally and independently, including two zero-callback witnesses and three
-real pure chain-validator checks. Production gates and source are unchanged.
-This closes a bounded coverage qualification, not the native canary or R15.
-AmIBot remains registered but undispatched. Memory Horizon is a separately owned
-open proposal in PR #1822. WRE ROC AutoResearch remains task-specific dry-run
-research; AI Gateway model campaigns/Fusion routing are distinct existing paths.
-The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) binds source,
-fixture evidence and the freshly scored core integration prerequisite.
+PR1877 closed the deferred-callback qualification. The next core contract now
+passes11 frozen cases locally and independently: real use-time collection and
+resident readiness retain distinct diagnostics. Accepted typed generation evidence
+removes only three use-time reasons; seven other anchors and no effect lease
+remain. Readiness retains its own generation/peer blockers with no supplier calls.
+The minimal fixture retains independent binding errors while signature acceptance
+still triggers collection. This is characterized acquisition, not a source repair.
+Production, shared fixtures and existing tests are unchanged; no native or retained
+RSI claim. AmIBot remains registered/undispatched, Memory Horizon separately owned.
+The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) binds exact
+source, synthetic evidence, current ownership and the freshly scored next action.
 
 ### Bounded campaign and report acceptance
 

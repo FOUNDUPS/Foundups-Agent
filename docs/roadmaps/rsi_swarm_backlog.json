@@ -1856,8 +1856,8 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "4169beaf990e99510146008efdd78b86684f90c5",
-    "selected_action": "R22-core-canary-test-entry-20260923",
+    "base_commit": "23a675b627c4c76cc780455cbed8a2f117279164",
+    "selected_action": "R22-generation-readiness-20260923",
     "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
@@ -1871,15 +1871,15 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T20:51:45.804581+00:00",
-    "base": "4169beaf990e99510146008efdd78b86684f90c5",
+    "utc": "2026-09-22T21:59:15.742133+00:00",
+    "base": "23a675b627c4c76cc780455cbed8a2f117279164",
     "self": "0102",
     "role": "architect",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "observation_id": "R22-core-canary-test-entry-20260923",
+    "observation_id": "R22-generation-readiness-20260923",
     "selected": {
-      "task": "Qualify deferred evidence callback reachability in the resident RSI canary and extend existing evidence-validator controls",
+      "task": "Qualify existing signer-generation evidence projection into resident canary readiness without changing admission",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1888,28 +1888,34 @@
         "total": 15,
         "priority": "P1"
       },
-      "reason": "Principal requests core WRE/RSI testing. Independent source review found mutation tests blocked before their callbacks; executable test correction precedes trustworthy canary assessment. Native18/P0 remains blocked by missing authentic runtime dependencies; prior LinkedIn12/P2 is deferred.",
-      "state": "locally_and_independently_qualified_publication_pending"
+      "state": "locally_and_independently_qualified_publication_pending",
+      "source": "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py::validate_reddog_resident_runtime_artifacts",
+      "dependency": "Exact11 frozen cases passed locally and independently; unchanged production. Publication and closure remain separate.",
+      "next_step": "Publish only this reviewed test/documentation qualification; do not repeat the matrix or infer authenticated freshness, replay, native admission or retained improvement."
     },
     "previous_closed": {
-      "pr": 1876,
-      "merge": "4169beaf990e99510146008efdd78b86684f90c5"
+      "pr": 1877,
+      "merge": "0dd4f2bbd0a69760df42c3d7a9af1920559cbf87"
+    },
+    "intervening": {
+      "pr": 1878,
+      "summary": "LinkedIn editorial documentation/templates and contract tests; separate owner; no selected core source delta"
     },
     "retrieval": {
-      "semantic": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact error retained, no reindex",
-      "fallback": "Fresh main docs, NAVIGATION and bounded exact-source searches",
-      "noise": "Broad term searches mixed historical checkpoints; narrowed to canonical canary/fixture and current roadmap",
-      "ordering": "WSP00 and historical boundary, current roadmap, WSP97/15, existing source/test owners",
-      "missing": "No direct evaluate_live_proof test caller in bridge test search; optional module artifacts checked by agents",
-      "staleness": "Historical roadmap numbers treated as snapshots; main and PR heads verified",
-      "duplication": "Reuse existing canary source and integration suite; no new scheduler/module/skill"
+      "noise": "Historical continuity explicitly non-authoritative; source-only bindings and narrow owner reads prioritize current state.",
+      "ordering": "WSP00 bootstrap; WSP15/97; canonical roadmap/dispatch; current Git and queue; source/tests.",
+      "missing": "Holo semantic index generation unusable at previous exact shared head; no native-authority proof.",
+      "staleness": "All55 selected source bindings match newmain; current CI/PR/peer state refreshed. Prior whole-module runtime claims not reused.",
+      "duplication": "Reuse readiness/use-time test owners and existing verifier/supplier; no new module.",
+      "holo": "Previous governed query rejected HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH at shared HEAD0c81418; sharedHEAD and query host source unchanged. Not repeating unchanged failed probe or reindexing; exact current-main/NAVIGATION fallback. No assertion that a new owner query succeeded.",
+      "prior_query": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\holo-query.json"
     },
     "owner_reconciliation": {
       "open_peer_heads": 93,
       "peer_worktrees": 157,
       "scope_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\scope-owner-check.json",
-        "sha256": "603555154ef658a285bbe04cb586a0f6aba3a1f080eec7c2e8e5f62849b59d66"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\scope-owner-check.json",
+        "sha256": "0c07ce639deb29178e43a94c1287157513480e2c5dd7bf86a616e7cb9e6484fe"
       }
     },
     "source_bindings": {
@@ -1968,7 +1974,12 @@
       "modules/infrastructure/wre_core/src/pattern_memory.py": "e7f0f58cdfd37407725d89d7d6f68203d8471273",
       "modules/communication/moltbot_bridge/tests/reddog_live_canary_artifact_test_support.py": "1ab6c18ede9f5aae5fc7ce5cf5d75ae5b9f5bf11",
       "modules/communication/moltbot_bridge/tests/reddog_resident_queue_test_helpers.py": "e2b1b7dbb7bc318619430f435c07bc57751e123e",
-      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py": "0d8e350aad39a3ff50f885b2fcca71d74429c1d6"
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py": "0d8e350aad39a3ff50f885b2fcca71d74429c1d6",
+      "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "e65ffd3f72a0d2061869e2e149a1fcfe66cbc7fa",
+      "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "2d4488ea0e45bde82c83876678593de12acade60",
+      "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_use_time_gate.py": "c718b384cbc9b213204fc6f4185fda4d9d35f3da",
+      "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "c5ff1b322a85fecf8e75e5668f1fd78c96629325",
+      "modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py": "34e9f56005b59ac07ec97c8721097e91ca9406e7"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -2005,77 +2016,65 @@
         "sha256": "b1cfbf5bf1aab9d64585c5ed3c7420c74c4f771ba4dda8fea4d852f6a33597fb"
       }
     },
-    "execution_plane": "Ordinary finite synthetic component tests in disposable repositories, with Python-level guards. No native admission, OS sandbox, live provider or retained-learning claim.",
-    "finding": "Ten existing named mutation cases reject before their deferred mutations. New witnesses prove zero callback/constructor calls; separate pure chain controls exercise specific rejection branches.",
+    "execution_plane": "Finite synthetic contract tests, not native WRE dispatch, authority issuance, or provider execution.",
+    "finding": "Real collector/resolver removes only3 generation anchors for typed accepted digest; real readiness keeps3 and peer blocker with no additional supplier calls. Minimal fixture independent binding errors survive; signed acceptance still enters collection. No lease or native proof.",
     "validation": {
-      "selected_cases": 15,
-      "new_cases": 5,
-      "preserved_selected_cases": 10,
-      "primary_pass": 15,
-      "independent_same_cases_pass": 15,
+      "selected_cases": 11,
+      "new_cases": 7,
+      "preserved_selected_cases": 4,
+      "primary_pass": 11,
+      "independent_same_cases_pass": 11,
       "registry": "current1656/quarantined269; unchanged",
       "production": "unchanged",
-      "canary-test-freeze.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\canary-test-freeze.json",
-        "sha256": "5ff002c0e31c1af96ec36873ac0ef745307b723c881c67896f576f50b87de73e"
+      "generation-test-freeze.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\generation-test-freeze.json",
+        "sha256": "4568c22b957e6acd721d3906a8662ba8e9bb9335b940b784ca9f918ffa3bb701"
       },
-      "run_canary_tests.py": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests.py",
-        "sha256": "03747a177ba52dd5843420fe32628994d38f2603eac5999e64598beb589147c9"
+      "run_generation_tests.py": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\run_generation_tests.py",
+        "sha256": "d418f73d12a197b1bf0c91c8c535e0513b6f29801cbd78ccde292459f0c854bf"
       },
       "preexecution-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review.json",
-        "sha256": "8c25d4b026608779b94d7e6a80d091a263052bff72c4c0de502fb2b8751afb50"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\preexecution-review.json",
+        "sha256": "612fa357941a3eb4adbd4eb07f6238ddeec0f88be4bd4e3e10a42b556802178a"
       },
       "primary-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-tests.xml",
-        "sha256": "aa3d4063c6420a2a20c14b342398f177c859e9c0784aa8f7655a183a2cc277f3"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\primary-tests.xml",
+        "sha256": "0c865023ddd88b5315ec9f3aff73cbc11c160a197c570899d1d5663560bc1ed9"
       },
       "independent-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-tests.xml",
-        "sha256": "e3efbaaa60e877fc1ca151bc387b2de0e71a1f5b6758ea04cd270b51cd88ad06"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\independent-tests.xml",
+        "sha256": "a456c1ac385eef134b156f2564423f872102b41042e504d66cbdadada7d33fbf"
       },
       "primary-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-invocation.json",
-        "sha256": "1cadb5eb2c40c22753ed8af4e364a09a10bf52c23d56751effac426e685a2f1e"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\primary-invocation.json",
+        "sha256": "83ed2d66ece18c6d45e2a49f630a5bce1723b46ae7d593b3736930027af1661e"
       },
       "independent-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-invocation.json",
-        "sha256": "d86a2ad9d615c4ec2c7c02b643568b44056298a5c1adef22dd49ad5e75577198"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\independent-invocation.json",
+        "sha256": "da67d1c87c26768230811b846c6ffb9ffe1f3b6fa5bd4f2aa20db7cc6da63153"
       },
       "independent-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-review.json",
-        "sha256": "df197cdee2c78ebe15554c1f38dec1be05c32b8c493135a2dd4c5b0b208dbdef"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\independent-review.json",
+        "sha256": "751436e5f98795b67f44c20b17a7e0f9ddfdf834729a0fd31d87f596a86c235b"
       },
-      "attempt1-failure.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt1-failure.json",
-        "sha256": "5a79c99a542fe9ce138f44bc538d96673e64854fc59c9f33cdb736c947be82e7"
-      },
-      "attempt2-failure.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt2-failure.json",
-        "sha256": "beb28de0393c03ef510d7b97c923c83f2d9cbf12aca8ac4ad277d242d78d6158"
-      },
-      "attempt3-failure.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt3-failure.json",
-        "sha256": "4e197311a83898f2f0c6c864f8e2da7f2d7e93d9593b9fe4ee7ea36e0c084c52"
-      },
-      "attempt4-failure.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt4-failure.json",
-        "sha256": "177499f758b7941b0d80b433765c889fe090daf74597ea1b14d2b0e8ebd70e15"
+      "generation-readiness-source-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\generation-readiness-source-review.json",
+        "sha256": "371221d67a02c572c559e21cf419bccba7c8150029266b7bf6188778ecb10411"
       }
     },
     "wsp00_gates": [
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\wsp00-gate.json",
-        "sha256": "6a9a4c317ef3e56449e144a1ffe20fef77ec8f2aa669397f62ea7e7f2937f6b8"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\wsp00-gate.json",
+        "sha256": "e35777ca2afca9b841d619e53f800863152a1ee9cb45c29e383d51f1a3e89703"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\amibot-wsp00-gate.json",
-        "sha256": "3983a83c3f843c6148179b5bb00283331711558743656e42ed9cc7c51b0fffc7"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\author-wsp00-gate.json",
+        "sha256": "071a731fb32ea32265034a52377d0e29cc07a52b19dd47028389354f02df940c"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\gateway-wsp00-gate.json",
-        "sha256": "2f970c57156d0facc4b0b4cec5ddc1d42ed880d4d99d888f021f85fda6b38f75"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness\\verifier-wsp00-gate.json",
+        "sha256": "f9ccdfeede50178029191aa001551c4022c2aadfc00513cdc0071a7d0e1f0a9b"
       }
     ],
     "post_sprint_reobservation": {
@@ -2103,10 +2102,15 @@
             "total": 15,
             "priority": "P1"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1877",
           "source": "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py::test_blocked_canary_never_invokes_deferred_callbacks",
-          "dependency": "Exact15 cases passed primary and independent; production unchanged. Publication and exact closure are separate.",
-          "next_step": "Publish only the reviewed test/documentation candidate; do not repeat this qualification or infer native completion."
+          "dependency": "Verified merge 0dd4f2bbd0a69760df42c3d7a9af1920559cbf87 is an ancestor of current base.",
+          "next_step": "Do not repeat the completed callback-reachability qualification; deferred leaf cases remain separately scoped.",
+          "closure": {
+            "pr": 1877,
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1877",
+            "merge": "0dd4f2bbd0a69760df42c3d7a9af1920559cbf87"
+          }
         },
         {
           "task": "Qualify existing signer-generation evidence projection into resident canary readiness without changing admission",
@@ -2118,10 +2122,10 @@
             "total": 15,
             "priority": "P1"
           },
-          "state": "selected_bounded_contract_qualification_after_fresh_owner_recheck",
+          "state": "locally_and_independently_qualified_publication_pending",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py::validate_reddog_resident_runtime_artifacts",
-          "dependency": "Use existing typed generation verifier, selection supplier and readiness/use-time owners. Freeze a finite cross-owner test matrix before any optional diagnostic wiring; no new issuer, provider, fake admission, service or live Linux authority execution.",
-          "next_step": "In existing readiness/use-time test owners, bind the current disagreement: accepted generation evidence removes only three reasons in the existing use-time projection, while readiness has no supplier input and reports these reasons unconditionally. Exercise absent/rejected/malformed/expired/changed-generation supplier controls and accepted synthetic projection controls with exact callback counts. Preserve readiness peer-handshake blocker, use-time remaining seven reasons and absent effect lease. Specify any future diagnostic seam separately; defaults and all current effect gates remain closed."
+          "dependency": "Exact11 frozen cases passed locally and independently; unchanged production. Publication and closure remain separate.",
+          "next_step": "Publish only this reviewed test/documentation qualification; do not repeat the matrix or infer authenticated freshness, replay, native admission or retained improvement."
         },
         {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
@@ -2248,10 +2252,10 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_secondary_core_coverage",
-          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_chain_evidence",
-          "dependency": "Existing ten integration labels do not exercise deferred mutations. Reuse pure fixture controls; no gate bypass.",
-          "next_step": "After selected contract qualification, freeze individual currently unexercised leaf rejection oracles where source inspection shows a concrete gap; do not claim full evaluator coverage."
+          "state": "selected_bounded_core_receipt_leaf_qualification_after_fresh_owner_recheck",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_new_chain_receipt_blockers",
+          "dependency": "Existing receipt and planner owners only; declare a finite direct pure-input matrix with an accepted structural control before execution. No readiness override, callback execution, PatternMemory write, live proof or native authority.",
+          "next_step": "Extend the existing canary test owner with direct new-final-receipt controls: canonical synthetic structural success; no new receipt; final receipt not new; malformed shape; queue/slice mismatch; observed revision mismatch; and recorded-stage, previous-plan, next-plan, next-action and derived receipt-ID transition mismatches. Use the existing resident_queue_chain_receipt_id producer and immutable plan projections; preserve blocked integration cases. Assert exact leaf blockers and input nonmutation. This validates a pure evidence predicate, not authentic execution, complete evaluate_live_proof coverage or durable learning."
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -2428,25 +2432,39 @@
           "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
           "dependency": "Four preserved failed runner attempts establish capture/logging/Popen/extended-path friction, not product failure. External runner is not a generalized sandbox or authority mechanism.",
           "next_step": "Search existing governed test tooling before adopting a shared recipe; preserve exact import/effect scope and avoid another parallel guard framework."
+        },
+        {
+          "task": "Avoid generation supplier acquisition on an independently rejected use-time resolution",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 11,
+            "priority": "P2"
+          },
+          "state": "eligible_separate_minimal_repair_pending_clean_positive_fixture",
+          "source": "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py::_reverify_and_bind",
+          "dependency": "Signature acceptance alone currently triggers collector despite independent binding reasons. Real supplier consumes a newly issued process-local selection handle; no authoritative nonce or effect lease is shown consumed. Preserve signed_authority_reverified and diagnostics.",
+          "next_step": "Before a minimal source change, freeze a clean-positive resolution and signature-accepted mismatch controls proving when collector acquisition is required or must be skipped. Do not treat the current already-invalid synthetic fixture as an admitted positive."
         }
       ],
       "selected_next": {
-        "task": "Qualify existing signer-generation evidence projection into resident canary readiness without changing admission",
+        "task": "Extend direct live-proof leaf coverage for existing deferred mutation cases",
         "wsp15": {
           "complexity": 3,
           "importance": 4,
-          "deferability": 4,
-          "impact": 4,
-          "total": 15,
+          "deferability": 3,
+          "impact": 3,
+          "total": 13,
           "priority": "P1"
         },
-        "state": "selected_bounded_contract_qualification_after_fresh_owner_recheck",
-        "source": "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py::validate_reddog_resident_runtime_artifacts",
-        "dependency": "Use existing typed generation verifier, selection supplier and readiness/use-time owners. Freeze a finite cross-owner test matrix before any optional diagnostic wiring; no new issuer, provider, fake admission, service or live Linux authority execution.",
-        "next_step": "In existing readiness/use-time test owners, bind the current disagreement: accepted generation evidence removes only three reasons in the existing use-time projection, while readiness has no supplier input and reports these reasons unconditionally. Exercise absent/rejected/malformed/expired/changed-generation supplier controls and accepted synthetic projection controls with exact callback counts. Preserve readiness peer-handshake blocker, use-time remaining seven reasons and absent effect lease. Specify any future diagnostic seam separately; defaults and all current effect gates remain closed."
+        "state": "selected_bounded_core_receipt_leaf_qualification_after_fresh_owner_recheck",
+        "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_new_chain_receipt_blockers",
+        "dependency": "Existing receipt and planner owners only; declare a finite direct pure-input matrix with an accepted structural control before execution. No readiness override, callback execution, PatternMemory write, live proof or native authority.",
+        "next_step": "Extend the existing canary test owner with direct new-final-receipt controls: canonical synthetic structural success; no new receipt; final receipt not new; malformed shape; queue/slice mismatch; observed revision mismatch; and recorded-stage, previous-plan, next-plan, next-action and derived receipt-ID transition mismatches. Use the existing resident_queue_chain_receipt_id producer and immutable plan projections; preserve blocked integration cases. Assert exact leaf blockers and input nonmutation. This validates a pure evidence predicate, not authentic execution, complete evaluate_live_proof coverage or durable learning."
       },
-      "rationale": "The15-case qualification is complete at the finite synthetic level. Existing generation verification and one-shot selection consumption are already implemented; the missing connection is the readiness diagnostic input contract, not a missing research engine or issuer. Readiness already preserves a separate signer peer-handshake failure. The valve resolver removes only its three generation reasons and retains seven other reasons with no effect lease. A fixed cross-owner contract matrix is the smallest executable core step before wiring diagnostics, and outranks more leaf coverage or LinkedIn12 under the principal core-RSI objective. Native18 remains blocked; FAM14, GotJunk14 and runtime/model/PostgreSQL13 retain their distinct dependencies. Closed work is not reselected.",
-      "selection_reason": "The15-case qualification is complete at the finite synthetic level. Existing generation verification and one-shot selection consumption are already implemented; the missing connection is the readiness diagnostic input contract, not a missing research engine or issuer. Readiness already preserves a separate signer peer-handshake failure. The valve resolver removes only its three generation reasons and retains seven other reasons with no effect lease. A fixed cross-owner contract matrix is the smallest executable core step before wiring diagnostics, and outranks more leaf coverage or LinkedIn12 under the principal core-RSI objective. Native18 remains blocked; FAM14, GotJunk14 and runtime/model/PostgreSQL13 retain their distinct dependencies. Closed work is not reselected.",
+      "rationale": "The current11-case cross-owner qualification is complete locally and independently. The selected13/P1 pure final-chain receipt predicate coverage addresses specific named mutation cases still not reached through the blocked integration runner; current direct controls cover only prestate/schema/revision. Source search found no direct _new_chain_receipt_blockers or _final_receipt_transition_matches tests. It is an executable core evidence step with an accepted structural control and explicit negative oracles, outranking supplier-acquisition11/P2 and separate LinkedIn12/P2. Native18, FAM14 and GotJunk14 remain dependency-blocked; PostgreSQL13 needs runtime qualification. No gate removal or supplier authority is inferred.",
       "source_bindings": {
         ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
         ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
@@ -2471,7 +2489,7 @@
         "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "056e09dea7dbc8ac83adf1976d077a068e315122",
         "modules/communication/moltbot_bridge/tests/test_reddog_resident_runtime_artifact_readiness.py": "7dc5b3de2fcbb7099eda05291950bf80a59623f0",
         "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py": "0a02f9bf28ea48d1dbebc35f11efd517d6d96416",
-        "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "66db36e0b259678cf6bec8f0aff7b5ddda10bdde",
+        "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "e65ffd3f72a0d2061869e2e149a1fcfe66cbc7fa",
         "modules/foundups/gotjunk/cloudbuild.yaml": "a56884616b879619509b2bd4a3480b7cae02da4c",
         "modules/foundups/gotjunk/foundup_manifest.json": "6438d15d62d8b7935548ee7a7fd2477f600e2341",
         "modules/foundups/gotjunk/frontend/Dockerfile": "3ad21a7fb0f30260ea84f724ecbbb9c9ec4afd8d",
@@ -2502,20 +2520,20 @@
         "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3",
         "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": "9ad8bc76abc7219be4033b5819cfebf9c840694d",
         "scripts/reddog_backend_manifest.json": "6c467c24cdcfc25123dabba3dd53bdef928cbe3e",
-        "scripts/tests/test_generate_reddog_backend_manifest.py": "124816a55c3ec7dbd55965af51574b6b90283af9"
-      },
-      "still_open": [
-        "Native admitted execution, independent live proof, retained PatternMemory improvement and entitlement remain unproved.",
-        "Current signer-generation verifier consumes a process-local selection capability; audit-only return is not an effect lease or proof of an entirely non-consuming operation.",
-        "Synthetic positive projection controls do not authenticate deployed runtime artifacts or authorize a control-loop callback.",
-        "Readiness retains signer_client_peer_handshake_verifier_missing; use-time resolver separately retains seven authority reasons and no authoritative_use_lease.",
-        "WRE ROC dry-run AutoResearch, AI Gateway model research and a generic native WRE evaluator remain distinct; no automatic generalization.",
-        "Existing inherited owners: readiness514 lines/validator42, use-time resolver722/class208, canary714/entry50, generation gate70/collector20. Reuse existing owners and apply differential WSP62 before any source growth."
-      ]
+        "scripts/tests/test_generate_reddog_backend_manifest.py": "124816a55c3ec7dbd55965af51574b6b90283af9",
+        "modules/communication/moltbot_bridge/src/reddog_resident_queue_chain_results_store.py": "84e88635ffdb2e25d226270ebed5e0440900f913",
+        "modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py": "c75ecd480fc2e3be766a297af6317058875741f9",
+        "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "35da9daecf3af8c33f055091310af6bceea8d451",
+        "modules/infrastructure/wre_core/src/pattern_memory.py": "e7f0f58cdfd37407725d89d7d6f68203d8471273",
+        "modules/communication/moltbot_bridge/tests/reddog_live_canary_artifact_test_support.py": "1ab6c18ede9f5aae5fc7ce5cf5d75ae5b9f5bf11",
+        "modules/communication/moltbot_bridge/tests/reddog_resident_queue_test_helpers.py": "e2b1b7dbb7bc318619430f435c07bc57751e123e",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py": "0d8e350aad39a3ff50f885b2fcca71d74429c1d6",
+        "modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py": "34e9f56005b59ac07ec97c8721097e91ca9406e7"
+      }
     },
     "publication": {
       "state": "pending_exact_review_PR_merge_and_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry"
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-generation-readiness"
     }
   }
 }
