@@ -1,3 +1,17 @@
+## Self-audit diagnostic accounting
+
+`test_daemon_self_audit_diagnostic_outcomes.py` exercises all three existing
+accounting/escalation consumers with inert effects and disposable SQLite inputs.
+Run it with `test_daemon_self_audit_scan_status.py`: 94 cases pass locally and
+independently (the same cases). Diagnostic baseline: 7 passed,
+16 failed, no collection errors. Original 30 legacy definitions
+and the 71-case scan-status file remain unchanged.
+
+Use disabled plugin autoload, Python `-I -B -m pytest`, `-o addopts=`,
+`-p no:cacheprovider` and a fresh external `--basetemp`. No live daemon, default
+database, provider, queue claim or payout is exercised. See the
+[outcome contract](../INTERFACE.md#self-audit-diagnostic-outcomes).
+
 # wre_core Test Suite
 
 ## Self-audit scan status

@@ -1,3 +1,8 @@
+## 2026-09-22: RSI diagnostic-outcome accounting
+
+- WSP00/15/22/49/50/62/91/97;11/P2. Existing WRE self-audit now distinguishes successful SQLite checks from repair outcomes across counters, feedback and escalation.
+- 94 fixed cases pass locally and independently; original scan-status/legacy tests preserved. Exact source/publication and re-scored next action are in the [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). No live RSI or retained learning claimed.
+
 ## 2026-09-22: RSI self-audit attempt-status repair
 
 - WSP00/15/22/49/50/62/91/97;13/P1. Existing WRE scanner and OpenClaw observation now distinguish bounded completion, partial coverage and failure without changing dispatch authority.

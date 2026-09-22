@@ -299,6 +299,20 @@ path confinement, offsets, effects and fixed scan-status acceptance. Do not
 compress unrelated code to disguise size debt. The supervisor separately retains
 its pre-existing 3419-line ceiling and 2026-09-30 review deadline.
 
+## Self-audit diagnostic accounting — 2026-09-22
+
+The 11/P2 repair separates SQLite diagnostics from repair counters, feedback and
+escalation suppression. 94 fixed cases pass locally and independently, including
+the unchanged 71-case scan-status suite. Exact publication and re-observation
+belong to the canonical backlog; native runtime and retained learning remain open.
+
+The touched outcome responsibility is decomposed within the existing WRE module.
+This shrinks the critical scanner and its inherited oversized class; exact
+dimensions are in candidate validation. Remaining input/tail/config decomposition
+above is still required before scanner growth. No new monitor, store or authority
+owner is introduced. The single runtime helper requires a reviewed 1400-to-1401
+manifest count ceiling; all byte, path, digest and execution controls remain.
+
 ## WRE master orchestrator decomposition
 
 Execution-truth hardening extracted registry-bound executor dispatch, local

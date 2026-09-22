@@ -1856,29 +1856,29 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "6ede800afdc93d4d7223e10dea80c6c047e0598d",
-    "selected_action": "R18-R23-self-audit-scan-status-repair",
+    "base_commit": "28ea17b5ca9caed155b56bb966d7e540ddf5da1b",
+    "selected_action": "R18-R23-self-audit-diagnostic-outcome-repair",
     "status": "independent_local_validation_passed_publication_pending",
     "wsp15": {
-      "complexity": 3,
-      "importance": 4,
+      "complexity": 2,
+      "importance": 3,
       "deferability": 3,
       "impact": 3,
-      "total": 13,
-      "priority": "P1"
+      "total": 11,
+      "priority": "P2"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T01:52:41.988176+00:00",
-    "base": "6ede800afdc93d4d7223e10dea80c6c047e0598d",
+    "utc": "2026-09-22T03:14:36.002995+00:00",
+    "base": "28ea17b5ca9caed155b56bb966d7e540ddf5da1b",
     "role": "coordinator",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "previous_pr": 1856,
-    "previous_publication": "merged;10exactPR checks and mainCI/CodeQL passed; owned lane retired",
-    "previous_closure": "blocked only on inherited temporary-staging cleanup policy; no repeat deletion",
+    "previous_pr": 1857,
+    "previous_publication": "Verified merged;10 PR checks and exact-main CI/CodeQL passed; owned worktree/local branch retired; remote absent",
+    "previous_closure": "Inherited temporary staging deletion remains blocked; no unchanged retry or alternate deletion route",
     "ranked_candidates": [
       {
         "task": "One native admitted ticket, independent audit and simulated entitlement",
@@ -1931,9 +1931,9 @@
           "total": 13,
           "priority": "P1"
         },
-        "state": "eligible_bounded_source_repair",
-        "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-health\\independent-test-review.json",
-        "next_step": "Repair truthful per-attempt scan status and same-attempt supervisor projection in existing owners; implement fixed acceptance below without creating another qualification sprint.",
+        "state": "merged_independently_validated_owned_lane_retired",
+        "evidence": "PR1857; exact merge28ea17b5;71 fixed cases and PR/main checks passed",
+        "next_step": "Remove resolved source repair from executable queue; inherited staging cleanup remains separately blocked",
         "dependencies": [
           "Qualification passed; freeze agreed additive attempt-status semantics in source repair and existing interface docs.",
           "Respect exact WSP62 ceilings, including existing supervisor exemption expiry; recheck at dispatch.",
@@ -1969,16 +1969,16 @@
       {
         "task": "Keep SQLite structural diagnostics separate from repair-success feedback and escalation suppression in the existing WRE self-audit owner",
         "wsp15": {
-          "importance": 3,
-          "impact": 4,
-          "deferability": 3,
           "complexity": 2,
-          "priority": "P2",
-          "total": 12
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3,
+          "total": 11,
+          "priority": "P2"
         },
-        "state": "outstanding_bounded_source_repair",
+        "state": "eligible_scoped_source_repair",
         "evidence": "daemon_self_audit_loop.py::_is_successful_fix_result/_record_fix_feedback/_maybe_escalate; legacy opt-in SQLite verification is credited as repair",
-        "next_step": "Preserve diagnostic observability and its narrow success status, but do not credit event_store_verified as evidence that a causal write failure was repaired. Ensure repeated unresolved signals remain eligible for existing inert escalation policy. Keep actual repair markers distinct. Do not merely delete a marker and silently misclassify a healthy diagnostic as failed repair.",
+        "next_step": "Classify successful SQLite structural diagnostics separately across existing telemetry, feedback and escalation consumers; preserve report and legacy tuple but do not create repair success or failure from diagnostic success.",
         "acceptance": [
           "SQLite-only verification still emits narrowly scoped diagnostic evidence",
           "Healthy diagnostic does not increment completed-repair success",
@@ -1986,7 +1986,15 @@
           "Repeated unresolved collision signal is not suppressed solely by event_store_verified",
           "Existing true repair outcomes preserve their behavior",
           "No live escalation/process dispatch in fixtures"
-        ]
+        ],
+        "historical_wsp15": {
+          "importance": 3,
+          "impact": 4,
+          "deferability": 3,
+          "complexity": 2,
+          "priority": "P2",
+          "total": 12
+        }
       },
       {
         "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -2004,123 +2012,150 @@
       }
     ],
     "selected": {
-      "task": "Add truthful bounded scan-attempt status in existing WRE self-audit owner and project the same attempt through existing supervisor",
+      "task": "Keep SQLite structural diagnostics separate from repair-success feedback and escalation suppression in the existing WRE self-audit owner",
       "wsp15": {
-        "complexity": 3,
-        "importance": 4,
+        "complexity": 2,
+        "importance": 3,
         "deferability": 3,
         "impact": 3,
-        "total": 13,
-        "priority": "P1"
+        "total": 11,
+        "priority": "P2"
       },
-      "state": "eligible_bounded_source_repair",
-      "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-health\\independent-test-review.json",
-      "next_step": "Repair truthful per-attempt scan status and same-attempt supervisor projection in existing owners; implement fixed acceptance below without creating another qualification sprint.",
-      "dependencies": [
-        "Qualification passed; freeze agreed additive attempt-status semantics in source repair and existing interface docs.",
-        "Respect exact WSP62 ceilings, including existing supervisor exemption expiry; recheck at dispatch.",
-        "Keep count/status correspondence for the synchronous caller despite possible background scan interleaving."
-      ]
-    },
-    "wsp15": {
-      "complexity": 3,
-      "importance": 4,
-      "deferability": 3,
-      "impact": 3,
-      "total": 13,
-      "priority": "P1"
-    },
-    "source_bindings": {
-      "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py": {
-        "reviewed": "a78f71e7fcde113aa1b64d6bff6040b9461d7928",
-        "current": "a78f71e7fcde113aa1b64d6bff6040b9461d7928"
-      },
-      "modules/communication/moltbot_bridge/src/openclaw_supervisor.py": {
-        "reviewed": "4f3a7808703cf70c4a98f5df723b2a1e16219990",
-        "current": "4f3a7808703cf70c4a98f5df723b2a1e16219990"
-      },
-      "modules/communication/moltbot_bridge/wsp_62_exemptions.yaml": {
-        "reviewed": "ac0e4383f0efcd53518a98356cf76deb915daada",
-        "current": "ac0e4383f0efcd53518a98356cf76deb915daada"
-      },
-      "modules/infrastructure/wre_core/wsp_62_exemptions.yaml": {
-        "reviewed": "a7fb47ecd1d646cbc544a8691f75475baafaf824",
-        "current": "a7fb47ecd1d646cbc544a8691f75475baafaf824"
-      },
-      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": {
-        "reviewed": "a582b84ff1dae534c10891ab36f6d4b29e25c339",
-        "current": "a582b84ff1dae534c10891ab36f6d4b29e25c339"
+      "state": "eligible_scoped_source_repair",
+      "evidence": "daemon_self_audit_loop.py::_is_successful_fix_result/_record_fix_feedback/_maybe_escalate; legacy opt-in SQLite verification is credited as repair",
+      "next_step": "Classify successful SQLite structural diagnostics separately across existing telemetry, feedback and escalation consumers; preserve report and legacy tuple but do not create repair success or failure from diagnostic success.",
+      "acceptance": [
+        "SQLite-only verification still emits narrowly scoped diagnostic evidence",
+        "Healthy diagnostic does not increment completed-repair success",
+        "Healthy diagnostic is not relabeled as failed repair solely due to classification change",
+        "Repeated unresolved collision signal is not suppressed solely by event_store_verified",
+        "Existing true repair outcomes preserve their behavior",
+        "No live escalation/process dispatch in fixtures"
+      ],
+      "historical_wsp15": {
+        "importance": 3,
+        "impact": 4,
+        "deferability": 3,
+        "complexity": 2,
+        "priority": "P2",
+        "total": 12
       }
     },
-    "selection_reason": "Fresh base and5production/protocol bindings unchanged. Previous13case qualification complete, not repeated. Concrete source repair13/P1 wins eligible tie over unqualified PostgreSQL; LinkedIn separately owned. Native18 andFAM14 remain blocked; diagnostic12 separate.",
+    "wsp15": {
+      "complexity": 2,
+      "importance": 3,
+      "deferability": 3,
+      "impact": 3,
+      "total": 11,
+      "priority": "P2"
+    },
+    "selection_reason": "Fresh main is the prior verified merge. Eight diagnostic methods are unchanged; no newly available higher-ranked prerequisite in the scoped source delta. Native18 and FAM14 remain blocked, PostgreSQL13 lacks qualified runtime, LinkedIn13 separately owned, parity12 lacks bound consumer. Concrete three-sink diagnostic correction11 is eligible; prior scan repair13 is resolved.",
+    "source_bindings": {
+      "modules/infrastructure/wre_core/src/daemon_self_audit_loop.py": "bcbfe546bb21f522e49dca9ab7c29e3d995459da",
+      "modules/infrastructure/wre_core/tests/test_daemon_self_audit_loop.py": "db2e3f97ba21d4b2e9d2b5574f59ddcf4a622769",
+      "modules/infrastructure/wre_core/tests/test_daemon_self_audit_scan_status.py": "d603bdcd5005bbf5b6b4f5d5e579ca9c2893ecc7",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md": "1364165b54eb78dc3e230f316c23a52664e07f5f",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md": "46844bd527c4abf8e46de367998f39bcb43bcf41",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339"
+    },
+    "diagnostic_method_bindings": {
+      "_recommend_fix": {
+        "source_sha256": "eec7d4174abb0e6d0acc51a5a5942f1d90c1ca779423f47eba9f01d6ac705dae",
+        "line": 572,
+        "end_line": 594
+      },
+      "_fix_score": {
+        "source_sha256": "846f4feae43b1e097e3039a6ebd7709b507ec7a4d5b58d8acc86583415c2f714",
+        "line": 596,
+        "end_line": 604
+      },
+      "_open_fix_task": {
+        "source_sha256": "6ab54c071e4bfc2f1140eb9a7b2ae733129c09009245404b71e6811f3af73f4a",
+        "line": 606,
+        "end_line": 660
+      },
+      "_maybe_escalate": {
+        "source_sha256": "7b7adc71a48dc9f12e71a292201abdf851ab9b834ee3843b90813866f09cffb0",
+        "line": 750,
+        "end_line": 789
+      },
+      "_is_successful_fix_result": {
+        "source_sha256": "2a9229c3519d42af460eb52ada39db51de79113f4fcb7c6841679ba4b34cc979",
+        "line": 796,
+        "end_line": 802
+      },
+      "_record_fix_feedback": {
+        "source_sha256": "cd1a608f1baae2ca2248669208ddbae6ccefc63640f1952a6faf03c8813f2b9c",
+        "line": 804,
+        "end_line": 822
+      },
+      "_diagnose_microphone_device": {
+        "source_sha256": "0388eef6c1a466c7b5d63ad41d1664ca80305ad35d4f73be6f502156252eb059",
+        "line": 890,
+        "end_line": 932
+      },
+      "_verify_dae_event_store": {
+        "source_sha256": "c66495d3a8d83ada155cc9ad2fb26cc68e55687d3bca358c474a00fe642e1760",
+        "line": 934,
+        "end_line": 988
+      }
+    },
     "retrieval": {
-      "noise": "Historical bootstrap and broader docs are context only; narrowed to exact priorbindings and current scanner/supervisor contracts",
-      "ordering": "Actual WSP00bootstrap/gate; currentWSP15/97; freshGit/PR/main; skill/navigation; current module docs/tests and fixed acceptance",
-      "missing": "No live runtime/whole-input-coverage evidence; no imported provider or defaultdatabase permitted",
-      "staleness": "SharedHEAD0c81418 unchanged; known governedHolo authority-root mismatch reused without retry/reindex. Exact source fallback remains bound.",
-      "duplication": "Extend existing WRE scanner and supervisor. Cohesive test extraction permitted inside current WRE owner; no second monitor or productmodule"
+      "noise": "Historical briefing lanes ignored as current state; incremental source/contract reads only",
+      "ordering": "Actual WSP00 bootstrap/gate, WSP15/97, skill, current root roadmap/backlog, existing WRE docs and exact producer/consumer source",
+      "missing": "WRE memory/README.md absent; no live runtime/admission proof; no new memory owner invented",
+      "staleness": "Shared HEAD0c81418 unchanged. Existing HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH blocks source-bound semantic query; unchanged failed probe not retried and no reindex. Exact Git/NAVIGATION/rg fallback explicitly used.",
+      "duplication": "Extend existing scanner and test owner; no new monitor, scheduler, store, skill or authority"
     },
     "effort_cost_verification": {
-      "effort": "one source/test/contract repair with exact digest maintenance",
-      "cost": "no provider dispatch; token billing unavailable",
-      "verification": "frozen ordinary baseline/candidate/independent cases, relevant compatibility/manifest/registry checks, exact hosted checks and owned closure"
+      "effort": "one three-sink source correction and bounded tests/contracts",
+      "cost": "deterministic checks and bounded agent review; no paid provider runtime; token billing unavailable",
+      "verification": "tests fixed before repair, source/candidate/independent results, manifest and exact hosted checks; inherited critical-size remediation applies"
     },
-    "manual_reason": "Deterministic source/API repair and independent pytest evidence need no local model/provider startup",
-    "scope": [
-      "existing WRE scanner",
-      "existing supervisor",
-      "focused WRE tests",
-      "existing module/system docs",
-      "canonical registry and backend digest maintenance"
+    "manual_reason": "Deterministic local source correction and pytest evidence; no Qwen/Gemma model startup necessary",
+    "boundaries": [
+      "No live daemon, provider/defaultDB, WSL, process harness, payout or protected-project effects",
+      "No retroactive counter rewrite",
+      "Preserve diagnostic tuple/report and original scan status contract",
+      "Review design before source edit; no-growth/decomposition contract applies"
     ],
-    "exclusions": [
-      "provider/services/native runtime activation",
-      "process harness",
-      "payout/domain authority",
-      "new monitor/scheduler/database",
-      "prior blocked cleanup",
-      "retained RSI claims"
-    ],
-    "observation_id": "rsi-scan-status-20260922",
+    "observation_id": "rsi-diagnostic-outcome-20260922",
     "prior_observation": {
-      "git_ref": "6ede800afdc93d4d7223e10dea80c6c047e0598d",
+      "git_ref": "28ea17b5ca9caed155b56bb966d7e540ddf5da1b",
       "path": "docs/roadmaps/rsi_swarm_backlog.json"
     },
     "wsp00_gates": {
       "wsp00-gate.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-status\\wsp00-gate.json",
-        "sha256": "6a6b12581dc75463947ab4d1946dcca8911e66c35dd58216a7d550f94921538f",
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-diagnostic-outcome\\wsp00-gate.json",
+        "sha256": "63fa17410a629f694c08a2b0650e41de984c8ff1975df4d22eef1faf98dcb824",
         "is_zen_compliant": true
       },
       "worker-wsp00-gate.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-status\\worker-wsp00-gate.json",
-        "sha256": "bc4544431bb84aa8b837994b12a85f99ef5f8483005db37a3309df1fa54c103d",
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-diagnostic-outcome\\worker-wsp00-gate.json",
+        "sha256": "a2df416f56f6fc43c0cdcffb543397579aaf1aab4abe8872472da316fd6dc8d3",
         "is_zen_compliant": true
       },
       "verifier-wsp00-gate.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-status\\verifier-wsp00-gate.json",
-        "sha256": "04eefcd6ade5209d0a0405b60bfcd56cd87a8034774175bbef75deffd116eb7c",
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-diagnostic-outcome\\verifier-wsp00-gate.json",
+        "sha256": "e343e10e9e964fdc4ea0a6e38b07a8af6949d4e79e43484eaa6a82472188e21b",
         "is_zen_compliant": true
       }
     },
     "validation": {
-      "cases_each_run": 71,
+      "cases_each_run": 94,
       "same_cases": true,
-      "initial_baseline": {
-        "passed": 8,
-        "failed": 10,
-        "api_absence_fixture_errors": 32
+      "baseline": {
+        "tests": 23,
+        "failures": 16,
+        "errors": 0,
+        "skipped": 0
       },
-      "coherence_baseline": {
-        "passed": 3,
-        "failed": 18,
-        "deselected": 50
-      },
+      "baseline_passed": 7,
       "production_changed": true,
       "test_inventory_changed": true,
-      "evidence_root": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-status"
+      "evidence_root": "O:\\Foundups-Agent-audits\\20260922-rsi-diagnostic-outcome"
     },
-    "implementation_state": "bounded_status_source_repair_independently_validated",
+    "implementation_state": "bounded_diagnostic_outcome_repair_independently_validated",
     "publication_state": "pending_exact_head_checks",
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2161,9 +2196,11 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "qualification_complete_tests_passed_future_repair_separate",
+          "state": "qualification_closed_and_followup_repair_merged",
           "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-health\\independent-test-review.json",
-          "next_step": "Do not repeat this qualification; implement separately scored bounded scan-attempt status repair after normal sprint closure."
+          "next_step": "No executable work remains in this qualification. Preserve its13-case historical evidence; follow-up scan-status repair closed in PR1857 at28ea17b5. Do not repeat qualification or reimplement the repair.",
+          "historical_next_step": "Do not repeat this qualification; implement separately scored bounded scan-attempt status repair after normal sprint closure.",
+          "followup_closure": "PR1857 merged28ea17b5ca9caed155b56bb966d7e540ddf5da1b;71 fixed cases and PR/main checks passed; owned lane retired; inherited staging cleanup separately blocked."
         },
         {
           "task": "Add truthful bounded scan-attempt status in existing WRE self-audit owner and project the same attempt through existing supervisor",
@@ -2175,10 +2212,10 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "independently_validated_source_tests_final_candidate_review_and_publication_pending",
-          "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-scan-status\\independent-test-review.json",
-          "next_step": "Repair truthful per-attempt scan status and same-attempt supervisor projection in existing owners; implement fixed acceptance below without creating another qualification sprint.",
-          "dependencies": [
+          "state": "merged_independently_validated_owned_lane_retired",
+          "evidence": "PR1857; exact merge28ea17b5;71 fixed cases and PR/main checks passed",
+          "next_step": "No source or qualification work remains for the merged scan-status repair. Preserve fixed71-case regression contract in future edits; inherited staging cleanup and remaining WRE decomposition stay separate.",
+          "historical_dependencies": [
             "Qualification passed; freeze agreed additive attempt-status semantics in source repair and existing interface docs.",
             "Respect exact WSP62 ceilings, including existing supervisor exemption expiry; recheck at dispatch.",
             "Keep count/status correspondence for the synchronous caller despite possible background scan interleaving."
@@ -2220,9 +2257,9 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "next_eligible_source_repair_after_current_sprint_closure",
-          "evidence": "daemon_self_audit_loop.py::_is_successful_fix_result/_record_fix_feedback/_maybe_escalate; legacy opt-in SQLite verification is credited as repair",
-          "next_step": "Classify successful SQLite structural diagnostics separately across existing telemetry, feedback and escalation consumers; preserve report and legacy tuple but do not create repair success or failure from diagnostic success.",
+          "state": "source_independently_validated_final_candidate_and_publication_pending",
+          "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-diagnostic-outcome\\independent-test-review.json",
+          "next_step": "Complete exact final docs/runtime-manifest/cap candidate review, then coordinator-owned exact-head checks, publication and owned-lane closure. Do not reimplement the independently validated three-sink classification;94 fixed cases passed. Preserve any staging failure evidence and rerun corrected full-index validation before publication.",
           "acceptance": [
             "SQLite-only verification still emits narrowly scoped diagnostic evidence",
             "Healthy diagnostic does not increment completed-repair success",
@@ -2238,7 +2275,8 @@
             "complexity": 2,
             "priority": "P2",
             "total": 12
-          }
+          },
+          "historical_next_step": "Classify successful SQLite structural diagnostics separately across existing telemetry, feedback and escalation consumers; preserve report and legacy tuple but do not create repair success or failure from diagnostic success."
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -2253,49 +2291,81 @@
           "state": "deferred_consumer_qualification",
           "evidence": "Central verify_parity has no production caller in scoped search; equal-count malformed/different JSONL passes; inherited class-size debt",
           "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API"
+        },
+        {
+          "task": "Repair callable-import failure streak tracking in existing DAE launch broker",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "next_eligible_tests_first_source_repair_after_current_closure",
+          "source": "modules/infrastructure/dae_daemon/src/dae_launch_broker.py::_run_launch",
+          "evidence": "Counter cleared before callable invocation, so repeated ImportError/ModuleNotFoundError increments from zero and never reaches existing threshold3. Existing monitor-map gap; not a repeated source audit.",
+          "next_step": "Freeze finite inert repeated-failure and recovery oracles, then narrowly repair streak transition in existing broker; preserve admission and dispatch guards."
+        },
+        {
+          "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 2,
+            "total": 11,
+            "priority": "P2"
+          },
+          "state": "required_before_further_scanner_growth_remaining_debt",
+          "dependency": "Current outcome extraction may shrink owner but does not resolve all existing input/config responsibility debt; pursue when next scanner growth is proposed."
         }
       ],
       "selected_next": {
-        "task": "Keep SQLite structural diagnostics separate from repair-success feedback and escalation suppression in the existing WRE self-audit owner",
+        "task": "Repair callable-import failure streak tracking in existing DAE launch broker",
         "wsp15": {
-          "complexity": 2,
+          "complexity": 3,
           "importance": 3,
           "deferability": 3,
           "impact": 3,
-          "total": 11,
+          "total": 12,
           "priority": "P2"
         },
-        "state": "next_eligible_source_repair_after_current_sprint_closure",
-        "evidence": "daemon_self_audit_loop.py::_is_successful_fix_result/_record_fix_feedback/_maybe_escalate; legacy opt-in SQLite verification is credited as repair",
-        "next_step": "Classify successful SQLite structural diagnostics separately across existing telemetry, feedback and escalation consumers; preserve report and legacy tuple but do not create repair success or failure from diagnostic success.",
-        "acceptance": [
-          "SQLite-only verification still emits narrowly scoped diagnostic evidence",
-          "Healthy diagnostic does not increment completed-repair success",
-          "Healthy diagnostic is not relabeled as failed repair solely due to classification change",
-          "Repeated unresolved collision signal is not suppressed solely by event_store_verified",
-          "Existing true repair outcomes preserve their behavior",
-          "No live escalation/process dispatch in fixtures"
-        ],
-        "historical_wsp15": {
-          "importance": 3,
-          "impact": 4,
-          "deferability": 3,
-          "complexity": 2,
-          "priority": "P2",
-          "total": 12
-        }
+        "state": "next_eligible_tests_first_source_repair_after_current_closure",
+        "source": "modules/infrastructure/dae_daemon/src/dae_launch_broker.py::_run_launch",
+        "evidence": "Counter cleared before callable invocation, so repeated ImportError/ModuleNotFoundError increments from zero and never reaches existing threshold3. Existing monitor-map gap; not a repeated source audit.",
+        "next_step": "Freeze finite inert repeated-failure and recovery oracles, then narrowly repair streak transition in existing broker; preserve admission and dispatch guards."
       },
-      "selection_reason": "Conditional on current13/P1scanstatus repair successful validation and closure. Native18/P0 and FAM14/P1 remain blocked, PostgreSQL13runtime unqualified, LinkedIn13 separatelyowned, parity12 lacks a boundconsumer. Diagnosticclassification has concrete threeconsumer source defect and fixedinert testseams, now independently11/P2. No repeatedqualification loop.",
+      "selection_reason": "Conditional on current diagnostic repair successful validation/publication. In the inspected existing backlog/monitor-map set, native18/FAM14 blocked, PostgreSQL13 unqualified, LinkedIn13 separately owned, parity12 lacks a bound consumer, prior scans resolved. Broker12 has a source-reproducible threshold defect, actual broker callers and an inert method seam. It outranks remaining decomposition11 and avoids another completed qualification loop. No whole-repository completeness claim.",
       "still_open": [
-        "Current scan-status source repair independently reviewed and 71 fixed cases passed; final candidate docs/digest review and publication pending. No merge or runtime claim.",
-        "Native runtime/admission/effectlease18/P0.",
-        "FAM14/P1 named domain-action mapping and ingress; no role-string authorization.",
-        "PostgreSQLruntime13 and separatelyownedLinkedIn13.",
-        "Count/contentparity12 requires consumer/contract.",
-        "Microphone diagnostic and command-dispatch causality remain separate from narrowSQLite correction.",
-        "Historical diagnosticpollution cannot be safely retroactively repaired without provenance.",
-        "Prior blocked temporary-staging cleanup remains open; no retry."
-      ]
+        "Current diagnostic source repair independently reviewed and94fixed cases passed; final candidate docs/manifest/cap review and publication remain pending.",
+        "Native production trust/lease18 and named FAM domain mapping14 remain blocked.",
+        "PostgreSQL runtime13 and LinkedIn13 need their own qualification/owner.",
+        "Parity12 needs consumer-bound acceptance; no replay or receipt API inferred.",
+        "Broker stop acknowledgment and observer lazy broker construction are separate existing monitor-map gaps, outside selected import-streak repair.",
+        "WRE input/tail/config decomposition remains before future owner growth; exact final size needed.",
+        "Historical diagnostic pollution cannot be retrospectively repaired without provenance.",
+        "Inherited temporary-staging cleanup remains blocked; no retry."
+      ],
+      "reconciled_at_utc": "2026-09-22T03:39:47.506436+00:00"
+    },
+    "packaging": {
+      "runtime_members": 1401,
+      "previous_members": 1400,
+      "only_added_member": "modules/infrastructure/wre_core/src/daemon_self_audit_outcomes.py",
+      "manifest_digest": "5cade2540f521672ca62be0ab59d34eeee89e3224316106a11cbe1871fbcac77",
+      "cap": 1401,
+      "cap_oracle": "1401 accepted and 1402 rejected; failed against old cap before correction",
+      "first_generation": "untracked_runtime_dependency rejected before explicit git intent-to-add; retained manifest-write.log",
+      "successful_generation": "manifest-write-v2.log",
+      "byte_path_digest_controls": "unchanged",
+      "first_generator_test_run": "7 passed / 1 staged-index pin mismatch from partial staging; retained manifest-tests.log",
+      "generator_test_rerun": "manifest-tests-v2.log after explicit complete runtime-closure staging",
+      "extension_fast_groups": 15,
+      "package_files": 67,
+      "package_raw_bytes": 950440,
+      "test_registry_files": 1653,
+      "quarantined": 269
     }
   }
 }

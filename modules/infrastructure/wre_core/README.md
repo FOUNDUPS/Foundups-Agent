@@ -22,6 +22,10 @@ zero findings, partial input coverage and failure. `scan_once()` remains the
 integer compatibility API. See [scan observations](INTERFACE.md#self-audit-scan-observations)
 for clock, coverage and supervisor-consumer limits.
 
+SQLite structural checks now have separate diagnostic accounting and remain
+escalation-eligible. See [diagnostic outcomes](INTERFACE.md#self-audit-diagnostic-outcomes)
+for exact qualification and historical-counter limits.
+
 WRE Core owns:
 
 - registry-bound Skillz discovery and production admission;

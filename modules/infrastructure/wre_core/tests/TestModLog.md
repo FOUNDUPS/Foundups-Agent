@@ -1,3 +1,10 @@
+## 2026-09-22: Separate SQLite diagnostics from repair credit
+
+- WSP00/15/22/49/50/62/91/97; C2/I3/D3/Impact3 = 11/P2. Exact action/result qualification separates diagnostic invocation/success across telemetry, feedback and escalation. Existing tuple/report and historical repair counters/score remain intact.
+- Baseline 7 passed/16 failed with no collection errors. Final 94 fixed cases pass locally and independently, including unchanged71 scan-status cases; original30 legacy definitions unchanged. Disposable fixtures/inert effects only; no native RSI or causal-repair claim.
+- Cohesive outcome extraction reduces the existing scanner and touched oversized method. Existing interface, module roadmap, monitor map, test registry and backend bindings updated; no new monitor/store/authority.
+- Re-observe after closure; exact checks, hashes, inherited staging-cleanup blocker and next action belong to the canonical RSI backlog.
+
 ## 2026-09-22: Report bounded self-audit scan outcomes
 
 - WSP00/15/22/49/50/62/91/97; C3/I4/D3/Impact3 = 13/P1. Extends existing scanner and supervisor after PR1856 qualification; no parallel monitor or new execution authority.
