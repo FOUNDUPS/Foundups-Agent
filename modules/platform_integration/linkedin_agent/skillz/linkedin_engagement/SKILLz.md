@@ -1,7 +1,7 @@
 ---
 name: linkedin_engagement
 description: Master LinkedIn activity router for full operations or scoped messages, connections, groups, feed, dedicated FoundUps ROC and JHR newsletters, publishing and continuity; retains the WRE bridge
-version: 1.3.0
+version: 1.4.0
 author: 0102
 agents: [qwen]
 dependencies: [linkedin_social_adapter, browser_actions, wre_core]
@@ -20,6 +20,11 @@ evals: []
 # LinkedIn Master Activity Skill (Existing WRE Bridge)
 
 For every invocation, read [master activity routing](../../docs/LINKEDIN_ACTIVITY_ROUTING.md), select only the requested activities and read their child SKILLz.md files. “Run LinkedIn” selects the full cycle; “check messages” selects inbox only. Finish with continuity. This is instruction-level routing; the existing executor remains an action bridge, not an implementation of every child workflow.
+
+For newsletter audits, development or a new series, use the existing
+[newsletter router](../linkedin_newsletters/SKILLz.md) and its
+[Red Dog -> 0102 editorial handoff](../linkedin_newsletters/references/editorial-workflow.md).
+Preserve request scope, issue revision, authority and evidence on the return path.
 
 Before selecting an action, read [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md). The current full cycle starts with connection triage, then messages (Focused + Other), notifications, group queues and relevant feed; urgent commitments may override order. Route membership to [linkedin_group_moderation](../linkedin_group_moderation/SKILLz.md) and Good/Bad/Ugly automation discussions to [openclaw_group_news](../openclaw_group_news/SKILLz.md). Do not instantiate a competing LinkedIn orchestrator.
 

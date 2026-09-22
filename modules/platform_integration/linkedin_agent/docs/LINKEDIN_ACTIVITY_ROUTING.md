@@ -16,6 +16,7 @@ not a new executor, daemon, or certification of legacy automation.
 | Good, Bad and Ugly / group news | [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) | Research and group discussion; no membership changes |
 | Feed / ROC engagement / reply to a post | [linkedin_agentic_reply](../skillz/linkedin_agentic_reply/SKILLz.md) | Read post and relevant replies; contextual engagement |
 | Newsletter audit / all newsletters | [linkedin_newsletters](../skillz/linkedin_newsletters/SKILLz.md) | Router; all three lanes only when requested/full cycle |
+| Develop / revise an issue; create a new newsletter | [editorial workflow](../skillz/linkedin_newsletters/references/editorial-workflow.md) | Red Dog handoff, issue brief, new-series template and revision continuity |
 | FoundUps / Eat the Startup / contextually clear “BoundUps” | [linkedin_foundups_newsletter](../skillz/linkedin_foundups_newsletter/SKILLz.md) | Foundups-Agent implementation and founder benefit |
 | ROC / Return on Compute newsletter | [linkedin_roc_newsletter](../skillz/linkedin_roc_newsletter/SKILLz.md) | Personal compute-economics lane; live series identity required |
 | Japan Hyperscaler Report / JHR | [linkedin_jhr_newsletter](../skillz/linkedin_jhr_newsletter/SKILLz.md) | Significance-gated Japan infrastructure reporting |
@@ -30,6 +31,14 @@ my messages” does not authorize feed likes, member approval, or a newsletter.
 Read the chosen child and the shared [review contract](LINKEDIN_REVIEW_WORKFLOW.md)
 before action. Children return to the master for receipt/reporting, not another
 recursive full run. Unknown or materially ambiguous scope needs clarification.
+
+Red Dog translates 012's request into the scoped work packet in the editorial
+workflow; 0102 executes the selected instruction child and returns evidence,
+artifact revision, blockers and next action to Red Dog. Roles do not prove a
+running dispatcher. “Audit newsletters” reports written/saved/scheduled/live
+states with inspected coverage; it does not silently start writing all editions.
+“Develop ROC” advances its brief and draft, including when live placement remains
+BLOCKED_IDENTITY. New issues and new series use different template paths.
 
 ## Full cycle
 

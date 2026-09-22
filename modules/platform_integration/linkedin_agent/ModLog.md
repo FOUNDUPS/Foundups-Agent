@@ -1,5 +1,12 @@
 ## 2026-09-23: Requested-note ordering and acknowledgment repair
 
+## 2026-09-22 — Editorial orchestration and reusable newsletter templates
+
+- WSP 97 / WSP 15 C2/I4/D3/Impact4=13/P1: audited current main and all LinkedIn instruction nodes; retained existing master, three newsletter children and group news owner.
+- Added scoped Red Dog/0102 work packet and return receipt, audit/develop/revise/create-series routes, issue brief and child-skill template. Separated editorial progress from delivery so missing ROC series identity does not block a local draft.
+- Connected public group intelligence to the newsletter lanes, with revision, privacy and duplicate controls. Recorded repository-only editorial backlog; live LinkedIn NOT_CHECKED_LIVE. No newsletter or group post published, no runtime dispatcher added.
+
+
 - WSP00/10/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Existing LinkedIn owner prepares requested notes before one explicit Send; failed Add/typing suppress Send and success credit. Unattempted Send is None. Preserve no-message fallback and manager/policy/preview behavior.
 - Frozen 23 cases: baseline 4 fail/19 pass, candidate 23 pass and independent same 23 pass; 17 compatibility controls/four legacy constructor definitions preserved, four deselected, two known warnings per run. Same-file bounded helpers reduce inherited size debt; no live delivery/browser/OS-isolation proof.
 - One backend digest and two pins refreshed; 1401 members unchanged. Eight manifest tests, 67-file package and canonical registry verified. Existing backlog records the separately scored next qualification; no native RSI or automatic runtime-upgrade claim.
