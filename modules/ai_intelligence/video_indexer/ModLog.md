@@ -2,6 +2,65 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-09-22 - Pre-merge integrity audit
+
+- Rebased the isolated indexing branch onto current main without the concurrent
+  paperwork or RSI changes.
+- Applied duplicate-response protection to single-video persistence as well as
+  channel batches; propagate nested pass errors and skipped cycles as failures.
+- Exclude older Gemini-labelled artifacts from training and preserve legacy
+  list transcript support.
+- Updated browser fixtures to deliver the new answer after prompt input, so
+  successful-path tests exercise the retained-answer guard instead of supplying
+  the final answer before submission. Pinned registry inputs in pass-routing
+  tests and corrected the old malformed-JSON success expectation.
+- Validation: isolated pytest dependencies; video-indexer suite **142 passed,
+  13 skipped**. Live browser backfill is still unverified. WSP00 detector lacked
+  torch; tracker fallback passed. Holo lexical bundle had UNKNOWN freshness and
+  an index gap; direct module source was used for the audit.
+
+## V0.31.0 - Resumable portfolio indexing and per-video integrity (2026-09-21)
+
+**By:** 0102
+**WSP References:** WSP 11, WSP 22, WSP 50, WSP 72, WSP 84, WSP 91, WSP 96
+
+### Why
+
+The Studio Ask loop could scrape the still-visible answer from the preceding
+video and persist it under the next video ID. Bounded reruns also sliced the
+oldest rows before excluding existing manifests, so they could revisit the same
+batch forever. Channel/daemon IDs existed but were not runnable through the
+shared action surface. Gemini API enrichment additionally used the default
+`undaodu` save path for every channel and overwrote the canonical manifest.
+
+### Changed
+
+- Snapshots the pre-submit Ask answer and ignores it until a new response
+  appears; prompts now request `source_video_id`, mismatches fail closed, and a
+  response SHA-256 prevents the same answer being assigned to two video IDs.
+- Filters existing manifests before the batch limit and scrolls the virtualized
+  Studio list to find pending rows, making repeated bounded runs resumable.
+- Implements typed Studio Ask channel, three-channel portfolio, and bounded
+  daemon actions. The CLI now exposes `--portfolio`, `--daemon`, and `--cycles`.
+- Corrects Gemini enrichment to the owning channel and merges it without
+  replacing Studio provenance.
+- Marks Studio/Gemini summaries retrieval-only and rejects them in
+  `DatasetBuilder`; only YouTube/Whisper verbatim segments are preferred for
+  training.
+- Makes package exports lazy and optional dotenv loading graceful so lightweight
+  action/index helpers do not require every media/SDK dependency.
+- Replaces the stale watch-page/full-transcript Skillz executor with an adapter
+  to the canonical action surface.
+
+### Validation
+
+- Added mock regressions for retained-answer rejection, response identity/hash,
+  duplicate detection, portfolio browser grouping, training exclusion, and
+  enrichment merge preservation.
+- Direct Python integrity harness and module compilation passed locally.
+- Full pytest execution was unavailable in this environment because `pytest`
+  is not installed; CI remains the full-suite gate.
+
 ## V0.30.0 - Index Shorts as well as long-form (add videos/short pass) (INDEXER_SHORTS_PASS_PHASE1) (2026-06-19)
 
 **By:** 0102 (Worker-Lane INDEX-SHORTS)

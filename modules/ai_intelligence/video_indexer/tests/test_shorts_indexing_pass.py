@@ -176,7 +176,8 @@ async def test_upload_pass_skips_shorts(monkeypatch, tmp_path):
 # 3 & 4. Per-channel content_types decide which passes run.
 # ---------------------------------------------------------------------------
 
-def test_resolve_passes_short_only_channel():
+def test_resolve_passes_short_only_channel(monkeypatch):
+    monkeypatch.setattr(studio_ask_indexer, "get_channel_by_id", lambda _: {"content_types": ["short"]})
     # foundups registry content_types == ["short"] -> shorts pass only.
     passes = studio_ask_indexer._resolve_index_passes("UCSNTUXjAgpd4sgWYP0xoJgw")
     assert passes == ["short"]
@@ -224,6 +225,10 @@ async def test_cycle_runs_passes_per_content_types(monkeypatch, tmp_path):
 
     foundups = "UCSNTUXjAgpd4sgWYP0xoJgw"   # ["short"]
     move2japan = "UC-LSSlOZwpGIRIYihaz8zCw"  # ["short","upload"]
+    monkeypatch.setattr(
+        studio_ask_indexer, "get_channel_by_id",
+        lambda channel_id: {"content_types": ["short"] if channel_id == foundups else ["short", "upload"]},
+    )
 
     result = await studio_ask_indexer.run_video_indexing_cycle(
         driver=_FakeDriver(),

@@ -223,8 +223,36 @@ class DatasetBuilder:
         return rows, clips, stats, training_worthy
     
     def _extract_segments(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Extract segments from various transcript formats."""
-        # Try different formats
+        """Extract only ground-truth/verbatim segments for model training.
+
+        Gemini/Ask Studio segments are semantic summaries and teacher labels.
+        They remain useful for retrieval and prioritization but must never be
+        presented to Red Dog as words 012 actually spoke.
+        """
+        if isinstance(data, list):
+            return data
+        metadata = data.get("metadata") or {}
+        transcript_source = str(data.get("transcript_source") or "").lower()
+
+        youtube_segments = data.get("youtube_transcript")
+        if isinstance(youtube_segments, list) and youtube_segments:
+            return youtube_segments
+
+        whisper_segments = data.get("whisper_transcript")
+        if isinstance(whisper_segments, list) and whisper_segments:
+            return whisper_segments
+
+        if metadata.get("training_eligible") is False:
+            return []
+        if transcript_source in {"gemini", "gemini_summary", "studio_ask"}:
+            return []
+        if data.get("indexer") == "gemini" or (
+            data.get("audio") or {}
+        ).get("extraction_method") == "youtube_ask_gemini":
+            return []
+
+        # Legacy transcript files without an explicit provenance marker remain
+        # supported; provider-labelled Gemini summaries are excluded above.
         if "segments" in data:
             return data["segments"]
         if "audio" in data and "segments" in data["audio"]:

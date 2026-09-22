@@ -155,7 +155,11 @@ def _fast_and_clean(monkeypatch):
 def _make_css_map(box, response_text="", send_button=None):
     header = _Simple(attributes={"aria-label": "Ask Studio"})
     dialog = _Simple()
-    response = _Simple(text=response_text)
+    class Response(_Simple):
+        @property
+        def text(self):
+            return self._text if box.clicked else "Hello, UnDaoDu"
+    response = Response(text=response_text)
     css = {
         'ytcp-icon-button[aria-label="Ask Studio"]': header,
         "ytcp-dialog#dialog": dialog,

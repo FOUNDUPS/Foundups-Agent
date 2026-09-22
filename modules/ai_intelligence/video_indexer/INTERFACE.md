@@ -8,6 +8,12 @@
 # Index all videos for a channel
 python -m modules.ai_intelligence.video_indexer.cli --channel undaodu
 
+# One resumable cycle across Move2Japan, UnDaoDu, and FoundUps
+python -m modules.ai_intelligence.video_indexer.cli --portfolio --batch-size 10
+
+# Run bounded daemon cycles for one channel
+python -m modules.ai_intelligence.video_indexer.cli --channel undaodu --daemon --cycles 3
+
 # Index specific video
 python -m modules.ai_intelligence.video_indexer.cli --channel move2japan --video-id abc123
 
@@ -26,6 +32,9 @@ python -m modules.ai_intelligence.video_indexer.cli --channel move2japan --reind
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `--channel`, `-c` | str | required | Channel: move2japan, undaodu, foundups, ravingantifa |
+| `--portfolio` | flag | - | Index Move2Japan, UnDaoDu, and FoundUps in browser-isolated batches |
+| `--daemon` | flag | - | Run bounded daemon cycles for `--channel` |
+| `--cycles` | int | 1 | Number of bounded daemon cycles |
 | `--video-id`, `-v` | str | - | Specific video ID to index |
 | `--batch-size`, `-b` | int | 10 | Videos per batch |
 | `--status`, `-s` | flag | - | Show indexing status |
@@ -275,7 +284,7 @@ async def run_indexing_daemon(
     """Run continuous indexing cycles with STOP/REINDEX signals."""
 ```
 
-### Action Surface (typed SKILLz/ACTION SURFACE - Phase 1)
+### Action Surface (typed SKILLz/ACTION SURFACE)
 
 A typed, reusable capability surface so the CLI menu, OpenClaw/WRE, Hermes, or
 any 0102 agent invoke the SAME governed indexing capability by action ID
@@ -297,11 +306,12 @@ from modules.ai_intelligence.video_indexer.src.action_surface import (
 )
 
 # Action IDs
-#   IMPLEMENTED (Phase 1):
+#   IMPLEMENTED:
 #     VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO = "video_index.studio_ask.single_video"
-#   REGISTERED ONLY (NOT wired this phase -> 'not_implemented'):
 #     STUDIO_ASK_CHANNEL_CYCLE = "video_index.studio_ask.channel_cycle"
 #     STUDIO_ASK_DAEMON_CYCLE  = "video_index.studio_ask.daemon_cycle"
+#     STUDIO_ASK_PORTFOLIO_CYCLE = "video_index.studio_ask.portfolio_cycle"
+#   REGISTERED ONLY (returns 'not_implemented'):
 #     GEMINI_API_SINGLE_VIDEO  = "video_index.gemini_api.single_video"
 #     WHISPER_LOCAL_TRANSCRIPT = "video_index.whisper.local_transcript"
 #     SHORTS_SCHEDULER_CONSUME = "shorts_scheduler.consume_video_index"
@@ -323,6 +333,19 @@ class StudioAskSingleVideoOutput:
     topics_count: int = 0
     saved_path: Optional[str] = None
     error: Optional[str] = None
+
+@dataclass
+class StudioAskChannelCycleInput:
+    channel_id: str
+    browser: str = "chrome"
+    max_videos: int = 10
+    force_reindex: bool = False
+
+@dataclass
+class StudioAskPortfolioCycleInput:
+    channel_keys: Optional[List[str]] = None  # defaults to the three primary channels
+    max_videos_per_channel: int = 10
+    force_reindex: bool = False
 
 async def run_studio_ask_single_video(
     inp: StudioAskSingleVideoInput,
@@ -348,9 +371,20 @@ async def run_studio_ask_single_video(
     On any of these the result is success=False and NOTHING is persisted."""
 
 async def run_action(action_id: str, **kwargs) -> Any:
-    """Route by typed action ID. Implemented IDs run real work; registered-only
-    IDs return a 'not_implemented' result; unknown IDs raise ValueError."""
+    """Route by typed action ID. Studio Ask single/channel/portfolio/daemon
+    IDs run real work; registered-only IDs return `not_implemented`."""
 ```
+
+### Manifest integrity and training boundary
+
+- Every Studio Ask prompt carries the requested video ID. A mismatched returned
+  `source_video_id` fails closed and is not persisted.
+- A response hash is stored per manifest; the same Gemini response cannot be
+  persisted under two different video IDs in the same channel.
+- Gemini/Ask Studio segments are semantic retrieval data, not verified speech.
+  They are marked `training_eligible: false` and rejected by `DatasetBuilder`.
+- Weight-training data must come from `youtube_transcript` or
+  `whisper_transcript` (or a compatible legacy verbatim source).
 
 ## Data Classes
 
