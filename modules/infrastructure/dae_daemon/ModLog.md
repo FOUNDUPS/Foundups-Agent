@@ -1,3 +1,9 @@
+## 2026-09-22: Truthful broker stop acknowledgment
+
+- WSP00/10/15/22/49/50/62/91/97; C3/I3/D3/Impact3=12/P2. The existing broker distinguishes accepted stop requests from observed worker exit, binds the active handle's hook and rejects changed ownership across callbacks.
+- Fixed baseline:25failed/26passed; candidate and independent replay:51passed (same cases). Existing13 import cases retained; three threaded lifecycle cases deselected, with only the legacy stop-status expectation updated for the new contract.
+- Callbacks stay outside broker locks; finite replacement tests do not prove atomic publication against arbitrary concurrent registry writers. No stop/join/kill scheduler or runtime update authority added. Canonical backlog records source, package checks, review and publication.
+
 ## 2026-09-22: Preserve broker import-failure streaks
 
 - WSP00/10/15/22/49/50/62/91/97; C3/I3/D3/Impact3=12/P2. Existing broker counter now survives repeated caught import errors and reaches threshold3; successful full launch handling or a caught non-import exception resets only the affected DAE.

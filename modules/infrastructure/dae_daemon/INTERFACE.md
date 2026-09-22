@@ -82,8 +82,29 @@ failure detaches again. No automatic enable, retry or recovery is introduced.
 Interruptions outside `Exception` retain the count and propagate through the
 existing final bookkeeping. Exceptions from pre-launch/failure/finally reporting
 retain their prior propagation boundary. The count is neither durable nor a
-health score; stop acknowledgment, live restart behavior and broader concurrency
+health score; live restart behavior and broader concurrency
 remain separate acceptance work.
+
+### Broker stop acknowledgment
+
+`stop_dae` reports `success: true, status: stopping` when the captured worker
+remains alive after its stop hook returns. It reports `stopped` and publishes
+`stop_completed` only after observing that captured worker exit. A successful
+request is not a completed stop. The existing Holo controller independently
+polls `thread_alive`; that stronger check remains required.
+
+The stop hook is captured from the active handle's launch spec, so refreshing
+a future launch spec does not redirect an existing worker's stop. Registry and
+stop-hook callbacks run outside the broker lock. Ownership is checked across callback boundaries;
+replacement or removal returns `runtime_changed` without subsequent stale
+state/event publication. Missing/dead workers and unsupported stop hooks retain
+their existing errors; same-owner hook failures retain their error handling.
+
+The evidence covers finite callback changes and observed broker-thread state,
+not atomicity against arbitrary concurrent registry writers or external process
+termination. No wait/join/kill, automatic retry, new timeout or restart policy is
+introduced. Reporting exceptions and persistence acknowledgment retain their
+existing limitations.
 
 ## Data Persistence
 

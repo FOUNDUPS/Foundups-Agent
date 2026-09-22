@@ -221,46 +221,20 @@ class DAELaunchBroker:
         }
 
     def stop_dae(self, dae_id: str, *, actor_id: str = "0102") -> Dict[str, Any]:
-        """Stop a running DAE when a stop hook exists."""
-        spec = self._specs.get(dae_id)
-        handle = self._handles.get(dae_id)
-        if spec is None or handle is None or not handle.is_alive:
-            return {
-                "success": False,
-                "dae_id": dae_id,
-                "error": "not_running",
-            }
-        if spec.stop_callable is None:
-            return {
-                "success": False,
-                "dae_id": dae_id,
-                "error": "stop_unsupported",
-            }
-
-        self._daemon.registry.set_state(dae_id, DAEState.STOPPING, "broker_stop_requested")
-        self._daemon.registry.report_event(
-            dae_id,
-            DAEEventType.ACTION_PERFORMED,
-            {
-                "action_type": "stop_requested",
-                "actor_id": actor_id,
-            },
-        )
-        try:
-            spec.stop_callable()
-            self._daemon.registry.set_state(dae_id, DAEState.STOPPED, "broker_stopped")
-            self._daemon.registry.report_event(
-                dae_id,
-                DAEEventType.ACTION_PERFORMED,
-                {
-                    "action_type": "stop_completed",
-                    "actor_id": actor_id,
-                },
-            )
-            return {"success": True, "dae_id": dae_id, "status": "stopped"}
-        except Exception as exc:
-            self._daemon.registry.set_state(dae_id, DAEState.CRASHED, f"stop_failed:{exc}")
-            return {"success": False, "dae_id": dae_id, "error": str(exc)}
+        """Request the captured worker's stop and report its observed completion."""
+        with self._lock:
+            handle = self._handles.get(dae_id)
+            if self._specs.get(dae_id) is None or handle is None:
+                return {"success": False, "dae_id": dae_id, "error": "not_running"}
+            alive = handle.is_alive
+            if self._handles.get(dae_id) is not handle:
+                return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+            if not alive:
+                return {"success": False, "dae_id": dae_id, "error": "not_running"}
+            stop_callable = handle.spec.stop_callable
+        if stop_callable is None:
+            return {"success": False, "dae_id": dae_id, "error": "stop_unsupported"}
+        return _request_owned_stop(self, dae_id, handle, stop_callable, actor_id)
 
     def get_runtime_status(self, dae_id: str) -> Dict[str, Any]:
         spec = self._specs.get(dae_id)
@@ -362,6 +336,66 @@ class DAELaunchBroker:
         self._stop_event.set()
         if self._heartbeat_thread.is_alive():
             self._heartbeat_thread.join(timeout=3.0)
+
+
+def _stop_handle_is_current(broker: DAELaunchBroker, dae_id: str, handle: DAERuntimeHandle) -> bool:
+    with broker._lock:
+        return broker._handles.get(dae_id) is handle
+
+
+def _request_owned_stop(
+    broker: DAELaunchBroker, dae_id: str, handle: DAERuntimeHandle,
+    stop_callable: Callable[[], Any], actor_id: str,
+) -> Dict[str, Any]:
+    """Publish the request without holding the broker lock across callbacks."""
+    registry = broker._daemon.registry
+    if not _stop_handle_is_current(broker, dae_id, handle):
+        return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+    registry.set_state(dae_id, DAEState.STOPPING, "broker_stop_requested")
+    if not _stop_handle_is_current(broker, dae_id, handle):
+        return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+    registry.report_event(
+        dae_id, DAEEventType.ACTION_PERFORMED,
+        {"action_type": "stop_requested", "actor_id": actor_id},
+    )
+    if not _stop_handle_is_current(broker, dae_id, handle):
+        return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+    return _complete_owned_stop(broker, dae_id, handle, stop_callable, actor_id)
+
+
+def _complete_owned_stop(
+    broker: DAELaunchBroker, dae_id: str, handle: DAERuntimeHandle,
+    stop_callable: Callable[[], Any], actor_id: str,
+) -> Dict[str, Any]:
+    """Observe only this handle; retain the existing hook/reporting catch scope."""
+    registry = broker._daemon.registry
+    try:
+        stop_callable()
+        with broker._lock:
+            if broker._handles.get(dae_id) is not handle:
+                return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+            alive = handle.is_alive
+            if broker._handles.get(dae_id) is not handle:
+                return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        if alive:
+            return {"success": True, "dae_id": dae_id, "status": "stopping"}
+        registry.set_state(dae_id, DAEState.STOPPED, "broker_stopped")
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        registry.report_event(
+            dae_id, DAEEventType.ACTION_PERFORMED,
+            {"action_type": "stop_completed", "actor_id": actor_id},
+        )
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        return {"success": True, "dae_id": dae_id, "status": "stopped"}
+    except Exception as exc:
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        registry.set_state(dae_id, DAEState.CRASHED, f"stop_failed:{exc}")
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        return {"success": False, "dae_id": dae_id, "error": str(exc)}
 
 
 def _record_launch_failure(

@@ -44,14 +44,28 @@ no real kill action occurs, and WRE/FAM comparisons are static only.
 
 Select `-k test_import_streak_` in `test_dae_launch_broker.py` for the bounded
 regressions: 13 passed locally and independently (the same cases), after
-9 failed/4 passed on unchanged source. Original three lifecycle
-tests remain exact and are deselected because they start real daemon threads.
+9 failed/4 passed on unchanged source. That revision retained the three lifecycle
+tests unchanged and deselected them because they start real daemon threads.
 
 Fixtures use inert registry/handles and finite callables. They cover thresholds,
 per-DAE recovery, re-enable, downstream exceptions, admission and final bookkeeping.
 Use disabled plugin autoload, Python `-I -B -m pytest`, `-o addopts=`,
 `-p no:cacheprovider` and a fresh external `--basetemp`. This proves the bounded
 state transition, not live restart safety, durable monitoring or retained RSI.
+
+## Broker stop regressions — 2026-09-22
+
+In `test_dae_launch_broker.py`, select `-k "test_import_streak_ or test_stop_ack_"`.
+The unchanged import cases and new inert stop cases total51; the same cases pass
+locally and independently after baseline25failed/26passed. Three
+threaded lifecycle cases remain deselected. The existing threaded stop assertion
+now accepts a successful pending request or observed completion; that legacy case
+was not executed in this bounded qualification.
+
+Use disabled plugin autoload, `python -I -B -m pytest`, `-o addopts=`,
+`-p no:cacheprovider`, and a fresh external `--basetemp` per run. Fixed acceptance
+covers handle ownership, hook identity, pending/completed/error paths and callback
+replacement. No live service, provider or production database is used.
 
 ## Running Tests
 
