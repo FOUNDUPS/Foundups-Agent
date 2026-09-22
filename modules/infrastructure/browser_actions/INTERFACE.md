@@ -134,8 +134,11 @@ Its `LinkedInActionResult.details` contains `dry_run`, `policy_reason`,
 policy returns success, denied policy returns failure. Neither certifies quota,
 deduplication or authority. Constructor/browser access remains separate.
 Missing-metadata/manager early errors retain their existing shapes. Explicit
-live calls retain their existing request-status/results contract.
-See [verified scope](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22).
+live calls preserve manager request status. With a truthy requested note, Add and
+typing must succeed before the sole explicit Send; unattempted Send is `None`.
+Success/counter credit requires the complete requested sequence. No-message
+fallback remains unchanged; these local results do not prove external delivery.
+See [preview scope](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22) and [note-path repair](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-requested-note-repair--2026-09-23).
 
 ```python
 class LinkedInActions:

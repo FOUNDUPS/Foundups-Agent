@@ -19,11 +19,11 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ## Current bounded checkpoint — 2026-09-23
 
-Acknowledgment qualification11/P2 passes24 fixed inert cases locally and
-independently; production unchanged. Requested notes currently follow an initial
-Send, and failed typing can still report success. Next12/P2 repairs only the
-requested-note sequence. No-message variants/bookkeeping stay separate.
-[Contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-invitation-acknowledgment-qualification--2026-09-23).
+Requested-note repair 12/P2 passes 23 frozen cases locally and independently
+(baseline 4 fail/19 pass). Add/type now precede one explicit Send; failed preparation
+prevents Send and success credit. No-message fallback/bookkeeping are unchanged.
+The root backlog re-scores manager-result/UI-admission qualification separately.
+[Contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-requested-note-repair--2026-09-23).
 
 The sprint map below is historical planning: source such as `action_router.py`
 already exists. Its unchecked boxes are not a verified current completion audit.

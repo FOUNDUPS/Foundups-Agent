@@ -63,33 +63,28 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
-### RSI invitation acknowledgment qualification — 2026-09-23
+### RSI requested-note repair — 2026-09-23
 
-At main `aca14b3e`, production code is unchanged. Seven new fixed cases plus
-the existing17 inert compatibility cases pass locally and independently; four
-legacy constructor tests remain unchanged/excluded. Fake routing, constructor
-bypass and simulation controls establish Python results, not actual delivery.
+PR #1875's current-behavior qualification is closed. The existing owner now
+handles truthy requested notes in this order: Connect, Add a note, type, then
+one explicit Send. Failed Add or typing suppresses explicit Send; its result
+field is None when unattempted. Generic failure errors remain unchanged.
+Success/counter credit requires the complete requested sequence to succeed.
+No-message fallback, policy/dry-run, early errors and manager bookkeeping remain.
 
-Observed: Connect=True and Send=False without a note still reports success and
-increments `connections_sent`; the source allows direct-connect UI variants,
-so absence of Send is ambiguous. With a note, the method attempts Send before
-Add a note and typing, then attempts Send again whenever Add succeeds. Failed
-typing does not prevent that final Send or reported success. A successful first
-Send followed by a failed final Send reports failure despite the earlier action.
-Pending/history/simulation occur before these UI calls; neither pending status
-nor the counter proves external delivery or inclusion of the requested note.
+Frozen 23 cases (six prospective plus 17 preserved controls) fail 4/pass 19 on the
+original source, then pass 23 locally and on independent replay. Four legacy
+constructor tests remain unchanged/excluded; two known config warnings per run.
+Exact results, payload/driver order, pending/history and counters are checked
+with inert routing and constructor/import sentinels. The same-file refactor
+shrinks the inherited method/class without adding another module. Backend
+manifest membership stays 1401; one source digest and two existing pins change.
 
-Next bounded repair contract: for nonempty requested notes, omit the premature
-explicit Send, require successful Add and typing before the sole explicit final
-Send, and credit success only for the completed requested sequence. Represent
-unattempted Send as `None`; keep generic failure errors. Preserve no-message fallback, policy/dry-run behavior and existing manager bookkeeping.
-Connect may itself send in some UI variants: this proposed repair cannot promise
-that no invitation escaped or establish delivery truth. UI verification and
-bookkeeping redesign are separate work; no live browser/account action is admitted.
-
-This qualification closes the finite observation only. Production repair, native
-WRE admission, OpenClaw/Hermes update readiness and retained RSI remain separate.
-The canonical backlog binds source, tests, receipts and the rescored next action.
+Connect may itself send in some UI variants. This local sequencing repair does
+not prove external delivery, absence of an invitation or actual note inclusion.
+No-message acknowledgment ambiguity and manager-result/UI-admission behavior
+remain separate. Native WRE admission, runtime upgrade readiness and retained
+RSI are not established. The canonical backlog owns exact evidence and ranking.
 
 ### RSI connection policy preview — 2026-09-22
 

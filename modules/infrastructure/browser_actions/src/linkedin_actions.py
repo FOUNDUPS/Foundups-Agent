@@ -101,6 +101,29 @@ def _connection_policy_result(
     )
 
 
+async def _connection_invitation_clicks(router: ActionRouter, message: Optional[str]) -> tuple:
+    """Attempt explicit Send only after any requested note was entered."""
+    async def click(description: str, **payload) -> RoutingResult:
+        return await router.execute(
+            'click_by_description', {'description': description, **payload},
+            driver=DriverType.VISION,
+        )
+
+    add_note_result = None
+    type_result = None
+    if message:
+        add_note_result = await click('Add a note button in Connect dialog')
+        if not add_note_result.success:
+            return None, add_note_result, type_result
+        type_result = await click(
+            'Invitation note text input field', text=message, slow_type=True,
+        )
+        if not type_result.success:
+            return None, add_note_result, type_result
+    send_result = await click('Send invitation button in Connect dialog')
+    return send_result, add_note_result, type_result
+
+
 class LinkedInActions:
     """
     LinkedIn vision-based engagement actions.
@@ -926,38 +949,13 @@ class LinkedInActions:
         # LinkedIn variants:
         # 1) direct send after connect click
         # 2) modal with optional add note + send invitation
-        add_note_result = None
-        type_result = None
-        send_result = await self.router.execute(
-            'click_by_description',
-            {'description': 'Send invitation button in Connect dialog'},
-            driver=DriverType.VISION,
+        send_result, add_note_result, type_result = await _connection_invitation_clicks(
+            self.router, message,
         )
 
-        if message:
-            add_note_result = await self.router.execute(
-                'click_by_description',
-                {'description': 'Add a note button in Connect dialog'},
-                driver=DriverType.VISION,
-            )
-            if add_note_result.success:
-                type_result = await self.router.execute(
-                    'click_by_description',
-                    {
-                        'description': 'Invitation note text input field',
-                        'text': message,
-                        'slow_type': True,
-                    },
-                    driver=DriverType.VISION,
-                )
-                send_result = await self.router.execute(
-                    'click_by_description',
-                    {'description': 'Send invitation button in Connect dialog'},
-                    driver=DriverType.VISION,
-                )
-
         invitation_sent = connect_click.success and (
-            send_result.success or add_note_result is None
+            (send_result is not None and send_result.success)
+            or (not message and add_note_result is None)
         )
         if invitation_sent:
             self._session_stats['connections_sent'] += 1
@@ -975,7 +973,7 @@ class LinkedInActions:
                 "request_status": request.status.value,
                 "profile": metadata,
                 "connect_click_success": connect_click.success,
-                "send_click_success": send_result.success,
+                "send_click_success": send_result.success if send_result is not None else None,
                 "add_note_success": add_note_result.success if add_note_result else None,
                 "note_typed_success": type_result.success if type_result else None,
             },
