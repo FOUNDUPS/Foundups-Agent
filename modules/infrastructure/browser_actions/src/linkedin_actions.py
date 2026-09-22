@@ -79,6 +79,28 @@ class LinkedInActionResult:
         }
 
 
+def _connection_policy_result(
+    profile_slug: str, metadata: Dict[str, str], policy: Any, start_time: datetime,
+    *, dry_run: bool = False, request_status: Optional[str] = None,
+) -> LinkedInActionResult:
+    """Project policy-only previews and the existing live rejection schema."""
+    allowed_preview = dry_run and policy.allowed
+    return LinkedInActionResult(
+        success=allowed_preview,
+        action="send_connection_request",
+        post_id=profile_slug,
+        error=None if allowed_preview else f"policy_blocked: {policy.reason}",
+        duration_ms=int((datetime.now() - start_time).total_seconds() * 1000),
+        details={
+            "policy_reason": policy.reason,
+            "matched_allow": policy.matched_allow,
+            "matched_deny": policy.matched_deny,
+            "profile": metadata,
+            **({"dry_run": True} if dry_run else {"request_status": request_status}),
+        },
+    )
+
+
 class LinkedInActions:
     """
     LinkedIn vision-based engagement actions.
@@ -863,6 +885,11 @@ class LinkedInActions:
         )
 
         policy = self._connection_manager.evaluate_connection_policy(target_profile)
+        if dry_run:
+            return _connection_policy_result(
+                profile_slug, metadata, policy, start_time, dry_run=True,
+            )
+
         request = self._connection_manager.send_connection_request(
             profile_slug,
             message=message,
@@ -873,36 +900,8 @@ class LinkedInActions:
             self._connection_status_cls.BLOCKED if self._connection_status_cls else None
         )
         if not policy.allowed or (blocked_status is not None and request.status == blocked_status):
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error=f"policy_blocked: {policy.reason}",
-                duration_ms=elapsed_ms,
-                details={
-                    "policy_reason": policy.reason,
-                    "matched_allow": policy.matched_allow,
-                    "matched_deny": policy.matched_deny,
-                    "request_status": request.status.value,
-                    "profile": metadata,
-                },
-            )
-
-        if dry_run:
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=True,
-                action="send_connection_request",
-                post_id=profile_slug,
-                duration_ms=elapsed_ms,
-                details={
-                    "dry_run": True,
-                    "policy_reason": policy.reason,
-                    "matched_allow": policy.matched_allow,
-                    "request_status": request.status.value,
-                    "profile": metadata,
-                },
+            return _connection_policy_result(
+                profile_slug, metadata, policy, start_time, request_status=request.status.value,
             )
 
         connect_click = await self.router.execute(

@@ -169,9 +169,10 @@ if __name__ == "__main__":
     unittest.main(verbosity=2)
 
 
-# Current-behavior qualification, not a future no-mutation acceptance contract.
+# Policy-only dry-run acceptance plus explicit live compatibility controls.
 # The reviewed runner supplies inert import boundaries; the four legacy tests
 # above remain unchanged and are excluded because they call the real constructor.
+from copy import deepcopy
 from datetime import datetime as _Datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -250,9 +251,49 @@ def _connection_result(success=True, error=None, details=None):
             "details": details or {}}
 
 
-def _connection_preview(status="pending"):
-    return {"dry_run": True, "policy_reason": "allow role category matched",
-            "matched_allow": ["founder"], "request_status": status, "profile": _CONNECTION_META}
+def _connection_preview(allowed, profile):
+    return {"dry_run": True,
+            "policy_reason": "allow role category matched" if allowed else "hard-deny role category matched",
+            "matched_allow": ["founder"] if allowed else [],
+            "matched_deny": [] if allowed else ["marketing"], "profile": profile}
+
+
+def _connection_state(state):
+    return deepcopy((state.manager.pending_requests, state.manager.connection_history,
+                     state.manager.connections, state.actions._session_stats))
+
+
+def _connection_preview_guard(state, monkeypatch):
+    send = Mock(side_effect=AssertionError("preview must not create a request"))
+    simulate = Mock(side_effect=AssertionError("preview must not simulate a request"))
+    monkeypatch.setattr(state.manager, "send_connection_request", send)
+    monkeypatch.setattr(state.manager, "_simulate_connection_request", simulate)
+    return _connection_state(state), send, simulate
+
+
+def _connection_preview_unchanged(state, guarded):
+    before, send, simulate = guarded
+    assert _connection_state(state) == before
+    send.assert_not_called()
+    simulate.assert_not_called()
+    assert not state.simulations
+    assert not any(call["action"] == "click_by_description" for call in state.router.calls)
+
+
+def _connection_seed(state, kind):
+    state.actions._session_stats["connections_sent"] = 7
+    if kind == "pending":
+        prior = state.policy.ConnectionRequest("synthetic-prior", "current_user", "synthetic-person")
+        state.manager.pending_requests["synthetic-person"] = prior
+        state.manager.connection_history.append(prior)
+    elif kind == "connected":
+        profile = state.policy.LinkedInProfile("synthetic-person", "Synthetic", "Principal", "Founder")
+        prior = state.policy.Connection("synthetic-connection", "current_user", profile, _ConnectionClock.now())
+        state.manager.connections["synthetic-person"] = prior
+    elif kind == "quota":
+        state.manager.max_daily_requests = 1
+        state.manager.connection_history.append(state.policy.ConnectionRequest(
+            "synthetic-prior", "current_user", "other", status=state.policy.ConnectionStatus.BLOCKED))
 
 
 def _connection_pending(state):
@@ -265,25 +306,43 @@ def _connection_pending(state):
     assert state.simulations == [(1, 1, ("synthetic-person",))]
 
 
+@pytest.mark.parametrize("allowed", [True, False])
 @pytest.mark.parametrize("extract", [False, True])
-def test_connection_current_allowed_dry_mutates_before_preview(connection_current, extract):
+def test_connection_preview_uses_policy_without_request(connection_current, monkeypatch, allowed, extract):
     state = connection_current
-    state.router.profile_extract = dict(_CONNECTION_META)
-    overrides = dict(profile_name=None, headline=None, company=None, industry=None) if extract else {}
+    profile = {**_CONNECTION_META, "headline": "Founder" if allowed else "Founder and Marketing Advisor"}
+    state.router.profile_extract = dict(profile)
+    overrides = dict(profile_name=None, headline=None, company=None, industry=None) if extract else {
+        "headline": profile["headline"]}
+    guarded = _connection_preview_guard(state, monkeypatch)
     result = _connection_request(state, **overrides)
-    assert result.to_dict() == _connection_result(details=_connection_preview())
+    error = None if allowed else "policy_blocked: hard-deny role category matched"
+    assert result.to_dict() == _connection_result(allowed, error, _connection_preview(allowed, profile))
     expected = ["router:navigate"] + (["router:find_by_description"] if extract else [])
-    assert state.events == expected + ["policy", "manager", "policy", "simulation"]
-    _connection_pending(state)
+    assert state.events == expected + ["policy"]
     assert state.router.calls[0]["payload"] == {"url": _CONNECTION_URL}
-    assert not any(call["action"] == "click_by_description" for call in state.router.calls)
-    assert state.actions._session_stats == {"connections_sent": 0}
+    _connection_preview_unchanged(state, guarded)
 
 
-def test_connection_current_blocked_dry_records_history(connection_current):
+@pytest.mark.parametrize("allowed", [True, False])
+@pytest.mark.parametrize("kind", ["empty", "pending", "connected", "quota"])
+def test_connection_preview_repeated_with_seeded_state(connection_current, monkeypatch, allowed, kind):
+    state = connection_current
+    _connection_seed(state, kind)
+    guarded = _connection_preview_guard(state, monkeypatch)
+    profile = {**_CONNECTION_META, "headline": "Founder" if allowed else "Founder and Marketing Advisor"}
+    error = None if allowed else "policy_blocked: hard-deny role category matched"
+    for _ in range(2):
+        result = _connection_request(state, headline=profile["headline"])
+        assert result.to_dict() == _connection_result(allowed, error, _connection_preview(allowed, profile))
+        _connection_preview_unchanged(state, guarded)
+    assert state.events == ["router:navigate", "policy"] * 2
+
+
+def test_connection_live_denial_preserves_bookkeeping(connection_current):
     state = connection_current
     headline = "Founder and Marketing Advisor"
-    result = _connection_request(state, headline=headline)
+    result = _connection_request(state, headline=headline, dry_run=False)
     details = {"policy_reason": "hard-deny role category matched", "matched_allow": [],
                "matched_deny": ["marketing"], "request_status": "blocked",
                "profile": {**_CONNECTION_META, "headline": headline}}
@@ -303,47 +362,6 @@ def test_connection_current_missing_metadata_skips_manager(connection_current):
     assert result.to_dict() == _connection_result(False, "policy_blocked: missing_profile_metadata", details)
     assert state.events == ["router:navigate", "router:find_by_description"]
     assert not state.manager.pending_requests and not state.manager.connection_history
-    assert not state.simulations and state.actions._session_stats == {"connections_sent": 0}
-
-
-def test_connection_current_pending_retry_reuses_request(connection_current):
-    state = connection_current
-    _connection_request(state)
-    original = state.manager.pending_requests["synthetic-person"]
-    state.events.clear()
-    state.simulations.clear()
-    state.router.calls.clear()
-    result = _connection_request(state)
-    assert result.to_dict() == _connection_result(details=_connection_preview())
-    assert state.manager.pending_requests["synthetic-person"] is original
-    assert len(state.manager.connection_history) == 1 and state.manager.connection_history[0] is original
-    assert state.events == ["router:navigate", "policy", "manager"]
-    assert not state.simulations and state.actions._session_stats == {"connections_sent": 0}
-
-
-def test_connection_current_blocked_history_exhausts_quota(connection_current):
-    state = connection_current
-    state.manager.max_daily_requests = 1
-    prior = state.policy.ConnectionRequest("synthetic-prior", "current_user", "other",
-                                           status=state.policy.ConnectionStatus.BLOCKED)
-    state.manager.connection_history.append(prior)
-    result = _connection_request(state)
-    assert result.to_dict() == _connection_result(details=_connection_preview("withdrawn"))
-    assert state.manager.connection_history == [prior] and not state.manager.pending_requests
-    assert state.events == ["router:navigate", "policy", "manager"]
-    assert not state.simulations and state.actions._session_stats == {"connections_sent": 0}
-
-
-def test_connection_current_connected_returns_dry_success(connection_current):
-    state = connection_current
-    profile = state.policy.LinkedInProfile("synthetic-person", "Synthetic", "Principal", "Founder")
-    prior = state.policy.Connection("synthetic-connection", "current_user", profile, _ConnectionClock.now())
-    state.manager.connections["synthetic-person"] = prior
-    result = _connection_request(state)
-    assert result.to_dict() == _connection_result(details=_connection_preview("connected"))
-    assert state.manager.connections == {"synthetic-person": prior}
-    assert not state.manager.pending_requests and not state.manager.connection_history
-    assert state.events == ["router:navigate", "policy", "manager"]
     assert not state.simulations and state.actions._session_stats == {"connections_sent": 0}
 
 

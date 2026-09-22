@@ -63,7 +63,37 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI connection policy preview — 2026-09-22
+
+The browser owner now returns a policy-only preview after metadata retrieval
+and the existing `evaluate_connection_policy`, before the mutating request
+manager. Both allowed and denied dry-runs preserve pending requests, history,
+connections and session counters, with no send simulation. Details contain
+`dry_run: true`, `policy_reason`, `matched_allow`, `matched_deny` and `profile`;
+`request_status` is omitted because no request was created. These fields apply
+when policy evaluation is reached; missing-metadata/manager early errors retain
+their existing shapes. Denial remains a failure. A successful policy preview does not certify quota, deduplication,
+send eligibility or permission. Seeded pending/connected/quota state cannot
+turn the preview into a request. Constructor/navigation/extraction effects
+remain separate; this is not a browser-free preview.
+
+Seventeen frozen cases: baseline12 fail/5 pass, repaired17 pass, independent17
+pass on identical IDs; four original constructor tests remain unchanged and
+excluded. Both fake-live click controls and missing/unavailable early-error
+oracles are preserved, with a live policy-denial compatibility control. Each
+run retains two known disabled-plugin warnings. Tests use inert routing and
+constructor/import controls; no live account or OS sandbox proof is claimed.
+
+The existing evaluator is reused and result projection extracted in the same
+source file. Method194→171, class2718→2695, file2827→2826;
+remaining inherited size debt is not declared resolved. Backend manifest
+membership remains1401; only the changed source digest and existing pins are
+refreshed. Runtime upgrade, native WRE admission and retained learning remain
+unqualified. The canonical backlog owns the newly rescored next action.
+
 ### RSI connection policy qualification — 2026-09-22
+
+Historical PR1869 qualification; the preview behavior and prospective repair below are superseded by the current policy-preview contract above.
 
 Qualification only, at baseline `1364eb1644741ae0d66b51997ed3419c34264e3a`;
 production source is unchanged. Ten fixed current-behavior cases pass locally
@@ -82,7 +112,7 @@ quota have distinct outcomes. Missing metadata and unavailable policy manager
 return early. Inert live success/failure controls bind the current click ordering.
 No real account, external send, persistence or OS sandbox claim follows.
 
-**Next repair contract — 12/P2 (3/3/3/3), not implemented here:** reuse the existing
+**Historical repair acceptance — 12/P2 (3/3/3/3), implemented above:** reuse the existing
 read-only `evaluate_connection_policy` in the browser owner. For a dry-run,
 return policy preview before calling the mutating request manager, on both allow
 and deny. Preserve truthful policy/profile fields, keep denial a failure and
