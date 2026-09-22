@@ -7,6 +7,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import math
+from inspect import getattr_static
 import os
 import re
 import sqlite3
@@ -96,6 +98,300 @@ class SelfAuditEscalation:
     dispatch_result: str
 
 
+_SCAN_ERROR_CODES = frozenset({
+    "discovery_excluded", "discovery_failed", "stat_failed", "read_failed",
+    "scan_failed", "scan_interrupted",
+})
+
+
+def _empty_scan_status(outcome="never_scanned", attempt_id=0):
+    return {
+        "attempt_id": attempt_id, "outcome": outcome, "event_count": None,
+        "coverage": "unknown", "error_codes": [],
+        "started_at_monotonic": None, "completed_at_monotonic": None,
+        "last_success": None, "last_success_age_sec": None,
+        "sampled_at_monotonic": None, "clock_valid": False,
+    }
+
+
+class _ScanStatus:
+    """Volatile per-instance diagnostics, independent of the long scan lock."""
+
+    def __init__(self, clock):
+        self.clock = time.monotonic if clock is None else clock
+        self.lock = threading.Lock()
+        self.high_water = None
+        self.result = _empty_scan_status()
+        self.last_success = None
+
+    def _now(self):
+        try:
+            now = self.clock()
+            if type(now) not in (int, float) or not math.isfinite(now) or now < 0:
+                return None
+            if self.high_water is not None and now < self.high_water:
+                return None
+            self.high_water = now
+            return now
+        except Exception:
+            return None
+
+    def begin(self):
+        with self.lock:
+            self.result = _empty_scan_status("running", self.result["attempt_id"] + 1)
+            self.result["started_at_monotonic"] = self._now()
+
+    def inputs(self, count):
+        with self.lock:
+            self.result["coverage"] = "bounded" if count else "no_inputs"
+
+    def issue(self, code):
+        with self.lock:
+            if self.result["outcome"] == "running" and code not in self.result["error_codes"]:
+                self.result["error_codes"].append(code)
+
+    def finish(self, count, *, failed=False):
+        with self.lock:
+            now = self._now()
+            outcome = "failed" if failed else ("partial" if self.result["error_codes"] else "completed")
+            self.result.update(outcome=outcome, event_count=count, completed_at_monotonic=now)
+            if outcome != "completed":
+                self.result["coverage"] = "unknown" if failed else "known_partial"
+            if (outcome == "completed" and self.result["coverage"] == "bounded"
+                    and now is not None and self.result["started_at_monotonic"] is not None):
+                self.last_success = {
+                    "attempt_id": self.result["attempt_id"],
+                    "completed_at_monotonic": now, "event_count": count,
+                }
+
+    def snapshot(self):
+        with self.lock:
+            now = self._now()
+            success = dict(self.last_success) if self.last_success is not None else None
+            age = None if now is None or success is None else now - success["completed_at_monotonic"]
+            return {
+                **self.result, "error_codes": list(self.result["error_codes"]),
+                "last_success": success, "last_success_age_sec": age,
+                "sampled_at_monotonic": now, "clock_valid": now is not None,
+            }
+
+
+def _note_scan_issue(loop, code):
+    state = getattr(loop, "_scan_status", None)
+    if state is not None:
+        state.issue(code)
+
+
+def _attempt_scan(loop, *, propagate):
+    with loop._scan_lock:
+        loop._scan_status.begin()
+        try:
+            count = loop._scan_once_locked()
+            if type(count) is not int or count < 0:
+                raise ValueError("invalid_scan_count")
+        except BaseException as exc:
+            loop._scan_status.issue("scan_failed" if isinstance(exc, Exception) else "scan_interrupted")
+            loop._scan_status.finish(None, failed=True)
+            if propagate or not isinstance(exc, Exception):
+                raise
+        else:
+            loop._scan_status.finish(count)
+        return loop._scan_status.snapshot()
+
+
+def _valid_scan_snapshot(status):
+    if type(status) is not dict or set(status) != set(_empty_scan_status()):
+        return False
+    count = status["event_count"]
+    if type(status["attempt_id"]) is not int or status["attempt_id"] < 1:
+        return False
+    if status["outcome"] not in {"completed", "partial", "failed"}:
+        return False
+    if (status["outcome"] == "failed" and count is not None
+            or status["outcome"] != "failed" and (type(count) is not int or count < 0)):
+        return False
+    if status["coverage"] not in {"bounded", "no_inputs", "known_partial", "unknown"}:
+        return False
+    codes = status["error_codes"]
+    if type(codes) is not list or len(codes) > len(_SCAN_ERROR_CODES) or not all(
+        type(code) is str and code in _SCAN_ERROR_CODES for code in codes
+    ):
+        return False
+    if len(set(codes)) != len(codes):
+        return False
+    times = ("started_at_monotonic", "completed_at_monotonic",
+             "sampled_at_monotonic", "last_success_age_sec")
+    if not all(_valid_scan_time(status[key]) for key in times):
+        return False
+    return (type(status["clock_valid"]) is bool and _valid_scan_success(status["last_success"])
+            and _coherent_scan_snapshot(status))
+
+
+def _coherent_scan_snapshot(status):
+    outcome, coverage, codes = status["outcome"], status["coverage"], status["error_codes"]
+    if outcome == "completed" and (coverage not in {"bounded", "no_inputs"} or codes):
+        return False
+    if outcome == "partial" and (coverage != "known_partial" or not codes):
+        return False
+    if outcome == "failed" and (coverage != "unknown" or not codes):
+        return False
+    if coverage == "no_inputs" and status["event_count"] != 0:
+        return False
+    started, completed, sampled = (status[key] for key in (
+        "started_at_monotonic", "completed_at_monotonic", "sampled_at_monotonic"))
+    known_times = [value for value in (started, completed, sampled) if value is not None]
+    if any(left > right for left, right in zip(known_times, known_times[1:])):
+        return False
+    if status["clock_valid"] != (sampled is not None):
+        return False
+    qualified = (outcome == "completed" and coverage == "bounded"
+                 and started is not None and completed is not None)
+    success, age = status["last_success"], status["last_success_age_sec"]
+    if success is None:
+        return age is None and not qualified
+    success_id, attempt_id = success["attempt_id"], status["attempt_id"]
+    success_time = success["completed_at_monotonic"]
+    if success_id > attempt_id or (qualified and success_id != attempt_id):
+        return False
+    if success_id == attempt_id:
+        if (not qualified or success["event_count"] != status["event_count"]
+                or success_time != completed):
+            return False
+    elif known_times and success_time > known_times[0]:
+        return False
+    expected_age = None if sampled is None else sampled - success_time
+    return age == expected_age
+
+
+def _valid_scan_time(value):
+    return value is None or (type(value) in (int, float) and math.isfinite(value) and value >= 0)
+
+
+def _valid_scan_success(success):
+    if success is None:
+        return True
+    if type(success) is not dict or set(success) != {"attempt_id", "completed_at_monotonic", "event_count"}:
+        return False
+    return (type(success["attempt_id"]) is int and success["attempt_id"] > 0
+            and type(success["event_count"]) is int and success["event_count"] >= 0
+            and success["completed_at_monotonic"] is not None
+            and _valid_scan_time(success["completed_at_monotonic"]))
+
+
+def observe_self_audit_status(loop, *, enabled):
+    """Project one scan result; legacy collaborators never acquire invented status."""
+    if not enabled or loop is None:
+        return _empty_scan_status("disabled" if not enabled else "absent", None)
+    try:
+        if callable(getattr_static(loop, "scan_once_with_status", None)):
+            result = loop.scan_once_with_status()
+            if not _valid_scan_snapshot(result):
+                return _empty_scan_status("unavailable", None)
+            return {**result, "error_codes": list(result["error_codes"]),
+                    "last_success": dict(result["last_success"]) if result["last_success"] is not None else None}
+        scan = getattr(loop, "scan_once", None)
+        if not callable(scan):
+            return _empty_scan_status("absent", None)
+        count = scan()
+        result = _empty_scan_status("unavailable", None)
+        if type(count) is int and count >= 0:
+            result["event_count"] = count
+        return result
+    except Exception:
+        result = _empty_scan_status("failed", None)
+        result["error_codes"] = ["scan_failed"]
+        return result
+
+
+def _initialize_scan_owner(loop, monotonic_clock):
+    loop.runtime_root = loop._resolve_runtime_root()
+    loop.task_log_path = loop.runtime_root / "daemon_self_audit_tasks.jsonl"
+    loop.improvement_job_log_path = (
+        loop.runtime_root / "daemon_self_audit_improvement_jobs.jsonl"
+    )
+    loop.escalation_log_path = loop.runtime_root / "daemon_self_audit_escalations.jsonl"
+    loop.state_path = loop.runtime_root / "daemon_self_audit_state.json"
+    loop._offsets: Dict[str, int] = {}
+    loop._seen: Dict[str, float] = {}
+    loop._last_fix_at: Dict[str, float] = {}
+    loop._fix_stats: Dict[str, Dict[str, Any]] = {}
+    loop._signature_stats: Dict[str, Dict[str, Any]] = {}
+    loop._last_escalation_at: Dict[str, float] = {}
+    loop._thread: Optional[threading.Thread] = None
+    loop._stop = threading.Event()
+    loop._scan_lock = threading.Lock()
+    loop._state_loaded_mtime_ns = 0
+    loop._scan_status = _ScanStatus(monotonic_clock)
+    loop._load_state()
+
+
+def _scan_log_files(loop) -> List[Path]:
+    raw = os.getenv(
+        "OPENCLAW_SELF_AUDIT_LOG_GLOBS",
+        "holo_index/logs/**/*.log;logs/**/*.log;holo_index/logs/telemetry/**/*.jsonl",
+    )
+    globs = [part.strip() for part in re.split(r"[;,\n]+", raw) if part.strip()]
+    files: List[Path] = []
+    for pattern in globs:
+        if not loop._valid_log_glob(pattern):
+            _note_scan_issue(loop, "discovery_excluded")
+            continue
+        try:
+            files.extend(loop.repo_root.glob(pattern))
+        except (OSError, ValueError):
+            _note_scan_issue(loop, "discovery_failed")
+            raise
+    # stable ordering for deterministic state writes
+    resolved: set[Path] = set()
+    for path in files:
+        try:
+            candidate = path.resolve()
+        except (OSError, ValueError):
+            _note_scan_issue(loop, "discovery_failed")
+            continue
+        try:
+            candidate.relative_to(loop.repo_root)
+        except ValueError:
+            _note_scan_issue(loop, "discovery_excluded")
+            continue
+        try:
+            if candidate.is_file():
+                resolved.add(candidate)
+            else:
+                _note_scan_issue(loop, "discovery_excluded")
+        except OSError:
+            _note_scan_issue(loop, "discovery_failed")
+            raise
+    return sorted(resolved)
+
+
+def _read_scan_lines(loop, path: Path) -> List[str]:
+    key = str(path)
+    try:
+        size = path.stat().st_size
+    except Exception:
+        _note_scan_issue(loop, "stat_failed")
+        return []
+
+    offset = int(loop._offsets.get(key, 0))
+    if offset > size:
+        offset = 0
+    read_from = max(0, size - loop.max_read_bytes) if offset == 0 else offset
+    try:
+        raw, next_offset = secure_read_confined_bytes(
+            path,
+            allowed_root=loop.repo_root,
+            offset=read_from,
+            max_bytes=loop.max_read_bytes,
+        )
+        text = raw.decode("utf-8", errors="replace")
+        loop._offsets[key] = next_offset
+    except (OSError, ValueError):
+        _note_scan_issue(loop, "read_failed")
+        return []
+    return text.splitlines()
+
+
 class DaemonSelfAuditLoop:
     """Tails daemon logs and proposes RedDog-directed dry-run improvement jobs."""
 
@@ -118,7 +414,7 @@ class DaemonSelfAuditLoop:
         "from fastapi import fastapi",  # import line in stack trace
     ]
 
-    def __init__(self, repo_root: Path):
+    def __init__(self, repo_root: Path, *, monotonic_clock=None):
         self.repo_root = Path(repo_root).resolve()
         self.interval_sec = float(os.getenv("OPENCLAW_SELF_AUDIT_INTERVAL_SEC", "5"))
         self.max_read_bytes = int(os.getenv("OPENCLAW_SELF_AUDIT_MAX_READ_BYTES", "65536"))
@@ -161,24 +457,7 @@ class DaemonSelfAuditLoop:
         self.escalation_dispatch_enabled = False
         self.escalation_allow_shell = False
 
-        self.runtime_root = self._resolve_runtime_root()
-        self.task_log_path = self.runtime_root / "daemon_self_audit_tasks.jsonl"
-        self.improvement_job_log_path = (
-            self.runtime_root / "daemon_self_audit_improvement_jobs.jsonl"
-        )
-        self.escalation_log_path = self.runtime_root / "daemon_self_audit_escalations.jsonl"
-        self.state_path = self.runtime_root / "daemon_self_audit_state.json"
-        self._offsets: Dict[str, int] = {}
-        self._seen: Dict[str, float] = {}
-        self._last_fix_at: Dict[str, float] = {}
-        self._fix_stats: Dict[str, Dict[str, Any]] = {}
-        self._signature_stats: Dict[str, Dict[str, Any]] = {}
-        self._last_escalation_at: Dict[str, float] = {}
-        self._thread: Optional[threading.Thread] = None
-        self._stop = threading.Event()
-        self._scan_lock = threading.Lock()
-        self._state_loaded_mtime_ns = 0
-        self._load_state()
+        _initialize_scan_owner(self, monotonic_clock)
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -195,8 +474,15 @@ class DaemonSelfAuditLoop:
 
     def scan_once(self) -> int:
         """Run one scan cycle. Returns number of events opened."""
-        with self._scan_lock:
-            return self._scan_once_locked()
+        return _attempt_scan(self, propagate=True)["event_count"]
+
+    def scan_once_with_status(self) -> Dict[str, Any]:
+        """Return this attempt's isolated status; ordinary failure remains diagnostic."""
+        return _attempt_scan(self, propagate=False)
+
+    def get_scan_status(self) -> Dict[str, Any]:
+        """Read instance-local status and monotonic age; neither implies health."""
+        return self._scan_status.snapshot()
 
     def _scan_once_locked(self) -> int:
         with runtime_operation_lock(self.runtime_root / "daemon_self_audit.scan"):
@@ -205,7 +491,9 @@ class DaemonSelfAuditLoop:
 
     def _scan_once_with_lease(self) -> int:
         events = 0
-        for log_file in self._resolve_log_files():
+        log_files = self._resolve_log_files()
+        self._scan_status.inputs(len(log_files))
+        for log_file in log_files:
             lines = self._tail_new_lines(log_file)
             for line in lines:
                 redacted = redact_runtime_text(line, max_chars=4096)
@@ -245,27 +533,7 @@ class DaemonSelfAuditLoop:
             self._stop.wait(max(self.interval_sec, 1.0))
 
     def _resolve_log_files(self) -> List[Path]:
-        raw = os.getenv(
-            "OPENCLAW_SELF_AUDIT_LOG_GLOBS",
-            "holo_index/logs/**/*.log;logs/**/*.log;holo_index/logs/telemetry/**/*.jsonl",
-        )
-        globs = [part.strip() for part in re.split(r"[;,\n]+", raw) if part.strip()]
-        files: List[Path] = []
-        for pattern in globs:
-            if not self._valid_log_glob(pattern):
-                continue
-            files.extend(self.repo_root.glob(pattern))
-        # stable ordering for deterministic state writes
-        resolved: set[Path] = set()
-        for path in files:
-            try:
-                candidate = path.resolve()
-                candidate.relative_to(self.repo_root)
-            except (OSError, ValueError):
-                continue
-            if candidate.is_file():
-                resolved.add(candidate)
-        return sorted(resolved)
+        return _scan_log_files(self)
 
     @staticmethod
     def _valid_log_glob(pattern: str) -> bool:
@@ -279,28 +547,7 @@ class DaemonSelfAuditLoop:
         return ".." not in Path(normalized).parts
 
     def _tail_new_lines(self, path: Path) -> List[str]:
-        key = str(path)
-        try:
-            size = path.stat().st_size
-        except Exception:
-            return []
-
-        offset = int(self._offsets.get(key, 0))
-        if offset > size:
-            offset = 0
-        read_from = max(0, size - self.max_read_bytes) if offset == 0 else offset
-        try:
-            raw, next_offset = secure_read_confined_bytes(
-                path,
-                allowed_root=self.repo_root,
-                offset=read_from,
-                max_bytes=self.max_read_bytes,
-            )
-            text = raw.decode("utf-8", errors="replace")
-            self._offsets[key] = next_offset
-        except (OSError, ValueError):
-            return []
-        return text.splitlines()
+        return _read_scan_lines(self, path)
 
     def _is_error_line(self, line: str) -> bool:
         return any(p.search(line) for p in self.ERROR_PATTERNS)

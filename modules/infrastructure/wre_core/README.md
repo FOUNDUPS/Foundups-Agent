@@ -17,6 +17,11 @@ dry-run evidence may write files and does not establish runtime confinement.
 
 ## Current responsibility
 
+Self-audit callers can use `scan_once_with_status()` to distinguish successful
+zero findings, partial input coverage and failure. `scan_once()` remains the
+integer compatibility API. See [scan observations](INTERFACE.md#self-audit-scan-observations)
+for clock, coverage and supervisor-consumer limits.
+
 WRE Core owns:
 
 - registry-bound Skillz discovery and production admission;

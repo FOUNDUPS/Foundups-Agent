@@ -1078,7 +1078,7 @@ Canonical 0102 lifecycle owner:
 
 Current explicit states: `BOOT -> PREFLIGHT -> OBSERVE -> TRIAGE -> PLAN -> EXECUTE -> VERIFY -> REMEMBER -> ESCALATE -> IDLE_WATCH`.
 Current operational rule:
-- the supervisor owns the daemon self-audit loop when enabled
+- the supervisor owns the enabled self-audit loop and exposes [per-attempt scan status](../../infrastructure/wre_core/INTERFACE.md#self-audit-scan-observations) separately from event count
 - `main.py` only starts direct self-audit as a fallback when supervisor is disabled
 - resident OpenClaw restarts are policy-gated through the broker/runtime surface
 - restart attempts use `OPENCLAW_SUPERVISOR_MAX_RESTARTS` and `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC`

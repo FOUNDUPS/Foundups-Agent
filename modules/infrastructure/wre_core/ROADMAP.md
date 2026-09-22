@@ -278,6 +278,27 @@ Extend current WRE/AgentDB/RedDog owners when runtime wiring is qualified. The
 legacy `ImprovementJob.WSP15Priority` risk hints and prototype roadmap-auditor
 outputs remain advisory; neither is a signed numeric allocation or dispatch grant.
 
+## Self-audit scan status and decomposition
+
+The bounded scan-status repair extends the existing scanner and OpenClaw
+consumer. Its fixed acceptance covers same-attempt count/status correspondence,
+incomplete inputs, detached snapshots and monotonic success age. The
+[interface](INTERFACE.md#self-audit-scan-observations) and
+[monitor map](../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+describe the exact contract; validation/publication receipts belong to the
+current system backlog. Local tests do not establish live RSI or full coverage.
+
+WSP62 review: the scanner enters the 1000–1499-line critical window while its
+inherited class and constructor shrink. The new bounded state helper and input
+diagnostics stay with their existing owner; no new monitor module or exemption
+is introduced. Exact candidate dimensions are recorded in validation. WRE Core
+Maintainers own the remaining decomposition: extract existing input-discovery,
+tailing and runtime-configuration responsibilities in a later parity-tested
+slice before further scanner growth. Preserve public integer/exception callers,
+path confinement, offsets, effects and fixed scan-status acceptance. Do not
+compress unrelated code to disguise size debt. The supervisor separately retains
+its pre-existing 3419-line ceiling and 2026-09-30 review deadline.
+
 ## WRE master orchestrator decomposition
 
 Execution-truth hardening extracted registry-bound executor dispatch, local

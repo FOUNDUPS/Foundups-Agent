@@ -597,6 +597,42 @@ allocation, and terminal receipt must agree. The independently recorded
 Verifier, CI, CodeQL, and red-team evidence do not independently publish or
 promote an artifact.
 
+## Self-audit scan observations
+
+`DaemonSelfAuditLoop.scan_once() -> int` retains the synchronous count and
+exception contract. `scan_once_with_status() -> dict` adds a detached result for
+that exact attempt; ordinary scan exceptions become failed results, while
+interrupts still propagate. `get_scan_status() -> dict` reads detached diagnostic
+state and does not initiate scanning. The constructor accepts a keyword-only
+`monotonic_clock` for deterministic age validation.
+
+An attempt reports its process-local `attempt_id`, `outcome`, `coverage`,
+`event_count`, bounded `error_codes`, start/completion monotonic timestamps,
+`sampled_at_monotonic`, `clock_valid`, `last_success`, and `last_success_age_sec`. Outcomes distinguish
+`never_scanned`, `running`, `completed`, `partial`, and `failed`. Raised or
+unfinished scans have an unknown count; a returned partial scan keeps the count
+actually observed. Error metadata contains no raw exception or log payload.
+
+Coverage is `unknown`, `bounded`, `known_partial`, or `no_inputs`. Completed
+bounded scanning includes a successful zero-findings pass; it never proves full
+repository coverage. Failed/partial attempts and empty input discovery do not
+refresh the last successful bounded-input scan. Invalid, nonfinite, negative or
+backward start/completion readings prevent that attempt from replacing success;
+a later valid sample can still report the prior success age. An invalid sampling
+reading makes age unknown without erasing an already qualified completion.
+The clock tracks a high-water mark across failed attempts too. No TTL or
+categorical healthy/fresh/stale verdict is supplied: such policy belongs to the
+consuming owner. Monotonic values and attempt IDs are not durable identifiers.
+
+`observe_self_audit_status(loop, enabled=...)` supplies the OpenClaw compatibility
+projection. OpenClaw consumes the returned attempt directly, preserving its
+existing integer metric. Disabled, absent, failed and legacy status-unavailable
+owners remain distinct. Malformed additive results never trigger a second scan;
+legacy integer-only owners retain their compatibility path. These observations
+do not grant remediation, dispatch, promotion or reward authority. See the
+[monitor contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+and focused scan-status tests for qualification boundaries.
+
 ## Configuration
 
 | Variable | Meaning |
