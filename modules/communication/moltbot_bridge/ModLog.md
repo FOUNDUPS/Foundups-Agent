@@ -1,3 +1,9 @@
+## 2026-09-22: Dominant dry-run flags and early direct-like previews
+
+- WSP00/15/22/50/62/97;14/P1. Reuse existing wrapper/adapter; outer default/true overrides nested false without caller mutation. Direct-like previews precede browser import/construction and preserve declared parsing, agentic routing and live error/close semantics.
+- Fixed54 cases: baseline29fail/25pass; candidate54pass, independent54pass (same cases). Original18 unchanged/deselected; two configuration warnings per run. Tests use inert collaborators only.
+- Executor97→33 and adapter dispatch343→313 via same-file helpers; inherited remaining debt stays explicit. Current API/review docs and root backlog record scope, manifest binding and next engagement-session13/P1 gap. No live authority or runtime readiness claim.
+
 ## 2026-09-22: LinkedIn dry-run characterization
 
 - WSP00/15/22/50/62/97; add11 synchronous fake-only cases to the existing adapter suite, preserving its original18 tests. No production source change, real browser import, account action or WRE job.

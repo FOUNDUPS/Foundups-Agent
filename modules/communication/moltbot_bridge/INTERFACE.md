@@ -918,7 +918,7 @@ LinkedIn `digital_twin` action parameters:
 - optional: `mentions` (comma-separated), `identity_cycle` (comma-separated), `dry_run`
 
 Current adapter behavior:
-- `execute_linkedin_action(action="digital_twin", ...)` forwards all above params to `LinkedInActions.run_digital_twin_flow(...)`.
+- `execute_linkedin_action(action="digital_twin", ...)` forwards all above params to `LinkedInActions.run_digital_twin_flow(...)`. Direct `like_post`/`like_reply` truthy dry-run now returns a target preview before browser import/construction; see [exact fields and limits](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22). Agentic delegation and omitted/false live behavior are preserved; other routes remain separately qualified.
 
 Structured result contract:
 

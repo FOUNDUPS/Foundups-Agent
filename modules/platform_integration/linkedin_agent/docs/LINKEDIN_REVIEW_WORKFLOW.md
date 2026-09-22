@@ -63,7 +63,43 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI dry-run repair — 2026-09-22
+
+From baseline `63fb669c6175c3efb469dee4f9bab7e2d54db256`, the existing WRE
+wrapper makes outer default/true dominant over nested false for write actions,
+without changing the caller's task. Explicit false and read-only handling retain
+their existing semantics; a flag never grants live permission.
+
+Direct non-agentic `like_post` and `like_reply` with truthy dry-run now return a
+preview before importing or constructing browser actions. It contains
+`success`, `action`, `dry_run: true`, `post_id` and `post_index`; like-reply also
+contains stripped `reply_text`, `agentic_requested: false` and `draft: null`.
+Missing reply text retains its error envelope. Pure browser-port validation and
+existing field parsing still apply. No fake posted result or unowned close is
+produced. `like_post` with agentic=true remains a direct preview; actual delegated
+like-reply routing and omitted/false direct live result/error/cleanup stay intact.
+
+The same frozen54-case selection went from29 failures/25 passes to54 passes,
+then54 passes on independent replay. Original18 tests remain unchanged/deselected;
+each run has two disabled-plugin configuration warnings. Import sentinels and
+inert action spies qualify these call boundaries, not a live account or OS sandbox.
+The prior11 characterizations were explicitly evolved against the independently
+declared safety oracle; unsafe observations were not retained as desired behavior.
+
+Same-file helpers shrink executor97→33 and adapter dispatch343→313 lines.
+Remaining large-method/test-class debt is explicit; no parallel adapter was added.
+The existing backend manifest and digest pins are regenerated without expanding
+the1401-file runtime closure. No OpenClaw/Hermes version or activation claim follows.
+
+Next, freshly scored13/P1 (C2/I4/D3/Impact4): `engagement_session` still ignores
+dry-run and can enter its autonomous drafting/liking loop. Freeze inert session
+preflight/live-compatibility tests before adding an early configuration preview.
+The real session method, broader write routes, provider behavior and live authority
+remain separate. Non-agentic reply preview still constructs its client first.
+
 ### RSI dry-run boundary qualification — 2026-09-22
+
+Historical baseline evidence below; the repair above supersedes only its declared routes.
 
 Baseline `03f7279685040c4794762abe71e41f2cd22e7980`; WSP15 C3/I4/D3/Impact3
 =13/P1. PR1863/1865 merged the instruction contracts and the previous owner

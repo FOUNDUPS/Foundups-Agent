@@ -97,8 +97,8 @@ exact identity, not the first autocomplete suggestion.
   while committing these changes. The antifaFM skill is a separate campaign and
   excluded from the default LinkedIn cycle; do not retarget it or mine private
   profile data for political persuasion.
-- Known runtime gaps remain: simulated DM manager, nested dry-run conflicts,
-  unguarded direct action paths and legacy group heuristics. Documentation tests
+- Known runtime gaps remain: simulated DM manager, engagement-session dry-run,
+  other live-action paths and legacy group heuristics. The scoped wrapper/direct-like repair is recorded in the review workflow; documentation tests
   do not certify these executors; no unattended execution is claimed.
 
 Validation: local child links/metadata, ownership, narrow/full scope, independent

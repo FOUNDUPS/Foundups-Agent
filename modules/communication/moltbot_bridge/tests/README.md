@@ -1,3 +1,17 @@
+## LinkedIn dry-run repair — 2026-09-22
+
+The existing adapter suite now has54 fixed `test_linkedin_dry_run_` cases, evolving
+the previous11 characterizations against their separate safety contract. Use the
+same reviewed inert-package runner and unique external staging for baseline,
+candidate and independent replay; disable plugin autoload/cache. Original18 class
+tests remain unchanged/deselected. Scope includes all write-label forwarding,
+early direct-like import/constructor prohibition, exact previews, delegated-route
+control and fake live/error/close envelopes. It does not certify every action or
+the active-event-loop wrapper fallback. Exact runner/XML are in the root backlog.
+Baseline29 failures/25 passes becomes54 passes locally and independently; two
+disabled-plugin configuration warnings per run, no skips/errors. The original
+qualification below is historical, not a request to retain unsafe expectations.
+
 ## LinkedIn dry-run qualification — 2026-09-22
 
 Select the11 standalone `test_linkedin_dry_run_characterizes_` cases in

@@ -288,6 +288,39 @@ async def _execute_agentic_linkedin_skill(
     return result
 
 
+async def _execute_direct_like(
+    action: str, params: Dict[str, str], linkedin: Any = None, *, dry_run: bool = False,
+) -> Dict[str, Any]:
+    """Parse direct like inputs and distinguish previews from action results."""
+    reply_fields = {}
+    if action == "like_reply":
+        reply_text = params.get("reply_text", "").strip()
+        if not reply_text:
+            return {
+                "success": False, "action": action, "error": "missing reply_text",
+                "agentic_requested": False, "draft": None,
+            }
+        reply_fields = {"reply_text": reply_text, "agentic_requested": False, "draft": None}
+    post_index = _safe_int(params.get("post_index", "0"), default=0)
+    post_id = params.get("post_id", "").strip() or f"index_{post_index}"
+
+    if dry_run:
+        return {
+            "success": True, "action": action, "dry_run": True,
+            "post_id": post_id, "post_index": post_index, **reply_fields,
+        }
+    if action == "like_post":
+        result = await linkedin.like_post(post_id=post_id, post_index=post_index)
+    else:
+        result = await linkedin.like_and_reply(
+            post_id=post_id, reply_text=reply_fields["reply_text"], post_index=post_index,
+        )
+    return {
+        "success": bool(result.success), "action": action, **reply_fields,
+        "result": _to_jsonable(result),
+    }
+
+
 async def execute_linkedin_action(
     action: str,
     params: Dict[str, str],
@@ -296,6 +329,10 @@ async def execute_linkedin_action(
     agentic = _truthy(params.get("agentic", "false"))
     if action in {"reply_post", "like_reply", "scam_reply", "scam_scan_reply"} and agentic:
         return await _execute_agentic_linkedin_skill(action, params, dom_action_observer)
+
+    if action in {"like_post", "like_reply"} and _truthy(params.get("dry_run", "false")):
+        int(params.get("browser_port", "9222"))  # Preserve validation without browser effects.
+        return await _execute_direct_like(action, params, dry_run=True)
 
     from modules.infrastructure.browser_actions.src.linkedin_actions import LinkedInActions
 
@@ -329,11 +366,8 @@ async def execute_linkedin_action(
                 "posts": _to_jsonable(posts),
             }
 
-        if action == "like_post":
-            post_index = _safe_int(params.get("post_index", "0"), default=0)
-            post_id = params.get("post_id", "").strip() or f"index_{post_index}"
-            result = await linkedin.like_post(post_id=post_id, post_index=post_index)
-            return {"success": bool(result.success), "action": action, "result": _to_jsonable(result)}
+        if action in {"like_post", "like_reply"}:
+            return await _execute_direct_like(action, params, linkedin)
 
         if action == "reply_post":
             reply_text = params.get("reply_text", "").strip()
@@ -365,37 +399,6 @@ async def execute_linkedin_action(
                     "draft": _to_jsonable(drafted),
                 }
             result = await linkedin.reply_to_post(
-                post_id=post_id,
-                reply_text=reply_text,
-                post_index=post_index,
-            )
-            return {
-                "success": bool(result.success),
-                "action": action,
-                "reply_text": reply_text,
-                "agentic_requested": agentic,
-                "draft": _to_jsonable(drafted),
-                "result": _to_jsonable(result),
-            }
-
-        if action == "like_reply":
-            reply_text = params.get("reply_text", "").strip()
-            drafted = None
-            if not reply_text and agentic:
-                drafted = await _draft_agentic_linkedin_reply(linkedin, params)
-                if drafted.get("success"):
-                    reply_text = str(drafted.get("reply_text", "")).strip()
-            if not reply_text:
-                return {
-                    "success": False,
-                    "action": action,
-                    "error": "missing reply_text",
-                    "agentic_requested": agentic,
-                    "draft": _to_jsonable(drafted),
-                }
-            post_index = _safe_int(params.get("post_index", "0"), default=0)
-            post_id = params.get("post_id", "").strip() or f"index_{post_index}"
-            result = await linkedin.like_and_reply(
                 post_id=post_id,
                 reply_text=reply_text,
                 post_index=post_index,
