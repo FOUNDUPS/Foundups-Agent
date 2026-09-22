@@ -1028,9 +1028,9 @@ Routing contract:
 - `dae_runtime_adapter.py`
 - central `DAELaunchBroker`
 
-Authorization:
-- `list` and `status` are read-only
-- `launch` and `stop` require `012` authority
+Authorization and acquisition (qualification 2026-09-23):
+- `list`/`status` are read operations; current matched commands acquire observer then broker even before unresolved-name or denied-control rejection. Fixed inert tests characterize this; whole-command effect freedom is not established.
+- `launch`/`stop` require `012` authority. Prospective repair: reject unresolved/unauthorized requests before either getter; broker-only for list/status/authorized mutations, observer-only for tail/follow/live status. Preserve required creating-getter semantics and exact responses/callbacks; [test evidence](tests/README.md#rsi-adapter-acquisition-and-linkedin-previews) does not claim the repair is implemented.
 
 Resident OpenClaw contract:
 - `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
@@ -1310,7 +1310,7 @@ OpenClaw can now read the DAEmon live ledger for itself and broker-managed DAEs:
 - `status pqn research live`
 - `tail holodae`
 
-These commands are read-only. They use the central DAEmon observer surface and do not mutate runtime state.
+These commands request ledger reads; current adapter acquisition and default observer/broker construction may change runtime state. The inert acquisition qualification above does not certify whole-command effect freedom.
 
 ## Skill Evolution Loop
 
