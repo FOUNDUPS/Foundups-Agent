@@ -1,5 +1,15 @@
 # wre_core Test Suite
 
+## Self-audit scan qualification
+
+Run the finite scan-health cases in `test_daemon_self_audit_loop.py` using the
+exact selection in the current backlog. 13 cases pass locally and independently.
+The fixtures exercise inert `_run`, `_tail_new_lines` and supervisor `_observe`
+boundaries; they do not start a daemon or run the supervisor execution cycle.
+The [scan contract](../../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+records observed defects and required future status/freshness acceptance.
+Existing full-file cases have broader effects and are not part of this focused run.
+
 ## Consumer forced-dry isolation
 
 The existing projection-consumer suite covers fresh/warmed dry, non-dry and
