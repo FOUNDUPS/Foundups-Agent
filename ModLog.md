@@ -1,3 +1,9 @@
+## 2026-09-23: LinkedIn invitation acknowledgment qualification
+
+- WSP00/15/22/34/50/62/84/97; C2/I3/D3/Impact3=11/P2. Seven new finite acknowledgment cases reuse the existing inert fixture; existing17 compatibility cases and four legacy constructor definitions are preserved. Production source and backend manifest unchanged.
+- Same24 cases pass locally and independently, four legacy deselected, two known config warnings per run. Initial Send precedes requested note entry; type failure can still report success; no-message missing Send remains ambiguous. No live delivery, browser or OS-isolation claim.
+- Existing workflow/backlog records the separate message-path ordering/acknowledgment repair contract12/P2; required direct-connect UI and bookkeeping boundaries remain explicit.
+
 ## 2026-09-23: DAE branch-local acquisition repair
 
 - WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Existing adapter rejects unresolved/unauthorized requests before acquisition, then obtains only the required collaborator. Bounded same-file helpers preserve parser, response, callback, actor, cursor and required creating-getter semantics.
