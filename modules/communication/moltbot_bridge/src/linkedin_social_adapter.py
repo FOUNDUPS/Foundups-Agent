@@ -288,10 +288,19 @@ async def _execute_agentic_linkedin_skill(
     return result
 
 
-async def _execute_direct_like(
+async def _execute_direct_action(
     action: str, params: Dict[str, str], linkedin: Any = None, *, dry_run: bool = False,
 ) -> Dict[str, Any]:
-    """Parse direct like inputs and distinguish previews from action results."""
+    """Run direct likes or sessions, or return their input preview."""
+    if action == "engagement_session":
+        config = {
+            "duration_minutes": int(params.get("duration_minutes", "10")),
+            "max_engagements": int(params.get("max_engagements", "5")),
+        }
+        if dry_run:
+            return {"success": True, "action": action, "dry_run": True, **config}
+        result = await linkedin.run_engagement_session(**config)
+        return {"success": bool(result.success), "action": action, "result": _to_jsonable(result)}
     reply_fields = {}
     if action == "like_reply":
         reply_text = params.get("reply_text", "").strip()
@@ -330,9 +339,9 @@ async def execute_linkedin_action(
     if action in {"reply_post", "like_reply", "scam_reply", "scam_scan_reply"} and agentic:
         return await _execute_agentic_linkedin_skill(action, params, dom_action_observer)
 
-    if action in {"like_post", "like_reply"} and _truthy(params.get("dry_run", "false")):
+    if action in {"like_post", "like_reply", "engagement_session"} and _truthy(params.get("dry_run", "false")):
         int(params.get("browser_port", "9222"))  # Preserve validation without browser effects.
-        return await _execute_direct_like(action, params, dry_run=True)
+        return await _execute_direct_action(action, params, dry_run=True)
 
     from modules.infrastructure.browser_actions.src.linkedin_actions import LinkedInActions
 
@@ -366,8 +375,8 @@ async def execute_linkedin_action(
                 "posts": _to_jsonable(posts),
             }
 
-        if action in {"like_post", "like_reply"}:
-            return await _execute_direct_like(action, params, linkedin)
+        if action in {"like_post", "like_reply", "engagement_session"}:
+            return await _execute_direct_action(action, params, linkedin)
 
         if action == "reply_post":
             reply_text = params.get("reply_text", "").strip()
@@ -543,15 +552,6 @@ async def execute_linkedin_action(
                 "flagged_count": len(flagged),
                 "reply_results": results,
             }
-
-        if action == "engagement_session":
-            duration_minutes = int(params.get("duration_minutes", "10"))
-            max_engagements = int(params.get("max_engagements", "5"))
-            result = await linkedin.run_engagement_session(
-                duration_minutes=duration_minutes,
-                max_engagements=max_engagements,
-            )
-            return {"success": bool(result.success), "action": action, "result": _to_jsonable(result)}
 
         if action == "connect":
             profile_url = params.get("profile_url", "").strip()

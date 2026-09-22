@@ -338,6 +338,7 @@ def linkedin_inert(monkeypatch):
     module_name = "modules.infrastructure.browser_actions.src.linkedin_actions"
     outcome = SimpleNamespace(success=True, to_dict=lambda: {"success": True})
     client = SimpleNamespace(
+        run_engagement_session=AsyncMock(return_value=outcome),
         like_post=AsyncMock(return_value=outcome),
         like_and_reply=AsyncMock(return_value=outcome),
         reply_to_post=AsyncMock(return_value=outcome),
@@ -394,7 +395,7 @@ def _linkedin_no_effects(state):
     state.client.close.assert_not_called()
     state.agentic.assert_not_awaited()
     state.draft.assert_not_awaited()
-    for name in ("like_post", "like_and_reply", "reply_to_post", "read_feed"):
+    for name in ("like_post", "like_and_reply", "reply_to_post", "read_feed", "run_engagement_session"):
         getattr(state.client, name).assert_not_awaited()
 
 

@@ -1,3 +1,9 @@
+## 2026-09-22: LinkedIn session configuration preview
+
+- WSP00/10/15/22/50/62/84/97;13/P1. Extend existing direct adapter helper: session dry-run validates configuration and returns before browser import/construction; fake-live controls preserve parsing/results/cleanup.
+- Fixed77 cases: baseline15fail/62pass; candidate and independent replay each pass77. Existing54 definitions and18 legacy tests preserved;18deselected/two warnings. No live execution or broader safety claim.
+- Dispatch313→304, adapter670 lines; focused session test owner reuses the existing inert fixture. Manifest/pins and canonical test registry updated. Current backlog closes PR1867 and selects connection policy/history qualification12/P2.
+
 ## 2026-09-22: Fixed dry-run safety and compatibility regressions
 
 - Replace the11 prior characterization expectations with54 fixed parameterized acceptance cases in the same file; original18 class AST preserved.647 lines, new functions at most31.

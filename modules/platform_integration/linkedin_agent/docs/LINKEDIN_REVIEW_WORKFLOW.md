@@ -63,7 +63,37 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI session preview — 2026-09-22
+
+From baseline `0d19785c48da93794821140579340489e3ce4239`, `engagement_session` with truthy dry-run
+returns before browser import/construction. Its exact configuration preview is
+`success: true`, `action: engagement_session`, `dry_run: true`,
+`duration_minutes` and `max_engagements`. Defaults remain10 and5; existing
+`int` conversion, validation order and accepted numeric domain are preserved.
+It reports no executed result, posts read, engagements or policy approval.
+The WRE wrapper's default/true flag reaches this same boundary without mutating
+caller input. Agentic=true remains a direct session route; omitted/false
+fake-live controls preserve arguments, result/error projection and close semantics.
+
+Fixed77 cases: baseline15 failures/62 passes; candidate and independent
+replay each pass77. Prior54 case definitions and original18 legacy tests are
+preserved; the18 remain deselected, with two disabled-plugin warnings per run.
+Session tests reuse the existing inert fixture in a focused test file to keep
+both files below675 lines. No live account, session, provider or OS sandbox proof.
+Adapter dispatch313→304 lines; file670. Existing direct helper is extended,
+not duplicated. Manifest membership remains1401 with only the adapter digest
+and existing pins refreshed; the test registry includes the focused test owner.
+
+Next12/P2: qualify connection dry-run policy/history behavior using inert
+collaborators before reordering it. Existing browser actions navigate and call
+the simulated request manager before their dry-run guard; external sending or
+persistence is not established by that observation. Other direct/agentic routes,
+the real session method and live authorization remain separate. OpenClaw/Hermes
+upgrades, native admission and retained RSI learning are not claimed.
+
 ### RSI dry-run repair — 2026-09-22
+
+Historical PR1867 checkpoint; the session gap below is superseded by the current session preview above.
 
 From baseline `63fb669c6175c3efb469dee4f9bab7e2d54db256`, the existing WRE
 wrapper makes outer default/true dominant over nested false for write actions,
