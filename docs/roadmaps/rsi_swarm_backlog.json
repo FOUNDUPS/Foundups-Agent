@@ -1856,485 +1856,60 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "927d7607f2cf92944467f9684742809a602cf0f5",
-    "selected_action": "R21-linkedin-note-repair-20260923",
-    "status": "locally_and_independently_repaired_publication_pending",
+    "base_commit": "4169beaf990e99510146008efdd78b86684f90c5",
+    "selected_action": "R22-core-canary-test-entry-20260923",
+    "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
-      "importance": 3,
-      "deferability": 3,
-      "impact": 3,
-      "total": 12,
-      "priority": "P2"
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T19:33:36.443114+00:00",
-    "base": "927d7607f2cf92944467f9684742809a602cf0f5",
+    "utc": "2026-09-22T20:51:45.804581+00:00",
+    "base": "4169beaf990e99510146008efdd78b86684f90c5",
     "self": "0102",
     "role": "architect",
-    "origin": "autonomous_trigger",
+    "origin": "external_principal",
     "principal_ref": "012",
-    "observation_id": "R21-linkedin-note-repair-20260923",
-    "prior_observation": "927d7607f2cf92944467f9684742809a602cf0f5:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
+    "observation_id": "R22-core-canary-test-entry-20260923",
     "selected": {
-      "task": "Repair requested-note LinkedIn invitation ordering and local acknowledgment",
+      "task": "Qualify deferred evidence callback reachability in the resident RSI canary and extend existing evidence-validator controls",
       "wsp15": {
         "complexity": 3,
-        "importance": 3,
-        "deferability": 3,
-        "impact": 3,
-        "total": 12,
-        "priority": "P2"
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
       },
-      "state": "locally_and_independently_repaired_publication_pending",
-      "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-      "dependency": "Fresh source/owner rebind and frozen prospective note-path cases before source edit. Preserve no-message fallback and manager bookkeeping. Connect may itself send; no external delivery/non-delivery or live-account authority follows.",
-      "next_step": "Publish exact reviewed repair, verify PR/main checks and retire owned lane."
+      "reason": "Principal requests core WRE/RSI testing. Independent source review found mutation tests blocked before their callbacks; executable test correction precedes trustworthy canary assessment. Native18/P0 remains blocked by missing authentic runtime dependencies; prior LinkedIn12/P2 is deferred.",
+      "state": "locally_and_independently_qualified_publication_pending"
     },
     "previous_closed": {
-      "pr": 1875,
-      "merge": "927d7607f2cf92944467f9684742809a602cf0f5",
-      "main_workflows": [
-        {
-          "conclusion": "success",
-          "databaseId": 35767350044,
-          "headSha": "927d7607f2cf92944467f9684742809a602cf0f5",
-          "status": "completed",
-          "workflowName": "CI"
-        },
-        {
-          "conclusion": "success",
-          "databaseId": 35767349273,
-          "headSha": "927d7607f2cf92944467f9684742809a602cf0f5",
-          "status": "completed",
-          "workflowName": "CodeQL"
-        }
-      ],
-      "owned_lane_retired": true
-    },
-    "ranked_at_start": [
-      {
-        "task": "One native admitted ticket, independent audit and simulated entitlement",
-        "wsp15": {
-          "complexity": 4,
-          "importance": 5,
-          "deferability": 4,
-          "impact": 5,
-          "total": 18,
-          "priority": "P0"
-        },
-        "state": "blocked",
-        "dependency": "Seven resident trust anchors/absent effect lease and independently admitted production provenance"
-      },
-      {
-        "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
-        },
-        "state": "source_qualification_complete_implementation_blocked",
-        "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\next-role-source-audit.json",
-        "next_step": "Resolve named FAM ingress and mapping from existing signed authority to domain actions; do not repeat the completed source audit or introduce role-string authorization"
-      },
-      {
-        "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
-        },
-        "state": "closed_merged_PR1867",
-        "source": "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py; modules/communication/moltbot_bridge/src/linkedin_social_adapter.py",
-        "next_step": "Do not repeat repair; exact reviewed tree and local/independent/CI evidence verified.",
-        "dependency": "Closed PR1867; no remaining implementation step in this row."
-      },
-      {
-        "task": "Qualify the remaining GotJunk protobufjs critical-alert dependency and owner delta",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 4,
-          "deferability": 4,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
-        },
-        "state": "closed_merged_PR1872",
-        "source": "modules/foundups/gotjunk/frontend/package-lock.json::packages[node_modules/protobufjs]",
-        "next_step": "Do not repeat source/owner qualification; repair/deployment boundary remains separate.",
-        "dependency": "Independent static qualification, exact reviewed tree and PR/main checks passed."
-      },
-      {
-        "task": "Prepare an owner-coordinated minimal GotJunk protobufjs lock repair and bounded premerge compatibility evidence",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 4,
-          "deferability": 4,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
-        },
-        "state": "blocked_pending_product_owner_and_merge_deployment_boundary",
-        "source": "modules/foundups/gotjunk/frontend/package-lock.json::packages[node_modules/protobufjs]",
-        "next_step": "Reconcile exact overlapping heads with existing product owner; choose one narrowly scoped patch-version lock candidate satisfying the advisory and existing semver constraints, validate graph/integrity and separately authorized isolated npm ci/build compatibility. No PR merge until deployment effects and rollback acceptance are explicitly covered. Do not repeat the completed source qualification.",
-        "dependency": "Product metadata names 012; no named active lane or Dependabot authorship proves deploy authority. Existing module-wide main push workflow can deploy a lock or documentation change. Current read-only task authorizes neither installs/builds nor merge/deploy."
-      },
-      {
-        "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 4,
-          "total": 13,
-          "priority": "P1"
-        },
-        "state": "closed_merged_PR1868",
-        "source": "modules/communication/moltbot_bridge/src/linkedin_social_adapter.py::execute_linkedin_action[engagement_session]",
-        "next_step": "Do not repeat session repair; reviewed tree and local/independent/CI evidence verified.",
-        "dependency": "Closed with independently validated cases, exact reviewed merge and successful main workflows."
-      },
-      {
-        "task": "Qualify PostgreSQL compute initialization and locking parity",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 3,
-          "total": 13,
-          "priority": "P1"
-        },
-        "state": "deferred_qualification",
-        "dependency": "Actual PostgreSQL runtime/admission not established; SQLite-only rejection now explicit"
-      },
-      {
-        "task": "LinkedIn dry-run boundary qualification",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 3,
-          "total": 13,
-          "priority": "P1"
-        },
-        "state": "closed_PR1866",
-        "dependency": "Old separate-owner hold reconciled: PR1863/1865 merged; 93 open-PR path scan has no overlap, no LinkedIn local branch/worktree, relevant shared tracked paths clean, app owner idle/completed.",
-        "next_step": "Qualification closed PR1866; wrapper/direct-like repair closed PR1867. Remaining routes are separate scoped work."
-      },
-      {
-        "task": "Qualify exact promoted-model expectation projection from existing AI Gateway persisted signed binding into dependency-launcher compatibility supply",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 3,
-          "total": 13,
-          "priority": "P1"
-        },
-        "state": "closed_PR1864_projection_implementation_depends_on_named_mapping",
-        "source": "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py::compose_runtime_compatibility_evidence",
-        "next_step": "Do not repeat qualification; resolve exact slot policy/backend provenance and verifier consumer decisions."
-      },
-      {
-        "task": "Strengthen count-only parity diagnostics when a consumer is bound",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 4,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "deferred_consumer_qualification",
-        "evidence": "Central verify_parity has no production caller in scoped search; equal-count malformed/different JSONL passes; inherited class-size debt",
-        "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API"
-      },
-      {
-        "task": "Broker truthful stop acknowledgment",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1861",
-        "source": "modules/infrastructure/dae_daemon/src/dae_launch_broker.py::stop_dae",
-        "next_step": "No repeated repair; verified merge bac7513, ten PR checks and both main workflows passed, owned lane retired."
-      },
-      {
-        "task": "Qualify connection dry-run policy request mutation before browser-action guard",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1869",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "next_step": "Do not repeat qualification; use its evidence for the separately selected repair.",
-        "dependency": "Closed with independent qualification, reviewed merge and successful main workflows."
-      },
-      {
-        "task": "Repair connection dry-run policy preview without request bookkeeping mutation",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1870",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "next_step": "Do not repeat the repair; reviewed tree and fixed baseline/primary/independent evidence are closed.",
-        "dependency": "Closed with independent repair validation, reviewed merge and successful main workflows."
-      },
-      {
-        "task": "Qualify branch-scoped DAE runtime adapter acquisition and rejected-control effects",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1873",
-        "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
-        "next_step": "Do not repeat acquisition qualification; branch-local source repair remains separate.",
-        "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
-      },
-      {
-        "task": "Defer DAE adapter acquisition until command resolution and mutation authorization",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1874",
-        "source": "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py::handle_dae_runtime_intent",
-        "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed.",
-        "next_step": "Do not repeat acquisition repair; required creating-getter semantics remain."
-      },
-      {
-        "task": "Repair requested-note LinkedIn invitation ordering and local acknowledgment",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "selected_prospective_tests_then_note_repair",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "dependency": "Fresh source/owner rebind and frozen prospective note-path cases before source edit. Preserve no-message fallback and manager bookkeeping. Connect may itself send; no external delivery/non-delivery or live-account authority follows.",
-        "next_step": "Reuse existing source/test owners. For truthy requested messages, Connect then Add note then Type then exactly one explicit Send; do not invoke explicit Send if Add or Type fails. Report unattempted Send as None, retain generic failure error, and credit local success/counter only for all required successful steps. Keep no-message behavior, policy/preview/early errors and request bookkeeping unchanged; qualify positive/negative controls before implementation."
-      },
-      {
-        "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 2,
-          "total": 11,
-          "priority": "P2"
-        },
-        "state": "required_before_further_scanner_growth_remaining_debt",
-        "dependency": "Current outcome extraction may shrink owner but does not resolve all existing input/config responsibility debt; pursue when next scanner growth is proposed."
-      },
-      {
-        "task": "Remove broker creation from existing observer runtime lookup",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 11,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1871",
-        "dependency": "Closed: identical fixed cases independently verified, exact reviewed merge and main CI/CodeQL success.",
-        "next_step": "Do not repeat this observer lookup repair.",
-        "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
-      },
-      {
-        "task": "Qualify ambiguous LinkedIn Connect/Send acknowledgment with finite fake UI outcomes",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 11,
-          "priority": "P2"
-        },
-        "state": "closed_merged_PR1875",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "next_step": "Do not repeat this acknowledgment qualification; note ordering and acknowledgment repair is separately scoped.",
-        "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
-      }
-    ],
-    "selection_reason": "PR1875 acknowledgment qualification is verified closed at exact main/tree/CI. All44 source bindings and93 PR heads remain unchanged. Requested-note ordering/local acknowledgment12/P2 has concrete fixed counterexamples and an independently declared prospective contract. Native18/P0, FAM14/P1, GotJunk14/P1, model/PostgreSQL13 and parity12 remain blocked at named runtime, ingress, consumer or owner/deployment prerequisites. Scanner11 decomposition has no new proposed growth; note repair is the highest eligible action. Preserve no-message ambiguity and bookkeeping; no live delivery claim.",
-    "selection_receipt": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\selection.json",
-      "sha256": "99639b161df880b8e2e125740973692c252a66d79a9fe82fee1b173ef42a2c2a"
-    },
-    "owner_reconciliation": {
-      "open_prs": 93,
-      "changed_heads": [],
-      "overlap": [],
-      "named_lanes": [],
-      "shared_scoped_clean": true
+      "pr": 1876,
+      "merge": "4169beaf990e99510146008efdd78b86684f90c5"
     },
     "retrieval": {
-      "holo": "Unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH at protected shared0c81418 reused; no repeated failed probe or reindex",
-      "noise": "Bounded owner reads; historical completion and runtime claims kept separate",
-      "ordering": "WSP00 bootstrap/gate, canonical WSP15/97 and dispatch, source/tests and neighboring constructors",
-      "missing": "No module requirements.txt or memory/README discovered in tracked inventory; existing module docs/test owners reused",
-      "staleness": "All44 previous source bindings match current main; live PR/main checks and93 heads refreshed; four historical continuity documents unchanged",
-      "duplication": "Existing LinkedIn inert fixture and prior test definitions reused; no new module, skill or scheduler"
+      "semantic": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact error retained, no reindex",
+      "fallback": "Fresh main docs, NAVIGATION and bounded exact-source searches",
+      "noise": "Broad term searches mixed historical checkpoints; narrowed to canonical canary/fixture and current roadmap",
+      "ordering": "WSP00 and historical boundary, current roadmap, WSP97/15, existing source/test owners",
+      "missing": "No direct evaluate_live_proof test caller in bridge test search; optional module artifacts checked by agents",
+      "staleness": "Historical roadmap numbers treated as snapshots; main and PR heads verified",
+      "duplication": "Reuse existing canary source and integration suite; no new scheduler/module/skill"
     },
-    "cost_effort": "Evolve existing inert cases before source edits; cohesive same-file helper extraction and one runtime manifest digest/pins. Deterministic local/independent tests; no application runtime provider/browser/network call.",
-    "verification_burden": "Freeze desired note-path oracle before baseline/candidate with preserved compatibility controls. Independently review results/source and manifest/package binding; source method must shrink with bounded helpers.",
-    "execution_plane": "Ordinary finite inert Python qualification; no native WRE admission, live browser or OS isolation proof.",
-    "manual_reason": "Existing deterministic routing/manager fixtures and separate author/verifier roles establish bounded behavior without application provider calls. Native execution remains blocked by admission prerequisites.",
-    "integration_maintenance": {
-      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
-      "sha256": "2d14e57e89ad2b210c66d7f01e77b54ec002615354758482f66c63068d3d9b51",
-      "linkedin": {
-        "owner": "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py",
-        "state": "PR1867/1868/1869/1870 verified closed; requested-note repair 23 inert cases passed, suppressing explicit Send on preparation failure; no-message delivery ambiguity, browser/constructor access and live authority remain unresolved."
-      },
-      "gmail": {
-        "owner": "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md",
-        "feedback_owner": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-        "state": "Registered prototype; approved feedback-to-ticket and independent retention remain unwired. No private correspondence ingestion or resend authority inferred."
-      },
-      "foundup_identity": {
-        "principal_names": "MyBot and Mind Horizon unresolved; optional clarification pending",
-        "amibot": "modules/foundups/detect_ai; registry detect_ai; SPECIFIED/hidden, not a running build",
-        "memory_horizon": "Separate open PR1822 at663f0e17566a4e613a6b419456239e02f156923d; SPECIFIED/NO_RUNTIME, absent main; no alias assumed"
-      },
-      "maintenance_owners": [
-        "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py",
-        "modules/infrastructure/dependency_launcher/src/runtime_compatibility_preflight.py",
-        "modules/communication/moltbot_bridge/src/openclaw_maintenance_selector.py"
-      ],
-      "maintenance_state": "INTEGRITY_ONLY/NOT_READY; source authentication, installed/running/upstream freshness, admitted canary and rollback remain unqualified. Existing supplier/watchlist is not proof of scheduled update success; no blind startup update.",
-      "reuse": "R25 feedback, R24 product validation, R07 native readiness, R18/R23 operations; preserve26packets and existing skills/modules"
-    },
-    "contract": "modules/platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-requested-note-repair--2026-09-23",
-    "repair": {
-      "behavior": "Truthy requested notes: Connect, Add, type, one explicit Send. Failed preparation suppresses Send; unattempted Send is None; credit only all required successful steps.",
-      "compatibility": "No-message fallback, policy/preview/early errors and manager bookkeeping preserved; same-file helpers shrink inherited method/class.",
-      "claim_limit": "Connect may itself send; no external delivery/absence or actual note-inclusion proof, no live account effect."
-    },
-    "validation": {
-      "fixed_cases": 23,
-      "prospective_cases": 6,
-      "preserved_inert_cases": 17,
-      "baseline_fail": 4,
-      "baseline_pass": 19,
-      "primary_pass": 23,
-      "independent_same_cases_pass": 23,
-      "legacy_not_selected": 4,
-      "warnings_per_run": 2,
-      "registry": "current1656/quarantined269; unchanged",
-      "manifest_members": 1401,
-      "manifest_tests": 8,
-      "package_files": 67,
-      "author-test-freeze.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\author-test-freeze.json",
-        "sha256": "2a7c9ba5a9bfd0da03567e0b404c760ef69ed3dffe92d8a8ca0ee5db5efb308d"
-      },
-      "author-source-freeze.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\author-source-freeze.json",
-        "sha256": "e052d0cd3c166ede40dfcf10839a533a1c4aa8998214d62be9d9cfd86b304c9b"
-      },
-      "manifest-binding.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\manifest-binding.json",
-        "sha256": "3c5b85e3f621926d2a041317a5287e64e579a2b6be8d39e1101e25ef2d3d2c18"
-      },
-      "run_connection_tests.py": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\run_connection_tests.py",
-        "sha256": "8daf60d536e6f75344f9996fa921eceed578edbbbb9cfa077e11a18c1a686d88"
-      },
-      "baseline-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\baseline-tests.xml",
-        "sha256": "df897b0167fd14aaac2ab792fbcf369a8bcbe9bb06d15c86c3baf8cdcd198f45"
-      },
-      "baseline-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\baseline-invocation.json",
-        "sha256": "8a0ce65732697b198dbb5f8ce19c329ab6d0a0edd158a04e4842a04e4a08a7bd"
-      },
-      "primary-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\primary-tests.xml",
-        "sha256": "0c4be509fda96fa631a718054e71a70f4b3df712c69e3bad359d42ec8da58a09"
-      },
-      "independent-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\independent-tests.xml",
-        "sha256": "ebd81c86d7551a3aa100b9981b99e63788f403a8c538fa28182a9850c51bc5c1"
-      },
-      "primary-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\primary-invocation.json",
-        "sha256": "0538d669b223a4226c6c94156b5c9660d5393f3dd1d4a384d073fe026852d880"
-      },
-      "independent-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\independent-invocation.json",
-        "sha256": "5793fcc3e649b0cc523d5d1ca47991f0876e8e08aef9f0a8584767921fd4d24d"
-      }
-    },
-    "wsp00_gates": [
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\wsp00-gate.json",
-        "sha256": "75e16aac9214d3edc088ddf534d3f72b3af07353c185cf0c52937820f43b149c"
-      },
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\author-wsp00-gate.json",
-        "sha256": "706f050602712fc93530062ad57f316bab3a0977031e9a651e199c3caa0d0909"
-      },
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\verifier-wsp00-gate.json",
-        "sha256": "0041fd6e2a8173b5b2a545335e55551adf61b021132769c9a371ffefccb4935e"
-      }
-    ],
-    "reviews": {
-      "preexecution-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\preexecution-review.json",
-        "sha256": "6ea9f499b2e5d8f5963eae5303afb5ba708679a11c98ed640a3530de1173cd4a"
-      },
-      "baseline-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\baseline-review.json",
-        "sha256": "008b72e02d3336c1a3fd4c2452d7f084d0250b1187227a8a9abfbb87564aeed5"
-      },
-      "size-rule-reconciliation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\size-rule-reconciliation.json",
-        "sha256": "c580b2bafef3d67333945ce4a57d2d24225dee2b5802fcff66d399a7a8be65f3"
-      },
-      "independent-repair-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\independent-repair-review.json",
-        "sha256": "32538875e6215ba6dcf4098910c61abdcde6777585a76130076d7b2639e43c58"
-      },
-      "next-action-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair\\next-action-review.json",
-        "sha256": "679d29753c68af9c26b95af9baf1d1560071c6ad7be22b45076d05dadb66ec96"
+    "owner_reconciliation": {
+      "open_peer_heads": 93,
+      "peer_worktrees": 157,
+      "scope_check": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\scope-owner-check.json",
+        "sha256": "603555154ef658a285bbe04cb586a0f6aba3a1f080eec7c2e8e5f62849b59d66"
       }
     },
     "source_bindings": {
@@ -2381,8 +1956,128 @@
       "modules/infrastructure/browser_actions/src/action_router.py": "9c6e882a6a6bc2a300331b41999a161aae368acb",
       "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
       "modules/platform_integration/linkedin_agent/src/__init__.py": "6c331fffb9ef3641e1a0bc6352ed644fc18467a4",
-      "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3"
+      "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "056e09dea7dbc8ac83adf1976d077a068e315122",
+      "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
+      "modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py": "5b392fef5446f7d6994ac913f5d8d9ff595b4a13",
+      "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py": "0e50607969fc12ab70e45427fc40a6e18c080139",
+      "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py": "2bd3da62131bf761bbf147c558689b5a8b41a2f0",
+      "modules/communication/moltbot_bridge/src/reddog_resident_queue_chain_results_store.py": "84e88635ffdb2e25d226270ebed5e0440900f913",
+      "modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py": "c75ecd480fc2e3be766a297af6317058875741f9",
+      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "35da9daecf3af8c33f055091310af6bceea8d451",
+      "modules/infrastructure/wre_core/src/pattern_memory.py": "e7f0f58cdfd37407725d89d7d6f68203d8471273",
+      "modules/communication/moltbot_bridge/tests/reddog_live_canary_artifact_test_support.py": "1ab6c18ede9f5aae5fc7ce5cf5d75ae5b9f5bf11",
+      "modules/communication/moltbot_bridge/tests/reddog_resident_queue_test_helpers.py": "e2b1b7dbb7bc318619430f435c07bc57751e123e",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py": "0d8e350aad39a3ff50f885b2fcca71d74429c1d6"
     },
+    "integration_maintenance": {
+      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
+      "sha256": "2d14e57e89ad2b210c66d7f01e77b54ec002615354758482f66c63068d3d9b51",
+      "linkedin": {
+        "owner": "modules/platform_integration/linkedin_agent/skillz/linkedin_engagement/executor.py",
+        "state": "PR1867/1868/1869/1870/1876 verified closed; PR1876 requested-note repair merged at 4169beaf990e99510146008efdd78b86684f90c5. All 23 inert cases passed; no-message delivery ambiguity, browser/constructor access and live authority remain unresolved and deferred behind core RSI work."
+      },
+      "gmail": {
+        "owner": "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md",
+        "feedback_owner": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+        "state": "Registered prototype; approved feedback-to-ticket and independent retention remain unwired. No private correspondence ingestion or resend authority inferred."
+      },
+      "foundup_identity": {
+        "principal_names": "MyBot and Mind Horizon unresolved; optional clarification pending",
+        "amibot": "modules/foundups/detect_ai; registry detect_ai; SPECIFIED/hidden, not a running build",
+        "memory_horizon": "Separate open PR1822 at663f0e17566a4e613a6b419456239e02f156923d; SPECIFIED/NO_RUNTIME, absent main; no alias assumed"
+      },
+      "maintenance_owners": [
+        "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py",
+        "modules/infrastructure/dependency_launcher/src/runtime_compatibility_preflight.py",
+        "modules/communication/moltbot_bridge/src/openclaw_maintenance_selector.py"
+      ],
+      "maintenance_state": "INTEGRITY_ONLY/NOT_READY; source authentication, installed/running/upstream freshness, admitted canary and rollback remain unqualified. Existing supplier/watchlist is not proof of scheduled update success; no blind startup update.",
+      "reuse": "R25 feedback, R24 product validation, R07 native readiness, R18/R23 operations; preserve26packets and existing skills/modules"
+    },
+    "system_entry_audits": {
+      "foundup-test-entry-audit.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\foundup-test-entry-audit.json",
+        "sha256": "0a1d52c69d8a03f0b6335b52530c3c29c77883174cd6e54b6500c76026375ca7"
+      },
+      "research-routing-audit.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\research-routing-audit.json",
+        "sha256": "b1cfbf5bf1aab9d64585c5ed3c7420c74c4f771ba4dda8fea4d852f6a33597fb"
+      }
+    },
+    "execution_plane": "Ordinary finite synthetic component tests in disposable repositories, with Python-level guards. No native admission, OS sandbox, live provider or retained-learning claim.",
+    "finding": "Ten existing named mutation cases reject before their deferred mutations. New witnesses prove zero callback/constructor calls; separate pure chain controls exercise specific rejection branches.",
+    "validation": {
+      "selected_cases": 15,
+      "new_cases": 5,
+      "preserved_selected_cases": 10,
+      "primary_pass": 15,
+      "independent_same_cases_pass": 15,
+      "registry": "current1656/quarantined269; unchanged",
+      "production": "unchanged",
+      "canary-test-freeze.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\canary-test-freeze.json",
+        "sha256": "5ff002c0e31c1af96ec36873ac0ef745307b723c881c67896f576f50b87de73e"
+      },
+      "run_canary_tests.py": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests.py",
+        "sha256": "03747a177ba52dd5843420fe32628994d38f2603eac5999e64598beb589147c9"
+      },
+      "preexecution-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review.json",
+        "sha256": "8c25d4b026608779b94d7e6a80d091a263052bff72c4c0de502fb2b8751afb50"
+      },
+      "primary-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-tests.xml",
+        "sha256": "aa3d4063c6420a2a20c14b342398f177c859e9c0784aa8f7655a183a2cc277f3"
+      },
+      "independent-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-tests.xml",
+        "sha256": "e3efbaaa60e877fc1ca151bc387b2de0e71a1f5b6758ea04cd270b51cd88ad06"
+      },
+      "primary-invocation.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-invocation.json",
+        "sha256": "1cadb5eb2c40c22753ed8af4e364a09a10bf52c23d56751effac426e685a2f1e"
+      },
+      "independent-invocation.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-invocation.json",
+        "sha256": "d86a2ad9d615c4ec2c7c02b643568b44056298a5c1adef22dd49ad5e75577198"
+      },
+      "independent-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-review.json",
+        "sha256": "df197cdee2c78ebe15554c1f38dec1be05c32b8c493135a2dd4c5b0b208dbdef"
+      },
+      "attempt1-failure.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt1-failure.json",
+        "sha256": "5a79c99a542fe9ce138f44bc538d96673e64854fc59c9f33cdb736c947be82e7"
+      },
+      "attempt2-failure.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt2-failure.json",
+        "sha256": "beb28de0393c03ef510d7b97c923c83f2d9cbf12aca8ac4ad277d242d78d6158"
+      },
+      "attempt3-failure.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt3-failure.json",
+        "sha256": "4e197311a83898f2f0c6c864f8e2da7f2d7e93d9593b9fe4ee7ea36e0c084c52"
+      },
+      "attempt4-failure.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt4-failure.json",
+        "sha256": "177499f758b7941b0d80b433765c889fe090daf74597ea1b14d2b0e8ebd70e15"
+      }
+    },
+    "wsp00_gates": [
+      {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\wsp00-gate.json",
+        "sha256": "6a9a4c317ef3e56449e144a1ffe20fef77ec8f2aa669397f62ea7e7f2937f6b8"
+      },
+      {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\amibot-wsp00-gate.json",
+        "sha256": "3983a83c3f843c6148179b5bb00283331711558743656e42ed9cc7c51b0fffc7"
+      },
+      {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\gateway-wsp00-gate.json",
+        "sha256": "2f970c57156d0facc4b0b4cec5ddc1d42ed880d4d99d888f021f85fda6b38f75"
+      }
+    ],
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
@@ -2397,6 +2092,36 @@
           },
           "state": "blocked",
           "dependency": "Seven resident trust anchors/absent effect lease and independently admitted production provenance"
+        },
+        {
+          "task": "Qualify resident canary callback reachability and direct chain evidence",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 15,
+            "priority": "P1"
+          },
+          "state": "locally_and_independently_qualified_publication_pending",
+          "source": "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py::test_blocked_canary_never_invokes_deferred_callbacks",
+          "dependency": "Exact15 cases passed primary and independent; production unchanged. Publication and exact closure are separate.",
+          "next_step": "Publish only the reviewed test/documentation candidate; do not repeat this qualification or infer native completion."
+        },
+        {
+          "task": "Qualify existing signer-generation evidence projection into resident canary readiness without changing admission",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 15,
+            "priority": "P1"
+          },
+          "state": "selected_bounded_contract_qualification_after_fresh_owner_recheck",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py::validate_reddog_resident_runtime_artifacts",
+          "dependency": "Use existing typed generation verifier, selection supplier and readiness/use-time owners. Freeze a finite cross-owner test matrix before any optional diagnostic wiring; no new issuer, provider, fake admission, service or live Linux authority execution.",
+          "next_step": "In existing readiness/use-time test owners, bind the current disagreement: accepted generation evidence removes only three reasons in the existing use-time projection, while readiness has no supplier input and reports these reasons unconditionally. Exercise absent/rejected/malformed/expired/changed-generation supplier controls and accepted synthetic projection controls with exact callback counts. Preserve readiness peer-handshake blocker, use-time remaining seven reasons and absent effect lease. Specify any future diagnostic seam separately; defaults and all current effect gates remain closed."
         },
         {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
@@ -2514,6 +2239,21 @@
           "next_step": "Do not repeat qualification; resolve exact slot policy/backend provenance and verifier consumer decisions."
         },
         {
+          "task": "Extend direct live-proof leaf coverage for existing deferred mutation cases",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "eligible_secondary_core_coverage",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_chain_evidence",
+          "dependency": "Existing ten integration labels do not exercise deferred mutations. Reuse pure fixture controls; no gate bypass.",
+          "next_step": "After selected contract qualification, freeze individual currently unexercised leaf rejection oracles where source inspection shows a concrete gap; do not claim full evaluator coverage."
+        },
+        {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
           "wsp15": {
             "complexity": 2,
@@ -2611,10 +2351,25 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "locally_and_independently_repaired_publication_pending",
+          "state": "closed_merged_PR1876",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-          "dependency": "Frozen23 cases independently passed after four semantic baseline failures; exact publication and PR/main closure remain separate.",
-          "next_step": "Publish exact reviewed candidate and verify PR/main checks and owned-lane closure; no further implementation in this row."
+          "dependency": "Exact current main4169beaf is the verified PR1876 merge; no implementation remains in this row.",
+          "next_step": "Do not repeat note-path repair; manager-result admission remains a separate lower-ranked qualification."
+        },
+        {
+          "task": "Qualify LinkedIn manager-result admission to browser connection actions",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "eligible_deferred_behind_core_RSI_contract",
+          "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+          "dependency": "Retain finite fake-only scope and fresh owner check; principal-selected core canary connection takes priority, with no LinkedIn live permission.",
+          "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes."
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -2660,92 +2415,107 @@
           "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
         },
         {
-          "task": "Qualify LinkedIn manager-result admission to browser connection actions",
+          "task": "Retain reusable bounded Windows test-runner compatibility lessons",
           "wsp15": {
-            "complexity": 3,
+            "complexity": 2,
             "importance": 3,
             "deferability": 3,
             "impact": 3,
-            "total": 12,
+            "total": 11,
             "priority": "P2"
           },
-          "state": "selected_after_current_repair_closure_and_fresh_owner_recheck",
-          "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-          "dependency": "Fresh source/owner rebind after repair closure; finite current-behavior qualification with existing inert fixtures. No automatic status gate or new policy authority.",
-          "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes."
+          "state": "deferred_bounded_test_infrastructure_reuse",
+          "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
+          "dependency": "Four preserved failed runner attempts establish capture/logging/Popen/extended-path friction, not product failure. External runner is not a generalized sandbox or authority mechanism.",
+          "next_step": "Search existing governed test tooling before adopting a shared recipe; preserve exact import/effect scope and avoid another parallel guard framework."
         }
       ],
       "selected_next": {
-        "task": "Qualify LinkedIn manager-result admission to browser connection actions",
+        "task": "Qualify existing signer-generation evidence projection into resident canary readiness without changing admission",
         "wsp15": {
           "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 15,
+          "priority": "P1"
         },
-        "state": "selected_after_current_repair_closure_and_fresh_owner_recheck",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "dependency": "Fresh source/owner rebind after repair closure; finite current-behavior qualification with existing inert fixtures. No automatic status gate or new policy authority.",
-        "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes."
+        "state": "selected_bounded_contract_qualification_after_fresh_owner_recheck",
+        "source": "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py::validate_reddog_resident_runtime_artifacts",
+        "dependency": "Use existing typed generation verifier, selection supplier and readiness/use-time owners. Freeze a finite cross-owner test matrix before any optional diagnostic wiring; no new issuer, provider, fake admission, service or live Linux authority execution.",
+        "next_step": "In existing readiness/use-time test owners, bind the current disagreement: accepted generation evidence removes only three reasons in the existing use-time projection, while readiness has no supplier input and reports these reasons unconditionally. Exercise absent/rejected/malformed/expired/changed-generation supplier controls and accepted synthetic projection controls with exact callback counts. Preserve readiness peer-handshake blocker, use-time remaining seven reasons and absent effect lease. Specify any future diagnostic seam separately; defaults and all current effect gates remain closed."
       },
+      "rationale": "The15-case qualification is complete at the finite synthetic level. Existing generation verification and one-shot selection consumption are already implemented; the missing connection is the readiness diagnostic input contract, not a missing research engine or issuer. Readiness already preserves a separate signer peer-handshake failure. The valve resolver removes only its three generation reasons and retains seven other reasons with no effect lease. A fixed cross-owner contract matrix is the smallest executable core step before wiring diagnostics, and outranks more leaf coverage or LinkedIn12 under the principal core-RSI objective. Native18 remains blocked; FAM14, GotJunk14 and runtime/model/PostgreSQL13 retain their distinct dependencies. Closed work is not reselected.",
+      "selection_reason": "The15-case qualification is complete at the finite synthetic level. Existing generation verification and one-shot selection consumption are already implemented; the missing connection is the readiness diagnostic input contract, not a missing research engine or issuer. Readiness already preserves a separate signer peer-handshake failure. The valve resolver removes only its three generation reasons and retains seven other reasons with no effect lease. A fixed cross-owner contract matrix is the smallest executable core step before wiring diagnostics, and outranks more leaf coverage or LinkedIn12 under the principal core-RSI objective. Native18 remains blocked; FAM14, GotJunk14 and runtime/model/PostgreSQL13 retain their distinct dependencies. Closed work is not reselected.",
       "source_bindings": {
+        ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
+        ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
+        "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json": "a46306a42d5a56396b8d3dbd64a09138c9e745d2",
+        "extensions/reddog/backend_compatibility_constants.js": "b9347b03618d4ee2c89e8362fc56f02f29aa4525",
+        "holo_index/core/holo_index.py": "14329dcd2f48a089bd598c1d19a1b97a262f8cb9",
+        "holo_index/requirements.txt": "94c4c3f3b1606a56f86cb7dfdb19075e4c150cc3",
         "modules/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "modules/communication/moltbot_bridge/src/__init__.py": "166eed840b776b8987f82f4a5e605cba9092e407",
+        "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "8861f07b9f3f41ee5b23fe7a4b7d5ed3938b5c3d",
+        "modules/communication/moltbot_bridge/src/reddog_current_generation_manifest_launch_selection.py": "1d2b51fe01bf9b3810bbcbb593d85f4f44063667",
+        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "2d4488ea0e45bde82c83876678593de12acade60",
+        "modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py": "5b392fef5446f7d6994ac913f5d8d9ff595b4a13",
+        "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py": "0e50607969fc12ab70e45427fc40a6e18c080139",
+        "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py": "2bd3da62131bf761bbf147c558689b5a8b41a2f0",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "c5ff1b322a85fecf8e75e5668f1fd78c96629325",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_use_time_gate.py": "c718b384cbc9b213204fc6f4185fda4d9d35f3da",
+        "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "f2c6353fa888a67495c05012569d894ed540a557",
+        "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
+        "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "7ab28ea29fc5c2bca7814cdea901b8178d843ed4",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "056e09dea7dbc8ac83adf1976d077a068e315122",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_runtime_artifact_readiness.py": "7dc5b3de2fcbb7099eda05291950bf80a59623f0",
+        "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py": "0a02f9bf28ea48d1dbebc35f11efd517d6d96416",
+        "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "66db36e0b259678cf6bec8f0aff7b5ddda10bdde",
+        "modules/foundups/gotjunk/cloudbuild.yaml": "a56884616b879619509b2bd4a3480b7cae02da4c",
+        "modules/foundups/gotjunk/foundup_manifest.json": "6438d15d62d8b7935548ee7a7fd2477f600e2341",
+        "modules/foundups/gotjunk/frontend/Dockerfile": "3ad21a7fb0f30260ea84f724ecbbb9c9ec4afd8d",
+        "modules/foundups/gotjunk/frontend/package-lock.json": "a4c6965ba89fefeb9c15d5614ef8f6f01a8139ca",
+        "modules/foundups/gotjunk/frontend/package.json": "24b06e3c94ea681bbba8dde877756b1730266ef6",
+        "modules/foundups/gotjunk/frontend/services/firebaseConfig.ts": "8082788c2db596fc1a9feabfe5b4598e274658a3",
+        "modules/infrastructure/browser_actions/src/__init__.py": "95c41c97624e0c363c8dc93ca0398d3a0efd0322",
+        "modules/infrastructure/browser_actions/src/action_router.py": "9c6e882a6a6bc2a300331b41999a161aae368acb",
+        "modules/infrastructure/browser_actions/src/linkedin_actions.py": "545c6cb2efc44551e1b3c04aa7c574d6289c27ea",
+        "modules/infrastructure/browser_actions/tests/test_linkedin_connection_policy.py": "edcdca4feafccb2a6b33932abc538807eb4b2b85",
         "modules/infrastructure/dae_daemon/__init__.py": "e6ec6ffdee5d68d6dc9f6d9b78f0082d721b5901",
         "modules/infrastructure/dae_daemon/src/__init__.py": "1c4e511d18f2d2db9d5f07bb09918caf0b449f53",
-        "modules/infrastructure/dae_daemon/tests/__init__.py": "0f7b89383721c533e1075ef02da0f028f3070b8d",
+        "modules/infrastructure/dae_daemon/src/dae_daemon.py": "f042b4130b11eddd5914a462968ba809d90edce4",
         "modules/infrastructure/dae_daemon/src/dae_launch_broker.py": "c1b185f8a2bfc621c4f3a3511aa59ae3277c3499",
         "modules/infrastructure/dae_daemon/src/dae_observer.py": "7a35ea9e184cd1902530fe3b31d853d60dcab5ff",
-        "modules/infrastructure/dae_daemon/src/dae_daemon.py": "f042b4130b11eddd5914a462968ba809d90edce4",
         "modules/infrastructure/dae_daemon/src/dae_registry.py": "285e1528a45c184a7057821aade4603553173b61",
         "modules/infrastructure/dae_daemon/src/event_store.py": "57539772077f4c9a2294ec02cfd75002d0f84c07",
         "modules/infrastructure/dae_daemon/src/killswitch.py": "e4f6dcb8c83e1fd4966ccbcae93ae1969591faef",
         "modules/infrastructure/dae_daemon/src/schemas.py": "b186015545ed3dac16e55e877fbc066e24dc77e5",
+        "modules/infrastructure/dae_daemon/tests/__init__.py": "0f7b89383721c533e1075ef02da0f028f3070b8d",
         "modules/infrastructure/dae_daemon/tests/test_dae_observer.py": "301999b4ee1a73900e1435bce60276a9f550ca54",
-        "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "8861f07b9f3f41ee5b23fe7a4b7d5ed3938b5c3d",
-        "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "7ab28ea29fc5c2bca7814cdea901b8178d843ed4",
-        "modules/communication/moltbot_bridge/src/__init__.py": "166eed840b776b8987f82f4a5e605cba9092e407",
-        "modules/infrastructure/browser_actions/src/linkedin_actions.py": "545c6cb2efc44551e1b3c04aa7c574d6289c27ea",
-        "holo_index/requirements.txt": "94c4c3f3b1606a56f86cb7dfdb19075e4c150cc3",
-        "holo_index/core/holo_index.py": "14329dcd2f48a089bd598c1d19a1b97a262f8cb9",
         "modules/infrastructure/foundups_mcp_bridge/requirements.txt": "ca0566e30971d7a82bbb84b323ca7a4f9ebb4cc6",
-        "modules/infrastructure/foundups_mcp_bridge/src/mcp_server.py": "8daba14986b065bed0d0a5024deef861d2770fa7",
         "modules/infrastructure/foundups_mcp_bridge/scripts/launch.py": "be466e138a6a7a67d7105b3553521187e588939a",
+        "modules/infrastructure/foundups_mcp_bridge/src/mcp_server.py": "8daba14986b065bed0d0a5024deef861d2770fa7",
         "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py": "0cd28babbd0d3b8423f9e637c19ad6b82ae5d3f2",
-        "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json": "a46306a42d5a56396b8d3dbd64a09138c9e745d2",
-        "modules/foundups/gotjunk/frontend/package.json": "24b06e3c94ea681bbba8dde877756b1730266ef6",
-        "modules/foundups/gotjunk/frontend/package-lock.json": "a4c6965ba89fefeb9c15d5614ef8f6f01a8139ca",
-        "modules/foundups/gotjunk/frontend/services/firebaseConfig.ts": "8082788c2db596fc1a9feabfe5b4598e274658a3",
-        "scripts/reddog_backend_manifest.json": "6c467c24cdcfc25123dabba3dd53bdef928cbe3e",
-        ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
-        ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
-        "modules/foundups/gotjunk/cloudbuild.yaml": "a56884616b879619509b2bd4a3480b7cae02da4c",
-        "modules/foundups/gotjunk/frontend/Dockerfile": "3ad21a7fb0f30260ea84f724ecbbb9c9ec4afd8d",
-        "modules/foundups/gotjunk/foundup_manifest.json": "6438d15d62d8b7935548ee7a7fd2477f600e2341",
-        "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-        "modules/infrastructure/browser_actions/tests/test_linkedin_connection_policy.py": "edcdca4feafccb2a6b33932abc538807eb4b2b85",
-        "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": "9ad8bc76abc7219be4033b5819cfebf9c840694d",
-        "extensions/reddog/backend_compatibility_constants.js": "b9347b03618d4ee2c89e8362fc56f02f29aa4525",
-        "scripts/tests/test_generate_reddog_backend_manifest.py": "124816a55c3ec7dbd55965af51574b6b90283af9",
-        "modules/infrastructure/browser_actions/src/__init__.py": "95c41c97624e0c363c8dc93ca0398d3a0efd0322",
-        "modules/infrastructure/browser_actions/src/action_router.py": "9c6e882a6a6bc2a300331b41999a161aae368acb",
         "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
         "modules/platform_integration/linkedin_agent/src/__init__.py": "6c331fffb9ef3641e1a0bc6352ed644fc18467a4",
-        "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3"
+        "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3",
+        "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": "9ad8bc76abc7219be4033b5819cfebf9c840694d",
+        "scripts/reddog_backend_manifest.json": "6c467c24cdcfc25123dabba3dd53bdef928cbe3e",
+        "scripts/tests/test_generate_reddog_backend_manifest.py": "124816a55c3ec7dbd55965af51574b6b90283af9"
       },
-      "selection_reason": "Requested-note repair passes23 fixed cases locally and independently. Separately, manager code returns WITHDRAWN for quota/exception, CONNECTED for existing connections and a prior PENDING object for duplicates; browser only blocks disallowed policy/BLOCKED before Connect. Seeded-state tests cover dry-run, not these fake-live combinations. Concrete cross-owner qualification12/P2 outranks scanner11 decomposition without proposed scanner growth. Higher native18, FAM14, GotJunk14 and runtime/model/PostgreSQL13 work retain named authority/runtime/owner dependencies; parity12 lacks a bound consumer. Closed qualifications/repairs are not reselected.",
       "still_open": [
-        "External delivery, no-message variant truth and note inclusion remain unverified.",
-        "Manager return status/identity is not a universal admission or durable receipt; fresh and prior requests can both be PENDING.",
-        "Inherited browser debt remains; future changes follow differential WSP62 using existing owners.",
-        "Native trust anchors, FAM mapping, GotJunk product/deployment coordination and runtime/model/PostgreSQL dependencies remain distinct."
+        "Native admitted execution, independent live proof, retained PatternMemory improvement and entitlement remain unproved.",
+        "Current signer-generation verifier consumes a process-local selection capability; audit-only return is not an effect lease or proof of an entirely non-consuming operation.",
+        "Synthetic positive projection controls do not authenticate deployed runtime artifacts or authorize a control-loop callback.",
+        "Readiness retains signer_client_peer_handshake_verifier_missing; use-time resolver separately retains seven authority reasons and no authoritative_use_lease.",
+        "WRE ROC dry-run AutoResearch, AI Gateway model research and a generic native WRE evaluator remain distinct; no automatic generalization.",
+        "Existing inherited owners: readiness514 lines/validator42, use-time resolver722/class208, canary714/entry50, generation gate70/collector20. Reuse existing owners and apply differential WSP62 before any source growth."
       ]
     },
     "publication": {
-      "state": "pending_exact_candidate_review_PR_checks_merge_and_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-linkedin-note-repair",
-      "claims": "No push, merge or remote pass claimed in this prepublication record."
+      "state": "pending_exact_review_PR_merge_and_main_checks",
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry"
     }
   }
 }
