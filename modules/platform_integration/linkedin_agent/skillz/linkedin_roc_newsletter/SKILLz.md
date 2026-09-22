@@ -1,7 +1,7 @@
 ---
 name: linkedin_roc_newsletter
 description: Research, draft, maintain and publish the personal ROC Return on Compute LinkedIn newsletter or article lane without confusing it with FoundUps engineering or JHR infrastructure reporting
-version: 1.1.0
+version: 1.2.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -46,6 +46,22 @@ Use the personal 012/0102 corpus voice selected for the exact draft. Preserve
 FoundUps.com as supporting platform evidence when relevant, not a compulsory CTA.
 Before publication verify whether the destination is the actual ROC newsletter,
 a personal article or a different series, and obtain approval for that exact surface.
+
+## Ownership and contemporary research
+
+Read the [shared verification contract](../linkedin_newsletters/references/research-verification.md).
+Research actual compute costs, utilization, useful completed output, human review
+and recovery costs, energy and capital costs, access/ownership and distribution of
+returns. Distinguish provider prices from total cost and model economics from
+measured deployments; use current original sources and counterarguments.
+
+Intelligent Internet Champion is a candidate featured ownership comparison: use
+[the sourced research seed](../../docs/audits/CHAMPION_EDITORIAL_RESEARCH_20260923.md),
+then refresh originals and compare local hardware, institutions, records, equity,
+control, supplier portability and value distribution. Similarity to COGDC is an
+analysis, not proof of adoption, partnership or a physical data-center design.
+Use a relevant eSingularity.ai or FoundUps.com case after the argument, with project
+interest disclosed. Score research/section work using WSP 15 after evidence admission.
 
 ## Completion
 

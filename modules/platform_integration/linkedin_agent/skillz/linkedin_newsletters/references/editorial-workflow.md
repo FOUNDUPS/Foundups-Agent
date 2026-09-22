@@ -4,6 +4,11 @@ This is the shared instruction contract for the newsletter router and its lane
 skills. It also accepts public intelligence from `openclaw_group_news`. It adds
 no dispatcher, database, scheduler or autonomous publication authority.
 
+Read [research-verification.md](research-verification.md) for the lane-specific
+source gate, Gemini boundary, WSP 15 ordering, Google Docs manuscript ownership,
+session-learning capture and relevant project discovery. 012's current queue is
+JHR -> ROC -> Good/Bad/Ugly -> FoundUps/Eat the Startup; narrow requests override it.
+
 ## Red Dog -> 0102 -> Red Dog
 
 012 sets scope. Red Dog normalizes that request, selects the existing LinkedIn
@@ -77,6 +82,12 @@ schedule and live publication independently. Revision or destination changes
 invalidate an approval that no longer covers the exact action.
 
 ## Collaborative issue development
+
+Use the lane's stable Google Docs master moshpit for newest-first issue history
+and private session decisions; each linked issue retains its own manuscript Doc.
+Search before creating either identity, preserve recovered older drafts, and record
+the scope of missing-history searches. The shared research contract owns the
+moshpit/issue reconciliation rules; no runtime state store is added.
 
 Use [issue-brief.md](../assets/issue-brief.md) for all three lanes, applying the
 child's editorial lens. Start from the latest artifact rather than creating a

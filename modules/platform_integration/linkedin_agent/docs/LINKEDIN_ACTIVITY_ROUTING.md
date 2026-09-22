@@ -56,6 +56,15 @@ BLOCKED_IDENTITY. New issues and new series use different template paths.
 7. Verify, record and report every queue as checked, completed, waiting, blocked
    or not checked. Run continuity/improvement even when no public action is useful.
 
+## Editorial research and development
+
+012's editorial queue: JHR -> ROC -> Good/Bad/Ugly -> FoundUps/Eat the Startup.
+A named request still selects only that owner. Follow the [research contract](../skillz/linkedin_newsletters/references/research-verification.md)
+for claim admission, WSP 15 section priorities, Google Docs as manuscript master,
+private feedback capture and contextual project links. Scores allocate work; they
+do not prove facts or automatically determine prose order. Google/Gemini/YouTube
+summaries are discovery leads requiring original-source verification.
+
 ## Priority and authority are independent
 
 Use current repository WSP 15 for MPS: Complexity + Importance + Deferability +

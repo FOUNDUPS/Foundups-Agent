@@ -1,9 +1,15 @@
 # Newsletter issue brief — {{issue_key}}
 
+- Lane master moshpit Doc ID/URL (private continuity only):
+- Existing issue history checked / missing-history scope:
+- Newest-first master entry and issue backlink verified:
+
 Template only. Replace placeholders in an authorized draft store, not in this file.
 Unknown fields remain explicitly unknown; never fill them with invented evidence.
 
 - Lane / child owner: {{lane_and_skill}}
+- Google Doc ID/URL / section anchors / last verified update: {{doc_identity}}
+- Linked private session record / capture and training eligibility: {{session_record}}
 - Current artifact / revision / parent revision: {{location_and_versions}}
 - Request / 012 feedback: {{scope_and_feedback}}
 - Checked-through / timezone / inspected surfaces: {{coverage}}
@@ -23,6 +29,13 @@ Unknown fields remain explicitly unknown; never fill them with invented evidence
 Apply the lane lens: FoundUps = founder burden, verified change, practical benefit,
 limitations; ROC = defined metric/thesis, evidence, strongest counterargument;
 JHR = significance, provenance, local implications and disclosed project interest.
+
+## Editorial ordering and project relevance
+
+- WSP 15 components / score / rationale per candidate section: {{priorities}}
+- Evidence admission / narrative dependency exceptions: {{ordering_reason}}
+- Relevant project / bridge / destination / disclosure or NO_RELEVANT_LINK: {{reader_path}}
+- Claim ledger with provenance, dates, source location and verification status: {{ledger}}
 
 ## Draft and review
 

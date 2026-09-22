@@ -1,7 +1,7 @@
 ---
 name: linkedin_foundups_newsletter
 description: Research, draft, maintain and publish the FoundUps Eat the Startup LinkedIn newsletter from verified Foundups-Agent implementation evidence; also route an explicit BoundUps newsletter request to the canonical FoundUps identity after noting the spelling
-version: 1.0.0
+version: 1.1.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -46,6 +46,25 @@ Keep the established edition language unless 012 selects another. Avoid raw logs
 secrets, private contacts and code detail without reader benefit. Use source-grounded
 screenshots or project imagery; label conceptual imagery. Cite the exact repository
 evidence that supports each material implementation claim.
+
+## GitHub / RSI research scope
+
+Read the [shared verification contract](../linkedin_newsletters/references/research-verification.md).
+This lane reports our actual Foundups-Agent GitHub work: RSI experiments, Red Dog,
+LinkedIn operations, WSP/Skillz and the proposed AGI schema. Inspect current main,
+merged PRs and their exact tests against the last covered baseline. Read failures,
+open gaps and architectural contracts, not just commit titles or promotional docs.
+
+For each highlighted change record problem -> change -> exact validation -> founder
+benefit -> remaining gap. Separate instruction skills, routed runtime, deployed
+service and verified live outcomes. Distinguish retained code/skill improvement
+from model-weight learning; a green CI run does not establish autonomous AGI or
+successful self-improvement in production. Describe AGI schema as the project's
+architecture/thesis unless an explicit scoped capability evaluation supports more.
+
+Prefer a few consequential, demonstrated changes over a changelog dump. Rank the
+research with WSP 15, preserve reader prerequisites, and link the relevant GitHub
+implementation/FoundUps.com destination as evidence and a useful next step.
 
 ## Completion
 

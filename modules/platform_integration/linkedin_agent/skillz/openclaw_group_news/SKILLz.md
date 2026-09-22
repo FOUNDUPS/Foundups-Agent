@@ -1,7 +1,7 @@
 ---
 name: openclaw_group_news
 description: Research and draft The Good, The Bad and The Ugly automation discussion for the OpenClaw LinkedIn group
-version: 1.2.0
+version: 1.3.0
 author: 0102
 agents: [qwen, selenium]
 dependencies: [web_search, anti_detection_poster]
@@ -18,6 +18,13 @@ evals: []
 Reuse this existing skill for the group's automation/agent discussion. Research and draft within scope; publish only the exact approved content to the verified group. Invoking this skill never starts a scheduler or authorizes continuous posting.
 
 Read [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md). Membership belongs in [linkedin_group_moderation](../linkedin_group_moderation/SKILLz.md), with message-before-approval and separate human decisions. Do not run a welcome-and-approve cycle from this news job.
+
+Read the [shared research and verification contract](../linkedin_newsletters/references/research-verification.md).
+This lane studies actual agent operation: version, task, success/failure, recovery,
+permissions, human interventions and cost. Prefer original releases/reproducible
+reports over announcements; distinguish vendor claims from tested behavior.
+Use WSP 15 to select the most useful verified lesson. A brief relevant FoundUps
+implementation example may invite further exploration, with its limits disclosed.
 
 ## Research
 

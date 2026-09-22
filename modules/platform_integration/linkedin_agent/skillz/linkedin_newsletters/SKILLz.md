@@ -1,7 +1,7 @@
 ---
 name: linkedin_newsletters
 description: Master LinkedIn newsletter router that dispatches FoundUps Eat the Startup, ROC Return on Compute and Japan Hyperscaler Report to separate lane skills
-version: 1.2.0
+version: 1.3.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -10,6 +10,10 @@ category: workflow
 evals: []
 ---
 # LinkedIn newsletter router
+
+Read [research verification](references/research-verification.md) before research
+or editorial prioritization. Use Google Docs as the working manuscript when
+developing an issue; keep session learning separate from model training.
 
 Read the [master routing contract](../../docs/LINKEDIN_ACTIVITY_ROUTING.md).
 Read the [editorial orchestration contract](references/editorial-workflow.md) for

@@ -1,5 +1,8 @@
 # Linkedin Agent Module - Roadmap
 
+- Lane-specific research/verification and Docs collaboration instructions implemented. Next: live draft/Doc discovery and JHR evidence cycle; ROC Champion ownership seed is researched but not a completed article. Runtime indexing, capture and model training remain separately evidenced actions.
+
+
 - Editorial handoff and reusable issue/new-series templates: implemented in the existing newsletter router. Next operational work: inspect live drafts/editions, then develop the selected lane; [audit evidence and backlog](docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md).
 
 

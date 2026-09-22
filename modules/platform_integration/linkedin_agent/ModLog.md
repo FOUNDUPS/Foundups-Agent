@@ -1,4 +1,12 @@
-## 2026-09-23: Requested-note ordering and acknowledgment repair
+## 2026-09-23 — Lane-specific research and verification
+
+Added one stable newest-first Google Docs master moshpit per editorial lane, manuscript backlinks and history/session reconciliation. Private operational Doc identities remain outside public Git.
+
+- WSP 97 / WSP 15 C2/I4/D4/Impact4=14/P1, instruction plane: current-main and lexical Holo retrieval (UNKNOWN freshness/index gap retained); reused newsletter and video-index/Digital Twin owners, no runtime changes.
+- Added claim ledger, source/paper/video verification, current Japanese JHR coverage, ROC ownership/cost research, GitHub/RSI FoundUps scope and operational group evidence. Gemini is a discovery aid, not independent proof; owned-channel Studio access is not arbitrary-video access.
+- Preserved 012's JHR/ROC/group/FoundUps order; evidence admission precedes section scoring. Added contextual disclosed project links, Google Docs manuscript/read-back, private correction records and separate dataset/training gates.
+- Champion originals researched and routed primarily to ROC; no adoption/partnership/COGDC equivalence claim. JHR leads retain retrieval limits. Separate authorized Docs work is recorded in private continuity; this instruction change runs no indexer or training and publishes nothing.
+- Repaired an earlier editorial ModLog insertion that split the pre-existing requested-note entry; all content preserved.
 
 ## 2026-09-22 — Editorial orchestration and reusable newsletter templates
 
@@ -6,6 +14,7 @@
 - Added scoped Red Dog/0102 work packet and return receipt, audit/develop/revise/create-series routes, issue brief and child-skill template. Separated editorial progress from delivery so missing ROC series identity does not block a local draft.
 - Connected public group intelligence to the newsletter lanes, with revision, privacy and duplicate controls. Recorded repository-only editorial backlog; live LinkedIn NOT_CHECKED_LIVE. No newsletter or group post published, no runtime dispatcher added.
 
+## 2026-09-23: Requested-note ordering and acknowledgment repair
 
 - WSP00/10/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Existing LinkedIn owner prepares requested notes before one explicit Send; failed Add/typing suppress Send and success credit. Unattempted Send is None. Preserve no-message fallback and manager/policy/preview behavior.
 - Frozen 23 cases: baseline 4 fail/19 pass, candidate 23 pass and independent same 23 pass; 17 compatibility controls/four legacy constructor definitions preserved, four deselected, two known warnings per run. Same-file bounded helpers reduce inherited size debt; no live delivery/browser/OS-isolation proof.

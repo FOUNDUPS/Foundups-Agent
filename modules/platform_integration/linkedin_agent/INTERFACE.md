@@ -1,5 +1,8 @@
 # LinkedIn Agent Interface Documentation
 
+The [research contract](skillz/linkedin_newsletters/references/research-verification.md) extends editorial instructions with source admission, Docs revision/read-back and private session records. Existing video-index and Digital Twin interfaces remain unchanged; this does not wire automatic data capture or training.
+
+
 The [editorial work packet](skillz/linkedin_newsletters/references/editorial-workflow.md) is an instruction contract: request/mode, scope, continuity, evidence, target, authority, acceptance and return receipt. It is not a new Python API or runtime dispatcher.
 
 

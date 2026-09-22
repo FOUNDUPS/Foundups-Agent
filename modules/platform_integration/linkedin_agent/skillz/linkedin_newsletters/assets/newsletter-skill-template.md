@@ -20,7 +20,8 @@ evals: []
 
 Read [master routing](../../docs/LINKEDIN_ACTIVITY_ROUTING.md),
 [newsletter router](../linkedin_newsletters/SKILLz.md), and
-[editorial workflow](../linkedin_newsletters/references/editorial-workflow.md).
+[editorial workflow](../linkedin_newsletters/references/editorial-workflow.md), and
+[research verification](../linkedin_newsletters/references/research-verification.md).
 
 ## Identity and scope
 
