@@ -1,3 +1,9 @@
+## 2026-09-23: DAE adapter acquisition qualification
+
+- WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Extend the existing adapter test owner; production source unchanged, original13 definitions preserved. Matched commands acquire both collaborators before branch selection and unresolved/unauthorized rejection.
+- Fixed28 inert cases pass locally and independently;13 original cases deselected. Both getters replaced, eager bridge initializer/daemon imports forbidden; exact responses and callback traces retained. No real services, provider, defaultDB or OS-isolation claim.
+- Canonical RSI backlog and existing interface record the separate branch-local repair oracle and next12/P2 action. Passing current-behavior characterizations does not close the production defect or establish retained learning.
+
 ## 2026-09-22: LinkedIn session configuration preview
 
 - WSP00/10/15/22/50/62/84/97;13/P1. Extend existing direct adapter helper: session dry-run validates configuration and returns before browser import/construction; fake-live controls preserve parsing/results/cleanup.
