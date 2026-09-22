@@ -5,6 +5,7 @@ Persistent state management for tracking scheduled videos per date.
 """
 
 import json
+import copy
 import logging
 import random
 from pathlib import Path
@@ -84,7 +85,7 @@ class ScheduleTracker:
     - Prioritizes empty dates over partially filled
     """
 
-    def __init__(self, channel_id: str, storage_dir: Optional[Path] = None):
+    def __init__(self, channel_id: str, storage_dir: Optional[Path] = None, *, persist: bool = True):
         """
         Initialize tracker for a channel.
 
@@ -94,7 +95,9 @@ class ScheduleTracker:
         """
         self.channel_id = channel_id
         self.storage_dir = storage_dir or TRACKER_DIR
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        self.persist = persist
+        if self.persist:
+            self.storage_dir.mkdir(parents=True, exist_ok=True)
 
         self.tracker_file = self.storage_dir / f"schedule_{channel_id}.json"
         self.schedule: Dict[str, int] = {}  # {date_str: count}
@@ -120,6 +123,8 @@ class ScheduleTracker:
 
     def save(self):
         """Persist schedule to JSON file."""
+        if not self.persist:
+            return
         try:
             data = {
                 "channel_id": self.channel_id,
@@ -132,6 +137,12 @@ class ScheduleTracker:
             logger.info(f"[TRACKER] Saved {len(self.schedule)} dates")
         except Exception as e:
             logger.error(f"[TRACKER] Error saving: {e}")
+
+    def preview_copy(self):
+        """Independent in-memory allocation state, retaining this storage scope."""
+        preview = copy.deepcopy(self)
+        preview.persist = False
+        return preview
 
     def get_count(self, date_str: str) -> int:
         """

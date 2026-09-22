@@ -68,6 +68,27 @@ class TestYouTubeAutomationAdapter(unittest.IsolatedAsyncioTestCase):
         self.assertIn("--max-videos", cmd)
         self.assertIn("--dry-run", cmd)
 
+    def test_scheduling_preflight_and_preserve_flags(self):
+        cmd = _build_scheduling_command({"channel": "move2japan", "preflight": "true", "preserve_metadata": "true"})
+        self.assertIn("--preflight", cmd)
+        self.assertIn("--preserve-metadata", cmd)
+
+    def test_scheduling_default_covers_whole_selected_batch(self):
+        cmd = _build_scheduling_command({'channel': 'move2japan', 'video_ids': '-0yj_HLordQ,abcdefghijk'})
+        self.assertEqual(cmd[cmd.index('--max-videos')+1], '0')
+        self.assertIn('--video-ids=-0yj_HLordQ,abcdefghijk', cmd)
+
+    def test_invalid_explicit_limit_is_not_silently_unlimited(self):
+        cmd = _build_scheduling_command({'channel': 'move2japan', 'max_videos': 'invalid'})
+        self.assertEqual(cmd[cmd.index('--max-videos')+1], 'invalid')
+
+    async def test_scheduling_payload_failure_overrides_zero_exit_code(self):
+        fake_run = {"success": True, "returncode": 0, "stdout_tail": '{"success":false,"status":"browser_unavailable"}'}
+        with patch("modules.communication.moltbot_bridge.src.youtube_automation_adapter._run_subprocess", return_value=fake_run):
+            result = await execute_youtube_action("scheduling", {"channel": "move2japan"})
+        self.assertFalse(result["success"])
+        self.assertEqual(result["result"]["status"], "browser_unavailable")
+
     async def test_execute_comments_parses_json_result(self):
         fake_run = {
             "success": True,

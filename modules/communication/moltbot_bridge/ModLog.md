@@ -147,6 +147,15 @@
 
 # ModLog - moltbot_bridge
 
+## 2026-09-22 - Reuse existing YouTube scheduling command
+
+Forwarded preflight, metadata preservation and exact video-ID selection to
+the existing scheduler CLI. Removed the default five-clip cap; explicit
+invalid limits fail instead of widening scope. Preserve structured failures
+even with exit zero. No resident worker, indexing or RSI routing changes.
+Local transport was unavailable; this is not live scheduling proof.
+WSP 11/22/50/84/97.
+
 ## 2026-09-15: Preserve canonical M2M instructions through local provider delivery
 
 - Extended six existing owners: detached canonical request before authority use; paired schema/prompt digest before model issuance; raw/redacted wire checks before all three adapters' effects. Reused codec, digest, profile, output and one-shot owners; no new module/skill/test file or runtime grant.

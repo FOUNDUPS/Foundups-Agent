@@ -1,4 +1,10 @@
 # Video Indexer Tests - ModLog
+
+## 2026-09-21 - Audio language and timestamp regressions
+
+Five offline tests pass: batch language/output forwarding; Japanese, mixed
+and unknown evidence labels; preserved chunk offsets; local-file language
+forwarding. Uses fake extractor, model and metadata response; no live requests.
 **WSP Compliance**: WSP 34 (Test Documentation), WSP 22 (Change Log)
 
 ## 2026-06-17 - STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 (heartbeat + no-hang budget + content_category normalize/preserve) [updates #836] (Worker-Lane SSREADY-POLISH)

@@ -1,5 +1,15 @@
 # OpenClaw Bridge Interface
 
+## YouTube scheduling command repair (2026-09-22)
+
+`youtube action scheduling channel=move2japan preflight=true` checks transport
+without launching or changing YouTube. Preview/apply requires `video_ids`;
+the default `max_videos=0` includes all selected clips. Pass
+`preserve_metadata=true` to retain prepared metadata. Structured CLI failure
+remains failure even with subprocess exit zero. See the scheduler
+[runbook](../../platform_integration/youtube_shorts_scheduler/docs/REMOTE_SCHEDULING.md)
+and existing Work prototype boundary before enabling recent discovery.
+
 ## Public RedDog Lick PoC
 
 `PublicSessionGate.open_lick_encounter(...)` accepts the exact open-source,

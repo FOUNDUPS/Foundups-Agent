@@ -1,5 +1,9 @@
 # Video Indexer Test Suite
 
+`test_audio_transcript_language.py` covers the reused batch and local-file
+language parameters, Japanese/mixed/unknown labels and chunk start positions.
+Its extractor, metadata request and model are fake; no live content changes.
+
 **WSP Compliance**: WSP 5 (Test Coverage), WSP 6 (Test Audit), WSP 49 (Module Structure)
 
 ## Purpose
