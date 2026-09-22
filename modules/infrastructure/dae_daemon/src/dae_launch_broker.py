@@ -457,6 +457,12 @@ def _summarize_result(result: Any) -> str:
     return str(result)[:200]
 
 
+def get_existing_dae_launch_broker() -> Optional[DAELaunchBroker]:
+    """Return the current broker without constructing runtime resources."""
+    with _broker_lock:
+        return _launch_broker
+
+
 def get_dae_launch_broker(daemon=None) -> DAELaunchBroker:
     global _launch_broker
     with _broker_lock:

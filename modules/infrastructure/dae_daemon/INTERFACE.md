@@ -106,6 +106,24 @@ termination. No wait/join/kill, automatic retry, new timeout or restart policy i
 introduced. Reporting exceptions and persistence acknowledgment retain their
 existing limitations.
 
+### Observer runtime lookup
+
+`get_existing_dae_launch_broker() -> Optional[DAELaunchBroker]` reads the
+existing singleton under its short lock and returns `None` when absent. It
+does not construct a broker, start a heartbeat, register a DAE or call lifecycle
+hooks. The creating `get_dae_launch_broker(daemon=None)` and reset API retain
+their existing behavior.
+
+`DAEObserver._get_runtime_status` uses this lookup; absent runtime and lookup
+or status exceptions retain the existing `{}` fallback. An installed broker's
+status method runs after the singleton lock is released. Each lookup reads the
+current singleton; capturing it does not guarantee an atomic status snapshot
+against concurrent replacement or stop.
+
+This corrects broker creation inside observer status reads. Default observer
+construction still acquires CentralDAEmon; the runtime adapter also eagerly
+acquires owners. Whole read commands are not qualified as effect-free.
+
 ## Data Persistence
 
 - JSONL: `modules/infrastructure/dae_daemon/memory/dae_events.jsonl`

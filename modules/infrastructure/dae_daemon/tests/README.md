@@ -67,6 +67,17 @@ Use disabled plugin autoload, `python -I -B -m pytest`, `-o addopts=`,
 covers handle ownership, hook identity, pending/completed/error paths and callback
 replacement. No live service, provider or production database is used.
 
+## Observer runtime lookup regressions — 2026-09-22
+
+Extend `test_dae_observer.py`; select `-k test_observer_runtime_` for eight
+fixed cases. Baseline4fail/4pass; repaired and independent8pass on identical frozen cases;19 original cases unchanged and not selected.
+The absent-owner case records attempted creation even when the existing observer
+swallows exceptions. Other cases cover status/error projection, lock release,
+current singleton replacement and compatibility of the explicit creating getter.
+Use the reviewed runner referenced by the canonical backlog: disabled plugin
+autoload, isolated Python (`-I -B`), fresh external temp, no pytest cache.
+These ordinary unit tests do not establish OS confinement or live runtime readiness.
+
 ## Running Tests
 
 ```bash
