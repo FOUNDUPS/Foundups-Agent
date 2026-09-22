@@ -1,3 +1,9 @@
+## 2026-09-22: RSI connection preview qualification
+
+- WSP00/15/22/50/62/84/97; 12/P2. Extend the existing browser-actions test owner; ten current-behavior cases pass locally and independently. Four original tests unchanged/deselected; no production source change.
+- Exposes preview pending/history mutation, simulation and blocked-history quota effects. Existing policy evaluator supports the next bounded repair; browser access and live authorization remain separate.
+- Canonical backlog reconciles PR1868 closure, records qualification and selects policy-preview repair12/P2. Browser roadmap's old sprint checkboxes are marked historical instead of claimed current completion.
+
 ## 2026-09-22: LinkedIn session configuration preview
 
 - WSP00/10/15/22/50/62/84/97;13/P1. Extend existing direct adapter helper: session dry-run validates configuration and returns before browser import/construction; fake-live controls preserve parsing/results/cleanup.

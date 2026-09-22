@@ -7,6 +7,13 @@
 
 ## Change Log
 
+## 2026-09-22: Connection dry-run state qualification
+
+- WSP00/15/22/50/62/84/97; 12/P2. Ten fixed current-behavior cases pass locally and independently; four original tests remain unchanged/deselected. Production source unchanged; inert routing, constructor bypass and patched sleep only.
+- Preview currently calls the manager before its guard: pending/history mutation, blocked-history quota and simulation are observable. Existing policy evaluation supports a narrow future no-bookkeeping-mutation preview; browser access remains separate.
+- [Current evidence and prospective repair](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-qualification--2026-09-22). No live action, runtime update or retained-learning claim.
+
+
 ### 2026-03-07: LinkedIn Registry Migration
 **By:** 0102
 **WSP References:** WSP 22, WSP 60, WSP 3

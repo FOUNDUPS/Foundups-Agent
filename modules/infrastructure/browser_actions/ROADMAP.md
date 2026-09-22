@@ -17,6 +17,16 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ---
 
+## Current bounded checkpoint — 2026-09-22
+
+Connection dry-run qualification: ten inert cases pass locally and independently;
+production behavior is unchanged. Next 12/P2 is policy preview without request
+bookkeeping mutation, using the existing evaluator. Browser access remains a
+separate boundary. [Evidence and repair contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-qualification--2026-09-22).
+
+The sprint map below is historical planning: source such as `action_router.py`
+already exists. Its unchecked boxes are not a verified current completion audit.
+
 ## Sprint Map (Aligned with foundups_vision)
 
 ### Sprint A1: Action Router Foundation
