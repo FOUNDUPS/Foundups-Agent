@@ -1,3 +1,9 @@
+## 2026-09-22: LinkedIn dry-run characterization
+
+- WSP00/15/22/50/62/97; add11 synchronous fake-only cases to the existing adapter suite, preserving its original18 tests. No production source change, real browser import, account action or WRE job.
+- Record wrapper nested-flag precedence, direct like writes, reply guard after construction, read control and unchanged caller inputs. Current unsafe observations are evidence, not normative safety assertions for a repair.
+- Existing LinkedIn review workflow and root RSI backlog define prospective zero-import/construction/write direct previews, next14/P1 repair, exact validation and closure. Source methods' inherited size debt remains explicit.
+
 ## 2026-09-22: Report bounded self-audit scan outcomes
 
 - WSP00/15/22/49/50/62/91/97; C3/I4/D3/Impact3 = 13/P1. Extends existing scanner and supervisor after PR1856 qualification; no parallel monitor or new execution authority.
