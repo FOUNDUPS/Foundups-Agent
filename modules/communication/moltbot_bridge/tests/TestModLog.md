@@ -1,3 +1,9 @@
+## 2026-09-23: Core generation evidence and resident readiness contract
+
+- WSP00/15/22/34/50/62/97; C3/I4/D4/Impact4=15/P1. Extended the existing use-time test owner with seven cross-owner controls; production, shared fixtures and all original definitions are unchanged.
+- Eleven frozen cases pass locally and independently. The real collector/resolver projects only three generation reasons away for a typed accepted digest; seven other anchors and no effect lease remain. The real readiness validator retains its three generation reasons and peer-handshake blocker without additional verifier/clock calls. These are synthetic boundary results, not native admission or freshness/replay proof.
+- The minimal fixture also retains independent binding errors even when signature verification succeeds and collection occurs. This acquisition behavior is characterized, not repaired or certified as valid authority. Canonical backlog records fresh priority/ownership, PR1877 closure, separate LinkedIn PR1878 and the next scored action. Registry remains current1656/quarantined269.
+
 ## 2026-09-23: Core RSI canary callback and chain-evidence qualification
 
 - WSP 00/15/22/34/50/62/97; C3/I4/D4/Impact4 = 15/P1. Reused the resident canary integration suite; production and shared fixtures are unchanged.
