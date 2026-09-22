@@ -224,28 +224,25 @@ No layer is operationally complete merely because its happy-path test passes.
 
 ### Current WSP15 selection and WSP97 disposition
 
-The architecture reconciliation is closed in PR1853. The existing retry-method
-repair is C3/I4/D4/Impact4 = **15/P1**, with fixed baseline failures, independent
-source review and bounded local tests; exact publication status is in the backlog.
-The **15/P1** persistence/ack qualification now records seven ordinary
-characterizations of six boundaries; sixteen selected cases pass with unchanged
-production code. It does not fix durability. That checkpoint selected persistent
-role/caller-authority qualification at **15/P1**. The later source audit completes
-that investigation and re-scores its unresolved domain mapping **14/P1**, blocked
-on a named FAM ingress and existing-authority-to-action contract. The current
-scan qualification and next repair are recorded in the backlog. The concrete WRE follow-up
-is **12/P2**: `event_store_verified` currently credits repair success and suppresses
-escalation although it verifies SQLite structure only, on a legacy opt-in path.
-Keep diagnostic evidence observable without calling it a causal repair; preserve
-real repair outcomes. No new registry receipt API is justified without a mapped
-consumer. Count-parity improvement is likewise a lower-priority diagnostic step.
-Full monitoring, recovery and native runtime completion remain unproved.
+PR1853 closed architecture reconciliation; PR1854 repaired bounded event-store
+retry; PR1855 and PR1856 qualified persistence and scan boundaries. PR1857 merged
+same-attempt scan status with 71 fixed cases and verified PR/main checks. These
+are bounded source/validation results, not whole-system runtime completion.
 
-The native ticket remains **18/P0 blocked** by current trust anchors/absent effect
-lease. Persistent role/caller-authority qualification remains **15/P1 outstanding**;
-PostgreSQL parity **13/P1** remains separately unqualified; LinkedIn **13/P1** is
-separately owned. Re-observe all candidates after this sprint. Do not simply take
-the old second-ranked item or revive the old unified event-queue proposal below.
+The current **11/P2** SQLite diagnostic-outcome repair keeps checks observable
+without repair credit or escalation suppression. 94 fixed cases pass locally
+and independently; the [WRE interface](../modules/infrastructure/wre_core/INTERFACE.md#self-audit-diagnostic-outcomes)
+defines exact action/result qualification, invocation semantics and preserved
+history. No historical counter migration or new diagnostic-failure inference.
+Independent review and exact publication receipts are in the current backlog.
+
+The native ticket remains **18/P0 blocked** by trust anchors/absent effect lease.
+Persistent role/caller-authority source qualification is complete; its domain
+mapping remains **14/P1 blocked** on named ingress and existing-authority mapping.
+PostgreSQL parity **13/P1** remains unqualified; LinkedIn **13/P1** is separately
+owned. Fresh selection after this repair is recorded in the backlog, not inferred
+from the old queue. Count parity has no bound consumer; do not revive the old
+unified event-queue proposal below. Full recovery and production RSI remain unproved.
 
 ---
 

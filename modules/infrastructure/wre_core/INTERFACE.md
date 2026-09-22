@@ -633,6 +633,32 @@ do not grant remediation, dispatch, promotion or reward authority. See the
 [monitor contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
 and focused scan-status tests for qualification boundaries.
 
+## Self-audit diagnostic outcomes
+
+The opt-in `verify_dae_event_store` policy checks SQLite structure; its existing
+`(True, "event_store_verified")` return and `dae_event_store_health.json` report
+are preserved. Neither establishes repair of a failed write or JSONL parity.
+
+Eligible invocations use `self_audit_diagnostic_attempts`, including calls that
+return cooldown or missing-store results. Only the exact verification action,
+literal True flag and exact `event_store_verified` result add
+`self_audit_diagnostic_success` and feedback `diagnostic_successes`. A False flag
+does not identify whether verification ran or completed; no diagnostic failure
+count is inferred. Last-result observation remains available.
+
+Every outcome for that action stays outside repair attempt/success/failure
+counters and feedback. Historical repair counts and their score are preserved;
+they are not retrospectively corrected. A diagnostic result cannot suppress
+repeated-fault escalation, even if it contains another legacy success marker.
+Existing thresholds, cooldown and disabled process-dispatch gates still apply.
+Other legacy policy outcomes retain their prior behavior, except the SQLite
+marker alone no longer earns repair success for an unrelated action. The existing
+microphone/start markers are compatibility behavior, not proof of causal repair.
+
+The focused diagnostic tests use inert collaborators and disposable SQLite
+fixtures. They establish local accounting and escalation behavior, not live
+monitoring, authenticated verification, retained learning or native RSI readiness.
+
 ## Configuration
 
 | Variable | Meaning |

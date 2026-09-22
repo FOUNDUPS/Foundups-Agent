@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1652,
+  "total_tests": 1653,
   "quarantined_tests": 269,
   "tests": [
     {
@@ -18308,6 +18308,19 @@
       "description": "Behavior tests for shared DAE security preflight."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_daemon_self_audit_diagnostic_outcomes",
+      "path": "modules/infrastructure/wre_core/tests/test_daemon_self_audit_diagnostic_outcomes.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "SQLite diagnostic accounting with inert sinks and explicit disposable stores."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_daemon_self_audit_loop",
       "path": "modules/infrastructure/wre_core/tests/test_daemon_self_audit_loop.py",
       "owner": "modules/infrastructure/wre_core",
@@ -18602,7 +18615,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_hermes_job_executor.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -19096,7 +19109,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_recall.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

@@ -19,6 +19,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
+from modules.infrastructure.wre_core.src.daemon_self_audit_outcomes import (
+    classify_fix_outcome,
+    record_fix_feedback,
+)
 from modules.infrastructure.wre_core.src.improvement_job_contract import (
     ImprovementRiskLevel,
     ImprovementScope,
@@ -634,12 +638,7 @@ class DaemonSelfAuditLoop:
             and not self.legacy_process_dispatch_enabled
         )
         if self.auto_fix_enabled and recommended in self.allowed_fixes and not process_fix_blocked:
-            self._increment_counter("self_audit_auto_fix_attempts")
-            attempted, result = self._apply_policy_fix(recommended)
-            if attempted and self._is_successful_fix_result(result):
-                self._increment_counter("self_audit_auto_fix_success")
-            elif attempted:
-                self._increment_counter("self_audit_auto_fix_fail")
+            attempted, result = self._apply_fix_with_telemetry(recommended)
         safe_result = redact_runtime_text(result, max_chars=600).text
         self._record_fix_feedback(recommended, attempted, safe_result)
         return SelfAuditEvent(
@@ -658,6 +657,17 @@ class DaemonSelfAuditLoop:
             ),
             line_truncated=line_truncated or safe_line_result.truncated,
         )
+
+    def _apply_fix_with_telemetry(self, fix_name: str) -> Tuple[bool, str]:
+        prefix = "self_audit_diagnostic" if fix_name == "verify_dae_event_store" else "self_audit_auto_fix"
+        self._increment_counter(f"{prefix}_attempts")
+        attempted, result = self._apply_policy_fix(fix_name)
+        outcome = classify_fix_outcome(fix_name, attempted, result)
+        if outcome in {"success", "diagnostic_success"}:
+            self._increment_counter(f"{prefix}_success")
+        elif outcome == "failure":
+            self._increment_counter(f"{prefix}_fail")
+        return attempted, result
 
     def _emit_improvement_proposal(
         self,
@@ -752,7 +762,9 @@ class DaemonSelfAuditLoop:
         count = int(stats.get("count", 0))
         if count < max(self.escalate_after, 1):
             return
-        if event.auto_fix_attempted and self._is_successful_fix_result(event.auto_fix_result):
+        if classify_fix_outcome(
+            event.recommended_fix, event.auto_fix_attempted, event.auto_fix_result
+        ) == "success":
             return
 
         now = event.timestamp
@@ -794,32 +806,13 @@ class DaemonSelfAuditLoop:
 
     @staticmethod
     def _is_successful_fix_result(result: str) -> bool:
-        success_markers = (
-            "start_command_dispatched",
-            "microphone_diagnostics_written",
-            "event_store_verified",
-        )
-        return any(marker in result for marker in success_markers)
+        return classify_fix_outcome("", True, result) == "success"
 
     def _record_fix_feedback(self, fix_name: str, attempted: bool, result: str) -> None:
-        stats = self._fix_stats.setdefault(
-            fix_name,
-            {
-                "attempts": 0,
-                "successes": 0,
-                "failures": 0,
-                "last_result": "",
-                "last_attempt_at": 0.0,
-            },
+        record_fix_feedback(
+            self._fix_stats, fix_name, attempted, result,
+            attempted_at=time.time() if attempted else None,
         )
-        if attempted:
-            stats["attempts"] = int(stats.get("attempts", 0)) + 1
-            if self._is_successful_fix_result(result):
-                stats["successes"] = int(stats.get("successes", 0)) + 1
-            else:
-                stats["failures"] = int(stats.get("failures", 0)) + 1
-            stats["last_attempt_at"] = time.time()
-        stats["last_result"] = result
 
     def _apply_policy_fix(self, fix_name: str) -> Tuple[bool, str]:
         now = time.time()

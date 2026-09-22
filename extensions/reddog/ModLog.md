@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-09-22 - WRE diagnostic-outcome backend binding
+
+- Bind the existing scanner and one cohesive WRE outcome helper; generated runtime membership is exactly1,401, with no removed members. Both digest pins are `5cade2540f521672ca62be0ab59d34eeee89e3224316106a11cbe1871fbcac77`.
+- Increase only the explicit runtime-file ceiling from1,400 to1,401. Byte/total/path/digest controls and API/version remain unchanged. The fixed in-memory boundary test failed before the change and now accepts1,401/rejects1,402.
+- Fifteen fast groups and deterministic67-file/950,440-byte package pass. Canonical backlog evidence records generator validation, independent review and exact publication. Initial generation rejected the untracked helper; explicit owned-file Git registration preceded the successful rerun.
+- No installed extension, service or provider update. WSP15/22/49/50/62/84/97; structural diagnosis is not causal repair or production RSI.
+
 ## 2026-09-22 - Event-store retry backend binding
 
 - Refresh the existing event-store member and both digest pins to `b5fd49e4592cf2814da481d42d254df4bd8ef36b897576018b789b4f291bed95`. Membership remains1,400; API/version, package caps and installed runtime are unchanged.

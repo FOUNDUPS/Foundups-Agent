@@ -237,6 +237,27 @@ function assertConfigurationMigrationPrecedence() {
   );
 }
 
+function assertRuntimeFileCountBoundary() {
+  const validator = require('../backend_compatibility_manifest');
+  const candidate = JSON.parse(JSON.stringify(manifest));
+  const addMember = (index) => {
+    const member = `modules/infrastructure/wre_core/src/cap_fixture_${index}.py`;
+    candidate.required_runtime_files.push(member);
+    candidate.required_runtime_sha256[member] = '0'.repeat(64);
+  };
+  while (candidate.required_runtime_files.length < 1401) {
+    addMember(candidate.required_runtime_files.length);
+  }
+  assert.strictEqual(candidate.required_runtime_files.length, 1401);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1401);
+  assert.strictEqual(candidate.required_runtime_files.length, 1402);
+  assert.deepStrictEqual(validator.validateManifest(candidate), [
+    'backend_runtime_file_contract_mismatch'
+  ]);
+}
+
+assertRuntimeFileCountBoundary();
 assertManifestContract();
 assertPinnedDigest();
 assertRuntimeOrdering();
