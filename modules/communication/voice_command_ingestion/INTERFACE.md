@@ -5,9 +5,14 @@
 `FasterWhisperSTT`, `VoiceCommandIngestion` and `get_voice_ingestion` accept an
 optional trailing `language: Optional[str] = "en"`. Use `"ja"` for Japanese or
 `None` for Whisper auto-detection. English-only `.en` models reject non-English
-and detection requests before loading. The batch API is unchanged.
+and detection requests before loading.
 The package exports the documented BatchTranscriber/TranscriptSegment factory
 as well as FasterWhisperSTT and get_voice_ingestion.
+
+`BatchTranscriber` and `get_batch_transcriber` also accept the trailing
+`language: Optional[str] = "en"`. `STTEvent` and `TranscriptSegment` add a
+`language` field (default `"unknown"`), carrying the recognizer's reported
+language into saved JSONL without breaking existing constructors.
 
 ## STTEvent
 ```python

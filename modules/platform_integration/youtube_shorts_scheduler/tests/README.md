@@ -1,5 +1,11 @@
 # YouTube Shorts Scheduler - Test Documentation
 
+Remote regression coverage: `test_remote_cli.py` exercises host preflight,
+nonpersistent previews, exact recording batches (3/8/13 and 61 across pages),
+whole-batch defaults, incomplete receipts and optional limits. It uses fake
+browser/model boundaries; no live publication. For combined module runs use
+`--import-mode=importlib` to avoid colliding `tests` package names.
+
 > **WSP 34 Compliance**: Test documentation for the youtube_shorts_scheduler module.
 
 ## Test Overview

@@ -283,8 +283,13 @@ def _build_scheduling_command(params: Dict[str, str]) -> list[str]:
     if channel:
         cmd.extend(["--channel", channel])
 
-    max_videos = _int_param(params, "max_videos", 5)
+    # An ordinary scheduling request covers the whole recorded batch. Preserve
+    # explicit malformed values for argparse to reject instead of widening scope.
+    max_videos = params.get("max_videos", "0")
     cmd.extend(["--max-videos", str(max_videos)])
+    if "video_ids" in params:
+        # A valid YouTube ID can start with '-'; '=' keeps it an option value.
+        cmd.append("--video-ids=" + params["video_ids"])
 
     browser = params.get("browser", "").strip().lower()
     if browser in {"chrome", "edge"}:
@@ -292,6 +297,10 @@ def _build_scheduling_command(params: Dict[str, str]) -> list[str]:
 
     if _truthy(params.get("dry_run", "false")):
         cmd.append("--dry-run")
+    if _truthy(params.get("preflight", "false")):
+        cmd.append("--preflight")
+    if _truthy(params.get("preserve_metadata", "false")):
+        cmd.append("--preserve-metadata")
     if _truthy(params.get("verbose", "false")):
         cmd.append("--verbose")
 
@@ -407,7 +416,11 @@ async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[st
         cmd = _build_scheduling_command(params)
         timeout_s = _int_param(params, "timeout_s", 1800)
         run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
-        return {"success": bool(run_result.get("success", False)), "action": action, **run_result}
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and (parsed.get("success") is False or parsed.get("error")):
+            success = False
+        return {**run_result, "success": success, "action": action, "result": parsed}
 
     if action == "schedule_priority":
         cmd = _build_schedule_priority_command(params)

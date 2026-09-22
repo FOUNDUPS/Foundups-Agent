@@ -11,7 +11,9 @@ Japanese input is available through `FasterWhisperSTT(language="ja")` and
 Use `language=None` for Whisper detection and a multilingual model (not `.en`).
 The [Japanese message-call prototype](../../platform_integration/elevenlabs_calls/README.md)
 reuses this STT through the CLI speech adapter; telephone speech is hosted by
-ElevenLabs. Batch-transcriber language behavior is unchanged.
+ElevenLabs. `get_batch_transcriber(language="ja")` extends the same selection
+to archive clips; `language=None` detects language. Saved segments retain
+language and chunk offsets for evidence-based clip metadata.
 
 voice_command_ingestion converts live audio into text events using faster-whisper,
 detects the "0102" trigger token, and emits command events for WRE skill routing.
