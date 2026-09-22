@@ -1856,95 +1856,72 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "18e43e7fdfd71d4be208496bac857474b05e9d8f",
-    "selected_action": "R18-R23-broker-stop-ack-repair",
-    "status": "independent_local_validation_passed_publication_pending",
+    "base_commit": "7ff0ccde76414caaefaefdd29e6d7b21ff2abf79",
+    "selected_action": "R07-runtime-expectation-contract",
+    "status": "independent_local_qualification_passed_publication_pending",
     "wsp15": {
       "complexity": 3,
-      "importance": 3,
+      "importance": 4,
       "deferability": 3,
       "impact": 3,
-      "total": 12,
-      "priority": "P2"
+      "total": 13,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T05:26:46.957354+00:00",
-    "base": "18e43e7fdfd71d4be208496bac857474b05e9d8f",
+    "utc": "2026-09-22T06:53:27.566867+00:00",
+    "base": "7ff0ccde76414caaefaefdd29e6d7b21ff2abf79",
     "origin": "external_principal",
-    "role": "coordinator",
+    "role": "architect",
     "principal_ref": "012",
+    "observation_id": "R07-runtime-expectation-contract-20260922",
+    "prior_observation": "7ff0ccde76414caaefaefdd29e6d7b21ff2abf79:docs/roadmaps/rsi_swarm_backlog.json#current_observation",
     "selected": {
-      "task": "Repair broker stop acknowledgment to distinguish requested stop from observed worker exit",
+      "task": "Qualify exact promoted-model expectation projection from existing AI Gateway persisted signed binding into dependency-launcher compatibility supply",
       "wsp15": {
         "complexity": 3,
-        "importance": 3,
+        "importance": 4,
         "deferability": 3,
         "impact": 3,
-        "total": 12,
-        "priority": "P2"
+        "total": 13,
+        "priority": "P1"
       },
-      "state": "selected_tests_first_current_source_verified",
-      "source": "modules/infrastructure/dae_daemon/src/dae_launch_broker.py::stop_dae",
-      "next_step": "Freeze finite inert stop-hook/handle-state acceptance and consumer compatibility first; then minimally report pending versus observed completion in existing broker. Preserve independently polling Holo controller."
+      "state": "selected_contract_qualification",
+      "source": "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py::compose_runtime_compatibility_evidence",
+      "next_step": "Bind exact three promoted expectation slots to existing AI Gateway signed runtime binding/use-time verification; freeze one cross-owner source packet and synthetic positive/negative compatibility matrix. Preserve integrity-only v1 and leave software installer/update authority unqualified."
     },
-    "previous_closed": "PR1859; all PR/main checks passed, owned lane retired; prior staging cleanup block retained",
-    "selection_reason": "Fresh main retains stop hook return -> unconditional STOPPED, despite handle.is_alive remaining true. Existing runtime adapters display it; Holo controller independently polls exit and must be preserved. Higher-ranked native/FAM remain admission-blocked; LinkedIn has its own owner; PostgreSQL runtime is unqualified. Integration/maintenance audit may amend ordering before source changes.",
+    "previous_closed": {
+      "pr": 1861,
+      "merge": "bac7513caefc2255a386b3c5f9e1e9260162a143",
+      "reviewed_head": "fe2c9fd38a54b0944b4fbb0bbe5d302ee1232bd6",
+      "pr_checks_passed": 10,
+      "main_ci": 35692735101,
+      "main_codeql": 35692734967,
+      "owned_lane_retired": true,
+      "source": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1861",
+      "temporary_staging": "retained under inherited deletion-policy block"
+    },
+    "selection_reason": "Fresh main PR1862 advances video-indexer/packaging, not this source contract. Existing signed-model verifier and compatibility supplier expose a bounded13/P1 qualification. Native18 and FAM14 require unresolved trust/domain input, LinkedIn13 has a separate owner, PostgreSQL13 lacks qualified runtime. This reusable contract advances runtime maintenance ahead of observer11; no exhaustive global ranking claim.",
     "retrieval": {
-      "noise": "Historical shelf read in order, explicitly non-authoritative; current source/receipts override old claims",
-      "ordering": "WSP00 actual bootstrap/gate; actual WSP15/97/10/62, existing skill, NAVIGATION/module docs/source/consumer paths",
-      "missing": "module ROADMAP.md and memory/README.md absent; use current contracts/system roadmap, no new stubs",
-      "staleness": "Shared HEAD unchanged0c81418 with known HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; no unchanged query retry/reindex. Source-bound Git/NAVIGATION/rg fallback.",
-      "duplication": "Existing broker, tests, adapters, monitor map and backlog; no new module/skill/scheduler"
+      "method": "Exact Git source/docs, NAVIGATION and targeted rg; prior field-map reused only after current blob rebind",
+      "holo": "Prior unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH on protected shared checkout; no repeated failed query, reindex or alternate authority claim",
+      "noise": "Root history is large; selected packet and bounded chunks used",
+      "ordering": "WSP00 bootstrap/gate, WSP15/97, current root/dispatch, module and test docs, exact source",
+      "missing": "Explicit slot mapping, backend software identity and projected-evidence consumer absent",
+      "staleness": "Historical briefings non-authoritative; remote PR1861 merge and exact-base CI refreshed",
+      "duplication": "Existing INTERFACE/ROADMAP/test docs extended; no new module, skill, scheduler or planning packet"
     },
-    "effort_cost": "One inert regression slice and existing-file repair; no provider usage. Worker and independent verifier; actual model billing unavailable.",
-    "manual_reason": "Deterministic callback/handle semantics require fixed source-grounded test oracles; no model runtime startup needed.",
-    "boundary": [
-      "No live daemon/provider/default database or real thread starts",
-      "No join/kill/restart/update activation",
-      "Preserve stronger Holo exit polling and consumer error/status fields",
-      "Fixed tests before source repair; independent replay; exact digest closure",
-      "Protect shared checkout, Remote AutoPost and other active projects"
+    "effort_cost": "Bounded docs/contract qualification plus existing deterministic49-case test replay; no paid provider calls or software updates.",
+    "manual_reason": "Existing Qwen/Gemma analysis cannot choose an absent signed owner mapping or prove cross-owner API semantics. 0102 source audit, deterministic fixtures and separate verifier used; no invented model runtime/budget claim.",
+    "contract": "modules/infrastructure/dependency_launcher/INTERFACE.md#signed-expectation-projection-contract--qualification-2026-09-22",
+    "acceptance_matrix": "modules/infrastructure/dependency_launcher/tests/README.md#signed-expectation-projection-acceptance-matrix",
+    "owner_decisions": [
+      "AI Gateway ModelRuntimeBindingPolicy and WRE supply producer: explicit versioned task/surface/role/model/provider mapping, immutable binding and selection identity; existing policy has no slot field.",
+      "Dependency-launcher installed-inventory/supply owner: typed backend artifact provenance and verifier; MODEL/PANEL authority does not cover engine binaries.",
+      "AI Gateway verifier and advisory consumer: private capability disposal or qualified capability-free API, current-time/key revalidation at projection; no borrowed dispatch authority."
     ],
-    "observation_id": "rsi-stop-ack-20260922",
-    "initial_selection_receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\selection.json",
-    "prior_observation": {
-      "git_ref": "18e43e7fdfd71d4be208496bac857474b05e9d8f",
-      "path": "docs/roadmaps/rsi_swarm_backlog.json"
-    },
-    "wsp00_gates": {
-      "wsp00-gate.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\wsp00-gate.json",
-        "sha256": "2a34899faf987844d9305de905ca8b8a63d6c18f192ef9beb6e4b1d85ed97e3d",
-        "is_zen_compliant": true
-      },
-      "worker-wsp00-gate.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\worker-wsp00-gate.json",
-        "sha256": "73181b70bb991b6b042c224adb2d38a7a28771cbbae80a1c808ebc116d391a39",
-        "is_zen_compliant": true
-      },
-      "verifier-wsp00-gate.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\verifier-wsp00-gate.json",
-        "sha256": "85896a83410887abd82af4fa2082e90590ca66b5eade2517271ef41e39f88468",
-        "is_zen_compliant": true
-      }
-    },
-    "validation": {
-      "cases_each_run": 51,
-      "same_cases": true,
-      "baseline": {
-        "tests": 51,
-        "failures": 25,
-        "errors": 0,
-        "skipped": 0
-      },
-      "baseline_passed": 26,
-      "production_changed": true,
-      "test_inventory_changed": false,
-      "evidence_root": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack"
-    },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
       "sha256": "2d14e57e89ad2b210c66d7f01e77b54ec002615354758482f66c63068d3d9b51",
@@ -1970,27 +1947,49 @@
       "maintenance_state": "INTEGRITY_ONLY/NOT_READY; source authentication, installed/running/upstream freshness, admitted canary and rollback remain unqualified. Existing supplier/watchlist is not proof of scheduled update success; no blind startup update.",
       "reuse": "R25 feedback, R24 product validation, R07 native readiness, R18/R23 operations; preserve26packets and existing skills/modules"
     },
-    "runtime_contract_followup": {
-      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\runtime-next-contract-review.json",
-      "sha256": "860f1d3a590ee7200bc1910fa8130c32f430287fc026733e3049884220305bd9",
-      "decision": {
-        "task": "Qualify exact promoted-model expectation projection from existing AI Gateway persisted signed binding into dependency-launcher compatibility supply",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 4,
-          "deferability": 3,
-          "impact": 3,
-          "total": 13,
-          "priority": "P1"
-        },
-        "state": "executable_bounded_contract_and_fixed_synthetic_matrix_after_owner_recheck",
-        "why_new": "Current audit establishes boundary and reusable owners. Next output must select exact fields/role mapping/current-state consumer and produce a reviewable source packet, not restate missing authority or repeat existing unit claims."
-      },
-      "correction": "A bounded contract qualification is executable; broad missing update authority must not defer every reusable step. No binary installer authority follows."
+    "validation": {
+      "existing_owner_cases": 49,
+      "primary_pass": 49,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "warnings": 2,
+      "independent": "49 passed; same cases, zero failures/errors/skips, two disabled-plugin config warnings",
+      "tests_changed": false,
+      "production_source_changed": false,
+      "cross_owner_projection": "not implemented; fixed matrix is prospective",
+      "signature_fixture": "Deterministic signatures through actual canonical verification path; not production cryptographic proof",
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract",
+      "primary_junit_sha256": "4cb70cc2a2e25eb296256992b6dc1389e383dd4113aa2a34b2c34fa61e05c3f5",
+      "independent_junit_sha256": "0e2c3de184026ef6ec776b6b01f35d2afb44c0e3d4342d2e5ca845726a4848c9"
     },
-    "implementation_state": "bounded_stop_ack_repair_independently_validated",
-    "publication_state": "pending_exact_head_checks",
+    "wsp00_gates": [
+      {
+        "role": "architect",
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\wsp00-gate.json",
+        "sha256": "c4949c94f2dcd90220d024fd7f19f6e6d20e95d571524b70998e7d6a38df475e"
+      },
+      {
+        "role": "worker",
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\runtime-author-wsp00-gate.json",
+        "sha256": "7a39041b7e1b607b9677574c6c286b2b566a58174aacd458e1bf161e74b0d7ca"
+      },
+      {
+        "role": "verifier",
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\verifier-wsp00-gate.json",
+        "sha256": "a497d39c93667072dbad5357681af6e7cb7f35fab30280a31da309c2de63c888"
+      }
+    ],
+    "implementation_state": "Existing v1 serialization and INTEGRITY_ONLY/NOT_READY unchanged. No installer/backend/source authentication, slot mapping or runtime activation implemented.",
+    "publication_state": "independent local qualification passed; exact final candidate and hosted checks pending",
+    "boundaries": [
+      "No provider, WSL/version command, installed/running/latest version assertion, runtime update, canary, rollback, admission, FoundUp activation, message, wallet or payout.",
+      "MyBot/Mind Horizon aliases unresolved; known AmIBot and Memory Horizon records remain distinct.",
+      "LinkedIn/Gmail/AutoPost/YUMORI and active RedDog owners remain protected.",
+      "Temporary test staging retained; inherited automatic approval review rejected deletion; no workaround or retry."
+    ],
     "post_sprint_reobservation": {
+      "utc": "2026-09-22T06:57:47.783798+00:00",
       "ranked_candidates": [
         {
           "task": "One native admitted ticket, independent audit and simulated entitlement",
@@ -2055,9 +2054,9 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_bounded_source_packet_qualification_after_current_closure",
+          "state": "qualification_complete_implementation_depends_on_named_owner_mapping",
           "source": "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py::compose_runtime_compatibility_evidence",
-          "next_step": "Bind exact three promoted expectation slots to existing AI Gateway signed runtime binding/use-time verification; freeze one cross-owner source packet and synthetic positive/negative compatibility matrix. Preserve integrity-only v1 and leave software installer/update authority unqualified."
+          "next_step": "Close publication; implement only after explicit slot policy, backend provenance and observer verification API decisions. Do not repeat this qualification."
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -2083,9 +2082,9 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "independently_validated_publication_pending",
+          "state": "closed_merged_PR1861",
           "source": "modules/infrastructure/dae_daemon/src/dae_launch_broker.py::stop_dae",
-          "next_step": "Finish exact final candidate review, hosted checks, publication and owned-lane closure. No repeated repair/qualification."
+          "next_step": "No repeated repair; verified merge bac7513, ten PR checks and both main workflows passed, owned lane retired."
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -2101,7 +2100,7 @@
           "dependency": "Current outcome extraction may shrink owner but does not resolve all existing input/config responsibility debt; pursue when next scanner growth is proposed."
         },
         {
-          "task": "Remove broker creation from existing observer runtime lookup and qualify read-command ingress",
+          "task": "Remove broker creation from existing observer runtime lookup",
           "wsp15": {
             "complexity": 2,
             "importance": 3,
@@ -2110,37 +2109,68 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "executable_smaller_followup_deferred",
-          "dependency": "Observer-only no-create lookup is bounded; adapter read commands also eagerly acquire daemon and broker, so whole-command effect-free claims require separate ingress change and tests."
+          "state": "eligible_bounded_repair_after_contract_publication",
+          "dependency": "Observer-only no-create lookup is bounded; adapter read commands also eagerly acquire daemon and broker, so whole-command effect-free claims require separate ingress change and tests.",
+          "next_step": "Extend existing broker singleton owner with noncreating lookup; use it in DAEObserver._get_runtime_status. Fixed inert absent/present/error cases forbid constructor/thread start. Preserve creating getter and treat default observer/adapter ingress effects separately.",
+          "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
         }
       ],
       "selected_next": {
-        "task": "Qualify exact promoted-model expectation projection from existing AI Gateway persisted signed binding into dependency-launcher compatibility supply",
+        "task": "Remove broker creation from existing observer runtime lookup",
         "wsp15": {
-          "complexity": 3,
-          "importance": 4,
+          "complexity": 2,
+          "importance": 3,
           "deferability": 3,
           "impact": 3,
-          "total": 13,
-          "priority": "P1"
+          "total": 11,
+          "priority": "P2"
         },
-        "state": "eligible_bounded_source_packet_qualification_after_current_closure",
-        "source": "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py::compose_runtime_compatibility_evidence",
-        "next_step": "Bind exact three promoted expectation slots to existing AI Gateway signed runtime binding/use-time verification; freeze one cross-owner source packet and synthetic positive/negative compatibility matrix. Preserve integrity-only v1 and leave software installer/update authority unqualified."
+        "state": "eligible_bounded_repair_after_contract_publication",
+        "dependency": "Observer-only no-create lookup is bounded; adapter read commands also eagerly acquire daemon and broker, so whole-command effect-free claims require separate ingress change and tests.",
+        "next_step": "Extend existing broker singleton owner with noncreating lookup; use it in DAEObserver._get_runtime_status. Fixed inert absent/present/error cases forbid constructor/thread start. Preserve creating getter and treat default observer/adapter ingress effects separately.",
+        "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
       },
-      "selection_reason": "Stop-ack source independently passes fixed51cases, pending publication. Existing runtime issuer/use-time owners expose a concrete next engineering contract qualification13/P1, not an automatically blocked update and not a repeat broad audit. It outranks observer11/WRE decomposition11 after closure. Missing production admission blocks effects, not this bounded synthetic source packet. R25 approval-owner qualification already complete; its separately owned host dependency remains, so repeating it is not progress. Native18/FAM14, PostgreSQL13 and LinkedIn13 retain their exact prerequisites. No exhaustive global ranking claim.",
+      "source_bindings": {
+        "modules/infrastructure/dae_daemon/src/dae_observer.py": "b628235482e23689008518f5145116f7b1e1e5e8",
+        "modules/infrastructure/dae_daemon/src/dae_launch_broker.py": "2094a738fa281372a5d89989637222ca34ef656f",
+        "modules/infrastructure/dae_daemon/tests/test_dae_observer.py": "bacd319bbd0c316c12eb3d0780167e50720c202f"
+      },
+      "selection_reason": "Runtime13 qualification is complete with precise mapping/provenance/API dependencies; no repeat audit. Native18/FAM14, PostgreSQL13 and LinkedIn13 retain dependencies/ownership. Observer11 beats tied WRE decomposition11 because current status lookup demonstrably creates broker/heartbeat while decomposition is conditional on future scanner growth. Repair only this lookup; default observer and adapter ingress remain separate.",
       "still_open": [
-        "Current broker source independently validated51cases; final docs/digest review, publication, hosted checks and closure pending.",
-        "Runtime source packet must resolve exact role/model/provider/task/surface mapping; no heuristic qwen role assignment and no consumed/leaked dispatch capability merely to observe.",
-        "OpenClaw/Hermes binary provenance, current installed/running versions, upstream latest, canary/rollback and update admission remain unqualified; model evidence cannot authorize installers.",
-        "Gmail/R25 positive feedback needs existing host approve/withdraw/current-state consumer; no new contact database or transcript ingestion.",
-        "MyBot/Mind Horizon identity unresolved unless 012 supplies clarification; distinct known AmIBot and open PR1822 Memory Horizon remain protected.",
-        "Higher native/FAM trust/domain prerequisites blocked, PostgreSQL runtime unqualified, LinkedIn/AutoPost/YUMORI separate owners.",
-        "Finite callback stop proof is not arbitrary registry linearizability, eventual thread exit or process termination.",
-        "Read-side observer construction and remaining owner size debt retained.",
-        "Prior staging cleanup policy block remains; no retry.",
-        "All26planning packets retained; no new authority/module/packet."
+        "Explicit general/code slot policy and backend software-provenance decisions before signed projection.",
+        "Fresh trust/policy acquisition and private capability disposal at the projection boundary.",
+        "OpenClaw/Hermes installed/running/latest status, binary authentication, canary/rollback and governed update admission remain unverified.",
+        "Daily Gmail/LinkedIn feedback requires existing consent and host admission path; no messages or transcript ingestion.",
+        "MyBot/Mind Horizon aliases unresolved; AmIBot hidden/unbuilt and Memory Horizon separately owned openPR1822.",
+        "Monitor lookup repair does not make default observer construction or adapter ingress effect-free.",
+        "Inherited temporary test-staging deletion rejection retained; no retry."
       ]
+    },
+    "reviews": {
+      "independent-test-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\independent-test-review.json",
+        "sha256": "5ae8d44f414065f7dee671ae3e6235646041156cdf09fd2da70b95098012ea0f"
+      },
+      "independent-contract-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-runtime-contract\\independent-contract-review.json",
+        "sha256": "4da92810d6cd0c2745d8f7237e38beca2e1fd66e10611ab567732e8469aac5a9"
+      }
+    },
+    "source_bindings": {
+      "modules/ai_intelligence/ai_gateway/tests/test_model_runtime_binding_security.py": "74bdff0704a7ffbed5c0db96d1f90e1605c0c966",
+      "modules/infrastructure/dependency_launcher/tests/test_runtime_compatibility_evidence_supplier.py": "1820246bb3b150d8da7c1a135e202b998242de03",
+      "modules/infrastructure/dependency_launcher/tests/test_runtime_compatibility_receipt.py": "48c218bf864fa56af136aa7a551bfc1547583679",
+      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding.py": "0426c474568fdaa048e6384519afb3b6fc0a4690",
+      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_capability.py": "16247cf561a8964224c26f8615cb45fac2cf5068",
+      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_use_time_verifier.py": "12344f19ccacd15b370a501dbc5a7c0ddd45bf5e",
+      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_evidence_verifier.py": "8d101fd9d41ea75fc5c1a69395efd431f5caab2d",
+      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_verified_admission.py": "6afed48961742cc44b83a4ae19af519c13f9ece1",
+      "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_input_rehydration.py": "a306e6be9f700f705289dc916a5b0979a6a33e14",
+      "modules/ai_intelligence/ai_gateway/src/model_signed_evidence.py": "92868989510c026a6bc33cc43195932b68784e66",
+      "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py": "14746a9d02251896639dbf74752eddf204748494",
+      "modules/infrastructure/dependency_launcher/src/runtime_compatibility_receipt.py": "84d567f983bf706ad65d6f28fe7c27e34aaf3b8c",
+      "modules/infrastructure/dependency_launcher/src/runtime_compatibility_preflight.py": "850b0b36d1cf7919af037d059dcc15d6793612a7",
+      "scripts/refresh_openclaw_ecosystem_watchlist.py": "4d9b89aa4974280b9be258e6e3fb0b38fbe678f0"
     }
   }
 }

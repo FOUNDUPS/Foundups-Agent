@@ -7,6 +7,19 @@
 
 ## Change Log
 
+### 2026-09-22: Qualify signed runtime-expectation projection
+
+- WSP00/15/22/50/62/84/97/99;13/P1. Extended existing INTERFACE/ROADMAP/test
+  documentation with exact mapping, use-time verification and capability
+  disposal requirements, plus a fixed synthetic acceptance matrix.
+- Current AI Gateway signed MODEL/PANEL evidence does not declare the general/
+  code compatibility slots or an installed inference-engine artifact. Named
+  existing policy/supply/inventory owners must resolve these before source work.
+- Existing49 security/supplier/receipt cases pass locally. This is owner-level
+  verification, not end-to-end projection or production cryptographic proof.
+  Source/tests/v1 receipts remain unchanged; no update, provider or service ran.
+  Independent review and exact publication state: canonical RSI backlog.
+
 ### 2026-09-20: Default WSL availability checks to metadata-only
 
 - Added a separate default-off `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` control

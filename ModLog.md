@@ -1,3 +1,13 @@
+## 2026-09-22: RSI runtime expectation contract qualification
+
+- WSP00/15/22/50/62/84/97/99;13/P1. Existing dependency-launcher documentation
+  now specifies exact AI Gateway mapping/verification decisions and a fixed
+  acceptance matrix. No duplicate module, scheduler, signer or roadmap created.
+- Reused49 passing owner-level tests; cross-owner projection remains blocked on
+  explicit slot policy and backend provenance. PR1861 closure is reconciled in
+  the [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). No runtime upgrade,
+  FoundUp activation, messaging or retained RSI learning is claimed.
+
 ## 2026-09-22: RSI stop acknowledgment and integration reconciliation
 
 - WSP00/10/15/22/49/50/62/91/97;12/P2. Broker stop completion now requires observed exit of the captured worker; fixed51cases pass locally and independently. PR1859 is merged with all PR/main checks and owned-lane retirement verified.
