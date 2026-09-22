@@ -2,6 +2,20 @@
 
 Central monitoring and control daemon for all Domain Autonomous Ecosystems (DAEs).
 
+## Broker failure-count repair — 2026-09-22
+
+Repeated caught import errors now reach the existing detach threshold instead
+of resetting before every callable invocation. See the
+[streak contract](INTERFACE.md#broker-import-failure-streak) for reset, reporting
+and manual re-enable semantics. 13 fixed inert cases pass locally and independently;
+no daemon thread, service or provider is started by this qualification.
+
+WSP62: the oversized launch method is split inside the existing file; the
+inherited class shrinks and every new/touched function stays at most50lines.
+Remaining broker class-size debt belongs to dae_daemon maintainers: qualify
+launch/stop/heartbeat separation before future class growth. This is no exemption
+or new scheduler. Exact dimensions/publication are in the canonical RSI backlog.
+
 ## Architecture
 
 ```

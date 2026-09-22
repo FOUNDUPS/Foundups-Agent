@@ -304,8 +304,6 @@ class DAELaunchBroker:
             reg.pid = os.getpid()
 
         self._daemon.registry.set_state(dae_id, DAEState.RUNNING, "broker_started")
-        # WSP 97: Clear import failure count on successful start (imports passed)
-        self._import_failures.pop(dae_id, None)
         self._daemon.registry.report_event(
             dae_id,
             DAEEventType.DAE_STARTED,
@@ -326,51 +324,13 @@ class DAELaunchBroker:
             )
             self._daemon.registry.set_state(dae_id, DAEState.STOPPED, "launch_completed")
         except Exception as exc:
-            handle.last_error = str(exc)
-            error_type = type(exc).__name__
-
-            # WSP 97: Circuit breaker for import-time failures (track at broker level)
-            is_import_error = isinstance(exc, (ImportError, ModuleNotFoundError))
-            import_failure_count = self._import_failures.get(dae_id, 0)
-            if is_import_error:
-                import_failure_count += 1
-                self._import_failures[dae_id] = import_failure_count
-
-            # Log verbosity: ERROR on first failure, DEBUG on subsequent (reduce noise)
-            if import_failure_count <= 1:
-                logger.exception("[DAE-BROKER] Launch failed for %s", dae_id)
-            else:
-                logger.debug(
-                    "[DAE-BROKER] Repeated %s for %s (%d/%d): %s",
-                    error_type, dae_id, import_failure_count,
-                    MAX_IMPORT_FAILURES, handle.last_error[:100]
-                )
-
-            self._daemon.registry.report_event(
-                dae_id,
-                DAEEventType.ACTION_PERFORMED,
-                {
-                    "action_type": "launch_failed",
-                    "actor_id": actor_id,
-                    "error": handle.last_error[:200],
-                    "import_failure_count": import_failure_count,
-                },
+            _record_launch_failure(
+                self._daemon.registry, self._import_failures, handle,
+                dae_id, actor_id, exc,
             )
-
-            # WSP 97: Detach after MAX_IMPORT_FAILURES to stop restart loop
-            if is_import_error and import_failure_count >= MAX_IMPORT_FAILURES:
-                logger.error(
-                    "[DAE-BROKER] Import failures exceeded for %s - DETACHED (install deps in venv)",
-                    dae_id
-                )
-                self._daemon.registry.set_state(
-                    dae_id, DAEState.DETACHED,
-                    f"import_failures_exceeded:{handle.last_error[:100]}"
-                )
-                # Also disable to prevent is_enabled() from allowing restarts
-                self._daemon.registry.disable(dae_id)
-            else:
-                self._daemon.registry.set_state(dae_id, DAEState.CRASHED, handle.last_error[:200])
+        else:
+            # Completion includes the existing summary, event and state callbacks.
+            self._import_failures.pop(dae_id, None)
         finally:
             handle.completed_at = time.time()
             self._daemon.registry.report_event(
@@ -402,6 +362,54 @@ class DAELaunchBroker:
         self._stop_event.set()
         if self._heartbeat_thread.is_alive():
             self._heartbeat_thread.join(timeout=3.0)
+
+
+def _record_launch_failure(
+    registry: Any, failures: Dict[str, int], handle: DAERuntimeHandle,
+    dae_id: str, actor_id: str, exc: Exception,
+) -> None:
+    """Update the per-DAE exception streak and existing failure observations."""
+    handle.last_error = str(exc)
+    error_type = type(exc).__name__
+    is_import_error = isinstance(exc, (ImportError, ModuleNotFoundError))
+    if is_import_error:
+        import_failure_count = failures.get(dae_id, 0) + 1
+        failures[dae_id] = import_failure_count
+    else:
+        failures.pop(dae_id, None)
+        import_failure_count = 0
+
+    if import_failure_count <= 1:
+        logger.exception("[DAE-BROKER] Launch failed for %s", dae_id)
+    else:
+        logger.debug(
+            "[DAE-BROKER] Repeated %s for %s (%d/%d): %s",
+            error_type, dae_id, import_failure_count,
+            MAX_IMPORT_FAILURES, handle.last_error[:100]
+        )
+
+    registry.report_event(
+        dae_id,
+        DAEEventType.ACTION_PERFORMED,
+        {
+            "action_type": "launch_failed",
+            "actor_id": actor_id,
+            "error": handle.last_error[:200],
+            "import_failure_count": import_failure_count,
+        },
+    )
+    if is_import_error and import_failure_count >= MAX_IMPORT_FAILURES:
+        logger.error(
+            "[DAE-BROKER] Import failures exceeded for %s - DETACHED (install deps in venv)",
+            dae_id
+        )
+        registry.set_state(
+            dae_id, DAEState.DETACHED,
+            f"import_failures_exceeded:{handle.last_error[:100]}"
+        )
+        registry.disable(dae_id)
+    else:
+        registry.set_state(dae_id, DAEState.CRASHED, handle.last_error[:200])
 
 
 def _summarize_result(result: Any) -> str:
