@@ -85,6 +85,11 @@ tail = observer.tail_events(dae_id="openclaw", limit=8)
 snapshot = observer.get_live_status("pqn_research", limit=8)
 ```
 
+Persistence qualification: the [current contract](INTERFACE.md#persistence-result-boundaries)
+separates SQLite record evidence, JSONL attempt history and registry acceptance.
+Sixteen focused cases characterize these boundaries; they do not prove atomic
+durability or a live RSI system. Runtime methods remain unchanged in this slice.
+
 Runtime supervision intent:
 - `tail <dae>` -> recent DAEmon event stream for that DAE
 - `status <dae> live` -> registry state + runtime status + recent event tail

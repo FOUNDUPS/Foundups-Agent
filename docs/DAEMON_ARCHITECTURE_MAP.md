@@ -48,6 +48,42 @@ The candidate process-witness review was blocked by automatic screening, so only
 ordinary source review/unit replay is claimed for the repair. Broader proof remains open. The [WRE roadmap](../modules/infrastructure/wre_core/ROADMAP.md)
 records the narrower verified per-counter SQLite handle repair separately.
 
+### Persistence and acknowledgment qualification — 2026-09-22
+
+This is the observed contract at `e4075f3`, qualified by seven additional ordinary
+characterizations of six boundaries in the existing observer test owner. All sixteen
+selected cases pass locally and independently (the same cases, not thirty-two unique tests).
+No production method, schema, callback policy or persistence order changed.
+
+| Observation | What the current code establishes | What it does not establish |
+|---|---|---|
+| SQLite row/query/dedupe | Current query and duplicate-detection record authority. Reopening loads SQLite sequence state. | Reconstruction from JSONL, crash/power-loss durability or cross-process recovery. |
+| JSONL entry | An append attempt occurred before SQLite. Failed writes can leave entries or partial bytes. | A committed event or a safely replayable commit journal. No reconstruction loader was found in the scoped owners. |
+| `write` returns success | Both existing write calls returned normally. | Atomicity across files, independent verification or an fsync/power-loss guarantee. |
+| `write` returns false | Duplicate or caught error, according to its message. | Row absence: an exception after SQLite commit can return false despite a readable row. Exact and conflicting dedupe inputs are not distinguished. |
+| Registry boolean/listener | Local acceptance for a registered DAE; listeners still run on a returned storage failure. | Durable acknowledgment. A raised store exception exits `_emit` before listeners; notification is not universally failure-independent. |
+| `verify_parity` / WRE `event_store_verified` | Line-count agreement / SQLite integrity and sequence checks, respectively. | Content agreement, recovery completeness or a successfully persisted particular event. Equal counts can hide malformed or different JSONL. |
+
+The fixed fixtures cover append rejection, SQL failure plus reopen/retry, an error
+after commit, exact/conflicting duplicates, equal-count content mismatch, and
+returned-versus-raised storage failure with inert emergency callback spies. Existing
+nine retry regressions and three observer methods remain unchanged; those three
+observer methods are not executed in this bounded run. WRE/FAM comparisons remain
+static evidence, not new runtime tests.
+
+**Decision:** preserve the current public signatures and emergency listener path.
+Treat SQLite reads as current record evidence, JSONL as attempt history, and
+registry acceptance as volatile. Do not automatically replay JSONL or retry an
+external effect based only on a false return. A future repair must first declare
+its stronger acceptance contract using the same fault inputs; these legacy
+characterization assertions are not a requirement to retain defective behavior.
+Do not change evaluation criteria merely to report a successful repair.
+
+Keep result propagation, content integrity and transactional recovery as separate
+owner-scoped steps. Count-only parity must not be promoted into a durability gate;
+FAM's success-only listener policy must not be copied into central emergency
+handling. No new store, receipt schema, service or scheduler is introduced here.
+
 ### A monitor is required beside every execution layer
 
 Before promoting a layer, bind its existing producer, consumer and control owner
@@ -145,10 +181,16 @@ No layer is operationally complete merely because its happy-path test passes.
 The architecture reconciliation is closed in PR1853. The existing retry-method
 repair is C3/I4/D4/Impact4 = **15/P1**, with fixed baseline failures, independent
 source review and bounded local tests; exact publication status is in the backlog.
-Re-observation selects authoritative-store/recovery/acknowledgment qualification
-at **15/P1** before any persistence redesign. Partial writes are now demonstrated
-in disposable fixtures; volatile emergency listeners must remain available even
-when durable storage fails. No full monitoring/runtime completion is claimed.
+The **15/P1** persistence/ack qualification now records seven ordinary
+characterizations of six boundaries; sixteen selected cases pass with unchanged
+production code. It does not fix durability. Re-scoring selects existing persistent
+role/caller-authority qualification at **15/P1** next. The concrete WRE follow-up
+is **12/P2**: `event_store_verified` currently credits repair success and suppresses
+escalation although it verifies SQLite structure only, on a legacy opt-in path.
+Keep diagnostic evidence observable without calling it a causal repair; preserve
+real repair outcomes. No new registry receipt API is justified without a mapped
+consumer. Count-parity improvement is likewise a lower-priority diagnostic step.
+Full monitoring, recovery and native runtime completion remain unproved.
 
 The native ticket remains **18/P0 blocked** by current trust anchors/absent effect
 lease. Persistent role/caller-authority qualification remains **15/P1 outstanding**;

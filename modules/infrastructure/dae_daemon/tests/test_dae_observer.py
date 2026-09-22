@@ -3,8 +3,10 @@
 import json
 import sqlite3
 import threading
+from types import SimpleNamespace
 
 from modules.infrastructure.dae_daemon.src.dae_daemon import (
+    CentralDAEmon,
     get_central_daemon,
     reset_central_daemon,
 )
@@ -16,6 +18,7 @@ from modules.infrastructure.dae_daemon.src.dae_observer import (
     get_dae_observer,
     reset_dae_observer,
 )
+from modules.infrastructure.dae_daemon.src.dae_registry import DAERegistry
 from modules.infrastructure.dae_daemon.src.event_store import DAEEventStore
 from modules.infrastructure.dae_daemon.src.schemas import DAERegistration, DAEEventType, DAEEvent
 
@@ -286,3 +289,185 @@ def test_event_store_exact_duplicate_preserves_both_stores(tmp_path):
     assert [row.to_dict() for row in store.query()] == sqlite_before
     assert store.verify_parity() == (True, "parity ok: 1 events")
     assert not store._lock.lock.locked()
+
+
+# Existing-gap characterization, not acceptance of a repaired persistence contract.
+# Future repairs must revise these explicit observations with new source evidence.
+def test_event_store_characterizes_jsonl_failure_before_sqlite(tmp_path):
+    """A failed append stops SQLite, but consumes a local sequence number."""
+    store, seed = _event_store_with_seed(tmp_path)
+    event = _event_store_event("append-failure")
+    before = store._jsonl_path.read_bytes()
+    write_jsonl = store._write_jsonl
+
+    def fail_append(current):
+        raise OSError("injected JSONL append failure")
+
+    store._write_jsonl = fail_append
+    trace = _event_store_write_trace(store)
+    try:
+        result = store.write(event)
+    finally:
+        store._write_jsonl = write_jsonl
+
+    assert result == (False, "error: injected JSONL append failure")
+    assert trace == [("jsonl", 2)]
+    assert store._jsonl_path.read_bytes() == before
+    assert [row.to_dict() for row in store.query()] == [seed.to_dict()]
+    assert not store._lock.lock.locked()
+    following = _event_store_event("after-append-failure")
+    assert store.write(following) == (True, "ok")
+    assert [row.sequence_id for row in store.query()] == [1, 3]
+
+
+def test_event_store_characterizes_jsonl_only_reopen_retry(tmp_path):
+    """Reopening does not replay the JSONL-only attempt; retry appends again."""
+    store, seed = _event_store_with_seed(tmp_path)
+    event = _event_store_event("jsonl-only")
+    write_sqlite = store._write_sqlite
+
+    def fail_sqlite(current):
+        raise sqlite3.OperationalError("injected pre-commit failure")
+
+    store._write_sqlite = fail_sqlite
+    try:
+        assert store.write(event) == (False, "error: injected pre-commit failure")
+    finally:
+        store._write_sqlite = write_sqlite
+
+    attempt_bytes = store._jsonl_path.read_bytes()
+    assert _event_store_jsonl(store) == [seed.to_dict(), event.to_dict()]
+    reopened = DAEEventStore(data_dir=store._data_dir)
+    assert reopened._jsonl_path.read_bytes() == attempt_bytes
+    assert [row.to_dict() for row in reopened.query()] == [seed.to_dict()]
+    assert reopened.get_latest_sequence_id() == 1
+    assert reopened.write(event) == (True, "ok")
+    assert [row.to_dict() for row in reopened.query()] == [seed.to_dict(), event.to_dict()]
+    assert _event_store_jsonl(reopened) == [seed.to_dict(), event.to_dict(), event.to_dict()]
+    assert reopened.verify_parity() == (False, "parity mismatch: jsonl=3 sqlite=2")
+
+
+def test_event_store_characterizes_post_commit_error_and_replay(tmp_path):
+    """False is not proof of rollback when the response fails after commit."""
+    store, seed = _event_store_with_seed(tmp_path)
+    event = _event_store_event("committed-error")
+    write_sqlite = store._write_sqlite
+
+    def commit_then_fail(current):
+        write_sqlite(current)
+        raise RuntimeError("injected response failure after SQLite commit")
+
+    store._write_sqlite = commit_then_fail
+    try:
+        assert store.write(event) == (
+            False, "error: injected response failure after SQLite commit"
+        )
+    finally:
+        store._write_sqlite = write_sqlite
+
+    expected = [seed.to_dict(), event.to_dict()]
+    assert [row.to_dict() for row in store.query()] == expected
+    assert _event_store_jsonl(store) == expected
+    before = store._jsonl_path.read_bytes()
+    reopened = DAEEventStore(data_dir=store._data_dir)
+    assert reopened.write(event) == (False, f"duplicate: {event.dedupe_key}")
+    assert [row.to_dict() for row in reopened.query()] == expected
+    assert reopened._jsonl_path.read_bytes() == before
+    assert reopened.verify_parity() == (True, "parity ok: 2 events")
+
+
+def test_event_store_characterizes_conflicting_dedupe_unclassified(tmp_path):
+    """Exact and conflicting repeats currently receive the same duplicate result."""
+    store, seed = _event_store_with_seed(tmp_path)
+    exact = DAEEvent.from_dict(seed.to_dict())
+    conflict = _event_store_event("conflicting-identity")
+    conflict.dedupe_key = seed.dedupe_key
+    conflict.actor_id = "different-actor"
+    before = store._jsonl_path.read_bytes()
+    trace = _event_store_write_trace(store)
+
+    outcomes = [store.write(exact), store.write(conflict)]
+
+    assert outcomes == [(False, f"duplicate: {seed.dedupe_key}")] * 2
+    assert conflict.sequence_id == 0
+    assert trace == []
+    assert [row.to_dict() for row in store.query()] == [seed.to_dict()]
+    assert store._jsonl_path.read_bytes() == before
+
+
+def test_event_store_characterizes_count_only_parity_false_positive(tmp_path):
+    """Count parity currently accepts malformed or unrelated one-line content."""
+    store, seed = _event_store_with_seed(tmp_path)
+    unrelated = _event_store_event("unrelated", sequence_id=99).to_dict()
+    for content in ("not-json\n", json.dumps(unrelated) + "\n"):
+        store._jsonl_path.write_text(content, encoding="utf-8")
+        assert store.verify_parity() == (True, "parity ok: 1 events")
+        assert [row.to_dict() for row in store.query()] == [seed.to_dict()]
+
+    store._jsonl_path.write_text("not-json\nsecond-line\n", encoding="utf-8")
+    assert store.verify_parity() == (False, "parity mismatch: jsonl=2 sqlite=1")
+
+
+def test_event_store_characterizes_returned_false_still_notifies_emergency(tmp_path):
+    """A returned False preserves volatile callbacks, not a durable ack."""
+    attempted, failed_listener, emergency, detach = [], [], [], []
+
+    def failed_write(event):
+        attempted.append(event)
+        return False, "error: injected unavailable store"
+
+    def listener_error(event):
+        failed_listener.append(event)
+        raise RuntimeError("injected listener failure")
+
+    report = object()
+
+    def evaluate(event):
+        emergency.append(event)
+        return report
+
+    registry = DAERegistry(SimpleNamespace(write=failed_write))
+    assert registry.register(DAERegistration("security-test", "Test", "infrastructure"))
+    target = SimpleNamespace(
+        killswitch=SimpleNamespace(evaluate_security_event=evaluate),
+        _execute_detach=detach.append,
+    )
+    registry.add_listener(listener_error)
+    registry.add_listener(lambda event: CentralDAEmon._on_event(target, event))
+    payload = {"reason": "synthetic test", "severity": "critical"}
+
+    assert registry.report_event("security-test", DAEEventType.SECURITY_VIOLATION, payload)
+
+    assert len(attempted) == 2  # Registration and security report both failed persistence.
+    assert failed_listener == emergency == [attempted[-1]]
+    assert emergency[0].payload == payload
+    assert emergency[0].sequence_id == 0
+    assert detach == [report]  # Inert spy only: no real killswitch or daemon instance.
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_event_store_characterizes_raised_failure_skips_registry_listeners(tmp_path):
+    """An exception from the store escapes before volatile listeners run."""
+    store = SimpleNamespace(write=lambda event: (True, "ok"))
+    registry = DAERegistry(store)
+    assert registry.register(DAERegistration("raised-test", "Test", "infrastructure"))
+    attempted, notified = [], []
+    failure = OSError("injected raised store failure")
+
+    def raise_write(event):
+        attempted.append(event)
+        raise failure
+
+    store.write = raise_write
+    registry.add_listener(notified.append)
+    try:
+        registry.report_event("raised-test", DAEEventType.SECURITY_VIOLATION, {})
+    except OSError as observed:
+        assert observed is failure
+    else:
+        raise AssertionError("Expected the exact store exception to escape")
+
+    assert len(attempted) == 1
+    assert attempted[0].event_type == DAEEventType.SECURITY_VIOLATION
+    assert notified == []
+    assert list(tmp_path.iterdir()) == []

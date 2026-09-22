@@ -1,5 +1,13 @@
 # dae_daemon TestModLog
 
+## 2026-09-22: Seven persistence/acknowledgment characterization cases
+
+- Reuse the existing observer file; preserve the original nine retry regressions and three observer methods exactly. Seven ordinary cases characterize six boundaries, including a separate raised-exception control; production methods are unchanged.
+- Local and independent selected runs:16passed,3deselected, two plugin-configuration warnings. Same16cases overlap; no new crash, cross-process, live WRE/FAM or power-loss evidence.
+- Run with `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`: `python -B -m pytest modules/infrastructure/dae_daemon/tests/test_dae_observer.py -k test_event_store_ -q -o addopts= -p no:cacheprovider`. Exact interpreter, external temporary paths and JUnit are in the evidence receipts.
+- Test command, frozen hashes, independent result and any failed attempts are bound in the current backlog evidence. Existing prior process-witness screening block remains unchanged; this uses ordinary pytest only.
+- Compare returned versus raised store failure, record/append state after error and reopen, duplicate identity ambiguity and equal-count content mismatch. Do not promote a characterization pass into a durability or retained RSI claim.
+
 ## 2026-09-22: Fixed sequence-collision regression oracles
 
 - Reuse `test_dae_observer.py`; nine new standalone cases, original three observer methods unchanged.

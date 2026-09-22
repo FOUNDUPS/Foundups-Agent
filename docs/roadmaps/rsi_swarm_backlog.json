@@ -1856,8 +1856,8 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "9103ec35d50495fd37690e48e442025372fac6e5",
-    "selected_action": "R18-R23-event-store-collision-retry",
+    "base_commit": "e4075f3da5abc8382c76bc67da552316e9647b4c",
+    "selected_action": "R18-R23-persistence-ack-contract-qualification",
     "status": "independent_local_validation_passed_publication_pending",
     "wsp15": {
       "complexity": 3,
@@ -1871,17 +1871,17 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-event-store-20260922",
-    "observed_at": "2026-09-21T22:46:36.881315+00:00",
-    "base_commit": "9103ec35d50495fd37690e48e442025372fac6e5",
+    "observation_id": "rsi-persistence-contract-20260922",
+    "observed_at": "2026-09-21T23:51:29.979923+00:00",
+    "base_commit": "e4075f3da5abc8382c76bc67da552316e9647b4c",
     "previous_observation": {
-      "observation_id": "rsi-monitor-controls-20260922",
-      "git_reference": "9103ec35d50495fd37690e48e442025372fac6e5:docs/roadmaps/rsi_swarm_backlog.json"
+      "observation_id": "rsi-event-store-20260922",
+      "git_reference": "e4075f3da5abc8382c76bc67da552316e9647b4c:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "role": "coordinator",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected_task": "Remove proven central event-store sequence-collision deadlock in the existing write method",
+    "selected_task": "Existing event persistence/recovery/ack characterization and contract qualification",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1891,60 +1891,116 @@
       "priority": "P1"
     },
     "status": "independent_local_validation_passed_publication_pending",
-    "selection_basis": "Existing supervision evidence integrity is the upstream15/P1 dependency; native18/P0 remains blocked. No module/store/scheduler duplication.",
+    "selection_basis": "Newly proven divergence remains an upstream supervision dependency, winning15/P1 tie over persistent roles; native18/P0 lacks admitted prerequisites. No new telemetry owner needed.",
     "retrieval": {
-      "noise": "Historical bootstrap shelf and old test pass counts are not current execution evidence",
-      "ordering": "WSP00 gate, WSP97/15/62, current Git, NAVIGATION, module interface/readme/tests/log, exact owner and adjacent FAM pattern",
-      "missing": "No dae_daemon ROADMAP or dedicated persistence test owner; reuse existing observer test file",
-      "staleness": "Shared root still0c81418; known HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH unchanged, no repeated query/reindex; exact-source fallback only",
-      "duplication": "Existing event_store.write owns retry; no module, new store, scheduler or skill needed"
+      "noise": "Historical bootstrap/ledger and aggregate pass claims are not current status",
+      "ordering": "WSP00 bootstrap/gate, currentWSP15/97, exact main+PR/accounting,22source bindings, NAVIGATION, module docs/tests",
+      "missing": "No daemon-local ROADMAP or memoryREADME; use existing system map/backlog; no new docs owner",
+      "staleness": "Shared rootHEAD0c81418 unchanged; known HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH not retried or reindexed",
+      "duplication": "Existing observer test file, store/registry and FAM precedent; extend before creating"
     },
     "closure_reconciliation": {
-      "pr": 1853,
-      "merge": "9103ec35d50495fd37690e48e442025372fac6e5",
-      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-monitor-controls\\final-accounting.json",
-      "sha256": "27c3c08ef2f74a3c0381eb2edc84e134f4f899ad87a7d050667729f571b6ceea",
-      "state": "complete",
+      "pr": 1854,
+      "merge": "e4075f3da5abc8382c76bc67da552316e9647b4c",
+      "publication": "complete",
+      "overall_state": "blocked_only_on_temporary_staging_cleanup_policy",
       "main_workflows": [
         {
           "conclusion": "success",
-          "databaseId": 35660777905,
-          "headSha": "9103ec35d50495fd37690e48e442025372fac6e5",
+          "databaseId": 35665149437,
+          "headSha": "e4075f3da5abc8382c76bc67da552316e9647b4c",
           "status": "completed",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35660777905",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35665149437",
           "workflowName": "CI"
         },
         {
           "conclusion": "success",
-          "databaseId": 35660777164,
-          "headSha": "9103ec35d50495fd37690e48e442025372fac6e5",
+          "databaseId": 35665149446,
+          "headSha": "e4075f3da5abc8382c76bc67da552316e9647b4c",
           "status": "completed",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35660777164",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35665149446",
           "workflowName": "CodeQL"
         }
       ],
-      "owned_lane": "retired; ignored state and recovery bundle preserved"
+      "owned_worktree": "retired; recovery bundle and ignored state archived",
+      "remaining_blocker": {
+        "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\test-staging-cleanup-blocked.json",
+        "sha256": "be899c591e748b487a3575d8d29620fe438ec1a1d97a6e5ed288f77db9e762fe",
+        "reason": "Automatic approval review rejected the PowerShell removal command: blocked by policy. No narrower policy explanation was returned."
+      },
+      "retained_paths": [
+        "O:/Foundups-Agent-audits/20260922-rsi-event-store/manifest-test-staging",
+        "O:/Foundups-Agent-audits/20260922-rsi-event-store/focused-unit-tmp",
+        "O:/Foundups-Agent-audits/20260922-rsi-event-store/independent-unit-tmp"
+      ],
+      "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\final-accounting.json",
+      "sha256": "5e8673f0b09af4b8c2e0b6e73002d38d6ea690db7f497b5cdfa72ae616384b73"
     },
-    "contract": "docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22",
-    "artifact_root": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store",
+    "contract": "docs/DAEMON_ARCHITECTURE_MAP.md#persistence-and-acknowledgment-qualification--2026-09-22",
+    "artifact_root": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract",
     "dispatchable": false,
     "retained_improvement_proven": false,
     "validation": {
-      "baseline": "Actual-lock collision deadline hit; recursive write stack/partial stores observed, own child terminated. Frozen regressions5passed/4failed. Partial-write, duplicate, volatile notification and listener-isolation characterization retained.",
-      "candidate": "Ordinary focused pytest9passed/3deselected, two plugin-configuration warnings. Same nine fixed test IDs/assertions; fail-fast Lock wrapper. Original three daemon observer methods unchanged and not run.",
-      "limits": "Candidate process witness not run: automatic screening blocked two broader reviews. That harness remains paused. Narrow source/unit review does not override screening or prove candidate actual-lock subprocess/cross-process/crash recovery.",
-      "packaging": "Manifest1400same members, one member digest plus two pins;8generator tests,15fast groups and67file/950440byte package pass. Test registry1651/269 unchanged.",
-      "independent": "Independent ordinary replay9passed/3deselected, same nine cases; source hashes match static review. Initial9fixture-setup errors preserved, missing external parent created before rerun; no source/test/oracle changes. Not18unique tests.",
-      "no_claims": [
-        "atomic dual-store durability",
-        "registry durable acknowledgment",
-        "native runtime admission",
-        "production effects",
-        "reward settlement",
-        "retained RSI improvement"
+      "scope": "Test/document qualification only; no production source or runtime activation",
+      "local": "16passed/3deselected/two configuration warnings",
+      "independent": "same16cases passed; not32unique cases",
+      "fixed_prior_cases": "Original9retry functions and3observer methods unchanged",
+      "new_cases": "7current-behavior characterizations of6boundaries; existing defects explicitly retained as gaps",
+      "static_only": "WRE SQLite verifier and adjacent FAM behavior; no new execution of those owners",
+      "not_claimed": [
+        "atomic durability",
+        "JSONL replay/recovery",
+        "cross-process/crash/power-loss proof",
+        "universal emergency delivery",
+        "native admission",
+        "retained benefit"
       ]
     },
-    "size_debt": "event_store332→333/class310→311; write32; observer tests288. Existing mirrored WSP module logs own cohesive persistence/recovery review before further growth.",
+    "bootstrap_evidence": {
+      "wsp00-gate.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\wsp00-gate.json",
+        "sha256": "698c82a1b56c2439591ede1a2e0b41c35a99bc67ec8ef63576ee6f5881efb85f"
+      },
+      "worker-wsp00-gate.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\worker-wsp00-gate.json",
+        "sha256": "6bf2873025fd27b7314db08864dad4ff8c6de652e837e60423d1b36856f97e31"
+      },
+      "verifier-wsp00-gate.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\verifier-wsp00-gate.json",
+        "sha256": "3c4f3904af0f71fd9badbd39015068b674c4ee0f9774670672f44f72b888af95"
+      }
+    },
+    "effort_cost_verification": {
+      "effort": "One characterization/contract slice; production source unchanged",
+      "cost": "No provider dispatch; token/cost unavailable",
+      "verification": "Fixed ordinary unit fixtures with explicit temporary paths, independent review/replay, relevant registry check, exact PR/mainCI and own closure"
+    },
+    "audit_receipts": {
+      "worker-test-characterization-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\worker-test-characterization-review.json",
+        "sha256": "8eac43ac3da30b7fb146cd8d37d8ad208e1442c5d1e8d2a68ae39345f6029b08"
+      },
+      "independent-contract-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\independent-contract-review.json",
+        "sha256": "7e3840362032845d9b54d05ed9112613079509aff9058753bdf1e7f8145b705c"
+      },
+      "independent-next-source-rescore.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\independent-next-source-rescore.json",
+        "sha256": "70e452ad51c35d6eee5314087eec6171d11f0ceaae1202387ddc5ad15166ac8a"
+      },
+      "independent-test-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\independent-test-review.json",
+        "sha256": "967d088ce45e069cb031d347ee1413e3518ade9c90ca67f4be15069f0f223bb9"
+      },
+      "focused-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\focused-tests.xml",
+        "sha256": "5de585da4e2332226b59a99797780e304c2bd98d5b64ca6d15b3fdff7cdbfaaa"
+      },
+      "independent-tests.xml": {
+        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\independent-tests.xml",
+        "sha256": "cdf0fc9edb826a418f4f5ff42a123f5a674ada1388e1705390fc9262f2c60949"
+      }
+    },
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
@@ -1959,20 +2015,6 @@
           },
           "state": "blocked",
           "dependency": "Seven resident trust anchors/absent effect lease and independently admitted production provenance"
-        },
-        {
-          "task": "Qualify authoritative event persistence, recovery and caller acknowledgment",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4,
-            "total": 15,
-            "priority": "P1"
-          },
-          "state": "eligible_bounded_qualification",
-          "evidence": "Disposable partial-write/volatile-listener baseline; nine fixed store regressions preserve known JSONL divergence",
-          "next_step": "Map current JSONL readers, SQLite authority/recovery and registry consumers; freeze crash/reopen/idempotency/ack oracles before extending existing owner. Preserve volatile emergency notification; no live DB."
         },
         {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
@@ -2027,43 +2069,48 @@
           },
           "state": "separate_owner_scope",
           "dependency": "Owner reconciliation; no social effects"
+        },
+        {
+          "task": "Keep SQLite structural diagnostics separate from repair-success feedback and escalation suppression in the existing WRE self-audit owner",
+          "wsp15": {
+            "importance": 3,
+            "impact": 4,
+            "deferability": 3,
+            "complexity": 2,
+            "priority": "P2",
+            "total": 12
+          },
+          "state": "outstanding_bounded_source_repair",
+          "evidence": "daemon_self_audit_loop.py::_is_successful_fix_result/_record_fix_feedback/_maybe_escalate; legacy opt-in SQLite verification is credited as repair",
+          "next_step": "Preserve diagnostic observability and its narrow success status, but do not credit event_store_verified as evidence that a causal write failure was repaired. Ensure repeated unresolved signals remain eligible for existing inert escalation policy. Keep actual repair markers distinct. Do not merely delete a marker and silently misclassify a healthy diagnostic as failed repair.",
+          "acceptance": [
+            "SQLite-only verification still emits narrowly scoped diagnostic evidence",
+            "Healthy diagnostic does not increment completed-repair success",
+            "Healthy diagnostic is not relabeled as failed repair solely due to classification change",
+            "Repeated unresolved collision signal is not suppressed solely by event_store_verified",
+            "Existing true repair outcomes preserve their behavior",
+            "No live escalation/process dispatch in fixtures"
+          ]
+        },
+        {
+          "task": "Strengthen count-only parity diagnostics when a consumer is bound",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 4,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "deferred_consumer_qualification",
+          "evidence": "Central verify_parity has no production caller in scoped search; equal-count malformed/different JSONL passes; inherited class-size debt",
+          "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API"
         }
       ],
-      "selected_next": "Authoritative event persistence/recovery/acknowledgment qualification15/P1",
-      "selection_reason": "Proven fixture-level partial writes are upstream of trustworthy supervision and win the15/P1 tie over persistent roles. This is qualification, not authority to redesign persistence. Re-observe after closure.",
-      "resolved": "Recursive lock retry defect locally repaired; PR1853 publication/main checks/owned cleanup reconciled",
-      "still_open": "Partial writes, conflict classification, crash recovery, native authority, persistent roles, confirmed controls, sustained capacity and independent retained benefit"
-    },
-    "effort_cost_verification": {
-      "effort": "One existing method, reused test owner, required digest/docs; no new module",
-      "cost": "No provider/model/runtime dispatch; orchestration token/cost not measured",
-      "verification": "Fixed regression oracles, independent source/unit review, exact-head checks, main workflows and owned cleanup required"
-    },
-    "audit_receipts": {
-      "selection.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\selection.json",
-        "sha256": "894bd0fd868a944338513e568de7201c92b0a2ad23fb1729498683908fb751fa"
-      },
-      "source-only-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\source-only-review.json",
-        "sha256": "cc20f81de93fdc7c9fb90d9913b00a898ab23f5f93ccf01d85f4251f21e891e9"
-      },
-      "independent-unit-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\independent-unit-review.json",
-        "sha256": "0cfa3fb29e631d201ce07a3d0e1c2288a3424ba3d11aa5d63f4b717c2e8c32d1"
-      },
-      "focused-unit-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\focused-unit-tests.xml",
-        "sha256": "d650bae88ef13b3c61814db9a878ca6e2628e2edb70819999b055e5742981bba"
-      },
-      "independent-unit-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\independent-unit-tests.xml",
-        "sha256": "c031a1fb1f349deee0c2b029c3bc78f10393f92009932c9bbe742f6983ba572e"
-      },
-      "disposable/baseline-all/receipt.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260922-rsi-event-store\\disposable\\baseline-all\\receipt.json",
-        "sha256": "d3f0d71db3ba96151e2168cdcd45217920291f5e5610dd8406746c6afe853b6b"
-      }
+      "selected_next": "Persistent verifier/treasury role and caller-authority qualification15/P1",
+      "selection_reason": "Qualification closes the unknown current-behavior scope. Concrete diagnostic repair is12/P2 on a mapped legacy opt-in path, below role15/P1. Do not invent another15/P1 persistence audit or unused receipt API; native18/P0 remains blocked. Re-observe before dispatch.",
+      "resolved": "Existing persistence/ack behavior characterized; PR1854 publication reconciled",
+      "still_open": "Prior policy-blocked staging cleanup; actual persistence/ack repairs, role authority, native admission, scale and retained benefit"
     }
   }
 }
