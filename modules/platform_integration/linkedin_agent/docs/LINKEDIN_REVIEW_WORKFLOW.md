@@ -63,6 +63,42 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI connection policy qualification — 2026-09-22
+
+Qualification only, at baseline `1364eb1644741ae0d66b51997ed3419c34264e3a`;
+production source is unchanged. Ten fixed current-behavior cases pass locally
+and on independent replay using the actual browser action method and in-memory
+connection manager, inert routing and a patched simulation sleep. Both runs
+retain two known disabled-plugin configuration warnings. The real
+browser constructor is bypassed; four original constructor-using tests remain
+unchanged and deselected. These tests document a defect; they do not endorse it.
+
+The browser method navigates, optionally extracts metadata, evaluates policy,
+then calls `send_connection_request` on the manager before checking `dry_run`.
+An allowed preview can create a pending request, append history and simulate a
+send. A denied preview can append blocked history; same-day blocked history
+counts toward the daily limit. Existing pending/connected requests and exhausted
+quota have distinct outcomes. Missing metadata and unavailable policy manager
+return early. Inert live success/failure controls bind the current click ordering.
+No real account, external send, persistence or OS sandbox claim follows.
+
+**Next repair contract — 12/P2 (3/3/3/3), not implemented here:** reuse the existing
+read-only `evaluate_connection_policy` in the browser owner. For a dry-run,
+return policy preview before calling the mutating request manager, on both allow
+and deny. Preserve truthful policy/profile fields, keep denial a failure and
+omit `request_status` because no request was created. An allowed policy preview
+does not certify quota, deduplication, send eligibility or permission. Fixed
+future tests must prove unchanged history/pending/connections and no simulation,
+including seeded quota/pending/connected controls; retain explicit live behavior.
+Navigation, metadata extraction and constructor effects remain a separate gap.
+Do not advertise this narrow repair as a browser-free preview. The inherited
+194-line method requires cohesive extraction before growth, reusing existing
+result projection rather than creating a second policy module.
+
+OpenClaw/Hermes current versions, admitted worker execution, live social authority
+and retained RSI learning remain unqualified. See the canonical root backlog
+for source bindings, receipts, ranking and publication state.
+
 ### RSI session preview — 2026-09-22
 
 From baseline `0d19785c48da93794821140579340489e3ce4239`, `engagement_session` with truthy dry-run
@@ -84,7 +120,7 @@ Adapter dispatch313→304 lines; file670. Existing direct helper is extended,
 not duplicated. Manifest membership remains1401 with only the adapter digest
 and existing pins refreshed; the test registry includes the focused test owner.
 
-Next12/P2: qualify connection dry-run policy/history behavior using inert
+Historical next12/P2 (qualification now recorded above): inspect connection behavior using inert
 collaborators before reordering it. Existing browser actions navigate and call
 the simulated request manager before their dry-run guard; external sending or
 persistence is not established by that observation. Other direct/agentic routes,
