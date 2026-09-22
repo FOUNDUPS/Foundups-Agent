@@ -1,3 +1,8 @@
+## 2026-09-22: RSI broker import-failure counter repair
+
+- WSP00/10/15/22/49/50/62/91/97;12/P2. Repeated caught import failures now reach the existing detach threshold without erasing the streak at launch entry. No admission or scheduling authority added.
+- 13 fixed cases pass locally and independently; original3 lifecycle tests unchanged/deselected. [Canonical backlog](docs/roadmaps/rsi_swarm_backlog.json) records exact validation, publication, inherited staging-cleanup block and re-scored next work. PR1858 is fully published and its owned lane retired.
+
 ## 2026-09-22: RSI diagnostic-outcome accounting
 
 - WSP00/15/22/49/50/62/91/97;11/P2. Existing WRE self-audit now distinguishes successful SQLite checks from repair outcomes across counters, feedback and escalation.

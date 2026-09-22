@@ -65,6 +65,26 @@ Those limitations remain explicit in the system supervision map.
 
 See the [system persistence qualification](../../../docs/DAEMON_ARCHITECTURE_MAP.md#persistence-and-acknowledgment-qualification--2026-09-22) for the evidence boundary and stronger future acceptance requirements.
 
+### Broker import-failure streak
+
+The broker preserves a per-DAE in-memory streak across launches. A caught
+`ImportError` (including `ModuleNotFoundError`) increments it; at the existing
+threshold of three the registry is marked `DETACHED` and disabled. Earlier
+failures remain `CRASHED`. Disabled admission prevents another start.
+
+The count resets only after the complete existing success path finishes, or
+when that path catches a non-import `Exception`. The existing catch also covers
+result summarization and success-event/state reporting, so this is an exception
+classification, not proof of missing dependencies or callable-origin failure.
+Manually re-enabling the registry does not reset the streak; another import
+failure detaches again. No automatic enable, retry or recovery is introduced.
+
+Interruptions outside `Exception` retain the count and propagate through the
+existing final bookkeeping. Exceptions from pre-launch/failure/finally reporting
+retain their prior propagation boundary. The count is neither durable nor a
+health score; stop acknowledgment, live restart behavior and broader concurrency
+remain separate acceptance work.
+
 ## Data Persistence
 
 - JSONL: `modules/infrastructure/dae_daemon/memory/dae_events.jsonl`

@@ -31,7 +31,7 @@ passing test claim. The initial map was documentation-only; the bounded retry ch
 | Lifecycle events, registry, snapshots | `modules/infrastructure/dae_daemon/src/{dae_daemon,dae_registry,dae_adapter,dae_observer}.py` | Reuse CentralDAEmon. State, heartbeat, event cursor and runtime view exist; they do not prove task progress, durable admission or accepted output. |
 | Durable event evidence | `modules/infrastructure/dae_daemon/src/event_store.py` | `write` still appends JSONL before SQLite. Disposable baseline reproduced its recursive lock deadlock; bounded retry now stays within one lock acquisition and nine fixed regressions pass. Failed attempts can still leave extra JSONL records. Atomicity, crash/reopen, cross-process ordering and durable caller acknowledgment remain unqualified; no observed production incident is claimed. |
 | Event acknowledgment | `modules/infrastructure/dae_daemon/src/dae_registry.py::_emit` | Ignores the store write result before notifying listeners. Qualify failed persistence, duplicate identity and listener acknowledgment before using notifications as durable evidence. |
-| Launch, stop and detach | `modules/infrastructure/dae_daemon/src/dae_launch_broker.py`, `killswitch.py` | `stop_dae` reports STOPPED after the stop callable returns without confirming worker exit. Registry `disable` changes a flag. Import-failure count resets before the start callable; qualify repeated callable ImportError. No global restart/kill authority follows from a monitor alert. |
+| Launch, stop and detach | `modules/infrastructure/dae_daemon/src/dae_launch_broker.py`, `killswitch.py` | `stop_dae` reports STOPPED after the stop callable returns without confirming worker exit. Registry `disable` changes a flag. Import-failure streak now survives consecutive caught errors and reaches threshold3; fixed inert tests qualify reset/re-enable semantics, not live recovery. No global restart/kill authority follows from a monitor alert. |
 | Observation effects | `modules/infrastructure/dae_daemon/src/dae_observer.py::_get_runtime_status` | Lazy broker retrieval can create its heartbeat thread. Read-side APIs are not yet proved effect-free; use source inspection/disposable fixtures until side effects are qualified. Missing runtime data must remain unknown. |
 | Admission, claims, leases, assurance | `modules/infrastructure/database/src/agent_db.py` and current OpenClaw supervisor | Existing signed-worker lease/heartbeat/recovery owners remain authoritative. CentralDAEmon does not grant work or override expiry/quarantine. Reserve independent verifier capacity. |
 | RSI self-audit and native supervisor | `modules/infrastructure/wre_core/src/daemon_self_audit_loop.py`; `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` | Bounded attempt outcome, coverage and success age are now distinct from event count; fixed local/independent tests do not establish live health or full coverage. A broker heartbeat for a live thread cannot prove useful progress. Preserve native valve reason codes and absent effect lease. |
@@ -225,24 +225,23 @@ No layer is operationally complete merely because its happy-path test passes.
 ### Current WSP15 selection and WSP97 disposition
 
 PR1853 closed architecture reconciliation; PR1854 repaired bounded event-store
-retry; PR1855 and PR1856 qualified persistence and scan boundaries. PR1857 merged
-same-attempt scan status with 71 fixed cases and verified PR/main checks. These
-are bounded source/validation results, not whole-system runtime completion.
+retry; PR1855/1856 qualified persistence/scan boundaries; PR1857 repaired scan
+status; PR1858 separated diagnostics from repair credit. Their bounded results
+are preserved in Git and current receipts; none proves whole-system runtime RSI.
 
-The current **11/P2** SQLite diagnostic-outcome repair keeps checks observable
-without repair credit or escalation suppression. 94 fixed cases pass locally
-and independently; the [WRE interface](../modules/infrastructure/wre_core/INTERFACE.md#self-audit-diagnostic-outcomes)
-defines exact action/result qualification, invocation semantics and preserved
-history. No historical counter migration or new diagnostic-failure inference.
-Independent review and exact publication receipts are in the current backlog.
+The current **12/P2** broker repair preserves per-DAE caught import-failure
+streaks until full launch success or a caught non-import exception. 13 fixed
+inert cases pass locally and independently; original three lifecycle tests are
+unchanged and deselected. The [broker contract](../modules/infrastructure/dae_daemon/INTERFACE.md#broker-import-failure-streak)
+defines the catch scope, threshold3, manual re-enable and interruption boundaries.
+These fixtures launch no process; the repair adds no restart policy or authority.
 
-The native ticket remains **18/P0 blocked** by trust anchors/absent effect lease.
-Persistent role/caller-authority source qualification is complete; its domain
-mapping remains **14/P1 blocked** on named ingress and existing-authority mapping.
-PostgreSQL parity **13/P1** remains unqualified; LinkedIn **13/P1** is separately
-owned. Fresh selection after this repair is recorded in the backlog, not inferred
-from the old queue. Count parity has no bound consumer; do not revive the old
-unified event-queue proposal below. Full recovery and production RSI remain unproved.
+Native **18/P0** remains blocked by trust/effect admission. FAM domain mapping
+**14/P1** remains blocked after source qualification; PostgreSQL **13/P1** lacks
+runtime qualification and LinkedIn **13/P1** has a separate owner. Count parity
+has no bound consumer. Fresh post-sprint selection and exact publication are in
+the canonical backlog. Stop acknowledgment and observer read-side effects remain
+separate gaps; do not revive the historical unified event-queue proposal below.
 
 ---
 

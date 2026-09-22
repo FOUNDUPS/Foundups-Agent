@@ -1,3 +1,10 @@
+## 2026-09-22: Preserve broker import-failure streaks
+
+- WSP00/10/15/22/49/50/62/91/97; C3/I3/D3/Impact3=12/P2. Existing broker counter now survives repeated caught import errors and reaches threshold3; successful full launch handling or a caught non-import exception resets only the affected DAE.
+- Preserve broad existing catch, events/finally, disabled admission and manual re-enable semantics. Same-file failure-transition extraction shrinks inherited class and oversized method; no new broker/module or process authority.
+- Fixed baseline:9failed/4passed; candidate and independent replay:13passed, original3 lifecycle methods unchanged/deselected. Inert fixtures only; no service, real thread, provider or default database.
+- Corrects the historical V1.2.5 completion claim below; no measured live crash-loop/noise improvement is asserted. Exact source, manifest, checks and closure are in the canonical RSI backlog. Re-score after closure.
+
 # dae_daemon ModLog
 
 ## 2026-09-22: Qualify persistence and acknowledgment boundaries

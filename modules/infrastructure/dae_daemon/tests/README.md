@@ -40,6 +40,19 @@ future contract. Keep fault inputs fixed when proposing a repair, independently
 review its stronger oracle, and retain the historical result. No daemon is started,
 no real kill action occurs, and WRE/FAM comparisons are static only.
 
+## Broker import-streak regressions — 2026-09-22
+
+Select `-k test_import_streak_` in `test_dae_launch_broker.py` for the bounded
+regressions: 13 passed locally and independently (the same cases), after
+9 failed/4 passed on unchanged source. Original three lifecycle
+tests remain exact and are deselected because they start real daemon threads.
+
+Fixtures use inert registry/handles and finite callables. They cover thresholds,
+per-DAE recovery, re-enable, downstream exceptions, admission and final bookkeeping.
+Use disabled plugin autoload, Python `-I -B -m pytest`, `-o addopts=`,
+`-p no:cacheprovider` and a fresh external `--basetemp`. This proves the bounded
+state transition, not live restart safety, durable monitoring or retained RSI.
+
 ## Running Tests
 
 ```bash

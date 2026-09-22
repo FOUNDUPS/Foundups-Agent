@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-09-22 - Broker import-streak backend binding
+
+- Refresh the existing broker member and both digest pins to `52968ee67ecb7645bd21d39ce6dcbafcb578ded28f0dd7fe8db7285d6884d267`. Runtime membership remains 1,401; API/version and package caps are unchanged.
+- Eight generator tests, manifest check, 15 fast groups and the deterministic 67-file/950,440-byte package pass. The broker's 13 fixed inert cases pass locally and independently; these do not prove live recovery or autonomous RSI.
+- No installed extension, service or provider update. Exact publication and fresh selection are recorded in the canonical RSI backlog. WSP 15/22/49/50/62/84/97.
+
 ## 2026-09-22 - WRE diagnostic-outcome backend binding
 
 - Bind the existing scanner and one cohesive WRE outcome helper; generated runtime membership is exactly1,401, with no removed members. Both digest pins are `5cade2540f521672ca62be0ab59d34eeee89e3224316106a11cbe1871fbcac77`.
