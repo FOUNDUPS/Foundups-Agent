@@ -81,6 +81,27 @@ Provide zero-friction startup for YouTube DAE by automatically launching all req
   signed model benchmark and promotion evidence at use time.
 - [ ] Canary and rollback receipts before any runtime or model update.
 
+### Signed expectation projection qualification — 2026-09-22
+
+- [x] Qualify the existing AI Gateway-to-supplier boundary, WSP15 C3/I4/D3/Impact3
+  =13/P1. The [interface contract](INTERFACE.md#signed-expectation-projection-contract--qualification-2026-09-22)
+  identifies exact owner decisions and a fixed nine-row acceptance matrix.
+  Existing49 owner tests pass locally; no production source or schema changed.
+- [ ] AI Gateway policy/supply owners: select explicit versioned task/surface/
+  role/model/provider-to-slot mapping and the observer verification lifecycle.
+  This is the next decision dependency, not another broad discovery audit.
+- [ ] Inventory/supply owner: qualify typed inference-backend artifact identity
+  and software provenance. Current MODEL/PANEL proof cannot fill this slot.
+- [ ] After those decisions, independently qualify the cross-owner implementation
+  against the fixed matrix; preserve v1 bytes and NOT_READY in the interim.
+
+No exact general/code mapping exists in the inspected owners; no mapping is
+invented here. Verification checks trusted current time/key state; one-shot
+consumption alone does not. Installed/running runtime versions, latest upstream
+release, canary/rollback and update admission remain separate unverified work.
+See the [system backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) for
+source bindings, independent review, publication and the next WSP15 selection.
+
 Automatic updates during `main.py` startup are explicitly rejected. The runtime
 compatibility advisory observes cached evidence only; the separate opt-in WSL
 version advisory executes installed programs. WRE owns research and any later
