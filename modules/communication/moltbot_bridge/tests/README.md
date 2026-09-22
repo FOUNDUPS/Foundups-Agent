@@ -1,3 +1,16 @@
+## LinkedIn session preview — 2026-09-22
+
+Run the existing54 `test_linkedin_dry_run_` cases and the focused
+`test_linkedin_session_preview.py` through the same reviewed inert-package runner.
+The latter imports the shared inert fixture/helpers; no parallel fixture or live
+browser bootstrap. Freeze both files before baseline; unique external staging,
+plugin autoload disabled, `-B`, `-o addopts=`, cache disabled remain required.
+Fixed77 cases change from15fail/62pass to77pass on candidate and independent
+replay; original18 unchanged/deselected, two configuration warnings per run.
+Preview fields, numeric validation, wrapper precedence, omitted/false fake-live
+results and errors/close are bounded acceptance, not live-account certification.
+Exact runner, source and XML bindings are in the canonical RSI backlog.
+
 ## LinkedIn dry-run repair — 2026-09-22
 
 The existing adapter suite now has54 fixed `test_linkedin_dry_run_` cases, evolving
