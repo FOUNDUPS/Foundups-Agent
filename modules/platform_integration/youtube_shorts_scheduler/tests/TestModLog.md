@@ -2,7 +2,7 @@
 
 ## 2026-09-22 - Isolated current-main validation
 
-**84 passed**, one pre-existing Pydantic annotation warning. Same seven-file
+**85 passed**, one pre-existing Pydantic annotation warning. Same seven-file
 focused suite below, including three new unscoped-command regressions.
 Compared with the historical shared checkout run, current main also contains
 six previously merged STT language cases. Windows temporary fixture access

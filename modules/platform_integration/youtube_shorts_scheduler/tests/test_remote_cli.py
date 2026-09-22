@@ -269,3 +269,19 @@ def test_bound_is_shared_across_visibility_passes(monkeypatch):
         result = asyncio.run(scheduler.run_scheduling_cycle(max_videos=1, update_metadata=False))
     assert len(result['scheduled']) == 1
     assert scheduler.dom.navigate_calls == ['UNLISTED']
+
+
+def test_selected_batch_audit_cannot_autoheal_unrelated_schedules(monkeypatch):
+    monkeypatch.setenv('YT_SCHEDULER_POST_AUDIT', 'true')
+    monkeypatch.setenv('YT_SCHEDULER_AUDIT_AUTO_HEAL', 'true')
+    from modules.platform_integration.youtube_shorts_scheduler.tests.test_schedule_include_private import _make_scheduler
+    scheduler = _make_scheduler([], [], dry_run=False)
+    scheduler.dom.has_next_page = Mock(return_value=False)
+    auditor = MagicMock()
+    auditor.run_audit.return_value = {'healthy': True}
+    with patch('asyncio.sleep', new=AsyncMock()), patch.dict('sys.modules', {
+        'modules.platform_integration.youtube_shorts_scheduler.src.schedule_auditor': SimpleNamespace(ScheduleAuditor=Mock(return_value=auditor)),
+    }):
+        result = asyncio.run(scheduler.run_scheduling_cycle(video_ids=['missing'], update_metadata=False))
+    assert result['batch_complete'] is False
+    auditor.run_audit.assert_called_once_with(auto_heal=False)

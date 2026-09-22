@@ -52,6 +52,7 @@ the legacy templates are not transcript-grounded generation.
 - Correct async constructor/method calls and registry-selected browser.
 - Transport-only readiness and JSON failure receipts through Red Dog.
 - Nonpersistent tracker preview, no preview autoheal, and shared-browser detach.
+- Selected-batch audits cannot auto-repair unrelated channel schedules.
 - Exact-ID selection across Studio pages, requested order per visibility,
   stalled-page detection, and explicit unresolved IDs for partial batches.
 - No default clip-count cap and no unqualified remote backlog execution.

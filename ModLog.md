@@ -638,7 +638,7 @@
 ## 2026-09-22 - Isolated YouTube remote command repair and prior Work audit
 
 Repaired the existing CLI/adapter, nonpersistent previews, exact-ID batch
-selection and Japanese batch transcript evidence. Focused regressions: 84
+selection and Japanese batch transcript evidence. Focused regressions: 85
 passed. Unqualified remote requests stop before selecting old backlog.
 Retrieved the prior Work 21-clip receipt and `publish_daily_clips` provenance;
 excluded the proposed parallel publisher registration. Source export, recent

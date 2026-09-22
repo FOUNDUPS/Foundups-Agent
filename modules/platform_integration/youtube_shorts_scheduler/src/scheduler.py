@@ -397,6 +397,9 @@ class YouTubeShortsScheduler:
                 from .schedule_auditor import ScheduleAuditor
                 auditor = ScheduleAuditor(self.channel_key, self.driver)
                 auto_heal = os.getenv("YT_SCHEDULER_AUDIT_AUTO_HEAL", "true").lower() in ("1", "true", "yes")
+                # A bounded clip request cannot authorize channel-wide repairs.
+                if video_ids is not None:
+                    auto_heal = False
                 audit_report = auditor.run_audit(auto_heal=auto_heal)
                 results["audit"] = {
                     "healthy": audit_report.get("healthy", False),
