@@ -1,5 +1,7 @@
 ## LinkedIn Digital Twin Flow (UI-TARS + Selenium)
 
+Current scope and authority live in [master activity routing](LINKEDIN_ACTIVITY_ROUTING.md). The layered execution design below is historical runtime context, not permission to like, switch identities, comment or schedule. Each action needs its own authorization and verification. Never resolve a mention by blindly selecting the first result; match the exact verified entity. Work uses the advertised browser skill.
+
 ### Purpose
 Define the layered automation flow for 012 Digital Twin LinkedIn engagement:
 - **Live action**: 012 comment (only live post)

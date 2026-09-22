@@ -1,5 +1,12 @@
 # Linkedin Agent Module - Roadmap
 
+## 2026-09-22 activity routing status
+
+- Instruction-level master and activity children: implemented; see [routing](docs/LINKEDIN_ACTIVITY_ROUTING.md).
+- Existing moderation/news owners reused with researched message-first membership and reviewed Good/Bad/Ugly discussion.
+- Legacy runtime safety (nested dry-run, direct action guards, simulated messaging, persistent deduplication): not certified by this documentation work. Do not launch unattended live jobs.
+- Historical daily news quotas and identity-like loops below are implementation history, not current operating authority.
+
 ## Overview
 This module operates within the **platform_integration** enterprise domain following WSP protocols for modular architecture, testing, and documentation compliance.
 
