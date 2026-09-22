@@ -1,14 +1,17 @@
 # wre_core Test Suite
 
-## Self-audit scan qualification
+## Self-audit scan status
 
-Run the finite scan-health cases in `test_daemon_self_audit_loop.py` using the
-exact selection in the current backlog. 13 cases pass locally and independently.
-The fixtures exercise inert `_run`, `_tail_new_lines` and supervisor `_observe`
-boundaries; they do not start a daemon or run the supervisor execution cycle.
+Run `test_daemon_self_audit_scan_status.py` for the bounded scanner/consumer
+contract: 71 fixed cases pass locally and independently (the same cases).
+The file preserves 13 prior fault inputs and adds outcome, partial coverage,
+clock, snapshot and compatibility acceptance. The remaining 30 definitions in
+`test_daemon_self_audit_loop.py` are unchanged and outside this focused run.
+Use `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, Python `-I -B -m pytest`,
+`-o addopts= -p no:cacheprovider` and an explicitly owned external `--basetemp`.
 The [scan contract](../../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
-records observed defects and required future status/freshness acceptance.
-Existing full-file cases have broader effects and are not part of this focused run.
+records baseline results and limits. Fixtures create no daemon thread, run no
+full supervisor cycle and invoke no provider/default database or payout.
 
 ## Consumer forced-dry isolation
 

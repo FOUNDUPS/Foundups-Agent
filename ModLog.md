@@ -1,3 +1,9 @@
+## 2026-09-22: RSI self-audit attempt-status repair
+
+- WSP00/15/22/49/50/62/91/97;13/P1. Existing WRE scanner and OpenClaw observation now distinguish bounded completion, partial coverage and failure without changing dispatch authority.
+- 71 fixed cases pass locally and independently; legacy integer/exception behavior, detached same-attempt counts, unknown failed counts and validated success age are covered. No runtime activation or retained learning claimed.
+- Canonical [monitor map](docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22), API docs and backlog carry scope/limits. PR1856 publication is complete; inherited temporary-staging cleanup remains policy-blocked.
+
 ## 2026-09-22: RSI self-audit scan qualification
 
 - WSP 00/10/15/22/49/50/62/91/97;13/P1. Extend existing WRE tests with 13 independently replayed cases distinguishing current failure/empty projections; no production behavior changed.

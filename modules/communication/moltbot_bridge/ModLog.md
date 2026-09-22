@@ -1,3 +1,12 @@
+## 2026-09-22: Report bounded self-audit scan outcomes
+
+- WSP00/15/22/49/50/62/91/97; C3/I4/D3/Impact3 = 13/P1. Extends existing scanner and supervisor after PR1856 qualification; no parallel monitor or new execution authority.
+- Add per-attempt detached status and validated monotonic success age while preserving integer/exception callers. Partial reads retain known counts; raised scans retain unknown counts. The supervisor consumes the same attempt and does not rescan malformed results.
+- 71 fixed ordinary cases pass locally and independently. Initial baseline:8passed/10failed/32API-absence fixture assertions across two runs. Independent review exposed a remaining cross-field gap:18added cases failed/3controls passed before correction. Original30 unrelated definitions and all prior fault inputs preserved;13 prior cases extracted into the focused test owner.
+- No TTL or healthy verdict invented. No-input/partial/failed scans do not refresh bounded-input success. No live daemon/provider/default DB, native worker activation, financial effect or retained RSI claim.
+- Existing API/test indexes and monitor map updated; canonical test registry and backend manifest/digest bindings regenerated and verified separately. Exact sizes, tests, hashes and publication state are in the current backlog evidence.
+- Re-observe after closure; native18/P0 and FAM domain mapping14/P1 remain blocked, PostgreSQL13 unqualified and LinkedIn13 separately owned. The structural-diagnostic/repair-success distinction remains a separately re-scored11/P2 candidate.
+
 ## 2026-09-22: Registered signer lifecycle consumer
 
 - WSP00/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. PR1849 is closed on main with both workflows successful and its owned lane retired.92 peer heads unchanged.

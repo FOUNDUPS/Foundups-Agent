@@ -34,7 +34,7 @@ passing test claim. The initial map was documentation-only; the bounded retry ch
 | Launch, stop and detach | `modules/infrastructure/dae_daemon/src/dae_launch_broker.py`, `killswitch.py` | `stop_dae` reports STOPPED after the stop callable returns without confirming worker exit. Registry `disable` changes a flag. Import-failure count resets before the start callable; qualify repeated callable ImportError. No global restart/kill authority follows from a monitor alert. |
 | Observation effects | `modules/infrastructure/dae_daemon/src/dae_observer.py::_get_runtime_status` | Lazy broker retrieval can create its heartbeat thread. Read-side APIs are not yet proved effect-free; use source inspection/disposable fixtures until side effects are qualified. Missing runtime data must remain unknown. |
 | Admission, claims, leases, assurance | `modules/infrastructure/database/src/agent_db.py` and current OpenClaw supervisor | Existing signed-worker lease/heartbeat/recovery owners remain authoritative. CentralDAEmon does not grant work or override expiry/quarantine. Reserve independent verifier capacity. |
-| RSI self-audit and native supervisor | `modules/infrastructure/wre_core/src/daemon_self_audit_loop.py`; `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` | Audit scan exceptions are swallowed/logged without a distinct health projection; zero events cannot prove a successful scan. A broker heartbeat for a live thread cannot prove useful progress. Preserve native valve reason codes and absent effect lease. |
+| RSI self-audit and native supervisor | `modules/infrastructure/wre_core/src/daemon_self_audit_loop.py`; `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` | Bounded attempt outcome, coverage and success age are now distinct from event count; fixed local/independent tests do not establish live health or full coverage. A broker heartbeat for a live thread cannot prove useful progress. Preserve native valve reason codes and absent effect lease. |
 | Skill outcomes and bounded advice | WRE `pattern_memory.py`, `libido_monitor.py`, existing monitor/AI Overseer owners | Reuse outcome storage and existing sensors. Proposed variants, confidence and local logs are not independent acceptance, activation or retained improvement. No verified generic small-model supervisor pool is established here. |
 | Telemetry intake and pressure | `modules/ai_intelligence/ai_overseer/src/{mcp_integration,holo_telemetry_monitor,ai_overseer}.py` | Queue, file reads and dedupe set are unbounded; critical-module to WRE mapping remains TODO. Qualify overload, rotation, failed enqueue and replay before scaling. Existing code and diagnostic callers are not proof of a running production consumer. |
 | Worker execution and rewards | Current OpenClaw/Hermes contracts; FAM `task_pipeline.py` and persistent adapter | Correlate artifacts and verdicts with current authority. PR1852 locally qualifies atomic SQLite pending initiation; pending is not paid, authenticated role authority or native RSI proof. |
@@ -86,43 +86,49 @@ handling. No new store, receipt schema, service or scheduler is introduced here.
 
 ### Self-audit scan qualification — 2026-09-22
 
-At `183ca279`, the existing WRE test owner qualifies the scanner and its
-OpenClaw observation consumer with 13 ordinary cases, replayed independently.
-These are the same cases in both runs. No production method or return type changed.
+PR1856 qualified 13 existing scanner/consumer cases at `183ca279`; it changed no
+production method. The repair based on merged `6ede800` preserves those fault
+inputs and extends acceptance to 71 fixed ordinary cases. Local and independent
+runs pass the same cases. Baseline results are retained separately: eight passed,
+ten failed and 32 fixture assertions failed because the additive API did not exist.
+Independent review then found contradictory status fields still accepted by the
+consumer: 18 added negative cases failed and three valid clock controls passed
+against the first repair. Their fixed acceptance is included in the final suite.
 
-| Existing seam | Observed boundary | Required repair acceptance |
+The existing WRE scanner now reports a detached result for each attempt through
+`scan_once_with_status()`. Its original `scan_once() -> int` retains exception
+propagation. OpenClaw consumes the returned attempt, so a later scan cannot
+replace the result associated with its event count. `get_scan_status()` is a
+separate diagnostic snapshot. The [WRE interface](../modules/infrastructure/wre_core/INTERFACE.md#self-audit-scan-observations)
+is the field-level contract.
+
+| Observation | Contract | Limit |
 |---|---|---|
-| `_run` | A caught scan exception allows another finite iteration. | Liveness is separate from successful scanning; record the failed attempt. |
-| `_tail_new_lines` | Stat/read failures can return an empty list without advancing the saved offset. | Incomplete input coverage must remain failed/partial/unknown, never healthy-empty. |
-| Supervisor `_observe` | Successful zero, scan exception and absent loop share zero event count. Positive results increment the count. | Expose attempt outcome separately from findings; absence/disabled ownership must remain distinguishable. |
+| Outcome/count | Unattempted, running, completed, partial and failed are distinct. A raised scan has unknown count; a returned partial scan preserves observed findings. | Finding count is neither scan health nor proof of persisted effects. |
+| Coverage | Bounded selected inputs, no inputs, known partial or unknown. Stat/read errors and discovery exclusions remain visible. | Completion never asserts whole-repository coverage. |
+| Success age | Completed bounded-input scans need valid start/completion times to refresh success. A later valid sample can age prior success; invalid sampling makes age unknown without undoing qualified completion. | Process-local observations; no durable identity or freshness policy. |
+| Supervisor | Disabled, absent, failed and legacy unavailable results are distinguishable. Malformed additive results never cause a second scan. | Existing integer metrics and legacy callers remain supported; execution authority is unchanged. |
 
-The tests call existing methods through inert collaborators. No daemon constructor,
-background thread, full supervisor cycle, provider, queue claim or payout is run.
-They characterize defects; passing them does not repair monitoring or establish
-full input coverage, live operation or retained RSI benefit. Existing historical
-tests remain unchanged and are outside this focused execution scope.
+The earlier qualification requested staleness handling under an explicit owner
+policy. No such TTL is established here: this repair supplies validated age and
+clock validity, without inventing healthy/fresh/stale verdicts. High-water clock
+validation includes failed attempts. Invalid start/completion readings prevent
+success replacement; invalid sampling only makes age unknown. Error codes are
+bounded and omit raw exceptions, paths and log content.
 
-**Next repair contract:** preserve `scan_once() -> int` compatibility and existing
-admission/dispatch policy. The producer must distinguish an unattempted scan,
-an in-progress attempt, completed scan, caught failure and incomplete input read.
-The consumer must carry that result without deriving health from event count.
-Count and status must describe the same attempt even if a background scan
-interleaves; an unbound latest-status read is insufficient. Return isolated
-snapshots, retaining unknown counts if a partial scan fails after effects.
-Keep last attempt and last successful complete scan separate; a failed attempt
-must not refresh success. Define staleness with an injected clock and explicit
-owner policy, including invalid/backward time and disabled/absent ownership.
-Current code has no such time/status contract; those are future acceptance cases,
-not tests claimed to pass here. Do not substitute heartbeat for this evidence.
+Tests cover mixed three-findings/failed-input results and metrics, discovery
+exclusions, zero-input results, failures before/after inert effects, interruptions,
+backward-time recovery, detached snapshots and capture before scan-lock release.
+The finite lock-release hook tests ordering without a background worker. They
+use disposable files and inert effects; no service, full supervisor cycle,
+provider, default database, queue claim or payout is executed. They do not prove
+live scheduler behavior, global coverage or retained RSI improvement.
 
-Use the existing WRE scanner and OpenClaw consumer, preserving confinement,
-offsets and integer callers. Test faults then recovery, zero/positive complete
-scans, partial input and stale success before claiming a repair. Preserve bounded
-error metadata without raw log content. No second monitor, scheduler, authority
-service or full-cycle execution is needed. Existing oversized production owners
-require a cohesive bounded change; this qualification does not exempt new debt.
-The existing supervisor ceiling is 3419 lines, expiring 2026-09-30; verify that
-contract again before repair and preserve its owner boundary.
+The prior 30 unrelated test definitions remain exact. The 13 characterization
+cases move into a cohesive focused file; consumer assertions now require the
+agreed repaired behavior. No second monitor, scheduler or authority service is
+introduced. The supervisor remains within its existing 3419-line ceiling,
+expiring 2026-09-30. Exact WSP62 dimensions are in candidate validation.
 
 ### A monitor is required beside every execution layer
 
