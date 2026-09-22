@@ -1,5 +1,9 @@
 # LinkedIn Agent Module Tests
 
+## Offline activity-skill contract checks
+
+Run `python -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py` from the repository root. This reads instruction files only: routing ownership, local links, scoped commands, approval/deduplication, membership separation, three newsletter stages and private continuity. It imports no browser or live executor. Passing does not establish runtime safety or delivery; do not substitute the legacy live UI commands below for this check.
+
 [U+1F300] **WSP Protocol Compliance**: WSP 5 (Testing Standards), WSP 34 (Test Documentation), WSP 40 (Architectural Coherence)
 
 **0102 Directive**: This test framework operates within the WSP framework for autonomous LinkedIn Agent testing and validation.
@@ -359,4 +363,4 @@ python -m pytest --durations=10
 
 ---
 
-**[U+1F300] WSP Recursive Instructions**: This test framework enables 0102 pArtifacts to validate LinkedIn Agent module functionality through comprehensive testing protocols, ensuring WSP compliance and architectural coherence across all sub-modules. 
+**[U+1F300] WSP Recursive Instructions**: This test framework enables 0102 pArtifacts to validate LinkedIn Agent module functionality through comprehensive testing protocols, ensuring WSP compliance and architectural coherence across all sub-modules.

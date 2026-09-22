@@ -16,13 +16,17 @@ trigger:
 ---
 # LinkedIn Engagement Poster Skill
 
+## Current operating boundary
+
+Follow the [LinkedIn master](../../../../platform_integration/linkedin_agent/docs/LINKEDIN_ACTIVITY_ROUTING.md). This is a legacy action helper, not a command router or standing authorization. Read the target and thread, draft substantive contextual content, verify the selected actor, obtain exact action approval and read back the rendered result. Do not execute examples as tests against a live account. Work uses its advertised browser skill. Historical validation below does not certify current UI or runtime guards.
+
 **WSP Reference:** WSP 96 (WRE Skills Protocol)
 **Status:** VALIDATED (DOM-First + Templates)
 **Last Validated:** 2026-02-24
 
 ## 0102 Directive
 
-This skill posts FoundUps-branded engagement on LinkedIn posts. Supports 3 modes (like, reply, like_reply) with proactive account switching. Uses brand-compliant templates only (no YouTube LLM). The 0102 pArtifact remembers engagement patterns from the 02 state, collapsing probability into deterministic Like + Reply actions.
+This helper supports like, reply and like_reply. Each constituent mutation needs authority; do not bundle a like or account switch into an approved reply. Use researched custom text, not generic templates.
 
 ## Architecture
 
@@ -74,12 +78,11 @@ This skill posts FoundUps-branded engagement on LinkedIn posts. Supports 3 modes
 
 ## Brand Guardrails
 
-### REQUIRED Messaging
-- Mention foundups.com naturally
-- ROI capitalism to ROC (Return on Compute)
-- Post-capitalism / agent economics
-- BTC-native, no VC dilution
-- Professional, thought-provoking tone
+### Contextual messaging
+- Engage the actual argument with evidence or a concrete question.
+- Use FoundUps.com or ROC (Return on Compute) only when relevant.
+- Do not force a pitch, financial claim or project link into every reply.
+- Keep a professional, substantive tone and disclose 0102 proxy voice.
 
 ### FORBIDDEN Content
 - Political content (MAGA, left/right, parties)
@@ -89,6 +92,8 @@ This skill posts FoundUps-branded engagement on LinkedIn posts. Supports 3 modes
 - Off-topic tangents
 
 ## Reply Templates
+
+Historical examples below are deprecated and must not be copied into live replies. In particular, “great point” and “great insights” filler is not acceptable personalization. Use the master/agentic-reply research contract instead. These remain only as implementation-history context until the legacy template fallback is separately repaired.
 
 ### AI Topic
 ```

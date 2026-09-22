@@ -1,5 +1,9 @@
 # LinkedIn Agent Interface Documentation
 
+## Human-directed activity routing
+
+The existing `skillz/linkedin_engagement/SKILLz.md` is the instruction entrypoint for [full or scoped LinkedIn operations](docs/LINKEDIN_ACTIVITY_ROUTING.md). Child skills describe workflows; they do not add Python APIs or certify the legacy APIs below. Messaging simulation, dry-run conflicts and direct live-action guards remain separate runtime readiness gaps. A successful mock result is never a sent-message receipt.
+
 **WSP 11 Compliance**: Public API Definition and Interface Specifications
 
 ---
