@@ -280,3 +280,103 @@ def test_uninvoked_chain_leaf_reports_specific_blockers(tmp_path: Path, mutation
     assert (plan is not None) is (mutation == "prestate")
     assert invocation.invoked is False
     assert chain_path.read_bytes() == before
+
+
+def _synthetic_final_receipt_inputs():
+    """Build structural inputs, not an admitted invocation or planner result."""
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import CanaryInvocationEvidence
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
+        NEXT_QUEUE_CHAIN_COMPLETE, NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE,
+        RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE, RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+        ResidentQueueOrchestrationPlan,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
+        resident_queue_chain_receipt_id,
+    )
+
+    previous = ResidentQueueOrchestrationPlan(
+        accepted=True, status=RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+        plan_id="synthetic-previous-plan", selected_queue_item_id="synthetic-queue",
+        selected_slice="SYNTHETIC_RECEIPT", current_stage="pattern_memory_admission",
+        next_action=NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE,
+    )
+    final = replace(
+        previous, status=RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE,
+        plan_id="synthetic-final-plan", current_stage=None, next_action=NEXT_QUEUE_CHAIN_COMPLETE,
+    )
+    transition = {
+        "queue_item_id": final.selected_queue_item_id, "selected_slice": final.selected_slice,
+        "recorded_stage": "pattern_memory_admission", "previous_plan_id": previous.plan_id,
+        "next_plan_id": final.plan_id,
+    }
+    receipt = {
+        **transition, "receipt_id": resident_queue_chain_receipt_id(**transition),
+        "next_action": NEXT_QUEUE_CHAIN_COMPLETE, "store_revision": "sha256:" + "2" * 64,
+    }
+    seen_id = resident_queue_chain_receipt_id(
+        **{**transition, "previous_plan_id": "synthetic-older-plan"}
+    )
+    invocation = CanaryInvocationEvidence(
+        confirmed=False, invoked=False, blockers=("synthetic_evidence_only",),
+        control_result={}, control_receipt={}, control_receipt_id=None,
+        previous_revision="sha256:" + "1" * 64, observed_revision=receipt["store_revision"],
+        pre_chain_receipt_ids=frozenset({seen_id}), work_state={},
+        chain_state={"receipts": [receipt]},
+    )
+    return invocation, previous, final
+
+
+_FINAL_RECEIPT_TRANSITION_BLOCKER = "final_chain_store_receipt_transition_mismatch"
+
+
+@pytest.mark.parametrize(
+    ("target", "field", "value", "expected_blocker"),
+    [
+        pytest.param("none", None, None, None, id="structural-control"),
+        pytest.param("seen", None, None, "new_chain_store_receipt_not_observed", id="no-new-receipt"),
+        pytest.param("old-final", None, None, "final_chain_store_receipt_not_new", id="final-already-observed"),
+        pytest.param("remove", "recorded_stage", None, "new_chain_store_receipt_malformed", id="malformed-shape"),
+        pytest.param("receipt", "queue_item_id", "other-queue", "new_chain_store_receipt_envelope_mismatch", id="queue-mismatch"),
+        pytest.param("receipt", "selected_slice", "OTHER_SLICE", "new_chain_store_receipt_envelope_mismatch", id="slice-mismatch"),
+        pytest.param("receipt", "store_revision", "other-revision", "new_chain_store_receipt_revision_mismatch", id="revision-mismatch"),
+        pytest.param("receipt", "recorded_stage", "other-stage", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-stage"),
+        pytest.param("receipt", "previous_plan_id", "other-previous", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-previous-plan"),
+        pytest.param("receipt", "next_plan_id", "other-final", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-next-plan"),
+        pytest.param("receipt", "next_action", "OTHER_ACTION", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-next-action"),
+        pytest.param("receipt", "receipt_id", "sha256:" + "9" * 64, _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-derived-id"),
+        pytest.param("previous", "accepted", False, _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-rejected"),
+        pytest.param("previous", "status", "OTHER_STATUS", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-wrong-status"),
+        pytest.param("previous", "current_stage", "other-stage", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-wrong-stage"),
+        pytest.param("previous", "next_action", "OTHER_ACTION", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-wrong-action"),
+    ],
+)
+def test_final_chain_receipt_predicate_is_structural_and_nonmutating(target, field, value, expected_blocker) -> None:
+    from copy import deepcopy
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import (
+        _new_chain_receipt_blockers,
+    )
+
+    invocation, previous, final = _synthetic_final_receipt_inputs()
+    receipt = invocation.chain_state["receipts"][0]
+    if target == "seen":
+        invocation = replace(invocation, pre_chain_receipt_ids=frozenset({receipt["receipt_id"]}))
+    elif target == "old-final":
+        invocation.chain_state["receipts"].append(
+            {**receipt, "receipt_id": next(iter(invocation.pre_chain_receipt_ids))}
+        )
+    elif target == "remove":
+        receipt.pop(field)
+    elif target == "receipt":
+        receipt[field] = value
+    elif target == "previous":
+        previous = replace(previous, **{field: value})
+    before = deepcopy((invocation, previous, final))
+
+    blockers = _new_chain_receipt_blockers(invocation, previous, final)
+
+    assert blockers == (() if expected_blocker is None else (expected_blocker,))
+    assert (invocation, previous, final) == before
+    assert invocation.invoked is False
+    assert invocation.confirmed is False
