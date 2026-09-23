@@ -304,6 +304,8 @@ def test_esingularity_current_council_position_is_packet_aligned_and_multilingua
     ):
         assert obsolete not in current_surfaces
 
+    assert "/ Updated September 23, 2026" in switcher
+    assert "/ Atualizado em 23 de setembro de 2026" in switcher
     assert "See the Preparatory Committee’s current request and evidence" in switcher
     assert "Ver o pedido atual e as evidências do Comitê Preparatório" in switcher
     assert "The budget vote and adoption of the YUMORI proposal are separate decisions." in switcher
