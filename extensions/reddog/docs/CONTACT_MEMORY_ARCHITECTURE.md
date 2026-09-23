@@ -40,7 +40,7 @@ principal-scoped contact memory index
         +<---- Lick identity/encounter evidence where governed
         |
         +----> Brain/Memex current-state consolidation
-        +----> Mosh Pit activity/history projection when project-relevant
+        +----> Moshpit activity/history projection when project-relevant
         |
         v
 contextual retrieval for RedDog / 0102
@@ -83,7 +83,7 @@ Every meaningful encounter is an immutable or append-only event containing:
 - projects/topics involved
 - confidence/provenance per extracted fact
 
-When an interaction materially advances a FoundUp/project, the same event should be represented or referenced as a **Breadcrumb** for that project. Do not duplicate the meeting into an unrelated prose history. Contact Memory, Breadcrumbs, Brain/Memex, and Mosh Pit should project from the same underlying evidence.
+When an interaction materially advances a FoundUp/project, the same event should be represented or referenced as a **Breadcrumb** for that project. Do not duplicate the meeting into an unrelated prose history. Contact Memory, Breadcrumbs, Brain/Memex, and Moshpit should project from the same underlying evidence.
 
 ### Relationship graph
 
@@ -117,14 +117,14 @@ RedDog contact memory should combine:
 
 The result is an entity-centric relationship memory with RAG as one component, not a pile of embedded documents.
 
-## Breadcrumb / Brain / Mosh Pit Integration
+## Breadcrumb / Brain / Moshpit Integration
 
 The layers answer different questions:
 
 - **Contact memory**: who is this person, what is our relationship, what happened between us, and what remains open?
 - **Breadcrumbs**: what materially happened in the operation/project, in sequence, with evidence?
 - **Brain/Memex**: what do those events mean now — current state, open work, queued work, commitments, and next actions?
-- **Mosh Pit**: what reverse-chronological history/accomplishment/status view should RedDog render for 012, the PC, a stakeholder, or another governed audience?
+- **Moshpit**: what reverse-chronological history/accomplishment/status view should RedDog render for 012, the PC, a stakeholder, or another governed audience?
 
 One interaction can therefore feed all four without becoming four independent records.
 
@@ -133,7 +133,7 @@ Meeting Event
   -> participant edges -> Contact Memory
   -> project event/breadcrumb -> Breadcrumbs
   -> open commitment -> Brain/Memex current state
-  -> selected history/status projection -> Mosh Pit
+  -> selected history/status projection -> Moshpit
   -> evidence edge -> capture/photo/message/Lick receipt
 ```
 
@@ -193,6 +193,6 @@ This follows the RedDog attention invariant: relationship context is always near
 
 ## Alpha Pattern
 
-The current founding workflow is already an external alpha of this system: 012 captures screenshots, cards, photographs, meeting facts, and names; 0102 resolves them against projects and prior interactions; relevant events become operational Breadcrumbs; Brain/Memex retains the resulting state/open loops; RedDog later retrieves the relationship or project history through contact and Mosh Pit views.
+The current founding workflow is already an external alpha of this system: 012 captures screenshots, cards, photographs, meeting facts, and names; 0102 resolves them against projects and prior interactions; relevant events become operational Breadcrumbs; Brain/Memex retains the resulting state/open loops; RedDog later retrieves the relationship or project history through contact and Moshpit views.
 
 The implementation objective is to convert that manual recursive behavior into a dependable principal-scoped subsystem without losing provenance, ambiguity handling, or the RedDog/0102 layer separation.
