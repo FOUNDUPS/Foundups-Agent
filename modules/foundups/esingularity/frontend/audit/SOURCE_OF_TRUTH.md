@@ -4,6 +4,8 @@ Last audited: 2026-09-11 (Asia/Tokyo)
 
 Campaign correction — 2026-09-13: the operator withdrew the fixed review-period proposal. The current request is **VOTE NO** on the budget containing Sukatto demolition preparation at the September 25 vote. Do not reintroduce a 60-day offer through copy, translations, diagrams, captions, or supporting documents. This is a campaign position, not a government finding or a commitment to adopt/fund YUMORI. YUMORI.me is eSingularity.ai's civic/preparatory-committee surface; both homepages stay distinct in one frontend. Support brief 03: https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit
 
+Packet/site reconciliation — 2026-09-23: the public eSingularity.ai homepage must attribute the current position to **すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会** and match the current council packet: the committee asks for a NO vote on the budget containing the demolition-preparation project; the former 60-day delay/fixed hold is not the current request; and a NO vote does not itself approve the YUMORI proposal, data-center construction, city investment/debt guarantees, grants, or a non-competitive contract. Current project links are `https://YUMORI.info`, `https://PPP.YUMORI.info` (Proposal 05), and `https://fin.YUMORI.info`. Historical sent messages remain historical records under `/vote-no`; supersession must remain explicit rather than rewriting history.
+
 > **INTERNAL — NOT A PUBLIC WEBSITE PAGE.** This ledger is the claim-admission
 > gate for eSingularity.ai and the approved knowledge boundary for Red Dog. It
 > links to evidence; it does not replace the signed, filed, or canonical Drive

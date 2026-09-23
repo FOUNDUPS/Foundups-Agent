@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-23 — eSingularity.ai current council-position packet concatenation
+
+- Reconciled the public project homepage against the current five-page YUMORI council packet and the existing September 13 VOTE NO truth boundary. Added an explicitly attributed current-position block for **すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会**: the committee asks for a NO vote on the budget containing demolition preparation; the former 60-day delay/fixed hold is no longer the current request; and that vote is separate from adoption, financing, grants, guarantees, or contracting for the reuse proposal.
+- Added direct public routes to the current civic record, project/evidence alias, Proposal 05 (PPP.YUMORI.info), and the financial-model alias. Kept historical September 7/10 correspondence intact under /vote-no with its existing supersession note instead of rewriting sent history.
+- Replaced the first vision-slide pause framing with the current request and separate-decision boundary. Removed obsolete multilingual dictionary entries that described continuing demolition preparation, a formal-condition-change route, fixed-gap public support, or funding-transfer triggers; added complete Japanese-source English and Portuguese translations for the new current-position block and action.
+- Extended the existing test_contracts.py rather than creating a parallel test owner. The regression locks the official Japanese committee name, current/no-longer-current distinction, short URLs, multilingual copy, removal of stale current-position phrases, and preservation of historical supersession.
+- Scope is limited to eSingularity/YUMORI public truth surfaces and their tests/docs. No RSI, WRE, accounting PR, Gmail, Drive packet, DNS, or external message state was changed by this repository patch.
+
 ## 2026-09-22 — YUMORI.me language repair merged, published, and verified
 
 - Squash-merged PR #1846 as `2cdda856cf53744b143da58c347ceaa2c171bcc1` after both `CI` and `Validate eSingularity` passed.

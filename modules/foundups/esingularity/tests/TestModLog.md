@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-23 — Current council-position concatenation regression
+
+- Reused test_contracts.py; no parallel test file was created.
+- Added a bounded contract for the exact Japanese committee name, current September 25 request, explicit retirement of the former 60-day/fixed-hold request, separation of the budget vote from future YUMORI adoption, and the four public short routes (/vote-no, YUMORI.info, PPP.YUMORI.info, fin.YUMORI.info).
+- The same contract requires English and Portuguese translations for the new current-position copy, rejects the obsolete current-position phrases from the homepage/translator/vision surfaces, and preserves the historical /vote-no supersession note so sent correspondence is not rewritten.
+
 ## 2026-09-21 — YUMORI.me English and Portuguese language switch
 
 - Reproduced the production defect: selecting English changed `html.lang`, the URL, and the multilingual ticker, while the restored YUMORI movement-page body remained Japanese because its source strings were absent from the shared language dictionary.

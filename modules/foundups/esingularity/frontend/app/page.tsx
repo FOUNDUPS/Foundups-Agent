@@ -7,8 +7,8 @@ import FukuiComparisonMap from '../components/FukuiComparisonMap';
 
 const YUMORI_URL = 'https://yumori.me';
 
-function YumoriAction({ children }: { children: string }) {
-  return <a className="section-action" href={YUMORI_URL}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
+function YumoriAction({ children, href = YUMORI_URL }: { children: string; href?: string }) {
+  return <a className="section-action" href={href}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
 }
 
 export default function Home() {
@@ -54,6 +54,28 @@ export default function Home() {
             <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>解体予算に反対を。VOTE NO</span><b>湯守に登録・準備委員会に参加 →</b></a>
           </div>
           <FukuiComparisonMap />
+        </section>
+
+        <section className="story section current-position" id="current-position" aria-labelledby="current-position-title">
+          <div className="section-index">現在の委員会要請 <span>/ 2026年9月23日更新</span></div>
+          <div className="story-heading">
+            <div>
+              <p className="eyebrow"><span /> すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会</p>
+              <h2 id="current-position-title">9月25日の採決に向けた<br /><em>現在の立場。</em></h2>
+            </div>
+            <p>本委員会の現在の要請は、9月25日の採決で「旧すかっとランド九頭竜解体準備事業」を含む予算案について反対票を求めることです。以前の「60日間の延期」「一定期間の保留」は、現在の要請ではありません。</p>
+          </div>
+          <div className="evidence-boundary">
+            <strong>予算判断と、YUMORI案の採否は別の判断です。</strong>
+            <p>反対票は、YUMORI案の採用、データセンター建設、市による出資・債務保証、補助金交付、随意契約を承認するものではありません。再利用案の採否は、別途の正式手続、技術・財務検証、地権者・地域との協議、公平な審査を経て判断されるべきだと、本委員会は考えています。</p>
+            <div className="scenario-links">
+              <a href="https://yumori.me/vote-no" target="_blank" rel="noreferrer">現在の要請・公開記録 <b>↗</b></a>
+              <a href="https://yumori.info" target="_blank" rel="noreferrer">プロジェクト・根拠資料 <b>↗</b></a>
+              <a href="https://ppp.yumori.info" target="_blank" rel="noreferrer">PPP/PFI提案資料（05） <b>↗</b></a>
+              <a href="https://fin.yumori.info" target="_blank" rel="noreferrer">財務モデル <b>↗</b></a>
+            </div>
+          </div>
+          <p className="hub-caveat">この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。</p>
         </section>
 
         <YumoriPresentation />
@@ -133,7 +155,7 @@ export default function Home() {
             <p>監査を通過していない売上、利益、投資回収などの数値は、このサイトの根拠として公開しません。</p>
             <div className="scenario-links"><a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf" target="_blank" rel="noreferrer">福井市 財産資料 <b>↗</b></a><a href="https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf" target="_blank" rel="noreferrer">福井市議会 2026年6月質問資料 <b>↗</b></a></div>
           </div>
-          <YumoriAction>壊す前に、再利用案を比べる時間を求める</YumoriAction>
+          <YumoriAction href="https://yumori.me/vote-no">設立準備委員会の現在の要請と根拠を見る</YumoriAction>
         </section>
 
         <section className="proposal section" id="proposal" aria-labelledby="proposal-title">
