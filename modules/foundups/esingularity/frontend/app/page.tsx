@@ -7,8 +7,8 @@ import FukuiComparisonMap from '../components/FukuiComparisonMap';
 
 const YUMORI_URL = 'https://yumori.me';
 
-function YumoriAction({ children }: { children: string }) {
-  return <a className="section-action" href={YUMORI_URL}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
+function YumoriAction({ children, href = YUMORI_URL }: { children: string; href?: string }) {
+  return <a className="section-action" href={href}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
 }
 
 export default function Home() {
@@ -155,7 +155,7 @@ export default function Home() {
             <p>監査を通過していない売上、利益、投資回収などの数値は、このサイトの根拠として公開しません。</p>
             <div className="scenario-links"><a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf" target="_blank" rel="noreferrer">福井市 財産資料 <b>↗</b></a><a href="https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf" target="_blank" rel="noreferrer">福井市議会 2026年6月質問資料 <b>↗</b></a></div>
           </div>
-          <YumoriAction>設立準備委員会の現在の要請と根拠を見る</YumoriAction>
+          <YumoriAction href="https://yumori.me/vote-no">設立準備委員会の現在の要請と根拠を見る</YumoriAction>
         </section>
 
         <section className="proposal section" id="proposal" aria-labelledby="proposal-title">
