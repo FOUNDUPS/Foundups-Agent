@@ -380,3 +380,131 @@ def test_final_chain_receipt_predicate_is_structural_and_nonmutating(target, fie
     assert (invocation, previous, final) == before
     assert invocation.invoked is False
     assert invocation.confirmed is False
+
+
+
+def _synthetic_pattern_readback_inputs(tmp_path, record_overrides, storage):
+    """Seed only an explicit disposable DB; this is not sink activation."""
+    import sqlite3
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.tests.test_reddog_verified_pattern_memory_sink import (
+        _record, _seed_active,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
+        QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT,
+    )
+
+    repo, runtime = tmp_path / "repo", tmp_path / "runtime"
+    repo.mkdir()
+    runtime.mkdir()
+    original = _record()
+    record = {**original, **record_overrides}
+    invocation, _, final = _synthetic_final_receipt_inputs()
+    assert invocation.invoked is False
+    plan = replace(final, selected_slice=original["slice_name"])
+    draft = {
+        "work_order_id": original["work_order_id"], "slice_name": original["slice_name"],
+        "head": original["candidate_head_sha"],
+    }
+    worktree = {"head": original["candidate_head_sha"]}
+    record_id = reddog_verified_pattern_memory_record_id(record)
+    admission_id, digest = canonical_pattern_memory_admission_identity(record, record_id)
+    stage = {
+        "decision": QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT,
+        "pattern_memory_write_performed": True, "no_merge_performed": True,
+        "receipt": {"admission_id": admission_id, "pattern_memory_record_id": record_id,
+                    "record_digest": digest},
+    }
+    db_path = runtime / "pattern_memory.db"
+    if storage != "absent":
+        _seed_active(db_path, record_id, record)
+    if storage == "deleted":
+        connection = sqlite3.connect(db_path)
+        try:
+            connection.execute("DELETE FROM skill_outcomes WHERE execution_id = ?", (record_id,))
+            connection.commit()
+        finally:
+            connection.close()
+    return repo, runtime, record, plan, draft, worktree, stage
+
+
+def _pattern_readback_skill_rows(db_path):
+    """Snapshot logical outcomes, not schema/seed writes or raw DB bytes."""
+    import sqlite3
+
+    if not db_path.is_file():
+        return None
+    connection = sqlite3.connect(db_path)
+    try:
+        return tuple(connection.execute("SELECT * FROM skill_outcomes ORDER BY execution_id"))
+    finally:
+        connection.close()
+
+
+@pytest.mark.parametrize(
+    ("target", "field", "value"),
+    [
+        pytest.param("control", None, None, id="canonical-synthetic-record"),
+        pytest.param("remove", "admission_id", None, id="missing-admission-id"),
+        pytest.param("remove", "pattern_memory_record_id", None, id="missing-record-id"),
+        pytest.param("remove", "record_digest", None, id="missing-record-digest"),
+        pytest.param("storage", None, "absent", id="database-absent"),
+        pytest.param("storage", None, "deleted", id="record-deleted"),
+        pytest.param("receipt", "admission_id", "pattern_memory_admission_" + "0" * 16, id="admission-identity-mismatch"),
+        pytest.param("receipt", "record_digest", "sha256:" + "0" * 64, id="record-digest-mismatch"),
+        pytest.param("record", "work_order_id", "other-work-order", id="reidentified-wrong-ticket"),
+        pytest.param("record", "slice_name", "OTHER_SLICE", id="reidentified-wrong-slice"),
+        pytest.param("record", "candidate_head_sha", "f" * 40, id="reidentified-wrong-commit"),
+        pytest.param("plan", None, None, id="plan-absent"),
+        pytest.param("plan", "selected_slice", "OTHER_SLICE", id="plan-slice-mismatch"),
+        pytest.param("draft", "slice_name", "OTHER_SLICE", id="draft-slice-mismatch"),
+        pytest.param("draft", "head", "f" * 40, id="draft-head-mismatch"),
+        pytest.param("worktree", "head", "f" * 40, id="worktree-head-mismatch"),
+        pytest.param("stage", "decision", "REJECT", id="stage-rejected"),
+        pytest.param("stage", "pattern_memory_write_performed", False, id="write-not-performed"),
+        pytest.param("stage", "no_merge_performed", False, id="no-merge-not-confirmed"),
+    ],
+)
+def test_pattern_readback_leaf_requires_receipt_and_context(tmp_path, target, field, value) -> None:
+    """Real disposable readback qualifies this leaf, not a live canary proof."""
+    from copy import deepcopy
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import (
+        _pattern_memory_evidence,
+    )
+
+    overrides = {field: value} if target == "record" else {}
+    storage = value if target == "storage" else "present"
+    repo, runtime, record, plan, draft, worktree, stage = _synthetic_pattern_readback_inputs(
+        tmp_path, overrides, storage,
+    )
+    receipt = stage["receipt"]
+    if target == "remove":
+        receipt.pop(field)
+    elif target == "receipt":
+        receipt[field] = value
+    elif target == "plan":
+        plan = None if field is None else replace(plan, **{field: value})
+    elif target in ("draft", "worktree", "stage"):
+        {"draft": draft, "worktree": worktree, "stage": stage}[target][field] = value
+    if target == "record":
+        assert canonical_pattern_memory_admission_identity(record, receipt["pattern_memory_record_id"]) == (
+            receipt["admission_id"], receipt["record_digest"],
+        )
+    stages = {"pattern_memory_admission": stage}
+    before = deepcopy((stages, record, plan, draft, worktree))
+    db_path = runtime / "pattern_memory.db"
+    rows_before = _pattern_readback_skill_rows(db_path)
+
+    result = _pattern_memory_evidence(stages, repo, runtime, plan, draft, worktree)
+
+    assert result == {
+        "blockers": () if target == "control" else ("highest_profile_completion_evidence_missing",),
+        "admission_id": receipt.get("admission_id"),
+        "record_id": receipt.get("pattern_memory_record_id"),
+        "record_digest": receipt.get("record_digest"),
+    }
+    assert (stages, record, plan, draft, worktree) == before
+    assert _pattern_readback_skill_rows(db_path) == rows_before
+    if storage == "absent":
+        assert not db_path.exists()

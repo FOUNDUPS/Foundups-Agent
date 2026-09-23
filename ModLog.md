@@ -1,3 +1,9 @@
+## 2026-09-23: Canary PatternMemory receipt and readback projection
+
+- WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary test owner with19 direct PatternMemory projection cases plus two unchanged blocked-callback controls; all original definitions, production and shared fixtures remain unchanged.
+- Fixed21 cases pass locally and independently. Existing fixture records, canonical IDs/digests and real explicit-path sink readback verify synthetic success, missing/incorrect identities, absent/deleted storage, independent context mismatches and stage flags. Inputs and logical skill_outcomes rows remain unchanged by projection; the absent database stays absent.
+- Readback constructs PatternMemory and may initialize/migrate schema or seed metadata. Effects are bounded to disposable external databases; fixture seeding is not authorized activation, retained learning or native execution. PR1880 final-receipt scope is closed; separate PR1881 LinkedIn docs preserved. The canonical backlog records current source/ownership and next ranking; registry remains current1656/quarantined269.
+
 ## 2026-09-23: Resident final-receipt transition controls
 
 - WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary integration test owner with16 direct in-memory receipt/preceding-plan controls; production, shared fixtures and all original definitions remain unchanged.
