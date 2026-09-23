@@ -508,3 +508,118 @@ def test_pattern_readback_leaf_requires_receipt_and_context(tmp_path, target, fi
     assert _pattern_readback_skill_rows(db_path) == rows_before
     if storage == "absent":
         assert not db_path.exists()
+
+
+
+def _synthetic_registered_worktree_stages(isolated, head):
+    """Build leaf evidence only, without admitting a worktree-create operation."""
+    return {
+        "worktree_create": {
+            "decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT",
+            "worktree_create_result": {
+                "decision": "WORKTREE_CREATE_ACCEPT", "worktree_path": str(isolated),
+            },
+        },
+        "verified_draft_pr_publish": {
+            "publish_result": {"receipt": {"verified_head_sha": head}},
+        },
+        "held_out_regression_gate": {
+            "gate_result": {"receipt": {"candidate_head_sha": head}},
+        },
+    }
+
+
+def _mutate_registered_worktree_inputs(case, stages, repo, runtime, isolated, monkeypatch):
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import _git
+
+    stage = stages["worktree_create"]
+    result = stage["worktree_create_result"]
+    draft = stages["verified_draft_pr_publish"]["publish_result"]["receipt"]
+    held = stages["held_out_regression_gate"]["gate_result"]["receipt"]
+    if case == "stage-rejected":
+        stage["decision"] = "REJECT"
+    elif case == "result-rejected":
+        result["decision"] = "REJECT"
+    elif case == "path-missing":
+        result.pop("worktree_path")
+    elif case == "non-git-directory":
+        nongit = runtime / "nongit"
+        nongit.mkdir()
+        result["worktree_path"] = str(nongit)
+    elif case == "repository-root":
+        result["worktree_path"] = str(repo)
+    elif case == "foreign-repository":
+        foreign_parent = runtime / "foreign"
+        foreign_parent.mkdir()
+        foreign, _ = _roots(foreign_parent)
+        assert _git(foreign, "rev-parse", "--is-inside-work-tree") == "true"
+        foreign_head = _git(foreign, "rev-parse", "HEAD")
+        result["worktree_path"] = str(foreign)
+        draft["verified_head_sha"] = held["candidate_head_sha"] = foreign_head
+    elif case == "forged-matching-lineage":
+        draft["verified_head_sha"] = held["candidate_head_sha"] = "0" * 40
+    elif case == "draft-held-disagreement":
+        held["candidate_head_sha"] = "0" * 40
+    elif case == "relative-registered-path":
+        monkeypatch.chdir(runtime.parent)
+        result["worktree_path"] = str(isolated.relative_to(runtime.parent.resolve()))
+
+
+def _registered_worktree_snapshot(repo, isolated):
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import _git
+
+    return (
+        _git(repo, "rev-parse", "HEAD"), _git(isolated, "rev-parse", "HEAD"),
+        _git(repo, "worktree", "list", "--porcelain"),
+    )
+
+
+@pytest.mark.parametrize(
+    ("case", "accepted", "head_observed"),
+    [
+        pytest.param("registered-external-control", True, True, id="registered-external-control"),
+        pytest.param("stage-rejected", False, False, id="stage-rejected"),
+        pytest.param("result-rejected", False, False, id="result-rejected"),
+        pytest.param("path-missing", False, False, id="path-missing"),
+        pytest.param("non-git-directory", False, False, id="non-git-directory"),
+        pytest.param("repository-root", False, True, id="repository-root"),
+        pytest.param("foreign-repository", False, False, id="foreign-repository"),
+        pytest.param("forged-matching-lineage", False, True, id="forged-matching-lineage"),
+        pytest.param("draft-held-disagreement", False, True, id="draft-held-disagreement"),
+        pytest.param("relative-registered-path", False, True, id="relative-registered-path"),
+    ],
+)
+def test_registered_worktree_leaf_requires_local_registry_and_head(
+    tmp_path, monkeypatch, case, accepted, head_observed,
+) -> None:
+    """Real disposable Git consistency is not admitted native execution."""
+    from copy import deepcopy
+    from unittest.mock import Mock
+    from modules.communication.moltbot_bridge.src import reddog_resident_live_canary_evidence as evidence
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
+        _create_registered_worktree,
+    )
+
+    repo, runtime = _roots(tmp_path)
+    isolated, head = _create_registered_worktree(repo, runtime)
+    assert head != "0" * 40
+    stages = _synthetic_registered_worktree_stages(isolated, head)
+    original_cwd = Path.cwd()
+    with monkeypatch.context() as scoped:
+        _mutate_registered_worktree_inputs(case, stages, repo, runtime, isolated, scoped)
+        before = deepcopy(stages)
+        git_before = _registered_worktree_snapshot(repo, isolated)
+        registry_lookup = Mock(side_effect=AssertionError("early rejection must not read registry"))
+        if case in ("stage-rejected", "result-rejected", "path-missing"):
+            scoped.setattr(evidence, "_registered_worktree_head", registry_lookup)
+
+        result = evidence._worktree_evidence(stages, repo)
+
+        assert result == {
+            "blockers": () if accepted else ("isolated_worktree_evidence_missing",),
+            "head": head if head_observed else None,
+        }
+        assert stages == before
+        assert _registered_worktree_snapshot(repo, isolated) == git_before
+        registry_lookup.assert_not_called()
+    assert Path.cwd() == original_cwd

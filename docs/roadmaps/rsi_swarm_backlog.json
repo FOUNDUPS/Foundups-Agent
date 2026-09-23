@@ -1856,8 +1856,8 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "25085858ff097f3d45f10fa5199fb70b37ddafda",
-    "selected_action": "R22-pattern-readback-20260923",
+    "base_commit": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8",
+    "selected_action": "R22-worktree-evidence-20260923",
     "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
@@ -1871,15 +1871,15 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-23T00:03:04.007641+00:00",
-    "base": "25085858ff097f3d45f10fa5199fb70b37ddafda",
+    "utc": "2026-09-23T01:22:15.938628+00:00",
+    "base": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "observation_id": "R22-pattern-readback-20260923",
+    "observation_id": "R22-worktree-evidence-20260923",
     "selected": {
-      "task": "Qualify canary PatternMemory receipt, canonical readback and context projection with finite disposable evidence",
+      "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1889,26 +1889,20 @@
         "priority": "P1"
       },
       "state": "locally_and_independently_qualified_publication_pending",
-      "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
-      "dependency": "Only synthetic canary PatternMemory receipt/readback/context projection is qualified by21 fixed cases. Production activation authority, native execution and retained benefit remain separate.",
-      "next_step": "Publish the reviewed test/documentation qualification and verify closure; do not repeat the completed projection matrix or infer authoritative activation from fixture-seeded active rows."
+      "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
+      "dependency": "Only the frozen registered-worktree evidence projection is qualified: 12 identical local and independent cases pass with 27 unchanged bindings and zero denied events. Exact publication, CI/main and owned-lane closure remain separate.",
+      "next_step": "Complete reviewed publication/CI/main/owned-lane closure; do not repeat these direct Git evidence cases. Native creation/admission and remaining evidence predicates remain separately scoped."
     },
     "previous_closed": {
-      "pr": 1880,
-      "merge": "488768704f706d743ad03280cbb29066719471c6"
+      "pr": 1882,
+      "merge": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8"
     },
-    "intervening": [
-      {
-        "pr": 1881,
-        "merge": "25085858ff097f3d45f10fa5199fb70b37ddafda",
-        "summary": "LinkedIn newsletter research documentation; separate owner, no selected core-source delta"
-      }
-    ],
+    "intervening": [],
     "retrieval": {
       "noise": "Historical continuity is not current evidence; narrow source/test/contracts prioritized.",
       "ordering": "WSP00 actual bootstrap, historical read order, WSP15/97, roadmap/dispatch, exact Git/CI/owners, existing source and tests.",
       "missing": "No module requirements.txt or memory/README.md; Tier0 README/INTERFACE present. Native authority unproven. Holo generation unusable at prior exact query.",
-      "staleness": "All70 bound source files match new main; current Git/CI/PR/worktree state refreshed.",
+      "staleness": "All71 bound source files match current main; current Git/CI/PR/worktree state refreshed.",
       "duplication": "Extend existing canary integration test owner; no new module/skill or production source.",
       "holo": "Prior governed query HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; shared HEAD/query host unchanged. Heartbeat forbids repeated unchanged failed probe. No reindex or claim of newly verified authority. Current source/NAVIGATION fallback.",
       "prior_query": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json"
@@ -1917,7 +1911,7 @@
       "open_peer_heads": 93,
       "peer_worktrees": 157,
       "scope_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\scope-owner-check.json",
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\scope-owner-check.json",
         "sha256": "0a4e4071124c1026c02456f170224183959028ffd2418b0ae69618c1ee5f30c8"
       }
     },
@@ -1966,7 +1960,7 @@
       "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
       "modules/platform_integration/linkedin_agent/src/__init__.py": "6c331fffb9ef3641e1a0bc6352ed644fc18467a4",
       "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3",
-      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "6d939a243b0a5808935f229f561c2fc4dc3cb815",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "971ca32f215736afe021b4fca7b162f3c66fe41d",
       "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
       "modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py": "5b392fef5446f7d6994ac913f5d8d9ff595b4a13",
       "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py": "0e50607969fc12ab70e45427fc40a6e18c080139",
@@ -1990,7 +1984,11 @@
       "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339",
       "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "de622b09025e410cc982bba39033413b06943494",
       "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "677f6b2b05255e18f96ce581a56a0c7831a39d81",
-      "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089"
+      "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md": "1939eb50d9a572ca795d49b7fad20800563b3930",
+      "WSP_framework/src/WSP_CORE.md": "07930de7af9ee0452919711e223a3243a57e2973",
+      "modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py": "2e1b8bb10b41d42350dfdd9c5693ab95aab2f1ac",
+      "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_worktree_create_invoke.py": "bd4f9c4d439a9c3cbc8e820a1bf0b5d4cabeeb31"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -2028,64 +2026,64 @@
       }
     },
     "execution_plane": "Ordinary reversible synthetic component qualification; no native execution or authority. Independent verification before publication.",
-    "finding": "Real explicit-path PatternMemory projection accepts synthetic fixture evidence and rejects specific identity/storage/context/stage mismatches. Inputs/logical outcome rows remain unchanged; schema/seed initialization is allowed only in disposableDB. No authorized activation, native execution or retained-learning claim.",
+    "finding": "Actual disposable Git registry/HEAD readers accept local structural evidence and reject specific stage/result/path/isolation/lineage mismatches. Input stages and observed Git state stay unchanged. No authenticated worker creation, native execution, race confinement or retained-learning claim.",
     "validation": {
-      "selected_cases": 21,
-      "new_cases": 19,
+      "selected_cases": 12,
+      "new_cases": 10,
       "preserved_selected_cases": 2,
-      "primary_pass": 21,
-      "independent_same_cases_pass": 21,
+      "primary_pass": 12,
+      "independent_same_cases_pass": 12,
       "registry": "current1656/quarantined269; unchanged",
       "production": "unchanged",
-      "pattern-test-freeze.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\pattern-test-freeze.json",
-        "sha256": "48e26f0a17fa8c3331725e8674b2a8df0815c2d2885065f4f888b07f2e532097"
+      "worktree-test-freeze.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\worktree-test-freeze.json",
+        "sha256": "cbcd54ca04e2e8da4bf7418391b2e77c832c27e6ea21267e9d09c4762b61a649"
       },
-      "run_pattern_tests.py": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\run_pattern_tests.py",
-        "sha256": "9b312b08d2aa6d89fe72155ddcd6ed4ca33a16622d0eadd08a40cb61c3fe9a5f"
+      "run_worktree_tests.py": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\run_worktree_tests.py",
+        "sha256": "f25426b9bc35d3066dd6130e81658cfd94f8305aa7e6ebf48a6df96163e01ed5"
       },
       "preexecution-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\preexecution-review.json",
-        "sha256": "60177ca87a5ba6303cbcee91095120520044fed49515b45293df30080a953b3f"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\preexecution-review.json",
+        "sha256": "4425aba06f70f0df995a7ec7fd160a92d901f356b2bc1455f73555f9b5e16dc4"
       },
       "primary-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\primary-tests.xml",
-        "sha256": "93dbe1fc3b0297b16e4c07e3bcc6f24bae16b35e08b4dd60dd6a15b60e1c28bd"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\primary-tests.xml",
+        "sha256": "de0667a0d26fb470f278e4807b9d399b38cfa89c1ac6309d19edf5c1575c7c57"
       },
       "independent-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\independent-tests.xml",
-        "sha256": "1d5337e28ac66010759d0791a83ae4757c9c6eb7b23db121b98e5454e9916550"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\independent-tests.xml",
+        "sha256": "078c1ea658f53331c5387dcd3e8a8e2d582b25a7c661a823102bc186a86c4efc"
       },
       "primary-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\primary-invocation.json",
-        "sha256": "e6a7dc09d8bf47042dd2a9f79fbd16b7b32993c8a616772b7069b6217ee6e6b4"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\primary-invocation.json",
+        "sha256": "27ae3a39b7125445ae071d517a6e5c23d8caf5928a1f76c3672df9e199299dad"
       },
       "independent-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\independent-invocation.json",
-        "sha256": "9bc428c27f4fd355c82ae49ccf96366f3d0e8a6eff8109e6ff1b20b8d57d0c96"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\independent-invocation.json",
+        "sha256": "5cd07c1f810387f0d329503c2ececd844caa3e3606f68a544e0927f8b4d5d48e"
       },
       "independent-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\independent-review.json",
-        "sha256": "ea1a2dd1ec5c846b29043e7f0f34cabc3bd668befb82bb37955c8ec3cc7b7c9c"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\independent-review.json",
+        "sha256": "8c7e79cc061632cc2cef625668c43a15b030b92e2f825431159d3bcc96021449"
       },
-      "pattern-readback-source-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\pattern-readback-source-review.json",
-        "sha256": "d4fafec84bc1926cdcf8c8e0db30cb114d2357fa7310b98b68ce94ac7e3a9cf7"
+      "worktree-evidence-source-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\worktree-evidence-source-review.json",
+        "sha256": "94e6bc0d9396d5eac9a04e566502f1e0be25d3b82e313db171b5442e38518d38"
       }
     },
     "wsp00_gates": [
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\wsp00-gate.json",
-        "sha256": "2545ab8bcc333fd1906f201e1d8ce6e9256c084dcca9648860aa1b8ebf089685"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\wsp00-gate.json",
+        "sha256": "31f27744efa49af5cc85708e7e1db704358c5c4ea1dd01e230e87aba86cd614e"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\author-wsp00-gate.json",
-        "sha256": "c7f80534cfd0d93f689347f9607b40d0902c022c1c69be286e2de72724f30cc0"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\author-wsp00-gate.json",
+        "sha256": "c982379d90b5a37394de5b99159b936b80fc8194ca6e220fa894691d77726d97"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\verifier-wsp00-gate.json",
-        "sha256": "64b14da1c3d20a5eb7a030ec512cedd60e12a8b8444abd1ffbd392cb0f4f7d24"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\verifier-wsp00-gate.json",
+        "sha256": "62af691529e7b5fe0019a0298bb67a7a8fb146096006239743a77b0848151418"
       }
     ],
     "post_sprint_reobservation": {
@@ -2479,10 +2477,15 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1882",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
-          "dependency": "Only synthetic canary PatternMemory receipt/readback/context projection is qualified by21 fixed cases. Production activation authority, native execution and retained benefit remain separate.",
-          "next_step": "Publish the reviewed test/documentation qualification and verify closure; do not repeat the completed projection matrix or infer authoritative activation from fixture-seeded active rows."
+          "dependency": "Only the synthetic canary PatternMemory receipt/readback projection is closed: exact reviewed tree merged, all10 PR checks and exact-merge CI/CodeQL passed. Authenticated activation, native execution and retained benefit remain separate.",
+          "next_step": "Do not repeat synthetic PatternMemory projection qualification; freshly re-score remaining lineage and execution prerequisites before the next core action.",
+          "closure": {
+            "pr": 1882,
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1882",
+            "merge": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8"
+          }
         },
         {
           "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
@@ -2494,28 +2497,45 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "selected_bounded_registered_worktree_qualification_pending_source_effect_freeze",
+          "state": "locally_and_independently_qualified_publication_pending",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
-          "dependency": "Existing evidence _registered_worktree_head/_valid_git_worktree and existing _git/_create_registered_worktree fixtures only. Fresh owner/source/import/effect review required; Git operates solely on disposable explicit paths under owned evidence. No native control callback, main checkout mutation, provider, clone or staging deletion.",
-          "next_step": "Freeze direct accepted registered external worktree control plus rejected stage, rejected invoke result, missing path, non-Git directory, inside-repository path, separately initialized unregistered repository, and forged matching draft/held-out head controls. Add a distinct draft-versus-held-out head disagreement if needed to isolate expected lineage selection. Call real _worktree_evidence and its actual local Git registry/head readers; assert exact isolated_worktree_evidence_missing or structural acceptance and input nonmutation. Reuse scoped Git init/config/add/commit/worktree add/list/rev-parse. Use fresh fixtures rather than executing old blocked clone/unlink mutators. This proves local evidence consistency, not admitted worker creation or complete native live proof."
+          "dependency": "Only the frozen registered-worktree evidence projection is qualified: 12 identical local and independent cases pass with 27 unchanged bindings and zero denied events. Exact publication, CI/main and owned-lane closure remain separate.",
+          "next_step": "Complete reviewed publication/CI/main/owned-lane closure; do not repeat these direct Git evidence cases. Native creation/admission and remaining evidence predicates remain separately scoped."
+        },
+        {
+          "task": "Qualify canary receipt-lineage and draft-only evidence predicates with pure fixed controls",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "eligible_bounded_pure_qualification_pending_fresh_source_effect_and_test_freeze",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_lineage_blockers",
+          "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
+          "dependency": "Reuse existing frozen plan/stage mappings and current consumer owner. Fresh ownership, import/effect and fixed-oracle review required; no DB/Git/network fixture needed for these direct pure calls. Integration test is 625 lines and main canary test 659. Prefer cohesive readable parameterization in an existing owner, preserve existing ASTs and keep candidate-created/grown functions at most 50 lines. WSP62 default Python thresholds are below 800 OK, 800-1000 cohesion review, above 1000 critical and 1500 hard; 675 occurs in the example domain configuration and is not an established hard cap for this owner. Current 650 bound was scoped to this sprint. Check actual applicable configuration before next freeze; split only when justified by cohesion or applicable limits, not automatically. No new production owner or authority mechanism.",
+          "next_step": "Freeze pure accepted lineage and draft controls, absent-plan missing-lineage result, independent missing/mismatched work-order/slice/head and selected-slice controls; independently reject outer/nested acceptance and receipt fields, missing/malformed draft URL/ID, and each explicit no_merge/no_ready layer. Assert exact blocker tuples and projected fields plus deep input equality. Use _draft_pr_evidence (actual owner); no _draft_only_blockers function exists. Scope establishes current string/boolean contract only, not remote GitHub state, signed authenticity or live completion."
         }
       ],
       "selected_next": {
-        "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
+        "task": "Qualify canary receipt-lineage and draft-only evidence predicates with pure fixed controls",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 4,
           "deferability": 3,
           "impact": 3,
-          "total": 13,
-          "priority": "P1"
+          "total": 12,
+          "priority": "P2"
         },
-        "state": "selected_bounded_registered_worktree_qualification_pending_source_effect_freeze",
-        "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
-        "dependency": "Existing evidence _registered_worktree_head/_valid_git_worktree and existing _git/_create_registered_worktree fixtures only. Fresh owner/source/import/effect review required; Git operates solely on disposable explicit paths under owned evidence. No native control callback, main checkout mutation, provider, clone or staging deletion.",
-        "next_step": "Freeze direct accepted registered external worktree control plus rejected stage, rejected invoke result, missing path, non-Git directory, inside-repository path, separately initialized unregistered repository, and forged matching draft/held-out head controls. Add a distinct draft-versus-held-out head disagreement if needed to isolate expected lineage selection. Call real _worktree_evidence and its actual local Git registry/head readers; assert exact isolated_worktree_evidence_missing or structural acceptance and input nonmutation. Reuse scoped Git init/config/add/commit/worktree add/list/rev-parse. Use fresh fixtures rather than executing old blocked clone/unlink mutators. This proves local evidence consistency, not admitted worker creation or complete native live proof."
+        "state": "eligible_bounded_pure_qualification_pending_fresh_source_effect_and_test_freeze",
+        "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_lineage_blockers",
+        "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
+        "dependency": "Reuse existing frozen plan/stage mappings and current consumer owner. Fresh ownership, import/effect and fixed-oracle review required; no DB/Git/network fixture needed for these direct pure calls. Integration test is 625 lines and main canary test 659. Prefer cohesive readable parameterization in an existing owner, preserve existing ASTs and keep candidate-created/grown functions at most 50 lines. WSP62 default Python thresholds are below 800 OK, 800-1000 cohesion review, above 1000 critical and 1500 hard; 675 occurs in the example domain configuration and is not an established hard cap for this owner. Current 650 bound was scoped to this sprint. Check actual applicable configuration before next freeze; split only when justified by cohesion or applicable limits, not automatically. No new production owner or authority mechanism.",
+        "next_step": "Freeze pure accepted lineage and draft controls, absent-plan missing-lineage result, independent missing/mismatched work-order/slice/head and selected-slice controls; independently reject outer/nested acceptance and receipt fields, missing/malformed draft URL/ID, and each explicit no_merge/no_ready layer. Assert exact blocker tuples and projected fields plus deep input equality. Use _draft_pr_evidence (actual owner); no _draft_only_blockers function exists. Scope establishes current string/boolean contract only, not remote GitHub state, signed authenticity or live completion."
       },
-      "rationale": "The synthetic PatternMemory projection is qualified locally and independently. The remaining registered-worktree evidence has seven named integration negatives whose mutations still do not run because readiness blocks _runner, and no direct _worktree_evidence tests in the scoped bridge search. A finite real disposable Git registry/HEAD matrix is the next executable core evidence step13/P1 (C3/I4/D3/Impact3), reusing existing fixtures and scoped runner operations. Pure lineage/draft-only predicates are lower-complexity12/P2; unnecessary generation supplier acquisition remains11/P2. Neither absence of direct tests nor synthetic success justifies native admission. Native18/FAM14/GotJunk14 and runtime/PostgreSQL13 retain distinct prerequisites; separate LinkedIn12 remains lower priority under the current core-RSI objective.",
+      "rationale": "After the fixed worktree projection passes, pure lineage/draft predicates are the highest eligible core step supported by this bounded source review (C2/I4/D3/Impact3=12/P2). Both feed evaluate_live_proof directly; scoped test search found only deferred mutation labels, not direct calls. Native18 still requires real trust anchors/effect lease; FAM14 needs named domain authority mapping; GotJunk14 needs product-owner/deployment acceptance; PostgreSQL13 requires actual runtime/admission; runtime expectation implementation still needs named policy/backend mapping. No new evidence unblocks those prerequisites. LinkedIn manager admission also scores12 but remains behind the principal-selected core canary path. Supplier acquisition11 needs a clean positive fixture and ranks lower; reusable runner/scanner debt does not justify broadening this slice. Historical completed qualification rows remain preserved.",
       "source_bindings": {
         ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
         ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
@@ -2537,7 +2557,7 @@
         "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
         "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
         "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "7ab28ea29fc5c2bca7814cdea901b8178d843ed4",
-        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "6d939a243b0a5808935f229f561c2fc4dc3cb815",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "971ca32f215736afe021b4fca7b162f3c66fe41d",
         "modules/communication/moltbot_bridge/tests/test_reddog_resident_runtime_artifact_readiness.py": "7dc5b3de2fcbb7099eda05291950bf80a59623f0",
         "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py": "0a02f9bf28ea48d1dbebc35f11efd517d6d96416",
         "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "e65ffd3f72a0d2061869e2e149a1fcfe66cbc7fa",
@@ -2587,12 +2607,21 @@
         "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339",
         "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "de622b09025e410cc982bba39033413b06943494",
         "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "677f6b2b05255e18f96ce581a56a0c7831a39d81",
-        "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089"
-      }
+        "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089",
+        "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md": "1939eb50d9a572ca795d49b7fad20800563b3930",
+        "WSP_framework/src/WSP_CORE.md": "07930de7af9ee0452919711e223a3243a57e2973",
+        "modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py": "2e1b8bb10b41d42350dfdd9c5693ab95aab2f1ac",
+        "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_worktree_create_invoke.py": "bd4f9c4d439a9c3cbc8e820a1bf0b5d4cabeeb31"
+      },
+      "still_open": [
+        "Native admitted ticket/effect lease and authentic signer/runtime generation prerequisites.",
+        "Domain authority mapping, product deployment ownership, PostgreSQL/runtime compatibility prerequisites remain separate.",
+        "Remaining pure lineage/draft evidence coverage and current selected publication/closure; no full native proof completion."
+      ]
     },
     "publication": {
       "state": "pending_exact_review_PR_merge_and_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback"
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence"
     }
   }
 }

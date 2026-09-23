@@ -1,17 +1,17 @@
 ## Resident canary evidence reachability — 2026-09-23
 
-PR1877 callback/chain, PR1879 generation/readiness and PR1880 final-receipt
-qualifications are closed at their exact sources. The current PatternMemory
-projection adds19 cases in the existing canary integration test owner, preserving
-all original definitions. The fixed21-case run includes two blocked-callback
-controls; local and independent runs pass the same cases. Existing record/seed
-fixtures, canonical identities and real explicit-path readback cover receipt,
-storage, stage and independently varied plan/draft/worktree context checks.
-Inputs and logical skill_outcomes rows are unchanged; an absent DB stays absent.
-PatternMemory construction can initialize/migrate schema and seed metadata.
-All DB effects use disposable external paths under diagnostic fixture guards.
-Fixture-seeded success is not authorized activation, retained learning or native
-execution. Exact sources, cases, receipts and next ranking are in the RSI backlog.
+PR1877/1879/1880/1882 closed callback/chain, generation, final-receipt and
+PatternMemory qualifications at their exact sources. Current worktree evidence
+adds10 direct cases; the fixed12-case run includes two unchanged blocked-callback
+controls. Both local and independent runs pass the same12 cases using actual
+disposable Git registries, linked worktrees and HEAD readers. Exact blockers and
+observed heads distinguish early rejection, unregistered paths and lineage or
+isolation failures. Stages, repository/worktree HEAD and registry are unchanged.
+Production/shared fixtures and previous definitions are preserved. These tests
+establish local structural consistency, not authenticated creation, native
+execution, race-proof isolation or retained benefit. Python guards are diagnostic;
+all fixture effects stay in explicit external disposable paths. Exact bindings,
+test receipts and the freshly ranked next action are in the canonical RSI backlog.
 
 ## RSI adapter acquisition and LinkedIn previews
 
