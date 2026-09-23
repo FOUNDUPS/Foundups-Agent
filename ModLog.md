@@ -1,3 +1,8 @@
+## 2026-09-24: RSI manager-result qualification
+
+- Existing LinkedIn/browser owners:29 fixed fake-only cases pass locally and independently; four manager outcomes still cross into UI despite not admitting new work. No production source change. Canonical docs/test inventory and WSP15 queue updated; next13/P1 instruction hygiene and13/P1 coherent admission repair are separate.
+- PR1899 advisory startup display is fully closed: all10PR checks, exact-merge mainCI/CodeQL, reviewed tree and owned-lane retirement verified. Shared checkout and94peer heads preserved. Native RSI remains gated. WSP00/15/22/34/50/62/84/97.
+
 ## 2026-09-24: RSI startup evidence display
 
 WSP00/15/97 selected the existing WRE advisory display seam (13/P1) after closing

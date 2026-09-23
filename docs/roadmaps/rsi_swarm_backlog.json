@@ -1856,205 +1856,196 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
-    "selected_action": "R10-research-advisory-display-20260924",
-    "status": "locally_and_independently_validated_publication_pending",
+    "base_commit": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
+    "selected_action": "linkedin-manager-outcome-qualification-20260924",
+    "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 3,
       "deferability": 3,
-      "impact": 4,
-      "total": 13,
-      "priority": "P1"
+      "impact": 3,
+      "total": 12,
+      "priority": "P2"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "R10-research-advisory-display-20260924",
-    "base": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+    "observation_id": "linkedin-manager-outcome-qualification-20260924",
+    "base": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
     "self": "0102",
-    "role": "architect",
-    "origin": "external_principal",
+    "role": "architect/coordinator",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Wire advisory AutoResearcher report display into existing WRE startup owner",
+    "selected": "Qualify LinkedIn manager-result admission to browser connection actions",
     "wsp15": {
       "complexity": 3,
       "importance": 3,
       "deferability": 3,
-      "impact": 4,
-      "total": 13,
-      "priority": "P1"
+      "impact": 3,
+      "total": 12,
+      "priority": "P2"
     },
     "previous_closed": {
-      "utc": "2026-09-23T15:28:06.047833+00:00",
-      "pr": 1898,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1898",
-      "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
-      "reviewed_head": "a3bdf386ad57ba5bab9b5e1ea37df24c636ecc91",
-      "reviewed_tree": "f420d024c1910a60167f7190629f874ae9736391",
+      "utc": "2026-09-23T17:04:24.189639+00:00",
+      "pr": 1899,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1899",
+      "merge": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
+      "reviewed_head": "8be02f8c152ca12c7f80dad85300138ad30d8776",
+      "reviewed_tree": "4ace1e4b581b1219da205a95de76ff334009f569",
       "merged_tree_matches": true,
       "pr_checks_passed": 10,
       "main_workflows": [
         {
           "conclusion": "success",
-          "createdAt": "2026-09-23T15:19:22Z",
-          "databaseId": 35880681641,
-          "headSha": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+          "databaseId": 35891809519,
+          "headSha": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
           "status": "completed",
-          "updatedAt": "2026-09-23T15:23:16Z",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35880681641",
           "workflowName": "CI"
         },
         {
           "conclusion": "success",
-          "createdAt": "2026-09-23T15:19:21Z",
-          "databaseId": 35880680300,
-          "headSha": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+          "databaseId": 35891808954,
+          "headSha": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
           "status": "completed",
-          "updatedAt": "2026-09-23T15:27:01Z",
-          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35880680300",
           "workflowName": "CodeQL"
         }
       ],
-      "validation": "66 fixed cases passed after32pass/34fail baseline;136 regressions passed; same202unique cases independently replayed. Persistent drift repair with genuine improvement control; no errors/skips/unexpected denials.",
+      "validation": "67 final cases passed locally and independently; initial63 baseline7pass56fail; review-found2 accounting and2 path controls failed before respective repairs. No errors/skips/unexpected denials in final runs.",
       "owned_lane_retired": true,
       "remote_branch_absent": true,
       "shared_unchanged": true,
       "paused_lane": "agent/rsi-lineage-draft-20260923 preserved; independent review still blocked",
       "next_action": {
-        "task": "Determine and qualify the intended existing WRE diagnostic/outcome consumer boundary for ROC reports",
+        "task": "Qualify LinkedIn manager-result admission to browser connection actions",
         "wsp15": {
           "complexity": 3,
-          "importance": 4,
+          "importance": 3,
           "deferability": 3,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
         },
-        "state": "eligible_after_fresh_owner_and_effect_review",
-        "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
-        "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
-        "next_step": "Re-observe fresh owners; trace existing authorized ratchet invocation and diagnostic consumers, then freeze applicable negative raw-report/non-authority cases in existing tests only if there is a real owner/call binding. If absent, reconcile current canonical docs and mark the missing adapter/dependency without creating an unused consumer.",
-        "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
-        "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
-        "independent_preparation_review": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-action-review.json",
-          "sha256": "ec7291721f8977819c564d1141dbece16826e88a621785eb045ca6ccb88387d7"
-        },
-        "alternatives": [
-          {
-            "task": "Immutable profile consumption",
-            "decision": "defer automatic rewrite; retain ABA limit until actual admitted workload requires stronger isolation"
-          },
-          {
-            "task": "Parent program/oracle/environment identity",
-            "decision": "qualify at intended consumer; avoid another disconnected hash or unused API"
-          },
-          {
-            "task": "LinkedIn manager-result qualification12/P2",
-            "decision": "executable adjacent fallback after core selection, subject to fresh ownership"
-          },
-          {
-            "task": "Parity diagnostics12/P2",
-            "decision": "consumer not bound; avoid unconsumed receipt API"
-          },
-          {
-            "task": "Native admitted ticket18/P0",
-            "decision": "blocked by existing trust/effect prerequisites; do not bypass"
-          }
-        ],
-        "handoff_preparation": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-preparation.md",
-          "sha256": "f85a68db4ff155ab9d9a286c4f06d3508cb363c8c2b376fd2470286770ca0b8d",
-          "state": "source_only_not_an_executed_second_sprint"
-        },
-        "handoff_review": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-review.json",
-          "sha256": "b000772daa0807a2f1ddda747bc9250cf8e25ca80568dab36138c54c81201615"
-        },
-        "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted."
+        "state": "selected_after_completed_advisory_display_requires_fresh_scope_qualification",
+        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+        "dependency": "Fake-only scope and exact owner/effect preflight; no live LinkedIn send, browser session or external dispatch.",
+        "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes.",
+        "reconciliation_constraint": "Reuse existing connection-policy fake fixtures. Qualify manager return identity/status and stored state before any browser-action repair; no new module or live test."
       },
-      "limits": "Persistent sampled drift guard only; ABA/immutable consumption/concurrency, authenticated oracle identity, economic validity, native RSI and retained benefit remain open.",
+      "limits": "Advisory display of caller-selected local diagnostic only. Exact main function bodies tested; full menu startup, authenticated freshness, oracle identity, native RSI and retention remain unverified.",
+      "backend_binding_validation": {
+        "utc": "2026-09-23T16:46:41.205169+00:00",
+        "binding": {
+          "old_digest": "c7d2f0bab78522f9437b69e74778e4ccdcc16028999ad8f933b78400da8c88b0",
+          "new_digest": "3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618",
+          "changed_members": [
+            "modules/infrastructure/wre_core/src/dashboard_alerts.py"
+          ],
+          "runtime_count": 1401,
+          "other_fields_unchanged": true,
+          "ci_run": 35889528743,
+          "ci_failed_head": "a470d262d041971efd4fbdf47cba23a511ffd882",
+          "initial_validation_gap": "Dashboard reader membership in the existing backend closure was omitted from initial dependency validation; unchanged CI gate detected it."
+        },
+        "generator_cases": 8,
+        "case_names": [
+          "test_package_initializers_resolve_relative_imports_from_their_package",
+          "test_generated_closure_binds_executable_and_dynamic_load_sentinels",
+          "test_generated_closure_binds_isolated_acceptance_entrypoint",
+          "test_newly_tracked_imported_runtime_dependency_cannot_be_omitted",
+          "test_untracked_local_import_fails_closed",
+          "test_checked_in_manifest_matches_independent_generation",
+          "test_extension_javascript_is_package_bound_not_backend_materialized",
+          "test_staged_index_manifest_is_self_consistent"
+        ],
+        "generator_check": "passed",
+        "unchanged_node_contract": "passed",
+        "evidence": {
+          "manifest-before.log": "b567dd4f4d192cac627589f08e9a3475e548e5d69a5ce0187cf2899969d93824",
+          "backend-before.log": "43bbea902f3e759d11809ef46265e27ea38d011ffa6261b385c5a93111787dfe",
+          "manifest-generated.log": "d12bfa7013221c1f0302470904577b5c77ee5ea57e0027fa27a66cb4b2387245",
+          "manifest-after.log": "d12bfa7013221c1f0302470904577b5c77ee5ea57e0027fa27a66cb4b2387245",
+          "backend-after.log": "d144e51688a745714b33398ca2a0a71c670c8c0763bb30c6dbd203cfd2cb2dd7",
+          "manifest-tests.log": "da7a1175d48d9fa123dca7a4ad644ea19b990e4d274a44135aa1c065345bb513",
+          "manifest-tests/results.xml": "5448dc55ef5e9847dd0b46b60d48d6e97e9a27190a53979d2af97c050a36157b",
+          "manifest-binding.json": "13c170ee70a3192b40e1d14193b4e6b958e56dee06663e3f16346f75219b73ef",
+          "ci-failure.log": "f219265074148a04bf029a246de24fc94b667036a62dfbdb4c4406b5ba5fe76f"
+        },
+        "source_hashes": {
+          "scripts/reddog_backend_manifest.json": "6b26c2fbb4e2441cd15aca7db27d7a87d21bd192685314330ccc29d1f4f1e2bc",
+          "extensions/reddog/backend_compatibility_constants.js": "d05f5740a18ada5a10fa2aeab0dd5180afff618698d81a38ac8e57285488f355",
+          "scripts/tests/test_generate_reddog_backend_manifest.py": "71c0aaba62f07e4523050a70b8e274e50ba9a3552a925f9a05c19b05810466a5"
+        },
+        "limits": "Local static generator and source contract checks. Separate from the guarded67 display cases; no OS sandbox, installed runtime or live RSI qualification claim. Two inherited disabled-plugin configuration warnings."
+      },
       "experiment_metrics": {
-        "unique_cases": 202,
+        "unique_cases": 67,
+        "additional_generator_cases": 8,
+        "unchanged_node_contract": "passed",
         "phase_runs_overlap": true,
         "phases": {
-          "baseline": {
+          "baseline-final": {
             "counts": {
-              "tests": 66,
-              "failures": 34,
+              "tests": 63,
+              "failures": 56,
               "errors": 0,
               "skipped": 0,
-              "passed": 32
+              "passed": 7
             },
-            "test_phase_wall_seconds": 2.922111,
+            "test_phase_wall_seconds": 1.349444,
             "permitted_abrupt_exit_children": 0,
             "unexpected_denials": 0,
             "database_opens": 0
           },
-          "candidate": {
+          "baseline-acceptance": {
             "counts": {
-              "tests": 66,
-              "failures": 0,
+              "tests": 65,
+              "failures": 2,
               "errors": 0,
               "skipped": 0,
-              "passed": 66
+              "passed": 63
             },
-            "test_phase_wall_seconds": 2.179221,
+            "test_phase_wall_seconds": 1.258018,
             "permitted_abrupt_exit_children": 0,
             "unexpected_denials": 0,
             "database_opens": 0
           },
-          "candidate-final": {
+          "baseline-local-path": {
             "counts": {
-              "tests": 66,
-              "failures": 0,
+              "tests": 67,
+              "failures": 2,
               "errors": 0,
               "skipped": 0,
-              "passed": 66
+              "passed": 65
             },
-            "test_phase_wall_seconds": 2.12594,
+            "test_phase_wall_seconds": 1.436049,
             "permitted_abrupt_exit_children": 0,
             "unexpected_denials": 0,
             "database_opens": 0
           },
-          "regression": {
+          "candidate-local-path": {
             "counts": {
-              "tests": 136,
+              "tests": 67,
               "failures": 0,
               "errors": 0,
               "skipped": 0,
-              "passed": 136
+              "passed": 67
             },
-            "test_phase_wall_seconds": 6.165023,
-            "permitted_abrupt_exit_children": 3,
-            "unexpected_denials": 0,
-            "database_opens": 0
-          },
-          "independent": {
-            "counts": {
-              "tests": 66,
-              "failures": 0,
-              "errors": 0,
-              "skipped": 0,
-              "passed": 66
-            },
-            "test_phase_wall_seconds": 2.093233,
+            "test_phase_wall_seconds": 1.361439,
             "permitted_abrupt_exit_children": 0,
             "unexpected_denials": 0,
             "database_opens": 0
           },
-          "independent-regression": {
+          "independent-local-path": {
             "counts": {
-              "tests": 136,
+              "tests": 67,
               "failures": 0,
               "errors": 0,
               "skipped": 0,
-              "passed": 136
+              "passed": 67
             },
-            "test_phase_wall_seconds": 5.644978,
-            "permitted_abrupt_exit_children": 3,
+            "test_phase_wall_seconds": 1.478543,
+            "permitted_abrupt_exit_children": 0,
             "unexpected_denials": 0,
             "database_opens": 0
           }
@@ -2068,172 +2059,123 @@
       }
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\observation.json",
-      "sha256": "4f05f6170f50da9212d9f29b3b99803f7f5e44613e1b7554b8ac12bc481a08f8"
+      "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\previous-observation.json",
+      "sha256": "62c09647c3bdc88c0c7e42846f161ce8564bc89b97e204d1af22d252ad3974da"
     },
     "retrieval": {
-      "primary": "Governed Holo failure reused at unchanged authority/host source; exact-main Git fallback.",
+      "primary": "Governed query failure reused at unchanged shared host/authority HEAD; exact-main Git/rg fallback.",
       "failure_receipt": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json",
       "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
       "freshness": "UNKNOWN",
-      "noise": "Narrow current handoff/display/outcome contracts; avoid repeating caller-absence audit.",
-      "ordering": "WSP00/15/97 and closure/ownership, canonical selection, module contracts then actual invocation/source.",
-      "missing": "No qualified ROC-report production consumer demonstrated; module memory/README absent at prior exact source.",
-      "staleness": "Main/shared/94peer heads and mainCI refreshed; existing prep reused only against unchanged source blobs.",
-      "duplication": "Known missing generic ROC caller is not new work. Qualify exact handoff suitability or close known dependency and rescore."
+      "index_gap_detected": true,
+      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "noise": "Navigation broad platform map narrowed to two source leaves, existing policy tests and routing skill.",
+      "ordering": "WSP00/15/97, closure/ownership, canonical queue, module contracts, test inventory/fixtures, source.",
+      "missing": [
+        "browser_actions/tests/TestModLog.md",
+        "browser_actions/requirements.txt",
+        "browser_actions/memory/README.md",
+        "linkedin_agent/memory/README.md"
+      ],
+      "staleness": "Historical sprint boxes and old test README filename examples are not current implementation truth; main and94peer heads refreshed.",
+      "duplication": "Extend existing fixture/23 controls. No new test file/module/skill; required missing canonical TestModLog inventories six actual test files."
     },
     "allocation": {
-      "score": {
-        "complexity": 3,
-        "importance": 3,
-        "deferability": 3,
-        "impact": 4,
-        "total": 13,
-        "priority": "P1"
-      },
-      "scope": [
-        "main.py",
-        "modules/infrastructure/wre_core/src/dashboard_alerts.py",
-        "modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py",
-        "modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py",
-        "ROADMAP.md",
-        "docs/operations/RSI_SWARM_DISPATCH.md",
-        "docs/roadmaps/rsi_swarm_backlog.json",
-        "ModLog.md",
-        "modules/infrastructure/wre_core/ROADMAP.md",
-        "modules/infrastructure/wre_core/INTERFACE.md",
-        "modules/infrastructure/wre_core/README.md",
-        "modules/infrastructure/wre_core/ModLog.md",
-        "modules/infrastructure/wre_core/tests/README.md",
-        "modules/infrastructure/wre_core/tests/TestModLog.md",
-        "modules/ai_intelligence/ai_overseer/tests/TestModLog.md"
-      ],
-      "budget": {
-        "workers": 1,
-        "independent_reviewers": 1,
-        "provider_spend": 0,
-        "autonomous_research_cycles": 0
-      },
-      "verification": "Focused existing dashboard/export and exact startup function bodies; fail closed on unexplained effects; no full menu import/live runtime"
+      "effort": "Six bounded current-behavior cases in existing owner, independent replay.",
+      "cost": "Local CPU/coordinator/reviewer; no provider/API spend.",
+      "verification": "23 preserved inert cases plus6; exclude4 legacy constructor cases. Freeze IDs/source hashes and review effects first.",
+      "execution_plane": "Local source/test qualification with independent review; not native WRE or external-service work."
     },
     "dialectic": {
-      "simplest": "Advisory explicit report read at existing display seam",
-      "competing": "Raw report to retained-outcome ratchet rejected: missing admitted work/verifier/publication authority",
-      "weakest_assumption": "Report self-declared completion and copied mtime do not prove benefit, runtime identity or freshness",
-      "reuse": "Existing dashboard/parser location, startup preflight and existing tests; no new module/skill/scheduler",
-      "manual_reason": "Existing Qwen/Gemma routes do not adjudicate exact reader/trust contracts; direct architecture work plus independent review has lower bounded cost"
+      "simplest": "Qualify actual manager return versus UI/result before admission changes.",
+      "reuse": "Existing manager, fixture, router/clock/simulator; no new status model.",
+      "competing": "PENDING-only guard insufficient: prior pending work also passes.",
+      "weak_assumption": "IDs alone prove fresh work: exception may return WITHDRAWN sharing storedPENDING request_id.",
+      "decision": "Freeze status/object identity/bookkeeping/UI witnesses; then select one coherent repair contract."
     },
     "validation": {
-      "unique_cases": 67,
-      "baseline_original": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\baseline-final\\receipt.json",
-        "sha256": "ca81b52a7410e6a14f2d9463d069bdfb5a02d16ca18e7456a782ffe6e460d775"
-      },
-      "independent_finding": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-review.json",
-        "sha256": "54a3da965f4e4a42c13eb82f317af8eae0d8e1bfa24e46fbbd9b747432984ae8"
-      },
-      "baseline_added_controls": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\baseline-acceptance\\receipt.json",
-        "sha256": "bd17dc206756281c2c975c5e950f04173c6d530fa889eb9d513d00ed821b821c"
-      },
-      "candidate": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\candidate-local-path\\receipt.json",
-        "sha256": "49254b79b0cbb9859be4562d8e061c5d5e4719dd853e4112b74490012c22b962"
+      "kind": "Current-behavior qualification; four unsafe-to-admit manager outcomes remain unrepaired.",
+      "unique_cases": 29,
+      "preserved_cases": 23,
+      "added_cases": 6,
+      "legacy_cases_deselected": 4,
+      "warnings": "Two inherited disabled-plugin config warnings per run.",
+      "primary": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\primary-invocation.json",
+        "sha256": "f3a3715575976510071195b574ae7200b78ba1a3421436f2d5d5601eb2247ab8"
       },
       "independent": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-local-path\\receipt.json",
-        "sha256": "a114161aebef36848307ce0df11d11333b0d2237b33280857a2839b90a37dfcc"
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\independent-invocation.json",
+        "sha256": "a4703801388ddce402a0265b97b612ce6d5dda046ea8327cc378ca4e684d7d05"
       },
-      "independent_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-local-path-review.json",
-        "sha256": "362e725118fd97f023deddc2ee91fc1e8e41f9bd0c2d4eab22496814db9746e2"
+      "review": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\independent-review.json",
+        "sha256": "3ee3c8b198c365c1f98c2fb68be1b413c7fe57805105b04c3509e43185969d76"
       },
       "test_freeze": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\test-freeze-local-path.json",
-        "sha256": "7fca05e942d9cade56de92b8565f457c573705cd37d8497060d87c9849f7422b"
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\test-freeze.json",
+        "sha256": "1e65d9c4db521519bf1d83592cf75e39506bf4bad0e0bd07d05a9f219fbd1812"
       },
-      "limits": "Exact startup function bodies and real dashboard leaves; no full main import/menu, native worker, provider, retained learning or authenticated report freshness.",
-      "baseline_path_controls": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\baseline-local-path\\receipt.json",
-        "sha256": "541fd380a9a60074f75d17957bf5c5d7b75a8c7257a57231143b28673fa08567"
+      "preflight": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-test-preflight.json",
+        "sha256": "f51b55537631419b418d233ebab16dd16904d43eed2a4a39d8a0f202fd4c5a43"
       },
-      "prior_accounting_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-final-review.json",
-        "sha256": "406a8fccf6bbc3a43c7cc1cac87b8b02063efcd95ec88ab6184886128aad4488"
-      },
-      "backend_binding": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\binding-validation.json",
-        "sha256": "7c10a0b0edfa704955677c0a7fcfec4f878e1489ae02c39a05e684bfde6dd602",
-        "generator_cases": 8,
-        "unchanged_node_contract": "passed",
-        "generator_check": "passed"
+      "original_test_ast_prefix_preserved": true,
+      "production_source_unchanged": true,
+      "runtime_manifest_and_registry_unchanged": true,
+      "limits": "Real two source leaves under inert imports/fake router, constructor bypass and simulator sleep. No live request, OS confinement, rollback, exactly-once or retained RSI proof.",
+      "registry_check": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\registry-check.log",
+        "sha256": "529925c1f8590b15c78e98663bec88366113eb1b5c91480d97a34b987a9459e7",
+        "state": "current",
+        "total": 1659,
+        "quarantined": 269,
+        "method": "Existing static generator --check; no product/test imports or registry writes."
       }
     },
     "owner_reconciliation": {
-      "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\peer-files.json",
-      "sha256": "956efbcbfe739bbafea9292d98066958247f2d1faceae468f0a6c0c6a4d48e2e"
+      "entry": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\entry.json",
+        "sha256": "d27f31b392524bdd481b6730641263e0a507840d93d2b94205ee447a708c9eda"
+      },
+      "peer_heads": 94,
+      "exact_test_overlap": false,
+      "shared_preserved": true
     },
     "source_bindings": {
-      "modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py": {
-        "raw_sha256": "eb38666a3abab73e8d3360fd2fbb9be75d67cf7326380f2198eb22db7dc1125c",
-        "lf_sha256": "79494971775e266b474daa519cde5be648ab2ac706bb03cc4466088222ad4e6e",
-        "git_blob_lf": "17b42b5ed84cad5201f950687687c6418c9e866f"
+      "modules/infrastructure/browser_actions/src/linkedin_actions.py": {
+        "raw_sha256": "b016199ba0daa622c52e836c1086ee7f0c39f40a7393d25913ff1d2b7639fd06",
+        "lf_sha256": "8ce3c389506ee757901f5eeab11324703a1ba584f0eb721b88ca811a2f1b4c88"
       },
-      "modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py": {
-        "raw_sha256": "c5d1700e9fbb013523f1462f6d87e7688b135c6132d55cc295aeb03e82c89aa6",
-        "lf_sha256": "c39447268fdd2f3cc2ebf69f13c68907eca796426fc5b8f8a683dd411870a003",
-        "git_blob_lf": "ef7d7d8adb5ae8069ae0fceb2a4bc653c2666505"
-      },
-      "main.py": {
-        "raw_sha256": "1fd9f841902bf83cffec931e60ebfb312666b7de14911d19c1a587c04360177d",
-        "lf_sha256": "c06f5008088aeb19f3ee206844da08cdac0c186187dc6e7cfc909c02c4ca5a96",
-        "git_blob_lf": "0b2275ce8774bfc3725cffb0ebd3d321dad7f8b3"
-      },
-      "modules/infrastructure/wre_core/src/dashboard_alerts.py": {
-        "raw_sha256": "ba8fbca08d627347bd10d667312ec761d6bb5f37dbbec2dd5d55d356e61fc526",
-        "lf_sha256": "5b894fc0ae5d74778ed4b1e8adb0465200bd608373dce6367e689ff350536d7f",
-        "git_blob_lf": "0d5c1d46fd77ce478513170bdd69ed2396978796"
-      },
-      "modules/infrastructure/wre_core/src/dashboard_snapshot_export.py": {
-        "raw_sha256": "35d1df2f736138a2b6b80fb6f4201da1bf551ed625c35d5f31857b2974afb5e4",
-        "lf_sha256": "ae485758ca98bf2b621e6df94412c2cc6c16ed7a6803b3bdb0da49791b5602df",
-        "git_blob_lf": "25884e8f2658041f520b96fa1b768f22c419c0c0"
-      },
-      "modules/ai_intelligence/ai_overseer/src/preflight_resolution.py": {
-        "raw_sha256": "23588013e2a9d10dbde7bfc3667cd0617a708d6925ac37d9cbc11921bd1780db",
-        "lf_sha256": "8364ba5a398a2edcbe577d16f6bb01c79b232fd98a6407571c1026e5077a2cc7",
-        "git_blob_lf": "1654d2a5147863c8bd5af560222ce873a993a0bd"
-      },
-      "modules/ai_intelligence/ai_overseer/tests/conftest.py": {
-        "raw_sha256": "7c3d715c8c1befd0dafa3db0abbd930a2bca836c580772efd22b1162a0d4f210",
-        "lf_sha256": "7c16eaaa16225237dbbddd1aa43b871147d6f4b13c529e54221488ed6bafe193",
-        "git_blob_lf": "5974ceb67f3710665a8853a3abfe193a31821e34"
+      "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": {
+        "raw_sha256": "1722787d530870049895979c4b717dec39d03ba0db835c9dca1c670e462ed11f",
+        "lf_sha256": "c21c2c5f54207e822e6163dc06c28b385cf1572a96f787c65e9e31c46685def5"
       },
       "modules/__init__.py": {
         "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "lf_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "git_blob_lf": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        "lf_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "modules/infrastructure/wre_core/__init__.py": {
-        "raw_sha256": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
-        "lf_sha256": "79b0984199b2119f468645f3ed3f59e6615f8dab61279990c27fa6d21ffcd5d7",
-        "git_blob_lf": "7fe5bab5af0b225c1a6edadd9ae49e98b87fdcff"
+      "modules/infrastructure/browser_actions/src/__init__.py": {
+        "raw_sha256": "a5c3edb151c5e55250cac3143241e1ed3d72786eecdfe5c98b4c67bdcefec89c",
+        "lf_sha256": "13c1ea30fd48f9d123b20428cf39fcc0b44862ce0beef6f8f199b42184c4bd1a"
       },
-      "modules/infrastructure/wre_core/src/__init__.py": {
-        "raw_sha256": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
-        "lf_sha256": "e416e549da20d918b4fcb91d9b8cb0df5cece68ef149a3edc019175dc5da50de",
-        "git_blob_lf": "a5a91280e64cebb077cc8a51cf7d78f4c3a00ed0"
+      "modules/platform_integration/linkedin_agent/__init__.py": {
+        "raw_sha256": "119411905e67f42d67256df2ca2a112c5f5547d7f90323f0d6fdbcac6b7850a9",
+        "lf_sha256": "26ad290f0ac8f8871b4fc7f7a437ff82e5b1c9528929e3bf7cdd76a7a8e93abf"
+      },
+      "modules/platform_integration/linkedin_agent/src/__init__.py": {
+        "raw_sha256": "9da5c72eccb2d6ef809d2dbdecf4bdde21fd451c62c99721ba6a6fd4e821c9f3",
+        "lf_sha256": "9c612aa3fab7f878a825ce5109f2c0d98f63e0b28ef4bbbc0f3c0f6cf32eff28"
+      },
+      "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": {
+        "raw_sha256": "b6db167befc69d6efc8d1907e5740217e42e19b75911645428e6fa19bfc04062",
+        "lf_sha256": "1837debf1902ad3ea98bcaeb2e023c8fbea7b09e1a6d7dc6f46cee1622e48ac2"
       }
     },
     "publication": {
-      "state": "PR1899_open_initial_CI_failed_binding_repaired_pending_fresh_exact_head_checks",
-      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json",
-      "pr": 1899,
-      "first_head": "a470d262d041971efd4fbdf47cba23a511ffd882",
-      "first_failed_ci_run": 35889528743,
-      "failure": "Unchanged backend compatibility contract caught omitted dashboard manifest binding.",
-      "repair": "Exactly one runtime member hash and two digest pins; topology/API/caps unchanged. Local original contract and generator validation pass."
+      "state": "not_yet_published_at_document_commit",
+      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2538,10 +2480,14 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "eligible_deferred_behind_core_RSI_contract",
+          "state": "locally_and_independently_qualified_publication_pending",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
           "dependency": "Retain finite fake-only scope and fresh owner check; principal-selected core canary connection takes priority, with no LinkedIn live permission.",
-          "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes."
+          "next_step": "Close exact-head PR/main checks and own worktree; do not repeat characterization. Select the separately scored repair after fresh re-observation.",
+          "evidence": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\independent-review.json",
+            "sha256": "3ee3c8b198c365c1f98c2fb68be1b413c7fe57805105b04c3509e43185969d76"
+          }
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -2946,7 +2892,7 @@
           "state": "source_adjudication_complete_no_runtime_handoff_or_retention_verified",
           "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
           "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
-          "next_step": "Re-observe fresh owners; trace existing authorized ratchet invocation and diagnostic consumers, then freeze applicable negative raw-report/non-authority cases in existing tests only if there is a real owner/call binding. If absent, reconcile current canonical docs and mark the missing adapter/dependency without creating an unused consumer.",
+          "next_step": "Source adjudication complete. Do not repeat the known missing-caller audit or add an unconsumed adapter. Advance only when existing upstream runtime admission, independent verification and publication evidence supply an actual authorized handoff.",
           "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
           "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
           "independent_preparation_review": {
@@ -2996,30 +2942,73 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "locally_and_independently_validated_publication_pending",
+          "state": "closed_merged_PR1899",
           "dependency": "Explicit local report selection and expected baseline identity, no runtime admission or retention grant",
-          "next_step": "Freeze display/wiring cases, extend existing dashboard and existing startup call without growing main, validate and independently review; reconcile closure and rescore",
-          "effort_cost": "One bounded parser/display integration, two existing test owners, no provider spend. C3 integration, I3 launch visibility, D3 current launch plan, impact4 reusable diagnostics."
+          "next_step": "Closed in PR1899 with PR/main checks and lane retirement; do not repeat the display implementation/qualification. Admitted campaigns, runtime identity and retained outcome acceptance remain separate dependencies.",
+          "effort_cost": "One bounded parser/display integration, two existing test owners, no provider spend. C3 integration, I3 launch visibility, D3 current launch plan, impact4 reusable diagnostics.",
+          "closure": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json"
+        },
+        {
+          "task": "Repair manager-result admission before LinkedIn Connect UI",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "eligible_after_qualification_closure",
+          "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+          "dependency": "Preserve existing preview/policy/note and manager bookkeeping contracts; future fixed acceptance and independent verification before repair. No live sends.",
+          "next_step": "Admit only newly created PENDING work with matching target and current stored object; preexisting pending/connected, quota rejection and manager failure must not reach Connect/Send or gain success credit. Request IDs alone are insufficient.",
+          "effort_cost": "Small existing-owner guard/helpers plus fixed acceptance and unchanged regressions/backend binding; local CPU only.",
+          "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim."
+        },
+        {
+          "task": "Remove credential-shaped examples from existing LinkedIn module instructions",
+          "wsp15": {
+            "complexity": 1,
+            "importance": 4,
+            "deferability": 5,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "eligible_after_current_owned_closure",
+          "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
+          "evidence": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
+            "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
+          },
+          "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
+          "next_step": "Replace the two literal configuration examples with inert placeholders, validate instruction references and absence of literal assignments without printing values, independently review and close the narrow owned change.",
+          "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
+          "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3."
         }
       ],
       "selected_next": {
-        "task": "Qualify LinkedIn manager-result admission to browser connection actions",
+        "task": "Remove credential-shaped examples from existing LinkedIn module instructions",
         "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
+          "complexity": 1,
+          "importance": 4,
+          "deferability": 5,
           "impact": 3,
-          "total": 12,
-          "priority": "P2"
+          "total": 13,
+          "priority": "P1"
         },
-        "state": "next_candidate_requires_postclosure_reobservation",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "dependency": "Retain finite fake-only scope and fresh owner check; principal-selected core canary connection takes priority, with no LinkedIn live permission.",
-        "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes.",
-        "selection_reason": "Research handoff adjudication and advisory display close the executable core items. Native18/P0 and higher14/P1 tasks retain actual authority/owner blockers; PostgreSQL13/P1 runtime absent; count-only parity12/P2 consumer unbound. Existing fake-only LinkedIn qualification12/P2 is executable and tests the systems daily-work effect boundary without external sends.",
-        "preparation": "Read existing method and test/docs; browser checks BLOCKED only, while manager may return CONNECTED/WITHDRAWN. This is source evidence, not an executed failure or live authorization."
+        "state": "eligible_after_current_owned_closure",
+        "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
+        "evidence": {
+          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
+          "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
+        },
+        "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
+        "next_step": "Replace the two literal configuration examples with inert placeholders, validate instruction references and absence of literal assignments without printing values, independently review and close the narrow owned change.",
+        "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
+        "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3."
       },
-      "rationale": "Research handoff adjudication and advisory display close the executable core items. Native18/P0 and higher14/P1 tasks retain actual authority/owner blockers; PostgreSQL13/P1 runtime absent; count-only parity12/P2 consumer unbound. Existing fake-only LinkedIn qualification12/P2 is executable and tests the systems daily-work effect boundary without external sends."
+      "rationale": "Fresh unchanged main/shared94peers; close1899 advisory display and selected12/P2 characterization. Native18/domain14/product14/backend13 still gated; new13/P1 instruction hygiene wins tie with13/P1 manager repair as smallest memory-boundary prerequisite. No credential authenticity or live-runtime claim."
     }
   }
 }

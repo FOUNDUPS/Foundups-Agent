@@ -63,6 +63,33 @@ In Work, use the advertised browser skill. Do not reuse repository session cooki
 
 ## Retrieval audit and acceptance
 
+### RSI manager-result qualification — 2026-09-24
+
+The12/P2 qualification extends the existing browser-actions policy tests. Six
+new cases plus23 unchanged controls pass locally and independently (29 unique,
+four legacy constructor cases excluded, two known warnings per run). Real
+source leaves run with inert router/import boundaries and constructor bypass;
+no browser, provider or live connection is qualified.
+
+| Manager outcome | Current fake UI and bookkeeping observation |
+|---|---|
+| Fresh PENDING | Stores the returned object, reaches Connect/Send, credits success. |
+| Quota WITHDRAWN | Leaves prior history unchanged but still reaches UI and credits success. |
+| Already CONNECTED | Leaves the connection unchanged but still reaches UI and credits success. |
+| Prior PENDING | Returns the identical prior object, adds no request, still reaches UI and credits success. |
+| Simulation failure | StoresPENDING first, returns distinctWITHDRAWN with the same request_id under the fixed test clock, still reaches UI and credits success. |
+| Policy BLOCKED | Appends blocked history; navigation occurs, but no pending request, Connect/Send or success credit. |
+
+Prospective repair13/P1: before any Connect/Send, accept only newly created
+PENDING work matching the target and stored object, with no preexisting pending
+request or connection. Reject withdrawn/connected/blocked, missing or mismatched
+results without success credit. Preserve existing preview, policy, requested-note
+and no-message contracts. Do not infer admission from request_id equality alone.
+This guard would not repair existing history/quota accounting, roll back a
+simulator failure, prove delivery, or provide concurrent exactly-once behavior.
+The current sprint is qualification only; production source remains unchanged.
+Exact freeze, review and publication are in the canonical RSI backlog.
+
 ### RSI requested-note repair — 2026-09-23
 
 PR #1875's current-behavior qualification is closed. The existing owner now

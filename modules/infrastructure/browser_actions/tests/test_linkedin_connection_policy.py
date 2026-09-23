@@ -478,3 +478,93 @@ def test_connection_ack_note_sequence(
     assert request.message == (message or generated)
     assert request.response_timestamp is None and not state.manager.connections
     assert state.actions._session_stats == {"connections_sent": 7 + int(success)}
+
+
+# Current-behavior qualification, not the prospective admission acceptance gate.
+def _connection_admission_capture(state, monkeypatch, kind):
+    _connection_seed(state, kind if kind in {"quota", "connected", "pending"} else "empty")
+    if kind == "simulation_failure":
+        simulate = state.manager._simulate_connection_request
+
+        def failed_simulation(request):
+            simulate(request)
+            raise RuntimeError("synthetic simulation failure")
+
+        monkeypatch.setattr(state.manager, "_simulate_connection_request", failed_simulation)
+    returned = []
+    send = state.manager.send_connection_request
+
+    def capture(*args, **kwargs):
+        request = send(*args, **kwargs)
+        returned.append(request)
+        return request
+
+    monkeypatch.setattr(state.manager, "send_connection_request", capture)
+    return returned
+
+
+def _connection_admission_bookkeeping(state, kind, before, prior, request):
+    assert state.manager.connections == before[2]
+    if kind in {"quota", "connected", "pending"}:
+        assert _connection_state(state)[:3] == before[:3]
+        if kind == "pending":
+            assert request is prior is state.manager.pending_requests["synthetic-person"]
+            assert state.manager.connection_history[0] is prior
+        else:
+            assert not state.manager.pending_requests
+            assert all(item is not request for item in state.manager.connection_history)
+    else:
+        assert len(state.manager.connection_history) == 1
+        stored = state.manager.connection_history[0]
+        if kind == "blocked":
+            assert stored is request and not state.manager.pending_requests
+        else:
+            assert state.manager.pending_requests == {"synthetic-person": stored}
+            assert state.manager.pending_requests["synthetic-person"] is stored
+            assert stored.status is state.policy.ConnectionStatus.PENDING
+            assert stored.request_id == request.request_id
+            assert (stored is request) is (kind == "fresh")
+            assert stored.message == _ACK_NOTE and stored.response_timestamp is None
+
+
+@pytest.mark.parametrize("kind,status", [
+    ("fresh", "pending"), ("quota", "withdrawn"), ("connected", "connected"),
+    ("pending", "pending"), ("simulation_failure", "withdrawn"), ("blocked", "blocked"),
+])
+def test_connection_admission_current_manager_outcome(connection_current, monkeypatch, kind, status):
+    state = connection_current
+    returned = _connection_admission_capture(state, monkeypatch, kind)
+    before = _connection_state(state)
+    prior = state.manager.pending_requests.get("synthetic-person")
+    headline = "Founder and Marketing Advisor" if kind == "blocked" else "Founder"
+    result = _connection_request(state, headline=headline, message=_ACK_NOTE, dry_run=False)
+    assert len(returned) == 1
+    request = returned[0]
+    assert request.status is state.policy.ConnectionStatus(status)
+    assert (request.from_profile_id, request.to_profile_id) == ("current_user", "synthetic-person")
+    expected_id = "synthetic-prior" if kind == "pending" else f"req_synthetic-person_{_ConnectionClock.now().timestamp()}"
+    assert request.request_id == expected_id and request.timestamp == _ConnectionClock.now()
+    assert request.response_timestamp is None
+    assert request.message == (None if kind == "pending" else _ACK_NOTE)
+    success = kind != "blocked"
+    details = {"policy_reason": "allow role category matched" if success else "hard-deny role category matched",
+               "matched_allow": ["founder"] if success else [], "request_status": status,
+               "profile": {**_CONNECTION_META, "headline": headline}}
+    if success:
+        details.update(connect_click_success=True, send_click_success=True,
+                       add_note_success=True, note_typed_success=True)
+    else:
+        details.update(matched_deny=["marketing"])
+    error = None if success else "policy_blocked: hard-deny role category matched"
+    assert result.to_dict() == _connection_result(success, error, details)
+    steps = _ACK_NOTE_STEPS if success else ()
+    assert state.router.calls == _connection_ack_calls(steps, _ACK_NOTE)
+    events = ["router:navigate", "policy", "manager"]
+    if kind in {"fresh", "simulation_failure", "blocked"}:
+        events.append("policy")
+    simulated = kind in {"fresh", "simulation_failure"}
+    assert state.simulations == ([(1, 1, ("synthetic-person",))] if simulated else [])
+    assert state.events == events + (["simulation"] if simulated else []) + [
+        "router:click_by_description" for _ in steps]
+    assert state.actions._session_stats == {"connections_sent": 7 + int(success)}
+    _connection_admission_bookkeeping(state, kind, before, prior, request)
