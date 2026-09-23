@@ -26,6 +26,17 @@ SQLite and the reviewed external effect guard; no production authority follows.
 [R24](../../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-verification-failure-witnesses--2026-09-23)
 records the observations and separately selected repair acceptance boundary.
 
+## Shared ORM compatibility (2026-09-23)
+
+Three controls in existing `test_sqlite_adapter.py` qualify all14 legacy/new
+class identities, one registry/exact13-table inventory, trusted legacy pickle
+GLOBAL references, and a current transient row round trip. They run with125
+existing persistence/compute/lifecycle/schema/permission/CABR cases; all128 pass
+locally and independently with fixed IDs. The one expected baseline failure was
+the absent internal ORM owner. No existing test oracle changed.
+The new defining module changes newly emitted pickle paths; no PostgreSQL service
+or production verification authority was exercised. See [TestModLog](TestModLog.md).
+
 ## Run
 ```powershell
 cd o:\Foundups-Agent

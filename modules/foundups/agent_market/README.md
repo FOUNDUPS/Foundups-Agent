@@ -55,6 +55,7 @@ SQLite `trigger_payout` records payout, task linkage, configured compute charge 
 - `src/interfaces.py`: service contracts and adapter boundaries.
 - `src/in_memory.py`: PoC in-memory implementation.
 - `src/persistence/`: SQLite/Postgres adapters, migration manager, repository factory.
+- `src/persistence/orm_models.py`: single shared Base/13 ORM row mappings; legacy `sqlite_adapter` Base/row imports remain compatible. Domain dataclasses stay in `src/models.py`.
 - `src/exceptions.py`: domain errors.
 - `tests/`: schema, lifecycle, and permission tests.
 - `memory/`: module memory artifacts.

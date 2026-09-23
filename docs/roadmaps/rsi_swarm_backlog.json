@@ -1856,13 +1856,13 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b",
-    "selected_action": "R24-verification-retry-20260923",
-    "status": "locally_and_independently_characterized_publication_pending",
+    "base_commit": "6b5421dd4f996123fa3fa15185d0f13031d2db4a",
+    "selected_action": "R24-persistence-orm-20260923",
+    "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
       "complexity": 2,
-      "importance": 4,
-      "deferability": 3,
+      "importance": 3,
+      "deferability": 4,
       "impact": 3,
       "total": 12,
       "priority": "P2"
@@ -1871,58 +1871,54 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "R24-verification-retry-20260923",
-    "base": "6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b",
+    "observation_id": "R24-persistence-orm-20260923",
+    "base": "6b5421dd4f996123fa3fa15185d0f13031d2db4a",
     "self": "0102",
     "role": "coordinator",
     "origin": "internal_handoff",
     "principal_ref": "012",
     "selected": {
-      "task": "Qualify persistent proof-verification atomicity and reopen/retry behavior",
+      "task": "Qualify shared ORM cohesion extraction inside existing FAM persistence module",
       "wsp15": {
         "complexity": 2,
-        "importance": 4,
-        "deferability": 3,
+        "importance": 3,
+        "deferability": 4,
         "impact": 3,
         "total": 12,
         "priority": "P2"
       },
-      "state": "locally_and_independently_characterized_publication_pending",
-      "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
-      "next_step": "Publish independently confirmed five-case current-behavior observations and re-observe before the separately ranked atomic/replay repair.",
-      "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
-      "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls.",
-      "rationale": "After merged contract1891, native18/domain14/product14/backend13 remain blocked. Count-only12 has no consumer; LinkedIn12 outside core focus; paused lineage12 untouched. Existing persistence failure/retry12 is distinct, local and unblocked.",
+      "scope": "Move Base and13 ORM declarations at adapter57–277 once into internal persistence sibling; retain old import re-exports and metadata identity. Migration/factory/Postgres owners are unsuitable. Preserve816-line class unchanged; no behavioral change.",
+      "acceptance": "Fixed import/metadata/schema identity and existing persistence regressions; no duplicated ORM/ledger or hidden class growth. Select after fresh source/owner reconciliation.",
+      "state": "locally_and_independently_qualified_publication_pending",
+      "rationale": "Verification14/P1 has a concrete size/cohesion prerequisite. Native18, domain14/product14 and backend13 remain blocked; other12 candidates have no bound consumer, paused policy or external focus. This12/P2 prerequisite advances the core repair directly.",
+      "effort_cost": "One internal persistence file extracted mechanically, explicit legacy reexports, same-owner tests and existing persistence regressions; no provider spend or runtime calls.",
       "retrieval": {
-        "noise": "Historical payout mismatch is superseded by PR1851; staged assurance and completed happy-path tests do not prove business authorization or retry safety.",
-        "ordering": "WSP00 gate; prior independent source/contract; current NAVIGATION points to in-memory owner, direct persistent docs/source used; actual tests/runner effects inspected before frozen run.",
-        "missing": "Explicit disposable verification failure/retry coverage was missing; five current observations now fill that gap. Domain issuer remains missing.",
-        "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact source reuse at6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b verified against prior ten-file bindings at72faea198; no reindex or CURRENT claim.",
-        "duplication": "Extend same existing test owner; preserve29 prior definitions; no product source, module, skill or schema added."
-      },
-      "case_matrix_evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-proof-verification-contract\\next-action.json",
-      "scope": "Existing persistent compute test file, fixed five cases, explicit disposable SQLite, no production change or payout."
-    },
-    "previous_closed": {
-      "pr": 1891,
-      "merge": "6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b",
-      "state": "closed_merged_PR1891_main_checks_passed_owned_lane_retired",
-      "evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/final-accounting.json",
-        "sha256": "fd9612fc19a4805da1b858302d8c5bd88ecceb544063f92f34786a6aa6ba31f2"
+        "noise": "NAVIGATION points primarily to in-memory FAM; historical payout/PoC claims are not persistent runtime evidence.",
+        "ordering": "WSP00/15/97; current Git/PR/roadmap; FAM contracts/tests; actual SQLite ORM block and import consumers; prior source-bound independent cohesion review.",
+        "missing": "At entry no alternate shared ORM owner existed; one internal owner is now extracted and independently qualified. Module requirements.txt remains an existing gap, no installation inferred.",
+        "freshness": "UNKNOWN Holo: identical shared head0c81418/authority5326080 still mismatched; unchanged failed query reused, exact source fallback6b5421dd; no reindex/CURRENT claim.",
+        "duplication": "Move Base+13 declarations once inside existing FAM persistence module; retain legacy import names and one metadata registry. Do not duplicate ledger, table models or WSP module."
       }
     },
-    "previous_observation": "20260923-rsi-proof-verification-contract",
+    "previous_closed": {
+      "pr": 1892,
+      "merge": "6b5421dd4f996123fa3fa15185d0f13031d2db4a",
+      "evidence": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/final-accounting.json",
+        "sha256": "a538d549457c773bade16ab1c41e89b2c407a74a63129b8c41d756e536efc6a0"
+      }
+    },
+    "previous_observation": "R24-verification-retry-20260923",
     "retrieval": {
-      "noise": "Historical payout mismatch is superseded by PR1851; staged assurance and completed happy-path tests do not prove business authorization or retry safety.",
-      "ordering": "WSP00 gate; prior independent source/contract; current NAVIGATION points to in-memory owner, direct persistent docs/source used; actual tests/runner effects inspected before frozen run.",
-      "missing": "Explicit disposable verification failure/retry coverage was missing; five current observations now fill that gap. Domain issuer remains missing.",
-      "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact source reuse at6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b verified against prior ten-file bindings at72faea198; no reindex or CURRENT claim.",
-      "duplication": "Extend same existing test owner; preserve29 prior definitions; no product source, module, skill or schema added."
+      "noise": "NAVIGATION points primarily to in-memory FAM; historical payout/PoC claims are not persistent runtime evidence.",
+      "ordering": "WSP00/15/97; current Git/PR/roadmap; FAM contracts/tests; actual SQLite ORM block and import consumers; prior source-bound independent cohesion review.",
+      "missing": "At entry no alternate shared ORM owner existed; one internal owner is now extracted and independently qualified. Module requirements.txt remains an existing gap, no installation inferred.",
+      "freshness": "UNKNOWN Holo: identical shared head0c81418/authority5326080 still mismatched; unchanged failed query reused, exact source fallback6b5421dd; no reindex/CURRENT claim.",
+      "duplication": "Move Base+13 declarations once inside existing FAM persistence module; retain legacy import names and one metadata registry. Do not duplicate ledger, table models or WSP module."
     },
     "source_bindings": {
-      "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/candidate/receipt.json",
-      "sha256": "889cad0dbbe697d271b5d4e99741051b8d5691aeb49d059828ea05d0a30994e0"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/candidate/receipt.json",
+      "sha256": "f128c9c578c5221c2072e520c545db56eac66878a1055896e4b5e8bcdbb556f1"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -1960,23 +1956,36 @@
       }
     },
     "validation": {
-      "local": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/candidate/receipt.json",
-        "sha256": "889cad0dbbe697d271b5d4e99741051b8d5691aeb49d059828ea05d0a30994e0"
+      "baseline": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/baseline/receipt.json",
+        "sha256": "64086505b49314326adf41ae722a32d987199b46b08658d260f8e928b0e5ff13"
+      },
+      "candidate": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/candidate/receipt.json",
+        "sha256": "f128c9c578c5221c2072e520c545db56eac66878a1055896e4b5e8bcdbb556f1"
       },
       "independent": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/independent/receipt.json",
-        "sha256": "8f1d86181db5d6f739a1f3d2e26541ed103546ce60e619f6efb4f776d253ffd1"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/independent/receipt.json",
+        "sha256": "271de1d7da407d997a5f29cca6b2e502933fb1d1294d5959bc669fdefe618d4c"
       },
-      "cases": 5,
-      "independent_same_cases": 5,
-      "errors": 0,
-      "skipped": 0,
-      "meaning": "Passing observations reproduce existing defects; no atomicity/idempotency/authority acceptance",
-      "source_test_bindings": 39,
-      "guard": "10 explicit SQLite opens/run;0 test subprocesses;5 denied pytest convenience symlinks;no unexpected denials",
-      "registry": "current1658/quarantined269",
-      "independent_final_review": "Approved nine-file scope by /root/amibot_runtime_audit; same frozen five-case inputs, all29 prior definitions preserved, evidence/links/backlog verified; no production correctness claim."
+      "fixed_cases": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/fixed-case-names.json",
+        "sha256": "47e19b07cb266bd913db4cbe09e1aae21612e663f1d925f3ed79778db318be90"
+      },
+      "static_extraction": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/extraction-static-validation.json",
+        "sha256": "93c881cfd66302fa3a45fee42110f40f6aa895b4983d666127dff3f97cce25c2"
+      },
+      "counts": {
+        "baseline_passed": 127,
+        "baseline_expected_missing_owner": 1,
+        "candidate_passed": 128,
+        "independent_same_cases_passed": 128,
+        "errors": 0,
+        "skipped": 0
+      },
+      "limits": "Same128 cases, not256 unique.40 inventoried Python files stable;108 disposable SQLite opens/run;no allowed test subprocesses;5 denied convenience symlinks/no unexpected denials;two config warnings. Does not repair verification defects or qualify PostgreSQL/runtime authority.",
+      "registry": "current1658/quarantined269"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2474,14 +2483,22 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "locally_and_independently_characterized_publication_pending",
+          "state": "closed_merged_PR1892",
           "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
-          "next_step": "Publish independently verified five-case observations; use separately ranked repair candidate after fresh reobservation.",
+          "next_step": "Do not repeat the closed five-case qualification; repair remains separate.",
           "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
           "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls.",
           "evidence": {
             "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/independent/receipt.json",
             "sha256": "8f1d86181db5d6f739a1f3d2e26541ed103546ce60e619f6efb4f776d253ffd1"
+          },
+          "closure": {
+            "pr": 1892,
+            "merge": "6b5421dd4f996123fa3fa15185d0f13031d2db4a",
+            "evidence": {
+              "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/final-accounting.json",
+              "sha256": "a538d549457c773bade16ab1c41e89b2c407a74a63129b8c41d756e536efc6a0"
+            }
           }
         },
         {
@@ -2494,12 +2511,30 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "eligible_after_acceptance_and_cohesion_reconciliation",
+          "state": "eligible_after_fixed_acceptance_and_legacy_reconciliation",
           "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
-          "dependency": "Freeze desired acceptance against observed failure witnesses; map existing transaction/compute/event helpers and reconcile1330-line adapter no-growth before code growth. Domain-policy integration remains blocked and outside repair.",
+          "dependency": "ORM cohesion prerequisite independently qualified; retain1330 ceiling and unchanged816-line class debt. Fix desired atomic/replay acceptance and conservative incomplete-legacy handling before implementation; domain-policy/WRE integration remains outside repair.",
           "next_step": "Read existing transaction owner/helpers, choose smallest coherent atomic decision/debit/event/replay change with fixed failure controls; do not create a parallel verifier.",
           "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
           "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend."
+        },
+        {
+          "task": "Qualify shared ORM cohesion extraction inside existing FAM persistence module",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "locally_and_independently_qualified_publication_pending",
+          "source": "modules/foundups/agent_market/src/persistence/orm_models.py; sqlite_adapter compatibility exports",
+          "next_step": "Finish exact publication/closure then freshly re-score verification repair; do not repeat extraction.",
+          "evidence": {
+            "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/independent/receipt.json",
+            "sha256": "271de1d7da407d997a5f29cca6b2e502933fb1d1294d5959bc669fdefe618d4c"
+          }
         }
       ],
       "selected_next": {
@@ -2512,42 +2547,42 @@
           "total": 14,
           "priority": "P1"
         },
-        "state": "eligible_after_acceptance_and_cohesion_reconciliation",
+        "state": "eligible_after_fixed_acceptance_and_legacy_reconciliation",
         "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
-        "dependency": "Freeze desired acceptance against observed failure witnesses; map existing transaction/compute/event helpers and reconcile1330-line adapter no-growth before code growth. Domain-policy integration remains blocked and outside repair.",
+        "dependency": "ORM cohesion prerequisite independently qualified; retain1330 ceiling and unchanged816-line class debt. Fix desired atomic/replay acceptance and conservative incomplete-legacy handling before implementation; domain-policy/WRE integration remains outside repair.",
         "next_step": "Read existing transaction owner/helpers, choose smallest coherent atomic decision/debit/event/replay change with fixed failure controls; do not create a parallel verifier.",
         "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
         "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend."
       },
-      "rationale": "New reproducible debit/partial-commit witnesses raise existing-owner persistence repair14/P1 above unblocked12/P2 alternatives. Native18, domain14, product14 and backend13 retain distinct blockers; prior documentation is reconciled, not re-audited."
+      "rationale": "Concrete12/P2 cohesion prerequisite to14/P1 repair now qualified;1892 closure reconciled. Native18/domain14/product14/backend13 remain blocked; no consumer12/paused12/external-focus12 do not displace core persistence repair."
     },
     "publication": {
       "state": "pending_exact_head_checks_and_merge"
     },
     "owner_reconciliation": {
       "entry_evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/entry.json",
-        "sha256": "5922224ead5a63e9cec2863c0b7dc07d3ecbcc95c2e534e1831990726cb450d8"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/entry.json",
+        "sha256": "436b104e49435d418e86406d7e281ac8387dc6e9d28b3d1a923be08d64d989cd"
       },
       "scope_evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/scope-ownership.json",
-        "sha256": "07d51c89b7f578648c8a7939cc8756f17e00ed767bed55b942f679b5fcea0248"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/scope-ownership.json",
+        "sha256": "a62f4af73f99afc92ba3adfcc3ed229c56bbfdd2933f980460b72bb4f438b911"
       },
       "peer_prs": 94,
       "shared_checkout_preserved": true,
-      "owned_prior_contract_lane": "PR1891 main CI/CodeQL passed; exact reviewed tree merged; owned branch/worktree retired, bootstrap state and bundle archived",
+      "previous_owned_lanes": "1891 and1892 archived/retired; paused lineage preserved",
       "fresh_evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/prepublication-owner-check.json",
-        "sha256": "9471633d479ce6c29e325691d0163f952cac2b3870a248410adfae376246f27d"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/prepublication-owner-check.json",
+        "sha256": "698e7ef9e8a16a9bbcd9213fa74e82c72fb11a403891a100bfa92d59383926be"
       }
     },
     "observation_evidence": {
-      "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/selection.json",
-      "sha256": "855d36475f36bdc1e1e8f9e3f1e7b157271772139f16dd16df0e898d94ee2381"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/selection.json",
+      "sha256": "c69e14b3cc7c1e7b1df861494e1e116a6375b5951db02dde24a425cb07067b1c"
     },
     "previous_observation_evidence": {
-      "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/previous-observation.json",
-      "sha256": "2c6e7161686a6de8a06b3db36c04be6cb0b259d0f6db03d6f49c6783b5002ea2"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-persistence-orm/previous-observation.json",
+      "sha256": "4e164d5992f6bd5460b8c8a4a1266028b3331dc7f83033164f0568e7b6a18971"
     }
   }
 }

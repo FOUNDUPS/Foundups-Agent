@@ -271,6 +271,29 @@ conflicting decision. Reuse the current pipeline/adapter; domain issuer, signed
 WRE integration, PostgreSQL and payouts remain outside this repair. Do not retain
 these defective outcomes as desired acceptance when a repair is selected.
 
+### Shared ORM prerequisite — 2026-09-23
+
+At base `6b5421dd4f996123fa3fa15185d0f13031d2db4a`, the existing
+FAM persistence module separates Base/13 row definitions into
+[orm_models.py](../../modules/foundups/agent_market/src/persistence/orm_models.py).
+WSP15 C2/I3/D4/Impact3=12/P2 addresses the concrete size prerequisite for the14/P1
+verification repair. Legacy sqlite_adapter exports retain class/metadata identity;
+no duplicate tables, schema change or new WSP module is introduced.
+
+Adapter1330→1125, internal ORM owner238; all29 original class/function ASTs remain
+identical, including the816-line class. Existing debt remains and the1330 ceiling
+is not enlarged. Three fixed compatibility controls and125 existing cases pass
+locally/independently:128 same IDs, zero errors/skips. Baseline127pass/one expected
+missing-owner import failure was preserved before extraction. The five verification
+failure witnesses still pass as observations; their defects are not repaired here.
+Old pickle globals resolve; new row pickles reference the new ORM owner and require
+it when loading/rolling back. No live PostgreSQL/runtime/domain authority follows.
+
+Fresh next candidate remains14/P1: existing-owner atomic verification and exact
+replay, with fixed rollback/retry acceptance and conservative legacy-history
+reconciliation before implementation. Reuse SQLite session/compute/debit/event
+owners; do not introduce another ledger or erase incomplete historical records.
+
 ### Capacity gates: one ticket before one thousand agents
 
 Each increase requires a fresh admitted profile and measured acceptance, not a

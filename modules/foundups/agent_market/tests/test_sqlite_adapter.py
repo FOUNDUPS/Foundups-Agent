@@ -1,5 +1,6 @@
 """Tests for SQLite adapter implementation details."""
 
+import pickle
 import tempfile
 from pathlib import Path
 
@@ -165,3 +166,53 @@ class TestEnvironmentConfig:
             adapter = SQLiteAdapter(Path(tmpdir) / "test.db")
             assert adapter.db_path == Path(tmpdir) / "test.db"
             adapter.close()
+
+
+# Stable compatibility exports: one Base and the existing thirteen mapped rows.
+_ORM_TABLES = {
+    "FoundupRow": "foundups", "TokenTermsRow": "token_terms",
+    "AgentProfileRow": "agent_profiles", "TaskRow": "tasks", "ProofRow": "proofs",
+    "VerificationRow": "verifications", "PayoutRow": "payouts",
+    "DistributionPostRow": "distribution_posts", "EventRecordRow": "event_records",
+    "ComputePlanRow": "compute_plans", "ComputeWalletRow": "compute_wallets",
+    "ComputeLedgerEntryRow": "compute_ledger_entries", "ComputeSessionRow": "compute_sessions",
+}
+
+
+def test_shared_orm_compatibility_aliases():
+    from modules.foundups.agent_market.src.persistence import orm_models, sqlite_adapter
+
+    assert sqlite_adapter.Base is orm_models.Base is Base
+    assert set(Base.metadata.tables) == set(_ORM_TABLES.values())
+    assert {mapper.class_ for mapper in Base.registry.mappers} == {
+        getattr(orm_models, name) for name in _ORM_TABLES}
+    for name, table in _ORM_TABLES.items():
+        old = getattr(sqlite_adapter, name)
+        assert old is getattr(orm_models, name)
+        assert old.registry is Base.registry and old.metadata is Base.metadata
+        assert old.__table__ is Base.metadata.tables[table]
+
+
+def test_legacy_orm_pickle_globals_resolve():
+    from modules.foundups.agent_market.src.persistence import sqlite_adapter
+
+    for name in ("Base", *_ORM_TABLES):
+        # These trusted local literals model old import-qualified pickle references.
+        payload = f"c{sqlite_adapter.__name__}\n{name}\n.".encode("ascii")
+        assert pickle.loads(payload) is getattr(sqlite_adapter, name)
+
+
+def test_transient_orm_row_pickle_round_trip():
+    from modules.foundups.agent_market.src.models import TaskStatus
+
+    original = TaskRow(
+        task_id="synthetic_pickle_task", foundup_id="synthetic_foundup",
+        title="transient row", description="no database", acceptance_criteria=["fixed"],
+        reward_amount=0, creator_id="synthetic_author", status=TaskStatus.SUBMITTED,
+        assignee_id="synthetic_worker", proof_id="synthetic_proof",
+    )
+    restored = pickle.loads(pickle.dumps(original))
+    assert type(restored) is TaskRow
+    for name in TaskRow.__table__.columns.keys():
+        assert getattr(restored, name) == getattr(original, name)
+    assert restored.status is TaskStatus.SUBMITTED

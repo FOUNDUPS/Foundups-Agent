@@ -1,3 +1,10 @@
+## 2026-09-23: Shared persistence ORM cohesion prerequisite
+
+- WSP00/6/11/15/22/49/50/62/84/97; C2/I3/D4/Impact3=12/P2. Moved Base and13 existing ORM declarations once into internal `persistence/orm_models.py`; old sqlite_adapter names are identity-preserving re-exports. No duplicate registry, schema, migration, ledger or WSP module.
+- Adapter1330→1125 lines; cohesive ORM owner238; combined production source grows33 lines for imports/documentation. All29 original top-level class/function ASTs match, including unchanged816-line adapter class, transaction helpers and Engine listener. Existing critical-window/class debt remains;1330 ceiling is not expanded.
+- Three fixed compatibility controls plus125 existing cases: baseline127pass/one expected absent-owner import failure; candidate and independent replay each128pass, zero errors/skips, same IDs/oracles. Existing five verification failure observations remain unchanged.40 inventoried Python files stable,108 disposable SQLite opens/run, no allowed test subprocesses; five denied pytest convenience symlinks/run, no unexpected denials, two config warnings. Registry current1658/quarantined269.
+- Old pickle globals resolve through aliases; new row pickles name orm_models and require that file when loading/rolling back. No discovered FAM pickle consumer; no speculative module-name rewriting. Verification atomic/replay repair14/P1 remains next; this extraction does not fix its defects or confer PostgreSQL/runtime/domain/reward authority.
+
 ## 2026-09-23: Persistent verification interruption and retry qualification
 
 - WSP00/6/15/22/49/50/62/97; C2/I4/D3/Impact3=12/P2. Five fixed observations in the existing persistent compute test owner pass locally and independently (same five cases), reproducing double debit on rejected retry, charge-only/partial-decision/missing-event residues, and state rejection on accepted retry.
