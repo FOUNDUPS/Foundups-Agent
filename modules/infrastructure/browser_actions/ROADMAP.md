@@ -17,6 +17,15 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ---
 
+## Manager-result qualification — 2026-09-24
+
+Six fixed witnesses plus23 preserved cases pass locally and independently.
+Four disallowed manager outcomes still reach fake UI; this is a qualified gap.
+Next repair13/P1 must admit only fresh storedPENDING work, retaining the current
+preview/policy/note contract. Same IDs do not prove object identity or freshness.
+See [test log](tests/TestModLog.md) and the canonical system backlog for exact
+closure and fresh selection; no production source or live connection changed.
+
 ## Current bounded checkpoint — 2026-09-23
 
 Requested-note repair 12/P2 passes 23 frozen cases locally and independently

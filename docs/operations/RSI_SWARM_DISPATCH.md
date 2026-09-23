@@ -1,5 +1,16 @@
 # RSI hybrid production line: ticket dispatch and cost control
 
+## Manager-result qualification checkpoint — 2026-09-24
+
+The existing daily-work boundary has29 fixed local/independent cases: four
+non-admissible manager outcomes still reach fake UI and gain success credit.
+[Exact current behavior and prospective repair](../../modules/platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-manager-result-qualification--2026-09-24) distinguish object identity, status and stored work. This closes qualification only.
+PR1899 is fully merged/checked/retired. Re-scored13/P1 instruction hygiene precedes
+the tied13/P1 admission repair to prevent credential-shaped examples entering
+worker context; no values are reproduced or used. Follow current backlog evidence,
+not this historical ordering, on the next wake. No live effect or runtime admitted.
+
+
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. The hybrid planning refinement is dated 2026-09-11; earlier runtime observations retain their date. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
 
 ## Research-report startup checkpoint — 2026-09-24

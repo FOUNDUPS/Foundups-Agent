@@ -1,3 +1,10 @@
+## 2026-09-24: Manager-result to UI admission qualification
+
+- WSP00/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Extended the existing policy test owner with six fixed current-behavior cases; all23 prior cases and original test AST/fixtures preserved. Production source, backend manifest and registry remain unchanged.
+- Same29 cases pass locally and independently, four legacy constructor cases deselected, two known config warnings. Quota WITHDRAWN, already CONNECTED, prior PENDING and simulator-failure WITHDRAWN still reach fake Connect/Send and gain credit; freshPENDING and policyBLOCKED controls distinguish admission.
+- Returned/stored object identity is checked: under the fixed test clock, exception fallback shares the storedPENDING request_id but is a different object; priorPENDING reuses the exact existing object. Canonical workflow records a prospective13/P1 fresh-work guard, not a completed repair. No live delivery, rollback, concurrent exactly-once or retained-RSI claim.
+- Test inventory reconciled against six actual files; established required canonical tests/TestModLog. Source-only instruction hygiene was separately discovered/scored13/P1 without reproducing or using credential-shaped values. Exact evidence/closure and next selection are in the system backlog.
+
 ## 2026-09-22 — Live newsletter archive reconciliation
 
 - Reconciled the three editorial lanes against live LinkedIn and public article read-back: JHR series 7505133867079536640 with two editions, personal ROC series 7448137996484182016 with nine editions, and Foundups - Eat the Startup series 7376428210558808065.
