@@ -119,6 +119,7 @@ available an aborted mapping is published before propagation.
 | `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
 | `baseline_input_sha256` | SHA-256 of the invocation's captured baseline text encoded as UTF-8; constructor reads normalize newlines. Describes prepared input even on abort before evaluation; not raw source bytes, program/oracle identity or authenticated provenance |
 | `proposal_inputs` | Per-invocation ordered list of `{iteration, proposal_input_sha256}` for nonempty text reaching candidate preparation. SHA-256 covers returned Unicode content encoded as UTF-8 before scratch write/diff; no raw proposal content is added to this field |
+| `program_inputs` | Ordered local attempted-call records: `{iteration, call_ordinal, program_input_sha256, identity_error}`; ordinal starts at one per invocation. Digest covers the rendered instruction text used in that call, encoded as UTF-8 |
 | `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
 
 Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
@@ -136,6 +137,20 @@ built-in UTF-8 encoder rather than an overridden `encode` method. Encoding failu
 produces no record. Mode rejection before preparation also produces no record,
 even if a backend returned text. Digests do not identify raw model wire, normalized
 scratch bytes or the later evaluator input, and do not authenticate a proposal.
+
+`program_inputs` records the locally rendered instruction string immediately
+before invoking the resolved backend method. Rendering preserves the original
+empty-format semantics once, including custom format results, and the same text
+supplies prompt and digest. Backend failures/interruption and later mode rejection
+retain the entry. Formatting or backend-lookup failure before invocation has no
+entry. Multiple backend calls within one proposal have distinct invocation-wide
+ordinals. Heuristic, zero-attempt and overridden proposal paths that bypass the
+LLM method leave an empty list. Direct calls outside `run()` have no collector.
+The scoped collector restores its prior value or absence on every Python exit.
+An unencodable instruction records null digest and `UnicodeEncodeError`, without
+suppressing the backend call; otherwise `identity_error` is null. This describes
+an attempted local call, not provider receipt, raw program bytes, the full prompt,
+model/oracle/environment identity, authenticated provenance or retained learning.
 
 Each sequential call reserves a distinct subdirectory, stages complete JSON in
 `report.tmp`, then replaces `report.json` in that directory after cleanup settles.

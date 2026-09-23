@@ -1856,53 +1856,56 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "228ecbe0da3e43bd697ed464abdb674c7dd65440",
-    "selected_action": "R15-program-consumption-20260923",
-    "status": "locally_and_independently_qualified_publication_pending",
+    "base_commit": "6ae4dd1baa898b7d4be7c8978f76bfe9fece1120",
+    "selected_action": "R15-program-identity-20260923",
+    "status": "locally_and_independently_verified_publication_pending",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 3,
       "impact": 3,
-      "total": 12,
-      "priority": "P2"
+      "total": 13,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "R15-program-consumption-20260923",
-    "base": "228ecbe0da3e43bd697ed464abdb674c7dd65440",
+    "observation_id": "R15-program-identity-20260923",
+    "base": "6ae4dd1baa898b7d4be7c8978f76bfe9fece1120",
     "self": "0102",
     "role": "architect",
-    "origin": "autonomous_trigger",
+    "origin": "external_principal",
     "principal_ref": "012",
     "selected": {
-      "task": "Qualify AutoResearcher program-instruction consumption",
+      "task": "Record actual per-backend-call rendered program-text diagnostic identity",
       "wsp15": {
-        "complexity": 2,
+        "complexity": 3,
         "importance": 4,
         "deferability": 3,
         "impact": 3,
-        "total": 12,
-        "priority": "P2"
+        "total": 13,
+        "priority": "P1"
       },
-      "state": "locally_and_independently_qualified_publication_pending",
+      "state": "locally_and_independently_verified_publication_pending",
       "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
-      "next_step": "Finish exact publication checks; do not claim prompt provenance from characterization."
+      "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
+      "next_step": "Publish exact reviewed source, verify PR/main checks, retire only this owned lane and re-observe.",
+      "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
+      "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
     },
     "previous_closed": {
-      "pr": 1884,
-      "merge": "228ecbe0da3e43bd697ed464abdb674c7dd65440",
-      "evidence": "O:/Foundups-Agent-audits/20260923-rsi-worktree-evidence/final-accounting.json"
+      "pr": 1885,
+      "merge": "6ae4dd1baa898b7d4be7c8978f76bfe9fece1120",
+      "evidence": "O:/Foundups-Agent-audits/20260923-rsi-program-consumption/final-accounting.json"
     },
-    "previous_observation": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\previous-observation.json",
+    "previous_observation": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\previous-observation.json",
     "retrieval": {
-      "noise": "Reuse source-qualified prior audit at same source; do not repeat completed baseline/proposal/lifecycle work.",
+      "noise": "Prior source/ownership findings retained only where current blobs/heads match. PR1886 AutoPost docs remain separately owned.",
       "ordering": "WSP00 bootstrap/gate, actual WSP15/97/62, canonical selection, existing source/test/interfaces and independent source review.",
-      "missing": "No qualified production report reader; no previous direct program-consumption tests found.",
+      "missing": "Authenticated evaluator/environment/provider lineage and production reader remain unqualified; per-call rendered program diagnostic is now implemented.",
       "freshness": "Prior Holo authority-root mismatch prerequisites unchanged; no repeated query or CURRENT claim. Git/source retrieval fallback.",
-      "duplication": "Small sibling test imports existing temp_research_env fixture. Existing996-line suite unchanged; WSP62 supports distinct focused test placement."
+      "duplication": "Extend the existing producer and consumption test. Same-file extraction reduces class size; no new production module, reader, registry or skill."
     },
     "source_bindings": {
       "modules/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
@@ -1978,8 +1981,8 @@
       "WSP_framework/src/WSP_CORE.md": "07930de7af9ee0452919711e223a3243a57e2973",
       "modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py": "2e1b8bb10b41d42350dfdd9c5693ab95aab2f1ac",
       "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_worktree_create_invoke.py": "bd4f9c4d439a9c3cbc8e820a1bf0b5d4cabeeb31",
-      "modules/infrastructure/wre_core/tests/test_wre_research_program_consumption.py": "a92b95a8797f669e4087228d434a2e736e7fa839",
-      "modules/infrastructure/wre_core/src/wre_auto_researcher.py": "9a49c38d7e7b99f03c815725559bd323eddf8b7c",
+      "modules/infrastructure/wre_core/tests/test_wre_research_program_consumption.py": "6f42a1f42ebe2d2ae77e0e91774edcc18a1320d5",
+      "modules/infrastructure/wre_core/src/wre_auto_researcher.py": "8c1ea09bda99797755c59c56735b182c07f243e4",
       "modules/infrastructure/wre_core/src/wre_research_evaluator.py": "68240e136aa28c698fff2cffb03262280df5ba53",
       "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py": "2f797fc4908cf83e18163a2c266e5a769090e32d"
     },
@@ -2019,17 +2022,21 @@
       }
     },
     "validation": {
-      "fixed_cases": 7,
-      "local_pass": 7,
-      "independent_same_cases_pass": 7,
-      "author": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\author\\result.json",
-      "independent": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\independent\\result.json",
-      "runner": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\run_tests.py",
-      "runner_sha256": "f310404c3d70d85e5258a3cf4c00c1fc3f297635c62f0afc259e059c14def147",
+      "fixed_cases": 24,
+      "local_pass": 24,
+      "independent_same_cases_pass": 24,
+      "baseline": "22 missing-field failures / 1 compatibility pass; then independent review regression1fail/23pass before rendered-subclass fix",
+      "author": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\author-v2\\result.json",
+      "independent": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\independent\\result.json",
+      "runner": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\run_tests.py",
+      "runner_sha256": "18040b809961863b9b9c77eb9786da815517c1ee5a5c2c7a9426da0d3501c5ba",
+      "test_freeze": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\test-freeze.json",
+      "regression": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\regression-final\\result.json",
+      "regression_pass": 34,
       "registry": "current1657/quarantined269",
-      "production": "unchanged",
-      "legacy_tests": "unchanged/not run",
-      "limits": "Actual researcher loop and prompt builder, fake evaluator and backend, explicit temporary files, exact prompts/counts/accounting/restoration. Existing evaluator import leaves remain real; simulator/economics eager initializers replaced by inert namespaces. Not a real economic evaluation, OS sandbox, native worker or retention proof."
+      "production": "existing wre_auto_researcher only; additive diagnostic field and same-file extraction",
+      "legacy_tests": "unchanged;34 selected lifecycle/mode/proposal cases passed",
+      "limits": "24 fixed cases use real loop/prompt code with fake backend/evaluator.34 connected cases retain real local evaluator where applicable. No external provider, OS confinement, authenticated provenance or retained learning claimed."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2473,9 +2480,9 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1885",
           "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
-          "next_step": "Finish exact publication checks; do not claim prompt provenance from characterization."
+          "next_step": "Do not repeat characterization; merged6ae4dd1, mainCI/CodeQL verified and owned lane retired."
         },
         {
           "task": "Record actual per-backend-call rendered program-text diagnostic identity",
@@ -2487,54 +2494,78 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_bounded_report_contract_after_fresh_reconciliation",
+          "state": "locally_and_independently_verified_publication_pending",
           "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
           "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
-          "next_step": "Reuse producer/report and the focused consumption test. Capture the same locally rendered instruction text used in the actual prompt immediately before backend invocation, including failed backend calls; identify invocation/iteration/ordinal. No entry-hash substitution or inferred heuristic consumption. Freeze compatibility and failure controls, including call-scoped collector cleanup, before implementation. No model/provider invocation or new reader.",
+          "next_step": "Publish exact reviewed source, verify PR/main checks, retire only this owned lane and re-observe.",
           "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
           "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
+        },
+        {
+          "task": "Qualify actual AutoResearcher evaluator inputs and dependency identity boundary",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "candidate_after_fresh_owner_and_source_reconciliation",
+          "source": "modules/infrastructure/wre_core/src/wre_research_evaluator.py::evaluate_target",
+          "dependency": "Map existing evaluator/simulator imports and mutable inputs before defining identity; use fixed local fixtures, no provider or live FoundUp. No single source-file hash may stand in for a complete oracle.",
+          "next_step": "Trace actual evaluator input/data/config consumption and existing tests; identify the smallest missing reproducibility gate that advances the admitted research ticket. Extend existing tests only if a specific uncovered behavior is demonstrated.",
+          "limits": "Qualification only; fixed acceptance criteria, no economic-validity or authenticated-oracle claim. Native effect lease and independent runtime provenance remain blockers.",
+          "effort_cost": "Bounded source/import and existing-test review; no external model spend planned."
         }
       ],
       "selected_next": {
-        "task": "Record actual per-backend-call rendered program-text diagnostic identity",
+        "task": "Qualify actual AutoResearcher evaluator inputs and dependency identity boundary",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 4,
           "deferability": 3,
           "impact": 3,
-          "total": 13,
-          "priority": "P1"
+          "total": 12,
+          "priority": "P2"
         },
-        "state": "eligible_bounded_report_contract_after_fresh_reconciliation",
-        "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
-        "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
-        "next_step": "Reuse producer/report and the focused consumption test. Capture the same locally rendered instruction text used in the actual prompt immediately before backend invocation, including failed backend calls; identify invocation/iteration/ordinal. No entry-hash substitution or inferred heuristic consumption. Freeze compatibility and failure controls, including call-scoped collector cleanup, before implementation. No model/provider invocation or new reader.",
-        "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
-        "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
+        "state": "candidate_after_fresh_owner_and_source_reconciliation",
+        "source": "modules/infrastructure/wre_core/src/wre_research_evaluator.py::evaluate_target",
+        "dependency": "Map existing evaluator/simulator imports and mutable inputs before defining identity; use fixed local fixtures, no provider or live FoundUp. No single source-file hash may stand in for a complete oracle.",
+        "next_step": "Trace actual evaluator input/data/config consumption and existing tests; identify the smallest missing reproducibility gate that advances the admitted research ticket. Extend existing tests only if a specific uncovered behavior is demonstrated.",
+        "limits": "Qualification only; fixed acceptance criteria, no economic-validity or authenticated-oracle claim. Native effect lease and independent runtime provenance remain blockers.",
+        "effort_cost": "Bounded source/import and existing-test review; no external model spend planned."
       },
-      "rationale": "Native/runtime/external-owner blockers persist; prior worktree qualification closed; lineage qualification paused. Program consumption is now qualified. The next report contract reuses its exact call boundary; choose it in core RSI scope before separate LinkedIn work or lower supplier work. Re-observe after publication."
+      "rationale": "Prior program characterization is closed; per-call identity now passes local criteria. Native18/P0, FAM/GotJunk14 and PostgreSQL13 retain authority/runtime blockers. Next core research qualification12/P2 precedes separately owned LinkedIn work and lower-priority supplier repair. Selection must be refreshed after publication; no automatic dispatch."
     },
     "publication": {
-      "state": "pending_exact_review_PR_merge_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption"
-    },
-    "observation_evidence": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\observation.json",
-      "sha256": "b076f4bc3ac7f55357f3acfb14e9edd3a13ee8e1a13e8c53deb290d120990763"
-    },
-    "previous_observation_evidence": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\previous-observation.json",
-      "sha256": "fd5571420a9fb7cebf0f0a0ef333b0cc3359f2a9792c5f32770cb1cd9f237d43"
+      "state": "pending_exact_PR_merge_main_checks",
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity"
     },
     "owner_reconciliation": {
-      "open_peer_prs": 93,
+      "open_peer_prs": 94,
       "changed_peer_pr_heads": 0,
       "changed_prior_peer_worktree_heads": 0,
       "shared_status_unchanged": true,
       "paused_lane_head": "6f70893bbb44da0364c90b549cc74cfd1e043ddd",
       "paused_lane_clean": true,
       "comparison_prs": "O:/Foundups-Agent-audits/20260923-rsi-lineage-draft/entry-observation.json",
-      "comparison_worktrees": "O:/Foundups-Agent-audits/20260923-rsi-lineage-draft/entry-peers.json"
+      "comparison_worktrees": "O:/Foundups-Agent-audits/20260923-rsi-lineage-draft/entry-peers.json",
+      "new_peer_prs": [
+        {
+          "number": 1886,
+          "head": "3aa71a0786b9202062e01beb84769c9ba0e7950e",
+          "scope": "AutoPost receipt schema/architecture docs; no current owner overlap"
+        }
+      ]
+    },
+    "observation_evidence": {
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\observation.json",
+      "sha256": "2a6f16408b97e30e69f493bdcb3e8bc40462c1ca76ad267a8c85f0f5c9fd39ff"
+    },
+    "previous_observation_evidence": {
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\previous-observation.json",
+      "sha256": "b81b1c06e28648701f6d7c5e0e11295a2e9e67219df3634d7bf53daa97798c6b"
     }
   }
 }

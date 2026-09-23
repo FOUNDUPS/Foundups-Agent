@@ -1,5 +1,22 @@
 # WRE Core Roadmap
 
+## Attempted-call program identity — 2026-09-23
+
+The13/P1 change extends the existing AutoResearcher report with per-call rendered
+instruction hashes. It preserves three-argument proposal callbacks, mode gates
+and exception behavior. Ordinals distinguish multiple backend calls within one
+iteration; the collector resets between invocations and restores prior state.
+Encoding failure is recorded without suppressing the call. Backend failures and
+interruptions remain visible; bypass/heuristic paths fabricate no input record.
+
+Local and independent24-case qualification includes the seven prior controls plus boundary and
+restoration cases. Independent review caught a rendered-str-subclass mismatch;
+a failing regression preceded the fix.34 unchanged legacy regression cases pass.
+Exact independent replay, publication and next selection belong to the canonical
+backlog. This advances the15/P1 report parent, which still needs authenticated
+provenance, evaluator/environment qualification, consumer binding and retention.
+No live OpenClaw/Hermes or FoundUp build is enabled by this diagnostic field.
+
 ## Program-consumption qualification — 2026-09-23
 
 The12/P2 seven-case characterization is locally and independently verified at

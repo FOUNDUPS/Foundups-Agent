@@ -1,3 +1,9 @@
+## 2026-09-23: AutoResearcher attempted-call program identity
+
+- WSP00/15/22/34/49/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing producer/report and focused consumption tests; no new runtime, reader or skill. Each attempted backend call records rendered-text identity, iteration and invocation-wide ordinal. Existing proposal signatures, dry-run valve, exception propagation and restoration remain intact.
+- Fixed criteria reproduced22 missing-field failures before implementation. Independent source review then exposed a double-formatting edge case; its new regression failed before the correction. Final24 focused cases pass locally and independently (same cases);34 unchanged legacy lifecycle/mode/proposal cases also pass at final source. Exact publication is tracked in the canonical backlog.
+- Same-file extraction shrinks the inherited class285 to249lines; loop82lines unchanged. Encoding failure remains diagnostic and never suppresses the backend call. No model/provider invocation, economic-quality, authenticated provenance or retained-learning claim. Prior7-case qualification closed in merged PR1885; the separate lineage draft remains paused.
+
 ## 2026-09-23: AutoResearcher program-consumption qualification
 
 - WSP00/15/22/34/49/50/62/97; C2/I4/D3/Impact3=12/P2. Seven fixed fake-backend cases pass locally and independently (the same cases). They observe the existing prompt builder across captured-file, attribute/callback mutation, backend-failure, heuristic and zero-attempt paths. Exact calls, outcome accounting, saved/returned report equality and scratch restoration are checked.
