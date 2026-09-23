@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -98,9 +99,9 @@ def _assert_comparison_artifacts(researcher, report, source, changed):
     assert researcher.working_target_path.read_text(encoding="utf-8") == source
 
 
-@pytest.mark.parametrize("changed", [False, True], ids=["stable_cost", "changed_cost"])
-def test_actual_loop_identical_candidate_comparison_observation(tmp_path, monkeypatch, changed):
-    """Characterize current comparison; acceptance is not retained improvement."""
+@pytest.mark.parametrize("change", ["stable", "replace", "mutate", "remove"])
+def test_actual_loop_identical_candidate_uses_frozen_costs(tmp_path, monkeypatch, change):
+    """Same candidate must not benefit from dependency-only cost changes."""
     source = (
         "AGENT_ALLOCATION = {'basic_search': 0.5, 'openclaw': 0.5}\n"
         "AGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0, 'openclaw': 2.0}\n"
@@ -127,16 +128,117 @@ def test_actual_loop_identical_candidate_comparison_observation(tmp_path, monkey
             assert code == source and history == []
             _assert_fixed_metrics(metrics, False)
             calls.append(code)
-            if changed:
+            if change == "replace":
                 fixture.setitem(table, "openclaw", costs.InfrastructureCost(0.008, 0, 0, 0, 0))
+            elif change == "mutate":
+                fixture.setattr(table["openclaw"], "compute_usd", 0.008)
+            elif change == "remove":
+                fixture.delitem(table, "openclaw")
             return code
 
         fixture.setattr(researcher, "_propose_change", propose)
         report = researcher.run()
         assert calls == [source]
-        _assert_comparison_artifacts(researcher, report, source, changed)
+        _assert_comparison_artifacts(researcher, report, source, False)
         assert target.read_bytes() == source.encode("utf-8")
         assert program.read_bytes() == b"Fixed synthetic comparison; no provider.\n"
     assert table.keys() == original.keys()
     assert all(table[key] is value for key, value in original.items())
     assert table is costs.AGENT_INFRASTRUCTURE_COSTS
+
+
+def _fixed_researcher(tmp_path, monkeypatch, iterations=1):
+    target, program = tmp_path / "target.py", tmp_path / "program.md"
+    target.write_text("AGENT_ALLOCATION = {'basic_search': 0.5, 'openclaw': 0.5}\n"
+                      "AGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0, 'openclaw': 2.0}\n")
+    program.write_text("Fixed fixture")
+    monkeypatch.setattr(researcher_module, "get_qwen_engine", lambda: None)
+    monkeypatch.setitem(evaluator.AGENT_INFRASTRUCTURE_COSTS, "basic_search",
+                        costs.InfrastructureCost(0.002, 0, 0, 0, 0))
+    monkeypatch.setitem(evaluator.AGENT_INFRASTRUCTURE_COSTS, "openclaw",
+                        costs.InfrastructureCost(0.004, 0, 0, 0, 0))
+    return researcher_module.WREAutoResearcher(
+        target, program, max_iterations=iterations, results_dir=tmp_path / "runs")
+
+
+def test_cost_snapshot_copies_values_and_drives_real_evaluator(tmp_path, monkeypatch):
+    researcher = _fixed_researcher(tmp_path, monkeypatch)
+    source = {"basic_search": 0.002, "openclaw": 0.004}
+    snapshot = evaluator.snapshot_cost_catalog(source)
+    source["openclaw"] = 0.008
+    with pytest.raises(TypeError):
+        snapshot["openclaw"] = 0.1
+    monkeypatch.setattr(evaluator.AGENT_INFRASTRUCTURE_COSTS["openclaw"], "compute_usd", 0.008)
+    _assert_fixed_metrics(evaluator.evaluate_target(researcher.target_path, cost_catalog=snapshot), False)
+    _assert_fixed_metrics(evaluator.evaluate_target(researcher.target_path), True)
+    assert dict(snapshot) == {"basic_search": 0.002, "openclaw": 0.004}
+
+
+@pytest.mark.parametrize("catalog", [False, [], {}, {1: 0.1}, {"openclaw": True},
+                                     {"openclaw": "0.1"}, {"openclaw": -1},
+                                     {"openclaw": float("nan")}, {"openclaw": float("inf")}])
+def test_invalid_cost_catalog_cannot_fall_back_to_live_values(tmp_path, monkeypatch, catalog):
+    researcher = _fixed_researcher(tmp_path, monkeypatch)
+    with pytest.raises(ValueError, match="cost catalog"):
+        evaluator.snapshot_cost_catalog(catalog)
+    with pytest.raises(ValueError, match="cost catalog"):
+        evaluator.evaluate_target(researcher.target_path, cost_catalog=catalog)
+
+
+@pytest.mark.parametrize("bad_total", [True, -1, float("nan"), float("inf")])
+def test_invalid_global_cost_aborts_with_report_and_cleanup(tmp_path, monkeypatch, bad_total):
+    researcher = _fixed_researcher(tmp_path, monkeypatch)
+    monkeypatch.setitem(evaluator.AGENT_INFRASTRUCTURE_COSTS, "openclaw",
+                        SimpleNamespace(total_usd=bad_total))
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: pytest.fail("proposal entered"))
+    with pytest.raises(ValueError, match="cost catalog"):
+        researcher.run()
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    assert report["failure"] == {"type": "ValueError", "phase": "cost_capture"}
+    assert report["status"] == "aborted" and report["cleanup"] == "restored"
+    assert report["baseline_evaluations"] == report["candidate_evaluations"] == 0
+    assert report["history"] == [] and report["optimized"] is None
+    assert researcher.working_target_path.read_text() == researcher.original_code
+
+
+def test_catalog_addition_does_not_enter_current_invocation(tmp_path, monkeypatch):
+    researcher = _fixed_researcher(tmp_path, monkeypatch)
+    def propose(code, *args):
+        monkeypatch.setitem(evaluator.AGENT_INFRASTRUCTURE_COSTS, "new_agent",
+                            costs.InfrastructureCost(0.004, 0, 0, 0, 0))
+        return code.replace("openclaw", "new_agent")
+    monkeypatch.setattr(researcher, "_propose_change", propose)
+    report = researcher.run()
+    assert report["history"] == [{"iteration": 1, "status": "failed_validation",
+                                  "error": "Unknown agent types: new_agent"}]
+    assert report["improvement"] == 0 and report["cleanup"] == "restored"
+
+
+def test_later_invocations_refresh_costs_without_mutating_earlier_metrics(tmp_path, monkeypatch):
+    first = _fixed_researcher(tmp_path, monkeypatch)
+    second = researcher_module.WREAutoResearcher(
+        first.target_path, first.program_path, max_iterations=0, results_dir=tmp_path / "runs")
+    inner_reports = []
+    def propose(code, *args):
+        monkeypatch.setattr(evaluator.AGENT_INFRASTRUCTURE_COSTS["openclaw"], "compute_usd", 0.008)
+        inner_reports.append(second.run())
+        return code
+    monkeypatch.setattr(first, "_propose_change", propose)
+    initial = first.run()
+    _assert_fixed_metrics(initial["baseline"], False)
+    _assert_fixed_metrics(initial["optimized"], False)
+    _assert_fixed_metrics(inner_reports[0]["baseline"], True)
+    monkeypatch.setattr(first, "_propose_change", lambda code, *args: code)
+    refreshed = first.run()
+    _assert_fixed_metrics(refreshed["baseline"], True)
+    assert initial["improvement"] == refreshed["improvement"] == 0
+    assert initial["invocation_id"] != refreshed["invocation_id"]
+    assert first.working_target_path.read_text() == first.original_code
+
+
+def test_zero_cost_still_records_work_in_compute_backing():
+    calc = evaluator.ResearchSustainabilityCalculator(
+        {"basic_search": 1.0}, {"basic_search": 1.0}, cost_catalog={"basic_search": 0.0})
+    assert calc.calculate_compute_revenue(10) == (0.0, 0.0)
+    assert calc.compute_backing.total_tasks_executed == 10
+    assert calc.compute_backing.total_fi_mined == pytest.approx(0.1)

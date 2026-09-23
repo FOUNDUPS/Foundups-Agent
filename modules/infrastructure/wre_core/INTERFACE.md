@@ -49,13 +49,15 @@ receipt versions as historical evidence; do not rewrite them in place.
 ## ROC research evaluator and dry-run producer
 
 `src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
-`load_target_config(path)` and `evaluate_target(path)`. The loader uses AST literal
+`load_target_config(path)`, `snapshot_cost_catalog(cost_catalog=None)` and
+`evaluate_target(path, *, cost_catalog=None)`. The loader uses AST literal
 evaluation; it does not import or execute the target. Metric dictionaries accept
 finite integers/floats with string keys, excluding booleans. Unusable numeric
 maps return empty dictionaries through the existing loader contract.
 
 Before simulation, `evaluate_target` rejects missing/invalid maps, agent names
-outside `AGENT_INFRASTRUCTURE_COSTS`, allocation fractions outside `[0, 1]`,
+outside the captured cost catalog (default: `AGENT_INFRASTRUCTURE_COSTS`),
+allocation fractions outside `[0, 1]`,
 totals not equal to one within absolute `1e-9` (zero relative tolerance), and
 multipliers outside `[1, 5]`. These input guards return an `error`, finite
 negative `fitness`, and false compute/ROI flags. Valid known-agent subsets,
@@ -127,16 +129,29 @@ Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
 may include evaluation or later acceptance/logging failures. Best metrics advance
 only after acceptance recording succeeds; accepted info names previous fitness.
 
-Comparison limitation qualified on 2026-09-23: the loop compares successive
-fitness values without freezing the shared evaluator cost table. Two fixed
-actual-loop controls use identical baseline/proposal text: stable costs reject,
-while changing only synthetic `openclaw` cost from 0.004 to 0.008 between
-evaluations accepts with apparent improvement `975/6592`. Both ROI flags remain
-true. This is the current local score comparison, not evidence that candidate
-code improved. Target/proposal digests alone cannot establish comparable oracle
-inputs. Reuse the existing evaluator-input tests; qualify an invocation-scoped
-comparison basis before using these scores for improvement admission. No new
-runtime or retention authority is supplied by this observation.
+Cost comparability repair, 2026-09-23: each invocation captures immutable numeric
+unit totals and catalog names after mode/report preparation, before baseline
+evaluation. Baseline and candidates consume the same captured values; replacement,
+in-place cost mutation and membership changes cannot alter this cost basis.
+Capture failure aborts in `cost_capture` with zero evaluator entries, preserving
+the existing terminal report and cleanup path. Later invocations refresh costs;
+separate instances do not share a snapshot. Same-instance concurrency remains
+unsupported, and capture is not atomic against concurrent mutation of globals.
+
+`snapshot_cost_catalog(None)` reads current catalog totals; an explicit mapping
+is copied and never falls back to globals through truthiness. Nonempty string-key
+mappings with finite nonnegative integer/float totals are accepted; booleans,
+non-numeric, negative, nonfinite and float-overflow values raise `ValueError`
+before simulation. Zero cost remains valid and still records performed tasks.
+Only aggregate totals are validated, not their five source components. The
+calculator accepts the same keyword and owns a copied immutable mapping. Valid
+one-argument evaluator calls still capture current costs independently.
+
+PR1895 preserves the historical observation: identical text accepted when only
+a synthetic cost changed. The repaired loop rejects that case under its frozen
+cost basis. Other mutable ROI/fee/subscription/angel inputs, oracle/environment
+identity, independent correctness and retained benefit remain unqualified.
+No new report field, runtime or retention authority is supplied by this repair.
 
 `proposal_inputs` is separate from finished `history`: a subsequent preparation,
 diff or evaluation interruption can leave an input record without an outcome.

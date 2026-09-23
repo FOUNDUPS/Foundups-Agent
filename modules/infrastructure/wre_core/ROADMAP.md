@@ -1,5 +1,29 @@
 # WRE Core Roadmap
 
+## Invocation-scoped cost comparability — 2026-09-23
+
+The14/P1 repair closes PR1895's dependency-only cost acceptance gap. Baseline and
+candidates now consume one immutable numeric cost/name snapshot per invocation;
+later calls capture current values. Direct evaluator calls retain valid one-argument
+behavior. Invalid/empty explicit catalogs cannot fall back to globals; invalid
+captured totals abort before evaluation with terminal reporting and cleanup.
+
+Fixed22cases pass locally and independently after2pass/20fail baseline. The136
+existing lifecycle/program cases also pass, including3 bounded child exits.
+No native worker/provider or retained-learning claim. Same-instance concurrency
+and atomic capture under concurrent global mutation remain unsupported.
+
+WSP62: same-file baseline/scoring extraction reduces inherited class249→242,
+loop82→75 and evaluator93→60; researcher594lines remains below600. New helpers
+are bounded; legacy996-line lifecycle tests only adapt signatures/stub imports.
+Continue reducing inherited orchestration debt when that owner is next changed.
+
+Next14/P1 qualifies all remaining ROC evaluation assumptions as one profile:
+distinguish live economic dictionaries from already-bound constructor defaults,
+enumerate values actually consumed and fix a comparison oracle before choosing
+further capture/report integration. Avoid one-constant repairs or unused hashes.
+Complete oracle/environment identity and independent retained benefit remain open.
+
 ## Actual-loop comparison qualification — 2026-09-23
 
 The13/P1 qualification extends the existing evaluator-input test owner with two
@@ -15,7 +39,7 @@ and scratch restoration agree. Model loading is disabled before construction;
 no provider, native worker, live commit or retained improvement occurs. Production
 source is unchanged. This closes the actual-loop observation, not the repair.
 
-Next: define and qualify the smallest invocation-scoped comparison-basis repair
+Historical follow-up, now addressed for cost inputs above: define the smallest comparison-basis repair
 in the existing evaluator/producer before admitting score improvements. Consider
 freezing the consumed input values versus rejecting detected drift; enumerate
 remaining mutable dependencies and concurrency limits. An unused digest or a

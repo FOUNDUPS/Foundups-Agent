@@ -1,29 +1,28 @@
-## AutoResearcher evaluator inputs
+## AutoResearcher evaluator inputs and cost snapshots
 
-`test_wre_research_evaluator_inputs.py` has three fixed controls: one isolated
-real-evaluator case and two actual-loop cases with stable/changed synthetic costs.
-It holds target bytes fixed, supplies two synthetic cost entries, changes one,
-checks independently calculated cost/margin/weighted ROC, then restores the
-entry and reproduces all baseline metrics. Original dictionary keys and value
-identities are restored. Local and independent replays pass the same three cases.
+`test_wre_research_evaluator_inputs.py` now has22fixed cases. The original direct
+evaluator sensitivity test stays unchanged. Actual-loop tests require rejection
+of identical text under stable/replaced/mutated/removed cost entries. Additional
+cases cover copied immutable values, real evaluator consumption, invalid/empty
+catalogs, capture failure reporting, added-agent exclusion, later/nested-instance
+refresh and zero-cost work accounting. PR1895 preserves the old acceptance
+observation; current desired behavior repairs it.
 
-The two loop controls keep candidate text unchanged, assert independently
-calculated full metrics (including ROI), and distinguish stable rejection from
-changed-cost acceptance. They check saved JSON, history, TSV, planned operations,
-equal baseline/proposal digests and source/scratch restoration. This records
-current comparison behavior, not desired repaired acceptance criteria.
+Local and independent22pass after a classified2pass/20fail baseline. The existing
+112lifecycle plus24program cases also pass locally and independently, with only
+keyword-forwarding and explicit child-stub adaptations; assertions are preserved.
+These158unique cases use the existing exact-interpreter external guard, isolated
+temporary/database paths and disabled model construction. Three reviewed child
+commands exercise abrupt-exit reporting with synthetic evaluator stubs, not real
+economics. All other subprocess/network effects remain denied. No database opens;
+21focused/135regression caught pytest symlink attempts and2config warnings per run.
 
-The focused owner preserves the996-line lifecycle and253-line prompt tests
-unchanged. The qualified external runner binds source/test/import leaves; only
-eager simulator/economics package initializers use inert namespaces. Plugins and
-bytecode are disabled; fresh external temporary/database paths and a sanitized
-environment are used. Python audit hooks reject network, subprocess and writes
-outside disposable outputs; no database opens occur. Model loading is disabled
-before construction, and a sentinel forbids delegated live commits. Three pytest
-convenience symlink attempts are denied/caught; two configuration warnings remain.
-These are known-fixture guards, not an OS sandbox. No model/provider, live FoundUp,
-economic-validity, authenticated oracle or retained-improvement claim.
-Exact commands/hashes/results are recorded by the canonical RSI backlog.
+The initial baseline post-run bookkeeping denial and noisy early Git status are
+preserved in external evidence. Fresh scope/diffs and source byte hashes remain
+the validation basis. Known-fixture Python hooks are not an OS sandbox. Other
+economic assumptions, authenticated oracle/environment identity, native execution
+and independently retained benefit remain unqualified. Exact receipts are bound
+through the canonical RSI backlog.
 
 ## AutoResearcher program consumption and identity
 
