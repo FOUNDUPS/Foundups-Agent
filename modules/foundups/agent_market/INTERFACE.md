@@ -243,6 +243,10 @@ FAMDaemonHealth(
 
 ### Persistence Repository Layer (Prototype Tranche 2)
 
+**Shared persistence mappings:**
+- `src/persistence/orm_models.py` owns the single Base and13 row declarations. Existing `sqlite_adapter.Base` and row imports re-export identical objects; PostgreSQL retains that compatibility path.
+- Mapping definitions, metadata inventory, schema/migrations and adapter method behavior are unchanged. Legacy pickle globals resolve; newly emitted row pickles name `orm_models` and require that module when loading, including rollback. No repository FAM pickle consumer was found; this is not a durable serialization-format guarantee.
+
 **SQLiteAdapter:**
 - Primary persistence adapter for local/dev and deterministic test execution.
 - Methods include CRUD coverage for:
