@@ -35,17 +35,17 @@ const source: VisionSource[] = [
     },
     title: { ja: '壊す前に、未来を比べる。', en: 'Before Demolition, Compare the Future.', pt: 'Antes de demolir, compare o futuro.' },
     summary: {
-      ja: '既存建物を壊してから考えるのではなく、24時間温泉、COG DC、eSingularity Lab、D-Kを組み合わせた再利用可能性を先に比較します。',
-      en: 'Test the reuse option first: a 24-hour onsen, COG DC, eSingularity Lab and D-K around the retained building.',
-      pt: 'Testar primeiro a opção de reuso: onsen 24 horas, COG DC, eSingularity Lab e D-K no edifício preservado.',
+      ja: '設立準備委員会の現在の要請は、9月25日の採決で解体準備事業を含む予算案について反対票を求めることです。再利用案の採否は別の正式手続で判断されます。',
+      en: 'The Preparatory Committee’s current request is a NO vote on the budget containing demolition preparation at the September 25 vote. Adoption of the reuse proposal is a separate formal decision.',
+      pt: 'O pedido atual do Comitê Preparatório é um voto NÃO ao orçamento que inclui a preparação da demolição na votação de 25 de setembro. A adoção da proposta de reutilização é uma decisão formal separada.',
     },
-    action: { ja: '壊す前に、比べる時間を。YUMORIに参加', en: 'Protect time to compare. Join YUMORI', pt: 'Proteja o tempo para comparar. Participe do YUMORI' },
+    action: { ja: '現在の要請と根拠を見る', en: 'See the current request and evidence', pt: 'Ver o pedido atual e as evidências' },
     evidence: {
       ja: ['建物・設備・法令適合性は未検証で、再利用の成立を保証するものではありません。', 'このビジュアルは実在建物を基にした構想図です。'],
       en: ['Building, systems and code feasibility remain unverified.', 'The visual is a concept based on the real building, not completed construction.'],
       pt: ['A viabilidade estrutural, técnica e legal ainda não foi validada.', 'A imagem é um conceito baseado no edifício real, não uma obra concluída.'],
     },
-    link: { label: { ja: '施設構想を見る', en: 'See the facility concept', pt: 'Ver o conceito da instalação' }, href: '#future-place' },
+    link: { label: { ja: '現在の要請・公開記録', en: 'Current request and public record', pt: 'Pedido atual e registro público' }, href: 'https://yumori.me/vote-no' },
   },
   {
     id: 'option-value', image: '/why-preserve.jpg',
