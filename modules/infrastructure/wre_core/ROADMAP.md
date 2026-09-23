@@ -1,5 +1,27 @@
 # WRE Core Roadmap
 
+## Actual-loop comparison qualification — 2026-09-23
+
+The13/P1 qualification extends the existing evaluator-input test owner with two
+one-attempt controls using the real dry-run producer and evaluator. Identical
+candidate text rejects with stable synthetic costs. Changing only one cost in
+the proposal callback accepts with simulated improvement975/6592, despite equal
+baseline/proposal digests. The independently derived full metrics include ROI
+and expose an incomparable-basis result; they do not validate economic assumptions.
+
+The three fixed cases (one preserved evaluator case plus two loop controls) pass
+locally and independently. Saved JSON, TSV, history, planned operations, source
+and scratch restoration agree. Model loading is disabled before construction;
+no provider, native worker, live commit or retained improvement occurs. Production
+source is unchanged. This closes the actual-loop observation, not the repair.
+
+Next: define and qualify the smallest invocation-scoped comparison-basis repair
+in the existing evaluator/producer before admitting score improvements. Consider
+freezing the consumed input values versus rejecting detected drift; enumerate
+remaining mutable dependencies and concurrency limits. An unused digest or a
+cost-only claim of complete oracle identity is insufficient. The canonical
+backlog retains broader native/runtime/authority blockers and publication evidence.
+
 ## Evaluator dependency qualification — 2026-09-23
 
 The12/P2 qualification confirms that fixed target bytes can produce different
