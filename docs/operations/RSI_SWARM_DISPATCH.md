@@ -1,15 +1,15 @@
 # RSI hybrid production line: ticket dispatch and cost control
 
-## Manager-result qualification checkpoint — 2026-09-24
+## Instruction-memory hygiene checkpoint — 2026-09-24
 
-The existing daily-work boundary has29 fixed local/independent cases: four
-non-admissible manager outcomes still reach fake UI and gain success credit.
-[Exact current behavior and prospective repair](../../modules/platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-manager-result-qualification--2026-09-24) distinguish object identity, status and stored work. This closes qualification only.
-PR1899 is fully merged/checked/retired. Re-scored13/P1 instruction hygiene precedes
-the tied13/P1 admission repair to prevent credential-shaped examples entering
-worker context; no values are reproduced or used. Follow current backlog evidence,
-not this historical ordering, on the next wake. No live effect or runtime admitted.
-
+PR1900 is merged, main-checked and retired. Its 29 unique qualification cases
+expose four manager-to-UI admission gaps; the production repair remains separate.
+The existing LinkedIn module instructions now use two inert configuration
+placeholders, keeping literal values out of subsequent worker context. This is
+current-source redaction, not credential rotation or Git-history removal.
+Static validation and independent review are recorded in the existing backlog;
+publication state remains explicit there. Re-score the next 13/P1 admission repair
+after closure. No runtime, account action or native RSI job was executed.
 
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. The hybrid planning refinement is dated 2026-09-11; earlier runtime observations retain their date. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
 

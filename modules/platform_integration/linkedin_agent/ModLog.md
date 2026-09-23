@@ -1,3 +1,9 @@
+## 2026-09-24: Remove credential-shaped instruction examples
+
+- WSP 00/15/22/50/97; C1/I4/D5/Impact3 = 13/P1. Replaced exactly two configuration assignments in the existing module CLAUDE.md with inert placeholders and added the existing memory-boundary rule for documentation, logs and worker packets.
+- Static validation preserves all other instruction text, all 42 ranked task identities and all 26 planning packets. No runtime, API, tests, registry or manifest changes; no new skill or module. Independent review and exact publication/closure evidence are bound in the system backlog.
+- This is current-source redaction only. Credential validity and rotation remain unknown; earlier Git history is unchanged. No values reproduced in receipts, no credential use or account action.
+
 ## 2026-09-24: Manager-result to UI admission qualification
 
 - WSP00/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Extended the existing policy test owner with six fixed current-behavior cases; all23 prior cases and original test AST/fixtures preserved. Production source, backend manifest and registry remain unchanged.

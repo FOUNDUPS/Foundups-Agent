@@ -1,3 +1,9 @@
+## 2026-09-24: RSI instruction-memory hygiene
+
+- Closed PR1900 at `3303f1a2ce9af9eb366125d99ac2a8449986e220`: 29 unique qualification cases passed locally and independently, ten PR checks and both exact-merge main workflows passed, and its owned lane was retired. Four manager-to-UI admission gaps remain separately scoped.
+- WSP 00/15/22/50/97 selected the 13/P1 instruction prerequisite after fresh main/94-peer reconciliation. Replaced two credential-shaped configuration examples in the existing LinkedIn module instructions; static-only source repair with independent review, no runtime or account action.
+- The existing backlog records evidence, publication state and the re-scored 13/P1 admission repair. Native ticket execution remains blocked on its existing trust/admission prerequisites; this documentation fix is not retained production RSI.
+
 ## 2026-09-24: RSI manager-result qualification
 
 - Existing LinkedIn/browser owners:29 fixed fake-only cases pass locally and independently; four manager outcomes still cross into UI despite not admitting new work. No production source change. Canonical docs/test inventory and WSP15 queue updated; next13/P1 instruction hygiene and13/P1 coherent admission repair are separate.

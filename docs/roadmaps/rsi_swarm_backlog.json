@@ -1856,326 +1856,88 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
-    "selected_action": "linkedin-manager-outcome-qualification-20260924",
-    "status": "locally_and_independently_qualified_publication_pending",
+    "base_commit": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
+    "selected_action": "linkedin-instruction-hygiene-20260924",
+    "status": "statically_validated_independent_review_and_publication_pending",
     "wsp15": {
-      "complexity": 3,
-      "importance": 3,
-      "deferability": 3,
+      "complexity": 1,
+      "importance": 4,
+      "deferability": 5,
       "impact": 3,
-      "total": 12,
-      "priority": "P2"
+      "total": 13,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "linkedin-manager-outcome-qualification-20260924",
-    "base": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
+    "observation_id": "linkedin-instruction-hygiene-20260924",
+    "base": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
     "self": "0102",
     "role": "architect/coordinator",
-    "origin": "autonomous_trigger",
+    "origin": "external_principal",
     "principal_ref": "012",
-    "selected": "Qualify LinkedIn manager-result admission to browser connection actions",
+    "selected": "Remove credential-shaped examples from existing LinkedIn module instructions",
     "wsp15": {
-      "complexity": 3,
-      "importance": 3,
-      "deferability": 3,
+      "complexity": 1,
+      "importance": 4,
+      "deferability": 5,
       "impact": 3,
-      "total": 12,
-      "priority": "P2"
+      "total": 13,
+      "priority": "P1"
     },
     "previous_closed": {
-      "utc": "2026-09-23T17:04:24.189639+00:00",
-      "pr": 1899,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1899",
-      "merge": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
-      "reviewed_head": "8be02f8c152ca12c7f80dad85300138ad30d8776",
-      "reviewed_tree": "4ace1e4b581b1219da205a95de76ff334009f569",
-      "merged_tree_matches": true,
-      "pr_checks_passed": 10,
-      "main_workflows": [
-        {
-          "conclusion": "success",
-          "databaseId": 35891809519,
-          "headSha": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
-          "status": "completed",
-          "workflowName": "CI"
-        },
-        {
-          "conclusion": "success",
-          "databaseId": 35891808954,
-          "headSha": "624c3e25fe3530c1063207436fe46b8aeb89a8bf",
-          "status": "completed",
-          "workflowName": "CodeQL"
-        }
-      ],
-      "validation": "67 final cases passed locally and independently; initial63 baseline7pass56fail; review-found2 accounting and2 path controls failed before respective repairs. No errors/skips/unexpected denials in final runs.",
-      "owned_lane_retired": true,
-      "remote_branch_absent": true,
-      "shared_unchanged": true,
-      "paused_lane": "agent/rsi-lineage-draft-20260923 preserved; independent review still blocked",
-      "next_action": {
-        "task": "Qualify LinkedIn manager-result admission to browser connection actions",
-        "wsp15": {
-          "complexity": 3,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
-        },
-        "state": "selected_after_completed_advisory_display_requires_fresh_scope_qualification",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "dependency": "Fake-only scope and exact owner/effect preflight; no live LinkedIn send, browser session or external dispatch.",
-        "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes.",
-        "reconciliation_constraint": "Reuse existing connection-policy fake fixtures. Qualify manager return identity/status and stored state before any browser-action repair; no new module or live test."
-      },
-      "limits": "Advisory display of caller-selected local diagnostic only. Exact main function bodies tested; full menu startup, authenticated freshness, oracle identity, native RSI and retention remain unverified.",
-      "backend_binding_validation": {
-        "utc": "2026-09-23T16:46:41.205169+00:00",
-        "binding": {
-          "old_digest": "c7d2f0bab78522f9437b69e74778e4ccdcc16028999ad8f933b78400da8c88b0",
-          "new_digest": "3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618",
-          "changed_members": [
-            "modules/infrastructure/wre_core/src/dashboard_alerts.py"
-          ],
-          "runtime_count": 1401,
-          "other_fields_unchanged": true,
-          "ci_run": 35889528743,
-          "ci_failed_head": "a470d262d041971efd4fbdf47cba23a511ffd882",
-          "initial_validation_gap": "Dashboard reader membership in the existing backend closure was omitted from initial dependency validation; unchanged CI gate detected it."
-        },
-        "generator_cases": 8,
-        "case_names": [
-          "test_package_initializers_resolve_relative_imports_from_their_package",
-          "test_generated_closure_binds_executable_and_dynamic_load_sentinels",
-          "test_generated_closure_binds_isolated_acceptance_entrypoint",
-          "test_newly_tracked_imported_runtime_dependency_cannot_be_omitted",
-          "test_untracked_local_import_fails_closed",
-          "test_checked_in_manifest_matches_independent_generation",
-          "test_extension_javascript_is_package_bound_not_backend_materialized",
-          "test_staged_index_manifest_is_self_consistent"
-        ],
-        "generator_check": "passed",
-        "unchanged_node_contract": "passed",
-        "evidence": {
-          "manifest-before.log": "b567dd4f4d192cac627589f08e9a3475e548e5d69a5ce0187cf2899969d93824",
-          "backend-before.log": "43bbea902f3e759d11809ef46265e27ea38d011ffa6261b385c5a93111787dfe",
-          "manifest-generated.log": "d12bfa7013221c1f0302470904577b5c77ee5ea57e0027fa27a66cb4b2387245",
-          "manifest-after.log": "d12bfa7013221c1f0302470904577b5c77ee5ea57e0027fa27a66cb4b2387245",
-          "backend-after.log": "d144e51688a745714b33398ca2a0a71c670c8c0763bb30c6dbd203cfd2cb2dd7",
-          "manifest-tests.log": "da7a1175d48d9fa123dca7a4ad644ea19b990e4d274a44135aa1c065345bb513",
-          "manifest-tests/results.xml": "5448dc55ef5e9847dd0b46b60d48d6e97e9a27190a53979d2af97c050a36157b",
-          "manifest-binding.json": "13c170ee70a3192b40e1d14193b4e6b958e56dee06663e3f16346f75219b73ef",
-          "ci-failure.log": "f219265074148a04bf029a246de24fc94b667036a62dfbdb4c4406b5ba5fe76f"
-        },
-        "source_hashes": {
-          "scripts/reddog_backend_manifest.json": "6b26c2fbb4e2441cd15aca7db27d7a87d21bd192685314330ccc29d1f4f1e2bc",
-          "extensions/reddog/backend_compatibility_constants.js": "d05f5740a18ada5a10fa2aeab0dd5180afff618698d81a38ac8e57285488f355",
-          "scripts/tests/test_generate_reddog_backend_manifest.py": "71c0aaba62f07e4523050a70b8e274e50ba9a3552a925f9a05c19b05810466a5"
-        },
-        "limits": "Local static generator and source contract checks. Separate from the guarded67 display cases; no OS sandbox, installed runtime or live RSI qualification claim. Two inherited disabled-plugin configuration warnings."
-      },
-      "experiment_metrics": {
-        "unique_cases": 67,
-        "additional_generator_cases": 8,
-        "unchanged_node_contract": "passed",
-        "phase_runs_overlap": true,
-        "phases": {
-          "baseline-final": {
-            "counts": {
-              "tests": 63,
-              "failures": 56,
-              "errors": 0,
-              "skipped": 0,
-              "passed": 7
-            },
-            "test_phase_wall_seconds": 1.349444,
-            "permitted_abrupt_exit_children": 0,
-            "unexpected_denials": 0,
-            "database_opens": 0
-          },
-          "baseline-acceptance": {
-            "counts": {
-              "tests": 65,
-              "failures": 2,
-              "errors": 0,
-              "skipped": 0,
-              "passed": 63
-            },
-            "test_phase_wall_seconds": 1.258018,
-            "permitted_abrupt_exit_children": 0,
-            "unexpected_denials": 0,
-            "database_opens": 0
-          },
-          "baseline-local-path": {
-            "counts": {
-              "tests": 67,
-              "failures": 2,
-              "errors": 0,
-              "skipped": 0,
-              "passed": 65
-            },
-            "test_phase_wall_seconds": 1.436049,
-            "permitted_abrupt_exit_children": 0,
-            "unexpected_denials": 0,
-            "database_opens": 0
-          },
-          "candidate-local-path": {
-            "counts": {
-              "tests": 67,
-              "failures": 0,
-              "errors": 0,
-              "skipped": 0,
-              "passed": 67
-            },
-            "test_phase_wall_seconds": 1.361439,
-            "permitted_abrupt_exit_children": 0,
-            "unexpected_denials": 0,
-            "database_opens": 0
-          },
-          "independent-local-path": {
-            "counts": {
-              "tests": 67,
-              "failures": 0,
-              "errors": 0,
-              "skipped": 0,
-              "passed": 67
-            },
-            "test_phase_wall_seconds": 1.478543,
-            "permitted_abrupt_exit_children": 0,
-            "unexpected_denials": 0,
-            "database_opens": 0
-          }
-        },
-        "native_openclaw_jobs": 0,
-        "native_hermes_jobs": 0,
-        "application_provider_calls_in_tests": 0,
-        "host_model_tokens": null,
-        "host_model_cost": null,
-        "implementation": "Coordinator implementation with independent peer source review and local replay; not an admitted native agent production experiment."
-      }
+      "pr": 1900,
+      "merge": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
+      "record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-accounting.json",
+      "sha256": "e0543a24325d809a923e4a4465365a575f405fa4710b326b3153d1a199b5b003"
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\previous-observation.json",
-      "sha256": "62c09647c3bdc88c0c7e42846f161ce8564bc89b97e204d1af22d252ad3974da"
+      "git_ref": "3303f1a2ce9af9eb366125d99ac2a8449986e220:docs/roadmaps/rsi_swarm_backlog.json",
+      "field": "current_observation"
     },
     "retrieval": {
-      "primary": "Governed query failure reused at unchanged shared host/authority HEAD; exact-main Git/rg fallback.",
+      "primary": "Degraded exact-main Git/rg retrieval; unchanged governed Holo failure reused, no retry or reindex.",
       "failure_receipt": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json",
       "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
       "freshness": "UNKNOWN",
       "index_gap_detected": true,
       "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
       "host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
-      "noise": "Navigation broad platform map narrowed to two source leaves, existing policy tests and routing skill.",
-      "ordering": "WSP00/15/97, closure/ownership, canonical queue, module contracts, test inventory/fixtures, source.",
-      "missing": [
-        "browser_actions/tests/TestModLog.md",
-        "browser_actions/requirements.txt",
-        "browser_actions/memory/README.md",
-        "linkedin_agent/memory/README.md"
-      ],
-      "staleness": "Historical sprint boxes and old test README filename examples are not current implementation truth; main and94peer heads refreshed.",
-      "duplication": "Extend existing fixture/23 controls. No new test file/module/skill; required missing canonical TestModLog inventories six actual test files."
+      "noise": "Bounded instruction owner read with configuration values redacted from output.",
+      "ordering": "WSP00 gate, WSP15/97, verified prior closure, roadmap/backlog, module README/INTERFACE/ROADMAP/ModLog, instruction/projection owner.",
+      "missing": "No module AGENTS projection; root generator only owns root instructions. Tier-0 docs present. No new artifact required.",
+      "staleness": "Old module status claims are historical; fresh main and94 unchanged peer heads bind this scope.",
+      "duplication": "Two assignments in existing CLAUDE owner; no duplicate instructions, skill, module, runtime or test."
     },
     "allocation": {
-      "effort": "Six bounded current-behavior cases in existing owner, independent replay.",
-      "cost": "Local CPU/coordinator/reviewer; no provider/API spend.",
-      "verification": "23 preserved inert cases plus6; exclude4 legacy constructor cases. Freeze IDs/source hashes and review effects first.",
-      "execution_plane": "Local source/test qualification with independent review; not native WRE or external-service work."
+      "execution_plane": "Source-only instruction maintenance; no native WRE job, account access, credential use or history rewrite.",
+      "effort_cost": "Static-only two-assignment repair and existing required records; no provider call or external spend.",
+      "verification": "Exact expected source transform, unchanged runtime/test tree, 42 task identities and26 packets, independent static review, exact-head/main CI.",
+      "manual_reason": "Deterministic instruction edit; configured native model route is unverified. Coordinator plus independent review avoids importing product code."
     },
     "dialectic": {
-      "simplest": "Qualify actual manager return versus UI/result before admission changes.",
-      "reuse": "Existing manager, fixture, router/clock/simulator; no new status model.",
-      "competing": "PENDING-only guard insufficient: prior pending work also passes.",
-      "weak_assumption": "IDs alone prove fresh work: exception may return WITHDRAWN sharing storedPENDING request_id.",
-      "decision": "Freeze status/object identity/bookkeeping/UI witnesses; then select one coherent repair contract."
+      "simplest": "Replace existing examples; retain configuration variable names and original instruction content.",
+      "competing": "A new scanner, credential service or full instruction rewrite would exceed this demonstrated source gap.",
+      "weak_assumption": "Credential-shaped text is not evidence of validity or rotation status.",
+      "decision": "13/P1 tied with manager repair; memory-boundary prerequisite first, then fresh selection."
     },
     "validation": {
-      "kind": "Current-behavior qualification; four unsafe-to-admit manager outcomes remain unrepaired.",
-      "unique_cases": 29,
-      "preserved_cases": 23,
-      "added_cases": 6,
-      "legacy_cases_deselected": 4,
-      "warnings": "Two inherited disabled-plugin config warnings per run.",
-      "primary": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\primary-invocation.json",
-        "sha256": "f3a3715575976510071195b574ae7200b78ba1a3421436f2d5d5601eb2247ab8"
-      },
-      "independent": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\independent-invocation.json",
-        "sha256": "a4703801388ddce402a0265b97b612ce6d5dda046ea8327cc378ca4e684d7d05"
-      },
-      "review": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\independent-review.json",
-        "sha256": "3ee3c8b198c365c1f98c2fb68be1b413c7fe57805105b04c3509e43185969d76"
-      },
-      "test_freeze": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\test-freeze.json",
-        "sha256": "1e65d9c4db521519bf1d83592cf75e39506bf4bad0e0bd07d05a9f219fbd1812"
-      },
-      "preflight": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-test-preflight.json",
-        "sha256": "f51b55537631419b418d233ebab16dd16904d43eed2a4a39d8a0f202fd4c5a43"
-      },
-      "original_test_ast_prefix_preserved": true,
+      "kind": "static-only documentation validation",
+      "receipt": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\validation.json",
+      "independent_review": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-review.json",
+      "tests_run": 0,
       "production_source_unchanged": true,
-      "runtime_manifest_and_registry_unchanged": true,
-      "limits": "Real two source leaves under inert imports/fake router, constructor bypass and simulator sleep. No live request, OS confinement, rollback, exactly-once or retained RSI proof.",
-      "registry_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\registry-check.log",
-        "sha256": "529925c1f8590b15c78e98663bec88366113eb1b5c91480d97a34b987a9459e7",
-        "state": "current",
-        "total": 1659,
-        "quarantined": 269,
-        "method": "Existing static generator --check; no product/test imports or registry writes."
-      }
+      "limits": "No credential use, account action, revocation, history rewrite, live send or native WRE experiment."
     },
     "owner_reconciliation": {
-      "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\entry.json",
-        "sha256": "d27f31b392524bdd481b6730641263e0a507840d93d2b94205ee447a708c9eda"
-      },
+      "entry": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\entry.json",
       "peer_heads": 94,
-      "exact_test_overlap": false,
       "shared_preserved": true
-    },
-    "source_bindings": {
-      "modules/infrastructure/browser_actions/src/linkedin_actions.py": {
-        "raw_sha256": "b016199ba0daa622c52e836c1086ee7f0c39f40a7393d25913ff1d2b7639fd06",
-        "lf_sha256": "8ce3c389506ee757901f5eeab11324703a1ba584f0eb721b88ca811a2f1b4c88"
-      },
-      "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": {
-        "raw_sha256": "1722787d530870049895979c4b717dec39d03ba0db835c9dca1c670e462ed11f",
-        "lf_sha256": "c21c2c5f54207e822e6163dc06c28b385cf1572a96f787c65e9e31c46685def5"
-      },
-      "modules/__init__.py": {
-        "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "lf_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      "modules/infrastructure/browser_actions/src/__init__.py": {
-        "raw_sha256": "a5c3edb151c5e55250cac3143241e1ed3d72786eecdfe5c98b4c67bdcefec89c",
-        "lf_sha256": "13c1ea30fd48f9d123b20428cf39fcc0b44862ce0beef6f8f199b42184c4bd1a"
-      },
-      "modules/platform_integration/linkedin_agent/__init__.py": {
-        "raw_sha256": "119411905e67f42d67256df2ca2a112c5f5547d7f90323f0d6fdbcac6b7850a9",
-        "lf_sha256": "26ad290f0ac8f8871b4fc7f7a437ff82e5b1c9528929e3bf7cdd76a7a8e93abf"
-      },
-      "modules/platform_integration/linkedin_agent/src/__init__.py": {
-        "raw_sha256": "9da5c72eccb2d6ef809d2dbdecf4bdde21fd451c62c99721ba6a6fd4e821c9f3",
-        "lf_sha256": "9c612aa3fab7f878a825ce5109f2c0d98f63e0b28ef4bbbc0f3c0f6cf32eff28"
-      },
-      "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": {
-        "raw_sha256": "b6db167befc69d6efc8d1907e5740217e42e19b75911645428e6fa19bfc04062",
-        "lf_sha256": "1837debf1902ad3ea98bcaeb2e023c8fbea7b09e1a6d7dc6f46cee1622e48ac2"
-      }
     },
     "publication": {
       "state": "not_yet_published_at_document_commit",
-      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-accounting.json"
+      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2480,13 +2242,19 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1900",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
           "dependency": "Retain finite fake-only scope and fresh owner check; principal-selected core canary connection takes priority, with no LinkedIn live permission.",
-          "next_step": "Close exact-head PR/main checks and own worktree; do not repeat characterization. Select the separately scored repair after fresh re-observation.",
+          "next_step": "Do not repeat qualification; separately scored manager-result repair remains open.",
           "evidence": {
             "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\independent-review.json",
             "sha256": "3ee3c8b198c365c1f98c2fb68be1b413c7fe57805105b04c3509e43185969d76"
+          },
+          "closure": {
+            "pr": 1900,
+            "merge": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
+            "record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-accounting.json",
+            "sha256": "e0543a24325d809a923e4a4465365a575f405fa4710b326b3153d1a199b5b003"
           }
         },
         {
@@ -2958,7 +2726,7 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_after_qualification_closure",
+          "state": "eligible_after_instruction_hygiene_closure_and_fresh_reobservation",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
           "dependency": "Preserve existing preview/policy/note and manager bookkeeping contracts; future fixed acceptance and independent verification before repair. No live sends.",
           "next_step": "Admit only newly created PENDING work with matching target and current stored object; preexisting pending/connected, quota rejection and manager failure must not reach Connect/Send or gain success credit. Request IDs alone are insufficient.",
@@ -2975,40 +2743,36 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_after_current_owned_closure",
+          "state": "statically_validated_independent_review_and_publication_pending",
           "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
           "evidence": {
             "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
             "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
           },
           "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
-          "next_step": "Replace the two literal configuration examples with inert placeholders, validate instruction references and absence of literal assignments without printing values, independently review and close the narrow owned change.",
+          "next_step": "Finish independent static review, exact-head publication checks and owned cleanup; do not repeat source redaction.",
           "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
           "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3."
         }
       ],
       "selected_next": {
-        "task": "Remove credential-shaped examples from existing LinkedIn module instructions",
+        "task": "Repair manager-result admission before LinkedIn Connect UI",
         "wsp15": {
-          "complexity": 1,
-          "importance": 4,
-          "deferability": 5,
+          "complexity": 3,
+          "importance": 3,
+          "deferability": 4,
           "impact": 3,
           "total": 13,
           "priority": "P1"
         },
-        "state": "eligible_after_current_owned_closure",
-        "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
-        "evidence": {
-          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
-          "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
-        },
-        "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
-        "next_step": "Replace the two literal configuration examples with inert placeholders, validate instruction references and absence of literal assignments without printing values, independently review and close the narrow owned change.",
-        "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
-        "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3."
+        "state": "eligible_after_instruction_hygiene_closure_and_fresh_reobservation",
+        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+        "dependency": "Preserve existing preview/policy/note and manager bookkeeping contracts; future fixed acceptance and independent verification before repair. No live sends.",
+        "next_step": "Admit only newly created PENDING work with matching target and current stored object; preexisting pending/connected, quota rejection and manager failure must not reach Connect/Send or gain success credit. Request IDs alone are insufficient.",
+        "effort_cost": "Small existing-owner guard/helpers plus fixed acceptance and unchanged regressions/backend binding; local CPU only.",
+        "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim."
       },
-      "rationale": "Fresh unchanged main/shared94peers; close1899 advisory display and selected12/P2 characterization. Native18/domain14/product14/backend13 still gated; new13/P1 instruction hygiene wins tie with13/P1 manager repair as smallest memory-boundary prerequisite. No credential authenticity or live-runtime claim."
+      "rationale": "Instruction redaction closes this source-only prerequisite after verification/publication. Remaining executable13/P1 manager admission repair outranks eligible11/P2 debt; blocked native18/P0/domain14/P1/product14/P1/PostgreSQL13/P1 prerequisites remain unchanged."
     }
   }
 }
