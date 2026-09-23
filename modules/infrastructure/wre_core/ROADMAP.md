@@ -1,5 +1,23 @@
 # WRE Core Roadmap
 
+## Program-consumption qualification — 2026-09-23
+
+The12/P2 seven-case characterization is locally and independently verified at
+base `228ecbe0`. Program-file contents are captured at construction, but each
+LLM prompt reads the current mutable instruction attribute. Baseline and backend
+callbacks can change what later calls receive. A failing backend still receives
+its prompt; heuristic/zero-attempt paths make no backend call.
+
+Tests reuse the model-disable fixture and actual prompt/loop code with fake
+metrics/backend responses. Production and the996-line legacy test file remain
+unchanged; a107-line focused sibling avoids unrelated file growth. This qualifies
+current consumption, not program identity, authenticated provenance or retained
+learning. The15/P1 report program still needs program/oracle/environment/reader
+contracts. Do not add an unused reader or label an entry hash as consumed input.
+The canonical backlog records the next bounded action and the separate paused
+lineage draft, with current ownership and publication state.
+
+
 ## Consumer dry-run isolation qualification — 2026-09-21
 
 The15/P1 qualification at main `e1c64d00674f1205ec20ca460c8b963fb34b6daa`

@@ -1,3 +1,10 @@
+## 2026-09-23: AutoResearcher program-consumption qualification
+
+- WSP00/15/22/34/49/50/62/97; C2/I4/D3/Impact3=12/P2. Seven fixed fake-backend cases pass locally and independently (the same cases). They observe the existing prompt builder across captured-file, attribute/callback mutation, backend-failure, heuristic and zero-attempt paths. Exact calls, outcome accounting, saved/returned report equality and scratch restoration are checked.
+- Production and the996-line legacy test owner remain unchanged. A cohesive107-line sibling reuses its pre-construction model-disable fixture; no new production module/skill or full-suite copy. Canonical registry is current1657/quarantined269. Two disabled-asyncio config warnings are retained.
+- Per-call instructions are mutable; an invocation-entry hash cannot identify later consumed input. Backend/evaluator callbacks are synthetic, package initializers are isolated by the external runner, and only four source/test hashes are bound. This is not real model quality, economic validity, OS confinement, authenticated provenance or retained improvement. The separate lineage draft remains unexecuted and blocked on its independent review.
+- Canonical backlog records fresh ownership, exact evidence, PR1884 closure and the next bounded action. No live OpenClaw/Hermes/AmIBot invocation or production activation.
+
 ## 2026-09-22: Separate SQLite diagnostics from repair credit
 
 - WSP00/15/22/49/50/62/91/97; C2/I3/D3/Impact3 = 11/P2. Exact action/result qualification separates diagnostic invocation/success across telemetry, feedback and escalation. Existing tuple/report and historical repair counters/score remain intact.
