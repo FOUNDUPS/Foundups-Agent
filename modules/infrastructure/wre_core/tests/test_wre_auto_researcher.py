@@ -348,11 +348,11 @@ def test_dry_run_restores_after_diff_interruption(temp_research_env, tmp_path, m
     if phase in ("baseline", "evaluation"):
         actual_evaluate = researcher_module.evaluate_target
         calls = []
-        def evaluate(path):
+        def evaluate(path, *, cost_catalog=None):
             calls.append(path)
             if phase == "baseline" or len(calls) > 1:
                 interrupted_diff()
-            return actual_evaluate(path)
+            return actual_evaluate(path, cost_catalog=cost_catalog)
         monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
     else:
         monkeypatch.setattr(runner if phase == "diff" else researcher,
@@ -540,11 +540,11 @@ def test_invocation_uses_one_baseline_snapshot(temp_research_env, tmp_path, monk
     assert researcher.working_target_path.read_text(encoding="utf-8") == original
     source_bytes = target.read_bytes()
     evaluated, proposed = [], []
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None):
         evaluated.append(path.read_text(encoding="utf-8"))
         if drift == "baseline":
             researcher.original_code = changed
-        return evaluate_target(path)
+        return evaluate_target(path, cost_catalog=cost_catalog)
     def propose(code, *args):
         proposed.append(code)
         if drift in ("proposal", "interrupted"):
@@ -589,7 +589,7 @@ def test_completed_run_accounts_for_every_attempt(temp_research_env, tmp_path, m
         active.append(state)
         return None if state == "no_proposal" else original.decode("utf-8") + "\n# candidate\n"
 
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None):
         calls.append(path)
         metrics = dict(fitness=0.0, roc_ratio=1.0, monthly_margin_usd=0.0, is_roi_sustainable=False)
         if active:
@@ -638,7 +638,7 @@ def test_invalid_attempt_cap_rejects_before_output(temp_research_env, tmp_path, 
     monkeypatch.setattr(researcher_module, "get_qwen_engine", lambda: None)
     researcher = WREAutoResearcher(target, program, max_iterations=0, results_dir=tmp_path / "valid")
     researcher.max_iterations = cap
-    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path: pytest.fail("invalid cap evaluated baseline"))
+    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path, **kwargs: pytest.fail("invalid cap evaluated baseline"))
     with pytest.raises(ValueError, match="max_iterations"):
         researcher.run()
 
@@ -652,7 +652,7 @@ def test_failed_acceptance_preserves_reported_best(temp_research_env, tmp_path, 
     metrics = iter([baseline, candidate])
     researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
     monkeypatch.setattr(researcher, "_propose_change", lambda *args: original + "\n# candidate\n")
-    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path: next(metrics))
+    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path, **kwargs: next(metrics))
     log = researcher._log_to_tsv
 
     def fail(*args):
@@ -722,7 +722,7 @@ def test_mode_drift_cannot_delegate_commit_or_skip_cleanup(temp_research_env, tm
     def diff(*args):
         researcher.dry_run = mode
         return ""
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None):
         evaluated.append(path)
         if timing == "evaluation" and len(evaluated) > 1:
             researcher.dry_run = mode
@@ -843,11 +843,11 @@ def test_aborted_proposal_keeps_input_identity(temp_research_env, tmp_path, monk
         if fault == "diff":
             raise RuntimeError("diff failed")
         return ""
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None):
         evaluated.append(path)
         if fault == "evaluation" and len(evaluated) == 2:
             raise KeyboardInterrupt()
-        return evaluator(path)
+        return evaluator(path, cost_catalog=cost_catalog)
     monkeypatch.setattr(Path, "write_text", write)
     monkeypatch.setattr(researcher.runner, "diff", diff)
     monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
@@ -923,7 +923,7 @@ def guard(event, args):
 sys.addaudithook(guard)
 def unused(*args):
     raise AssertionError("unused loader")
-for name, values in (("modules.infrastructure.shared_utilities.ai_engine_singletons", {"get_qwen_engine": lambda: None}), (owner + ".wre_research_evaluator", {"evaluate_target": lambda path: {"fitness": 1.0, "roc_ratio": 1.0, "monthly_margin_usd": 1.0}, "load_target_config_from_source": unused})):
+for name, values in (("modules.infrastructure.shared_utilities.ai_engine_singletons", {"get_qwen_engine": lambda: None}), (owner + ".wre_research_evaluator", {"evaluate_target": lambda path, **kwargs: {"fitness": 1.0, "roc_ratio": 1.0, "monthly_margin_usd": 1.0}, "load_target_config_from_source": unused, "snapshot_cost_catalog": lambda: {"fixture": 1.0}})):
     module = types.ModuleType(name)
     module.__dict__.update(values)
     sys.modules[name] = module

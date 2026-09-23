@@ -45,6 +45,7 @@ from modules.infrastructure.shared_utilities.ai_engine_singletons import get_qwe
 from modules.infrastructure.wre_core.src.wre_research_evaluator import (
     evaluate_target,
     load_target_config_from_source,
+    snapshot_cost_catalog,
 )
 
 
@@ -196,14 +197,7 @@ class WREAutoResearcher:
         if type(requested) is not int or requested < 0:
             raise ValueError("max_iterations must be a non-negative integer")
         print(f"[AUTO-RESEARCHER] Starting research loop (max_iterations={requested}, dry_run={self.dry_run})")
-        report["phase"] = "baseline"
-        report["baseline_evaluations"] += 1
-        baseline_metrics = report["baseline"] = evaluate_target(self.working_target_path)
-        if "error" in baseline_metrics:
-            self._log_to_tsv(0, "failed_baseline", baseline_metrics, baseline_metrics["error"])
-            raise ValueError(f"Baseline validation failed: {baseline_metrics['error']}")
-        print(f"[BASELINE] Fitness: {baseline_metrics.get('fitness'):.4f} (ROC: {baseline_metrics.get('roc_ratio'):.4f})")
-        self._log_to_tsv(0, "baseline", baseline_metrics, "Initial baseline parameters")
+        baseline_metrics, cost_catalog = _evaluate_baseline(self, report)
 
         best_code = baseline_code
         best_metrics = report["optimized"] = baseline_metrics
@@ -232,7 +226,7 @@ class WREAutoResearcher:
             try:
                 report["phase"] = "evaluation"
                 report["candidate_evaluations"] += 1
-                metrics = evaluate_target(self.working_target_path)
+                metrics = evaluate_target(self.working_target_path, cost_catalog=cost_catalog)
                 print(f"[EVALUATION] Fitness: {metrics.get('fitness'):.4f} (ROC: {metrics.get('roc_ratio'):.4f})")
 
                 # If error in evaluation
@@ -460,6 +454,21 @@ def _propose_dry_run(researcher: WREAutoResearcher, code: str, metrics: Dict, hi
     proposed = researcher._propose_change(code, metrics, history)
     _require_dry_run(researcher)
     return proposed
+
+
+def _evaluate_baseline(researcher: WREAutoResearcher, report: Dict):
+    """Capture costs per invocation, then use the same basis for every candidate."""
+    report["phase"] = "cost_capture"
+    cost_catalog = snapshot_cost_catalog()
+    report["phase"] = "baseline"
+    report["baseline_evaluations"] += 1
+    metrics = report["baseline"] = evaluate_target(researcher.working_target_path, cost_catalog=cost_catalog)
+    if "error" in metrics:
+        researcher._log_to_tsv(0, "failed_baseline", metrics, metrics["error"])
+        raise ValueError(f"Baseline validation failed: {metrics['error']}")
+    print(f"[BASELINE] Fitness: {metrics.get('fitness'):.4f} (ROC: {metrics.get('roc_ratio'):.4f})")
+    researcher._log_to_tsv(0, "baseline", metrics, "Initial baseline parameters")
+    return metrics, cost_catalog
 
 
 def _new_run_report(researcher: WREAutoResearcher, baseline_code: str) -> Dict:

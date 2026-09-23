@@ -12,6 +12,7 @@ import ast
 import math
 from collections.abc import Mapping
 from pathlib import Path
+from types import MappingProxyType
 
 # Add repo root to sys.path if not present
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -32,7 +33,8 @@ class ResearchSustainabilityCalculator(UnifiedSustainabilityCalculator):
     premium pricing multipliers and demand elasticity.
     """
 
-    def __init__(self, multipliers, agent_allocation, *args, **kwargs):
+    def __init__(self, multipliers, agent_allocation, *args, cost_catalog=None, **kwargs):
+        self.cost_catalog = snapshot_cost_catalog(cost_catalog)
         super().__init__(*args, **kwargs)
         self.multipliers = multipliers
         self.agent_allocation = agent_allocation
@@ -60,9 +62,9 @@ class ResearchSustainabilityCalculator(UnifiedSustainabilityCalculator):
             elasticity_factor = max(0.1, 1.0 - 0.22 * (m - 1.0))
             task_count = int(tasks_per_month * fraction * elasticity_factor)
 
-            infra = AGENT_INFRASTRUCTURE_COSTS.get(agent_name)
-            if infra:
-                cost = task_count * infra.total_usd
+            unit_cost = self.cost_catalog.get(agent_name)
+            if unit_cost is not None:
+                cost = task_count * unit_cost
                 revenue = cost * m
                 total_cost += cost
                 total_revenue += revenue
@@ -124,7 +126,27 @@ def _coerce_metric_map(value: object) -> dict[str, float]:
     return result
 
 
-def evaluate_target(target_path: Path) -> dict:
+def snapshot_cost_catalog(cost_catalog=None) -> Mapping:
+    """Copy finite nonnegative unit totals; never retain mutable cost objects."""
+    if cost_catalog is None:
+        cost_catalog = {name: cost.total_usd for name, cost in AGENT_INFRASTRUCTURE_COSTS.items()}
+    if not isinstance(cost_catalog, Mapping) or not cost_catalog:
+        raise ValueError("cost catalog must be a nonempty mapping")
+    captured = {}
+    for name, value in cost_catalog.items():
+        if not isinstance(name, str) or isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("cost catalog requires string names and numeric totals")
+        try:
+            total = float(value)
+        except (OverflowError, ValueError) as error:
+            raise ValueError("cost catalog totals must be finite and nonnegative") from error
+        if not math.isfinite(total) or total < 0:
+            raise ValueError("cost catalog totals must be finite and nonnegative")
+        captured[name] = total
+    return MappingProxyType(captured)
+
+
+def evaluate_target(target_path: Path, *, cost_catalog=None) -> dict:
     """
     Parse target constants from target_path and evaluate fitness.
 
@@ -132,6 +154,7 @@ def evaluate_target(target_path: Path) -> dict:
     dry-run research loop from turning a generated proposal into live code.
     """
     allocation, multipliers = load_target_config(target_path)
+    cost_catalog = snapshot_cost_catalog(cost_catalog)
 
     # Validation guards
     if not allocation or not multipliers:
@@ -144,7 +167,7 @@ def evaluate_target(target_path: Path) -> dict:
         }
 
     # Reject impossible mixtures before the simulator can reward negative costs.
-    unknown_agents = (set(allocation) | set(multipliers)) - set(AGENT_INFRASTRUCTURE_COSTS)
+    unknown_agents = (set(allocation) | set(multipliers)) - set(cost_catalog)
     invalid_fractions = any(value < 0.0 or value > 1.0 for value in allocation.values())
     if unknown_agents or invalid_fractions:
         return {
@@ -182,10 +205,15 @@ def evaluate_target(target_path: Path) -> dict:
                 "error": f"Multiplier {k}={v} is out of bounds [1.0, 5.0]",
             }
 
-    # Run simulation
+    return _evaluate_config(allocation, multipliers, cost_catalog)
+
+
+def _evaluate_config(allocation, multipliers, cost_catalog) -> dict:
+    """Score a valid literal configuration against explicit captured unit costs."""
     calc = ResearchSustainabilityCalculator(
         multipliers=multipliers,
         agent_allocation=allocation,
+        cost_catalog=cost_catalog,
     )
 
     # Calculate overall metrics using standard parameters
