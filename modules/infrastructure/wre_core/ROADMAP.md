@@ -1,5 +1,33 @@
 # WRE Core Roadmap
 
+## Advisory research display — 2026-09-24
+
+The planned launch seam now consumes an explicitly selected local ROC report in
+the existing dashboard/startup owners. It validates displayed accounting and
+labels it **unverified diagnostic**; absent/stale/aborted/inconsistent input is
+unknown. File age is not execution freshness. Health enforcement is preserved.
+No researcher, model, queue, retention or campaign is launched by the new read.
+
+All 67 focused cases pass locally and independently. The initial 63-case baseline
+was 7 pass / 56 fail. Independent source review then found impossible gain with
+zero accepted attempts: two added controls failed before repair and pass afterward.
+Two further mixed-slash UNC controls failed before lexical drive rejection;
+all 67 then pass. No network access was attempted under the filesystem sentinels.
+Exact startup function bodies are exercised without full main import/menu effects.
+Main remains 4855 lines; six new dashboard helpers are at most 42 lines.
+
+PR1898 comparison-guard work is merged as `c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019`,
+all ten PR checks and both main workflows passed, and its owned lane is retired.
+The 14/P1 consumer investigation closes as source reconciliation: the existing
+ratchet accepts admitted, independently verified published work; raw ROC reports
+cannot supply that chain. Repeating caller-absence tests would duplicate evidence.
+
+The remaining launch plan still requires authenticated program/oracle/runtime
+identity, an admitted campaign and independent retention acceptance. Explicit
+diagnostic display does not close those gates. Re-observe the canonical backlog;
+the next executable candidate is fake-only LinkedIn manager-result qualification
+12/P2, a daily-work effect boundary, with no live UI or external sends.
+
 ## Persistent comparison-profile guard — 2026-09-24
 
 The existing evaluator and dry-run producer reject persistent consumed-profile
@@ -18,7 +46,7 @@ inside evaluation still escapes detection. Concurrent evaluation, authenticated
 program/oracle/environment identity and independently retained benefit remain open.
 Do not expand into an immutable-profile rewrite merely because that limitation exists.
 
-Next 14/P1: determine and qualify the intended existing WRE consumer boundary for
+Historical next 14/P1, reconciled above: determine the intended existing WRE consumer boundary for
 ROC reports before extending oracle identity. Locate an actual accepted/error/cleanup reader and its
 existing WRE evidence contract, or record the missing connection with a smallest
 existing-owner repair. Keep ROC research separate from model AutoResearch and the
@@ -331,7 +359,7 @@ after their transaction contracts are established; no new exemption is added.
 
 Planning decision from 012's launch proposal, grounded at main
 `af29f082e866a05bb0d05a8f32e27414f8c1939b`. The first local layer is qualified by
-source inspection and the rehearsal below; the later launch wiring is a plan.
+source inspection and the rehearsal below. Explicit advisory report wiring is now implemented in the 2026-09-24 checkpoint above; admitted campaign/retention remain planned.
 
 **At launch, surface the latest qualified report quickly.** Show its source,
 freshness, evidence level, measured result, blockers and next WSP-15 selection.
@@ -348,9 +376,9 @@ and a complete repository RSI cycle are different units.
 
 | Existing owner | Verified source boundary | Next integration step |
 |---|---|---|
-| `main.py:run_wre_dashboard_preflight` and `src/dashboard_alerts.py` | Current startup health/sample warnings; may dispatch resolution events. Not an RSI benefit report or a wholly read-only path. | Extend the existing report/display seam after report-input qualification; do not infer learning from health/sample count. |
+| `main.py:run_wre_dashboard_preflight` and `src/dashboard_alerts.py` | Current startup health/sample warnings; may dispatch resolution events. Not an RSI benefit report or a wholly read-only path. | Explicit advisory ROC display is implemented above; automatic report selection and admitted campaigns remain separate. Do not infer learning from health/sample count. |
 | `main.py:_reddog_run_bounded_control_rounds` | Existing resident serial/claim rounds, configured default eight, idle/failure stops and receipt persistence. Count bounds alone are not time/cost bounds. | Compile an eligible campaign into current admitted jobs; retain stop, claim and receipt owners. No new ten-round default is enabled here. |
-| `src/wre_auto_researcher.py` / `src/wre_research_evaluator.py` | Isolated dry-run ROC configuration proposal/evaluation and per-run TSV; constructor attempts Qwen loading. | Terminal accounting is implemented locally; source/oracle/environment identity and reader qualification still precede launch reading. Keep its simulator judge task-specific. |
+| `src/wre_auto_researcher.py` / `src/wre_research_evaluator.py` | Isolated dry-run ROC configuration proposal/evaluation and per-run TSV; constructor attempts Qwen loading. | Terminal accounting and explicit unverified launch reading are implemented. Authenticated source/oracle/environment identity remains required for qualified-benefit display or an admitted campaign. Keep its simulator judge task-specific. |
 | AI Gateway model AutoResearch | Existing [benchmark and feedback contracts](../../ai_intelligence/ai_gateway/INTERFACE.md#benchmark-evidence-and-outcome-receipts) bind task family/split, model, verifier, cost and latency. | Reuse for model selection under current provider budgets/admission. A model campaign is not a generic repository editor. |
 | WRE differential tests, independent slice verifier and PatternMemory | Existing [verification and retention contracts](INTERFACE.md#outcome-recording-and-retention). Production acceptance/activation and later benefit remain incomplete. | Bind accepted evidence to the exact artifact and prove a later invocation consumes it successfully; keep write/read/promotion authorities distinct. |
 

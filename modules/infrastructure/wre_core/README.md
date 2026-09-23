@@ -1,5 +1,14 @@
 # WRE Core
 
+## Research evidence at startup
+
+The existing WRE dashboard preflight can display one selected AutoResearcher
+report using `WRE_RESEARCH_REPORT_PATH` (absolute local invocation `report.json`)
+and `WRE_RESEARCH_BASELINE_SHA256` (expected baseline text digest). Selection is
+explicit; no report discovery or researcher launch runs at startup. Missing or
+invalid selection displays unknown. Valid input is labelled unverified, with
+retention and actual resource usage unknown. See the [reader contract](INTERFACE.md#advisory-autoresearcher-startup-display).
+
 WRE Core is the governed recursive-work control plane for FoundUps. It admits
 Skillz, routes bounded work, records execution truth, and provides evidence
 surfaces for learning. WRE is intended to become the system's RSI engine, but

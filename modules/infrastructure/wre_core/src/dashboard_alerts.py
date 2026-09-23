@@ -16,7 +16,11 @@ Or programmatically:
 """
 
 import logging
+import json
+import math
 import os
+import re
+import stat
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -351,6 +355,138 @@ def check_dashboard_health() -> Dict:
         "min_samples": monitor.min_samples,
         "timestamp": datetime.now().isoformat()
     }
+
+
+def _local_research_report_path(value):
+    """Check the selected/embedded path lexically, never resolve a network path."""
+    text = os.fspath(value)
+    if not isinstance(text, str) or text.startswith(("\\\\", "//")):
+        raise ValueError("local path required")
+    path = Path(text)
+    if (not path.is_absolute() or path.drive.startswith("\\\\")
+            or ".." in path.parts or path.name != "report.json"
+            or not re.fullmatch(r"invocation-[A-Za-z0-9_-]+", path.parent.name)):
+        raise ValueError("final invocation report required")
+    return path
+
+
+def _research_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate report field")
+        result[key] = value
+    return result
+
+
+def _research_report_numbers(report):
+    """Check only displayed accounting, not economic validity or authority."""
+    keys = ("attempts_requested", "attempts_started", "attempts_finished",
+            "iterations_run", "baseline_evaluations", "candidate_evaluations")
+    if any(type(report.get(k)) is not int or report[k] < 0 for k in keys):
+        raise ValueError("invalid counters")
+    attempts = report["attempts_requested"]
+    if any(report[k] != attempts for k in keys[1:4]) or report["baseline_evaluations"] != 1:
+        raise ValueError("inconsistent counters")
+    counts = dict.fromkeys(("accepted", "rejected", "crashed", "failed_validation", "no_proposal"), 0)
+    history = report.get("history")
+    if not isinstance(history, list) or len(history) != attempts:
+        raise ValueError("inconsistent history")
+    for iteration, row in enumerate(history, 1):
+        if (not isinstance(row, dict) or type(row.get("iteration")) is not int
+                or row["iteration"] != iteration or row.get("status") not in counts):
+            raise ValueError("invalid outcome")
+        counts[row["status"]] += 1
+    supplied = report.get("outcome_counts")
+    if (not isinstance(supplied, dict) or any(type(v) is not int for v in supplied.values())
+            or supplied != counts or report["candidate_evaluations"] != attempts - counts["no_proposal"]):
+        raise ValueError("inconsistent outcomes")
+    metrics = [report.get(k) for k in ("baseline", "optimized")]
+    if any(not isinstance(m, dict) for m in metrics):
+        raise ValueError("missing metrics")
+    baseline, best = (m.get("fitness") for m in metrics)
+    improvement = report.get("improvement")
+    if any(type(v) not in (int, float) or not math.isfinite(v) for v in (baseline, best, improvement)):
+        raise ValueError("invalid metrics")
+    if (improvement < 0 or improvement != best - baseline
+            or (counts["accepted"] > 0) != (improvement > 0)):
+        raise ValueError("inconsistent improvement")
+    return {"attempts": attempts, "outcome_counts": counts, "improvement": improvement}
+
+
+def read_research_report_summary(report_path, expected_baseline_sha256, *, max_age_seconds=86400):
+    """Read one explicitly selected local diagnostic; no execution/retention grant.
+
+    Caller supplies a trusted local regular-file location. Size is bounded; local
+    filesystem latency and hostile path replacement are not sandboxed. File mtime
+    is an unauthenticated age hint, never proof of current execution or benefit.
+    """
+    result = {"state": "unknown", "reason": "not_configured", "file_age_seconds": None,
+              "independently_verified": None, "retained_improvements": None, "resource_usage": None}
+    if not report_path:
+        return result
+    try:
+        result["reason"] = "invalid_selection"
+        if (not isinstance(expected_baseline_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", expected_baseline_sha256)
+                or type(max_age_seconds) not in (int, float)
+                or not math.isfinite(max_age_seconds) or max_age_seconds <= 0):
+            return result
+        path = _local_research_report_path(report_path)
+        result["reason"] = "unavailable"
+        if not stat.S_ISREG(path.lstat().st_mode):
+            return result
+        with path.open("rb") as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode):
+                return result
+            data = stream.read(1024 * 1024 + 1)
+        result["reason"] = "invalid_report"
+        if len(data) > 1024 * 1024:
+            return result
+        report = json.loads(data.decode("utf-8"), object_pairs_hook=_research_json_object)
+        if not isinstance(report, dict) or not _research_report_matches(report, path, expected_baseline_sha256):
+            return result
+        numbers = _research_report_numbers(report)
+        age = datetime.now().timestamp() - info.st_mtime
+        if not math.isfinite(age) or not 0 <= age <= max_age_seconds:
+            result["reason"] = "stale_file"
+            return result
+        result.update(numbers, state="unverified_diagnostic", reason="reported_completed", file_age_seconds=age)
+    except (OSError, ValueError, TypeError, OverflowError, RecursionError):
+        pass
+    return result
+
+
+def _research_report_matches(report, path, expected_digest):
+    required = {"schema": "wre_auto_research_report.v1", "status": "completed",
+                "stop_reason": "attempt_limit", "cleanup": "restored", "failure": None,
+                "cleanup_failure": None, "baseline_input_sha256": expected_digest,
+                "invocation_id": path.parent.name}
+    if any(k not in report or report[k] != v for k, v in required.items()) or report.get("dry_run") is not True:
+        return False
+    embedded = _local_research_report_path(report.get("report_path"))
+    return os.path.normcase(str(embedded)) == os.path.normcase(str(path))
+
+
+def print_research_report_summary():
+    """Advisory startup output; never let a diagnostic failure change health gates."""
+    try:
+        summary = read_research_report_summary(
+            os.getenv("WRE_RESEARCH_REPORT_PATH"), os.getenv("WRE_RESEARCH_BASELINE_SHA256"))
+        if summary["state"] == "unverified_diagnostic":
+            counts = summary["outcome_counts"]
+            detail = (f"attempts={summary['attempts']} accepted={counts['accepted']} "
+                      f"crashed={counts['crashed']} invalid={counts['failed_validation']} "
+                      f"reported_fitness_delta={summary['improvement']:.6g} "
+                      f"file_age_seconds={summary['file_age_seconds']:.0f}")
+        else:
+            detail = "reason=" + summary["reason"]
+        print(f"[WRE-RESEARCH] {summary['state']} {detail} "
+              "source=explicit_selection baseline=caller_expected "
+              "execution_freshness=unknown verified=unknown retained=unknown resource_usage=unknown")
+    except Exception:
+        print("[WRE-RESEARCH] unknown reason=diagnostic_unavailable")
 
 
 # CLI entry point

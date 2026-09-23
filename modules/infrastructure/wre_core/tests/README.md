@@ -1,3 +1,18 @@
+## Selected research-report display — 2026-09-24
+
+Extend the existing dashboard export test owner for report parsing/display and
+AI Overseer's preflight-resolution owner for startup wiring/enforcement. Final
+selection: 67 unique passing cases, independently replayed. The exact command,
+interpreter, hashes and IDs are bound in the canonical RSI backlog and external
+evidence directory `O:/Foundups-Agent-audits/20260924-rsi-research-handoff`.
+
+The qualified runner uses builtin pytest fixtures, no plugin autoload/conftests,
+and `-k "dashboard or main_wre_research"`. It loads two exact main function bodies
+without executing main's import-time effects, while importing the real dashboard
+and preflight-resolution leaves. This is focused function-wiring validation, not
+full main startup. Do not substitute a whole-folder/live-menu run or infer that
+advisory report parsing proves independent acceptance or runtime admission.
+
 ## AutoResearcher persistent comparison-profile guard
 
 `test_wre_research_evaluator_inputs.py` now has 66 fixed cases: 22 preserved cost

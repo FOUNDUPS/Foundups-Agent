@@ -1,5 +1,41 @@
 # WRE Core Interface
 
+## Advisory AutoResearcher startup display
+
+`read_research_report_summary(report_path, expected_baseline_sha256, *,
+max_age_seconds=86400)` in `src/dashboard_alerts.py` reads one explicitly selected
+local `invocation-*/report.json`. The expected lowercase SHA-256 identifies the
+baseline text selected by the caller; it is not authenticated producer/oracle
+identity. No directory scan or implicit latest-report selection occurs.
+
+The reader rejects relative/UNC/device paths, nonregular final files, oversized
+input (actual read capped at 1 MiB + 1), duplicate JSON fields, invalid schema,
+source/path/invocation mismatch, incomplete/aborted/cleanup-failed reports,
+inconsistent counters/history, nonfinite metrics and impossible gain accounting.
+Valid zero-attempt runs and completed runs containing failed attempts remain
+diagnostics. Positive gain requires an accepted attempt and vice versa.
+
+The age limit must be a finite positive number, excluding bool. Future/expired
+file mtime gives `unknown`; current mtime is only **file age**, never authenticated
+execution freshness. A caller must supply a trusted local regular-file location;
+mapped/network storage, ancestor links and hostile path replacement are not
+confined by this helper, and synchronous filesystem latency has no hard bound.
+
+Output is `unknown` with a fixed reason, or `unverified_diagnostic` with attempts,
+outcome counts, reported fitness delta and file age. Independent verification,
+retained improvements and actual resource usage remain `None` even if the input
+claims otherwise. This checks displayed accounting, not economic validity or
+the complete report/proposal/program provenance.
+
+`print_research_report_summary()` reads `WRE_RESEARCH_REPORT_PATH` and
+`WRE_RESEARCH_BASELINE_SHA256`, then prints sanitized advisory output without raw
+paths/content/errors. `main.py:run_wre_dashboard_preflight` invokes it when that
+preflight is enabled, preserving existing health enforcement. Unconfigured or
+bad reports remain unknown; reading never constructs a researcher, model,
+PatternMemory, queue or resolution event, and writes no report. Existing health
+checks may still initialize memory and dispatch events under their own contract.
+No campaign, retention, queue admission, scheduled cycle or promotion is enabled.
+
 **Version:** 0.8.0
 **Status:** Execution-truth hardening implemented; production RSI incomplete
 

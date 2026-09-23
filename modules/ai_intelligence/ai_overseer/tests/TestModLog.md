@@ -1,3 +1,14 @@
+## 2026-09-24: WRE research display preserves preflight enforcement
+
+Two new cases in `test_preflight_resolution.py` bind the configured advisory reader
+and verify its failure cannot block healthy startup. Five prior dashboard cases
+remain unchanged. The connected dashboard/export suite additionally exercises the
+real reader through the exact main function bodies. Final 67-case selection passes
+locally and independently, without full main import or runtime effects. Scoped
+`--noconftest` prevents this module's allowlist skipping the WRE file; no repository
+collection policy changed. Detailed controls and preserved harness failures are in
+WRE `tests/TestModLog.md` and the canonical RSI backlog (WSP22/97).
+
 ## 2026-09-20: Reconcile four FoundUp validation fixture failures
 
 - WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.

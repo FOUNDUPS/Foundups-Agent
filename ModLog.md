@@ -1,3 +1,13 @@
+## 2026-09-24: RSI startup evidence display
+
+WSP00/15/97 selected the existing WRE advisory display seam (13/P1) after closing
+the consumer-boundary investigation as source reconciliation. Explicit selected
+ROC diagnostics now reach startup, labelled unverified; existing health gates
+remain intact. 67 cases pass locally and independently, including the review-found
+impossible-gain rejection. PR1898 and its main checks/owned cleanup are verified.
+See WRE INTERFACE/ROADMAP/TestModLog and the canonical backlog for exact evidence,
+remaining native-admission gates and fresh next selection. No production RSI claim.
+
 ## 2026-09-24: AutoResearcher persistent comparison-profile guard
 
 - WSP 00/15/22/48/50/62/97; C3/I4/D4/Impact4 = 15/P1. Extended the existing evaluator and producer once; the shared economic calculator is unchanged. Costs remain frozen per invocation. A separate copied comparison basis samples consumed profile values before and after evaluation and rejects persistent drift before metrics can advance the best candidate.
