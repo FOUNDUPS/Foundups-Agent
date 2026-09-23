@@ -1856,64 +1856,53 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8",
-    "selected_action": "R22-worktree-evidence-20260923",
+    "base_commit": "228ecbe0da3e43bd697ed464abdb674c7dd65440",
+    "selected_action": "R15-program-consumption-20260923",
     "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 3,
       "impact": 3,
-      "total": 13,
-      "priority": "P1"
+      "total": 12,
+      "priority": "P2"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-23T01:22:15.938628+00:00",
-    "base": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8",
+    "observation_id": "R15-program-consumption-20260923",
+    "base": "228ecbe0da3e43bd697ed464abdb674c7dd65440",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "observation_id": "R22-worktree-evidence-20260923",
     "selected": {
-      "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
+      "task": "Qualify AutoResearcher program-instruction consumption",
       "wsp15": {
-        "complexity": 3,
+        "complexity": 2,
         "importance": 4,
         "deferability": 3,
         "impact": 3,
-        "total": 13,
-        "priority": "P1"
+        "total": 12,
+        "priority": "P2"
       },
       "state": "locally_and_independently_qualified_publication_pending",
-      "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
-      "dependency": "Only the frozen registered-worktree evidence projection is qualified: 12 identical local and independent cases pass with 27 unchanged bindings and zero denied events. Exact publication, CI/main and owned-lane closure remain separate.",
-      "next_step": "Complete reviewed publication/CI/main/owned-lane closure; do not repeat these direct Git evidence cases. Native creation/admission and remaining evidence predicates remain separately scoped."
+      "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
+      "next_step": "Finish exact publication checks; do not claim prompt provenance from characterization."
     },
     "previous_closed": {
-      "pr": 1882,
-      "merge": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8"
+      "pr": 1884,
+      "merge": "228ecbe0da3e43bd697ed464abdb674c7dd65440",
+      "evidence": "O:/Foundups-Agent-audits/20260923-rsi-worktree-evidence/final-accounting.json"
     },
-    "intervening": [],
+    "previous_observation": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\previous-observation.json",
     "retrieval": {
-      "noise": "Historical continuity is not current evidence; narrow source/test/contracts prioritized.",
-      "ordering": "WSP00 actual bootstrap, historical read order, WSP15/97, roadmap/dispatch, exact Git/CI/owners, existing source and tests.",
-      "missing": "No module requirements.txt or memory/README.md; Tier0 README/INTERFACE present. Native authority unproven. Holo generation unusable at prior exact query.",
-      "staleness": "All71 bound source files match current main; current Git/CI/PR/worktree state refreshed.",
-      "duplication": "Extend existing canary integration test owner; no new module/skill or production source.",
-      "holo": "Prior governed query HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; shared HEAD/query host unchanged. Heartbeat forbids repeated unchanged failed probe. No reindex or claim of newly verified authority. Current source/NAVIGATION fallback.",
-      "prior_query": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json"
-    },
-    "owner_reconciliation": {
-      "open_peer_heads": 93,
-      "peer_worktrees": 157,
-      "scope_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\scope-owner-check.json",
-        "sha256": "0a4e4071124c1026c02456f170224183959028ffd2418b0ae69618c1ee5f30c8"
-      }
+      "noise": "Reuse source-qualified prior audit at same source; do not repeat completed baseline/proposal/lifecycle work.",
+      "ordering": "WSP00 bootstrap/gate, actual WSP15/97/62, canonical selection, existing source/test/interfaces and independent source review.",
+      "missing": "No qualified production report reader; no previous direct program-consumption tests found.",
+      "freshness": "Prior Holo authority-root mismatch prerequisites unchanged; no repeated query or CURRENT claim. Git/source retrieval fallback.",
+      "duplication": "Small sibling test imports existing temp_research_env fixture. Existing996-line suite unchanged; WSP62 supports distinct focused test placement."
     },
     "source_bindings": {
       "modules/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
@@ -1988,7 +1977,11 @@
       "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md": "1939eb50d9a572ca795d49b7fad20800563b3930",
       "WSP_framework/src/WSP_CORE.md": "07930de7af9ee0452919711e223a3243a57e2973",
       "modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py": "2e1b8bb10b41d42350dfdd9c5693ab95aab2f1ac",
-      "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_worktree_create_invoke.py": "bd4f9c4d439a9c3cbc8e820a1bf0b5d4cabeeb31"
+      "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_worktree_create_invoke.py": "bd4f9c4d439a9c3cbc8e820a1bf0b5d4cabeeb31",
+      "modules/infrastructure/wre_core/tests/test_wre_research_program_consumption.py": "a92b95a8797f669e4087228d434a2e736e7fa839",
+      "modules/infrastructure/wre_core/src/wre_auto_researcher.py": "9a49c38d7e7b99f03c815725559bd323eddf8b7c",
+      "modules/infrastructure/wre_core/src/wre_research_evaluator.py": "68240e136aa28c698fff2cffb03262280df5ba53",
+      "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py": "2f797fc4908cf83e18163a2c266e5a769090e32d"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -2025,67 +2018,19 @@
         "sha256": "b1cfbf5bf1aab9d64585c5ed3c7420c74c4f771ba4dda8fea4d852f6a33597fb"
       }
     },
-    "execution_plane": "Ordinary reversible synthetic component qualification; no native execution or authority. Independent verification before publication.",
-    "finding": "Actual disposable Git registry/HEAD readers accept local structural evidence and reject specific stage/result/path/isolation/lineage mismatches. Input stages and observed Git state stay unchanged. No authenticated worker creation, native execution, race confinement or retained-learning claim.",
     "validation": {
-      "selected_cases": 12,
-      "new_cases": 10,
-      "preserved_selected_cases": 2,
-      "primary_pass": 12,
-      "independent_same_cases_pass": 12,
-      "registry": "current1656/quarantined269; unchanged",
+      "fixed_cases": 7,
+      "local_pass": 7,
+      "independent_same_cases_pass": 7,
+      "author": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\author\\result.json",
+      "independent": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\independent\\result.json",
+      "runner": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\run_tests.py",
+      "runner_sha256": "f310404c3d70d85e5258a3cf4c00c1fc3f297635c62f0afc259e059c14def147",
+      "registry": "current1657/quarantined269",
       "production": "unchanged",
-      "worktree-test-freeze.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\worktree-test-freeze.json",
-        "sha256": "cbcd54ca04e2e8da4bf7418391b2e77c832c27e6ea21267e9d09c4762b61a649"
-      },
-      "run_worktree_tests.py": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\run_worktree_tests.py",
-        "sha256": "f25426b9bc35d3066dd6130e81658cfd94f8305aa7e6ebf48a6df96163e01ed5"
-      },
-      "preexecution-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\preexecution-review.json",
-        "sha256": "4425aba06f70f0df995a7ec7fd160a92d901f356b2bc1455f73555f9b5e16dc4"
-      },
-      "primary-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\primary-tests.xml",
-        "sha256": "de0667a0d26fb470f278e4807b9d399b38cfa89c1ac6309d19edf5c1575c7c57"
-      },
-      "independent-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\independent-tests.xml",
-        "sha256": "078c1ea658f53331c5387dcd3e8a8e2d582b25a7c661a823102bc186a86c4efc"
-      },
-      "primary-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\primary-invocation.json",
-        "sha256": "27ae3a39b7125445ae071d517a6e5c23d8caf5928a1f76c3672df9e199299dad"
-      },
-      "independent-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\independent-invocation.json",
-        "sha256": "5cd07c1f810387f0d329503c2ececd844caa3e3606f68a544e0927f8b4d5d48e"
-      },
-      "independent-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\independent-review.json",
-        "sha256": "8c7e79cc061632cc2cef625668c43a15b030b92e2f825431159d3bcc96021449"
-      },
-      "worktree-evidence-source-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\worktree-evidence-source-review.json",
-        "sha256": "94e6bc0d9396d5eac9a04e566502f1e0be25d3b82e313db171b5442e38518d38"
-      }
+      "legacy_tests": "unchanged/not run",
+      "limits": "Actual researcher loop and prompt builder, fake evaluator and backend, explicit temporary files, exact prompts/counts/accounting/restoration. Existing evaluator import leaves remain real; simulator/economics eager initializers replaced by inert namespaces. Not a real economic evaluation, OS sandbox, native worker or retention proof."
     },
-    "wsp00_gates": [
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\wsp00-gate.json",
-        "sha256": "31f27744efa49af5cc85708e7e1db704358c5c4ea1dd01e230e87aba86cd614e"
-      },
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\author-wsp00-gate.json",
-        "sha256": "c982379d90b5a37394de5b99159b936b80fc8194ca6e220fa894691d77726d97"
-      },
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence\\verifier-wsp00-gate.json",
-        "sha256": "62af691529e7b5fe0019a0298bb67a7a8fb146096006239743a77b0848151418"
-      }
-    ],
     "post_sprint_reobservation": {
       "ranked_candidates": [
         {
@@ -2497,10 +2442,10 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1884",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
-          "dependency": "Only the frozen registered-worktree evidence projection is qualified: 12 identical local and independent cases pass with 27 unchanged bindings and zero denied events. Exact publication, CI/main and owned-lane closure remain separate.",
-          "next_step": "Complete reviewed publication/CI/main/owned-lane closure; do not repeat these direct Git evidence cases. Native creation/admission and remaining evidence predicates remain separately scoped."
+          "dependency": "Exact reviewed tree merged at228ecbe0; PR/main checks passed; owned lane retired.",
+          "next_step": "Do not repeat closed qualification."
         },
         {
           "task": "Qualify canary receipt-lineage and draft-only evidence predicates with pure fixed controls",
@@ -2512,116 +2457,84 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "eligible_bounded_pure_qualification_pending_fresh_source_effect_and_test_freeze",
+          "state": "paused_local_unvalidated_checkpoint",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_lineage_blockers",
           "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
-          "dependency": "Reuse existing frozen plan/stage mappings and current consumer owner. Fresh ownership, import/effect and fixed-oracle review required; no DB/Git/network fixture needed for these direct pure calls. Integration test is 625 lines and main canary test 659. Prefer cohesive readable parameterization in an existing owner, preserve existing ASTs and keep candidate-created/grown functions at most 50 lines. WSP62 default Python thresholds are below 800 OK, 800-1000 cohesion review, above 1000 critical and 1500 hard; 675 occurs in the example domain configuration and is not an established hard cap for this owner. Current 650 bound was scoped to this sprint. Check actual applicable configuration before next freeze; split only when justified by cohesion or applicable limits, not automatically. No new production owner or authority mechanism.",
-          "next_step": "Freeze pure accepted lineage and draft controls, absent-plan missing-lineage result, independent missing/mismatched work-order/slice/head and selected-slice controls; independently reject outer/nested acceptance and receipt fields, missing/malformed draft URL/ID, and each explicit no_merge/no_ready layer. Assert exact blocker tuples and projected fields plus deep input equality. Use _draft_pr_evidence (actual owner); no _draft_only_blockers function exists. Scope establishes current string/boolean contract only, not remote GitHub state, signed authenticity or live completion."
+          "dependency": "Independent receipt command rejected by automatic approval before execution; no specific reason.29 cases unexecuted. Clean separate branch agent/rsi-lineage-draft-20260923 at6f70893bb; no retry/substitute.",
+          "next_step": "Resume only after permitted independent review and fresh source/ownership reconciliation; preserve local draft."
+        },
+        {
+          "task": "Qualify AutoResearcher program-instruction consumption",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "locally_and_independently_qualified_publication_pending",
+          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
+          "next_step": "Finish exact publication checks; do not claim prompt provenance from characterization."
+        },
+        {
+          "task": "Record actual per-backend-call rendered program-text diagnostic identity",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "eligible_bounded_report_contract_after_fresh_reconciliation",
+          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
+          "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
+          "next_step": "Reuse producer/report and the focused consumption test. Capture the same locally rendered instruction text used in the actual prompt immediately before backend invocation, including failed backend calls; identify invocation/iteration/ordinal. No entry-hash substitution or inferred heuristic consumption. Freeze compatibility and failure controls, including call-scoped collector cleanup, before implementation. No model/provider invocation or new reader.",
+          "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
+          "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
         }
       ],
       "selected_next": {
-        "task": "Qualify canary receipt-lineage and draft-only evidence predicates with pure fixed controls",
+        "task": "Record actual per-backend-call rendered program-text diagnostic identity",
         "wsp15": {
-          "complexity": 2,
+          "complexity": 3,
           "importance": 4,
           "deferability": 3,
           "impact": 3,
-          "total": 12,
-          "priority": "P2"
+          "total": 13,
+          "priority": "P1"
         },
-        "state": "eligible_bounded_pure_qualification_pending_fresh_source_effect_and_test_freeze",
-        "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_lineage_blockers",
-        "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
-        "dependency": "Reuse existing frozen plan/stage mappings and current consumer owner. Fresh ownership, import/effect and fixed-oracle review required; no DB/Git/network fixture needed for these direct pure calls. Integration test is 625 lines and main canary test 659. Prefer cohesive readable parameterization in an existing owner, preserve existing ASTs and keep candidate-created/grown functions at most 50 lines. WSP62 default Python thresholds are below 800 OK, 800-1000 cohesion review, above 1000 critical and 1500 hard; 675 occurs in the example domain configuration and is not an established hard cap for this owner. Current 650 bound was scoped to this sprint. Check actual applicable configuration before next freeze; split only when justified by cohesion or applicable limits, not automatically. No new production owner or authority mechanism.",
-        "next_step": "Freeze pure accepted lineage and draft controls, absent-plan missing-lineage result, independent missing/mismatched work-order/slice/head and selected-slice controls; independently reject outer/nested acceptance and receipt fields, missing/malformed draft URL/ID, and each explicit no_merge/no_ready layer. Assert exact blocker tuples and projected fields plus deep input equality. Use _draft_pr_evidence (actual owner); no _draft_only_blockers function exists. Scope establishes current string/boolean contract only, not remote GitHub state, signed authenticity or live completion."
+        "state": "eligible_bounded_report_contract_after_fresh_reconciliation",
+        "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
+        "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
+        "next_step": "Reuse producer/report and the focused consumption test. Capture the same locally rendered instruction text used in the actual prompt immediately before backend invocation, including failed backend calls; identify invocation/iteration/ordinal. No entry-hash substitution or inferred heuristic consumption. Freeze compatibility and failure controls, including call-scoped collector cleanup, before implementation. No model/provider invocation or new reader.",
+        "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
+        "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
       },
-      "rationale": "After the fixed worktree projection passes, pure lineage/draft predicates are the highest eligible core step supported by this bounded source review (C2/I4/D3/Impact3=12/P2). Both feed evaluate_live_proof directly; scoped test search found only deferred mutation labels, not direct calls. Native18 still requires real trust anchors/effect lease; FAM14 needs named domain authority mapping; GotJunk14 needs product-owner/deployment acceptance; PostgreSQL13 requires actual runtime/admission; runtime expectation implementation still needs named policy/backend mapping. No new evidence unblocks those prerequisites. LinkedIn manager admission also scores12 but remains behind the principal-selected core canary path. Supplier acquisition11 needs a clean positive fixture and ranks lower; reusable runner/scanner debt does not justify broadening this slice. Historical completed qualification rows remain preserved.",
-      "source_bindings": {
-        ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
-        ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
-        "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json": "a46306a42d5a56396b8d3dbd64a09138c9e745d2",
-        "extensions/reddog/backend_compatibility_constants.js": "b9347b03618d4ee2c89e8362fc56f02f29aa4525",
-        "holo_index/core/holo_index.py": "14329dcd2f48a089bd598c1d19a1b97a262f8cb9",
-        "holo_index/requirements.txt": "94c4c3f3b1606a56f86cb7dfdb19075e4c150cc3",
-        "modules/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-        "modules/communication/moltbot_bridge/src/__init__.py": "166eed840b776b8987f82f4a5e605cba9092e407",
-        "modules/communication/moltbot_bridge/src/dae_runtime_adapter.py": "8861f07b9f3f41ee5b23fe7a4b7d5ed3938b5c3d",
-        "modules/communication/moltbot_bridge/src/reddog_current_generation_manifest_launch_selection.py": "1d2b51fe01bf9b3810bbcbb593d85f4f44063667",
-        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "2d4488ea0e45bde82c83876678593de12acade60",
-        "modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py": "5b392fef5446f7d6994ac913f5d8d9ff595b4a13",
-        "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py": "0e50607969fc12ab70e45427fc40a6e18c080139",
-        "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py": "2bd3da62131bf761bbf147c558689b5a8b41a2f0",
-        "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "c5ff1b322a85fecf8e75e5668f1fd78c96629325",
-        "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_use_time_gate.py": "c718b384cbc9b213204fc6f4185fda4d9d35f3da",
-        "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "f2c6353fa888a67495c05012569d894ed540a557",
-        "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-        "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
-        "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "7ab28ea29fc5c2bca7814cdea901b8178d843ed4",
-        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "971ca32f215736afe021b4fca7b162f3c66fe41d",
-        "modules/communication/moltbot_bridge/tests/test_reddog_resident_runtime_artifact_readiness.py": "7dc5b3de2fcbb7099eda05291950bf80a59623f0",
-        "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py": "0a02f9bf28ea48d1dbebc35f11efd517d6d96416",
-        "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "e65ffd3f72a0d2061869e2e149a1fcfe66cbc7fa",
-        "modules/foundups/gotjunk/cloudbuild.yaml": "a56884616b879619509b2bd4a3480b7cae02da4c",
-        "modules/foundups/gotjunk/foundup_manifest.json": "6438d15d62d8b7935548ee7a7fd2477f600e2341",
-        "modules/foundups/gotjunk/frontend/Dockerfile": "3ad21a7fb0f30260ea84f724ecbbb9c9ec4afd8d",
-        "modules/foundups/gotjunk/frontend/package-lock.json": "a4c6965ba89fefeb9c15d5614ef8f6f01a8139ca",
-        "modules/foundups/gotjunk/frontend/package.json": "24b06e3c94ea681bbba8dde877756b1730266ef6",
-        "modules/foundups/gotjunk/frontend/services/firebaseConfig.ts": "8082788c2db596fc1a9feabfe5b4598e274658a3",
-        "modules/infrastructure/browser_actions/src/__init__.py": "95c41c97624e0c363c8dc93ca0398d3a0efd0322",
-        "modules/infrastructure/browser_actions/src/action_router.py": "9c6e882a6a6bc2a300331b41999a161aae368acb",
-        "modules/infrastructure/browser_actions/src/linkedin_actions.py": "545c6cb2efc44551e1b3c04aa7c574d6289c27ea",
-        "modules/infrastructure/browser_actions/tests/test_linkedin_connection_policy.py": "edcdca4feafccb2a6b33932abc538807eb4b2b85",
-        "modules/infrastructure/dae_daemon/__init__.py": "e6ec6ffdee5d68d6dc9f6d9b78f0082d721b5901",
-        "modules/infrastructure/dae_daemon/src/__init__.py": "1c4e511d18f2d2db9d5f07bb09918caf0b449f53",
-        "modules/infrastructure/dae_daemon/src/dae_daemon.py": "f042b4130b11eddd5914a462968ba809d90edce4",
-        "modules/infrastructure/dae_daemon/src/dae_launch_broker.py": "c1b185f8a2bfc621c4f3a3511aa59ae3277c3499",
-        "modules/infrastructure/dae_daemon/src/dae_observer.py": "7a35ea9e184cd1902530fe3b31d853d60dcab5ff",
-        "modules/infrastructure/dae_daemon/src/dae_registry.py": "285e1528a45c184a7057821aade4603553173b61",
-        "modules/infrastructure/dae_daemon/src/event_store.py": "57539772077f4c9a2294ec02cfd75002d0f84c07",
-        "modules/infrastructure/dae_daemon/src/killswitch.py": "e4f6dcb8c83e1fd4966ccbcae93ae1969591faef",
-        "modules/infrastructure/dae_daemon/src/schemas.py": "b186015545ed3dac16e55e877fbc066e24dc77e5",
-        "modules/infrastructure/dae_daemon/tests/__init__.py": "0f7b89383721c533e1075ef02da0f028f3070b8d",
-        "modules/infrastructure/dae_daemon/tests/test_dae_observer.py": "301999b4ee1a73900e1435bce60276a9f550ca54",
-        "modules/infrastructure/foundups_mcp_bridge/requirements.txt": "ca0566e30971d7a82bbb84b323ca7a4f9ebb4cc6",
-        "modules/infrastructure/foundups_mcp_bridge/scripts/launch.py": "be466e138a6a7a67d7105b3553521187e588939a",
-        "modules/infrastructure/foundups_mcp_bridge/src/mcp_server.py": "8daba14986b065bed0d0a5024deef861d2770fa7",
-        "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py": "0cd28babbd0d3b8423f9e637c19ad6b82ae5d3f2",
-        "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
-        "modules/platform_integration/linkedin_agent/src/__init__.py": "6c331fffb9ef3641e1a0bc6352ed644fc18467a4",
-        "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3",
-        "modules/platform_integration/linkedin_agent/src/engagement/connection_manager.py": "9ad8bc76abc7219be4033b5819cfebf9c840694d",
-        "scripts/reddog_backend_manifest.json": "6c467c24cdcfc25123dabba3dd53bdef928cbe3e",
-        "scripts/tests/test_generate_reddog_backend_manifest.py": "124816a55c3ec7dbd55965af51574b6b90283af9",
-        "modules/communication/moltbot_bridge/src/reddog_resident_queue_chain_results_store.py": "84e88635ffdb2e25d226270ebed5e0440900f913",
-        "modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py": "c75ecd480fc2e3be766a297af6317058875741f9",
-        "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "35da9daecf3af8c33f055091310af6bceea8d451",
-        "modules/infrastructure/wre_core/src/pattern_memory.py": "e7f0f58cdfd37407725d89d7d6f68203d8471273",
-        "modules/communication/moltbot_bridge/tests/reddog_live_canary_artifact_test_support.py": "1ab6c18ede9f5aae5fc7ce5cf5d75ae5b9f5bf11",
-        "modules/communication/moltbot_bridge/tests/reddog_resident_queue_test_helpers.py": "e2b1b7dbb7bc318619430f435c07bc57751e123e",
-        "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py": "0d8e350aad39a3ff50f885b2fcca71d74429c1d6",
-        "modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py": "34e9f56005b59ac07ec97c8721097e91ca9406e7",
-        "pytest.ini": "93e6231135ac4b459baf222d52f50a30807a7670",
-        "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md": "17a7be117ec207e08b7c07e32fc9de5a9875c4c7",
-        "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md": "46844bd527c4abf8e46de367998f39bcb43bcf41",
-        "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md": "1364165b54eb78dc3e230f316c23a52664e07f5f",
-        "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339",
-        "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "de622b09025e410cc982bba39033413b06943494",
-        "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "677f6b2b05255e18f96ce581a56a0c7831a39d81",
-        "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089",
-        "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md": "1939eb50d9a572ca795d49b7fad20800563b3930",
-        "WSP_framework/src/WSP_CORE.md": "07930de7af9ee0452919711e223a3243a57e2973",
-        "modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py": "2e1b8bb10b41d42350dfdd9c5693ab95aab2f1ac",
-        "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_worktree_create_invoke.py": "bd4f9c4d439a9c3cbc8e820a1bf0b5d4cabeeb31"
-      },
-      "still_open": [
-        "Native admitted ticket/effect lease and authentic signer/runtime generation prerequisites.",
-        "Domain authority mapping, product deployment ownership, PostgreSQL/runtime compatibility prerequisites remain separate.",
-        "Remaining pure lineage/draft evidence coverage and current selected publication/closure; no full native proof completion."
-      ]
+      "rationale": "Native/runtime/external-owner blockers persist; prior worktree qualification closed; lineage qualification paused. Program consumption is now qualified. The next report contract reuses its exact call boundary; choose it in core RSI scope before separate LinkedIn work or lower supplier work. Re-observe after publication."
     },
     "publication": {
-      "state": "pending_exact_review_PR_merge_and_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-worktree-evidence"
+      "state": "pending_exact_review_PR_merge_main_checks",
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption"
+    },
+    "observation_evidence": {
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\observation.json",
+      "sha256": "b076f4bc3ac7f55357f3acfb14e9edd3a13ee8e1a13e8c53deb290d120990763"
+    },
+    "previous_observation_evidence": {
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-consumption\\previous-observation.json",
+      "sha256": "fd5571420a9fb7cebf0f0a0ef333b0cc3359f2a9792c5f32770cb1cd9f237d43"
+    },
+    "owner_reconciliation": {
+      "open_peer_prs": 93,
+      "changed_peer_pr_heads": 0,
+      "changed_prior_peer_worktree_heads": 0,
+      "shared_status_unchanged": true,
+      "paused_lane_head": "6f70893bbb44da0364c90b549cc74cfd1e043ddd",
+      "paused_lane_clean": true,
+      "comparison_prs": "O:/Foundups-Agent-audits/20260923-rsi-lineage-draft/entry-observation.json",
+      "comparison_worktrees": "O:/Foundups-Agent-audits/20260923-rsi-lineage-draft/entry-peers.json"
     }
   }
 }

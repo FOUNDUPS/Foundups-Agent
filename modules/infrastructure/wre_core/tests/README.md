@@ -1,3 +1,20 @@
+## AutoResearcher program consumption
+
+`test_wre_research_program_consumption.py` selects seven fixed controls for the
+actual prompt builder with a fake backend and evaluator. It imports only the
+existing `temp_research_env` fixture, which disables model loading before
+construction. The996-line lifecycle suite is unchanged and is not selected.
+The small sibling isolates a distinct call-boundary contract under WSP62.
+
+Local and independent replays pass the same seven cases, checking prompts,
+callbacks, zero/heuristic paths, failure accounting and restoration. The external
+qualified runner disables pytest plugin autoload/bytecode, gives each run a fresh
+external temporary root and bypasses only simulator/economics eager package
+initializers with inert namespaces. Actual selected source remains loaded;
+evaluator calls are mocked. Two asyncio config warnings are expected with its
+plugin disabled. Evidence is bound in the canonical RSI backlog; this does not
+prove live model behavior, economic correctness or a complete runtime sandbox.
+
 ## Self-audit diagnostic accounting
 
 `test_daemon_self_audit_diagnostic_outcomes.py` exercises all three existing
