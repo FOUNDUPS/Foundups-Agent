@@ -188,6 +188,10 @@ FAMEvent(
 - Persistent SQLite initiation: `trigger_payout` delegates to `SQLiteAdapter.initiate_payout(task_id, actor_id)`. One write transaction binds task/proof/approved verification, pending payout, configured compute debit and correlated event. The task stays `VERIFIED`, payout `INITIATED`, with no settlement reference or `paid_at`.
 - Exact same-actor retry returns the persisted initiation without another debit/event, using its original cost snapshot. Conflicting or incomplete lineage and ambiguous legacy history reject before effects; missing scope cannot be guessed unrelated. No historical repair or settlement is performed. See [R24 acceptance](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22).
 
+- Persistent SQLite verification uses one transaction for decision, debit, correlated event and approved task state. Rejection records its result once before raising `ValidationError`; exact rejected retries repeat that error without writes. Exact accepted retries return the current task and preserve pending payout linkage.
+- Verification ID binds task/FoundUp/proof/artifact/verifier/approval/reason and normalized decision time. New naive times mean UTC; aware times convert to UTC with microseconds preserved. Replay uses original cost, without current-policy recharging. Conflicts, incomplete lineage and ambiguous relevant legacy history require reconciliation before further effects. See [fixed acceptance](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#atomic-verification-acceptance--2026-09-23).
+- This operation rejects non-SQLite before session/compute effects, leaves schema and adapter CRUD APIs unchanged, and confers no verifier/domain entitlement. SQLite history scans are complete rather than limited to the public ledger's 100-row view; large-history capacity is unqualified.
+
 ### TreasuryGovernanceService
 - `propose_transfer(foundup_id: str, amount: int, reason: str, proposer_id: str) -> str`
 - `approve_transfer(proposal_id: str, approver_id: str) -> None`
@@ -364,8 +368,9 @@ The [R24 handoff contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACK
 `PersistentTaskPipeline.verify_proof` after durable independent terminal WRE ACCEPT.
 Staged assurance, repository-write grants and compute debit are insufficient.
 The domain entitlement issuer/delegation decision remains unresolved; no route or
-bridge is enabled. Exact proof binding, atomic decision/debit/event application
-and replay/recovery require qualification before integration. Payout is separate.
+bridge is enabled. Local SQLite proof binding, atomic decision/debit/event and replay acceptance are
+qualified in 164 cases. Cross-store delivery, signed domain authorization and runtime
+admission still require qualification before integration. Payout is separate.
 
 ## Optional API Surface (Future)
 - `POST /foundups`

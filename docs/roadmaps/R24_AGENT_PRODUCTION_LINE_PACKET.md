@@ -294,6 +294,60 @@ replay, with fixed rollback/retry acceptance and conservative legacy-history
 reconciliation before implementation. Reuse SQLite session/compute/debit/event
 owners; do not introduce another ledger or erase incomplete historical records.
 
+### Atomic verification acceptance — 2026-09-23
+
+WSP15 C3/I4/D3/Impact4=14/P1; this local persistence repair follows PR1893's
+merged ORM prerequisite (`265e1bd6d`), whose exact PR/main checks and independent
+128-case replay passed and whose owned lane was retired. Native ticket admission
+and the domain issuer policy above remain separate blockers.
+
+The fixed desired contract extends the existing SQLite session, compute decision,
+event and debit owners. A cohesive internal `persistence/verification.py` operation
+may serve the existing pipeline without expanding the adapter's inherited class
+debt or its 1,330-line ceiling. This is within FAM, with no new ledger or scheduler.
+
+- In one SQLite write transaction, bind task/FoundUp/current proof and artifact,
+  record the verification, original compute cost, correlated debit and event, and
+  update an approved task. A rejection commits its decision/event/debit once and
+  raises the existing business rejection after commit; it does not approve a task.
+- Key exact replay by verification ID, with identical task, verifier, boolean
+  decision, reason and normalized decision time. Bind the proof snapshot using its
+  existing stored representation. New versioned decision timestamps interpret naive
+  inputs as UTC and convert aware inputs to UTC, preserving microseconds and caller
+  objects. Do not reinterpret unversioned historical timestamps.
+- Replay checks occur before charging or requiring a fresh state transition.
+  Approved replay preserves a later pending payout; an old rejection still rejects
+  after a distinct later approval. Mutable payout linkage is excluded from immutable
+  verification identity. Receipt cardinality is per decision, not per task.
+- Keep ordinary submission and payout events separate: a payout event also contains
+  a verification ID, which alone cannot classify it as a verification receipt.
+- Missing, duplicate, altered or incomplete decision/event/debit lineage rejects
+  without effects. Inspect complete relevant history, including beyond the public
+  ledger's 100-row window. Unlinked legacy verification debits in the target FoundUp
+  hold across actors; missing or contradictory scope cannot be guessed unrelated.
+  Exclude only demonstrably separate FoundUp history. No heuristic pairing, refund,
+  deletion, backfill or authority grant is part of this repair.
+- Reject unsupported backends before session acquisition or compute effects.
+  Preserve unrelated tables and rows. Actual post-write SQL failures roll back all
+  changes; reopen/retry after a committed response loss does not repeat effects.
+
+Acceptance is fixed before product edits: the five prior defect observations are
+replaced by desired rollback/replay assertions, and additional synthetic controls
+cover identity, timestamp equivalence, later-state retries, cost history, corruption,
+legacy residues, prerequisites, concurrency and backend rejection. Existing payout
+and mapping regressions remain required. Baseline and candidate results are recorded
+separately; this contract alone is not a passing implementation or domain entitlement.
+
+Local qualification: the fixed 164-case baseline produced 141 passes and 23
+production failures. The candidate and independent replay each pass the same 164
+cases without errors/skips. All 42 inventoried Python files remained stable; each
+run used 148 disposable SQLite opens and no allowed network/provider/subprocess
+activity. The 40 pytest convenience symlink denials were expected; two existing
+configuration warnings remain. Evidence and exact source bindings are in the
+canonical backlog. The internal operation is 192 lines; the pipeline shrinks to
+362 and SQLiteAdapter remains unchanged. Complete-table history scans favor this
+bounded correctness test; thousand-agent throughput remains unqualified.
+
 ### Capacity gates: one ticket before one thousand agents
 
 Each increase requires a fresh admitted profile and measured acceptance, not a

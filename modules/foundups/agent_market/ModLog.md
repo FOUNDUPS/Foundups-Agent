@@ -1,5 +1,16 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-09-23: Atomic persistent verification and exact replay
+
+- WSP 00/6/11/15/22/49/50/62/84/97; C3/I4/D3/Impact4 = 14/P1.
+- Existing `PersistentTaskPipeline.verify_proof` delegates to internal `persistence/verification.py`. One SQLite write transaction records decision, original compute cost, linked debit/event and approved task state. Exact approval/rejection retries have no new effects; a business rejection is raised after its first commit.
+- New decision times normalize to UTC (naive inputs defined as UTC), preserving microseconds and caller objects. Existing proof timestamps remain in their stored representation. Replay preserves a pending payout or a later distinct approval. Complete relevant history rejects missing/altered/duplicate lineage and ambiguous legacy verification debits across actors without guessing, refunding or backfilling.
+- Baseline 141 passed / 23 expected failures. Candidate and independent replay each pass the same 164 cases, no errors/skips: five evolved desired controls, 36 added semantic controls and 123 preserved cases. All 42 inventoried Python files stable per run; 148 disposable SQLite opens, 40 caught pytest convenience symlink denials, no unexpected denials or allowed test subprocess/provider/network calls. Two inherited configuration warnings remain.
+- Internal operation 192 lines, all functions at most 30 lines; pipeline shrinks to 362. SQLiteAdapter stays 1,125 lines with its inherited 816-line class and 1,330 ceiling unchanged. Other pipeline definitions and the 31 prior test/helper definitions outside the replaced observation are AST-identical. The new cohesive test file is 251 lines; existing compute test remains 680. Registry 1,659 current / 269 quarantined.
+- Local SQLite acceptance only. No verifier entitlement, PostgreSQL qualification, legacy repair, settlement, WRE/native worker activation or retained-learning claim. History validation currently scans complete tables; high-concurrency/large-history capacity still requires separate measurement.
+
+Evidence: `O:/Foundups-Agent-audits/20260923-rsi-verification-atomic/{baseline,candidate,independent}/receipt.json`; fixed case IDs and test hashes precede product edits. Python audit hooks constrain these known fixtures, not arbitrary hostile native code or an OS sandbox.
+
 ## 2026-09-23: Shared persistence ORM cohesion prerequisite
 
 - WSP00/6/11/15/22/49/50/62/84/97; C2/I3/D4/Impact3=12/P2. Moved Base and13 existing ORM declarations once into internal `persistence/orm_models.py`; old sqlite_adapter names are identity-preserving re-exports. No duplicate registry, schema, migration, ledger or WSP module.

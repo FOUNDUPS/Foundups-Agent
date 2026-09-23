@@ -56,6 +56,7 @@ SQLite `trigger_payout` records payout, task linkage, configured compute charge 
 - `src/in_memory.py`: PoC in-memory implementation.
 - `src/persistence/`: SQLite/Postgres adapters, migration manager, repository factory.
 - `src/persistence/orm_models.py`: single shared Base/13 ORM row mappings; legacy `sqlite_adapter` Base/row imports remain compatible. Domain dataclasses stay in `src/models.py`.
+- `src/persistence/verification.py`: internal atomic SQLite verification used by the existing task pipeline; one decision/debit/event, exact replay and fail-closed legacy history. This records a supplied decision without granting verifier authority.
 - `src/exceptions.py`: domain errors.
 - `tests/`: schema, lifecycle, and permission tests.
 - `memory/`: module memory artifacts.

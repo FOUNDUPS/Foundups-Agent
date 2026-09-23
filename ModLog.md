@@ -1,3 +1,9 @@
+## 2026-09-23: RSI persistent verification transaction
+
+- WSP 00/15/97 selected 14/P1 atomic proof verification after PR1893 fully merged, passed exact main CI/CodeQL and retired its owned lane. All 94 peer heads and shared checkout remain unchanged at entry.
+- Existing FAM pipeline now reuses SQLite transaction/compute/debit owners for one decision and safe replay. Same 164 cases pass locally and independently after 23 demonstrated baseline failures. Adapter/schema unchanged; no new ledger, scheduler or skill.
+- [R24 acceptance](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#atomic-verification-acceptance--2026-09-23) and canonical backlog retain scope/evidence. New test owner is added through the canonical registry generator. Native/runtime/domain authority and AmIBot admission remain blocked; source presence or local tests do not establish production RSI.
+
 ## 2026-09-23: Shared persistence ORM cohesion prerequisite
 
 - WSP00/6/11/15/22/49/50/62/84/97; C2/I3/D4/Impact3=12/P2. Moved Base and13 existing ORM declarations once into internal `persistence/orm_models.py`; old sqlite_adapter names are identity-preserving re-exports. No duplicate registry, schema, migration, ledger or WSP module.

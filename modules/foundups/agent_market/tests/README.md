@@ -15,16 +15,18 @@
 
 Keep baseline and candidate on identical case IDs and acceptance oracles. Use disposable explicit SQLite paths, actual -I/-B isolation and a reviewed external effect guard when qualifying this path. Preserve failed attempts and fixture corrections; test execution grants no live reward or runtime authority. Detailed counts and limitations are in [TestModLog](TestModLog.md).
 
-## Persistent verification failure observations (2026-09-23)
+## Persistent verification acceptance (2026-09-23)
 
-The same existing `test_persistent_compute_wiring.py` now includes five
-`test_verification_interruption_reopen_observation` cases: accepted/rejected
-reopen/retry and failures before decision insertion, task update and event insertion. They freeze
-current defects (double debit, partial state and failed exact replay), not desired
-correctness. All five pass locally and independently with explicit disposable
-SQLite and the reviewed external effect guard; no production authority follows.
-[R24](../../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-verification-failure-witnesses--2026-09-23)
-records the observations and separately selected repair acceptance boundary.
+The five historical failure observations are preserved in PR1892 and its evidence.
+Their existing test owner now contains five desired rollback/replay controls with
+real post-write SQL hooks. `test_verification_transaction.py` adds 36 controls for
+identity/time equivalence, pending payout and later-approval retries, original cost,
+corrupted history, legacy residues beyond 100 rows, missing prerequisites, competing
+adapters, response loss and pre-session backend rejection. All use synthetic actors
+and explicit disposable SQLite. The connected suite is 164 cases: baseline 141 pass /
+23 failures; candidate and independent replay each pass the same 164, zero errors or
+skips. Two inherited configuration warnings remain. See [TestModLog](TestModLog.md)
+and [R24 acceptance](../../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#atomic-verification-acceptance--2026-09-23).
 
 ## Shared ORM compatibility (2026-09-23)
 
