@@ -1,5 +1,23 @@
 # LinkedIn review: protocol, membership and discussion
 
+## RSI manager admission repair — 2026-09-24
+
+The browser owner now requires a fresh manager-admitted request before Connect.
+It checks pre-call pending/connected presence, the actual PENDING enum, matching
+target and returned/stored object identity. Quota rejection, existing connected or
+pending work, simulation failure, missing/malformed result and invalid stored
+identity fail before invitation UI or success credit. Policy-denial results and
+all preview/note/navigation compatibility remain unchanged.
+
+The same 36 frozen cases pass locally and independently after a baseline of
+11 fail/25 pass; four legacy constructor cases are excluded and two known warnings
+remain. Source, class and method shrink. Existing manager bookkeeping is preserved,
+including its pre-simulation pending entry; no rollback, quota repair, concurrent
+exactly-once or live delivery is proved. Source-bound evidence is under
+`O:/Foundups-Agent-audits/20260924-rsi-manager-guard`; exact closure and fresh WSP 15
+selection remain in the [canonical backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+Historical qualification sections below describe the original source.
+
 Contract updated 2026-09-22. Use [master activity routing](LINKEDIN_ACTIVITY_ROUTING.md) for scope, child skills and full-cycle order. This compact index connects the existing LinkedIn skills; it is not a new orchestrator, background service or claim of live executor compliance.
 
 ## Load the authored operating stack

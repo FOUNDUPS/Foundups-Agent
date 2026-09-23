@@ -17,14 +17,14 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ---
 
-## Manager-result qualification — 2026-09-24
+## Manager admission repair — 2026-09-24
 
-Six fixed witnesses plus23 preserved cases pass locally and independently.
-Four disallowed manager outcomes still reach fake UI; this is a qualified gap.
-Next repair13/P1 must admit only fresh storedPENDING work, retaining the current
-preview/policy/note contract. Same IDs do not prove object identity or freshness.
-See [test log](tests/TestModLog.md) and the canonical system backlog for exact
-closure and fresh selection; no production source or live connection changed.
+The qualified four-outcome gap is repaired in the existing action owner.
+Only fresh, target-matched, currently stored PENDING work can reach Connect.
+All 36 fixed cases pass locally and independently (baseline 11 fail/25 pass),
+including 23 preserved compatibility cases. Manager bookkeeping is unchanged.
+See [test log](tests/TestModLog.md) and the canonical backlog for publication and
+fresh selection. No live delivery, rollback or concurrent exactly-once claim.
 
 ## Current bounded checkpoint — 2026-09-23
 

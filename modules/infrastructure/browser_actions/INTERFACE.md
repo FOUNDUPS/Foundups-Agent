@@ -138,6 +138,13 @@ live calls preserve manager request status. With a truthy requested note, Add an
 typing must succeed before the sole explicit Send; unattempted Send is `None`.
 Success/counter credit requires the complete requested sequence. No-message
 fallback remains unchanged; these local results do not prove external delivery.
+Before Connect, explicit calls require no pre-call pending/connected target and
+a returned request with the configured PENDING enum, matching target and identity
+with the currently stored pending object. Otherwise the result has `success=False`,
+`error="connection_request_not_admitted"`, and `details={"request_status": value}`
+where value is the returned status object's `value` attribute, or `None` when absent. No Connect/Send or success credit
+occurs. Policy rejection retains its existing result. Earlier navigation and
+manager bookkeeping remain possible; this is not rollback or concurrent deduplication.
 See [preview scope](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22) and [note-path repair](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-requested-note-repair--2026-09-23).
 
 ```python

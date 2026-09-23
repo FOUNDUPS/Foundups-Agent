@@ -2377,7 +2377,7 @@
     "modules/infrastructure/browser_actions/src/action_router.py": "31b39d1e4f52b7f0b5351e206cd23c458b0b125e835d3f87aced8ecfa04c7b06",
     "modules/infrastructure/browser_actions/src/ai_overseer_integration.py": "dbf4fa9dd8750d4ec27e60e49a62e94c5865c2cc5d78885a08ede29b171f41cd",
     "modules/infrastructure/browser_actions/src/foundups_actions.py": "bcf915600e268845ed18b507bf97f7e67bf5333c3b70d61225b7ec7ca861e09d",
-    "modules/infrastructure/browser_actions/src/linkedin_actions.py": "8ce3c389506ee757901f5eeab11324703a1ba584f0eb721b88ca811a2f1b4c88",
+    "modules/infrastructure/browser_actions/src/linkedin_actions.py": "e1d646f65e44c8cdb24c5148f17c814edfeaa2decd406c0d0706838f595b8251",
     "modules/infrastructure/browser_actions/src/telemetry_dashboard.py": "b3446e66b409533008bd2335597092a309c3db79304c211bf5a9e8ffcdcfe125",
     "modules/infrastructure/browser_actions/src/x_actions.py": "609a6b821a7e9bbae8ff90ae725f31fe32dd60c91f1d257ad67dfbaa1ae332a8",
     "modules/infrastructure/browser_actions/src/youtube_actions.py": "e2640351f8e2af354568808d08b0e7f26835dcb8005b9e1b073d0a7c03e25614",

@@ -1,3 +1,9 @@
+## 2026-09-24: RSI manager admission repair
+
+- Closed PR1901 at `55d983fb6d8fc78b341c2dc76f6d997d28666bcf`: independent source review, ten PR checks, exact-merge CI/CodeQL and owned-lane retirement verified. Shared checkout and 94 peer heads preserved.
+- WSP 00/15/97 selected the existing 13/P1 manager-to-browser boundary. Non-admitted requests now stop before Connect/Send; the source owner shrank. Frozen baseline 11 fail/25 pass becomes 36 pass locally and independently, with 23 compatibility cases retained. Eight manifest tests, 67-file package and unchanged test registry pass; both invalid manifest preparations are preserved in evidence.
+- Existing roadmap/backlog records exact receipts and publication state. Re-observe after closure; the next eligible 11/P2 candidate retains bounded Windows test-runner lessons in existing documentation. Native OpenClaw/Hermes ticket admission remains blocked; no runtime job, social action or retained-learning claim.
+
 ## 2026-09-24: RSI instruction-memory hygiene
 
 - Closed PR1900 at `3303f1a2ce9af9eb366125d99ac2a8449986e220`: 29 unique qualification cases passed locally and independently, ten PR checks and both exact-merge main workflows passed, and its owned lane was retired. Four manager-to-UI admission gaps remain separately scoped.

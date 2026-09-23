@@ -1,5 +1,19 @@
 # Browser Actions - Test Documentation
 
+## Manager admission acceptance — 2026-09-24
+
+The existing test file now covers 36 fixed cases. Baseline: 11 fail/25 pass;
+repair and independent replay: 36 pass each, four legacy constructor cases
+excluded, two known disabled-plugin warnings. All 23 prior compatibility cases
+remain unchanged. The six manager outcomes now enforce admission and seven
+malformed/state faults reject before invitation UI. Exact results, object identity,
+history, call order and success credit are checked.
+
+Bound runner, hashes, XML and independent review:
+`O:/Foundups-Agent-audits/20260924-rsi-manager-guard`. This remains an inert fixture
+proof, not process confinement or a live send. The historical 29-case qualification
+below characterized the original gap; it is superseded by this acceptance scope.
+
 **WSP Reference:** WSP 34 (Test Documentation)
 
 ## Test Strategy
@@ -13,7 +27,7 @@ Browser action testing uses:
 
 | File | Existing scope |
 |---|---|
-| `test_linkedin_connection_policy.py` |29 qualified inert cases: policy/preview/note and manager-result behavior; four legacy constructor cases excluded. |
+| `test_linkedin_connection_policy.py` |36 inert acceptance cases: policy/preview/note, manager admission and malformed results; four legacy constructor cases excluded. |
 | `test_linkedin_actions_unit.py` |Other action behaviors with fake router; not run in this qualification. |
 | `test_autonomous_gemini_heart.py` |Existing-Chrome Gemini heart integration harness; not run. |
 | `test_final_autonomous_gemini.py` |Standalone Chrome/Gemini integration harness; not run. |
