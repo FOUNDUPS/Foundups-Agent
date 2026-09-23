@@ -1,3 +1,9 @@
+## 2026-09-23: AutoResearcher evaluator dependency sensitivity
+
+- WSP00/15/22/34/49/50/62/97; C2/I4/D3/Impact3=12/P2. One fixed real-evaluator control passes locally and independently (same case). Fixed target bytes with synthetic cost entries produce cost/margin/ROC1280/780/39:64; changing only one cost produces2060/1560/78:103. Restoring that entry reproduces complete baseline metrics; target bytes and original table keys/object identities remain intact.
+- Production code and existing tests are unchanged. A cohesive39-line evaluator-input sibling avoids growing the996-line lifecycle owner or mixing evaluator arithmetic into the253-line prompt owner. The runner binds13 test/source/import-leaf files; canonical registry current1658/quarantined269. Two disabled-plugin config warnings remain.
+- This qualifies dependency sensitivity, not a bug repair, economic accuracy, authenticated oracle, native RSI or retained learning. Candidate bytes alone cannot identify effective evaluation inputs. No new report field/reader/model/provider call. PR1887 is closed with exact mainCI/CodeQL, merged reviewed tree and owned-lane retirement; current backlog retains authority/owner blockers and fresh selection.
+
 ## 2026-09-23: AutoResearcher attempted-call program identity
 
 - WSP00/15/22/34/49/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing producer/report and focused consumption tests; no new runtime, reader or skill. Each attempted backend call records rendered-text identity, iteration and invocation-wide ordinal. Existing proposal signatures, dry-run valve, exception propagation and restoration remain intact.

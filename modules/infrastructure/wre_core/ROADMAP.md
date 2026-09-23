@@ -1,5 +1,21 @@
 # WRE Core Roadmap
 
+## Evaluator dependency qualification — 2026-09-23
+
+The12/P2 qualification confirms that fixed target bytes can produce different
+scores when a shared cost input changes. One real-evaluator case uses synthetic
+local costs and independently calculated expected cost/margin/ROC, then restores
+the dependency and reproduces the full baseline. Local and independent replays
+pass the same case; original target bytes and table keys/object identities are
+preserved. Source behavior remains unchanged and is not labelled a defect.
+
+This closes the narrow dependency-sensitivity question. Effective oracle and
+workload identity, admitted comparison/consumer binding and independent retention
+remain open in the15/P1 report parent. Do not add an unused hash or equate a target
+or evaluator-file digest with its mutable dependency state. The canonical backlog
+reconciles PR1887 closure and selects the next eligible core runtime prerequisite.
+No native OpenClaw/Hermes/FoundUp activation is implied.
+
 ## Attempted-call program identity — 2026-09-23
 
 The13/P1 change extends the existing AutoResearcher report with per-call rendered
