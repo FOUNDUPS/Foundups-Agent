@@ -1856,109 +1856,68 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "e4b3d37c4f25b596626481a0d87b8c03f320c6f6",
-    "selected_action": "R15-supplier-admission-20260923",
-    "status": "locally_and_independently_repaired_publication_pending",
+    "base_commit": "72faea198760a22072ac14aaf0e21bdc54760737",
+    "selected_action": "R24-proof-verification-contract-20260923",
+    "status": "contract_locally_and_independently_reviewed_publication_pending",
     "wsp15": {
-      "complexity": 2,
-      "importance": 3,
+      "complexity": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 11,
-      "priority": "P2"
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "R15-supplier-admission-20260923",
-    "base": "e4b3d37c4f25b596626481a0d87b8c03f320c6f6",
+    "observation_id": "20260923-rsi-proof-verification-contract",
+    "base": "72faea198760a22072ac14aaf0e21bdc54760737",
     "self": "0102",
-    "role": "architect",
-    "origin": "external_principal",
+    "role": "coordinator",
+    "origin": "internal_handoff",
     "principal_ref": "012",
     "selected": {
-      "task": "Avoid generation supplier acquisition on an independently rejected use-time resolution",
+      "task": "Resolve the persistent FoundUp proof-verification ingress and entitlement-owner contract",
       "wsp15": {
-        "complexity": 2,
-        "importance": 3,
+        "complexity": 3,
+        "importance": 4,
         "deferability": 3,
-        "impact": 3,
-        "total": 11,
-        "priority": "P2"
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
       },
-      "scope": "Qualify internally consistent synthetic control; fixed rejection regressions; existing-owner gate repair only after baseline. No native authority.",
-      "rationale": "Native18/P0, FAM/GotJunk14/P1, PostgreSQL13/P1 and paused lineage12/P2 remain blocked; LinkedIn12 outside current core RSI focus. Supplier11 directly advances use-time before untriggered scanner decomposition.",
-      "effort_cost": "One existing source conditional and same-owner test extension; deterministic local fixture, no paid provider. Needed to avoid downstream acquisition after rejection; runtime blockers cannot be solved by unrelated product builds.",
+      "scope": "Planning-only existing R24/FAM/WRE contracts; explicit missing domain-policy decision. No runtime or schema change.",
+      "rationale": "Native18 blocked by seven anchors/effect lease; FAM14 can close the architectural handoff specification now while issuer remains blocked; GotJunk14 external owner, PostgreSQL13 unadmitted. New persistence qualification12 is a separate next candidate.",
+      "effort_cost": "One bounded existing-document contract with independent source review; no provider/runtime spending.",
       "retrieval": {
-        "noise": "Older incomplete fixture is a negative, not accepted authority; historical characterizations are not the new acceptance oracle.",
-        "ordering": "Actual WSP00/15/97, current roadmap/ownership, module docs/test inventory, actual source and independent design review.",
-        "missing": "No internally consistent positive in current owner; shared fixtures reused unchanged.",
-        "freshness": "Unchanged Holo HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact-source fallback, no CURRENT claim.",
-        "duplication": "Existing resolver/collector/test file only; no new module/skill/registry owner."
+        "noise": "Historical payout mismatch is superseded by PR1851; staged assurance and completed happy-path tests do not prove business authorization or retry safety.",
+        "ordering": "Actual WSP00/15/97, root roadmap, R24, FAM interface/source/tests, WRE finalization/assurance/permission owners, independent review.",
+        "missing": "No named proof.verify domain issuer/delegation or existing persistent verification ingress found. Atomic/reopen coverage exists for payout, not verification.",
+        "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact Git/source fallback at72faea198, no reindex or CURRENT claim.",
+        "duplication": "Extend R24/FAM contracts and existing backlog only; no new module, skill, scheduler or authority schema."
       },
+      "state": "contract_locally_and_independently_reviewed_publication_pending",
       "previous_closed": {
-        "pr": 1888,
-        "merge": "e4b3d37c4f25b596626481a0d87b8c03f320c6f6"
-      },
-      "independent_design_review": "/root/amibot_runtime_audit: recommend reverified and not reasons; preserve signature boolean/diagnostics; synthetic positive plus three independent rejections and old incomplete fixture.",
-      "qualification": {
-        "baseline": "baseline3-tests.xml",
-        "passed": 11,
-        "failed": [
-          "test_rejected_bindings_do_not_acquire_generation[chain]",
-          "test_rejected_bindings_do_not_acquire_generation[work]",
-          "test_rejected_bindings_do_not_acquire_generation[slice]",
-          "test_rejected_bindings_do_not_acquire_generation[incomplete]"
-        ],
-        "initial_fixture_failures_retained": "baseline-tests.xml",
-        "intermediate_baseline": "baseline2-tests.xml"
-      },
-      "repair_selection": {
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 11,
-          "priority": "P2"
-        },
-        "decision": "Real positive has exactly seven remaining anchors; fixed rejection controls fail as predicted. Smallest existing-owner suppression conditional now selected; criteria unchanged.",
-        "implementation": "reverified and not reasons; preserve diagnostic signature truth and absence of effect lease."
-      },
-      "state": "locally_and_independently_repaired_publication_pending"
+        "pr": 1889,
+        "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
+      }
     },
     "previous_closed": {
-      "pr": 1888,
-      "merge": "e4b3d37c4f25b596626481a0d87b8c03f320c6f6",
-      "evidence": "O:/Foundups-Agent-audits/20260923-rsi-evaluator-inputs/final-accounting.json"
+      "pr": 1889,
+      "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
     },
-    "previous_observation": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\previous-observation.json",
+    "previous_observation": "R15-supplier-admission-20260923",
     "retrieval": {
-      "noise": "Older incomplete fixture is a negative, not accepted authority; historical characterizations are not the new acceptance oracle.",
-      "ordering": "Actual WSP00/15/97, current roadmap/ownership, module docs/test inventory, actual source and independent design review.",
-      "missing": "No internally consistent positive in current owner; shared fixtures reused unchanged.",
-      "freshness": "Unchanged Holo HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact-source fallback, no CURRENT claim.",
-      "duplication": "Existing resolver/collector/test file only; no new module/skill/registry owner."
+      "noise": "Historical payout mismatch is superseded by PR1851; staged assurance and completed happy-path tests do not prove business authorization or retry safety.",
+      "ordering": "Actual WSP00/15/97, root roadmap, R24, FAM interface/source/tests, WRE finalization/assurance/permission owners, independent review.",
+      "missing": "No named proof.verify domain issuer/delegation or existing persistent verification ingress found. Atomic/reopen coverage exists for payout, not verification.",
+      "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact Git/source fallback at72faea198, no reindex or CURRENT claim.",
+      "duplication": "Extend R24/FAM contracts and existing backlog only; no new module, skill, scheduler or authority schema."
     },
     "source_bindings": {
-      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "971ca32f215736afe021b4fca7b162f3c66fe41d",
-      "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
-      "modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py": "5b392fef5446f7d6994ac913f5d8d9ff595b4a13",
-      "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py": "0e50607969fc12ab70e45427fc40a6e18c080139",
-      "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py": "2bd3da62131bf761bbf147c558689b5a8b41a2f0",
-      "modules/communication/moltbot_bridge/src/reddog_resident_queue_chain_results_store.py": "84e88635ffdb2e25d226270ebed5e0440900f913",
-      "modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py": "c75ecd480fc2e3be766a297af6317058875741f9",
-      "modules/communication/moltbot_bridge/src/reddog_verified_pattern_memory_sink.py": "35da9daecf3af8c33f055091310af6bceea8d451",
-      "modules/infrastructure/wre_core/src/pattern_memory.py": "e7f0f58cdfd37407725d89d7d6f68203d8471273",
-      "modules/communication/moltbot_bridge/tests/reddog_live_canary_artifact_test_support.py": "1ab6c18ede9f5aae5fc7ce5cf5d75ae5b9f5bf11",
-      "modules/communication/moltbot_bridge/tests/reddog_resident_queue_test_helpers.py": "e2b1b7dbb7bc318619430f435c07bc57751e123e",
-      "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py": "0d8e350aad39a3ff50f885b2fcca71d74429c1d6",
-      "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "6d753e40253d7ea578327e7c56acf3d194f6ab5a",
-      "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "244693ab604874240842c6659f4b611cbfc70a98",
-      "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_use_time_gate.py": "c718b384cbc9b213204fc6f4185fda4d9d35f3da",
-      "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "c5ff1b322a85fecf8e75e5668f1fd78c96629325",
-      "modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py": "34e9f56005b59ac07ec97c8721097e91ca9406e7"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/contract-source-bindings.json",
+      "sha256": "a8c6917c7bf10d06758f929e0ab04a0a833c8d02d903065910ecdd72ac8fbfc8"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -1996,188 +1955,17 @@
       }
     },
     "validation": {
-      "baseline": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\baseline-tests.xml",
-        "cases": [
-          "test_resolver_removes_only_three_verified_generation_blockers",
-          "test_binding_requires_typed_accepted_digest[proof0]",
-          "test_binding_requires_typed_accepted_digest[proof1]",
-          "test_binding_dependency_failure_is_fail_closed",
-          "test_generation_projection_does_not_change_resident_readiness[typed-accepted]",
-          "test_generation_projection_does_not_change_resident_readiness[typed-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[malformed-digest]",
-          "test_generation_projection_does_not_change_resident_readiness[untyped-mapping]",
-          "test_generation_projection_does_not_change_resident_readiness[verifier-exception]",
-          "test_generation_projection_does_not_change_resident_readiness[signed-work-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[clock-exception]",
-          "test_rejected_bindings_do_not_acquire_generation[chain]",
-          "test_rejected_bindings_do_not_acquire_generation[work]",
-          "test_rejected_bindings_do_not_acquire_generation[slice]",
-          "test_rejected_bindings_do_not_acquire_generation[incomplete]"
-        ],
-        "failures": 12,
-        "errors": 0,
-        "skips": 0
-      },
-      "baseline2": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\baseline2-tests.xml",
-        "cases": [
-          "test_resolver_removes_only_three_verified_generation_blockers",
-          "test_binding_requires_typed_accepted_digest[proof0]",
-          "test_binding_requires_typed_accepted_digest[proof1]",
-          "test_binding_dependency_failure_is_fail_closed",
-          "test_generation_projection_does_not_change_resident_readiness[typed-accepted]",
-          "test_generation_projection_does_not_change_resident_readiness[typed-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[malformed-digest]",
-          "test_generation_projection_does_not_change_resident_readiness[untyped-mapping]",
-          "test_generation_projection_does_not_change_resident_readiness[verifier-exception]",
-          "test_generation_projection_does_not_change_resident_readiness[signed-work-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[clock-exception]",
-          "test_rejected_bindings_do_not_acquire_generation[chain]",
-          "test_rejected_bindings_do_not_acquire_generation[work]",
-          "test_rejected_bindings_do_not_acquire_generation[slice]",
-          "test_rejected_bindings_do_not_acquire_generation[incomplete]"
-        ],
-        "failures": 4,
-        "errors": 0,
-        "skips": 0
-      },
-      "baseline3": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\baseline3-tests.xml",
-        "cases": [
-          "test_resolver_removes_only_three_verified_generation_blockers",
-          "test_binding_requires_typed_accepted_digest[proof0]",
-          "test_binding_requires_typed_accepted_digest[proof1]",
-          "test_binding_dependency_failure_is_fail_closed",
-          "test_generation_projection_does_not_change_resident_readiness[typed-accepted]",
-          "test_generation_projection_does_not_change_resident_readiness[typed-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[malformed-digest]",
-          "test_generation_projection_does_not_change_resident_readiness[untyped-mapping]",
-          "test_generation_projection_does_not_change_resident_readiness[verifier-exception]",
-          "test_generation_projection_does_not_change_resident_readiness[signed-work-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[clock-exception]",
-          "test_rejected_bindings_do_not_acquire_generation[chain]",
-          "test_rejected_bindings_do_not_acquire_generation[work]",
-          "test_rejected_bindings_do_not_acquire_generation[slice]",
-          "test_rejected_bindings_do_not_acquire_generation[incomplete]"
-        ],
-        "failures": 4,
-        "errors": 0,
-        "skips": 0
-      },
-      "candidate": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\candidate-tests.xml",
-        "cases": [
-          "test_resolver_removes_only_three_verified_generation_blockers",
-          "test_binding_requires_typed_accepted_digest[proof0]",
-          "test_binding_requires_typed_accepted_digest[proof1]",
-          "test_binding_dependency_failure_is_fail_closed",
-          "test_generation_projection_does_not_change_resident_readiness[typed-accepted]",
-          "test_generation_projection_does_not_change_resident_readiness[typed-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[malformed-digest]",
-          "test_generation_projection_does_not_change_resident_readiness[untyped-mapping]",
-          "test_generation_projection_does_not_change_resident_readiness[verifier-exception]",
-          "test_generation_projection_does_not_change_resident_readiness[signed-work-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[clock-exception]",
-          "test_rejected_bindings_do_not_acquire_generation[chain]",
-          "test_rejected_bindings_do_not_acquire_generation[work]",
-          "test_rejected_bindings_do_not_acquire_generation[slice]",
-          "test_rejected_bindings_do_not_acquire_generation[incomplete]"
-        ],
-        "failures": 0,
-        "errors": 0,
-        "skips": 0
-      },
-      "independent": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\independent-tests.xml",
-        "cases": [
-          "test_resolver_removes_only_three_verified_generation_blockers",
-          "test_binding_requires_typed_accepted_digest[proof0]",
-          "test_binding_requires_typed_accepted_digest[proof1]",
-          "test_binding_dependency_failure_is_fail_closed",
-          "test_generation_projection_does_not_change_resident_readiness[typed-accepted]",
-          "test_generation_projection_does_not_change_resident_readiness[typed-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[malformed-digest]",
-          "test_generation_projection_does_not_change_resident_readiness[untyped-mapping]",
-          "test_generation_projection_does_not_change_resident_readiness[verifier-exception]",
-          "test_generation_projection_does_not_change_resident_readiness[signed-work-rejected]",
-          "test_generation_projection_does_not_change_resident_readiness[clock-exception]",
-          "test_rejected_bindings_do_not_acquire_generation[chain]",
-          "test_rejected_bindings_do_not_acquire_generation[work]",
-          "test_rejected_bindings_do_not_acquire_generation[slice]",
-          "test_rejected_bindings_do_not_acquire_generation[incomplete]"
-        ],
-        "failures": 0,
-        "errors": 0,
-        "skips": 0
-      },
-      "regression": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\regression-tests.xml",
-        "cases": [
-          "modules.communication.moltbot_bridge.tests.test_reddog_governed_execution_valve_production_wiring"
-        ],
-        "failures": 0,
-        "errors": 1,
-        "skips": 0
-      },
-      "regression2": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\regression2-tests.xml",
-        "cases": [
-          "modules.communication.moltbot_bridge.tests.test_reddog_governed_execution_valve_production_wiring"
-        ],
-        "failures": 0,
-        "errors": 1,
-        "skips": 0
-      },
-      "regression3": {
-        "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\regression3-tests.xml",
-        "cases": [
-          "test_exact_current_queue_receipt_is_accepted",
-          "test_current_queue_receipt_substitution_is_rejected[claim_id-claim-substituted-canonical_queue_authority_binding_mismatch:queue_consumer_receipt_digest]",
-          "test_current_queue_receipt_substitution_is_rejected[slice_id-REDDOG_OTHER_SLICE_PHASE1-canonical_queue_authority_binding_mismatch:slice_id]",
-          "test_current_queue_receipt_substitution_is_rejected[progressive_policy_stage_receipt_id-sha256:3333333333333333333333333333333333333333333333333333333333333333-canonical_queue_authority_binding_mismatch:progressive_policy_stage_receipt_id]",
-          "test_current_queue_receipt_substitution_is_rejected[progressive_policy_stage_digest-sha256:4444444444444444444444444444444444444444444444444444444444444444-canonical_queue_authority_binding_mismatch:progressive_policy_stage_digest]",
-          "test_caller_selected_slice_substitution_is_rejected",
-          "test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors",
-          "test_use_time_binding_rejects_base_ref_and_full_work_order_splices"
-        ],
-        "failures": 0,
-        "errors": 0,
-        "skips": 0,
-        "runner": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\run_regression3_tests.py",
-          "sha256": "8ecebead960c1a8e07e9c1c5a63594408b4d225f2804867a47d42d02e0956037"
-        },
-        "dependencies": "C:/Python312/python.exe -I -B, explicit C:/Users/user/AppData/Roaming/Python/Python312/site-packages at sys.path[1] after repository to keep installed pydantic/core and jsonschema consistent. No packages installed; all source/test assertions and guards preserved."
-      },
-      "limits": "15 fixed synthetic-boundary cases independently replayed; 8 existing connected cases. Baseline fixture failure and two regression collection/environment failures retained. No native service/provider, real signer authority, OS sandbox, retained learning or AmIBot launch claim.",
-      "fixture_corrections": "Preserve invalid historical fixture as negative. Local disposable positive refreshes expiry/current queue stage and synthetic runtime-verification refs using existing helper; regenerates valve against new work-state revision. Real validators/collector preserved. No test criteria changed after baseline3.",
-      "runner": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\run_supplier_tests.py",
-      "runner_sha256": "375bc1c1b490275eeab98ead28b48bfa472a8d6c102c44f000c60addcfe7db0d",
-      "packaging": {
-        "manifest_tests": {
-          "passed": 8,
-          "xml": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\manifest-tests.xml"
-        },
-        "backend_manifest": {
-          "runtime_files": 1401,
-          "changed_members": 1,
-          "digest": "c7d2f0bab78522f9437b69e74778e4ccdcc16028999ad8f933b78400da8c88b0",
-          "pins_refreshed": 2
-        },
-        "package_surface": {
-          "passed": true,
-          "files": 67,
-          "raw_bytes": 950440,
-          "content_digest": "sha256:ea5ba70681e82b2e66189e49d94348fbf88085bb7cd6e6a3453867e8434c6d72"
-        },
-        "test_registry": {
-          "current": true,
-          "total": 1658,
-          "quarantined": 269
-        },
-        "owner_check": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\prepublication-owner-check.json"
-      }
+      "scope": "Seven existing documentation files only; no source/schema/test edits",
+      "state": "local_and_independent_documentation_checks_passed",
+      "checks": [
+        "all26 packet definitions preserved",
+        "all31 historical ranked rows retained plus one distinct qualification candidate",
+        "canonical WSP15 score arithmetic and priority bands match",
+        "added local file links resolve",
+        "git diff --check passes"
+      ],
+      "product_tests": "not run; documentation-only",
+      "independent_review": "/root/amibot_runtime_audit approved seven-document scope; three corrections resolved; all26 packets/prior31 rows and full prior observation preserved; no runtime readiness granted."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2244,9 +2032,9 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "source_qualification_complete_implementation_blocked",
+          "state": "contract_specified_domain_policy_blocked",
           "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\next-role-source-audit.json",
-          "next_step": "Resolve named FAM ingress and mapping from existing signed authority to domain actions; do not repeat the completed source audit or introduce role-string authorization"
+          "next_step": "Obtain explicitly delegated proof.verify issuer/scope/independence/revocation policy before integration; R24 records prospective existing-owner handoff. Qualify persistence separately without creating authority."
         },
         {
           "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
@@ -2555,11 +2343,15 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "locally_and_independently_repaired_publication_pending",
+          "state": "closed_merged_PR1889",
           "source": "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py::_reverify_and_bind",
-          "dependency": "Pre-repair signature acceptance triggered collection despite independent binding rejections. Fixed15 cases now pass locally and independently; exact PR/main verification and owned-lane retirement remain. No effect lease or native readiness granted.",
-          "next_step": "Verify exact PR/main checks, retire only owned lane, then re-observe.",
-          "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\independent-invocation.json"
+          "dependency": "Exact reviewed tree merged; all10 PR checks and exact-merge CI/CodeQL passed; owned lane retired.",
+          "next_step": "Do not repeat qualification or repair.",
+          "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\independent-invocation.json",
+          "closure": {
+            "pr": 1889,
+            "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
+          }
         },
         {
           "task": "Qualify canary PatternMemory receipt, canonical readback and context projection with finite disposable evidence",
@@ -2660,49 +2452,70 @@
           "limits": "Qualification only; fixed acceptance criteria, no economic-validity or authenticated-oracle claim. Native effect lease and independent runtime provenance remain blockers.",
           "effort_cost": "Bounded source/import and existing-test review; no external model spend planned.",
           "evidence": "O:/Foundups-Agent-audits/20260923-rsi-evaluator-inputs/final-accounting.json"
+        },
+        {
+          "task": "Qualify persistent proof-verification atomicity and reopen/retry behavior",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "state": "eligible_after_fresh_reobservation",
+          "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+          "next_step": "Freeze and run five explicit disposable SQLite controls in existing owner; independently validate observations before selecting a repair.",
+          "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
+          "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls."
         }
       ],
       "selected_next": {
-        "task": "Resolve the persistent FoundUp proof-verification ingress and entitlement-owner contract",
+        "task": "Qualify persistent proof-verification atomicity and reopen/retry behavior",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 4,
           "deferability": 3,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
         },
-        "state": "contract_decision_required_before_implementation",
-        "source": "modules/foundups/agent_market/INTERFACE.md; existing R24/FAM/WRE owners",
-        "next_step": "Use existing contract locations to propose one named caller of PersistentTaskPipeline.verify_proof, exact foundup/task/proof/action/subject binding, and verifier-entitlement issuer. Independently review that decision before implementation; payout remains separate. Do not repeat the completed generic role/source audit or infer authority from a role string.",
-        "limits": "Planning only, no dispatch/verification/reward authority. If current evidence cannot select the owner, report that explicit decision rather than manufacture admission.",
-        "effort_cost": "One bounded architecture decision within existing owners; no runtime/provider calls or new abstraction."
+        "state": "eligible_after_fresh_reobservation",
+        "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+        "next_step": "Freeze and run five explicit disposable SQLite controls in existing owner; independently validate observations before selecting a repair.",
+        "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
+        "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls."
       },
-      "rationale": "Supplier rejection acquisition is repaired and evaluatorPR1888 closed. Native18 remains blocked by seven anchors/effect lease. FAM14 completed source qualification but lacks the named ingress/entitlement decision; make that decision explicit next, not another qualification. GotJunk14 remains product-owner/deploy blocked; PostgreSQL13 lacks admitted runtime; paused lineage12 untouched; LinkedIn12 remains outside core focus. Existing issuer-to-real-WRE-spine tests mean generic lease mapping would repeat coverage."
+      "rationale": "Contract names the prospective handoff without inventing an issuer. Higher native/domain/owner/backend tasks remain blocked; newly identified persistence controls12/P2 are executable inside core RSI scope; paused lineage and external owners remain untouched."
     },
     "publication": {
       "state": "pending_exact_head_checks_and_merge"
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\entry.json",
-      "open_peer_heads": 94,
-      "shared_checkout_preserved": true,
+      "peer_prs": 94,
+      "changed_peer_heads": 0,
+      "shared_checkout": "preserved unchanged; feat/yumori-economic-impact-model at0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "path_overlap": "Root ModLog only, four peer PRs; append own entry only. R24/FAM selected paths have no overlap.",
       "entry_evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\entry.json",
-        "sha256": "a622f95a1cf4a9335493cd1a9402bdc71c088203896f6bc1e916496acbb98774"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/entry.json",
+        "sha256": "610cf7e23fa02148abc10f011e4c83527ed64c8ae684082a16cde7a456cb5011"
+      },
+      "scope_evidence": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/scope-ownership.json",
+        "sha256": "1780b23a7364da5b0e316b54d57d7af5c1fcf428d3a6284039180f8741bd8110"
       },
       "fresh_evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\prepublication-owner-check.json",
-        "sha256": "b73178512737b74d03b4c76fadf04931c1c8ce6528f98482085b31a7647dc4cf"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/prepublication-owner-check.json",
+        "sha256": "6448e96f83c49264c1d3917671455dc644204e30560380f5b702bcb98b0f4d09"
       }
     },
     "observation_evidence": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\selection.json",
-      "sha256": "be47c890c0545ea4f875bea8fdadeb50990b75c8b81c00a490e622c00561a2d9"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/selection.json",
+      "sha256": "7208c44cdc7801903e34bf944cf3ad846a02bde8c72c4cd3898207f06b51d85b"
     },
     "previous_observation_evidence": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\previous-observation.json",
-      "sha256": "8339ae9a75656e18696dace6176e1b736458c32f6640560269561c3aad226645"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/previous-observation.json",
+      "sha256": "add0c89497fbc04888ca335c8cdfebcab8649822f5cf3fd69e7f726cd6033c49"
     }
   }
 }

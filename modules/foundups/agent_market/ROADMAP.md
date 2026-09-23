@@ -48,6 +48,14 @@ CRUD compression or a duplicate module merely to conceal this debt.
 This repair changes no schema, adds no module and activates no live effect. The
 in-memory completed-payment simulation remains distinct from persistent initiation.
 
+## Persistent proof verification — contract checkpoint 2026-09-23
+
+- [x] Specify existing post-finalization WRE to FAM handoff and exact identity/recovery boundaries in [R24](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-proof-verification-handoff-contract--2026-09-23); planning14/P1, independently source-reviewed.
+- [ ] Qualify five disposable SQLite verification retry/failure controls in the existing persistent compute test owner (12/P2; current witnesses before repair).
+- [ ] Select and independently validate the smallest persistence repair after observing those controls; preserve the adapter no-growth/cohesion boundary above.
+- [ ] Obtain explicit domain issuer/delegation policy before signed verification integration; repository-write and compute access are not verifier entitlement.
+- [ ] Qualify the integrated admitted caller and independent verifier before any native AmIBot/RSI claim. Settlement remains separately admitted.
+
 ## Prototype (Current)
 ### Goal
 Integrate real persistence and one chain adapter while keeping chain-agnostic interface.
