@@ -41,7 +41,7 @@ class RecordingBackend:
 def _observe_evaluations(monkeypatch, researcher, scenario):
     calls = []
 
-    def evaluate(path, *, cost_catalog=None):
+    def evaluate(path, *, cost_catalog=None, comparison_basis=None):
         calls.append(path.read_text(encoding="utf-8"))
         if scenario == "baseline_edit" and len(calls) == 1:
             researcher.program_instructions = CHANGED

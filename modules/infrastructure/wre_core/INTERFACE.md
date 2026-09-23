@@ -49,8 +49,9 @@ receipt versions as historical evidence; do not rewrite them in place.
 ## ROC research evaluator and dry-run producer
 
 `src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
-`load_target_config(path)`, `snapshot_cost_catalog(cost_catalog=None)` and
-`evaluate_target(path, *, cost_catalog=None)`. The loader uses AST literal
+`load_target_config(path)`, `snapshot_cost_catalog(cost_catalog=None)`,
+`snapshot_comparison_basis()` and
+`evaluate_target(path, *, cost_catalog=None, comparison_basis=None)`. The loader uses AST literal
 evaluation; it does not import or execute the target. Metric dictionaries accept
 finite integers/floats with string keys, excluding booleans. Unusable numeric
 maps return empty dictionaries through the existing loader contract.
@@ -147,23 +148,50 @@ Only aggregate totals are validated, not their five source components. The
 calculator accepts the same keyword and owns a copied immutable mapping. Valid
 one-argument evaluator calls still capture current costs independently.
 
-PR1895 preserves the historical observation: identical text accepted when only
-a synthetic cost changed. The repaired loop rejects that case under its frozen
-cost basis. Other mutable ROI/fee/subscription/angel inputs, oracle/environment
-identity, independent correctness and retained benefit remain unqualified.
-No new report field, runtime or retention authority is supplied by this repair.
+PR1895 preserves historical cost-only false acceptance; PR1896 freezes those
+consumed cost values. PR1897 preserves eight historical profile-only false gains
+of five points with unchanged candidate text. The current guard rejects persistent
+profile changes in those cases without changing their metrics or acceptance oracle.
 
-Remaining-profile behavior qualified on 2026-09-23: changing consumed subscription,
-distribution, fee or angel values between evaluations can change ROI and therefore
-fitness while candidate text and captured costs remain identical. Eight synthetic
-actual-loop controls show a five-point apparent gain solely from removing the ROI
-penalty. Reports record this as accepted; it is not evidence of candidate improvement.
-Reverse crossing rejects while logging changed candidate metrics. Exporter rebinding
-is distinct from mutating the imported consumer object, and reassigning a module
-constant does not change a previously bound constructor default. An empty distribution
-uses the inherited live fallback. NaN SATS_PER_USD raises during construction:
-baseline failure aborts; candidate failure is caught as a crashed outcome with cleanup.
-Complete consumed-profile capture or explicit drift rejection is still outstanding.
+Profile drift guard, 2026-09-24: `snapshot_comparison_basis()` returns an immutable
+JSON string of primitive values. It describes ordered effective tier distribution,
+tier presence/prices, subscription margin, angel subscription/OPO inputs and average
+stake default, DEX fee, consumed activity defaults, inherited constructor burn and
+SATS_PER_USD bookkeeping. The basis uses the values imported by the actual consumer
+and definition-bound method defaults. Explicitly overridden subscriber/angel/task
+defaults, unused agent mix/compute margin and unused constructor BTC price are not
+dependencies. A nonempty bound distribution takes precedence over the live global;
+an empty/None default uses the current fallback. Missing tiers differ from zero
+prices, distribution order is preserved, and integer precision is not discarded.
+
+Numeric profile values must be finite integers/floats excluding booleans. This
+validates comparability, not economic bounds or model correctness. Even a finite
+SATS change conservatively rejects bookkeeping drift although the eight returned
+scores may be equal. Missing/invalid profile inputs fail capture. No global values
+are overwritten and no shared economic method is changed.
+
+An invocation captures costs in `cost_capture`, then the profile in
+`comparison_capture`, before incrementing `baseline_evaluations`. Profile capture
+failure aborts with zero evaluator entries through normal report/cleanup handling.
+The same captured string is checked before each evaluator call performs simulation
+and after it returns metrics. A persistent change raises `ValueError` containing
+`comparison basis`; candidate failure records the existing `crashed` outcome,
+blank TSV metrics, unchanged best metrics and scratch rollback. If simulation
+raises, the existing exception path already prevents acceptance. Later invocations
+recapture; separate nested instances do not share a basis.
+
+Only omitted/None `comparison_basis` opts out for legacy direct calls. Explicit
+empty strings, other types or a mismatching string raise; they do not silently
+recapture or disable checks. The string is a local comparison value, not an
+authenticated hash, report receipt or stable public serialization contract.
+Frozen cost values remain a separate input and are not re-read by this guard.
+
+Before/after sampling is not atomic and does not make simulation consume an
+immutable profile. A value changed and restored inside simulation can evade checks;
+the fixed ABA control documents that remaining false gain. Same-instance concurrency
+is unsupported; no broader concurrency, source/oracle authentication, economic
+validity, runtime admission, promotion or retained-learning claim follows. The
+report schema and its independent-verification/retention fields are unchanged.
 
 `proposal_inputs` is separate from finished `history`: a subsequent preparation,
 diff or evaluation interruption can leave an input record without an outcome.

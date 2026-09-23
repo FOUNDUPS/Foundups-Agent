@@ -1,8 +1,32 @@
 # WRE Core Roadmap
 
+## Persistent comparison-profile guard — 2026-09-24
+
+The existing evaluator and dry-run producer reject persistent consumed-profile
+drift before a candidate can advance best metrics. Costs still use a separate
+immutable invocation catalog. The comparison basis preserves effective distribution
+order/membership, current consumer values and actual consumed definition-bound
+defaults. Invalid capture is reported before baseline evaluation; later runs refresh.
+
+All 66 fixed controls pass locally and independently after a 32-pass/34-failure
+pre-change baseline; all 136 existing lifecycle/program cases also pass. There are
+202 unique cases, not 404. The genuine multiplier change still improves the real
+synthetic model. The shared economic calculator is unchanged.
+
+Before/after checks do not freeze consumption: an explicit transient change restored
+inside evaluation still escapes detection. Concurrent evaluation, authenticated
+program/oracle/environment identity and independently retained benefit remain open.
+Do not expand into an immutable-profile rewrite merely because that limitation exists.
+
+Next 14/P1: determine and qualify the intended existing WRE consumer boundary for
+ROC reports before extending oracle identity. Locate an actual accepted/error/cleanup reader and its
+existing WRE evidence contract, or record the missing connection with a smallest
+existing-owner repair. Keep ROC research separate from model AutoResearch and the
+registry-workflow correctness oracle; no parallel framework or runtime authority.
+
 ## Remaining evaluation-profile qualification — 2026-09-23
 
-All 43 fixed evaluator-input cases pass locally and independently: 22 existing
+Historical PR1897 qualification: all 43 fixed cases passed locally and independently: 22 existing
 cost controls plus 21 profile cases. Production source is unchanged. Seven
 isolated subscription/distribution/margin/angel/fee changes and a combined change
 can remove the ROI penalty while target/proposal text and compute results stay
@@ -15,7 +39,7 @@ metrics. Exporter rebinding and reassigned constructor-default globals do not
 behave like actual consumer mutation. Finite SATS_PER_USD does not alter returned
 scores; invalid values can fail construction. Empty distribution uses a live fallback.
 
-Next 15/P1: extend the existing comparison boundary once for all consumed profile
+Historical next step, addressed by the bounded guard above: extend the comparison boundary for consumed profile
 values and catalog membership, including failure inputs and already-bound defaults,
 or explicitly reject drift. Preserve one-argument evaluator and existing keyword
 compatibility, per-invocation isolation and cleanup/report contracts. Freeze repair

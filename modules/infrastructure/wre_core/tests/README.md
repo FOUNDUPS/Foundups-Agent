@@ -1,25 +1,37 @@
-## AutoResearcher remaining evaluation profile
+## AutoResearcher persistent comparison-profile guard
 
-The existing evaluator-input test file now runs 43 cases: 22 unchanged cost cases
-and 21 new profile cases. All pass locally and independently; replays overlap.
-The 18-case actual-loop matrix captures all eight real evaluator outputs and checks
-terminal JSON/TSV/history, equal proposal/baseline digests, source/program restoration,
-planned-only operations and restored global identities. Eight controls reproduce
-ambient-only +5 fitness acceptance. Others cover stable/reverse/membership changes,
-exporter rebinding, bound defaults and finite bookkeeping inputs. Additional cases
-qualify empty-distribution fallback and separate baseline/candidate failure shapes.
+`test_wre_research_evaluator_inputs.py` now has 66 fixed cases: 22 preserved cost
+controls and 44 profile controls. The repair baseline is 32 pass / 34 expected
+failures; the repaired suite and independent replay both pass 66. All 136 existing
+lifecycle/program cases also pass locally and independently: 202 unique cases.
+Regressions only adapt optional-keyword forwarding and the reviewed abrupt-exit stub.
 
-These are characterization assertions, not desired repaired acceptance. New repair
-criteria must explicitly reject environmental-only gains without relaxing valid
-proposal correctness. Fixed synthetic metadata exercises real calculator methods;
-model construction is disabled and no provider/network/subprocess/database call
-occurs. Forty-two caught pytest convenience symlinks and two plugin-config warnings
-remain. Runner status metadata disagrees with fresh scope; cause is unproven and
-receipts are preserved. Source bytes stay unchanged; exact diffs establish scope.
+The actual-loop matrix requires persistent drift to produce a caught crash,
+unchanged best metrics, no accepted gain, blank failed TSV metrics and restoration.
+It preserves eight-field arithmetic, JSON/history/digests and planned-only receipts.
+Added controls cover genuine candidate improvement, ordered/member-aware copied
+bases, invalid explicit bases, pre/post checks, nested/later refresh, all consumed
+method defaults and effective-distribution precedence/fallback. Invalid capture
+must fail before baseline evaluator entry. One deliberately accepted transient
+change-and-restore control documents the ABA limitation; it does not certify RSI.
+
+The synthetic genuine change raises the openclaw multiplier from 2 to 3: spend
+1060, margin 1120, ROC 56/53, total revenue 27170 and ROI margin 170. It is still
+accepted. The same-text persistent profile controls cannot gain five points merely
+by crossing the ROI threshold. Historical characterization remains in PR1897.
+
+The existing external exact-interpreter runner constrains known fixtures with
+isolated scratch, provider construction disabled and two eager simulator package
+initializers isolated. Focused tests use real evaluator/calculator/producer leaves;
+no subprocess/database calls occur. Regression permits exactly three reviewed
+abrupt-exit children with evaluator stubs. Both suites have zero unexpected denials,
+failures, errors or skips; 65/135 caught pytest convenience symlinks and two inherited
+plugin-config warnings per run. These Python hooks are not a native/OS sandbox.
+Exact receipts and source bindings are linked from the canonical RSI backlog.
 
 ## AutoResearcher evaluator inputs and cost snapshots
 
-`test_wre_research_evaluator_inputs.py` contains 22 fixed cost cases within the 43-case combined suite. The original direct
+`test_wre_research_evaluator_inputs.py` contains 22 fixed cost cases within the 66-case combined suite. The original direct
 evaluator sensitivity test stays unchanged. Actual-loop tests require rejection
 of identical text under stable/replaced/mutated/removed cost entries. Additional
 cases cover copied immutable values, real evaluator consumption, invalid/empty
@@ -27,7 +39,7 @@ catalogs, capture failure reporting, added-agent exclusion, later/nested-instanc
 refresh and zero-cost work accounting. PR1895 preserves the old acceptance
 observation; current desired behavior repairs it.
 
-Local and independent22pass after a classified2pass/20fail baseline. The existing
+Historical PR1896 evidence: local and independent22pass after a classified2pass/20fail baseline. The existing
 112lifecycle plus24program cases also pass locally and independently, with only
 keyword-forwarding and explicit child-stub adaptations; assertions are preserved.
 These158unique cases use the existing exact-interpreter external guard, isolated
@@ -38,8 +50,8 @@ economics. All other subprocess/network effects remain denied. No database opens
 
 The initial baseline post-run bookkeeping denial and noisy early Git status are
 preserved in external evidence. Fresh scope/diffs and source byte hashes remain
-the validation basis. Known-fixture Python hooks are not an OS sandbox. Other
-economic assumptions, authenticated oracle/environment identity, native execution
+the validation basis. Known-fixture Python hooks are not an OS sandbox. Immutable consumption,
+authenticated oracle/environment identity, native execution
 and independently retained benefit remain unqualified. Exact receipts are bound
 through the canonical RSI backlog.
 
