@@ -1856,8 +1856,8 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "f017c4f614ba417c71d0fe11d862ae7910faa5c1",
-    "selected_action": "R22-final-receipt-controls-20260923",
+    "base_commit": "25085858ff097f3d45f10fa5199fb70b37ddafda",
+    "selected_action": "R22-pattern-readback-20260923",
     "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
@@ -1871,15 +1871,15 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "utc": "2026-09-22T22:58:38.630655+00:00",
-    "base": "f017c4f614ba417c71d0fe11d862ae7910faa5c1",
+    "utc": "2026-09-23T00:03:04.007641+00:00",
+    "base": "25085858ff097f3d45f10fa5199fb70b37ddafda",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "observation_id": "R22-final-receipt-controls-20260923",
+    "observation_id": "R22-pattern-readback-20260923",
     "selected": {
-      "task": "Extend direct live-proof leaf coverage for existing deferred mutation cases",
+      "task": "Qualify canary PatternMemory receipt, canonical readback and context projection with finite disposable evidence",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1889,20 +1889,26 @@
         "priority": "P1"
       },
       "state": "locally_and_independently_qualified_publication_pending",
-      "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_new_chain_receipt_blockers",
-      "dependency": "Only the final-receipt/preceding-plan sub-scope is qualified by21 fixed cases, including16 new and5 preserved controls; production unchanged. Broader evidence leaves remain separately open.",
-      "next_step": "Publish the reviewed final-receipt test/documentation qualification and verify closure. Do not repeat this sub-scope or describe the broad direct-leaf program as complete; PatternMemory projection and lineage remain separate."
+      "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
+      "dependency": "Only synthetic canary PatternMemory receipt/readback/context projection is qualified by21 fixed cases. Production activation authority, native execution and retained benefit remain separate.",
+      "next_step": "Publish the reviewed test/documentation qualification and verify closure; do not repeat the completed projection matrix or infer authoritative activation from fixture-seeded active rows."
     },
     "previous_closed": {
-      "pr": 1879,
-      "merge": "f017c4f614ba417c71d0fe11d862ae7910faa5c1"
+      "pr": 1880,
+      "merge": "488768704f706d743ad03280cbb29066719471c6"
     },
-    "intervening": [],
+    "intervening": [
+      {
+        "pr": 1881,
+        "merge": "25085858ff097f3d45f10fa5199fb70b37ddafda",
+        "summary": "LinkedIn newsletter research documentation; separate owner, no selected core-source delta"
+      }
+    ],
     "retrieval": {
       "noise": "Historical continuity is not current evidence; narrow source/test/contracts prioritized.",
       "ordering": "WSP00 actual bootstrap, historical read order, WSP15/97, roadmap/dispatch, exact Git/CI/owners, existing source and tests.",
       "missing": "No module requirements.txt or memory/README.md; Tier0 README/INTERFACE present. Native authority unproven. Holo generation unusable at prior exact query.",
-      "staleness": "All63 bound source files match final previous merge; current Git/CI/PR/worktree state refreshed.",
+      "staleness": "All70 bound source files match new main; current Git/CI/PR/worktree state refreshed.",
       "duplication": "Extend existing canary integration test owner; no new module/skill or production source.",
       "holo": "Prior governed query HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; shared HEAD/query host unchanged. Heartbeat forbids repeated unchanged failed probe. No reindex or claim of newly verified authority. Current source/NAVIGATION fallback.",
       "prior_query": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json"
@@ -1911,12 +1917,8 @@
       "open_peer_heads": 93,
       "peer_worktrees": 157,
       "scope_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\scope-owner-check.json",
-        "sha256": "1d6dcd83138c1550cbb6bbd77563eb2a2459ce05b63530ae8a594eeee67802b0"
-      },
-      "planner_store_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\supplement-owner-check.json",
-        "sha256": "fa1863d51125f538affedb6a5e04f2a4b3c0e1b142a2b80ef8eac228067f317a"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\scope-owner-check.json",
+        "sha256": "0a4e4071124c1026c02456f170224183959028ffd2418b0ae69618c1ee5f30c8"
       }
     },
     "source_bindings": {
@@ -1964,7 +1966,7 @@
       "modules/platform_integration/linkedin_agent/__init__.py": "24554d4ddd701ddb4d754b2117b5f842fdd9192d",
       "modules/platform_integration/linkedin_agent/src/__init__.py": "6c331fffb9ef3641e1a0bc6352ed644fc18467a4",
       "modules/platform_integration/linkedin_agent/src/engagement/__init__.py": "c307baba701aa6de53fc3ed6f4a1597c5aac61f3",
-      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "fc356afff0182a00225fb0e39e4368be573cbc00",
+      "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "6d939a243b0a5808935f229f561c2fc4dc3cb815",
       "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
       "modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py": "5b392fef5446f7d6994ac913f5d8d9ff595b4a13",
       "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py": "0e50607969fc12ab70e45427fc40a6e18c080139",
@@ -1985,7 +1987,10 @@
       "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md": "17a7be117ec207e08b7c07e32fc9de5a9875c4c7",
       "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md": "46844bd527c4abf8e46de367998f39bcb43bcf41",
       "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md": "1364165b54eb78dc3e230f316c23a52664e07f5f",
-      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339"
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339",
+      "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "de622b09025e410cc982bba39033413b06943494",
+      "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "677f6b2b05255e18f96ce581a56a0c7831a39d81",
+      "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -2023,64 +2028,64 @@
       }
     },
     "execution_plane": "Ordinary reversible synthetic component qualification; no native execution or authority. Independent verification before publication.",
-    "finding": "Direct final-receipt predicate accepts a canonical synthetic structural control and rejects specific receipt/previous-plan mismatches without input mutation. Outer readiness stays enforced; planner-produced/authenticated execution and durable memory remain separate.",
+    "finding": "Real explicit-path PatternMemory projection accepts synthetic fixture evidence and rejects specific identity/storage/context/stage mismatches. Inputs/logical outcome rows remain unchanged; schema/seed initialization is allowed only in disposableDB. No authorized activation, native execution or retained-learning claim.",
     "validation": {
       "selected_cases": 21,
-      "new_cases": 16,
-      "preserved_selected_cases": 5,
+      "new_cases": 19,
+      "preserved_selected_cases": 2,
       "primary_pass": 21,
       "independent_same_cases_pass": 21,
       "registry": "current1656/quarantined269; unchanged",
       "production": "unchanged",
-      "receipt-test-freeze.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\receipt-test-freeze.json",
-        "sha256": "0bf67aea2d61ea108ace0a0703dacba2670afda6bb321e49ec0090578656e101"
+      "pattern-test-freeze.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\pattern-test-freeze.json",
+        "sha256": "48e26f0a17fa8c3331725e8674b2a8df0815c2d2885065f4f888b07f2e532097"
       },
-      "run_receipt_tests.py": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\run_receipt_tests.py",
-        "sha256": "da37608acf5ec59991459c1e656730edd4e9cf6353754d1e7a4517b2f4c3c3ec"
+      "run_pattern_tests.py": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\run_pattern_tests.py",
+        "sha256": "9b312b08d2aa6d89fe72155ddcd6ed4ca33a16622d0eadd08a40cb61c3fe9a5f"
       },
       "preexecution-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\preexecution-review.json",
-        "sha256": "bea00f04d27c658997907b9647cef7031f123793fc741db0bc8c8b165f72e0ac"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\preexecution-review.json",
+        "sha256": "60177ca87a5ba6303cbcee91095120520044fed49515b45293df30080a953b3f"
       },
       "primary-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\primary-tests.xml",
-        "sha256": "caba46accb49c8d70b30173d236aeeb9532e8b7b8267d8ac3d41d30ff03b1704"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\primary-tests.xml",
+        "sha256": "93dbe1fc3b0297b16e4c07e3bcc6f24bae16b35e08b4dd60dd6a15b60e1c28bd"
       },
       "independent-tests.xml": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\independent-tests.xml",
-        "sha256": "01fa912ae49d59f5f9bd0789305f802338fdb03c9191fb551b6e13e954aece25"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\independent-tests.xml",
+        "sha256": "1d5337e28ac66010759d0791a83ae4757c9c6eb7b23db121b98e5454e9916550"
       },
       "primary-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\primary-invocation.json",
-        "sha256": "304a18144e1eb944da3aa59690a931820b904548213cd8cc72cab55645dda5cb"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\primary-invocation.json",
+        "sha256": "e6a7dc09d8bf47042dd2a9f79fbd16b7b32993c8a616772b7069b6217ee6e6b4"
       },
       "independent-invocation.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\independent-invocation.json",
-        "sha256": "eeb4796a7799f750d2595a49ddda414ca60a6828c5f22200db1adda29afb9ff8"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\independent-invocation.json",
+        "sha256": "9bc428c27f4fd355c82ae49ccf96366f3d0e8a6eff8109e6ff1b20b8d57d0c96"
       },
       "independent-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\independent-review.json",
-        "sha256": "bcc0bfba06f4df5e3c6137b3d254b033ffca4f96a4ad854b1d79ef42dacd7ce7"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\independent-review.json",
+        "sha256": "ea1a2dd1ec5c846b29043e7f0f34cabc3bd668befb82bb37955c8ec3cc7b7c9c"
       },
-      "final-receipt-source-review.json": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\final-receipt-source-review.json",
-        "sha256": "0dc8e188c87715b6ae292dfeef7467943801d08b0e22c9f85045aedfd1c4b145"
+      "pattern-readback-source-review.json": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\pattern-readback-source-review.json",
+        "sha256": "d4fafec84bc1926cdcf8c8e0db30cb114d2357fa7310b98b68ce94ac7e3a9cf7"
       }
     },
     "wsp00_gates": [
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\wsp00-gate.json",
-        "sha256": "76dd9d7136b93353337db850c9981f1bc9fe9354467892ef4e00a267aff471ed"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\wsp00-gate.json",
+        "sha256": "2545ab8bcc333fd1906f201e1d8ce6e9256c084dcca9648860aa1b8ebf089685"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\author-wsp00-gate.json",
-        "sha256": "00d656c3035c71882bee7e9fc66f8203efea5f420732754fdc78fadd0d54ffbd"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\author-wsp00-gate.json",
+        "sha256": "c7f80534cfd0d93f689347f9607b40d0902c022c1c69be286e2de72724f30cc0"
       },
       {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls\\verifier-wsp00-gate.json",
-        "sha256": "71b8730244ba85c8e9ce73fb8b7adc88fea96d8ff1248614f95b9d9bff544f2a"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback\\verifier-wsp00-gate.json",
+        "sha256": "64b14da1c3d20a5eb7a030ec512cedd60e12a8b8444abd1ffbd392cb0f4f7d24"
       }
     ],
     "post_sprint_reobservation": {
@@ -2263,10 +2268,15 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1880",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_new_chain_receipt_blockers",
-          "dependency": "Only the final-receipt/preceding-plan sub-scope is qualified by21 fixed cases, including16 new and5 preserved controls; production unchanged. Broader evidence leaves remain separately open.",
-          "next_step": "Publish the reviewed final-receipt test/documentation qualification and verify closure. Do not repeat this sub-scope or describe the broad direct-leaf program as complete; PatternMemory projection and lineage remain separate."
+          "dependency": "Only the final-receipt/preceding-plan sub-scope is closed: exact reviewed tree merged, all10 PR checks and exact-merge CI/CodeQL passed. PatternMemory/readback and lineage remain separately scoped.",
+          "next_step": "Do not repeat final-receipt qualification; freshly re-score remaining PatternMemory/readback and lineage evidence before selecting the next core action.",
+          "closure": {
+            "pr": 1880,
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1880",
+            "merge": "488768704f706d743ad03280cbb29066719471c6"
+          }
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -2469,14 +2479,29 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "selected_bounded_core_pattern_memory_projection_pending_source_effect_freeze",
+          "state": "locally_and_independently_qualified_publication_pending",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
-          "dependency": "Reuse existing canary evidence and verified sink owners plus existing sink _record/_seed_active fixture patterns. Freeze imports/effects and exact synthetic DB path before execution; no activation capability, authoritative admission, default database, provider or native control callback.",
-          "next_step": "In the existing canary test owner, freeze direct projection controls for a canonical synthetic active row; missing admission/record/digest receipt fields; absent/deleted row; digest or canonical identity mismatch; and digest-valid reidentified wrong work_order_id, slice_name or candidate_head_sha. Reuse canonical record/admission identity producers and the real confined sink readback against explicit disposable SQLite outside the checkout. Assert exact highest_profile_completion_evidence_missing blocker, independent plan/draft/worktree matching and input nonmutation. Preserve existing sink staging tests rather than duplicate them. Fixture seeding is not authorized activation, proof of retained improvement, or native canary completion."
+          "dependency": "Only synthetic canary PatternMemory receipt/readback/context projection is qualified by21 fixed cases. Production activation authority, native execution and retained benefit remain separate.",
+          "next_step": "Publish the reviewed test/documentation qualification and verify closure; do not repeat the completed projection matrix or infer authoritative activation from fixture-seeded active rows."
+        },
+        {
+          "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "selected_bounded_registered_worktree_qualification_pending_source_effect_freeze",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
+          "dependency": "Existing evidence _registered_worktree_head/_valid_git_worktree and existing _git/_create_registered_worktree fixtures only. Fresh owner/source/import/effect review required; Git operates solely on disposable explicit paths under owned evidence. No native control callback, main checkout mutation, provider, clone or staging deletion.",
+          "next_step": "Freeze direct accepted registered external worktree control plus rejected stage, rejected invoke result, missing path, non-Git directory, inside-repository path, separately initialized unregistered repository, and forged matching draft/held-out head controls. Add a distinct draft-versus-held-out head disagreement if needed to isolate expected lineage selection. Call real _worktree_evidence and its actual local Git registry/head readers; assert exact isolated_worktree_evidence_missing or structural acceptance and input nonmutation. Reuse scoped Git init/config/add/commit/worktree add/list/rev-parse. Use fresh fixtures rather than executing old blocked clone/unlink mutators. This proves local evidence consistency, not admitted worker creation or complete native live proof."
         }
       ],
       "selected_next": {
-        "task": "Qualify canary PatternMemory receipt, canonical readback and context projection with finite disposable evidence",
+        "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
         "wsp15": {
           "complexity": 3,
           "importance": 4,
@@ -2485,12 +2510,12 @@
           "total": 13,
           "priority": "P1"
         },
-        "state": "selected_bounded_core_pattern_memory_projection_pending_source_effect_freeze",
-        "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
-        "dependency": "Reuse existing canary evidence and verified sink owners plus existing sink _record/_seed_active fixture patterns. Freeze imports/effects and exact synthetic DB path before execution; no activation capability, authoritative admission, default database, provider or native control callback.",
-        "next_step": "In the existing canary test owner, freeze direct projection controls for a canonical synthetic active row; missing admission/record/digest receipt fields; absent/deleted row; digest or canonical identity mismatch; and digest-valid reidentified wrong work_order_id, slice_name or candidate_head_sha. Reuse canonical record/admission identity producers and the real confined sink readback against explicit disposable SQLite outside the checkout. Assert exact highest_profile_completion_evidence_missing blocker, independent plan/draft/worktree matching and input nonmutation. Preserve existing sink staging tests rather than duplicate them. Fixture seeding is not authorized activation, proof of retained improvement, or native canary completion."
+        "state": "selected_bounded_registered_worktree_qualification_pending_source_effect_freeze",
+        "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
+        "dependency": "Existing evidence _registered_worktree_head/_valid_git_worktree and existing _git/_create_registered_worktree fixtures only. Fresh owner/source/import/effect review required; Git operates solely on disposable explicit paths under owned evidence. No native control callback, main checkout mutation, provider, clone or staging deletion.",
+        "next_step": "Freeze direct accepted registered external worktree control plus rejected stage, rejected invoke result, missing path, non-Git directory, inside-repository path, separately initialized unregistered repository, and forged matching draft/held-out head controls. Add a distinct draft-versus-held-out head disagreement if needed to isolate expected lineage selection. Call real _worktree_evidence and its actual local Git registry/head readers; assert exact isolated_worktree_evidence_missing or structural acceptance and input nonmutation. Reuse scoped Git init/config/add/commit/worktree add/list/rev-parse. Use fresh fixtures rather than executing old blocked clone/unlink mutators. This proves local evidence consistency, not admitted worker creation or complete native live proof."
       },
-      "rationale": "The final-receipt sub-scope is qualified; it does not close the whole leaf-evidence program. The next13/P1 canary PatternMemory projection addresses concrete existing missing-ID/deleted-row/digest-valid-wrong-context integration labels still blocked before mutation. Scoped search found no direct _pattern_memory_evidence or _pattern_record_context_matches tests. Existing sink tests already cover staging and canonical readback, so the smallest remaining step reuses those fixtures for the canary cross-owner decision, rather than re-auditing or changing authority. This core evidence boundary outranks unnecessary supplier acquisition11/P2 and separate LinkedIn12/P2. Native18/FAM14/GotJunk14 and runtime/PostgreSQL13 retain their distinct prerequisites; no runtime grant is inferred.",
+      "rationale": "The synthetic PatternMemory projection is qualified locally and independently. The remaining registered-worktree evidence has seven named integration negatives whose mutations still do not run because readiness blocks _runner, and no direct _worktree_evidence tests in the scoped bridge search. A finite real disposable Git registry/HEAD matrix is the next executable core evidence step13/P1 (C3/I4/D3/Impact3), reusing existing fixtures and scoped runner operations. Pure lineage/draft-only predicates are lower-complexity12/P2; unnecessary generation supplier acquisition remains11/P2. Neither absence of direct tests nor synthetic success justifies native admission. Native18/FAM14/GotJunk14 and runtime/PostgreSQL13 retain distinct prerequisites; separate LinkedIn12 remains lower priority under the current core-RSI objective.",
       "source_bindings": {
         ".github/workflows/ci.yml": "bf5a4b476e438f0272c778879324912a698884f3",
         ".github/workflows/deploy-gotjunk.yml": "f9a43f2ca19bdf9b490455b8190b84966ad68987",
@@ -2512,7 +2537,7 @@
         "modules/communication/moltbot_bridge/tests/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
         "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py": "9a49dbcc112bd33e359171daa0b41ef5ae43ff19",
         "modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py": "7ab28ea29fc5c2bca7814cdea901b8178d843ed4",
-        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "fc356afff0182a00225fb0e39e4368be573cbc00",
+        "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py": "6d939a243b0a5808935f229f561c2fc4dc3cb815",
         "modules/communication/moltbot_bridge/tests/test_reddog_resident_runtime_artifact_readiness.py": "7dc5b3de2fcbb7099eda05291950bf80a59623f0",
         "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py": "0a02f9bf28ea48d1dbebc35f11efd517d6d96416",
         "modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py": "e65ffd3f72a0d2061869e2e149a1fcfe66cbc7fa",
@@ -2561,12 +2586,13 @@
         "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md": "1364165b54eb78dc3e230f316c23a52664e07f5f",
         "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md": "a582b84ff1dae534c10891ab36f6d4b29e25c339",
         "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py": "de622b09025e410cc982bba39033413b06943494",
-        "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "677f6b2b05255e18f96ce581a56a0c7831a39d81"
+        "modules/communication/moltbot_bridge/src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py": "677f6b2b05255e18f96ce581a56a0c7831a39d81",
+        "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "1afce70295d0fdd1a20d69a96a1b7b939ad85089"
       }
     },
     "publication": {
       "state": "pending_exact_review_PR_merge_and_main_checks",
-      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-final-receipt-controls"
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20260923-rsi-pattern-readback"
     }
   }
 }

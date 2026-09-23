@@ -1,17 +1,17 @@
 ## Resident canary evidence reachability — 2026-09-23
 
-PR1877 closed15 callback/chain controls; PR1879 closed11 generation/readiness
-cases. The current final-receipt qualification adds16 direct in-memory cases
-to test_reddog_resident_live_canary_integration.py, with all originals preserved.
-The fixed21-case run includes five earlier callback/chain controls. Local and
-independent runs pass the same cases. A canonical receipt-ID producer and frozen
-plan projections exercise structural success, missing/old/malformed receipts,
-envelope/revision/transition mismatches and preceding-plan preconditions.
-Exact blockers and input nonmutation are asserted. These pure predicates do not
-prove authenticated execution or planner-produced acceptance. Existing outer
-readiness gates remain blocked; PatternMemory readback/lineage cases are separate.
-Source hashes, run receipts and next ranking are in the root RSI backlog.
-No native admission, retained RSI, provider execution or OS sandboxing is claimed.
+PR1877 callback/chain, PR1879 generation/readiness and PR1880 final-receipt
+qualifications are closed at their exact sources. The current PatternMemory
+projection adds19 cases in the existing canary integration test owner, preserving
+all original definitions. The fixed21-case run includes two blocked-callback
+controls; local and independent runs pass the same cases. Existing record/seed
+fixtures, canonical identities and real explicit-path readback cover receipt,
+storage, stage and independently varied plan/draft/worktree context checks.
+Inputs and logical skill_outcomes rows are unchanged; an absent DB stays absent.
+PatternMemory construction can initialize/migrate schema and seed metadata.
+All DB effects use disposable external paths under diagnostic fixture guards.
+Fixture-seeded success is not authorized activation, retained learning or native
+execution. Exact sources, cases, receipts and next ranking are in the RSI backlog.
 
 ## RSI adapter acquisition and LinkedIn previews
 
