@@ -1,3 +1,10 @@
+## 2026-09-22 — Live newsletter archive reconciliation
+
+- Reconciled the three editorial lanes against live LinkedIn and public article read-back: JHR series 7505133867079536640 with two editions, personal ROC series 7448137996484182016 with nine editions, and Foundups - Eat the Startup series 7376428210558808065.
+- Updated each child skill with its verified continuity anchor while retaining fresh verification before editing or publishing. ROC source papers on personal and FOUNDUPS® surfaces remain distinct from ROC newsletter editions.
+- Recorded the Eat the Startup discrepancy between the series-page edition list and individual article newsletter badges rather than forcing one surface to overwrite the other.
+- Updated the existing editorial audit and contract test. No private Google Doc identity, manuscript, message, draft, schedule or subscriber count entered public Git; no LinkedIn content was edited, scheduled or published.
+
 ## 2026-09-23 — Lane-specific research and verification
 
 Added one stable newest-first Google Docs master moshpit per editorial lane, manuscript backlinks and history/session reconciliation. Private operational Doc identities remain outside public Git.
