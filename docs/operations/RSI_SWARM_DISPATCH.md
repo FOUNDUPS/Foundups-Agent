@@ -2,6 +2,18 @@
 
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. The hybrid planning refinement is dated 2026-09-11; earlier runtime observations retain their date. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
 
+## Research-report startup checkpoint — 2026-09-24
+
+The existing WRE startup seam now reads one explicit local report and expected
+baseline identity, producing an unverified diagnostic or unknown. 67 focused cases
+pass locally and independently. See [contract](../../modules/infrastructure/wre_core/INTERFACE.md#advisory-autoresearcher-startup-display)
+and [checkpoint](../../modules/infrastructure/wre_core/ROADMAP.md#advisory-research-display--2026-09-24).
+This closes13/P1 advisory visibility, not retained RSI. The prior14/P1 handoff
+investigation is source-reconciled: admitted verified-publication ratchets do not
+consume raw diagnostic assertions. PR1898 is merged, main-checked and retired.
+Next candidate12/P2 qualifies existing LinkedIn manager results against fake UI
+admission; no live send or second campaign is authorized by this planning record.
+
 ## Recursive repository prioritization and execution
 
 012's 2026-09-14 objective makes this the continuing work-selection rule for RSI:

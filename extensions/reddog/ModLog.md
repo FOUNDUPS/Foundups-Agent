@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-09-24 - WRE research-display backend binding
+
+- First PR1899 CI run35889528743 failed the unchanged backend compatibility contract: the dashboard source was a missed manifest dependency. The failure is retained in the canonical RSI backlog.
+- Regenerated the existing manifest and refreshed both digest pins to `3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618`. Exactly one member hash changed: `modules/infrastructure/wre_core/src/dashboard_alerts.py`. All1,401 members, API/version, caps and other hashes remain unchanged.
+- Local manifest check, eight existing generator tests and the unchanged Node backend contract pass. The67 display/wiring cases and their independent replay remain byte-bound and unchanged. Fresh exact-head CI is required; no installed extension/runtime or live RSI claim. WSP15/22/50/84/97.
+
+
 ## 2026-09-22 - Broker stop-acknowledgment backend binding
 
 - Existing broker member hash and both digest pins refreshed to `baf2e34b1d50a357692339c8489b821ed5f1f2e346c3ac87d0e5c7aa05f32098`; all1,401 members, API/version and caps unchanged.

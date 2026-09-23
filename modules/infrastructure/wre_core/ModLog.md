@@ -1,3 +1,12 @@
+## 2026-09-24: Explicit advisory research evidence at startup
+
+- WSP00/15/22/48/50/62/97, C3/I3/D3/Impact4=13/P1. Extended the existing dashboard and existing main preflight call; no new module, skill, scheduler or source of authority. Main file/function size is unchanged.
+- Explicit local report/baseline selection, bounded read, terminal accounting and age checks; sanitized unverified output. Missing/bad input remains unknown and preserves health enforcement. Independent verification, retained improvements and actual resource usage stay unknown.
+- 67 focused cases pass locally and independently. Independent review caught impossible positive gain without accepted work; two controls now reject it. Two further Windows mixed-slash UNC controls failed before the local-path guard repair and now pass. See tests/TestModLog and INTERFACE for exact limits, pre-change evidence and known-fixture isolation.
+- Prior PR1898 is fully closed. Raw diagnostics do not satisfy the post-publication outcome ratchet. Reconciled that source question rather than duplicating a missing-caller audit; remaining campaign/identity/admission gates remain explicit.
+
+- First PR1899 CI exposed the dashboard's omitted backend-manifest dependency. Refreshed its single member hash and both existing pins; all1,401 members/API/caps unchanged. Manifest check, eight generator tests and unchanged Node contract pass locally. Failure and repair evidence retained; fresh exact-head CI remains required. Existing test README now includes this dependency check.
+
 ## 2026-09-24: AutoResearcher persistent comparison-profile guard
 
 - WSP 00/15/22/48/50/62/97; C3/I4/D4/Impact4 = 15/P1. Extended the existing evaluator and producer once; the shared economic calculator is unchanged. Costs remain frozen per invocation. A separate copied comparison basis samples consumed profile values before and after evaluation and rejects persistent drift before metrics can advance the best candidate.

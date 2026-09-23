@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-24 - Research-display manifest validation
+
+- First PR1899 CI run35889528743 failed the unchanged backend compatibility contract: the dashboard source was a missed manifest dependency. The failure is retained in the canonical RSI backlog.
+- Regenerated the existing manifest and refreshed both digest pins to `3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618`. Exactly one member hash changed: `modules/infrastructure/wre_core/src/dashboard_alerts.py`. All1,401 members, API/version, caps and other hashes remain unchanged.
+- Local manifest check, eight existing generator tests and the unchanged Node backend contract pass. The67 display/wiring cases and their independent replay remain byte-bound and unchanged. Fresh exact-head CI is required; no installed extension/runtime or live RSI claim. WSP15/22/50/84/97.
+
+
 ## 2026-09-20 - Hermes rejection-evidence package validation
 
 - One existing runtime member changed; the 1,400-member manifest and both digest pins now bind `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. Membership, API/version, package caps and safeguard assertions stay unchanged.

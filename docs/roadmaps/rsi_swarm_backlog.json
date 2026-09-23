@@ -1856,168 +1856,364 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "cdd80ef734770f625079dfa0133f2acfad7da36c",
-    "selected_action": "R10-research-profile-guard-20260923",
+    "base_commit": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+    "selected_action": "R10-research-advisory-display-20260924",
     "status": "locally_and_independently_validated_publication_pending",
     "wsp15": {
       "complexity": 3,
-      "importance": 4,
-      "deferability": 4,
+      "importance": 3,
+      "deferability": 3,
       "impact": 4,
-      "total": 15,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-research-profile-guard-20260923",
-    "base": "cdd80ef734770f625079dfa0133f2acfad7da36c",
+    "observation_id": "R10-research-advisory-display-20260924",
+    "base": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
     "self": "0102",
-    "role": "architect/coordinator",
-    "origin": "autonomous_trigger",
+    "role": "architect",
+    "origin": "external_principal",
     "principal_ref": "012",
-    "selected": "Establish one complete consumed-profile boundary for AutoResearcher comparisons",
+    "selected": "Wire advisory AutoResearcher report display into existing WRE startup owner",
+    "wsp15": {
+      "complexity": 3,
+      "importance": 3,
+      "deferability": 3,
+      "impact": 4,
+      "total": 13,
+      "priority": "P1"
+    },
     "previous_closed": {
-      "utc": "2026-09-23T14:28:47.027234+00:00",
-      "pr": 1897,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1897",
-      "merge": "cdd80ef734770f625079dfa0133f2acfad7da36c",
-      "reviewed_head": "468c75830feba877b650b8af25ea3e2a40daec4b",
-      "reviewed_tree": "a2f2836d82afcf336ad55b4d943d1d8b17698bc0",
+      "utc": "2026-09-23T15:28:06.047833+00:00",
+      "pr": 1898,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1898",
+      "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+      "reviewed_head": "a3bdf386ad57ba5bab9b5e1ea37df24c636ecc91",
+      "reviewed_tree": "f420d024c1910a60167f7190629f874ae9736391",
       "merged_tree_matches": true,
       "pr_checks_passed": 10,
       "main_workflows": [
         {
           "conclusion": "success",
-          "createdAt": "2026-09-23T14:16:17Z",
-          "databaseId": 35872948326,
-          "headSha": "cdd80ef734770f625079dfa0133f2acfad7da36c",
+          "createdAt": "2026-09-23T15:19:22Z",
+          "databaseId": 35880681641,
+          "headSha": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
           "status": "completed",
-          "updatedAt": "2026-09-23T14:20:02Z",
+          "updatedAt": "2026-09-23T15:23:16Z",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35880681641",
           "workflowName": "CI"
         },
         {
           "conclusion": "success",
-          "createdAt": "2026-09-23T14:16:16Z",
-          "databaseId": 35872947066,
-          "headSha": "cdd80ef734770f625079dfa0133f2acfad7da36c",
+          "createdAt": "2026-09-23T15:19:21Z",
+          "databaseId": 35880680300,
+          "headSha": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
           "status": "completed",
-          "updatedAt": "2026-09-23T14:27:10Z",
+          "updatedAt": "2026-09-23T15:27:01Z",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/35880680300",
           "workflowName": "CodeQL"
         }
       ],
-      "validation": "43 fixed cases passed locally and independently:22 preserved cost and21 profile cases; eight ambient-only false acceptances qualified; no production changes or errors/skips",
+      "validation": "66 fixed cases passed after32pass/34fail baseline;136 regressions passed; same202unique cases independently replayed. Persistent drift repair with genuine improvement control; no errors/skips/unexpected denials.",
       "owned_lane_retired": true,
       "remote_branch_absent": true,
       "shared_unchanged": true,
       "paused_lane": "agent/rsi-lineage-draft-20260923 preserved; independent review still blocked",
       "next_action": {
-        "task": "Establish one complete consumed-profile boundary for AutoResearcher comparisons",
+        "task": "Determine and qualify the intended existing WRE diagnostic/outcome consumer boundary for ROC reports",
         "wsp15": {
           "complexity": 3,
           "importance": 4,
-          "deferability": 4,
+          "deferability": 3,
           "impact": 4,
-          "total": 15,
+          "total": 14,
           "priority": "P1"
         },
         "state": "eligible_after_fresh_owner_and_effect_review",
-        "source": "Existing wre_research_evaluator.py, wre_auto_researcher.py and unified_sustainability.py owners",
-        "dependency": "Profile drift is observed in actual-loop fixed fixtures; must preserve cost snapshot and current direct-call/report contracts. No new runtime authority.",
-        "next_step": "Before code changes, freeze desired same-text/no-environmental-gain criteria across consumed values, membership, imported bindings, bound defaults and failure inputs. Compare immutable invocation profile with explicit drift rejection; extend existing owners once, validate refresh/isolation and invalid/empty settings without live fallback.",
-        "effort_cost": "Moderate shared-source/interface repair and independent regression; no paid model required. D4: observed false improvement blocks trusting next research comparison.",
-        "limits": "Local deterministic comparison only; no economic-validity, oracle authentication, native execution, promotion or retained-learning claim.",
-        "qualification": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\independent-review.json",
-          "sha256": "246269b95a2cd6de67970d04a8c044f5b2644329bcc4b1abf80dce6bc89b9c5e",
-          "state": "actual_profile_drift_qualified_not_repaired"
+        "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
+        "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
+        "next_step": "Re-observe fresh owners; trace existing authorized ratchet invocation and diagnostic consumers, then freeze applicable negative raw-report/non-authority cases in existing tests only if there is a real owner/call binding. If absent, reconcile current canonical docs and mark the missing adapter/dependency without creating an unused consumer.",
+        "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
+        "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
+        "independent_preparation_review": {
+          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-action-review.json",
+          "sha256": "ec7291721f8977819c564d1141dbece16826e88a621785eb045ca6ccb88387d7"
         },
-        "preparation": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-preparation.md",
-          "sha256": "65349b3e6ff3cdd5662783e10acda39b3c4b69016e323caf337eb7b9911f87c7",
-          "state": "source_only_not_implemented"
+        "alternatives": [
+          {
+            "task": "Immutable profile consumption",
+            "decision": "defer automatic rewrite; retain ABA limit until actual admitted workload requires stronger isolation"
+          },
+          {
+            "task": "Parent program/oracle/environment identity",
+            "decision": "qualify at intended consumer; avoid another disconnected hash or unused API"
+          },
+          {
+            "task": "LinkedIn manager-result qualification12/P2",
+            "decision": "executable adjacent fallback after core selection, subject to fresh ownership"
+          },
+          {
+            "task": "Parity diagnostics12/P2",
+            "decision": "consumer not bound; avoid unconsumed receipt API"
+          },
+          {
+            "task": "Native admitted ticket18/P0",
+            "decision": "blocked by existing trust/effect prerequisites; do not bypass"
+          }
+        ],
+        "handoff_preparation": {
+          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-preparation.md",
+          "sha256": "f85a68db4ff155ab9d9a286c4f06d3508cb363c8c2b376fd2470286770ca0b8d",
+          "state": "source_only_not_an_executed_second_sprint"
         },
-        "architecture_review": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-preparation-review.json",
-          "sha256": "7a8d6995f85e505d9968c96de4f56ad25f149375d815570df465c3559cb508c3",
-          "recommended_option": "explicit drift rejection; immutable consumption/concurrency remain out of scope"
+        "handoff_review": {
+          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-review.json",
+          "sha256": "b000772daa0807a2f1ddda747bc9250cf8e25ca80568dab36138c54c81201615"
         },
-        "oracle_preparation_review": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-oracle-review.json",
-          "sha256": "f0b598cea756a1036781ad3a158af2d5d6f2375b07c58ac03632e21a179870cc",
-          "state": "positive_control_arithmetic_qualified_no_product_test"
-        }
+        "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted."
       },
-      "limits": "Remaining economic profile drift qualified but not repaired. Complete comparison boundary, oracle identity, economic validity, native RSI and retained learning remain open.",
-      "timing_observation": {
-        "local_test_phase_seconds": {
-          "baseline": 1.796681,
-          "independent": 1.791862
+      "limits": "Persistent sampled drift guard only; ABA/immutable consumption/concurrency, authenticated oracle identity, economic validity, native RSI and retained benefit remain open.",
+      "experiment_metrics": {
+        "unique_cases": 202,
+        "phase_runs_overlap": true,
+        "phases": {
+          "baseline": {
+            "counts": {
+              "tests": 66,
+              "failures": 34,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 32
+            },
+            "test_phase_wall_seconds": 2.922111,
+            "permitted_abrupt_exit_children": 0,
+            "unexpected_denials": 0,
+            "database_opens": 0
+          },
+          "candidate": {
+            "counts": {
+              "tests": 66,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 66
+            },
+            "test_phase_wall_seconds": 2.179221,
+            "permitted_abrupt_exit_children": 0,
+            "unexpected_denials": 0,
+            "database_opens": 0
+          },
+          "candidate-final": {
+            "counts": {
+              "tests": 66,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 66
+            },
+            "test_phase_wall_seconds": 2.12594,
+            "permitted_abrupt_exit_children": 0,
+            "unexpected_denials": 0,
+            "database_opens": 0
+          },
+          "regression": {
+            "counts": {
+              "tests": 136,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 136
+            },
+            "test_phase_wall_seconds": 6.165023,
+            "permitted_abrupt_exit_children": 3,
+            "unexpected_denials": 0,
+            "database_opens": 0
+          },
+          "independent": {
+            "counts": {
+              "tests": 66,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 66
+            },
+            "test_phase_wall_seconds": 2.093233,
+            "permitted_abrupt_exit_children": 0,
+            "unexpected_denials": 0,
+            "database_opens": 0
+          },
+          "independent-regression": {
+            "counts": {
+              "tests": 136,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 136
+            },
+            "test_phase_wall_seconds": 5.644978,
+            "permitted_abrupt_exit_children": 3,
+            "unexpected_denials": 0,
+            "database_opens": 0
+          }
         },
-        "main_workflow_created_to_updated_seconds": {
-          "CI": 225.0,
-          "CodeQL": 654.0
-        },
-        "interpretation": "Observed elapsed intervals, not CPU time, token cost or new RSI cycles. Existing required scans dominate wall time; retain required checks and consider coherent repair scope before publication.",
-        "model_token_cost": "unavailable"
+        "native_openclaw_jobs": 0,
+        "native_hermes_jobs": 0,
+        "application_provider_calls_in_tests": 0,
+        "host_model_tokens": null,
+        "host_model_cost": null,
+        "implementation": "Coordinator implementation with independent peer source review and local replay; not an admitted native agent production experiment."
       }
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\previous-observation.json",
-      "sha256": "042b4b08af16ca8cb2dc80f720adcc1f3648ed6bb582f28108d7ad6027357f9a"
+      "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\observation.json",
+      "sha256": "4f05f6170f50da9212d9f29b3b99803f7f5e44613e1b7554b8ac12bc481a08f8"
     },
     "retrieval": {
-      "primary": "Governed Holo existing failure reused at unchanged authority/host scope; no reindex or repeated failed probe. Exact current-main Git fallback.",
-      "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+      "primary": "Governed Holo failure reused at unchanged authority/host source; exact-main Git fallback.",
       "failure_receipt": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json",
+      "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
       "freshness": "UNKNOWN",
-      "noise": "Narrow existing evaluator/producer/economics owner; avoid whole-repo dump",
-      "ordering": "WSP00/15/97 then canonical roadmaps, module contracts, test/source",
-      "missing": "module memory/README.md absent; no test fixture import gap assumed",
-      "staleness": "Main and94peer heads refreshed; prior source preparation bound to identical merged blobs",
-      "duplication": "Reuse existing evaluator-input tests and qualified runner; no new runtime/module/skill"
+      "noise": "Narrow current handoff/display/outcome contracts; avoid repeating caller-absence audit.",
+      "ordering": "WSP00/15/97 and closure/ownership, canonical selection, module contracts then actual invocation/source.",
+      "missing": "No qualified ROC-report production consumer demonstrated; module memory/README absent at prior exact source.",
+      "staleness": "Main/shared/94peer heads and mainCI refreshed; existing prep reused only against unchanged source blobs.",
+      "duplication": "Known missing generic ROC caller is not new work. Qualify exact handoff suitability or close known dependency and rescore."
+    },
+    "allocation": {
+      "score": {
+        "complexity": 3,
+        "importance": 3,
+        "deferability": 3,
+        "impact": 4,
+        "total": 13,
+        "priority": "P1"
+      },
+      "scope": [
+        "main.py",
+        "modules/infrastructure/wre_core/src/dashboard_alerts.py",
+        "modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py",
+        "modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py",
+        "ROADMAP.md",
+        "docs/operations/RSI_SWARM_DISPATCH.md",
+        "docs/roadmaps/rsi_swarm_backlog.json",
+        "ModLog.md",
+        "modules/infrastructure/wre_core/ROADMAP.md",
+        "modules/infrastructure/wre_core/INTERFACE.md",
+        "modules/infrastructure/wre_core/README.md",
+        "modules/infrastructure/wre_core/ModLog.md",
+        "modules/infrastructure/wre_core/tests/README.md",
+        "modules/infrastructure/wre_core/tests/TestModLog.md",
+        "modules/ai_intelligence/ai_overseer/tests/TestModLog.md"
+      ],
+      "budget": {
+        "workers": 1,
+        "independent_reviewers": 1,
+        "provider_spend": 0,
+        "autonomous_research_cycles": 0
+      },
+      "verification": "Focused existing dashboard/export and exact startup function bodies; fail closed on unexplained effects; no full menu import/live runtime"
+    },
+    "dialectic": {
+      "simplest": "Advisory explicit report read at existing display seam",
+      "competing": "Raw report to retained-outcome ratchet rejected: missing admitted work/verifier/publication authority",
+      "weakest_assumption": "Report self-declared completion and copied mtime do not prove benefit, runtime identity or freshness",
+      "reuse": "Existing dashboard/parser location, startup preflight and existing tests; no new module/skill/scheduler",
+      "manual_reason": "Existing Qwen/Gemma routes do not adjudicate exact reader/trust contracts; direct architecture work plus independent review has lower bounded cost"
+    },
+    "validation": {
+      "unique_cases": 67,
+      "baseline_original": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\baseline-final\\receipt.json",
+        "sha256": "ca81b52a7410e6a14f2d9463d069bdfb5a02d16ca18e7456a782ffe6e460d775"
+      },
+      "independent_finding": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-review.json",
+        "sha256": "54a3da965f4e4a42c13eb82f317af8eae0d8e1bfa24e46fbbd9b747432984ae8"
+      },
+      "baseline_added_controls": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\baseline-acceptance\\receipt.json",
+        "sha256": "bd17dc206756281c2c975c5e950f04173c6d530fa889eb9d513d00ed821b821c"
+      },
+      "candidate": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\candidate-local-path\\receipt.json",
+        "sha256": "49254b79b0cbb9859be4562d8e061c5d5e4719dd853e4112b74490012c22b962"
+      },
+      "independent": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-local-path\\receipt.json",
+        "sha256": "a114161aebef36848307ce0df11d11333b0d2237b33280857a2839b90a37dfcc"
+      },
+      "independent_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-local-path-review.json",
+        "sha256": "362e725118fd97f023deddc2ee91fc1e8e41f9bd0c2d4eab22496814db9746e2"
+      },
+      "test_freeze": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\test-freeze-local-path.json",
+        "sha256": "7fca05e942d9cade56de92b8565f457c573705cd37d8497060d87c9849f7422b"
+      },
+      "limits": "Exact startup function bodies and real dashboard leaves; no full main import/menu, native worker, provider, retained learning or authenticated report freshness.",
+      "baseline_path_controls": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\baseline-local-path\\receipt.json",
+        "sha256": "541fd380a9a60074f75d17957bf5c5d7b75a8c7257a57231143b28673fa08567"
+      },
+      "prior_accounting_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-final-review.json",
+        "sha256": "406a8fccf6bbc3a43c7cc1cac87b8b02063efcd95ec88ab6184886128aad4488"
+      },
+      "backend_binding": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\binding-validation.json",
+        "sha256": "7c10a0b0edfa704955677c0a7fcfec4f878e1489ae02c39a05e684bfde6dd602",
+        "generator_cases": 8,
+        "unchanged_node_contract": "passed",
+        "generator_check": "passed"
+      }
+    },
+    "owner_reconciliation": {
+      "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\peer-files.json",
+      "sha256": "956efbcbfe739bbafea9292d98066958247f2d1faceae468f0a6c0c6a4d48e2e"
     },
     "source_bindings": {
+      "modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py": {
+        "raw_sha256": "eb38666a3abab73e8d3360fd2fbb9be75d67cf7326380f2198eb22db7dc1125c",
+        "lf_sha256": "79494971775e266b474daa519cde5be648ab2ac706bb03cc4466088222ad4e6e",
+        "git_blob_lf": "17b42b5ed84cad5201f950687687c6418c9e866f"
+      },
+      "modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py": {
+        "raw_sha256": "c5d1700e9fbb013523f1462f6d87e7688b135c6132d55cc295aeb03e82c89aa6",
+        "lf_sha256": "c39447268fdd2f3cc2ebf69f13c68907eca796426fc5b8f8a683dd411870a003",
+        "git_blob_lf": "ef7d7d8adb5ae8069ae0fceb2a4bc653c2666505"
+      },
+      "main.py": {
+        "raw_sha256": "1fd9f841902bf83cffec931e60ebfb312666b7de14911d19c1a587c04360177d",
+        "lf_sha256": "c06f5008088aeb19f3ee206844da08cdac0c186187dc6e7cfc909c02c4ca5a96",
+        "git_blob_lf": "0b2275ce8774bfc3725cffb0ebd3d321dad7f8b3"
+      },
+      "modules/infrastructure/wre_core/src/dashboard_alerts.py": {
+        "raw_sha256": "ba8fbca08d627347bd10d667312ec761d6bb5f37dbbec2dd5d55d356e61fc526",
+        "lf_sha256": "5b894fc0ae5d74778ed4b1e8adb0465200bd608373dce6367e689ff350536d7f",
+        "git_blob_lf": "0d5c1d46fd77ce478513170bdd69ed2396978796"
+      },
+      "modules/infrastructure/wre_core/src/dashboard_snapshot_export.py": {
+        "raw_sha256": "35d1df2f736138a2b6b80fb6f4201da1bf551ed625c35d5f31857b2974afb5e4",
+        "lf_sha256": "ae485758ca98bf2b621e6df94412c2cc6c16ed7a6803b3bdb0da49791b5602df",
+        "git_blob_lf": "25884e8f2658041f520b96fa1b768f22c419c0c0"
+      },
+      "modules/ai_intelligence/ai_overseer/src/preflight_resolution.py": {
+        "raw_sha256": "23588013e2a9d10dbde7bfc3667cd0617a708d6925ac37d9cbc11921bd1780db",
+        "lf_sha256": "8364ba5a398a2edcbe577d16f6bb01c79b232fd98a6407571c1026e5077a2cc7",
+        "git_blob_lf": "1654d2a5147863c8bd5af560222ce873a993a0bd"
+      },
+      "modules/ai_intelligence/ai_overseer/tests/conftest.py": {
+        "raw_sha256": "7c3d715c8c1befd0dafa3db0abbd930a2bca836c580772efd22b1162a0d4f210",
+        "lf_sha256": "7c16eaaa16225237dbbddd1aa43b871147d6f4b13c529e54221488ed6bafe193",
+        "git_blob_lf": "5974ceb67f3710665a8853a3abfe193a31821e34"
+      },
       "modules/__init__.py": {
         "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "lf_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "git_blob_lf": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
-      },
-      "modules/foundups/simulator/economics/agent_compute_costs.py": {
-        "raw_sha256": "3b7d83a9aa32f09d223131c2a67803f6ab1a814d8c26f42330b68b9f8c509863",
-        "lf_sha256": "c7f02b7a9625cd5a3c44febb5dbdc517bd086fd7405f35f123d039fb9002b7af",
-        "git_blob_lf": "dba28a360ce80c76e340c5e3af5c1575fb48c9b5"
-      },
-      "modules/foundups/simulator/economics/fee_revenue_tracker.py": {
-        "raw_sha256": "763d13fdf4b6b94b8dfd0b0c556de6012f2819687045d762709ebf0b57b53bd1",
-        "lf_sha256": "237dfbbc161c77cc03847a55e2a49fe71c7872521b7fb4cbe4ff861ead45705b",
-        "git_blob_lf": "7dcaf9facc7ec4fc9168ca16a40282030d2b826a"
-      },
-      "modules/foundups/simulator/economics/market_stress.py": {
-        "raw_sha256": "72b43dbf2d72ec0bf5bcd97a6c23e4f24a4c9e11bced8b497ce04a479882877b",
-        "lf_sha256": "35ce4f8695e3ea96b65aa7407aa129ad0f9e463efccd1f1aff317469940ddc56",
-        "git_blob_lf": "0293fd19646999c5549debe7f2a83175a05875dc"
-      },
-      "modules/foundups/simulator/economics/subscription_tiers.py": {
-        "raw_sha256": "47ff70984eee1457fd0ad8cdc64551c2ac004195dce8865b0db273ff4e3c1e4c",
-        "lf_sha256": "821e54077d5bd664dfc183f38752dcdc8067cca384a37d0b23f77a5f667d4b63",
-        "git_blob_lf": "b25936bd920990330ebd250383817f6b28a51971"
-      },
-      "modules/foundups/simulator/economics/sustainability_scenarios.py": {
-        "raw_sha256": "7be960ea754d548bd6b4da8741eb481e121c21ea2d8a752f3e19171967ea5fbc",
-        "lf_sha256": "5091781cc858142a4b9c470d4e61c24e4fe3af6601974dfc9a5d575f3d714896",
-        "git_blob_lf": "60683d9b86b6689d0d7ba1e7ad55f43bf87b1f56"
-      },
-      "modules/foundups/simulator/economics/unified_sustainability.py": {
-        "raw_sha256": "dee01069de1c2f4ea00cecda69811c38fe7cd8928946f9b83cc9bbb9d417abe0",
-        "lf_sha256": "3288f9e1838a7e5e7ff883da93e77a9b146a6495ea12ef5e7a5648f5d1187b75",
-        "git_blob_lf": "c19bcb04fa91dcd0000724e223e805c640e4f4be"
-      },
-      "modules/infrastructure/shared_utilities/ai_engine_singletons.py": {
-        "raw_sha256": "df5524cf34832ab1e8b4d7a9f0c9d3ae8d43747112d4269973b0824abd05f330",
-        "lf_sha256": "ac3e5e15fe22e563173e8784efd66d79de7c4d8c8f42fa5275ef0387a537eaab",
-        "git_blob_lf": "8766fc76602bbd87257d9f31d84651e253da895e"
       },
       "modules/infrastructure/wre_core/__init__.py": {
         "raw_sha256": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
@@ -2028,101 +2224,16 @@
         "raw_sha256": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
         "lf_sha256": "e416e549da20d918b4fcb91d9b8cb0df5cece68ef149a3edc019175dc5da50de",
         "git_blob_lf": "a5a91280e64cebb077cc8a51cf7d78f4c3a00ed0"
-      },
-      "modules/infrastructure/wre_core/src/wre_auto_researcher.py": {
-        "raw_sha256": "335e068dba82130a9a778d232a5e416030ba4c8bc54368e672fec928fc3e3491",
-        "lf_sha256": "6c23ed30bbc1db71a6bff682540fc95598c0641dcd5881450bed1f7935a0335e",
-        "git_blob_lf": "1eabf57d8edb9ec40c6c13a35ecc22f3bac10962"
-      },
-      "modules/infrastructure/wre_core/src/wre_research_evaluator.py": {
-        "raw_sha256": "889cee4e8200457d9b02ff877c27c547f6246470c14379e3e9c30b564bf73513",
-        "lf_sha256": "28d4569ff72d841a8f7c2cb6ff1e593ff876f3be7535b14b950ae93eb79dedae",
-        "git_blob_lf": "67e6b608191b7e0a8f527a22152eb8c27a3eb0f6"
-      },
-      "modules/infrastructure/wre_core/tests/__init__.py": {
-        "raw_sha256": "0ddaa768308a8536b7c74689d85bdf3eced859d4f1f73b71053bf328a6a5dcdf",
-        "lf_sha256": "0cf83db1e00a52babc8dd8d2ef1dd616692bf45e3eda5ee3dc41c1552ad61b3d",
-        "git_blob_lf": "4b631380fa0f954a8133b1f8a418d7900ce57e8d"
-      },
-      "modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py": {
-        "raw_sha256": "2903a97d5ce7c62cb2f114c3b2872ce7b872d34705a71807f2086bd9b7e2137d",
-        "lf_sha256": "2903a97d5ce7c62cb2f114c3b2872ce7b872d34705a71807f2086bd9b7e2137d",
-        "git_blob_lf": "8a70ab7644789e184175d8368f62db51065e7a97"
-      },
-      "modules/infrastructure/wre_core/tests/test_wre_research_evaluator_inputs.py": {
-        "raw_sha256": "02cdef8e61260c1769937c1b49dbd3cdd139d37b600b71ab08ac4010247de4bf",
-        "lf_sha256": "02cdef8e61260c1769937c1b49dbd3cdd139d37b600b71ab08ac4010247de4bf",
-        "git_blob_lf": "7346e72bd2dee356670aee72276cd9b136a6f59f"
-      },
-      "modules/infrastructure/wre_core/tests/test_wre_research_program_consumption.py": {
-        "raw_sha256": "ae8f542b73638c740ace0ed175843671e2f7ed64035148d4b9525aa3b20fcda3",
-        "lf_sha256": "ae8f542b73638c740ace0ed175843671e2f7ed64035148d4b9525aa3b20fcda3",
-        "git_blob_lf": "c2be27e1ffd19901ed7231b7af4ec89b1dc6b2ef"
       }
     },
-    "validation": {
-      "receipts": {
-        "baseline": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\baseline\\receipt.json",
-          "sha256": "e8fb8222acde1b287ca298d383ec36ccf7c780f0ad806dfe4817b867e9633cf5"
-        },
-        "candidate": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\candidate\\receipt.json",
-          "sha256": "8a10bd773e0ed5290a607c9fcd1307bfc171cb706d3697d0cc06e03c0370b667"
-        },
-        "candidate-final": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\candidate-final\\receipt.json",
-          "sha256": "9f7048641122ea78c1313758cc749fd366e41f834e5b0a151ec1f9ee3c1f2a6b"
-        },
-        "regression": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\regression\\receipt.json",
-          "sha256": "88cc20631bd1a47e848b2a160ac38d753ceff9d091aa4285ea53efd1238004b5"
-        },
-        "independent": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\independent\\receipt.json",
-          "sha256": "b5b15fb9278a19fd22ea2c82a59ae2749dde5494f50f34af861c0e8cb20d0400"
-        },
-        "independent-regression": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\independent-regression\\receipt.json",
-          "sha256": "4174fb58e8dd956b5b9fe0af90aaca899c794018b8b45302dfd20683e9e2bf38"
-        }
-      },
-      "independent_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\independent-review.json",
-        "sha256": "e72ba8fda60bc13a2505eec8d9f6f9ab081e461c734462f17d94bb1f58a59115"
-      },
-      "preflight_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\test-preflight-review-v2.json",
-        "sha256": "4a0993317c29de328919d6d0d0e473cf6f9263a4234f8503d96635579667ef97"
-      },
-      "freeze": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\test-freeze.json",
-        "sha256": "01c23ac24c09aaa28ce10f0a1335d632b1d6490d33f206e1e796ac59016e6130"
-      },
-      "regression_freeze": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\regression-freeze.json",
-        "sha256": "f547a5c972ca240e24d5b9b218ba3a3ddbe8b3254e0eeb99ea3e8c1292158414"
-      },
-      "unique_cases": 202,
-      "focused_cases": 66,
-      "regression_cases": 136,
-      "baseline_passed": 32,
-      "baseline_failed": 34,
-      "overlapping_replays": true,
-      "limits": "Known-fixture Python guard; persistent drift rejection only. ABA, immutable consumption, concurrency, authenticated identity, native execution and retained benefit unproven."
-    },
-    "owner_reconciliation": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\scope-ownership.json",
-      "sha256": "1cdeba2ff1a07a0f3444a94058d95fd6bcab2aeaaaa487d80a0edc3404a5b365"
-    },
-    "observation_evidence": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\entry.json",
-      "sha256": "d2ecf6fd0e394edd741533b0a2d082265473b6674ad7771a33daa42e6a099a44"
-    },
     "publication": {
-      "state": "pending",
-      "head": null,
-      "pr": null
+      "state": "PR1899_open_initial_CI_failed_binding_repaired_pending_fresh_exact_head_checks",
+      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json",
+      "pr": 1899,
+      "first_head": "a470d262d041971efd4fbdf47cba23a511ffd882",
+      "first_failed_ci_run": 35889528743,
+      "failure": "Unchanged backend compatibility contract caught omitted dashboard manifest binding.",
+      "repair": "Exactly one runtime member hash and two digest pins; topology/API/caps unchanged. Local original contract and generator validation pass."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2789,7 +2900,7 @@
             "total": 15,
             "priority": "P1"
           },
-          "state": "locally_and_independently_validated_publication_pending",
+          "state": "closed_merged_PR1898",
           "source": "Existing wre_research_evaluator.py, wre_auto_researcher.py and unified_sustainability.py owners",
           "dependency": "66 fixed plus136 regression cases pass locally and independently; exact-head publication and closure pending.",
           "next_step": "Close exact-head publication and main checks; re-observe consumer/evidence boundary without assuming the prior second task wins.",
@@ -2815,7 +2926,12 @@
             "sha256": "f0b598cea756a1036781ad3a158af2d5d6f2375b07c58ac03632e21a179870cc",
             "state": "positive_control_arithmetic_qualified_no_product_test"
           },
-          "result": "Persistent consumed-profile drift rejects; genuine improvement passes. Explicit ABA case remains a limit, not immutable execution."
+          "result": "Persistent consumed-profile drift rejects; genuine improvement passes. Explicit ABA case remains a limit, not immutable execution.",
+          "closure": {
+            "pr": 1898,
+            "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\final-accounting.json"
+          }
         },
         {
           "task": "Determine and qualify the intended existing WRE diagnostic/outcome consumer boundary for ROC reports",
@@ -2827,7 +2943,7 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "eligible_after_fresh_owner_and_effect_review",
+          "state": "source_adjudication_complete_no_runtime_handoff_or_retention_verified",
           "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
           "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
           "next_step": "Re-observe fresh owners; trace existing authorized ratchet invocation and diagnostic consumers, then freeze applicable negative raw-report/non-authority cases in existing tests only if there is a real owner/call binding. If absent, reconcile current canonical docs and mark the missing adapter/dependency without creating an unused consumer.",
@@ -2858,53 +2974,52 @@
               "task": "Native admitted ticket18/P0",
               "decision": "blocked by existing trust/effect prerequisites; do not bypass"
             }
-          ]
+          ],
+          "handoff_preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-preparation.md",
+            "sha256": "f85a68db4ff155ab9d9a286c4f06d3508cb363c8c2b376fd2470286770ca0b8d",
+            "state": "source_only_not_an_executed_second_sprint"
+          },
+          "handoff_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-review.json",
+            "sha256": "b000772daa0807a2f1ddda747bc9250cf8e25ca80568dab36138c54c81201615"
+          },
+          "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted."
+        },
+        {
+          "task": "Wire advisory AutoResearcher report display into existing WRE startup owner",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 4,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "locally_and_independently_validated_publication_pending",
+          "dependency": "Explicit local report selection and expected baseline identity, no runtime admission or retention grant",
+          "next_step": "Freeze display/wiring cases, extend existing dashboard and existing startup call without growing main, validate and independently review; reconcile closure and rescore",
+          "effort_cost": "One bounded parser/display integration, two existing test owners, no provider spend. C3 integration, I3 launch visibility, D3 current launch plan, impact4 reusable diagnostics."
         }
       ],
       "selected_next": {
-        "task": "Determine and qualify the intended existing WRE diagnostic/outcome consumer boundary for ROC reports",
+        "task": "Qualify LinkedIn manager-result admission to browser connection actions",
         "wsp15": {
           "complexity": 3,
-          "importance": 4,
+          "importance": 3,
           "deferability": 3,
-          "impact": 4,
-          "total": 14,
-          "priority": "P1"
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
         },
-        "state": "eligible_after_fresh_owner_and_effect_review",
-        "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
-        "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
-        "next_step": "Re-observe fresh owners; trace existing authorized ratchet invocation and diagnostic consumers, then freeze applicable negative raw-report/non-authority cases in existing tests only if there is a real owner/call binding. If absent, reconcile current canonical docs and mark the missing adapter/dependency without creating an unused consumer.",
-        "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
-        "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
-        "independent_preparation_review": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-action-review.json",
-          "sha256": "ec7291721f8977819c564d1141dbece16826e88a621785eb045ca6ccb88387d7"
-        },
-        "alternatives": [
-          {
-            "task": "Immutable profile consumption",
-            "decision": "defer automatic rewrite; retain ABA limit until actual admitted workload requires stronger isolation"
-          },
-          {
-            "task": "Parent program/oracle/environment identity",
-            "decision": "qualify at intended consumer; avoid another disconnected hash or unused API"
-          },
-          {
-            "task": "LinkedIn manager-result qualification12/P2",
-            "decision": "executable adjacent fallback after core selection, subject to fresh ownership"
-          },
-          {
-            "task": "Parity diagnostics12/P2",
-            "decision": "consumer not bound; avoid unconsumed receipt API"
-          },
-          {
-            "task": "Native admitted ticket18/P0",
-            "decision": "blocked by existing trust/effect prerequisites; do not bypass"
-          }
-        ]
+        "state": "next_candidate_requires_postclosure_reobservation",
+        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+        "dependency": "Retain finite fake-only scope and fresh owner check; principal-selected core canary connection takes priority, with no LinkedIn live permission.",
+        "next_step": "Freeze bounded fake UI cases for fresh PENDING, quota WITHDRAWN, already CONNECTED, prior pending identity, simulator exception returning WITHDRAWN after stored PENDING, and policy BLOCKED control. Compare returned identity/status and stored state, exact UI calls/result/counter and simulation count. Declare prospective admission separately before production changes.",
+        "selection_reason": "Research handoff adjudication and advisory display close the executable core items. Native18/P0 and higher14/P1 tasks retain actual authority/owner blockers; PostgreSQL13/P1 runtime absent; count-only parity12/P2 consumer unbound. Existing fake-only LinkedIn qualification12/P2 is executable and tests the systems daily-work effect boundary without external sends.",
+        "preparation": "Read existing method and test/docs; browser checks BLOCKED only, while manager may return CONNECTED/WITHDRAWN. This is source evidence, not an executed failure or live authorization."
       },
-      "rationale": "15/P1 persistent comparison repair validated. Next14/P1 core report-consumer qualification advances R10; native18 and domain/product14/backend13 remain blocked; eligible adjacent12/11 rank lower. Serial before/after guard does not by itself justify a larger immutable/concurrency rewrite."
+      "rationale": "Research handoff adjudication and advisory display close the executable core items. Native18/P0 and higher14/P1 tasks retain actual authority/owner blockers; PostgreSQL13/P1 runtime absent; count-only parity12/P2 consumer unbound. Existing fake-only LinkedIn qualification12/P2 is executable and tests the systems daily-work effect boundary without external sends."
     }
   }
 }
