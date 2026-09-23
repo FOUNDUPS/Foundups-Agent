@@ -1,19 +1,21 @@
-## AutoResearcher program consumption
+## AutoResearcher program consumption and identity
 
-`test_wre_research_program_consumption.py` selects seven fixed controls for the
-actual prompt builder with a fake backend and evaluator. It imports only the
-existing `temp_research_env` fixture, which disables model loading before
-construction. The996-line lifecycle suite is unchanged and is not selected.
-The small sibling isolates a distinct call-boundary contract under WSP62.
+`test_wre_research_program_consumption.py` exercises24 fixed cases with fake
+backend/evaluator callbacks. The seven original controls remain; added cases
+cover rendered Unicode/newlines, custom format/subclass semantics, UTF-8 failure,
+backend lookup/interrupt/mode exits, prior/absent collector restoration, bypass,
+sequential ordinals and direct-call compatibility. The existing pre-construction
+model-disable fixture is reused. Source/test identities and exact commands are
+bound in the canonical RSI backlog and its external runner receipts.
 
-Local and independent replays pass the same seven cases, checking prompts,
-callbacks, zero/heuristic paths, failure accounting and restoration. The external
-qualified runner disables pytest plugin autoload/bytecode, gives each run a fresh
-external temporary root and bypasses only simulator/economics eager package
-initializers with inert namespaces. Actual selected source remains loaded;
-evaluator calls are mocked. Two asyncio config warnings are expected with its
-plugin disabled. Evidence is bound in the canonical RSI backlog; this does not
-prove live model behavior, economic correctness or a complete runtime sandbox.
+Local and independent24pass (same cases) after22 missing-field failures and a separate double-formatting
+regression.34 unchanged cases from the lifecycle suite check mode drift, terminal
+reports and proposal identity. External runners disable pytest plugin autoload
+and bytecode, use fresh external temporary directories, and bypass only eager
+simulator/economics package initializers with inert namespaces. Two disabled
+asyncio config warnings remain. Focused cases mock metrics; connected cases use
+the real local evaluator where applicable. No live model behavior, economic
+validity or complete OS sandbox is claimed.
 
 ## Self-audit diagnostic accounting
 

@@ -69,7 +69,15 @@ live source. Each run freezes the current `original_code` text, prepares scratch
 and uses that snapshot for the initial proposal and terminal cleanup. The report's
 `baseline_input_sha256` hashes the captured text encoded as UTF-8. Constructor
 reads normalize newlines; this is not a raw-file or authenticated source identity.
-Program, oracle, environment and reader qualification remain outstanding.
+Reports now include `program_inputs` for each locally attempted backend call:
+iteration, invocation-wide ordinal and SHA-256 of the rendered instruction text.
+Instructions remain mutable between calls; the producer hashes the same text
+used in each prompt. UTF-8 encoding failure records a null digest with an error
+label while preserving the call. Failed calls remain visible; heuristic and
+zero-attempt paths do not fabricate consumption. See the
+[report contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
+Authenticated program provenance, oracle, environment and reader qualification
+remain outstanding.
 
 Reports also record `proposal_inputs`: the iteration and SHA-256 of each nonempty
 proposal text reaching candidate preparation after the existing mode gate. The
