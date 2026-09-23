@@ -247,7 +247,7 @@ def test_zero_cost_still_records_work_in_compute_backing():
     assert calc.compute_backing.total_fi_mined == pytest.approx(0.1)
 
 
-# Qualification of the current profile boundary; these observations do not repair it.
+# Fixed controls for persistent comparison-profile drift; ABA remains unguarded.
 def _profile_researcher(tmp_path, monkeypatch):
     researcher = _fixed_researcher(tmp_path, monkeypatch)
     tiers = {"basic": SimpleNamespace(price_usd=1.0), "pro": SimpleNamespace(price_usd=2.0)}
@@ -307,23 +307,39 @@ def _change_profile(monkeypatch, change):
         monkeypatch.setattr(economics, attribute, 1.0)
 
 
-def _assert_profile_receipts(researcher, report, observed, baseline, candidate):
-    accepted = (candidate >= 27000) and (baseline < 27000)
-    outcome = "accepted" if accepted else "rejected"
+def _assert_profile_receipts(researcher, report, observed, baseline, candidate, drift):
+    outcome = "crashed" if drift else "rejected"
     _assert_profile_metrics(report["baseline"], baseline)
-    _assert_profile_metrics(report["optimized"], candidate if accepted else baseline)
-    assert len(observed) == 2
+    assert report["optimized"] == report["baseline"] and report["improvement"] == 0
+    assert len(observed) == (1 if drift else 2)
     _assert_profile_metrics(observed[0], baseline)
-    _assert_profile_metrics(observed[1], candidate)
-    assert report["improvement"] == (5.0 if accepted else 0.0)
-    assert report["history"] == [{"iteration": 1, "status": outcome,
-                                  "fitness": observed[1]["fitness"], "roc_ratio": 39 / 64}]
+    if drift:
+        assert report["history"][0]["status"] == "crashed"
+        assert "comparison basis" in report["history"][0]["error"]
+    else:
+        _assert_profile_metrics(observed[1], candidate)
+        assert report["history"] == [{"iteration": 1, "status": outcome,
+                                      "fitness": observed[1]["fitness"], "roc_ratio": 39 / 64}]
     assert report["outcome_counts"][outcome] == sum(report["outcome_counts"].values()) == 1
     assert [report[k] for k in ("attempts_requested", "attempts_started", "attempts_finished",
                                "baseline_evaluations", "candidate_evaluations")] == [1] * 5
     assert (report["status"], report["stop_reason"], report["cleanup"]) == (
         "completed", "attempt_limit", "restored")
     assert report["failure"] is report["cleanup_failure"] is None
+    with researcher.results_path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    assert [r["status"] for r in rows] == ["baseline", outcome]
+    assert float(rows[0]["fitness"]) == pytest.approx(observed[0]["fitness"], abs=1e-6)
+    assert float(rows[0]["monthly_margin"]) == pytest.approx(baseline - 27000)
+    if drift:
+        assert all(rows[1][k] == "" for k in ("fitness", "roc_ratio", "monthly_margin"))
+    else:
+        assert float(rows[1]["fitness"]) == pytest.approx(observed[1]["fitness"], abs=1e-6)
+        assert float(rows[1]["monthly_margin"]) == pytest.approx(candidate - 27000)
+    _assert_profile_artifacts(researcher, report)
+
+
+def _assert_profile_artifacts(researcher, report):
     digest = hashlib.sha256(researcher.original_code.encode()).hexdigest()
     assert report["baseline_input_sha256"] == digest
     assert report["proposal_inputs"] == [{"iteration": 1, "proposal_input_sha256": digest}]
@@ -331,13 +347,8 @@ def _assert_profile_receipts(researcher, report, observed, baseline, candidate):
     assert researcher.program_path.read_text() == "Fixed fixture"
     assert all(report[k] is None for k in ("independently_verified", "retained_improvements", "resource_usage"))
     assert json.loads(Path(report["report_path"]).read_text(encoding="utf-8")) == report
-    with researcher.results_path.open(encoding="utf-8", newline="") as handle:
-        rows = list(csv.DictReader(handle, delimiter="\t"))
-    assert [r["status"] for r in rows] == ["baseline", outcome]
-    assert [float(r["fitness"]) for r in rows] == pytest.approx([m["fitness"] for m in observed], abs=1e-6)
-    assert [float(r["monthly_margin"]) for r in rows] == pytest.approx([baseline - 27000, candidate - 27000])
     operations = researcher.runner.planned_operations
-    assert [op["operation"] for op in operations] == (["commit", "restore"] if accepted else ["restore", "restore"])
+    assert [op["operation"] for op in operations] == ["restore", "restore"]
     assert all(op["no_execution_performed"] is True and op["path_digest"] == digest for op in operations)
     assert researcher.target_path.read_text() == researcher.working_target_path.read_text() == researcher.original_code
 
@@ -372,8 +383,8 @@ def _run_profile_case(tmp_path, monkeypatch, change, baseline, candidate):
     if change == "downward":
         monkeypatch.setattr(economics, "SUBSCRIPTION_GROSS_MARGIN", 0.6)
     actual_evaluate, observed = researcher_module.evaluate_target, []
-    def evaluate(path, *, cost_catalog=None):
-        result = actual_evaluate(path, cost_catalog=cost_catalog)
+    def evaluate(path, **context):
+        result = actual_evaluate(path, **context)
         observed.append(dict(result))
         return result
     def propose(code, metrics, history):
@@ -384,7 +395,9 @@ def _run_profile_case(tmp_path, monkeypatch, change, baseline, candidate):
     monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
     monkeypatch.setattr(researcher, "_propose_change", propose)
     report = researcher.run()
-    _assert_profile_receipts(researcher, report, observed, baseline, candidate)
+    drift = change not in {"stable", "export_tiers", "export_angel", "export_fees",
+                           "bound_burn", "bound_btc", "unused_compute"}
+    _assert_profile_receipts(researcher, report, observed, baseline, candidate, drift)
 
 def test_empty_distribution_uses_live_fallback(tmp_path, monkeypatch):
     researcher = _profile_researcher(tmp_path, monkeypatch)
@@ -405,20 +418,171 @@ def test_invalid_sats_affects_failure_path_without_changing_target(tmp_path, mon
     monkeypatch.setattr(researcher, "_propose_change", propose)
     if stage == "baseline":
         monkeypatch.setattr(economics, "SATS_PER_USD", float("nan"))
-        with pytest.raises(ValueError, match="NaN"):
+        with pytest.raises(ValueError, match="comparison basis"):
             researcher.run()
         report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
         assert report["status"] == "aborted" and report["history"] == []
-        assert report["failure"] == {"type": "ValueError", "phase": "baseline"}
-        assert report["baseline_evaluations"] == 1 and report["candidate_evaluations"] == 0
+        assert report["failure"] == {"type": "ValueError", "phase": "comparison_capture"}
+        assert report["baseline_evaluations"] == report["candidate_evaluations"] == 0
     else:
         report = researcher.run()
         assert report["status"] == "completed" and report["failure"] is None
         assert report["history"][0]["status"] == "crashed"
-        assert "NaN" in report["history"][0]["error"]
+        assert "comparison basis" in report["history"][0]["error"]
         assert report["outcome_counts"]["crashed"] == 1 and report["improvement"] == 0
         _assert_profile_metrics(report["baseline"], 26830)
         assert report["optimized"] == report["baseline"]
         assert report["baseline_evaluations"] == report["candidate_evaluations"] == 1
     assert report["cleanup"] == "restored" and report["cleanup_failure"] is None
     assert researcher.target_path.read_text() == researcher.working_target_path.read_text() == researcher.original_code
+
+
+
+def test_stable_profile_accepts_real_candidate_improvement(tmp_path, monkeypatch):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    candidate = researcher.original_code.replace("'openclaw': 2.0", "'openclaw': 3.0")
+    assert candidate != researcher.original_code
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: candidate)
+    report = researcher.run()
+    _assert_profile_metrics(report["baseline"], 26830)
+    fields = ("compute_cost_usd", "compute_margin_usd", "roc_ratio", "total_revenue_usd",
+              "monthly_margin_usd", "fitness")
+    assert tuple(report["optimized"][k] for k in fields) == pytest.approx(
+        (1060, 1120, 56 / 53, 27170, 170, 56 / 53))
+    assert report["optimized"]["is_roi_sustainable"] is report["optimized"]["is_compute_positive"] is True
+    assert report["improvement"] == pytest.approx(18477 / 3392)
+    assert report["history"] == [{"iteration": 1, "status": "accepted", "fitness": 56 / 53, "roc_ratio": 56 / 53}]
+    candidate_digest = hashlib.sha256(candidate.encode()).hexdigest()
+    assert report["proposal_inputs"] == [{"iteration": 1, "proposal_input_sha256": candidate_digest}]
+    assert report["baseline_input_sha256"] != candidate_digest
+    operations = researcher.runner.planned_operations
+    assert [op["operation"] for op in operations] == ["commit", "restore"]
+    assert operations[0]["path_digest"] == candidate_digest
+    assert all(op["no_execution_performed"] is True for op in operations)
+    assert report["cleanup"] == "restored" and report["failure"] is None
+    assert json.loads(Path(report["report_path"]).read_text(encoding="utf-8")) == report
+    assert researcher.target_path.read_text() == researcher.working_target_path.read_text() == researcher.original_code
+
+
+def test_basis_copies_ordered_profile_and_distinguishes_absence(tmp_path, monkeypatch):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    basis = evaluator.snapshot_comparison_basis()
+    assert isinstance(basis, str) and json.loads(basis)
+    monkeypatch.setattr(economics, "TIER_DISTRIBUTION", {"pro": 0.0, "basic": 1.0})
+    reordered = evaluator.snapshot_comparison_basis()
+    assert reordered != basis
+    monkeypatch.setattr(economics.TIERS["basic"], "price_usd", 0)
+    zero = evaluator.snapshot_comparison_basis()
+    monkeypatch.delitem(economics.TIERS, "basic")
+    absent = evaluator.snapshot_comparison_basis()
+    assert len({basis, reordered, zero, absent}) == 4
+    with pytest.raises(ValueError, match="comparison basis"):
+        evaluator.evaluate_target(researcher.target_path, comparison_basis=basis)
+
+
+@pytest.mark.parametrize("basis", ["", False, {}, [], 0, "bogus"])
+def test_explicit_invalid_basis_never_disables_guard(tmp_path, monkeypatch, basis):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    with pytest.raises(ValueError, match="comparison basis"):
+        evaluator.evaluate_target(researcher.target_path, comparison_basis=basis)
+
+
+@pytest.mark.parametrize("restore_inside", [False, True])
+def test_after_evaluation_check_and_explicit_aba_limit(tmp_path, monkeypatch, restore_inside):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    actual, calls = evaluator._evaluate_config, []
+    def evaluate(*args):
+        calls.append(1)
+        if len(calls) == 2:
+            monkeypatch.setattr(economics, "SUBSCRIPTION_GROSS_MARGIN", 0.6)
+        result = actual(*args)
+        if restore_inside:
+            monkeypatch.setattr(economics, "SUBSCRIPTION_GROSS_MARGIN", 0.5)
+        return result
+    monkeypatch.setattr(evaluator, "_evaluate_config", evaluate)
+    monkeypatch.setattr(researcher, "_propose_change", lambda code, *args: code)
+    report = researcher.run()
+    assert len(calls) == 2
+    assert report["history"][0]["status"] == ("accepted" if restore_inside else "crashed")
+    assert report["improvement"] == (5 if restore_inside else 0)
+    if not restore_inside:
+        assert "comparison basis" in report["history"][0]["error"]
+    # A transient change-and-restore escapes before/after sampling; never claim atomicity.
+    assert report["cleanup"] == "restored" and report["failure"] is None
+    assert researcher.target_path.read_text() == researcher.working_target_path.read_text() == researcher.original_code
+
+
+def test_nested_and_later_invocations_refresh_profile_independently(tmp_path, monkeypatch):
+    outer = _profile_researcher(tmp_path, monkeypatch)
+    inner = researcher_module.WREAutoResearcher(
+        outer.target_path, outer.program_path, max_iterations=0, results_dir=tmp_path / "inner")
+    nested = []
+    def propose(code, *args):
+        monkeypatch.setattr(economics, "SUBSCRIPTION_GROSS_MARGIN", 0.6)
+        nested.append(inner.run())
+        return code
+    monkeypatch.setattr(outer, "_propose_change", propose)
+    initial = outer.run()
+    _assert_profile_metrics(nested[0]["baseline"], 29330)
+    _assert_profile_metrics(initial["baseline"], 26830)
+    assert initial["history"][0]["status"] == "crashed" and initial["improvement"] == 0
+    monkeypatch.setattr(outer, "_propose_change", lambda code, *args: code)
+    later = outer.run()
+    _assert_profile_metrics(later["baseline"], 29330)
+    assert later["history"][0]["status"] == "rejected" and later["improvement"] == 0
+    assert len({initial["invocation_id"], nested[0]["invocation_id"], later["invocation_id"]}) == 3
+    assert all(r["cleanup"] == "restored" for r in (initial, nested[0], later))
+    assert outer.working_target_path.read_text() == outer.original_code
+
+
+@pytest.mark.parametrize("name", ["burn", "distribution", "dex", "exits", "creations", "opos", "stake"])
+def test_consumed_definition_bound_defaults_are_guarded(tmp_path, monkeypatch, name):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    cls = economics.UnifiedSustainabilityCalculator
+    method = {"burn": cls.__init__, "stake": cls.calculate_angel_revenue}.get(
+        name, cls.calculate_sustainability)
+    basis = evaluator.snapshot_comparison_basis()
+    values = list(method.__defaults__)
+    index, value = {"burn": (0, 29000), "distribution": (-2, {"pro": 1.0}),
+                    "dex": (3, 51000), "exits": (4, 11000), "creations": (5, 6000),
+                    "opos": (6, 6), "stake": (1, 11000)}[name]
+    values[index] = value
+    monkeypatch.setattr(method, "__defaults__", tuple(values))
+    assert evaluator.snapshot_comparison_basis() != basis
+    with pytest.raises(ValueError, match="comparison basis"):
+        evaluator.evaluate_target(researcher.target_path, comparison_basis=basis)
+    # Omitting the guard retains the direct-call API and reads current effective defaults.
+    assert "error" not in evaluator.evaluate_target(researcher.target_path)
+
+
+def test_effective_distribution_precedence_and_empty_default_fallback(tmp_path, monkeypatch):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    method = economics.UnifiedSustainabilityCalculator.calculate_sustainability
+    defaults = list(method.__defaults__)
+    defaults[-2] = {"pro": 1.0}
+    monkeypatch.setattr(method, "__defaults__", tuple(defaults))
+    basis = evaluator.snapshot_comparison_basis()
+    metrics = evaluator.evaluate_target(researcher.target_path, comparison_basis=basis)
+    monkeypatch.setattr(economics, "TIER_DISTRIBUTION", {"basic": 0.5})
+    assert evaluator.snapshot_comparison_basis() == basis
+    assert evaluator.evaluate_target(researcher.target_path, comparison_basis=basis) == metrics
+    defaults[-2] = {}
+    monkeypatch.setattr(method, "__defaults__", tuple(defaults))
+    fallback = evaluator.snapshot_comparison_basis()
+    assert fallback != basis
+    monkeypatch.setitem(economics.TIER_DISTRIBUTION, "basic", 0.6)
+    assert evaluator.snapshot_comparison_basis() != fallback
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), True, "0.5"])
+def test_invalid_profile_capture_never_enters_evaluator(tmp_path, monkeypatch, value):
+    researcher = _profile_researcher(tmp_path, monkeypatch)
+    monkeypatch.setattr(economics, "SUBSCRIPTION_GROSS_MARGIN", value)
+    with pytest.raises(ValueError, match="comparison basis"):
+        researcher.run()
+    report = json.loads(next(researcher.results_dir.glob("invocation-*/report.json")).read_text())
+    assert report["failure"] == {"type": "ValueError", "phase": "comparison_capture"}
+    assert report["baseline_evaluations"] == report["candidate_evaluations"] == 0
+    assert report["history"] == [] and report["optimized"] is None
+    assert report["status"] == "aborted" and report["cleanup"] == "restored"
+    assert researcher.working_target_path.read_text() == researcher.original_code

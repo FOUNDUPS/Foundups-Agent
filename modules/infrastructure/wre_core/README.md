@@ -49,14 +49,17 @@ production RSI canary.
 The existing ROC Auto Researcher remains a dry-run proposal/evaluation loop.
 Each invocation now captures immutable numeric cost totals and known-agent names
 for its baseline and all candidates. Later runs refresh costs. This prevents
-dependency-only cost changes from appearing as candidate improvement; other
-economic assumptions and independent retained benefit remain unqualified. See
-the [cost comparison contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
+dependency-only cost changes from appearing as candidate improvement. A separate
+comparison basis now rejects persistent drift in consumed economic inputs and
+actual method defaults before or after evaluation. This is a sampled guard, not
+immutable consumption or concurrency protection; transient change-and-restore,
+authenticated oracle identity and independently retained benefit remain open. See
+the [comparison contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
 Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionaries
 without executing target code. It now rejects negative/out-of-range allocations,
 non-finite values, booleans and unknown catalog agents before simulation;
 allocation totals must equal one within `1e-9`. An invalid negative allocation
-previously outscored the baseline. The [109 focused tests](tests/test_wre_auto_researcher.py)
+previously outscored the baseline. The [lifecycle tests](tests/test_wre_auto_researcher.py)
 include invalid-input rejection, cancellation/failure cleanup and the invalid
 baseline gate. The producer restores its scratch baseline on Python exception
 exits and surfaces cleanup errors; process termination and storage failure are
