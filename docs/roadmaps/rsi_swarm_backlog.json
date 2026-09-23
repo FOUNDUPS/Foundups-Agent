@@ -1889,7 +1889,7 @@
       },
       "state": "locally_and_independently_verified_publication_pending",
       "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
-      "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
+      "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; before this repair, the report had no program-consumption field.",
       "next_step": "Publish exact reviewed source, verify PR/main checks, retire only this owned lane and re-observe.",
       "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
       "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
@@ -2496,7 +2496,7 @@
           },
           "state": "locally_and_independently_verified_publication_pending",
           "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
-          "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; current report has no program-consumption field.",
+          "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; before this repair, the report had no program-consumption field.",
           "next_step": "Publish exact reviewed source, verify PR/main checks, retire only this owned lane and re-observe.",
           "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
           "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
@@ -2561,7 +2561,7 @@
     },
     "observation_evidence": {
       "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\observation.json",
-      "sha256": "2a6f16408b97e30e69f493bdcb3e8bc40462c1ca76ad267a8c85f0f5c9fd39ff"
+      "sha256": "4e0549beb8ca803ec9107c5d309b6a4b5d9fcdcc895e7cb36ac77515235ff8bb"
     },
     "previous_observation_evidence": {
       "path": "O:\\Foundups-Agent-audits\\20260923-rsi-program-identity\\previous-observation.json",
