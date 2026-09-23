@@ -45,9 +45,10 @@ Reuse sources: [FAM contract](../../modules/foundups/agent_market/INTERFACE.md),
 
 ## Existing foundation and verified gaps
 
-The inspected FAM contract already includes AgentProfile, Task, Proof, Verification and Payout. Its persistent lifecycle is `open → claimed → submitted → verified → paid`; this is an implementation finding, not proof of production settlement. The current roadmap places production chain writes outside the PoC.
+The inspected FAM contract already includes AgentProfile, Task, Proof, Verification and Payout. Its persistent lifecycle reaches `open → claimed → submitted → verified`; current SQLite payout initiation keeps the task `VERIFIED` with an `INITIATED` payout. The original audit's transition to `PAID` is superseded by PR1851 below; neither state is evidence of production settlement. The current roadmap places production chain writes outside the PoC.
 
-Two concrete boundaries require work:
+Historical boundaries at the original audit (payout mismatch superseded by the
+PR1851 repair below; independent qualification remains outstanding):
 
 - `PersistentTaskPipeline.trigger_payout()` creates a payout with `status=INITIATED`, `reference=None`, `paid_at=None`, then marks the task `PAID`. A consumer must not interpret that task label as confirmed reward delivery. Reconcile the existing task/payout contract and its consumers; do not introduce a parallel payment ledger to conceal the mismatch.
 - `AgentProfile.capability_tags` and the existing confidence tracker are useful inputs. They do not by themselves prove a fresh, independently evaluated qualification bound to the actual worker runtime. Likewise, an approved verification boolean is insufficient evidence of an independently authenticated audit.
@@ -56,7 +57,7 @@ Observed source: the documentation integration base `eb2994f5d1530d9f086e2f2265c
 
 ## Ticket and qualification requirements
 
-### Current execution checkpoint — 2026-09-22
+### Historical execution checkpoint — 2026-09-22
 
 012's priority is to prove the existing OpenClaw/Hermes ticket path, then grow
 measured capacity. Source checkpoint: `baa719d9a6de5ec74026e6a94f48827d5f2885c0`.
@@ -179,6 +180,63 @@ Local source/test review and independent replay are complete; exact-head CI
 and publication closure remain required.
 Persistent role authentication, funded settlement, native worker admission and
 verified RSI retention remain separate unresolved requirements.
+
+### Persistent proof-verification handoff contract — 2026-09-23
+
+**SPECIFIED_NOT_IMPLEMENTED.** Source checkpoint `72faea198760a22072ac14aaf0e21bdc54760737`.
+WSP15 C3/I4/D3/Impact4=14/P1 selects this existing-owner contract slice;
+production integration remains blocked on explicit domain authority. This is a
+proposed internal handoff, not an enabled endpoint, work order or permission grant.
+
+| Boundary | Existing owner and required future behavior |
+|---|---|
+| Independent WRE outcome | `ResidentQueueSliceVerifierStageHandler.__call__` stages assurance only. The prospective handoff follows `_finalize_owned_execution` and successful `finalize_signed_worker_execution` / `commit_signed_worker_final_state`. Read back exact durable terminal ACCEPT, linked independent assurance, reservation and result receipt. `ok`, `finalization_owned`, a staged callback, pending/requeue or durable rejection cannot admit a positive FAM decision. |
+| Business verification | Existing `PersistentTaskPipeline.verify_proof` owns FAM decisions. Extend this owner only after the missing authority policy is admitted. Current `FAMAdapter` is launch-only/in-memory; optional HTTP routes are future interfaces. Do not create a parallel verifier or infer a mounted endpoint. |
+| Domain entitlement | Authenticate the verifier subject and current, specifically scoped `proof.verify` entitlement. Bind FoundUp ID, task ID, persisted proof ID/artifact digest, decision and terminal WRE receipt. Validate persisted task/proof agreement, author/verifier principal independence, expiry and revocation at use. Caller-supplied `verifier_id`, compute access, capability tags and repository-write permission do not supply this authority. |
+| Durable application | Verification decision, task linkage/transition, correlated event and applicable compute debit must commit together in FAM. A committed business rejection is a recorded outcome; an infrastructure failure must not leave a charged or partially applied decision. Exact committed retry returns the original outcome without another decision/debit/event; changed identity, decision or proof fails before effects. |
+| Cross-store recovery | AgentDB finalization and FAM application are separate commits. Specify durable delivery/readback and idempotent application keyed to exact terminal evidence before wiring a caller; do not claim a distributed transaction. Missing or ambiguous evidence fails closed and remains diagnosable. |
+| Rewards | `VERIFIED` is not paid, funded, retained learning or token authority. Payout initiation and independently authorized settlement remain separate gates under the preceding contract. |
+
+The ACCEPT-only handoff above concerns positive FAM promotion. Durable WRE REJECT
+remains negative evidence; it does not automatically invoke FAM or charge compute.
+The mapping of rejected WRE outcomes needs its own admitted contract. Local FAM
+business-rejection tests do not establish that integration mapping.
+
+Existing signed worker verification and `WorkerDispatchAuthorityVerificationContext`
+can supply reusable cryptographic/time/revocation checks, but their current binding
+is not the required FAM task/proof/action/subject entitlement. In particular,
+`PermissionSnapshot.grants()` maps non-admin operation strings to repository-write
+semantics. Adding the string `proof.verify` would not fix the policy gap.
+`TreasuryGovernanceService` governs transfers; `AgentJoinStub` is not an issuer.
+No existing owner inspected at this checkpoint supplies the missing delegation.
+
+**Decision still required:** 012 or an already authorized domain-policy delegate
+must name who may issue verifier entitlement, its FoundUp scope, independence and
+delegation/revocation rules. This architect-defined contract does not choose or
+grant those rights. Until that decision exists, no runtime proof-verification
+bridge, contributor entitlement, payout or public AmIBot activation follows.
+
+**Independently executable prerequisite:** qualify persistence separately, using
+explicit disposable SQLite in the existing
+`modules/foundups/agent_market/tests/test_persistent_compute_wiring.py` owner.
+Fresh WSP15 C2/I4/D3/Impact3=12/P2; no authority decision is needed to observe
+isolated local persistence. Freeze five controls before execution: accepted
+close/reopen retry; rejected close/reopen same-ID retry; and failure immediately
+before each of verification insertion, task update and event insertion followed
+by reopen/retry. Inspect decision/task/event/compute state, preserve current
+failure witnesses, and distinguish them from future atomicity acceptance.
+Current CRUD/happy-compute coverage and payout atomicity tests do not cover this
+verification matrix. No new tests have been run for this planning checkpoint.
+Do not grow the1330-line adapter beyond its existing ceiling without its scoped
+cohesion review; any repair is selected after the witnesses, not bundled here.
+
+Source anchors: [FAM pipeline](../../modules/foundups/agent_market/src/task_pipeline.py),
+[SQLite adapter](../../modules/foundups/agent_market/src/persistence/sqlite_adapter.py),
+[WRE finalization caller](../../modules/communication/moltbot_bridge/src/reddog_signed_worker_run_task_runtime.py),
+[AgentDB commit owner](../../modules/infrastructure/database/src/signed_worker_execution_commit.py),
+and [permission mapping](../../modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py).
+Independent source review agrees on the prospective handoff and missing issuer;
+this does not certify runtime readiness or persistence atomicity.
 
 ### Capacity gates: one ticket before one thousand agents
 

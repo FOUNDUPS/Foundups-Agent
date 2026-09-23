@@ -1,3 +1,9 @@
+## 2026-09-23: Persistent proof-verification handoff contract
+
+- WSP00/15/22/50/77/97; C3/I4/D3/Impact4=14/P1. R24 now specifies a prospective existing-owner handoff after durable independent terminal WRE ACCEPT, exact FAM proof/subject binding, atomic application and cross-store replay/recovery. Staged assurance and repository-write grants confer no domain authority.
+- Independent source review found no proof.verify entitlement issuer; 012 or an authorized policy delegate must supply that decision before integration. A separate12/P2 five-control disposable SQLite qualification is the next executable candidate; no new product tests ran in this documentation slice.
+- PR1889 is verified merged at eb3b66820d1ec50864a3c4470790ddc9b761b95c, exact PR/main checks passed and owned lane retired. Existing runtime, schema, rewards, providers and public FoundUps are unchanged.
+
 ## 2026-09-23: Suppress generation acquisition after use-time rejection
 
 - WSP00/6/15/22/50/84/97; C2/I3/D3/Impact3=11/P2. The existing resolver enables the current-generation collector only after signature re-verification and an empty preceding rejection list. Signature truth, rejection diagnostics and the absent effect lease are unchanged.

@@ -354,6 +354,15 @@ The `FAMAdapter` in `moltbot_bridge/src/fam_adapter.py` provides the OpenClaw ->
 
 OpenClaw routes `IntentCategory.FOUNDUP` intents to `fam_adapter` domain.
 
+## Persistent verification integration boundary (planned)
+
+The [R24 handoff contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-proof-verification-handoff-contract--2026-09-23) specifies a future internal call to the existing
+`PersistentTaskPipeline.verify_proof` after durable independent terminal WRE ACCEPT.
+Staged assurance, repository-write grants and compute debit are insufficient.
+The domain entitlement issuer/delegation decision remains unresolved; no route or
+bridge is enabled. Exact proof binding, atomic decision/debit/event application
+and replay/recovery require qualification before integration. Payout is separate.
+
 ## Optional API Surface (Future)
 - `POST /foundups`
 - `PATCH /foundups/{foundup_id}`
