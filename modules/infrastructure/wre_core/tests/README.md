@@ -1,18 +1,28 @@
 ## AutoResearcher evaluator inputs
 
-`test_wre_research_evaluator_inputs.py` has one fixed real-evaluator control.
+`test_wre_research_evaluator_inputs.py` has three fixed controls: one isolated
+real-evaluator case and two actual-loop cases with stable/changed synthetic costs.
 It holds target bytes fixed, supplies two synthetic cost entries, changes one,
 checks independently calculated cost/margin/weighted ROC, then restores the
 entry and reproduces all baseline metrics. Original dictionary keys and value
-identities are restored. Local and independent replays pass the same case.
+identities are restored. Local and independent replays pass the same three cases.
 
-The focused39-line owner preserves the996-line lifecycle and253-line prompt
-tests unchanged. The qualified external runner binds13 test/source files,
-including six real economics dependency leaves; only eager simulator/economics
-package initializers are replaced by inert namespaces. Pytest plugins/bytecode
-are disabled, with fresh external temporary directories. Two configuration
-warnings remain. No model/provider, live FoundUp, economic-validity, authenticated
-oracle or OS-isolation claim. Source behavior is qualified, not repaired.
+The two loop controls keep candidate text unchanged, assert independently
+calculated full metrics (including ROI), and distinguish stable rejection from
+changed-cost acceptance. They check saved JSON, history, TSV, planned operations,
+equal baseline/proposal digests and source/scratch restoration. This records
+current comparison behavior, not desired repaired acceptance criteria.
+
+The focused owner preserves the996-line lifecycle and253-line prompt tests
+unchanged. The qualified external runner binds source/test/import leaves; only
+eager simulator/economics package initializers use inert namespaces. Plugins and
+bytecode are disabled; fresh external temporary/database paths and a sanitized
+environment are used. Python audit hooks reject network, subprocess and writes
+outside disposable outputs; no database opens occur. Model loading is disabled
+before construction, and a sentinel forbids delegated live commits. Three pytest
+convenience symlink attempts are denied/caught; two configuration warnings remain.
+These are known-fixture guards, not an OS sandbox. No model/provider, live FoundUp,
+economic-validity, authenticated oracle or retained-improvement claim.
 Exact commands/hashes/results are recorded by the canonical RSI backlog.
 
 ## AutoResearcher program consumption and identity

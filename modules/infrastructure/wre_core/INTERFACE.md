@@ -127,6 +127,17 @@ Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
 may include evaluation or later acceptance/logging failures. Best metrics advance
 only after acceptance recording succeeds; accepted info names previous fitness.
 
+Comparison limitation qualified on 2026-09-23: the loop compares successive
+fitness values without freezing the shared evaluator cost table. Two fixed
+actual-loop controls use identical baseline/proposal text: stable costs reject,
+while changing only synthetic `openclaw` cost from 0.004 to 0.008 between
+evaluations accepts with apparent improvement `975/6592`. Both ROI flags remain
+true. This is the current local score comparison, not evidence that candidate
+code improved. Target/proposal digests alone cannot establish comparable oracle
+inputs. Reuse the existing evaluator-input tests; qualify an invocation-scoped
+comparison basis before using these scores for improvement admission. No new
+runtime or retention authority is supplied by this observation.
+
 `proposal_inputs` is separate from finished `history`: a subsequent preparation,
 diff or evaluation interruption can leave an input record without an outcome.
 Equal text has the same digest; iteration and invocation distinguish attempts.

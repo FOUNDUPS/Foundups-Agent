@@ -1856,177 +1856,201 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "265e1bd6d07095e702230d0bec503d71b3d6a56d",
-    "selected_action": "R24-verification-atomic-20260923",
+    "base_commit": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
+    "selected_action": "R10-research-comparison-20260923",
     "status": "locally_and_independently_qualified_publication_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 3,
       "impact": 4,
-      "total": 14,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-verification-atomic-20260923",
-    "base": "265e1bd6d07095e702230d0bec503d71b3d6a56d",
+    "observation_id": "rsi-research-comparison-20260923",
+    "base": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
     "self": "0102",
     "role": "architect/coordinator",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
+    "selected": "Qualify AutoResearcher comparison consistency across mutable evaluator dependencies",
     "previous_closed": {
-      "utc": "2026-09-23T09:57:16.880891+00:00",
-      "pr": 1893,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1893",
-      "merge": "265e1bd6d07095e702230d0bec503d71b3d6a56d",
-      "reviewed_head": "50feec06af610dcb2d09232758750de15c74b0b8",
-      "reviewed_tree": "33998e40768a378e9d667b31711f0c24a0dbd097",
+      "utc": "2026-09-23T11:10:57.393514+00:00",
+      "pr": 1894,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1894",
+      "merge": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
+      "reviewed_head": "48c85896c6ecf6a90df12c9d7529612b8687e71f",
+      "reviewed_tree": "d91fb6ef2740b921f04bd7e942d244335be46066",
       "merged_tree_matches": true,
       "pr_checks_passed": 10,
       "main_workflows": [
         {
           "conclusion": "success",
-          "databaseId": 35845202611,
-          "headSha": "265e1bd6d07095e702230d0bec503d71b3d6a56d",
+          "databaseId": 35851866572,
+          "headSha": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
           "status": "completed",
-          "workflowName": "CI"
+          "workflowName": "CodeQL"
         },
         {
           "conclusion": "success",
-          "databaseId": 35845202424,
-          "headSha": "265e1bd6d07095e702230d0bec503d71b3d6a56d",
+          "databaseId": 35851866961,
+          "headSha": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
           "status": "completed",
-          "workflowName": "CodeQL"
+          "workflowName": "CI"
         }
       ],
-      "validation": "Same fixed 128 cases passed locally and independently; no errors/skips; all original definitions preserve AST identity; verification defects unchanged",
+      "validation": "Same fixed 164 cases passed locally and independently after 23 expected baseline failures; no errors/skips; SQLite adapter and other pipeline methods unchanged",
       "owned_lane_retired": true,
       "remote_branch_absent": true,
       "shared_unchanged": true,
       "paused_lane": "agent/rsi-lineage-draft-20260923 preserved; independent review still blocked",
       "next_action": {
-        "task": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
+        "task": "Qualify AutoResearcher comparison consistency across mutable evaluator dependencies",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 4,
           "deferability": 3,
           "impact": 4,
-          "total": 14,
+          "total": 13,
           "priority": "P1"
         },
-        "state": "eligible_after_fixed_acceptance_and_legacy_reconciliation",
-        "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
-        "dependency": "ORM cohesion prerequisite independently qualified; retain1330 ceiling and unchanged816-line class debt. Fix desired atomic/replay acceptance and conservative incomplete-legacy handling before implementation; domain-policy/WRE integration remains outside repair.",
-        "next_step": "Freeze desired atomic/replay controls against reviewed legacy/timestamp contract, then implement smallest coherent repair using existing persistence transaction owners; keep WSP62 debt and independent verification gates.",
-        "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
-        "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend.",
+        "state": "eligible_bounded_qualification_after_owner_and_effect_refresh",
+        "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_run_loop; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
+        "dependency": "PR1888 already qualifies isolated evaluator sensitivity. Actual research-loop baseline/candidate comparison still reads live dependencies; no observed cross-evaluation failure is claimed. Reuse existing model-disable and deterministic evaluator fixtures; no native execution or provider admission.",
+        "next_step": "Freeze a bounded actual-loop control with identical target/proposal and independently calculated synthetic costs; vary only the qualified shared cost dependency between evaluations, inspect accepted/rejected history and report, then restore all inputs. Qualify the comparison before choosing a repair.",
+        "limits": "Dry-run synthetic research qualification only; no paid calls, automatic commit, runtime authority or retained improvement. Do not repeat the closed single-evaluator sensitivity test or add an unused hash field.",
+        "effort_cost": "Small existing-owner test/effect review plus independent replay; no external spend. This core RSI comparison outranks lower adjacent12/P2 work after blocked native18/domain14/product14 and backend13 are excluded.",
         "preparation": {
-          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-persistence-orm\\verification-repair-preparation.md",
-          "sha256": "d88b2c3a29d076bba4f718d1ea31ab1bcf6429062fde8a0c64789021ca39a68f",
-          "status": "independently_source_reviewed_not_implemented"
+          "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\research-comparison-preparation.md",
+          "sha256": "49503a578bb85e16c17d73dd689e758877cdfa8bd5227cc4b1b0bfb45b8a08ca",
+          "status": "source_inspection_only_no_research_execution"
         }
       },
-      "limits": "ORM extraction is qualified; verification atomicity and replay repair remains next. No production atomicity, domain authority, native RSI, reward or retained-learning claim."
+      "limits": "Local SQLite verification atomicity and replay qualified. No domain authority, PostgreSQL, legacy reconciliation, native RSI, settlement or retained-learning claim."
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\previous-observation.json",
-      "sha256": "216eb19b5059498f90b8c2f0df66939bea7d2597c5330b796d15b3ec070bfa94"
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\previous-observation.json",
+      "sha256": "6e513587f5665b192ae7ebdeeaa01794b843f517324ef09f42c3620120cd4b06"
     },
     "retrieval": {
-      "noise": "NAVIGATION primarily points to in-memory FAM; retrieve persistent source/contracts explicitly.",
-      "ordering": "Actual WSP00/15/97, Git/main/peers, module contracts, reviewed legacy failure evidence, transaction helpers.",
-      "missing": "No module requirements.txt; preexisting gap. No alternate verification transaction owner.",
-      "freshness": "Shared0c81418 and authority5326080 remain unchanged; reuse exact HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH/UNKNOWN/index_gap=true failure from 20260923-rsi-system-test-entry/holo-query.json without repeating probe; exact main265e1bd6 source fallback.",
-      "duplication": "Extend existing session/compute/debit/event owners. No parallel ledger/verifier/scheduler/skill."
+      "status": "exact Git source fallback",
+      "reason": "Unchanged Holo authority5326080 vs shared0c81418; prior HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH remains scoped to same owner/host; no repeated query or reindex.",
+      "noise": "Broad WRE docs narrowed to ROC research owners",
+      "ordering": "WSP, roadmap, interface, existing tests, implementation",
+      "missing": "No descendant AGENTS; applicable skill search found no research-loop skill; historical documents are not current status",
+      "duplication": "Extend existing evaluator-input tests, reuse actual producer and dry-run runner",
+      "staleness": "main and peers freshly observed"
     },
     "source_bindings": {
-      "modules/foundups/agent_market/src/persistence/verification.py": {
-        "path": "modules/foundups/agent_market/src/persistence/verification.py",
-        "sha256": "e05c0d630eadd3a0057caa29eaf985f1aea76a43f3a99f88696fbea10890ccac",
-        "git_blob_lf": "9d6167673048e7145b8942b93847c30d07e555ac"
+      "modules/__init__.py": {
+        "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "lf_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob_lf": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
       },
-      "modules/foundups/agent_market/src/task_pipeline.py": {
-        "path": "modules/foundups/agent_market/src/task_pipeline.py",
-        "sha256": "444167e20b4d856c5c84c78603c605094c39108a44383a877a4c167d2e0c3a35",
-        "git_blob_lf": "df68bbe1ae690642cf5a3a79b6df96d80f7c876a"
+      "modules/foundups/simulator/economics/agent_compute_costs.py": {
+        "raw_sha256": "3b7d83a9aa32f09d223131c2a67803f6ab1a814d8c26f42330b68b9f8c509863",
+        "lf_sha256": "c7f02b7a9625cd5a3c44febb5dbdc517bd086fd7405f35f123d039fb9002b7af",
+        "git_blob_lf": "dba28a360ce80c76e340c5e3af5c1575fb48c9b5"
       },
-      "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py": {
-        "path": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
-        "sha256": "56cab8937a6cf0c10e034a0c3d02d7d6e1fba8a741e099a098c3a4e67eab5b03",
-        "git_blob_lf": "8d0d27bfb445ad504d121117373652fe9fd4ff91"
+      "modules/foundups/simulator/economics/fee_revenue_tracker.py": {
+        "raw_sha256": "763d13fdf4b6b94b8dfd0b0c556de6012f2819687045d762709ebf0b57b53bd1",
+        "lf_sha256": "237dfbbc161c77cc03847a55e2a49fe71c7872521b7fb4cbe4ff861ead45705b",
+        "git_blob_lf": "7dcaf9facc7ec4fc9168ca16a40282030d2b826a"
       },
-      "modules/foundups/agent_market/tests/test_verification_transaction.py": {
-        "path": "modules/foundups/agent_market/tests/test_verification_transaction.py",
-        "sha256": "e284a9196acd49f5211e4734d3b4eaa465af6c2c20df7e11997010ecc0d26c20",
-        "git_blob_lf": "b0bab33d94be1999df34404123a6765d0d317d5c"
+      "modules/foundups/simulator/economics/market_stress.py": {
+        "raw_sha256": "72b43dbf2d72ec0bf5bcd97a6c23e4f24a4c9e11bced8b497ce04a479882877b",
+        "lf_sha256": "35ce4f8695e3ea96b65aa7407aa129ad0f9e463efccd1f1aff317469940ddc56",
+        "git_blob_lf": "0293fd19646999c5549debe7f2a83175a05875dc"
+      },
+      "modules/foundups/simulator/economics/subscription_tiers.py": {
+        "raw_sha256": "47ff70984eee1457fd0ad8cdc64551c2ac004195dce8865b0db273ff4e3c1e4c",
+        "lf_sha256": "821e54077d5bd664dfc183f38752dcdc8067cca384a37d0b23f77a5f667d4b63",
+        "git_blob_lf": "b25936bd920990330ebd250383817f6b28a51971"
+      },
+      "modules/foundups/simulator/economics/sustainability_scenarios.py": {
+        "raw_sha256": "7be960ea754d548bd6b4da8741eb481e121c21ea2d8a752f3e19171967ea5fbc",
+        "lf_sha256": "5091781cc858142a4b9c470d4e61c24e4fe3af6601974dfc9a5d575f3d714896",
+        "git_blob_lf": "60683d9b86b6689d0d7ba1e7ad55f43bf87b1f56"
+      },
+      "modules/foundups/simulator/economics/unified_sustainability.py": {
+        "raw_sha256": "dee01069de1c2f4ea00cecda69811c38fe7cd8928946f9b83cc9bbb9d417abe0",
+        "lf_sha256": "3288f9e1838a7e5e7ff883da93e77a9b146a6495ea12ef5e7a5648f5d1187b75",
+        "git_blob_lf": "c19bcb04fa91dcd0000724e223e805c640e4f4be"
+      },
+      "modules/infrastructure/shared_utilities/ai_engine_singletons.py": {
+        "raw_sha256": "df5524cf34832ab1e8b4d7a9f0c9d3ae8d43747112d4269973b0824abd05f330",
+        "lf_sha256": "ac3e5e15fe22e563173e8784efd66d79de7c4d8c8f42fa5275ef0387a537eaab",
+        "git_blob_lf": "8766fc76602bbd87257d9f31d84651e253da895e"
+      },
+      "modules/infrastructure/wre_core/__init__.py": {
+        "raw_sha256": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "lf_sha256": "79b0984199b2119f468645f3ed3f59e6615f8dab61279990c27fa6d21ffcd5d7",
+        "git_blob_lf": "7fe5bab5af0b225c1a6edadd9ae49e98b87fdcff"
+      },
+      "modules/infrastructure/wre_core/src/__init__.py": {
+        "raw_sha256": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
+        "lf_sha256": "e416e549da20d918b4fcb91d9b8cb0df5cece68ef149a3edc019175dc5da50de",
+        "git_blob_lf": "a5a91280e64cebb077cc8a51cf7d78f4c3a00ed0"
       },
       "modules/infrastructure/wre_core/src/wre_auto_researcher.py": {
-        "path": "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
-        "sha256": "c70df2f37b950ed4d505444da11119f22a7393e29ad232cf46bcc2f36ca7a07d",
+        "raw_sha256": "c70df2f37b950ed4d505444da11119f22a7393e29ad232cf46bcc2f36ca7a07d",
+        "lf_sha256": "52151280e2fbffcbda6c436b2a1064934343e310ed10a3ed36a4691d35f5c307",
         "git_blob_lf": "8c1ea09bda99797755c59c56735b182c07f243e4"
       },
       "modules/infrastructure/wre_core/src/wre_research_evaluator.py": {
-        "path": "modules/infrastructure/wre_core/src/wre_research_evaluator.py",
-        "sha256": "87bfad03a769a923086c8dc08050f76a71d44cedd2ba3178bf725768b215e210",
+        "raw_sha256": "87bfad03a769a923086c8dc08050f76a71d44cedd2ba3178bf725768b215e210",
+        "lf_sha256": "490378c4e7d4b61dc179a83c9864f8846623f4e3a8eb3aa5c4431fa7164a9315",
         "git_blob_lf": "68240e136aa28c698fff2cffb03262280df5ba53"
       },
+      "modules/infrastructure/wre_core/tests/__init__.py": {
+        "raw_sha256": "0ddaa768308a8536b7c74689d85bdf3eced859d4f1f73b71053bf328a6a5dcdf",
+        "lf_sha256": "0cf83db1e00a52babc8dd8d2ef1dd616692bf45e3eda5ee3dc41c1552ad61b3d",
+        "git_blob_lf": "4b631380fa0f954a8133b1f8a418d7900ce57e8d"
+      },
       "modules/infrastructure/wre_core/tests/test_wre_research_evaluator_inputs.py": {
-        "path": "modules/infrastructure/wre_core/tests/test_wre_research_evaluator_inputs.py",
-        "sha256": "1f0a4939a20aebf19f632b74049f96bdc8727f4698ab23ca369cced883f8dc13",
-        "git_blob_lf": "ba0376584c30b73cfd2fa59462a48df1ac0b13b9"
+        "raw_sha256": "7b6aca0f93f3de689456713a6dd4a1b81ad3b39153078d9db451e377337d375c",
+        "lf_sha256": "c29f5482342104e08cf01f471821b10e498d357c04fc90f04366f1d1ebb95451",
+        "git_blob_lf": "c12479dbf8c5a96452f5dcf6328926b4b84526fc"
       }
     },
     "validation": {
-      "baseline": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\baseline\\receipt.json",
-        "sha256": "a56a3e8534f38d459878190a0170005e32626f5d686912f61b346610f654980d"
-      },
       "candidate": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\candidate\\receipt.json",
-        "sha256": "4892c1d59c1703b65ed423600253dceff35e9e540bd43d93966edc83df68d8f4"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\candidate\\receipt.json",
+        "sha256": "94bdcbd21c4a34d85879e0c6002d00f60a37c2d249f6373a1ec9434c27abf936"
       },
       "independent": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\independent\\receipt.json",
-        "sha256": "70f82de7ad9460a2664ec6dabdcff0f92fd1c5dd780d68ea3ddef73f8c2cb9c2"
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\independent\\receipt.json",
+        "sha256": "03b141e307f7be49af9ac7abc9107ed6d3bdafb7343141b3894a1f18745dd39d"
       },
-      "fixed_cases": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\fixed-case-names.json",
-        "sha256": "eff553c7b852461305c0ed616f7504a5d415805e50041a8d37ee504a405377de"
+      "independent_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\independent-review.json",
+        "sha256": "2ba1ca9b91402f52281b695f3dd8c8f6610407ddedcdbeb32ef6e29a6c40b273"
       },
-      "baseline_counts": {
-        "tests": 164,
-        "failures": 23,
-        "errors": 0,
-        "skipped": 0,
-        "passed": 141
+      "freeze": {
+        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\test-freeze.json",
+        "sha256": "4fa48c36c8f1be06b7fb12111985423b95de30d76a0feef81ad1162be028e333"
       },
-      "candidate_counts": {
-        "tests": 164,
-        "failures": 0,
-        "errors": 0,
-        "skipped": 0,
-        "passed": 164
-      },
-      "unique_cases": 164,
+      "unique_cases": 3,
       "overlapping_replays": true,
-      "registry": "current1659/quarantined269",
-      "scope": "SQLite synthetic persistence only; no domain/native/retained RSI claim"
+      "criteria_changed_after_execution": false,
+      "production_source_changes": false,
+      "limits": [
+        "Real ROC evaluator and actual dry-run producer; synthetic costs/proposals, two eager simulator package initializers isolated; no provider/native execution or retention.",
+        "Python audit hooks constrain known tests, not arbitrary hostile native code or an OS sandbox.",
+        "Only stdlib platform hostname/machine discovery substituted externally; other product package initialization remains real; two simulator package initializers are isolated."
+      ]
     },
     "owner_reconciliation": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\scope-ownership.json",
-      "sha256": "21cac07901311e23ab4c919d3cb09cd5fb02570c27f299ec42753620d7bf1667",
-      "fresh_check": {
-        "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\prepublication-owner-check.json",
-        "sha256": "dded94e3839f461a726305c42f58e0ecb1ce4aca59246c422c927e1deb648e5b"
-      }
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\scope-ownership.json",
+      "sha256": "1cdeba2ff1a07a0f3444a94058d95fd6bcab2aeaaaa487d80a0edc3404a5b365"
     },
     "observation_evidence": {
-      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\entry.json",
-      "sha256": "3265e15a9e575cdf021ac18ed70de6334b0ee478cc7b3ada3a3597b32c39bc46"
+      "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\entry.json",
+      "sha256": "e658f0315202deee312da977a938ea7549c49c29fc587a97e42939356aac289b"
     },
     "publication": {
       "state": "pending",
@@ -2557,15 +2581,20 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "locally_and_independently_qualified_publication_pending",
+          "state": "closed_merged_PR1894",
           "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
-          "dependency": "Fixed acceptance and conservative legacy holds qualified; finish exact publication and closure. Domain integration remains separate.",
-          "next_step": "Finish publication, then freshly re-observe and score.",
+          "dependency": "Closed by PR1894; exact-head PR and main checks passed; owned lane retired. Domain issuer and WRE delivery remain separate prerequisites.",
+          "next_step": "No further atomicity sprint work; preserve verified closure evidence and select the highest eligible current task.",
           "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
           "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend.",
           "evidence": {
             "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\independent\\receipt.json",
             "sha256": "70f82de7ad9460a2664ec6dabdcff0f92fd1c5dd780d68ea3ddef73f8c2cb9c2"
+          },
+          "closure": {
+            "pr": 1894,
+            "merge": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\final-accounting.json"
           }
         },
         {
@@ -2604,32 +2633,55 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_bounded_qualification_after_owner_and_effect_refresh",
+          "state": "locally_and_independently_qualified_publication_pending",
           "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_run_loop; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
-          "dependency": "PR1888 already qualifies isolated evaluator sensitivity. Actual research-loop baseline/candidate comparison still reads live dependencies; no observed cross-evaluation failure is claimed. Reuse existing model-disable and deterministic evaluator fixtures; no native execution or provider admission.",
-          "next_step": "Freeze a bounded actual-loop control with identical target/proposal and independently calculated synthetic costs; vary only the qualified shared cost dependency between evaluations, inspect accepted/rejected history and report, then restore all inputs. Qualify the comparison before choosing a repair.",
+          "dependency": "Actual-loop dependency-only acceptance observed and independently reproduced with identical candidate text; three fixed cases. Source unchanged; no native/provider/retention authority.",
+          "next_step": "Finish exact-head publication and owned-lane closure, then re-observe before the separately scored cost-catalog snapshot repair.",
           "limits": "Dry-run synthetic research qualification only; no paid calls, automatic commit, runtime authority or retained improvement. Do not repeat the closed single-evaluator sensitivity test or add an unused hash field.",
-          "effort_cost": "Small existing-owner test/effect review plus independent replay; no external spend. This core RSI comparison outranks lower adjacent12/P2 work after blocked native18/domain14/product14 and backend13 are excluded."
+          "effort_cost": "Small existing-owner test/effect review plus independent replay; no external spend. This core RSI comparison outranks lower adjacent12/P2 work after blocked native18/domain14/product14 and backend13 are excluded.",
+          "preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\research-comparison-preparation.md",
+            "sha256": "49503a578bb85e16c17d73dd689e758877cdfa8bd5227cc4b1b0bfb45b8a08ca",
+            "status": "source_inspection_only_no_research_execution"
+          },
+          "result": "Stable same-text proposal rejects; dependency-only changed cost accepts with identical text digest, improvement975/6592. Existing producer explicitly does not claim independent retention. Three fixed cases, no production change."
+        },
+        {
+          "task": "Freeze consumed cost-catalog values per AutoResearcher invocation",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "eligible_after_fresh_owner_check_and_fixed_acceptance",
+          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
+          "dependency": "Actual-loop comparison limitation independently reproduced. Fix acceptance before product edits; preserve characterization in this commit/evidence and use desired repaired controls in next sprint.",
+          "next_step": "Capture value-only known-agent cost totals once per invocation and explicitly consume the same snapshot in all baseline/candidate evaluations through existing evaluator/calculator seams. Test stable/dependency-change controls, mutable object changes, fresh-invocation refresh and original public call compatibility. Assess signatures and failure behavior before implementation.",
+          "limits": "Cost-catalog comparability only; other mutable ROI economics and concurrent host mutation are not full oracle/environment identity. No unused hash, provider, native admission, activation or retained-learning claim.",
+          "effort_cost": "Small existing-owner interface/loop extension and fixed regressions plus independent replay; no external spend. Higher14/P1 than adjacent12/11; native18/domain14/product14 retain external prerequisites."
         }
       ],
       "selected_next": {
-        "task": "Qualify AutoResearcher comparison consistency across mutable evaluator dependencies",
+        "task": "Freeze consumed cost-catalog values per AutoResearcher invocation",
         "wsp15": {
-          "complexity": 2,
+          "complexity": 3,
           "importance": 4,
           "deferability": 3,
           "impact": 4,
-          "total": 13,
+          "total": 14,
           "priority": "P1"
         },
-        "state": "eligible_bounded_qualification_after_owner_and_effect_refresh",
-        "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_run_loop; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
-        "dependency": "PR1888 already qualifies isolated evaluator sensitivity. Actual research-loop baseline/candidate comparison still reads live dependencies; no observed cross-evaluation failure is claimed. Reuse existing model-disable and deterministic evaluator fixtures; no native execution or provider admission.",
-        "next_step": "Freeze a bounded actual-loop control with identical target/proposal and independently calculated synthetic costs; vary only the qualified shared cost dependency between evaluations, inspect accepted/rejected history and report, then restore all inputs. Qualify the comparison before choosing a repair.",
-        "limits": "Dry-run synthetic research qualification only; no paid calls, automatic commit, runtime authority or retained improvement. Do not repeat the closed single-evaluator sensitivity test or add an unused hash field.",
-        "effort_cost": "Small existing-owner test/effect review plus independent replay; no external spend. This core RSI comparison outranks lower adjacent12/P2 work after blocked native18/domain14/product14 and backend13 are excluded."
+        "state": "eligible_after_fresh_owner_check_and_fixed_acceptance",
+        "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
+        "dependency": "Actual-loop comparison limitation independently reproduced. Fix acceptance before product edits; preserve characterization in this commit/evidence and use desired repaired controls in next sprint.",
+        "next_step": "Capture value-only known-agent cost totals once per invocation and explicitly consume the same snapshot in all baseline/candidate evaluations through existing evaluator/calculator seams. Test stable/dependency-change controls, mutable object changes, fresh-invocation refresh and original public call compatibility. Assess signatures and failure behavior before implementation.",
+        "limits": "Cost-catalog comparability only; other mutable ROI economics and concurrent host mutation are not full oracle/environment identity. No unused hash, provider, native admission, activation or retained-learning claim.",
+        "effort_cost": "Small existing-owner interface/loop extension and fixed regressions plus independent replay; no external spend. Higher14/P1 than adjacent12/11; native18/domain14/product14 retain external prerequisites."
       },
-      "rationale": "After persistence qualification, source review identifies actual-loop comparison as a distinct core13/P1 follow-up to closed evaluator sensitivity12/P2. Higher native/domain/product candidates remain blocked; backend13 requires unestablished runtime; lower adjacent12 does not supersede core research integrity. Refresh after actual closure."
+      "rationale": "Observation is closed locally with independent replay. Native18, domain14 and product14 remain blocked; eligible cost-comparability repair14/P1 advances core RSI ahead of backend13 blocked and adjacent12/11. Broad report/oracle parent is not complete."
     }
   }
 }

@@ -1,3 +1,10 @@
+## 2026-09-23: AutoResearcher actual-loop comparison qualification
+
+- WSP00/15/22/48/50/62/97; C2/I4/D3/Impact4=13/P1. Extended the existing evaluator-input owner with two fixed actual-loop controls; original sensitivity test AST and production source remain unchanged. Three cases pass locally and independently (same cases), zero failures/errors/skips or unexpected guard denials.
+- Identical candidate text rejects with fixed costs but accepts when only one synthetic cost changes between baseline and candidate: fitness39/64 to78/103, apparent improvement975/6592. Full ROI/compute metrics, JSON/TSV/history, equal digests, planned-only operations and input/cleanup restoration are checked. This qualifies a comparison limitation; it is not economic benefit or retained RSI.
+- Exact interpreter with -I/-B, sanitized environment, isolated scratch/database paths, real evaluator/producer, disabled model construction and two inert simulator package initializers. Three caught pytest symlink denials/two disabled-plugin warnings; zero subprocess/SQLite. Known-fixture Python guard is not OS containment. Frozen criteria unchanged after first execution.
+- Prior PR1894 is merged with exact PR/main checks and owned-lane retirement. Next14/P1: freeze value-only cost-catalog inputs per invocation in existing evaluator/producer, with fresh-invocation refresh and explicit remaining ROI/environment limits. No provider/native job, live commit, retained-learning or AmIBot build claim. Evidence and current owner/ranking are in the canonical RSI backlog.
+
 ## 2026-09-23: RSI persistent verification transaction
 
 - WSP 00/15/97 selected 14/P1 atomic proof verification after PR1893 fully merged, passed exact main CI/CodeQL and retired its owned lane. All 94 peer heads and shared checkout remain unchanged at entry.
