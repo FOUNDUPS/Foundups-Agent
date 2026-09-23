@@ -631,46 +631,46 @@ def _verification_observation(adapter, task, decision):
 
 
 @pytest.mark.parametrize("stage,first_error,retry_error,first_state,retry_state", [
-    ("accepted", None, InvalidStateTransitionError,
+    ("accepted", None, None,
      ("verified", True, 1, 1, 18, 1), ("verified", True, 1, 1, 18, 1)),
-    ("rejected", ValidationError, IntegrityError,
-     ("submitted", False, 1, 1, 18, 1), ("submitted", False, 1, 1, 16, 2)),
-    ("create_verification", RuntimeError, None,
-     ("submitted", False, 0, 0, 18, 1), ("verified", True, 1, 1, 16, 2)),
-    ("update_task", RuntimeError, IntegrityError,
-     ("submitted", False, 1, 0, 18, 1), ("submitted", False, 1, 0, 16, 2)),
-    ("create_event", RuntimeError, InvalidStateTransitionError,
-     ("verified", True, 1, 0, 18, 1), ("verified", True, 1, 0, 18, 1)),
-], ids=["accepted", "rejected", "before-decision", "before-task", "before-event"])
-def test_verification_interruption_reopen_observation(tmp_path, monkeypatch, stage,
-                                                      first_error, retry_error,
-                                                      first_state, retry_state):
-    """Current failure witnesses, not desired atomicity or authorization acceptance."""
-    db_path = tmp_path / "verification_observation.db"
+    ("rejected", ValidationError, ValidationError,
+     ("submitted", False, 1, 1, 18, 1), ("submitted", False, 1, 1, 18, 1)),
+    ("insert into verifications", RuntimeError, None,
+     ("submitted", False, 0, 0, 20, 0), ("verified", True, 1, 1, 18, 1)),
+    ("update tasks", RuntimeError, None,
+     ("submitted", False, 0, 0, 20, 0), ("verified", True, 1, 1, 18, 1)),
+    ("insert into event_records", RuntimeError, None,
+     ("submitted", False, 0, 0, 20, 0), ("verified", True, 1, 1, 18, 1)),
+], ids=["accepted", "rejected", "after-decision", "after-task", "after-event"])
+def test_verification_interruption_reopen_acceptance(tmp_path, stage, first_error,
+                                                     retry_error, first_state, retry_state):
+    """Fixed atomicity/replay acceptance; real post-write SQL failure seams."""
+    db_path = tmp_path / "verification_acceptance.db"
     adapter = SQLiteAdapter(db_path)
     try:
         task, decision = _submitted_verification(adapter, stage != "rejected")
         before = _database_snapshot(adapter)
-        assert _verification_observation(adapter, task, decision) == (
-            "submitted", False, 0, 0, 20, 0)
-        with monkeypatch.context() as patch:
-            if stage.startswith("create_") or stage == "update_task":
-                def interrupt(*args, **kwargs):
-                    raise RuntimeError("fixed verification interruption")
-                patch.setattr(adapter, stage, interrupt)
-            expected = (pytest.raises(first_error, match="fixed verification interruption"
-                        if first_error is RuntimeError else None) if first_error else nullcontext())
-            with expected:
+        observed = []
+        def interrupt(conn, cursor, statement, parameters, context, executemany):
+            if statement.lower().startswith(stage):
+                observed.append(stage)
+                raise RuntimeError("fixed verification interruption")
+        event.listen(adapter.engine, "after_cursor_execute", interrupt)
+        try:
+            with pytest.raises(first_error) if first_error else nullcontext():
                 PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
+        finally:
+            event.remove(adapter.engine, "after_cursor_execute", interrupt)
         after = _database_snapshot(adapter)
+        if first_error is RuntimeError:
+            assert observed == [stage] and after == before
         assert _verification_observation(adapter, task, decision) == first_state
         adapter.close()
         adapter = SQLiteAdapter(db_path)
         adapter.compute_access_enforced = True
         adapter.compute_meter_costs["proof.verify"] = 2
         assert _database_snapshot(adapter) == after
-        assert _verification_observation(adapter, task, decision) == first_state
-        with pytest.raises(retry_error) if retry_error else nullcontext():
+        with pytest.raises(retry_error, match="Proof rejected") if retry_error else nullcontext():
             PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
         assert _verification_observation(adapter, task, decision) == retry_state
         final = _database_snapshot(adapter)
