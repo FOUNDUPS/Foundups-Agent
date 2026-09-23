@@ -1,7 +1,7 @@
 ---
 name: linkedin_foundups_newsletter
 description: Research, draft, maintain and publish the FoundUps Eat the Startup LinkedIn newsletter from verified Foundups-Agent implementation evidence; also route an explicit BoundUps newsletter request to the canonical FoundUps identity after noting the spelling
-version: 1.1.0
+version: 1.2.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -20,10 +20,12 @@ state the correction and use **FoundUps**. Never create a BoundUps series or URL
 ## Source and identity gate
 
 1. Verify the live series, publisher and latest edition before remote editing.
-   Missing live access does not prevent authorized local research/drafting; mark
-   prior-topic coverage incomplete and placement blocked until verified. Historical
-   continuity identifies “Foundups - Eat the Startup” under the FOUNDUPS® company
-   page (company 1263645), but historical names, counts and URLs are not current proof.
+   The 2026-09-22 live reconciliation confirmed “Foundups - Eat the Startup”,
+   series 7376428210558808065, under the FOUNDUPS® company page (company 1263645).
+   The series page and individual article newsletter badges did not expose an
+   identical edition list, so record which surface supports each classification and
+   refresh both before editing. Missing live access does not prevent authorized local
+   research/drafting; mark prior-topic coverage incomplete and placement blocked.
 2. Read the latest published editions and saved/scheduled drafts to prevent topic
    duplication. Separate a newsletter edition from a normal Page article or post.
 3. Inspect the actual Foundups-Agent repository evidence: relevant commits/PRs,
