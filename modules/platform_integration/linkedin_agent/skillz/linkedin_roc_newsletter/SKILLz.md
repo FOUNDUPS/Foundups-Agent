@@ -1,7 +1,7 @@
 ---
 name: linkedin_roc_newsletter
 description: Research, draft, maintain and publish the personal ROC Return on Compute LinkedIn newsletter or article lane without confusing it with FoundUps engineering or JHR infrastructure reporting
-version: 1.2.0
+version: 1.3.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -18,9 +18,12 @@ the personal ROC / Return on Compute lane. ROC never means “Return on View.”
 ## Identity and corpus discovery
 
 1. Inspect the live personal profile, newsletter list, published articles, drafts
-   and schedules. The audited publishing map has ROC-related personal articles but
-   does **not** identify a verified ROC newsletter series. Do not invent a series,
-   URL, subscriber count or cadence, and do not silently substitute a normal article.
+   and schedules. The 2026-09-22 live reconciliation confirmed **Return On Compute
+   (ROC)**, series 7448137996484182016, on the personal profile, with nine verified
+   editions from April 10 through September 15, 2026. Treat that identity and count
+   as continuity anchors and refresh them before editing or publishing. Do not
+   silently substitute a normal personal article or FOUNDUPS® / Eat the Startup
+   economic paper for a ROC newsletter edition.
 2. Retrieve the historical baseline from PR #202 and
    `src/content/articles/ROI_to_RoC_Paradigm_Shift.md`, plus later canonical ROC
    definitions in current FoundUps economic documents. Treat the historical article
@@ -68,8 +71,7 @@ interest disclosed. Score research/section work using WSP 15 after evidence admi
 Track the shared newsletter stages. Route exact approved content through
 `linkedin_publishing`; verify saved draft, schedule and live permalink independently.
 Record which ROC definition and sources were used, counterarguments addressed and
-the next open question. No verified series identity means `BLOCKED_IDENTITY`, not
-permission to create or publish elsewhere.
-This is a delivery blocker only: continue authorized research and local drafting
-with the shared issue brief; report e.g. DRAFTED / BLOCKED_IDENTITY. Never imply
-that a drafted article was placed in a verified newsletter series.
+the next open question. If fresh verification cannot recover the known series,
+report `BLOCKED_IDENTITY`; continue authorized research and local drafting without
+creating or publishing elsewhere. Never imply that a drafted article was placed in
+the verified series without editor or live-page read-back.
