@@ -154,7 +154,7 @@ class GovernedValveUseTimeAuthorityResolver:
         )
 
         generation_evidence = collect_signer_current_generation_use_time_evidence(
-            reverified,
+            reverified and not reasons,
             self.repo_root,
             self.runtime_allowed_root,
             self.trusted_now_epoch,

@@ -1,3 +1,17 @@
+## Use-time generation acquisition — 2026-09-23
+
+`test_reddog_signer_current_generation_use_time_binding.py` retains all seven
+supplier-result scenarios with a consistent synthetic positive and four rejection
+controls. Real binding validators/collector remain; only signature/current-generation
+results and the injected clock are synthetic. 15 fixed cases pass locally and
+independently; eight existing queue/resolver regressions pass. Rejected bindings
+retain all ten anchors and invoke neither clock nor generation verifier; a clean
+typed generation result leaves exactly seven anchors and no effect lease.
+
+Disposable artifacts reuse the canonical queue and valve suppliers. Historical
+fixture/runner failures and exact case identities are in the canonical RSI backlog.
+These results establish local behavior, not authenticated admission or native RSI.
+
 ## Resident canary evidence reachability — 2026-09-23
 
 PR1877/1879/1880/1882 closed callback/chain, generation, final-receipt and

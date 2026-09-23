@@ -1,5 +1,15 @@
 # OpenClaw Bridge Interface
 
+## Governed use-time supplier admission
+
+`GovernedValveUseTimeAuthorityResolver.resolve(...)` requests current-generation
+evidence only when signature re-verification succeeds and earlier artifact,
+queue, recorded-authority and binding checks have no rejection. Rejected inputs
+skip the injected trusted clock and generation verifier, retain all missing-anchor
+diagnostics, and return no generation receipt. `signed_authority_reverified` still
+reports the signature result independently. Generation evidence never supplies an
+authoritative effect-use lease. See the existing execution-valve roadmap section.
+
 ## Public RedDog Lick PoC
 
 `PublicSessionGate.open_lick_encounter(...)` accepts the exact open-source,

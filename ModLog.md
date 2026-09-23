@@ -1,3 +1,9 @@
+## 2026-09-23: Suppress generation acquisition after use-time rejection
+
+- WSP00/6/15/22/50/84/97; C2/I3/D3/Impact3=11/P2. The existing resolver enables the current-generation collector only after signature re-verification and an empty preceding rejection list. Signature truth, rejection diagnostics and the absent effect lease are unchanged.
+- Final fixed baseline: four expected rejection failures/eleven passes; repaired15 cases pass locally and independently, plus eight existing queue/resolver regressions. The seven generation-result scenarios now use internally consistent disposable artifacts; the original incomplete fixture remains a negative. Initial fixture and runner dependency failures are retained separately. No acceptance criteria changed after the final baseline.
+- Backend membership remains1401; one runtime digest and two pins refreshed. Canonical backlog closes PR1888, preserves26 packets/31 ranked rows, and identifies the remaining persistent-verification ingress/entitlement decision. No live provider, signer, nonce consumption, native RSI retention, reward or AmIBot dispatch.
+
 ## 2026-09-23: AutoResearcher evaluator dependency sensitivity
 
 - WSP00/15/22/34/49/50/62/97; C2/I4/D3/Impact3=12/P2. One fixed real-evaluator control passes locally and independently (same case). Fixed target bytes with synthetic cost entries produce cost/margin/ROC1280/780/39:64; changing only one cost produces2060/1560/78:103. Restoring that entry reproduces complete baseline metrics; target bytes and original table keys/object identities remain intact.
