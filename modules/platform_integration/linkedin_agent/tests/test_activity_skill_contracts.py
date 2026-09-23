@@ -78,8 +78,8 @@ class ActivitySkillContracts(unittest.TestCase):
     def test_all_three_newsletter_lanes_and_verified_states(self):
         news = self.text("skillz/linkedin_newsletters/SKILLz.md")
         routes = {
-            "linkedin_foundups_newsletter": ("Eat the Startup", "BoundUps", "Foundups-Agent"),
-            "linkedin_roc_newsletter": ("Return on Compute", "PR #202", "BLOCKED_IDENTITY"),
+            "linkedin_foundups_newsletter": ("Eat the Startup", "BoundUps", "Foundups-Agent", "7376428210558808065"),
+            "linkedin_roc_newsletter": ("Return on Compute", "PR #202", "7448137996484182016", "BLOCKED_IDENTITY"),
             "linkedin_jhr_newsletter": ("Japan Hyperscaler Report", "NO_REPORT", "7505133867079536640"),
         }
         for skill, terms in routes.items():
