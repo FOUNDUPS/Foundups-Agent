@@ -1,15 +1,18 @@
 # RSI hybrid production line: ticket dispatch and cost control
 
-## Instruction-memory hygiene checkpoint — 2026-09-24
+## Manager admission checkpoint — 2026-09-24
 
-PR1900 is merged, main-checked and retired. Its 29 unique qualification cases
-expose four manager-to-UI admission gaps; the production repair remains separate.
-The existing LinkedIn module instructions now use two inert configuration
-placeholders, keeping literal values out of subsequent worker context. This is
-current-source redaction, not credential rotation or Git-history removal.
-Static validation and independent review are recorded in the existing backlog;
-publication state remains explicit there. Re-score the next 13/P1 admission repair
-after closure. No runtime, account action or native RSI job was executed.
+PR1901 is merged, main-checked and retired. The existing LinkedIn browser owner
+now rejects non-admitted manager work before Connect/Send. All 36 fixed cases pass
+locally and independently after an 11-failure baseline; 23 compatibility cases
+remain. Backend manifest/package/registry checks pass. Two manifest preparations were invalid: the first loaded an old pin and the
+second used a partially staged index. Both failures are preserved; the completed
+candidate and coherent index pass the sequential rerun.
+
+Exact publication/cleanup evidence is in the existing backlog. After closure,
+re-observe and score the 11/P2 existing test-runner documentation retention candidate.
+No native OpenClaw/Hermes job or live social action was executed; trust/admission
+and retained-learning gates remain open.
 
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. The hybrid planning refinement is dated 2026-09-11; earlier runtime observations retain their date. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
 

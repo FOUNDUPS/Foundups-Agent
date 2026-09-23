@@ -480,9 +480,12 @@ def test_connection_ack_note_sequence(
     assert state.actions._session_stats == {"connections_sent": 7 + int(success)}
 
 
-# Current-behavior qualification, not the prospective admission acceptance gate.
+# Prospective manager admission acceptance; original compatibility controls retained.
+_ADMISSION_FAULTS = {"missing", "missing_status", "string_status", "target", "copy", "unstored", "enum"}
+
+
 def _connection_admission_capture(state, monkeypatch, kind):
-    _connection_seed(state, kind if kind in {"quota", "connected", "pending"} else "empty")
+    _connection_seed(state, kind)
     if kind == "simulation_failure":
         simulate = state.manager._simulate_connection_request
 
@@ -496,6 +499,16 @@ def _connection_admission_capture(state, monkeypatch, kind):
 
     def capture(*args, **kwargs):
         request = send(*args, **kwargs)
+        if kind == "target":
+            request.to_profile_id = "other"
+        if kind == "unstored":
+            state.manager.pending_requests.clear()
+        if kind == "enum":
+            state.actions._connection_status_cls = None
+        transforms = {"missing": lambda: None, "missing_status": lambda: SimpleNamespace(),
+                      "string_status": lambda: SimpleNamespace(status="pending"), "copy": lambda: deepcopy(request)}
+        request = transforms[kind]() if kind in transforms else request
+        state.managed_snapshot = _connection_state(state)[:3]
         returned.append(request)
         return request
 
@@ -530,8 +543,10 @@ def _connection_admission_bookkeeping(state, kind, before, prior, request):
 @pytest.mark.parametrize("kind,status", [
     ("fresh", "pending"), ("quota", "withdrawn"), ("connected", "connected"),
     ("pending", "pending"), ("simulation_failure", "withdrawn"), ("blocked", "blocked"),
+    ("missing", None), ("missing_status", None), ("string_status", None),
+    ("target", "pending"), ("copy", "pending"), ("unstored", "pending"), ("enum", "pending"),
 ])
-def test_connection_admission_current_manager_outcome(connection_current, monkeypatch, kind, status):
+def test_connection_admission_manager_outcome(connection_current, monkeypatch, kind, status):
     state = connection_current
     returned = _connection_admission_capture(state, monkeypatch, kind)
     before = _connection_state(state)
@@ -540,31 +555,36 @@ def test_connection_admission_current_manager_outcome(connection_current, monkey
     result = _connection_request(state, headline=headline, message=_ACK_NOTE, dry_run=False)
     assert len(returned) == 1
     request = returned[0]
-    assert request.status is state.policy.ConnectionStatus(status)
-    assert (request.from_profile_id, request.to_profile_id) == ("current_user", "synthetic-person")
-    expected_id = "synthetic-prior" if kind == "pending" else f"req_synthetic-person_{_ConnectionClock.now().timestamp()}"
-    assert request.request_id == expected_id and request.timestamp == _ConnectionClock.now()
-    assert request.response_timestamp is None
-    assert request.message == (None if kind == "pending" else _ACK_NOTE)
-    success = kind != "blocked"
-    details = {"policy_reason": "allow role category matched" if success else "hard-deny role category matched",
-               "matched_allow": ["founder"] if success else [], "request_status": status,
-               "profile": {**_CONNECTION_META, "headline": headline}}
-    if success:
-        details.update(connect_click_success=True, send_click_success=True,
-                       add_note_success=True, note_typed_success=True)
-    else:
-        details.update(matched_deny=["marketing"])
-    error = None if success else "policy_blocked: hard-deny role category matched"
+    if kind not in _ADMISSION_FAULTS:
+        assert request.status is state.policy.ConnectionStatus(status)
+        assert (request.from_profile_id, request.to_profile_id) == ("current_user", "synthetic-person")
+        expected_id = "synthetic-prior" if kind == "pending" else f"req_synthetic-person_{_ConnectionClock.now().timestamp()}"
+        assert request.request_id == expected_id and request.timestamp == _ConnectionClock.now()
+        assert request.response_timestamp is None and request.message == (None if kind == "pending" else _ACK_NOTE)
+    success = kind == "fresh"
+    details = {"request_status": status}
+    if kind in {"fresh", "blocked"}:
+        details.update(policy_reason="allow role category matched" if success else "hard-deny role category matched",
+                       matched_allow=["founder"] if success else [], profile={**_CONNECTION_META, "headline": headline})
+        if success:
+            details.update(connect_click_success=True, send_click_success=True,
+                           add_note_success=True, note_typed_success=True)
+        else:
+            details.update(matched_deny=["marketing"])
+    error = None if success else "connection_request_not_admitted"
+    if kind == "blocked":
+        error = "policy_blocked: hard-deny role category matched"
     assert result.to_dict() == _connection_result(success, error, details)
     steps = _ACK_NOTE_STEPS if success else ()
     assert state.router.calls == _connection_ack_calls(steps, _ACK_NOTE)
     events = ["router:navigate", "policy", "manager"]
-    if kind in {"fresh", "simulation_failure", "blocked"}:
+    if kind in {"fresh", "simulation_failure", "blocked"} | _ADMISSION_FAULTS:
         events.append("policy")
-    simulated = kind in {"fresh", "simulation_failure"}
+    simulated = kind in {"fresh", "simulation_failure"} | _ADMISSION_FAULTS
     assert state.simulations == ([(1, 1, ("synthetic-person",))] if simulated else [])
     assert state.events == events + (["simulation"] if simulated else []) + [
         "router:click_by_description" for _ in steps]
     assert state.actions._session_stats == {"connections_sent": 7 + int(success)}
-    _connection_admission_bookkeeping(state, kind, before, prior, request)
+    assert _connection_state(state)[:3] == state.managed_snapshot
+    if kind not in _ADMISSION_FAULTS:
+        _connection_admission_bookkeeping(state, kind, before, prior, request)

@@ -1,3 +1,10 @@
+## 2026-09-24: Browser owner honors manager admission
+
+- WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.
+- Frozen acceptance: baseline 11 fail/25 pass; repaired and independent runs each pass the same 36 unique cases. All 23 earlier compatibility cases remain; four legacy constructor cases are deselected and two known plugin warnings remain. Seven malformed/state controls supplement the six manager outcomes. File/class/method shrink; no new module or skill.
+- Backend binding changes one source digest among 1401 unchanged members and updates two existing pins. Eight manifest tests, the 67-file package and unchanged 1659-file test registry pass. Two premature manifest preparations each yielded 1 fail/7 pass: an old loaded pin, then a partially staged index. Both are preserved; the completed, coherently staged candidate passes the sequential rerun.
+- Evidence: `O:/Foundups-Agent-audits/20260924-rsi-manager-guard`; exact publication/closure is recorded there and in the canonical system backlog. This proves a local admission guard, not live delivery, bookkeeping rollback, quota repair, concurrent exactly-once execution, OS confinement or retained native RSI.
+
 ## 2026-09-24: Remove credential-shaped instruction examples
 
 - WSP 00/15/22/50/97; C1/I4/D5/Impact3 = 13/P1. Replaced exactly two configuration assignments in the existing module CLAUDE.md with inert placeholders and added the existing memory-boundary rule for documentation, logs and worker packets.

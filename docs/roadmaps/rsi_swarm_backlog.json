@@ -1856,13 +1856,13 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
-    "selected_action": "linkedin-instruction-hygiene-20260924",
-    "status": "statically_validated_independent_review_and_publication_pending",
+    "base_commit": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
+    "selected_action": "linkedin-manager-admission-repair-20260924",
+    "status": "locally_and_independently_validated_publication_pending",
     "wsp15": {
-      "complexity": 1,
-      "importance": 4,
-      "deferability": 5,
+      "complexity": 3,
+      "importance": 3,
+      "deferability": 4,
       "impact": 3,
       "total": 13,
       "priority": "P1"
@@ -1871,73 +1871,122 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "linkedin-instruction-hygiene-20260924",
-    "base": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
+    "observation_id": "linkedin-manager-admission-repair-20260924",
+    "base": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
     "self": "0102",
     "role": "architect/coordinator",
     "origin": "external_principal",
     "principal_ref": "012",
-    "selected": "Remove credential-shaped examples from existing LinkedIn module instructions",
+    "selected": "Repair manager-result admission before LinkedIn Connect UI",
     "wsp15": {
-      "complexity": 1,
-      "importance": 4,
-      "deferability": 5,
+      "complexity": 3,
+      "importance": 3,
+      "deferability": 4,
       "impact": 3,
       "total": 13,
       "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1900,
-      "merge": "3303f1a2ce9af9eb366125d99ac2a8449986e220",
-      "record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\final-accounting.json",
-      "sha256": "e0543a24325d809a923e4a4465365a575f405fa4710b326b3153d1a199b5b003"
+      "pr": 1901,
+      "merge": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
+      "record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
     },
     "previous_observation": {
-      "git_ref": "3303f1a2ce9af9eb366125d99ac2a8449986e220:docs/roadmaps/rsi_swarm_backlog.json",
+      "git_ref": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf:docs/roadmaps/rsi_swarm_backlog.json",
       "field": "current_observation"
     },
     "retrieval": {
-      "primary": "Degraded exact-main Git/rg retrieval; unchanged governed Holo failure reused, no retry or reindex.",
-      "failure_receipt": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json",
-      "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+      "quality": "degraded",
+      "noise": "Scoped owner and fixture reads; ignore historical completion claims.",
+      "ordering": "WSP00/15/97, prior closure and fresh ownership, canonical queue, module contracts/tests and source, manifest owner.",
+      "missing": [
+        "browser_actions/requirements.txt",
+        "browser_actions/memory/README.md",
+        "linkedin_agent/memory/README.md"
+      ],
+      "tier0": "README and INTERFACE present for both owners",
+      "staleness": "Base55d983fb6 and94peer heads unchanged; only owned hygiene delta since qualified sources. Same Holo host/authority mismatch reused.",
+      "duplication": "Reuse existing connection source/result projection,36-case existing test owner and established runner; no new module,skill,test file or scheduler."
+    },
+    "holo": {
+      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
+      "query_host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "failure": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
       "freshness": "UNKNOWN",
       "index_gap_detected": true,
-      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
-      "host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
-      "noise": "Bounded instruction owner read with configuration values redacted from output.",
-      "ordering": "WSP00 gate, WSP15/97, verified prior closure, roadmap/backlog, module README/INTERFACE/ROADMAP/ModLog, instruction/projection owner.",
-      "missing": "No module AGENTS projection; root generator only owns root instructions. Tier-0 docs present. No new artifact required.",
-      "staleness": "Old module status claims are historical; fresh main and94 unchanged peer heads bind this scope.",
-      "duplication": "Two assignments in existing CLAUDE owner; no duplicate instructions, skill, module, runtime or test."
+      "receipt": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json",
+      "repeated": false
     },
     "allocation": {
-      "execution_plane": "Source-only instruction maintenance; no native WRE job, account access, credential use or history rewrite.",
-      "effort_cost": "Static-only two-assignment repair and existing required records; no provider call or external spend.",
-      "verification": "Exact expected source transform, unchanged runtime/test tree, 42 task identities and26 packets, independent static review, exact-head/main CI.",
-      "manual_reason": "Deterministic instruction edit; configured native model route is unverified. Coordinator plus independent review avoids importing product code."
-    },
-    "dialectic": {
-      "simplest": "Replace existing examples; retain configuration variable names and original instruction content.",
-      "competing": "A new scanner, credential service or full instruction rewrite would exceed this demonstrated source gap.",
-      "weak_assumption": "Credential-shaped text is not evidence of validity or rotation status.",
-      "decision": "13/P1 tied with manager repair; memory-boundary prerequisite first, then fresh selection."
+      "wsp15": {
+        "complexity": 3,
+        "importance": 3,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "execution_plane": "Local source repair with independent fixture verification; no native WRE/model/account admission.",
+      "effort_cost": "One coherent guard, bounded same-file error projection, fixed local+independent tests, standard manifest and existing docs; no provider calls.",
+      "manual_reason": "Deterministic source repair; native model binding/admission remains unverified. Existing fixture and peer verifier are reused.",
+      "verification": "Freeze36 cases before red baseline, candidate and independent same cases. Preserve23 AST compatibility controls. Refresh runtime digest/pins and run established manifest/package/registry checks.",
+      "dialectic": "A status-only guard admits old PENDING work; IDs alone cannot prove current object/freshness. Use pre-call target state plus typed PENDING, matching target/current stored object; no new manager or scheduler. File/class/method must not grow."
     },
     "validation": {
-      "kind": "static-only documentation validation",
-      "receipt": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\validation.json",
-      "independent_review": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-review.json",
-      "tests_run": 0,
-      "production_source_unchanged": true,
-      "limits": "No credential use, account action, revocation, history rewrite, live send or native WRE experiment."
+      "independent_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\independent-review.json",
+        "sha256": "2b17e571baa1aa13d182cd4c53f135a9460d246108d49386ae34bd255988e71a"
+      },
+      "baseline": {
+        "passed": 25,
+        "failed": 11
+      },
+      "primary_passed": 36,
+      "independent_same_cases_passed": 36,
+      "legacy_deselected": 4,
+      "known_warnings": 2,
+      "manifest_tests": 8,
+      "package_files": 67,
+      "registry_files": 1659,
+      "quarantined": 269,
+      "manifest_binding": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\manifest-binding.json",
+        "sha256": "4530aab50733c8ad576750eec5189586c45c1fece7be65417970e9d9b0e5f62f"
+      },
+      "premature_manifest_attempt": {
+        "passed": 7,
+        "failed": 1,
+        "reason": "Test module loaded old digest pin before generation/pin update completed; preserved, sequential rerun passed.",
+        "log": {
+          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\manifest-tests-premature.log",
+          "sha256": "949e74e276df86d79cb43af3441624d857d6840c8113bd5b44fb83cbae8c362e"
+        }
+      },
+      "partial_index_manifest_attempt": {
+        "passed": 7,
+        "failed": 1,
+        "reason": "Only extension pin was staged; source/manifest/pins now staged coherently before final validation.",
+        "log": {
+          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\manifest-tests-partial-index.log",
+          "sha256": "8d2f0c3c96700a91be0eebb5efe86ecccf7401ebcae72d022a8fac7a833f51ea"
+        }
+      },
+      "source_size": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\source-size.json",
+        "sha256": "906315c2ead45bfcbcc1779698cbe328ffae9250e0ed130aa65fa245fa9a0a37"
+      }
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\entry.json",
+      "entry": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\entry.json",
+        "sha256": "6c91f4d985886333af3eb3581f3d24a0c9f0455dfe2aec5add9960c6a31efdca"
+      },
       "peer_heads": 94,
       "shared_preserved": true
     },
     "publication": {
       "state": "not_yet_published_at_document_commit",
-      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
+      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2310,10 +2359,16 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "deferred_bounded_test_infrastructure_reuse",
+          "state": "eligible_documentation_retention_after_guard_closure",
           "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
-          "dependency": "Four preserved failed runner attempts establish capture/logging/Popen/extended-path friction, not product failure. External runner is not a generalized sandbox or authority mechanism.",
-          "next_step": "Search existing governed test tooling before adopting a shared recipe; preserve exact import/effect scope and avoid another parallel guard framework."
+          "dependency": "Fresh source/owner reconciliation after current closure; self-audit decomposition remains conditional on future scanner growth.",
+          "next_step": "Bind four preserved runner failures/corrections to existing successful receipts, then retain one concise Windows compatibility recipe and limits in the existing moltbot_bridge tests README/TestModLog; no new runner or framework.",
+          "effort_cost": "Documentation-only reuse of existing governed test tooling and preserved receipts; local static validation, no provider calls.",
+          "review": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\next-action-review.json",
+            "sha256": "4c45ce598e3429ed41ab47d7f4c89746d46b4569e568d1a6d06d594fcffeb08e"
+          },
+          "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification."
         },
         {
           "task": "Avoid generation supplier acquisition on an independently rejected use-time resolution",
@@ -2726,12 +2781,16 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "eligible_after_instruction_hygiene_closure_and_fresh_reobservation",
+          "state": "locally_and_independently_validated_publication_pending",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-          "dependency": "Preserve existing preview/policy/note and manager bookkeeping contracts; future fixed acceptance and independent verification before repair. No live sends.",
-          "next_step": "Admit only newly created PENDING work with matching target and current stored object; preexisting pending/connected, quota rejection and manager failure must not reach Connect/Send or gain success credit. Request IDs alone are insufficient.",
+          "dependency": "Finish exact-head review, remote checks, verified merge and owned cleanup; no live sends.",
+          "next_step": "Close this owned repair before selecting another lane; acceptance gap is repaired, do not repeat qualification.",
           "effort_cost": "Small existing-owner guard/helpers plus fixed acceptance and unchanged regressions/backend binding; local CPU only.",
-          "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim."
+          "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim.",
+          "validation": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\independent-review.json",
+            "sha256": "2b17e571baa1aa13d182cd4c53f135a9460d246108d49386ae34bd255988e71a"
+          }
         },
         {
           "task": "Remove credential-shaped examples from existing LinkedIn module instructions",
@@ -2743,36 +2802,45 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "statically_validated_independent_review_and_publication_pending",
+          "state": "closed_merged_PR1901",
           "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
           "evidence": {
             "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
             "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
           },
           "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
-          "next_step": "Finish independent static review, exact-head publication checks and owned cleanup; do not repeat source redaction.",
+          "next_step": "Do not repeat source redaction; account validity/rotation remains outside this closure.",
           "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
-          "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3."
+          "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3.",
+          "closure": {
+            "pr": 1901,
+            "merge": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
+            "record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
+          }
         }
       ],
       "selected_next": {
-        "task": "Repair manager-result admission before LinkedIn Connect UI",
+        "task": "Retain reusable bounded Windows test-runner compatibility lessons",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 3,
-          "deferability": 4,
+          "deferability": 3,
           "impact": 3,
-          "total": 13,
-          "priority": "P1"
+          "total": 11,
+          "priority": "P2"
         },
-        "state": "eligible_after_instruction_hygiene_closure_and_fresh_reobservation",
-        "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-        "dependency": "Preserve existing preview/policy/note and manager bookkeeping contracts; future fixed acceptance and independent verification before repair. No live sends.",
-        "next_step": "Admit only newly created PENDING work with matching target and current stored object; preexisting pending/connected, quota rejection and manager failure must not reach Connect/Send or gain success credit. Request IDs alone are insufficient.",
-        "effort_cost": "Small existing-owner guard/helpers plus fixed acceptance and unchanged regressions/backend binding; local CPU only.",
-        "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim."
+        "state": "eligible_documentation_retention_after_guard_closure",
+        "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
+        "dependency": "Fresh source/owner reconciliation after current closure; self-audit decomposition remains conditional on future scanner growth.",
+        "next_step": "Bind four preserved runner failures/corrections to existing successful receipts, then retain one concise Windows compatibility recipe and limits in the existing moltbot_bridge tests README/TestModLog; no new runner or framework.",
+        "effort_cost": "Documentation-only reuse of existing governed test tooling and preserved receipts; local static validation, no provider calls.",
+        "review": {
+          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\next-action-review.json",
+          "sha256": "4c45ce598e3429ed41ab47d7f4c89746d46b4569e568d1a6d06d594fcffeb08e"
+        },
+        "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification."
       },
-      "rationale": "Instruction redaction closes this source-only prerequisite after verification/publication. Remaining executable13/P1 manager admission repair outranks eligible11/P2 debt; blocked native18/P0/domain14/P1/product14/P1/PostgreSQL13/P1 prerequisites remain unchanged."
+      "rationale": "Guard13/P1 repair awaits closure. Existing11/P2 test-runner instruction retention is the highest demonstrated unblocked follow-up; self-audit11/P2 requires future scanner growth, while native/domain/product/PostgreSQL/ROC/parity and paused lineage dependencies remain unresolved. Re-observe after closure."
     }
   }
 }

@@ -79,25 +79,27 @@ class LinkedInActionResult:
         }
 
 
+def _connection_result(profile_slug, error=None, start_time=None, *, success=False, **details):
+    """Project connection outcomes without granting UI admission or mutating work."""
+    return LinkedInActionResult(
+        success=success, action="send_connection_request", post_id=profile_slug,
+        error=error, details=details,
+        duration_ms=int((datetime.now() - start_time).total_seconds() * 1000) if start_time else 0,
+    )
+
+
 def _connection_policy_result(
     profile_slug: str, metadata: Dict[str, str], policy: Any, start_time: datetime,
     *, dry_run: bool = False, request_status: Optional[str] = None,
 ) -> LinkedInActionResult:
     """Project policy-only previews and the existing live rejection schema."""
     allowed_preview = dry_run and policy.allowed
-    return LinkedInActionResult(
-        success=allowed_preview,
-        action="send_connection_request",
-        post_id=profile_slug,
-        error=None if allowed_preview else f"policy_blocked: {policy.reason}",
-        duration_ms=int((datetime.now() - start_time).total_seconds() * 1000),
-        details={
-            "policy_reason": policy.reason,
-            "matched_allow": policy.matched_allow,
-            "matched_deny": policy.matched_deny,
-            "profile": metadata,
-            **({"dry_run": True} if dry_run else {"request_status": request_status}),
-        },
+    return _connection_result(
+        profile_slug, None if allowed_preview else f"policy_blocked: {policy.reason}",
+        start_time, success=allowed_preview, policy_reason=policy.reason,
+        matched_allow=policy.matched_allow, matched_deny=policy.matched_deny,
+        profile=metadata,
+        **({"dry_run": True} if dry_run else {"request_status": request_status}),
     )
 
 
@@ -855,12 +857,7 @@ class LinkedInActions:
         profile_slug = self._profile_slug_from_url(profile_url)
 
         if not self._connection_manager or not self._connection_profile_cls:
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error="connection_policy_manager_unavailable",
-            )
+            return _connection_result(profile_slug, "connection_policy_manager_unavailable")
 
         nav = await self.navigate_to_profile(profile_url)
         if not nav.success:
@@ -886,14 +883,8 @@ class LinkedInActions:
             metadata["industry"] = metadata["industry"] or extracted.get("industry", "")
 
         if not (metadata["headline"] or metadata["company"] or metadata["industry"]):
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error="policy_blocked: missing_profile_metadata",
-                duration_ms=elapsed_ms,
-                details={"profile": metadata},
+            return _connection_result(
+                profile_slug, "policy_blocked: missing_profile_metadata", start_time, profile=metadata,
             )
 
         first_name, last_name = self._split_name(metadata.get("name", ""))
@@ -913,18 +904,30 @@ class LinkedInActions:
                 profile_slug, metadata, policy, start_time, dry_run=True,
             )
 
+        prior_work = (profile_slug in self._connection_manager.pending_requests
+                      or profile_slug in self._connection_manager.connections)
         request = self._connection_manager.send_connection_request(
             profile_slug,
             message=message,
             target_profile=target_profile,
         )
 
+        status = getattr(request, "status", None)
         blocked_status = (
             self._connection_status_cls.BLOCKED if self._connection_status_cls else None
         )
-        if not policy.allowed or (blocked_status is not None and request.status == blocked_status):
+        if not policy.allowed or (blocked_status is not None and status == blocked_status):
             return _connection_policy_result(
-                profile_slug, metadata, policy, start_time, request_status=request.status.value,
+                profile_slug, metadata, policy, start_time, request_status=getattr(status, "value", None),
+            )
+
+        if (prior_work or status is None
+                or status is not getattr(self._connection_status_cls, "PENDING", None)
+                or getattr(request, "to_profile_id", None) != profile_slug
+                or self._connection_manager.pending_requests.get(profile_slug) is not request):
+            return _connection_result(
+                profile_slug, "connection_request_not_admitted", start_time,
+                request_status=getattr(status, "value", None),
             )
 
         connect_click = await self.router.execute(
@@ -933,17 +936,9 @@ class LinkedInActions:
             driver=DriverType.VISION,
         )
         if not connect_click.success:
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error=f"connect_click_failed: {connect_click.error}",
-                duration_ms=elapsed_ms,
-                details={
-                    "policy_reason": policy.reason,
-                    "request_status": request.status.value,
-                },
+            return _connection_result(
+                profile_slug, f"connect_click_failed: {connect_click.error}", start_time,
+                policy_reason=policy.reason, request_status=request.status.value,
             )
 
         # LinkedIn variants:
