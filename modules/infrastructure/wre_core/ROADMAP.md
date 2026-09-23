@@ -213,17 +213,17 @@ and a complete repository RSI cycle are different units.
 
 ### Current core canary test checkpoint — 2026-09-23
 
-PR1877/1879/1880 closed callback/chain, generation and final-receipt qualifications.
-The13/P1 PatternMemory projection now passes21 fixed cases locally and independently:
-19 new receipt/readback/context/stage cases plus two existing blocked callbacks.
-Real explicit-path sink reads use existing fixture records and canonical identities;
-independent plan/draft/worktree mismatches cannot hide behind stale record digests.
-Inputs and logical outcome rows remain unchanged. Constructor schema/seed effects
-are admitted only in disposable external DBs; no storage-readonly claim is made.
-Production/shared fixtures are unchanged. Fixture seeding is not activation or
-proof of retained benefit. Native admission remains unproven; AmIBot undispatched.
-Memory Horizon is separately owned. The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json)
-binds current source, ownership, exact tests and the freshly scored next action.
+PR1877/1879/1880/1882 closed callback/chain, generation, final-receipt and
+PatternMemory evidence qualifications. The13/P1 worktree projection now passes12
+fixed cases locally and independently:10 direct disposable real-Git cases plus
+two existing blocked callbacks. Registry/HEAD readers accept the registered
+external control and reject stage/result/path, isolation and lineage mismatches.
+Input stages, repository/worktree HEAD and registry stay unchanged. Existing
+fixtures/test owner are reused; production remains unchanged. This is local
+structural consistency, not authorized worker creation, native execution, race
+confinement or retained improvement. AmIBot remains undispatched; Memory Horizon
+is separately owned. The [canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json)
+binds exact source, ownership, tests and the re-scored next action.
 
 ### Bounded campaign and report acceptance
 

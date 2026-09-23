@@ -1,3 +1,9 @@
+## 2026-09-23: Canary registered-worktree evidence qualification
+
+- WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary integration tests with10 direct cases using disposable real Git repositories and linked worktrees. Production, shared fixtures and previous definitions are unchanged.
+- Fixed12 cases pass locally and independently:10 new registry/isolation/HEAD cases plus two existing blocked-callback controls. Accepted external registration, rejected stage/result/path, foreign/non-Git roots, repository-local and relative paths, and mismatched expected HEADs have exact blocker/head assertions. Input stages, repository/worktree HEAD and registry remain unchanged by the evidence reader.
+- PR1882 PatternMemory qualification is closed. The new result proves local structural evidence consistency, not authenticated worker creation, native execution, race-proof confinement or retained improvement. Canonical backlog records current source/ownership, diagnostic runner limits and re-scored next work. Registry remains current1656/quarantined269.
+
 ## 2026-09-23: Canary PatternMemory receipt and readback projection
 
 - WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary test owner with19 direct PatternMemory projection cases plus two unchanged blocked-callback controls; all original definitions, production and shared fixtures remain unchanged.
