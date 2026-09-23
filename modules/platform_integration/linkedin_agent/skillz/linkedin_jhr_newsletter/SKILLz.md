@@ -1,7 +1,7 @@
 ---
 name: linkedin_jhr_newsletter
 description: Research, significance-gate, draft, maintain and publish the Japan Hyperscaler Report LinkedIn newsletter from the canonical eSingularity JHR evidence lane
-version: 1.1.0
+version: 1.2.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -22,8 +22,11 @@ eSingularity Page articles or YUMORI.me campaign posts.
    reports, evidence ledger/runtime result and the current public JHR route. Reconcile
    repository, site and LinkedIn editions before assigning an issue number.
 2. Verify the live newsletter series, publisher, latest edition, drafts and schedule.
-   Historical continuity identifies Japan Hyperscaler Report under FOUNDUPS®,
-   series 7505133867079536640; this is a discovery lead, not fresh live state.
+   The 2026-09-22 live reconciliation confirmed Japan Hyperscaler Report under
+   FOUNDUPS®, series 7505133867079536640, with LinkedIn editions published on
+   September 14 and September 16. Treat this as a continuity anchor and refresh it
+   before editing or publishing. Do not assume LinkedIn edition numbers and the
+   repository/site JHR report numbers are interchangeable.
 3. Respect the JHR significance gate. A cycle may correctly produce `NO_REPORT`.
    Vendor repetition, weak sourcing or a duplicate story does not justify an edition.
 
