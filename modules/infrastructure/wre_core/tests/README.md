@@ -1,3 +1,20 @@
+## AutoResearcher evaluator inputs
+
+`test_wre_research_evaluator_inputs.py` has one fixed real-evaluator control.
+It holds target bytes fixed, supplies two synthetic cost entries, changes one,
+checks independently calculated cost/margin/weighted ROC, then restores the
+entry and reproduces all baseline metrics. Original dictionary keys and value
+identities are restored. Local and independent replays pass the same case.
+
+The focused39-line owner preserves the996-line lifecycle and253-line prompt
+tests unchanged. The qualified external runner binds13 test/source files,
+including six real economics dependency leaves; only eager simulator/economics
+package initializers are replaced by inert namespaces. Pytest plugins/bytecode
+are disabled, with fresh external temporary directories. Two configuration
+warnings remain. No model/provider, live FoundUp, economic-validity, authenticated
+oracle or OS-isolation claim. Source behavior is qualified, not repaired.
+Exact commands/hashes/results are recorded by the canonical RSI backlog.
+
 ## AutoResearcher program consumption and identity
 
 `test_wre_research_program_consumption.py` exercises24 fixed cases with fake
