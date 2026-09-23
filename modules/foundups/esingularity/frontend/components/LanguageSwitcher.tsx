@@ -67,7 +67,7 @@ const copy: Record<string, [string, string]> = {
   "解体予算に反対を。VOTE NO": ["Oppose the demolition budget. VOTE NO", "Contra o orçamento de demolição. VOTE NÃO"],
   "湯守に登録・準備委員会に参加 →": ["Sign up as a YUMORI · Join the preparatory committee →", "Cadastre-se como YUMORI · Participe do comitê preparatório →"],
   '現在の委員会要請': ['Current committee request', 'Pedido atual do comitê'],
-  '2026年9月23日更新': ['Updated September 23, 2026', 'Atualizado em 23 de setembro de 2026'],
+  '/ 2026年9月23日更新': ['/ Updated September 23, 2026', '/ Atualizado em 23 de setembro de 2026'],
   'すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会': ['Sukatto Land Kuzuryu YUMORI.me Preparatory Committee', 'Comitê Preparatório YUMORI.me do Sukatto Land Kuzuryu'],
   '9月25日の採決に向けた': ['For the September 25 vote:', 'Para a votação de 25 de setembro:'],
   '現在の立場。': ['the committee’s current position.', 'a posição atual do comitê.'],
