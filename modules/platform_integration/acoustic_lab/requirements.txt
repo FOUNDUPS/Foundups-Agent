@@ -4,7 +4,7 @@
 # Web Framework
 Flask==3.0.0
 Werkzeug==3.0.0
-gunicorn==21.2.0
+gunicorn==22.0.0
 
 # Audio Processing
 librosa==0.10.1
