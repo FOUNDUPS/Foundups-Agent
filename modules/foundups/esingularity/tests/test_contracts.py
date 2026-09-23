@@ -274,3 +274,48 @@ def test_future_route_is_utf8_and_uses_cog_dc_compute() -> None:
     assert "まず約1 MWを検討単位" in future
     assert "容量、時期、費用、熱利用、収益は未確定" in future
     assert not re.search(r"縺|蜿|蝓|譛|險育", future)
+
+def test_esingularity_current_council_position_is_packet_aligned_and_multilingual() -> None:
+    page = read("app/page.tsx")
+    switcher = read("components/LanguageSwitcher.tsx")
+    vision = read("content/yumori-vision.ts")
+    vote_no = read("app/vote-no/page.tsx")
+    current_surfaces = page + switcher + vision
+
+    assert "すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会" in page
+    assert "以前の「60日間の延期」「一定期間の保留」は、現在の要請ではありません。" in page
+    assert "予算判断と、YUMORI案の採否は別の判断です。" in page
+    assert "この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。" in page
+
+    for url in (
+        "https://yumori.me/vote-no",
+        "https://yumori.info",
+        "https://ppp.yumori.info",
+        "https://fin.yumori.info",
+    ):
+        assert url in page
+
+    for obsolete in (
+        "解体準備は進めても、",
+        "代案の扉は閉じない",
+        "議会に正式な条件変更を求める",
+        "条件達成で資金の振替審査へ",
+        "解体を止め、比較の時間を確保する",
+    ):
+        assert obsolete not in current_surfaces
+
+    assert "See the Preparatory Committee’s current request and evidence" in switcher
+    assert "Ver o pedido atual e as evidências do Comitê Preparatório" in switcher
+    assert "The budget vote and adoption of the YUMORI proposal are separate decisions." in switcher
+    assert "A votação do orçamento e a adoção da proposta YUMORI são decisões separadas." in switcher
+
+    assert "現在の要請と根拠を見る" in vision
+    assert "https://yumori.me/vote-no" in vision
+    assert "Adoption of the reuse proposal is a separate formal decision." in vision
+    assert "A adoção da proposta de reutilização é uma decisão formal separada." in vision
+
+    # Preserve the historical record while making the supersession explicit.
+    assert "履歴注記" in vote_no
+    assert "その後撤回" in vote_no
+    assert "現在の要請は9月25日の解体準備予算への反対票です。" in vote_no
+
