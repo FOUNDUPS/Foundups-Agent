@@ -2161,6 +2161,13 @@
       "prior_accounting_review": {
         "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\independent-final-review.json",
         "sha256": "406a8fccf6bbc3a43c7cc1cac87b8b02063efcd95ec88ab6184886128aad4488"
+      },
+      "backend_binding": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\binding-validation.json",
+        "sha256": "7c10a0b0edfa704955677c0a7fcfec4f878e1489ae02c39a05e684bfde6dd602",
+        "generator_cases": 8,
+        "unchanged_node_contract": "passed",
+        "generator_check": "passed"
       }
     },
     "owner_reconciliation": {
@@ -2220,8 +2227,13 @@
       }
     },
     "publication": {
-      "state": "not_yet_published_at_document_commit",
-      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json"
+      "state": "PR1899_open_initial_CI_failed_binding_repaired_pending_fresh_exact_head_checks",
+      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json",
+      "pr": 1899,
+      "first_head": "a470d262d041971efd4fbdf47cba23a511ffd882",
+      "first_failed_ci_run": 35889528743,
+      "failure": "Unchanged backend compatibility contract caught omitted dashboard manifest binding.",
+      "repair": "Exactly one runtime member hash and two digest pins; topology/API/caps unchanged. Local original contract and generator validation pass."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [

@@ -13,6 +13,15 @@ and preflight-resolution leaves. This is focused function-wiring validation, not
 full main startup. Do not substitute a whole-folder/live-menu run or infer that
 advisory report parsing proves independent acceptance or runtime admission.
 
+The dashboard is also hashed in `scripts/reddog_backend_manifest.json`. For
+changes to a runtime member, run the existing generator check, regenerate that
+manifest and both existing digest pins together when stale, then stage the
+coherent binding before its eight generator tests (which check staged closure).
+Run the unchanged RedDog backend compatibility contract as well. PR1899
+initially missed this dependency and failed CI; local reproduction, repair and
+passing checks are retained in `binding-validation.json` in the evidence directory.
+These static checks are separate from the67 guarded display cases.
+
 ## AutoResearcher persistent comparison-profile guard
 
 `test_wre_research_evaluator_inputs.py` now has 66 fixed cases: 22 preserved cost
