@@ -1,6 +1,25 @@
+## AutoResearcher remaining evaluation profile
+
+The existing evaluator-input test file now runs 43 cases: 22 unchanged cost cases
+and 21 new profile cases. All pass locally and independently; replays overlap.
+The 18-case actual-loop matrix captures all eight real evaluator outputs and checks
+terminal JSON/TSV/history, equal proposal/baseline digests, source/program restoration,
+planned-only operations and restored global identities. Eight controls reproduce
+ambient-only +5 fitness acceptance. Others cover stable/reverse/membership changes,
+exporter rebinding, bound defaults and finite bookkeeping inputs. Additional cases
+qualify empty-distribution fallback and separate baseline/candidate failure shapes.
+
+These are characterization assertions, not desired repaired acceptance. New repair
+criteria must explicitly reject environmental-only gains without relaxing valid
+proposal correctness. Fixed synthetic metadata exercises real calculator methods;
+model construction is disabled and no provider/network/subprocess/database call
+occurs. Forty-two caught pytest convenience symlinks and two plugin-config warnings
+remain. Runner status metadata disagrees with fresh scope; cause is unproven and
+receipts are preserved. Source bytes stay unchanged; exact diffs establish scope.
+
 ## AutoResearcher evaluator inputs and cost snapshots
 
-`test_wre_research_evaluator_inputs.py` now has22fixed cases. The original direct
+`test_wre_research_evaluator_inputs.py` contains 22 fixed cost cases within the 43-case combined suite. The original direct
 evaluator sensitivity test stays unchanged. Actual-loop tests require rejection
 of identical text under stable/replaced/mutated/removed cost entries. Additional
 cases cover copied immutable values, real evaluator consumption, invalid/empty

@@ -1,5 +1,27 @@
 # WRE Core Roadmap
 
+## Remaining evaluation-profile qualification — 2026-09-23
+
+All 43 fixed evaluator-input cases pass locally and independently: 22 existing
+cost controls plus 21 profile cases. Production source is unchanged. Seven
+isolated subscription/distribution/margin/angel/fee changes and a combined change
+can remove the ROI penalty while target/proposal text and compute results stay
+identical. Apparent fitness rises by 5; this is dependency drift, not improved code.
+
+The fixed baseline has revenue 26830, burn 27000, margin -170 and fitness -281/64.
+The eight upward crossings retain ROC 39/64 but switch ROI to true. Reverse and
+membership controls preserve the best baseline while recording changed candidate
+metrics. Exporter rebinding and reassigned constructor-default globals do not
+behave like actual consumer mutation. Finite SATS_PER_USD does not alter returned
+scores; invalid values can fail construction. Empty distribution uses a live fallback.
+
+Next 15/P1: extend the existing comparison boundary once for all consumed profile
+values and catalog membership, including failure inputs and already-bound defaults,
+or explicitly reject drift. Preserve one-argument evaluator and existing keyword
+compatibility, per-invocation isolation and cleanup/report contracts. Freeze repair
+acceptance before editing; do not treat characterization of bad acceptance as desired
+behavior. Complete oracle authentication and retained benefit remain separate gates.
+
 ## Invocation-scoped cost comparability — 2026-09-23
 
 The14/P1 repair closes PR1895's dependency-only cost acceptance gap. Baseline and
@@ -18,7 +40,7 @@ loop82→75 and evaluator93→60; researcher594lines remains below600. New helpe
 are bounded; legacy996-line lifecycle tests only adapt signatures/stub imports.
 Continue reducing inherited orchestration debt when that owner is next changed.
 
-Next14/P1 qualifies all remaining ROC evaluation assumptions as one profile:
+Historical next step, now qualified above, examined remaining ROC assumptions:
 distinguish live economic dictionaries from already-bound constructor defaults,
 enumerate values actually consumed and fix a comparison oracle before choosing
 further capture/report integration. Avoid one-constant repairs or unused hashes.

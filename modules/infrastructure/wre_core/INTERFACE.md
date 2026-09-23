@@ -153,6 +153,18 @@ cost basis. Other mutable ROI/fee/subscription/angel inputs, oracle/environment
 identity, independent correctness and retained benefit remain unqualified.
 No new report field, runtime or retention authority is supplied by this repair.
 
+Remaining-profile behavior qualified on 2026-09-23: changing consumed subscription,
+distribution, fee or angel values between evaluations can change ROI and therefore
+fitness while candidate text and captured costs remain identical. Eight synthetic
+actual-loop controls show a five-point apparent gain solely from removing the ROI
+penalty. Reports record this as accepted; it is not evidence of candidate improvement.
+Reverse crossing rejects while logging changed candidate metrics. Exporter rebinding
+is distinct from mutating the imported consumer object, and reassigning a module
+constant does not change a previously bound constructor default. An empty distribution
+uses the inherited live fallback. NaN SATS_PER_USD raises during construction:
+baseline failure aborts; candidate failure is caught as a crashed outcome with cleanup.
+Complete consumed-profile capture or explicit drift rejection is still outstanding.
+
 `proposal_inputs` is separate from finished `history`: a subsequent preparation,
 diff or evaluation interruption can leave an input record without an outcome.
 Equal text has the same digest; iteration and invocation distinguish attempts.
