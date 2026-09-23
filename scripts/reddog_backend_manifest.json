@@ -1952,7 +1952,7 @@
     "modules/communication/moltbot_bridge/src/reddog_elevated_consensus_signer_reservation.py": "29ea1fb3e8381ee09b3e072155dff582a5d4ab0bb9b97e679596078998d059a1",
     "modules/communication/moltbot_bridge/src/reddog_exact_sha_commit_receipt.py": "7ce18a65405c78498b519b1b0a47996a31fcb2c71448c25bf1edf634825e7b60",
     "modules/communication/moltbot_bridge/src/reddog_execution_valve_environment_supply.py": "18518dc32906c56ace01bac5a5905508992e9c5fc2721d5e15389eeae527eaf9",
-    "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "9ad70d2e00bef407eaffd5ac97e3cab1e9a751070c1e0a26c9c99b98f896bc15",
+    "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "29e07cf1b78af091d8ea559bd3f12d386218c194e3ec5935c9d5845faa2e953f",
     "modules/communication/moltbot_bridge/src/reddog_explicit_read_target_grounding.py": "0e9c338a5c202080fa5fb2fa91fd5d404e2a57a67c907aa1212e4d9b745976a8",
     "modules/communication/moltbot_bridge/src/reddog_extension_live_enqueue_invoke.py": "4786227cbc2c2a60adfeb2abd12ea845a4fe78c2001ca9911b8ec6dfb67b7101",
     "modules/communication/moltbot_bridge/src/reddog_extension_wre_operational_spine_invoke.py": "b99301d0eb3679e36871da39c9b3d74646ff71ed161605b18d6b80740160df01",

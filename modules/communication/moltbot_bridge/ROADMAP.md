@@ -772,7 +772,8 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
   use-time preflight are non-consuming; after every non-mutating gate passes,
   the final worktree/live-enqueue boundary consumes the nonce lease exactly once.
 - Current-generation use-time concatenation is complete for three existing
-  trust primitives. After signed work-authority re-verification, the resolver
+  trust primitives. After signed work-authority re-verification and only when all preceding
+  artifact, queue, recorded-authority and binding checks have no rejection, the resolver
   consumes the root-owned system-service selection boundary, verifies the
   exact current manifest/config/run-packet generation and durable replay
   high-water state, and records a non-authoritative audit receipt. Trusted-clock
