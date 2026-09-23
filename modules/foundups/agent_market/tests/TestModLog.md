@@ -1,5 +1,14 @@
 # TestModLog - tests
 
+## 2026-09-23: Persistent verification interruption and retry qualification
+
+- WSP00/6/15/22/49/50/62/97; C2/I4/D3/Impact3=12/P2. Five fixed observations in the existing persistent compute test owner pass locally and independently (same five cases), reproducing double debit on rejected retry, charge-only/partial-decision/missing-event residues, and state rejection on accepted retry.
+- Production code unchanged; all29 prior top-level test/helper definitions remain AST-identical. Test owner581→680 lines, new functions22/20/36; no new module/skill. Exact interpreter -I/-B, disposable SQLite,39 unchanged package/test bindings; ten SQLite opens/run, no allowed test subprocesses, five denied convenience symlinks/run and no unexpected guard denials. Two config warnings retained; registry current1658/quarantined269.
+- Characterization success is not correctness. R24 records witnesses and next14/P1 atomic/replay repair candidate, requiring fixed desired acceptance and existing adapter no-growth/cohesion reconciliation before implementation. Signed issuer/integration, PostgreSQL, payout and native AmIBot/retained RSI remain separate.
+
+Evidence: `O:/Foundups-Agent-audits/20260923-rsi-verification-retry/{candidate,independent}/receipt.json`. Assertions compare first result, complete mapped-table close/reopen snapshot and same-ID retry; unrelated tables stay unchanged. No live funds or payout invoked.
+
+
 ## 2026-09-22 - Persistent initiation failure, replay and contention regression
 
 - Corrected fixed selection: baseline 79 passed/41 failed; candidate and independent replay each 120 passed, zero errors/skips/guard denials or source drift. Independent replay covers the same case IDs, not another 120 unique cases.

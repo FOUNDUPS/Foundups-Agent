@@ -15,6 +15,17 @@
 
 Keep baseline and candidate on identical case IDs and acceptance oracles. Use disposable explicit SQLite paths, actual -I/-B isolation and a reviewed external effect guard when qualifying this path. Preserve failed attempts and fixture corrections; test execution grants no live reward or runtime authority. Detailed counts and limitations are in [TestModLog](TestModLog.md).
 
+## Persistent verification failure observations (2026-09-23)
+
+The same existing `test_persistent_compute_wiring.py` now includes five
+`test_verification_interruption_reopen_observation` cases: accepted/rejected
+reopen/retry and failures before decision insertion, task update and event insertion. They freeze
+current defects (double debit, partial state and failed exact replay), not desired
+correctness. All five pass locally and independently with explicit disposable
+SQLite and the reviewed external effect guard; no production authority follows.
+[R24](../../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-verification-failure-witnesses--2026-09-23)
+records the observations and separately selected repair acceptance boundary.
+
 ## Run
 ```powershell
 cd o:\Foundups-Agent

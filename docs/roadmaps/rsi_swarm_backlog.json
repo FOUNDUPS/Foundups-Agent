@@ -1856,68 +1856,73 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "72faea198760a22072ac14aaf0e21bdc54760737",
-    "selected_action": "R24-proof-verification-contract-20260923",
-    "status": "contract_locally_and_independently_reviewed_publication_pending",
+    "base_commit": "6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b",
+    "selected_action": "R24-verification-retry-20260923",
+    "status": "locally_and_independently_characterized_publication_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 3,
-      "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "impact": 3,
+      "total": 12,
+      "priority": "P2"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "20260923-rsi-proof-verification-contract",
-    "base": "72faea198760a22072ac14aaf0e21bdc54760737",
+    "observation_id": "R24-verification-retry-20260923",
+    "base": "6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b",
     "self": "0102",
     "role": "coordinator",
     "origin": "internal_handoff",
     "principal_ref": "012",
     "selected": {
-      "task": "Resolve the persistent FoundUp proof-verification ingress and entitlement-owner contract",
+      "task": "Qualify persistent proof-verification atomicity and reopen/retry behavior",
       "wsp15": {
-        "complexity": 3,
+        "complexity": 2,
         "importance": 4,
         "deferability": 3,
-        "impact": 4,
-        "total": 14,
-        "priority": "P1"
+        "impact": 3,
+        "total": 12,
+        "priority": "P2"
       },
-      "scope": "Planning-only existing R24/FAM/WRE contracts; explicit missing domain-policy decision. No runtime or schema change.",
-      "rationale": "Native18 blocked by seven anchors/effect lease; FAM14 can close the architectural handoff specification now while issuer remains blocked; GotJunk14 external owner, PostgreSQL13 unadmitted. New persistence qualification12 is a separate next candidate.",
-      "effort_cost": "One bounded existing-document contract with independent source review; no provider/runtime spending.",
+      "state": "locally_and_independently_characterized_publication_pending",
+      "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+      "next_step": "Publish independently confirmed five-case current-behavior observations and re-observe before the separately ranked atomic/replay repair.",
+      "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
+      "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls.",
+      "rationale": "After merged contract1891, native18/domain14/product14/backend13 remain blocked. Count-only12 has no consumer; LinkedIn12 outside core focus; paused lineage12 untouched. Existing persistence failure/retry12 is distinct, local and unblocked.",
       "retrieval": {
         "noise": "Historical payout mismatch is superseded by PR1851; staged assurance and completed happy-path tests do not prove business authorization or retry safety.",
-        "ordering": "Actual WSP00/15/97, root roadmap, R24, FAM interface/source/tests, WRE finalization/assurance/permission owners, independent review.",
-        "missing": "No named proof.verify domain issuer/delegation or existing persistent verification ingress found. Atomic/reopen coverage exists for payout, not verification.",
-        "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact Git/source fallback at72faea198, no reindex or CURRENT claim.",
-        "duplication": "Extend R24/FAM contracts and existing backlog only; no new module, skill, scheduler or authority schema."
+        "ordering": "WSP00 gate; prior independent source/contract; current NAVIGATION points to in-memory owner, direct persistent docs/source used; actual tests/runner effects inspected before frozen run.",
+        "missing": "Explicit disposable verification failure/retry coverage was missing; five current observations now fill that gap. Domain issuer remains missing.",
+        "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact source reuse at6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b verified against prior ten-file bindings at72faea198; no reindex or CURRENT claim.",
+        "duplication": "Extend same existing test owner; preserve29 prior definitions; no product source, module, skill or schema added."
       },
-      "state": "contract_locally_and_independently_reviewed_publication_pending",
-      "previous_closed": {
-        "pr": 1889,
-        "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
-      }
+      "case_matrix_evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-proof-verification-contract\\next-action.json",
+      "scope": "Existing persistent compute test file, fixed five cases, explicit disposable SQLite, no production change or payout."
     },
     "previous_closed": {
-      "pr": 1889,
-      "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
+      "pr": 1891,
+      "merge": "6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b",
+      "state": "closed_merged_PR1891_main_checks_passed_owned_lane_retired",
+      "evidence": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/final-accounting.json",
+        "sha256": "fd9612fc19a4805da1b858302d8c5bd88ecceb544063f92f34786a6aa6ba31f2"
+      }
     },
-    "previous_observation": "R15-supplier-admission-20260923",
+    "previous_observation": "20260923-rsi-proof-verification-contract",
     "retrieval": {
       "noise": "Historical payout mismatch is superseded by PR1851; staged assurance and completed happy-path tests do not prove business authorization or retry safety.",
-      "ordering": "Actual WSP00/15/97, root roadmap, R24, FAM interface/source/tests, WRE finalization/assurance/permission owners, independent review.",
-      "missing": "No named proof.verify domain issuer/delegation or existing persistent verification ingress found. Atomic/reopen coverage exists for payout, not verification.",
-      "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact Git/source fallback at72faea198, no reindex or CURRENT claim.",
-      "duplication": "Extend R24/FAM contracts and existing backlog only; no new module, skill, scheduler or authority schema."
+      "ordering": "WSP00 gate; prior independent source/contract; current NAVIGATION points to in-memory owner, direct persistent docs/source used; actual tests/runner effects inspected before frozen run.",
+      "missing": "Explicit disposable verification failure/retry coverage was missing; five current observations now fill that gap. Domain issuer remains missing.",
+      "freshness": "UNKNOWN: unchanged governed Holo query rejects HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; exact source reuse at6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b verified against prior ten-file bindings at72faea198; no reindex or CURRENT claim.",
+      "duplication": "Extend same existing test owner; preserve29 prior definitions; no product source, module, skill or schema added."
     },
     "source_bindings": {
-      "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/contract-source-bindings.json",
-      "sha256": "a8c6917c7bf10d06758f929e0ab04a0a833c8d02d903065910ecdd72ac8fbfc8"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/candidate/receipt.json",
+      "sha256": "889cad0dbbe697d271b5d4e99741051b8d5691aeb49d059828ea05d0a30994e0"
     },
     "integration_maintenance": {
       "receipt": "O:\\Foundups-Agent-audits\\20260922-rsi-stop-ack\\integration-maintenance-review.json",
@@ -1955,17 +1960,23 @@
       }
     },
     "validation": {
-      "scope": "Seven existing documentation files only; no source/schema/test edits",
-      "state": "local_and_independent_documentation_checks_passed",
-      "checks": [
-        "all26 packet definitions preserved",
-        "all31 historical ranked rows retained plus one distinct qualification candidate",
-        "canonical WSP15 score arithmetic and priority bands match",
-        "added local file links resolve",
-        "git diff --check passes"
-      ],
-      "product_tests": "not run; documentation-only",
-      "independent_review": "/root/amibot_runtime_audit approved seven-document scope; three corrections resolved; all26 packets/prior31 rows and full prior observation preserved; no runtime readiness granted."
+      "local": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/candidate/receipt.json",
+        "sha256": "889cad0dbbe697d271b5d4e99741051b8d5691aeb49d059828ea05d0a30994e0"
+      },
+      "independent": {
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/independent/receipt.json",
+        "sha256": "8f1d86181db5d6f739a1f3d2e26541ed103546ce60e619f6efb4f776d253ffd1"
+      },
+      "cases": 5,
+      "independent_same_cases": 5,
+      "errors": 0,
+      "skipped": 0,
+      "meaning": "Passing observations reproduce existing defects; no atomicity/idempotency/authority acceptance",
+      "source_test_bindings": 39,
+      "guard": "10 explicit SQLite opens/run;0 test subprocesses;5 denied pytest convenience symlinks;no unexpected denials",
+      "registry": "current1658/quarantined269",
+      "independent_final_review": "Approved nine-file scope by /root/amibot_runtime_audit; same frozen five-case inputs, all29 prior definitions preserved, evidence/links/backlog verified; no production correctness claim."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2463,59 +2474,80 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "eligible_after_fresh_reobservation",
+          "state": "locally_and_independently_characterized_publication_pending",
           "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
-          "next_step": "Freeze and run five explicit disposable SQLite controls in existing owner; independently validate observations before selecting a repair.",
+          "next_step": "Publish independently verified five-case observations; use separately ranked repair candidate after fresh reobservation.",
           "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
-          "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls."
+          "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls.",
+          "evidence": {
+            "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/independent/receipt.json",
+            "sha256": "8f1d86181db5d6f739a1f3d2e26541ed103546ce60e619f6efb4f776d253ffd1"
+          }
+        },
+        {
+          "task": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "eligible_after_acceptance_and_cohesion_reconciliation",
+          "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+          "dependency": "Freeze desired acceptance against observed failure witnesses; map existing transaction/compute/event helpers and reconcile1330-line adapter no-growth before code growth. Domain-policy integration remains blocked and outside repair.",
+          "next_step": "Read existing transaction owner/helpers, choose smallest coherent atomic decision/debit/event/replay change with fixed failure controls; do not create a parallel verifier.",
+          "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
+          "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend."
         }
       ],
       "selected_next": {
-        "task": "Qualify persistent proof-verification atomicity and reopen/retry behavior",
+        "task": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
         "wsp15": {
-          "complexity": 2,
+          "complexity": 3,
           "importance": 4,
           "deferability": 3,
-          "impact": 3,
-          "total": 12,
-          "priority": "P2"
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
         },
-        "state": "eligible_after_fresh_reobservation",
-        "source": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
-        "next_step": "Freeze and run five explicit disposable SQLite controls in existing owner; independently validate observations before selecting a repair.",
-        "limits": "Synthetic persistence qualification only; no production issuer, payout, provider or runtime activation.",
-        "effort_cost": "Reuse existing adapter, explicit-path SQLite and snapshot helpers; no paid calls."
+        "state": "eligible_after_acceptance_and_cohesion_reconciliation",
+        "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+        "dependency": "Freeze desired acceptance against observed failure witnesses; map existing transaction/compute/event helpers and reconcile1330-line adapter no-growth before code growth. Domain-policy integration remains blocked and outside repair.",
+        "next_step": "Read existing transaction owner/helpers, choose smallest coherent atomic decision/debit/event/replay change with fixed failure controls; do not create a parallel verifier.",
+        "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
+        "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend."
       },
-      "rationale": "Contract names the prospective handoff without inventing an issuer. Higher native/domain/owner/backend tasks remain blocked; newly identified persistence controls12/P2 are executable inside core RSI scope; paused lineage and external owners remain untouched."
+      "rationale": "New reproducible debit/partial-commit witnesses raise existing-owner persistence repair14/P1 above unblocked12/P2 alternatives. Native18, domain14, product14 and backend13 retain distinct blockers; prior documentation is reconciled, not re-audited."
     },
     "publication": {
       "state": "pending_exact_head_checks_and_merge"
     },
     "owner_reconciliation": {
-      "peer_prs": 94,
-      "changed_peer_heads": 0,
-      "shared_checkout": "preserved unchanged; feat/yumori-economic-impact-model at0c81418fe94a7786cfd55f01e138ddc5d510583d",
-      "path_overlap": "Root ModLog only, four peer PRs; append own entry only. R24/FAM selected paths have no overlap.",
       "entry_evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/entry.json",
-        "sha256": "610cf7e23fa02148abc10f011e4c83527ed64c8ae684082a16cde7a456cb5011"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/entry.json",
+        "sha256": "5922224ead5a63e9cec2863c0b7dc07d3ecbcc95c2e534e1831990726cb450d8"
       },
       "scope_evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/scope-ownership.json",
-        "sha256": "1780b23a7364da5b0e316b54d57d7af5c1fcf428d3a6284039180f8741bd8110"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/scope-ownership.json",
+        "sha256": "07d51c89b7f578648c8a7939cc8756f17e00ed767bed55b942f679b5fcea0248"
       },
+      "peer_prs": 94,
+      "shared_checkout_preserved": true,
+      "owned_prior_contract_lane": "PR1891 main CI/CodeQL passed; exact reviewed tree merged; owned branch/worktree retired, bootstrap state and bundle archived",
       "fresh_evidence": {
-        "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/prepublication-owner-check.json",
-        "sha256": "6448e96f83c49264c1d3917671455dc644204e30560380f5b702bcb98b0f4d09"
+        "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/prepublication-owner-check.json",
+        "sha256": "9471633d479ce6c29e325691d0163f952cac2b3870a248410adfae376246f27d"
       }
     },
     "observation_evidence": {
-      "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/selection.json",
-      "sha256": "7208c44cdc7801903e34bf944cf3ad846a02bde8c72c4cd3898207f06b51d85b"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/selection.json",
+      "sha256": "855d36475f36bdc1e1e8f9e3f1e7b157271772139f16dd16df0e898d94ee2381"
     },
     "previous_observation_evidence": {
-      "path": "O:/Foundups-Agent-audits/20260923-rsi-proof-verification-contract/previous-observation.json",
-      "sha256": "add0c89497fbc04888ca335c8cdfebcab8649822f5cf3fd69e7f726cd6033c49"
+      "path": "O:/Foundups-Agent-audits/20260923-rsi-verification-retry/previous-observation.json",
+      "sha256": "2c6e7161686a6de8a06b3db36c04be6cb0b259d0f6db03d6f49c6783b5002ea2"
     }
   }
 }

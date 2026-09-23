@@ -51,8 +51,8 @@ in-memory completed-payment simulation remains distinct from persistent initiati
 ## Persistent proof verification — contract checkpoint 2026-09-23
 
 - [x] Specify existing post-finalization WRE to FAM handoff and exact identity/recovery boundaries in [R24](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-proof-verification-handoff-contract--2026-09-23); planning14/P1, independently source-reviewed.
-- [ ] Qualify five disposable SQLite verification retry/failure controls in the existing persistent compute test owner (12/P2; current witnesses before repair).
-- [ ] Select and independently validate the smallest persistence repair after observing those controls; preserve the adapter no-growth/cohesion boundary above.
+- [x] Qualify five disposable SQLite verification retry/failure controls in the existing persistent compute test owner (12/P2): same five cases pass locally/independently and reproduce double debit, partial commits and non-idempotent retry. These are failure witnesses, not production acceptance.
+- [ ] Next candidate14/P1: repair verification atomicity/replay in existing pipeline/SQLite owners after fixed desired acceptance and transaction-helper/no-growth reconciliation; independently validate. No authority or payout integration.
 - [ ] Obtain explicit domain issuer/delegation policy before signed verification integration; repository-write and compute access are not verifier entitlement.
 - [ ] Qualify the integrated admitted caller and independent verifier before any native AmIBot/RSI claim. Settlement remains separately admitted.
 
