@@ -1,5 +1,12 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-09-23: Persistent verification interruption and retry qualification
+
+- WSP00/6/15/22/49/50/62/97; C2/I4/D3/Impact3=12/P2. Five fixed observations in the existing persistent compute test owner pass locally and independently (same five cases), reproducing double debit on rejected retry, charge-only/partial-decision/missing-event residues, and state rejection on accepted retry.
+- Production code unchanged; all29 prior top-level test/helper definitions remain AST-identical. Test owner581→680 lines, new functions22/20/36; no new module/skill. Exact interpreter -I/-B, disposable SQLite,39 unchanged package/test bindings; ten SQLite opens/run, no allowed test subprocesses, five denied convenience symlinks/run and no unexpected guard denials. Two config warnings retained; registry current1658/quarantined269.
+- Characterization success is not correctness. R24 records witnesses and next14/P1 atomic/replay repair candidate, requiring fixed desired acceptance and existing adapter no-growth/cohesion reconciliation before implementation. Signed issuer/integration, PostgreSQL, payout and native AmIBot/retained RSI remain separate.
+
+
 ## 2026-09-23: Persistent proof-verification handoff contract
 
 - WSP00/15/22/50/77/97; C3/I4/D3/Impact4=14/P1. R24 now specifies a prospective existing-owner handoff after durable independent terminal WRE ACCEPT, exact FAM proof/subject binding, atomic application and cross-store replay/recovery. Staged assurance and repository-write grants confer no domain authority.

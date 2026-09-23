@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import tempfile
+from contextlib import nullcontext
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from pathlib import Path
@@ -10,9 +11,11 @@ from threading import Barrier
 
 import pytest
 from sqlalchemy import delete, event, insert, select, update
-from sqlalchemy.exc import InvalidRequestError, OperationalError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError, OperationalError
 
-from modules.foundups.agent_market.src.exceptions import AgentMarketError, PermissionDeniedError
+from modules.foundups.agent_market.src.exceptions import (
+    AgentMarketError, InvalidStateTransitionError, PermissionDeniedError, ValidationError,
+)
 from modules.foundups.agent_market.src.models import (
     EventRecord, Foundup, Payout, PayoutStatus, Proof, Task, TaskStatus, Verification,
 )
@@ -579,3 +582,99 @@ def test_busy_writer_rejects_without_fallback_then_retries_after_release(adapter
     payout = pipeline.trigger_payout(task.task_id, "treasury_1")
     _assert_initiation(adapter, task, payout)
     assert adapter.get_wallet("treasury_1")["credit_balance"] == 19
+
+
+def _submitted_verification(adapter, approved):
+    adapter.compute_access_enforced = True
+    adapter.compute_default_credits = 0
+    adapter.compute_meter_costs["proof.verify"] = 2
+    adapter.create_foundup(_foundup())
+    task = Task(
+        task_id="verify_task", foundup_id="f_1", title="verification witness",
+        description="disposable persistence only", acceptance_criteria=["fixed"],
+        reward_amount=100, creator_id="owner_1", status=TaskStatus.SUBMITTED,
+        assignee_id="agent_1", proof_id="verify_proof",
+    )
+    adapter.create_task(task)
+    adapter.create_proof(Proof(
+        proof_id=task.proof_id, task_id=task.task_id, submitter_id="agent_1",
+        artifact_uri="memory://synthetic-proof", artifact_hash="sha256:synthetic",
+    ))
+    adapter.activate_compute_plan("verifier_1", tier="builder", monthly_credit_allocation=20)
+    decision = Verification(
+        verification_id="verify_decision", task_id=task.task_id,
+        verifier_id="verifier_1", approved=approved, reason="fixed synthetic decision",
+    )
+    return task, decision
+
+
+def _verification_observation(adapter, task, decision):
+    current = adapter.get_task(task.task_id)
+    decisions = _rows(adapter, "verifications")
+    events = _rows(adapter, "event_records")
+    debits = [row for row in adapter.list_compute_ledger("verifier_1")
+              if row["entry_type"] == "debit"]
+    if decisions:
+        saved = adapter.get_verification(decision.verification_id)
+        assert saved.task_id == task.task_id and saved.verifier_id == decision.verifier_id
+        assert saved.approved == decision.approved and saved.reason == decision.reason
+    for event_row in events:
+        assert event_row["task_id"] == task.task_id
+        assert event_row["actor_id"] == decision.verifier_id
+        assert event_row["event_type"] == ("proof.verified" if decision.approved else "proof.rejected")
+    assert all(row["reason"] == "verify_proof" for row in debits)
+    assert current.proof_id == task.proof_id and current.payout_id is None
+    assert current.verification_id in (None, decision.verification_id)
+    return (current.status.value, current.verification_id == decision.verification_id,
+            len(decisions), len(events), adapter.get_wallet("verifier_1")["credit_balance"],
+            len(debits))
+
+
+@pytest.mark.parametrize("stage,first_error,retry_error,first_state,retry_state", [
+    ("accepted", None, InvalidStateTransitionError,
+     ("verified", True, 1, 1, 18, 1), ("verified", True, 1, 1, 18, 1)),
+    ("rejected", ValidationError, IntegrityError,
+     ("submitted", False, 1, 1, 18, 1), ("submitted", False, 1, 1, 16, 2)),
+    ("create_verification", RuntimeError, None,
+     ("submitted", False, 0, 0, 18, 1), ("verified", True, 1, 1, 16, 2)),
+    ("update_task", RuntimeError, IntegrityError,
+     ("submitted", False, 1, 0, 18, 1), ("submitted", False, 1, 0, 16, 2)),
+    ("create_event", RuntimeError, InvalidStateTransitionError,
+     ("verified", True, 1, 0, 18, 1), ("verified", True, 1, 0, 18, 1)),
+], ids=["accepted", "rejected", "before-decision", "before-task", "before-event"])
+def test_verification_interruption_reopen_observation(tmp_path, monkeypatch, stage,
+                                                      first_error, retry_error,
+                                                      first_state, retry_state):
+    """Current failure witnesses, not desired atomicity or authorization acceptance."""
+    db_path = tmp_path / "verification_observation.db"
+    adapter = SQLiteAdapter(db_path)
+    try:
+        task, decision = _submitted_verification(adapter, stage != "rejected")
+        before = _database_snapshot(adapter)
+        assert _verification_observation(adapter, task, decision) == (
+            "submitted", False, 0, 0, 20, 0)
+        with monkeypatch.context() as patch:
+            if stage.startswith("create_") or stage == "update_task":
+                def interrupt(*args, **kwargs):
+                    raise RuntimeError("fixed verification interruption")
+                patch.setattr(adapter, stage, interrupt)
+            expected = (pytest.raises(first_error, match="fixed verification interruption"
+                        if first_error is RuntimeError else None) if first_error else nullcontext())
+            with expected:
+                PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
+        after = _database_snapshot(adapter)
+        assert _verification_observation(adapter, task, decision) == first_state
+        adapter.close()
+        adapter = SQLiteAdapter(db_path)
+        adapter.compute_access_enforced = True
+        adapter.compute_meter_costs["proof.verify"] = 2
+        assert _database_snapshot(adapter) == after
+        assert _verification_observation(adapter, task, decision) == first_state
+        with pytest.raises(retry_error) if retry_error else nullcontext():
+            PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
+        assert _verification_observation(adapter, task, decision) == retry_state
+        final = _database_snapshot(adapter)
+        changed = {"tasks", "verifications", "event_records", "compute_wallets", "compute_ledger_entries"}
+        assert all(before[name] == final[name] for name in before if name not in changed)
+    finally:
+        adapter.close()

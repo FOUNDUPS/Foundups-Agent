@@ -226,7 +226,8 @@ before each of verification insertion, task update and event insertion followed
 by reopen/retry. Inspect decision/task/event/compute state, preserve current
 failure witnesses, and distinguish them from future atomicity acceptance.
 Current CRUD/happy-compute coverage and payout atomicity tests do not cover this
-verification matrix. No new tests have been run for this planning checkpoint.
+verification matrix. That planning checkpoint ran no new tests; the subsequent qualification below
+records the five-case execution separately.
 Do not grow the1330-line adapter beyond its existing ceiling without its scoped
 cohesion review; any repair is selected after the witnesses, not bundled here.
 
@@ -237,6 +238,38 @@ Source anchors: [FAM pipeline](../../modules/foundups/agent_market/src/task_pipe
 and [permission mapping](../../modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py).
 Independent source review agrees on the prospective handoff and missing issuer;
 this does not certify runtime readiness or persistence atomicity.
+
+### Persistent verification failure witnesses — 2026-09-23
+
+At source `6b2fd69c8ed5ac4709b1d21e7e46e36f8ec9593b`, five fixed
+`test_verification_interruption_reopen_observation` cases pass locally and in
+independent replay (the same five cases). These are **observed defects**, not
+atomicity/idempotency acceptance or domain authorization. Start with20 synthetic
+credits and cost2; close/reopen the explicit disposable SQLite before exact retry.
+
+| First outcome/cut | Persisted first result | Exact retry result |
+|---|---|---|
+| Accepted | VERIFIED, decision/event, balance18 | State error; no extra debit |
+| Rejected | SUBMITTED, rejection/event, balance18 | Duplicate-ID error after another debit; balance16 |
+| Before decision insertion | Charge only, balance18 | Success with second debit; balance16 |
+| Before task update | Decision and charge, SUBMITTED, no event | Duplicate-ID error after second debit; balance16 |
+| Before event insertion | VERIFIED and charged, no event | State error; missing event remains |
+
+All39 inventoried package/test Python files retain identical before/after hashes
+in both runs; no product code changed. Each run opens only ten disposable
+SQLite connections, allows no test subprocess/network/provider call, and denies
+five pytest convenience symlink attempts with no unexpected guard denials.
+Two disabled-plugin configuration warnings remain. Python audit hooks constrain
+these known tests; this is not an OS sandbox or process/power-loss proof.
+
+Fresh next candidate: **C3/I4/D3/Impact4=14/P1** existing-owner persistence repair.
+Before implementation, fix the desired rollback/replay acceptance against these
+preserved witnesses; map the current SQLite transaction/compute/event helpers and
+resolve the existing adapter no-growth/cohesion requirement. Keep business
+rejection distinct from infrastructure rollback and exact retry distinct from a
+conflicting decision. Reuse the current pipeline/adapter; domain issuer, signed
+WRE integration, PostgreSQL and payouts remain outside this repair. Do not retain
+these defective outcomes as desired acceptance when a repair is selected.
 
 ### Capacity gates: one ticket before one thousand agents
 
