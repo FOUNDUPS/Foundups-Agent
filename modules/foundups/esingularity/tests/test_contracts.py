@@ -136,6 +136,48 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
 
 
 
+def test_stt_artifacts_are_rejected_from_current_public_surfaces() -> None:
+    source_of_truth = (FRONTEND_ROOT / "audit" / "SOURCE_OF_TRUTH.md").read_text(encoding="utf-8")
+    assert "Speech-to-text normalization guard" in source_of_truth
+    for canonical in (
+        "旧すかっとランド九頭竜",
+        "Sukatto Land Kuzuryu",
+        "YUMORI.me",
+        "九頭竜川",
+        "Kuzuryu River",
+        "あわら温泉",
+        "Yukemuri Yokocho",
+        "旧下宇坂小学校",
+        "旧羽生小学校",
+    ):
+        assert canonical in source_of_truth
+
+    current_surfaces = "\n".join(
+        read(relative)
+        for relative in (
+            "app/page.tsx",
+            "app/future/page.tsx",
+            "components/LanguageSwitcher.tsx",
+            "content/yumori-vision.ts",
+        )
+    )
+    for artifact in (
+        "Scott Lando",
+        "Scottland",
+        "Kazuri",
+        "Kazury",
+        "Kazuru",
+        "Kuzuri",
+        "Kuzuru",
+        "Owarasa",
+        "cubicle restaurant",
+        "旧すかっとらんど九頭竜",
+        "旧スカットランド九頭竜",
+        "すかっとランド九頭龍",
+    ):
+        assert artifact not in current_surfaces
+
+
 def test_sites_configuration_and_primary_routes_are_present() -> None:
     hosting = load_json(FRONTEND_ROOT / ".openai" / "hosting.json")
     package = load_json(FRONTEND_ROOT / "package.json")
