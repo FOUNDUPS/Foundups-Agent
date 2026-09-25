@@ -598,11 +598,10 @@ def _build_rsi_measurements(report: Dict) -> Dict:
         "relative_gain": relative_gain,
         "candidate_evaluations": report.get("candidate_evaluations"),
         "accepted_candidates": counts.get("accepted", 0),
-        "rejected_candidates": (
-            counts.get("rejected", 0)
-            + counts.get("failed_validation", 0)
-            + counts.get("crashed", 0)
-        ),
+        "rejected_candidates": counts.get("rejected", 0),
+        "invalid_candidates": counts.get("failed_validation", 0),
+        "crashed_candidates": counts.get("crashed", 0),
+        "no_proposal_attempts": counts.get("no_proposal", 0),
         "independently_verified": report.get("independently_verified"),
         "retained_improvements": report.get("retained_improvements"),
         "resource_usage": report.get("resource_usage"),
