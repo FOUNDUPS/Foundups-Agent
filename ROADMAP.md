@@ -797,6 +797,27 @@ Existing project and system-service lanes retain their code and connection work.
 6. Index maintenance uses its existing leases and exact-main controller. Concurrent main advancement invalidates a run's authority; replan or repeat the governed transaction against the new target instead of weakening the check.
 7. Do not publish a site, send outreach, train on private conversation data, or activate a service as a side effect of an RSI packet.
 
+## RSI verification hierarchy and canonical measurements
+
+WSP 48 and WRE use one verification vocabulary across RSI work. Machine
+verification strength is ordered **intrinsic signal < learned judge < execution
+feedback < formal verifier**. Human research judgment remains the separate
+direction-setting layer for deciding what to work on and what should count as
+better; no current automated WRE component substitutes for that role.
+
+Every RSI candidate report must carry the canonical minimal measurements:
+verification-signal class, baseline/best metric, absolute/relative gain,
+candidate/outcome counts, independent-verification status, held-out status,
+resource usage when authenticated, activation/rollback evidence, and
+successive-generation retained gain. Missing evidence stays unknown.
+
+The current AutoResearcher report now emits this bundle and is explicitly
+classified as **execution feedback**, with
+`production_rsi_eligible=false`. A positive local fitness delta therefore
+advances candidate search only; it does not close G2-G5. The next system proof
+must compose independent held-out evaluation, governed activation/rollback and
+retained improvement across successive generations.
+
 ## Completion gates
 
 | Gate | Required evidence | Failure means |

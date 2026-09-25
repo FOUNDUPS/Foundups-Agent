@@ -1,3 +1,18 @@
+## 2026-09-25: RSI verification hierarchy and measurement bundle
+
+- Aligned WRE reporting with WSP 48's research verification hierarchy: intrinsic
+  signal < learned judge < execution feedback < formal verifier; human research
+  judgment remains the direction-setting boundary.
+- AutoResearcher now emits `wre_rsi_measurements.v1` on every report and
+  truthfully labels its current simulator as `execution_feedback`.
+- The bundle records baseline/best fitness, absolute/relative gain, candidate
+  and outcome counts, while leaving independent verification, resource usage,
+  activation rollback and successive-generation gain unknown.
+- Dashboard report ingestion validates the measurement bundle and refuses
+  self-asserted stronger verification or production-RSI eligibility.
+- This is measurement/evidence hardening, not G2-G5 completion and not a
+  production RSI claim. (WSP 00/22/48/50/62/97)
+
 ## 2026-09-24: Explicit advisory research evidence at startup
 
 - WSP00/15/22/48/50/62/97, C3/I3/D3/Impact4=13/P1. Extended the existing dashboard and existing main preflight call; no new module, skill, scheduler or source of authority. Main file/function size is unchanged.

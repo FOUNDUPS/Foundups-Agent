@@ -156,6 +156,47 @@ def test_evaluator_keeps_valid_numeric_boundaries(tmp_path, multiplier, expected
     assert math.isfinite(metrics["fitness"])
 
 
+def test_rsi_measurement_bundle_tracks_signal_strength_and_gain():
+    report = {
+        "baseline": {"fitness": 2.0},
+        "optimized": {"fitness": 3.0},
+        "candidate_evaluations": 4,
+        "outcome_counts": {
+            "accepted": 1,
+            "rejected": 1,
+            "failed_validation": 1,
+            "crashed": 1,
+            "no_proposal": 0,
+        },
+        "independently_verified": None,
+        "retained_improvements": None,
+        "resource_usage": None,
+    }
+
+    bundle = researcher_module._build_rsi_measurements(report)
+
+    assert bundle["schema"] == "wre_rsi_measurements.v1"
+    assert bundle["verification_signal_class"] == "execution_feedback"
+    assert bundle["verification_hierarchy_weak_to_strong"] == [
+        "intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"]
+    assert bundle["research_direction_judgment"] == "human_not_substituted"
+    assert bundle["verification_signal_independent"] is False
+    assert bundle["held_out_evaluation"] is False
+    assert bundle["baseline_fitness"] == 2.0
+    assert bundle["best_fitness"] == 3.0
+    assert bundle["absolute_gain"] == 1.0
+    assert bundle["relative_gain"] == pytest.approx(0.5)
+    assert bundle["candidate_evaluations"] == 4
+    assert bundle["accepted_candidates"] == 1
+    assert bundle["rejected_candidates"] == 1
+    assert bundle["invalid_candidates"] == 1
+    assert bundle["crashed_candidates"] == 1
+    assert bundle["no_proposal_attempts"] == 0
+    assert bundle["activation_rollback_verified"] is None
+    assert bundle["successive_generation_gain"] is None
+    assert bundle["production_rsi_eligible"] is False
+
+
 def test_auto_researcher_rejects_impossible_allocation(temp_research_env, tmp_path, monkeypatch):
     target_path, program_path = temp_research_env
     original_code = target_path.read_text(encoding="utf-8")
@@ -176,6 +217,9 @@ def test_auto_researcher_rejects_impossible_allocation(temp_research_env, tmp_pa
     assert result["history"][0]["status"] == "failed_validation"
     assert result["optimized"] == result["baseline"]
     assert result["improvement"] == 0.0
+    assert result["rsi_measurements"]["verification_signal_class"] == "execution_feedback"
+    assert result["rsi_measurements"]["absolute_gain"] == 0.0
+    assert result["rsi_measurements"]["production_rsi_eligible"] is False
     assert not any(op["operation"] == "commit" for op in runner.planned_operations)
     assert target_path.read_text(encoding="utf-8") == original_code
     assert researcher.working_target_path.read_text(encoding="utf-8") == original_code

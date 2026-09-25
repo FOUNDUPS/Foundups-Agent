@@ -22,10 +22,14 @@ mapped/network storage, ancestor links and hostile path replacement are not
 confined by this helper, and synchronous filesystem latency has no hard bound.
 
 Output is `unknown` with a fixed reason, or `unverified_diagnostic` with attempts,
-outcome counts, reported fitness delta and file age. Independent verification,
-retained improvements and actual resource usage remain `None` even if the input
-claims otherwise. This checks displayed accounting, not economic validity or
-the complete report/proposal/program provenance.
+outcome counts, reported fitness delta, verification-signal class and file age.
+The reader now requires a consistent `wre_rsi_measurements.v1` bundle and
+classifies this producer as `execution_feedback`; it rejects stronger
+self-asserted classes, independent/held-out claims, production-RSI eligibility,
+or non-null verification/retention/resource/rollback/generation evidence.
+Independent verification, retained improvements and actual resource usage remain
+`None`. This checks displayed accounting and RSI truth labels, not economic
+validity or the complete report/proposal/program provenance.
 
 `print_research_report_summary()` reads `WRE_RESEARCH_REPORT_PATH` and
 `WRE_RESEARCH_BASELINE_SHA256`, then prints sanitized advisory output without raw
@@ -160,6 +164,7 @@ available an aborted mapping is published before propagation.
 | `proposal_inputs` | Per-invocation ordered list of `{iteration, proposal_input_sha256}` for nonempty text reaching candidate preparation. SHA-256 covers returned Unicode content encoded as UTF-8 before scratch write/diff; no raw proposal content is added to this field |
 | `program_inputs` | Ordered local attempted-call records: `{iteration, call_ordinal, program_input_sha256, identity_error}`; ordinal starts at one per invocation. Digest covers the rendered instruction text used in that call, encoded as UTF-8 |
 | `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
+| `rsi_measurements` | `wre_rsi_measurements.v1`: verification class, baseline/best fitness, absolute/relative gain, candidate/outcome counts and explicit unknowns for independent verification, resource usage, activation rollback and successive-generation gain. Current AutoResearcher class is `execution_feedback`, not formal verification; `production_rsi_eligible=false`. |
 
 Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
 `crashed`. History/TSV record missing proposals with blank metric cells. `crashed`

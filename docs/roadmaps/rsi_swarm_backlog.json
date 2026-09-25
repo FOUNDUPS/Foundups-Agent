@@ -2,6 +2,23 @@
   "schema_description": "Non-executable audit planning records; not a new WRE runtime schema",
   "baseline_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
   "created_on": "2026-09-09",
+  "rsi_measurement_contract": {
+    "updated_on": "2026-09-25",
+    "normative_source": "WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md#42-verification-hierarchy-and-rsi-measurement-contract",
+    "machine_verification_order_weak_to_strong": [
+      "intrinsic_signal",
+      "learned_judge",
+      "execution_feedback",
+      "formal_verifier"
+    ],
+    "human_research_judgment": "direction_setting_not_automatically_substituted",
+    "runtime_producer": "modules/infrastructure/wre_core/src/wre_auto_researcher.py",
+    "runtime_consumer": "modules/infrastructure/wre_core/src/dashboard_alerts.py",
+    "report_schema": "wre_rsi_measurements.v1",
+    "current_signal_class": "execution_feedback",
+    "production_rsi_eligible": false,
+    "gate_effect": "measurement_truth_only_no_G2_G5_advance"
+  },
   "dispatchable": false,
   "packets": [
     {

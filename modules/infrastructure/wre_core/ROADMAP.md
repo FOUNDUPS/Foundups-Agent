@@ -1,5 +1,26 @@
 # WRE Core Roadmap
 
+## RSI verification hierarchy and measurement contract — 2026-09-25
+
+WSP 48 now adopts the research verification hierarchy: intrinsic signals <
+learned judges < execution feedback < formal verifiers, while human research
+judgment remains the unresolved direction-setting rung. The current
+AutoResearcher is truthfully classified as **execution feedback**.
+
+Every AutoResearcher invocation now emits a persisted `wre_rsi_measurements.v1`
+bundle containing baseline/best fitness, absolute/relative gain, evaluator and
+outcome counts, and explicit unknowns for independent verification, resource
+usage, activation rollback and successive-generation gain. The dashboard
+consumes and validates this bundle instead of treating a raw fitness delta as
+an RSI claim.
+
+This closes a measurement/labeling gap only. It does **not** close G2-G5.
+Next RSI closure work remains: independent authenticated evaluator + held-out
+cases, receipt-backed resource usage, governed activation/canary rollback, then
+multiple successive generations showing retained measured benefit under fixed
+criteria.
+
+
 ## Advisory research display — 2026-09-24
 
 The planned launch seam now consumes an explicitly selected local ROC report in

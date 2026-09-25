@@ -349,16 +349,80 @@ Observation -> Analysis -> Enhancement -> Validation -> Integration -> Assessmen
 - **Validation Management**: Coordination of testing and validation processes
 - **Integration Orchestration**: Safe deployment of validated enhancements
 
-### 4.2 Enhancement Metrics
+### 4.2 Verification Hierarchy and RSI Measurement Contract
 
-**Measurement Framework**: Quantifiable indicators of system improvement.
+**Research alignment (2026-09-25):** The operational measurement contract follows
+the verification hierarchy summarized in Chen, Wang & Qu, *Recursive
+Self-Improvement in AI: From Bounded Self-Refinement to Autonomous Research
+Loops* (arXiv:2607.07663). Demonstrated self-improvement strength depends on the
+quality of the verification signal. A model's confidence is not equivalent to an
+executed test, and an executed test is not equivalent to a formal proof.
 
-#### 4.2.1 Key Performance Indicators
-- **Autonomy Index**: Measure of independent decision-making capability
-- **Efficiency Metrics**: Resource utilization and processing speed improvements
-- **Error Reduction Rate**: Systematic decrease in failure patterns
-- **Capability Expansion**: New functionalities successfully integrated
-- **Quantum Coherence**: Enhanced entanglement state measurements
+#### 4.2.1 Verification hierarchy
+
+For machine-consumable evidence, strength increases in this order:
+
+1. **Intrinsic signals** — confidence, likelihood, self-consistency. Cheapest and
+   most gameable. Never sufficient for promotion.
+2. **Learned judges** — reward models, LLM-as-judge, rubrics. Useful but bounded
+   by the judge and itself an optimization target.
+3. **Execution feedback** — tests, compilers, simulators and benchmarks. More
+   reliable, but fixed tests/benchmarks can be gamed and may be incomplete.
+4. **Formal verifiers** — proof checkers, type systems or equivalent
+   sound-by-construction checks for the property actually verified.
+
+**Human research judgment** remains above this machine hierarchy for choosing
+what is worth improving and what should count as "better". WRE MUST NOT label a
+machine signal as a substitute for research-direction judgment unless an
+independently validated contract demonstrates that substitution for the
+declared scope.
+
+Every evaluator receipt MUST identify its actual signal class. A lower-rung
+signal MUST NOT be relabelled as a stronger one because an agent is confident,
+because a test passed, or because the same system produced both candidate and
+judgment.
+
+#### 4.2.2 Minimal RSI measurement bundle
+
+Every measured improvement loop MUST retain, at minimum:
+
+- `verification_signal_class`;
+- baseline metric and best candidate metric;
+- absolute and relative gain;
+- number of candidate evaluations;
+- accepted, rejected, invalid and crashed candidate counts;
+- whether evaluation is independently produced;
+- whether held-out evaluation exists;
+- authenticated resource usage when available;
+- activation/canary rollback evidence when activation occurs;
+- retained-improvement evidence showing whether a later generation benefits;
+- successive-generation gain under fixed correctness/regression criteria.
+
+A local fitness delta is **candidate evidence**, not production RSI. Missing
+independent verification, held-out evidence, resource receipts, activation
+rollback, or retained-generation evidence MUST remain explicit `None`/unknown
+rather than being inferred.
+
+#### 4.2.3 Current WRE AutoResearcher classification
+
+The current WRE AutoResearcher simulator is classified as
+`execution_feedback`. Its local report is produced by the same research process,
+is not a formal verifier, is not independently authenticated, and has no
+held-out evaluator, production activation, or retained-generation proof.
+Accordingly its report MUST keep `production_rsi_eligible=false`.
+
+This classification is a truth boundary, not a criticism of the evaluator.
+Execution feedback is useful for candidate search; it simply cannot by itself
+close G2-G5 or establish production RSI.
+
+#### 4.2.4 System-level indicators
+
+Broader indicators such as autonomy, efficiency, error reduction and capability
+expansion MAY be tracked, but they do not replace the measurement bundle above.
+Research hypotheses such as PQN/rESP or "quantum coherence" remain separate
+experimental variables unless they have an operational definition, a reproducible
+measurement protocol, and independent evidence tying them to the declared
+software outcome.
 
 ### 4.3 Safety Protocols
 
