@@ -489,6 +489,7 @@ def _new_run_report(researcher: WREAutoResearcher, baseline_code: str) -> Dict:
         "baseline_input_sha256": hashlib.sha256(baseline_code.encode("utf-8")).hexdigest(),
         "failure": None, "cleanup_failure": None, "cleanup": "not_performed",
         "independently_verified": None, "retained_improvements": None, "resource_usage": None,
+        "rsi_measurements": None,
     }
 
 
@@ -549,7 +550,66 @@ def _summarize_run(report: Dict) -> Dict:
         iterations_run=report["attempts_started"], attempts_finished=len(history),
         outcome_counts=counts,
     )
+    report["rsi_measurements"] = _build_rsi_measurements(report)
     return report
+
+
+def _build_rsi_measurements(report: Dict) -> Dict:
+    """Emit the minimal RSI measurement bundle used by WRE diagnostics.
+
+    The current AutoResearcher evaluator is execution feedback: it runs a bounded
+    simulator/benchmark-like check over a candidate. It is not a formal verifier,
+    an independent learned judge, a held-out evaluator, or human research judgment.
+    The bundle records that truth instead of promoting a fitness delta into an RSI
+    completion claim.
+    """
+    baseline = report.get("baseline")
+    best = report.get("optimized")
+    baseline_fitness = baseline.get("fitness") if isinstance(baseline, dict) else None
+    best_fitness = best.get("fitness") if isinstance(best, dict) else None
+    absolute_gain = (
+        best_fitness - baseline_fitness
+        if type(baseline_fitness) in (int, float) and type(best_fitness) in (int, float)
+        else None
+    )
+    relative_gain = (
+        absolute_gain / abs(baseline_fitness)
+        if type(absolute_gain) in (int, float)
+        and type(baseline_fitness) in (int, float)
+        and baseline_fitness != 0
+        else None
+    )
+    counts = report.get("outcome_counts") or {}
+    return {
+        "schema": "wre_rsi_measurements.v1",
+        "verification_signal_class": "execution_feedback",
+        "verification_hierarchy_weak_to_strong": [
+            "intrinsic_signal",
+            "learned_judge",
+            "execution_feedback",
+            "formal_verifier",
+        ],
+        "research_direction_judgment": "human_not_substituted",
+        "verification_signal_independent": False,
+        "held_out_evaluation": False,
+        "baseline_fitness": baseline_fitness,
+        "best_fitness": best_fitness,
+        "absolute_gain": absolute_gain,
+        "relative_gain": relative_gain,
+        "candidate_evaluations": report.get("candidate_evaluations"),
+        "accepted_candidates": counts.get("accepted", 0),
+        "rejected_candidates": (
+            counts.get("rejected", 0)
+            + counts.get("failed_validation", 0)
+            + counts.get("crashed", 0)
+        ),
+        "independently_verified": report.get("independently_verified"),
+        "retained_improvements": report.get("retained_improvements"),
+        "resource_usage": report.get("resource_usage"),
+        "activation_rollback_verified": None,
+        "successive_generation_gain": None,
+        "production_rsi_eligible": False,
+    }
 
 
 def _isolated_run_directory(results_dir: Optional[Path]) -> Path:
