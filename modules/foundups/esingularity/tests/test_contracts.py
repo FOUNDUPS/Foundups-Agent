@@ -290,6 +290,7 @@ def test_esingularity_current_council_position_is_packet_aligned_and_multilingua
     for url in (
         "https://yumori.me/vote-no",
         "https://yumori.info",
+        "https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit",
         "https://ppp.yumori.info",
         "https://fin.yumori.info",
     ):
@@ -308,6 +309,8 @@ def test_esingularity_current_council_position_is_packet_aligned_and_multilingua
     assert "/ Atualizado em 23 de setembro de 2026" in switcher
     assert "See the Preparatory Committee’s current request and evidence" in switcher
     assert "Ver o pedido atual e as evidências do Comitê Preparatório" in switcher
+    assert "Policy, economics & reuse evidence (03)" in switcher
+    assert "Evidências de política, economia e reutilização (03)" in switcher
     assert "The budget vote and adoption of the YUMORI proposal are separate decisions." in switcher
     assert "A votação do orçamento e a adoção da proposta YUMORI são decisões separadas." in switcher
 
