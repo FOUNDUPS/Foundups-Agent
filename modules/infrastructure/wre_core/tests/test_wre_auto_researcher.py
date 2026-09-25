@@ -188,7 +188,10 @@ def test_rsi_measurement_bundle_tracks_signal_strength_and_gain():
     assert bundle["relative_gain"] == pytest.approx(0.5)
     assert bundle["candidate_evaluations"] == 4
     assert bundle["accepted_candidates"] == 1
-    assert bundle["rejected_candidates"] == 3
+    assert bundle["rejected_candidates"] == 1
+    assert bundle["invalid_candidates"] == 1
+    assert bundle["crashed_candidates"] == 1
+    assert bundle["no_proposal_attempts"] == 0
     assert bundle["activation_rollback_verified"] is None
     assert bundle["successive_generation_gain"] is None
     assert bundle["production_rsi_eligible"] is False
