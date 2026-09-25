@@ -1,3 +1,13 @@
+## 2026-09-25: RSI verification measurement coverage
+
+- Added focused coverage for `wre_rsi_measurements.v1`: signal hierarchy,
+  execution-feedback classification, fitness gain arithmetic and outcome counts.
+- Dashboard fixtures now carry the measurement bundle and reject inconsistent
+  signal strength, independence, held-out status, production eligibility,
+  direction-judgment substitution and accounting.
+- No test result is claimed here because this documentation/source slice has not
+  yet received CI execution evidence. Publication/CI receipts govern acceptance.
+
 ## 2026-09-24: Advisory research report and startup wiring
 
 - WSP00/15/22/50/62/97; reused `test_dashboard_snapshot_export.py` and AI Overseer's existing `test_preflight_resolution.py`. Final 67 unique cases pass locally and independently (overlapping replays). Initial 63 cases: 7 pass / 56 fail. Independent review added two impossible-gain controls: 63 pass / 2 fail before the consistency repair. Coordinator review then added two Windows mixed-slash UNC controls: 65 pass / 2 fail before lexical drive rejection, followed by 67 passing.
