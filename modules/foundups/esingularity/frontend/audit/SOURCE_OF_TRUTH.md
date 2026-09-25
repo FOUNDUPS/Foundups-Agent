@@ -6,6 +6,37 @@ Campaign correction — 2026-09-13: the operator withdrew the fixed review-perio
 
 Packet/site reconciliation — 2026-09-23: the public eSingularity.ai homepage must attribute the current position to **すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会** and match the current council packet: the committee asks for a NO vote on the budget containing the demolition-preparation project; the former 60-day delay/fixed hold is not the current request; and a NO vote does not itself approve the YUMORI proposal, data-center construction, city investment/debt guarantees, grants, or a non-competitive contract. Current project links are `https://YUMORI.info`, `https://PPP.YUMORI.info` (Proposal 05), and `https://fin.YUMORI.info`. Historical sent messages remain historical records under `/vote-no`; supersession must remain explicit rather than rewriting history.
 
+## Speech-to-text normalization guard
+
+Voice transcription is an input aid, never a source of truth. Before any voice-derived
+text is admitted into a YUMORI/eSingularity document or public surface, normalize and
+verify protected project terms against this ledger and the applicable official source.
+
+Canonical forms:
+
+- Facility/project asset: **旧すかっとランド九頭竜** / **Sukatto Land Kuzuryu**.
+- Civic movement/site: **YUMORI.me**; use **YUMORI** only where the product/document
+  label intentionally omits `.me`. Never emit mixed-case `Yumori`.
+- River/geographic name: **九頭竜川** / **Kuzuryu River**. Reserve **九頭龍** for the
+  monk's spiritual/name context; do not substitute it for the facility or river.
+- Food-area reference: **あわら温泉** / **Awara Onsen** and **湯けむり横丁** /
+  **Yukemuri Yokocho**. Do not convert `yokocho` to "cubicle restaurant."
+- Current school assets: **旧下宇坂小学校** (福井市市波町55-5) and
+  **旧羽生小学校** (福井市大宮町12-31).
+- Compute terms: **COGDC / COG DC** and **AI交番 / AI Koban** according to the
+  surrounding document's established style.
+
+Known STT-corruption forms that must be rejected or manually resolved include:
+`Scott Lando`, `Scottland`, `Kazuri`, `Kazury`, `Kazuru`, `Kuzuri`,
+`Kuzuru`, `Owarasa`, `cubicle restaurant`, and `旧すかっとらんど九頭竜`.
+Do not infer that Chiba is a YUMORI project location; Chiba/Inzai may appear only as
+an explicitly labeled external comparison or market example.
+
+Semantic normalization matters as much as spelling. Speech-derived phrasing must not
+turn a proposal into a confirmed fact: heat recovery, 24-hour operation, rotenburo
+scale, data-center placement/capacity, funding, access, participation, or municipal
+approval remain conditional unless a current cited source establishes otherwise.
+
 > **INTERNAL — NOT A PUBLIC WEBSITE PAGE.** This ledger is the claim-admission
 > gate for eSingularity.ai and the approved knowledge boundary for Red Dog. It
 > links to evidence; it does not replace the signed, filed, or canonical Drive
