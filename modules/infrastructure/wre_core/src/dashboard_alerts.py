@@ -411,7 +411,47 @@ def _research_report_numbers(report):
     if (improvement < 0 or improvement != best - baseline
             or (counts["accepted"] > 0) != (improvement > 0)):
         raise ValueError("inconsistent improvement")
-    return {"attempts": attempts, "outcome_counts": counts, "improvement": improvement}
+
+    rsi = report.get("rsi_measurements")
+    if not isinstance(rsi, dict):
+        raise ValueError("missing RSI measurements")
+    required_rsi = {
+        "schema": "wre_rsi_measurements.v1",
+        "verification_signal_class": "execution_feedback",
+        "research_direction_judgment": "human_not_substituted",
+        "verification_signal_independent": False,
+        "held_out_evaluation": False,
+        "production_rsi_eligible": False,
+        "baseline_fitness": baseline,
+        "best_fitness": best,
+        "absolute_gain": improvement,
+        "candidate_evaluations": report["candidate_evaluations"],
+        "accepted_candidates": counts["accepted"],
+        "rejected_candidates": counts["rejected"] + counts["failed_validation"] + counts["crashed"],
+    }
+    if any(rsi.get(k) != v for k, v in required_rsi.items()):
+        raise ValueError("inconsistent RSI measurements")
+    hierarchy = rsi.get("verification_hierarchy_weak_to_strong")
+    if hierarchy != ["intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"]:
+        raise ValueError("invalid verification hierarchy")
+    relative_gain = rsi.get("relative_gain")
+    expected_relative = improvement / abs(baseline) if baseline != 0 else None
+    if relative_gain != expected_relative:
+        raise ValueError("inconsistent relative gain")
+    if any(rsi.get(k) is not None for k in (
+            "independently_verified", "retained_improvements", "resource_usage",
+            "activation_rollback_verified", "successive_generation_gain")):
+        raise ValueError("self-asserted RSI authority")
+
+    return {
+        "attempts": attempts,
+        "outcome_counts": counts,
+        "improvement": improvement,
+        "verification_signal_class": rsi["verification_signal_class"],
+        "rsi_absolute_gain": rsi["absolute_gain"],
+        "rsi_relative_gain": relative_gain,
+        "production_rsi_eligible": False,
+    }
 
 
 def read_research_report_summary(report_path, expected_baseline_sha256, *, max_age_seconds=86400):
@@ -422,7 +462,9 @@ def read_research_report_summary(report_path, expected_baseline_sha256, *, max_a
     is an unauthenticated age hint, never proof of current execution or benefit.
     """
     result = {"state": "unknown", "reason": "not_configured", "file_age_seconds": None,
-              "independently_verified": None, "retained_improvements": None, "resource_usage": None}
+              "independently_verified": None, "retained_improvements": None, "resource_usage": None,
+              "verification_signal_class": None, "rsi_absolute_gain": None,
+              "rsi_relative_gain": None, "production_rsi_eligible": None}
     if not report_path:
         return result
     try:
@@ -478,7 +520,9 @@ def print_research_report_summary():
             counts = summary["outcome_counts"]
             detail = (f"attempts={summary['attempts']} accepted={counts['accepted']} "
                       f"crashed={counts['crashed']} invalid={counts['failed_validation']} "
-                      f"reported_fitness_delta={summary['improvement']:.6g} "
+                      f"signal={summary['verification_signal_class']} "
+                      f"reported_fitness_delta={summary['rsi_absolute_gain']:.6g} "
+                      f"production_rsi_eligible={str(summary['production_rsi_eligible']).lower()} "
                       f"file_age_seconds={summary['file_age_seconds']:.0f}")
         else:
             detail = "reason=" + summary["reason"]
