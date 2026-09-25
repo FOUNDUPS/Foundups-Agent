@@ -427,7 +427,10 @@ def _research_report_numbers(report):
         "absolute_gain": improvement,
         "candidate_evaluations": report["candidate_evaluations"],
         "accepted_candidates": counts["accepted"],
-        "rejected_candidates": counts["rejected"] + counts["failed_validation"] + counts["crashed"],
+        "rejected_candidates": counts["rejected"],
+        "invalid_candidates": counts["failed_validation"],
+        "crashed_candidates": counts["crashed"],
+        "no_proposal_attempts": counts["no_proposal"],
     }
     if any(rsi.get(k) != v for k, v in required_rsi.items()):
         raise ValueError("inconsistent RSI measurements")
