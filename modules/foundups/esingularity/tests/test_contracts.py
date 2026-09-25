@@ -333,10 +333,10 @@ def test_yumori_stt_protected_vocabulary_has_no_current_surface_artifacts() -> N
             read("app/page.tsx"),
             read("content/yumori-vision.ts"),
             read("components/LanguageSwitcher.tsx"),
-            source_of_truth,
         )
     )
 
+    assert "STT / transcription protected vocabulary" in source_of_truth
     for required in (
         "旧すかっとランド九頭竜",
         "Sukatto Land Kuzuryu",
@@ -347,7 +347,8 @@ def test_yumori_stt_protected_vocabulary_has_no_current_surface_artifacts() -> N
         "旧下宇坂小学校",
         "旧羽生小学校",
     ):
-        assert required in current_surfaces
+        assert required in source_of_truth
+        assert required in (source_of_truth + current_surfaces)
 
     for forbidden in (
         "Scott Lando",
