@@ -69,8 +69,9 @@ export default function Home() {
             <strong>予算判断と、YUMORI案の採否は別の判断です。</strong>
             <p>反対票は、YUMORI案の採用、データセンター建設、市による出資・債務保証、補助金交付、随意契約を承認するものではありません。再利用案の採否は、別途の正式手続、技術・財務検証、地権者・地域との協議、公平な審査を経て判断されるべきだと、本委員会は考えています。</p>
             <div className="scenario-links">
-              <a href="https://yumori.me/vote-no" target="_blank" rel="noreferrer">現在の要請・公開記録 <b>↗</b></a>
-              <a href="https://yumori.info" target="_blank" rel="noreferrer">プロジェクト・根拠資料 <b>↗</b></a>
+              <a href="https://yumori.me/vote-no" target="_blank" rel="noreferrer">公開記録 <b>↗</b></a>
+              <a href="https://yumori.info" target="_blank" rel="noreferrer">プロジェクト概要 <b>↗</b></a>
+              <a href="https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit" target="_blank" rel="noreferrer">政策・経済・再利用エビデンス（03） <b>↗</b></a>
               <a href="https://ppp.yumori.info" target="_blank" rel="noreferrer">PPP/PFI提案資料（05） <b>↗</b></a>
               <a href="https://fin.yumori.info" target="_blank" rel="noreferrer">財務モデル <b>↗</b></a>
             </div>
