@@ -60,7 +60,37 @@ def _research_report(tmp_path, attempts=0):
         "outcome_counts": dict.fromkeys(
             ("accepted", "rejected", "crashed", "failed_validation", "no_proposal"), 0),
     }
+    _sync_rsi_measurements(report)
     return path, report
+
+
+def _sync_rsi_measurements(report):
+    baseline = report["baseline"]["fitness"]
+    best = report["optimized"]["fitness"]
+    gain = report["improvement"]
+    counts = report["outcome_counts"]
+    report["rsi_measurements"] = {
+        "schema": "wre_rsi_measurements.v1",
+        "verification_signal_class": "execution_feedback",
+        "verification_hierarchy_weak_to_strong": [
+            "intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"],
+        "research_direction_judgment": "human_not_substituted",
+        "verification_signal_independent": False,
+        "held_out_evaluation": False,
+        "baseline_fitness": baseline,
+        "best_fitness": best,
+        "absolute_gain": gain,
+        "relative_gain": gain / abs(baseline) if baseline != 0 else None,
+        "candidate_evaluations": report["candidate_evaluations"],
+        "accepted_candidates": counts["accepted"],
+        "rejected_candidates": counts["rejected"] + counts["failed_validation"] + counts["crashed"],
+        "independently_verified": None,
+        "retained_improvements": None,
+        "resource_usage": None,
+        "activation_rollback_verified": None,
+        "successive_generation_gain": None,
+        "production_rsi_eligible": False,
+    }
 
 
 def _write_research(path, report):
@@ -77,6 +107,7 @@ def test_research_display_remains_unverified(tmp_path, outcome):
         report["optimized"]["fitness"], report["improvement"] = 5.0, 2.0
     if outcome == "no_proposal":
         report["candidate_evaluations"] = 0
+    _sync_rsi_measurements(report)
     # A report cannot supply its own independent verification/retention authority.
     report.update(independently_verified=True, retained_improvements=100,
                   resource_usage={"tokens": 0})
@@ -86,6 +117,9 @@ def test_research_display_remains_unverified(tmp_path, outcome):
     assert result["attempts"] == int(outcome is not None)
     assert result["outcome_counts"] == report["outcome_counts"]
     assert result["improvement"] == report["improvement"]
+    assert result["verification_signal_class"] == "execution_feedback"
+    assert result["rsi_absolute_gain"] == report["improvement"]
+    assert result["production_rsi_eligible"] is False
     assert all(result[k] is None for k in (
         "independently_verified", "retained_improvements", "resource_usage"))
     assert result["file_age_seconds"] >= 0
@@ -111,6 +145,23 @@ def test_research_display_invalid_reports_are_unknown(tmp_path, field, value):
     result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
     assert result["state"] == "unknown"
     assert "improvement" not in result
+
+
+@pytest.mark.parametrize("field,value", [
+    ("verification_signal_class", "intrinsic_signal"),
+    ("verification_signal_independent", True),
+    ("held_out_evaluation", True),
+    ("production_rsi_eligible", True),
+    ("absolute_gain", 1.0),
+    ("candidate_evaluations", 99),
+    ("research_direction_judgment", "automated"),
+])
+def test_research_display_rejects_inconsistent_rsi_measurements(tmp_path, field, value):
+    path, report = _research_report(tmp_path)
+    report["rsi_measurements"][field] = value
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unknown"
 
 
 @pytest.mark.parametrize("payload", ["{", "[]", "{\"status\":1,\"status\":2}",
@@ -172,6 +223,8 @@ def test_research_display_is_read_only_and_sanitized(tmp_path, monkeypatch, caps
     dashboard_alerts.print_research_report_summary()
     output = capsys.readouterr().out
     assert "unverified_diagnostic" in output
+    assert "signal=execution_feedback" in output
+    assert "production_rsi_eligible=false" in output
     assert "retained=unknown" in output and "resource_usage=unknown" in output
     assert "PRIVATE-CONTENT" not in output and str(path) not in output
     assert path.read_bytes() == before
