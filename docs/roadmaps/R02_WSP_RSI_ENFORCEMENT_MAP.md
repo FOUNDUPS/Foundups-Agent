@@ -20,6 +20,27 @@ The **test references below are inventory**, not assertions that every reference
 
 Normative source key: [WSP catalog](../../WSP_framework/src/WSP_MASTER_INDEX.md), [WSP 46](../../WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md), [WSP 48](../../WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md), [WSP 95](../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md), [WSP 97](../../WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md). Other numbered references resolve through the catalog. Draft WSP 96 is a design reference; its draft status does not confer enforceable authority. WSP 95 §3.1 supplies the seven production-promotion requirements: exact digests, independent held-out outcome evidence, regression/security evidence, runtime binding, authorized receipt, rollback, and immutable independent lineage. They map to R01/R04/R09–R14/R19 below.
 
+## Verification signal and measurement rule — 2026-09-25
+
+WSP 48 now binds every RSI evaluation to the verification hierarchy used by the
+current RSI literature: `intrinsic_signal` < `learned_judge` <
+`execution_feedback` < `formal_verifier`. Human research judgment remains
+the direction-setting boundary above those machine signals.
+
+A gate may only consume evidence at the class actually produced. Passing tests
+are execution feedback, not formal verification. LLM confidence or
+self-consistency is intrinsic evidence, not an independent judge. A learned
+judge cannot promote its own candidate merely because it outputs a high score.
+
+The minimal cross-gate measurement record is baseline/best value,
+absolute/relative gain, candidate/outcome counts, independent-verification
+status, held-out status, authenticated resource usage where available,
+activation/rollback evidence and successive-generation retained gain. The
+current AutoResearcher emits these measurements but remains
+`execution_feedback`, non-independent, non-held-out and
+`production_rsi_eligible=false`. This improves evidence classification without
+advancing G2-G5.
+
 ## Gate coverage
 
 | Gate | Requirement owners | Current missing proof |
