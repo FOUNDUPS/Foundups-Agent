@@ -16,6 +16,26 @@ and retained-learning gates remain open.
 
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. The hybrid planning refinement is dated 2026-09-11; earlier runtime observations retain their date. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
 
+## Verification hierarchy and measurement checkpoint — 2026-09-25
+
+All RSI dispatches now use the WSP 48 verification vocabulary:
+`intrinsic_signal` < `learned_judge` < `execution_feedback` <
+`formal_verifier`. Human research judgment remains the separate
+direction-setting layer; a worker or evaluator may not self-promote into that
+role.
+
+Every candidate evaluation must preserve the minimal RSI measurements before it
+can be compared across cycles: baseline/best metric, absolute/relative gain,
+candidate/outcome counts, signal class, independent-verification status,
+held-out status, authenticated resource use when available, activation/rollback
+evidence and successive-generation retained gain. Missing fields stay unknown.
+
+The current AutoResearcher emits and the dashboard validates
+`wre_rsi_measurements.v1`. Its simulator is only
+`execution_feedback`, is not independently authenticated or held-out, and
+therefore reports `production_rsi_eligible=false`. Do not route its local
+fitness delta directly into promotion, activation or retained PatternMemory.
+
 ## Research-report startup checkpoint — 2026-09-24
 
 The existing WRE startup seam now reads one explicit local report and expected
