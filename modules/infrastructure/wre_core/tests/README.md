@@ -1,3 +1,13 @@
+## RSI verification measurement contract — 2026-09-25
+
+The AutoResearcher tests now require the canonical `wre_rsi_measurements.v1`
+bundle. Focused assertions cover the verification hierarchy, execution-feedback
+classification, absolute/relative gain, candidate/outcome counts and explicit
+non-eligibility for production RSI. Dashboard tests reject inconsistent or
+self-upgraded signal classes, independent/held-out claims and production-RSI
+eligibility. These tests validate reporting truth only; they do not supply an
+independent evaluator or retained RSI proof.
+
 ## Selected research-report display — 2026-09-24
 
 Extend the existing dashboard export test owner for report parsing/display and
