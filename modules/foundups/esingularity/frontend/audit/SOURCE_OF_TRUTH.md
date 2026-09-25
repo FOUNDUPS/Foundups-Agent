@@ -6,6 +6,20 @@ Campaign correction — 2026-09-13: the operator withdrew the fixed review-perio
 
 Packet/site reconciliation — 2026-09-23: the public eSingularity.ai homepage must attribute the current position to **すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会** and match the current council packet: the committee asks for a NO vote on the budget containing the demolition-preparation project; the former 60-day delay/fixed hold is not the current request; and a NO vote does not itself approve the YUMORI proposal, data-center construction, city investment/debt guarantees, grants, or a non-competitive contract. Current project links are `https://YUMORI.info`, `https://PPP.YUMORI.info` (Proposal 05), and `https://fin.YUMORI.info`. Historical sent messages remain historical records under `/vote-no`; supersession must remain explicit rather than rewriting history.
 
+## STT / transcription protected vocabulary — 2026-09-26
+
+Speech-to-text output is never authoritative for project proper nouns. Normalize against this list before copying transcript text into a current document, website, flyer, press item, or PPP/PFI submission:
+
+- Facility: **旧すかっとランド九頭竜** / **Sukatto Land Kuzuryu**.
+- River/facility geography uses **九頭竜**. The monk's public/spiritual name may use **九頭龍 泰澄**; do not interchange the two kanji forms mechanically.
+- Movement/domain: **YUMORI.me** (not `Yumori` in branded references).
+- Project: **eSingularity**.
+- Compute infrastructure: **COGDC** / **AI交番** as defined by the project.
+- Awara reference: **あわら温泉** and **横丁**; do not convert this to “Owarasa” or “cubicle restaurant.”
+- Current school-node names: **旧下宇坂小学校** and **旧羽生小学校**.
+
+Forbidden STT substitutions on current truth surfaces include `Scott Lando`, `Kazuri`, `Kazury`, `Kuzuri`, `Kuzuru`, `Owarasa`, and `すかっとらんど九頭竜`. Historical quoted material may retain original wording only when explicitly identified as a historical record.
+
 > **INTERNAL — NOT A PUBLIC WEBSITE PAGE.** This ledger is the claim-admission
 > gate for eSingularity.ai and the approved knowledge boundary for Red Dog. It
 > links to evidence; it does not replace the signed, filed, or canonical Drive
