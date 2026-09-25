@@ -324,3 +324,40 @@ def test_esingularity_current_council_position_is_packet_aligned_and_multilingua
     assert "その後撤回" in vote_no
     assert "現在の要請は9月25日の解体準備予算への反対票です。" in vote_no
 
+
+
+def test_yumori_stt_protected_vocabulary_has_no_current_surface_artifacts() -> None:
+    source_of_truth = read("audit/SOURCE_OF_TRUTH.md")
+    current_surfaces = "\n".join(
+        (
+            read("app/page.tsx"),
+            read("content/yumori-vision.ts"),
+            read("components/LanguageSwitcher.tsx"),
+        )
+    )
+
+    assert "STT / transcription protected vocabulary" in source_of_truth
+    for required in (
+        "旧すかっとランド九頭竜",
+        "Sukatto Land Kuzuryu",
+        "YUMORI.me",
+        "eSingularity",
+        "COGDC",
+        "AI交番",
+        "旧下宇坂小学校",
+        "旧羽生小学校",
+    ):
+        assert required in source_of_truth
+        assert required in (source_of_truth + current_surfaces)
+
+    for forbidden in (
+        "Scott Lando",
+        "Kazuri",
+        "Kazury",
+        "Kuzuri",
+        "Kuzuru",
+        "Owarasa",
+        "すかっとらんど九頭竜",
+        "cubicle restaurant",
+    ):
+        assert forbidden not in current_surfaces
