@@ -8,6 +8,20 @@ The FoundUps repository is the canonical project map and current-status authorit
 
 This index exists so agents do not create another document merely because they cannot find an existing one.
 
+## Current-project namespace boundary
+
+The current Fukui program is the **YUMORI × eSingularity.ai × AI Koban** project family. It is distinct from historical eSingularity / Educational Singularity work dating to 2007–2010 and later legacy material.
+
+- Current-project retrieval must start from this index and the current project family, not from a broad Drive search for `eSingularity` alone.
+- Historical eSingularity documents are provenance / long-term memory unless a current canonical document explicitly promotes a historical claim into the active project.
+- A historical title, matching keyword, or later modification timestamp does **not** make a legacy document current authority.
+- Do not bulk-move, rename, delete, or rewrite historical eSingularity material merely to clean current retrieval. Preserve provenance and separate retrieval scope.
+- When historical material is intentionally used, label it `HISTORICAL_SOURCE` with its source/date and verify any claim that is being promoted into current work.
+
+The current mutable working-artifact container is named **CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents**. Its semantic children are `WORK — Correspondence Drafts`, `EDITORIAL — Newsletters & Articles`, `PARTNERS — Partnership & Business Development`, and `ARCHIVE — Superseded Current-Project Drafts`. Discover them live by name; folder IDs are intentionally not encoded here.
+
+Numeric prefixes are reserved for the canonical current-project document spine. Operational containers must use semantic prefixes rather than `01`, `02`, etc.
+
 ## CORE — numbered project spine
 
 These are durable project documents. Preserve their file IDs and update in place rather than creating replacements.
@@ -87,7 +101,9 @@ Drive titles should be English-first so 012 can identify them immediately, with 
 
 Preferred prefixes:
 
-`01–06`, `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, `FIN`, `PRESS`, `PROCLAMATION`, `LANDOWNERS`, `PETITION`, `LEGAL`, `LEGAL-EVIDENCE`, `RESEARCH`, `ARCHIVE`.
+`01–07`, `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, `FIN`, `PRESS`, `PROCLAMATION`, `LANDOWNERS`, `PETITION`, `LEGAL`, `LEGAL-EVIDENCE`, `RESEARCH`, `ARCHIVE`.
+
+Operational folders use semantic prefixes such as `WORK`, `EDITORIAL`, `PARTNERS`, and `ARCHIVE`; do not use numeric prefixes for operational containers.
 
 Avoid generic titles such as `draft`, `new doc`, `research-brief`, `working copy`, or Japanese-only titles at the top level.
 
@@ -95,7 +111,7 @@ Avoid generic titles such as `draft`, `new doc`, `research-brief`, `working copy
 
 Before making a new YUMORI Drive document:
 
-1. Read this index.
+1. Read this index and classify the request as CURRENT_PROJECT or HISTORICAL_SOURCE before searching.
 2. Search Drive by the relevant prefix/role.
 3. Check the repo authority for that domain.
 4. Update an existing authoritative file in place when possible.
