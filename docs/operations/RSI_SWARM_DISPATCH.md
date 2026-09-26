@@ -1,5 +1,22 @@
 # RSI hybrid production line: ticket dispatch and cost control
 
+## Runner lesson checkpoint — 2026-09-27
+
+PR1902 is merged, exact-main-checked and its owned lane retired. Resumed main
+`585c963f92822c6f041d06469ab323ec7846fca3` also preserves PR1903 measurement truth.
+The existing [bridge test README](../../modules/communication/moltbot_bridge/tests/README.md#windows-fixture-runner-lessons--2026-09-27)
+now retains four reviewed Windows fixture corrections, with historical source,
+attempt and successful receipt bindings in the canonical backlog. This 11/P2
+sprint validates documentation only; it runs no test campaign or native job.
+
+Re-observe publication, ownership and eligibility after closure. The remaining
+18/P0 native ticket requires seven resident trust anchors, an admitted effect-use
+binding and independently admitted provenance. Lease implementation already
+exists; the resident resolver currently supplies no authoritative use lease.
+Reuse the current backlog's exact owner/prerequisite evidence rather than adding
+a parallel issuer or treating diagnostics as execution authority. No other next
+action is implied by packet order or by these retained instructions.
+
 ## Manager admission checkpoint — 2026-09-24
 
 PR1901 is merged, main-checked and retired. The existing LinkedIn browser owner

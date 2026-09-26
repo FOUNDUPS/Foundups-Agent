@@ -1,3 +1,8 @@
+## 2026-09-27: Discoverable runner compatibility lessons
+
+- WSP 00/15/22/34/50/84/97 selected 11/P2 documentation retention after PR1902 closure and fresh main/95-peer reconciliation. Existing tests/README and TestModLog now connect four historical failures to their reviewed corrections and evidence, without adding a runner, module or skill.
+- Static-only validation preserves production source, tests and acceptance criteria. Historical fixture passes do not establish OS confinement, native admission or retained learning. The system backlog owns exact evidence and the freshly reconciled next-action blockers.
+
 ## 2026-09-23: Suppress generation acquisition after use-time rejection
 
 - WSP00/6/15/22/50/84/97; C2/I3/D3/Impact3=11/P2. The existing resolver enables the current-generation collector only after signature re-verification and an empty preceding rejection list. Signature truth, rejection diagnostics and the absent effect lease are unchanged.
