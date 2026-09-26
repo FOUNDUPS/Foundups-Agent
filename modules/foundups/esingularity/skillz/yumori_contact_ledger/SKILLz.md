@@ -42,6 +42,19 @@ It does not create a second contact database. Live state remains in:
 
 Repository Skillz own reusable operating rules, not private recipient dumps.
 
+## Drive working-artifact routing
+
+Use Google Drive for mutable human/0102 working artifacts; do not create parallel private drafts in Git.
+
+- Discover the current Drive structure live by folder/file name rather than hard-coding personal Drive IDs.
+- Current eSingularity working hierarchy: `eSingularity — Working Documents` with `01 — Correspondence — Working Drafts`, `02 — Editorial — Newsletters & Articles`, `03 — Partnership & Business Development`, and `99 — Archive — Superseded Drafts`.
+- Substantive unsent stakeholder email drafts that 012 and 0102 are collaboratively revising belong in `01 — Correspondence — Working Drafts`.
+- Partnership strategy/reference material belongs in `03 — Partnership & Business Development`; do not duplicate the live email manuscript there.
+- Gmail remains canonical for sent/thread history. A Drive draft is a working artifact, never proof of send, receipt, approval, or current recipient routing.
+- Before creating a new draft, search Drive for the current stakeholder/topic manuscript and update it in place when appropriate.
+- Preserve private recipient/BCC state in the live CRM/Gmail surfaces, not in public Git.
+- Obvious speech-to-text substitutions may be normalized only against established project vocabulary; genuinely ambiguous identity/term substitutions must be held for 012 clarification.
+
 ## Mandatory execution order
 
 For every substantive YUMORI.me correspondence task:
