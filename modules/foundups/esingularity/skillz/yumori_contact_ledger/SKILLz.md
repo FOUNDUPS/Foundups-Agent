@@ -47,9 +47,11 @@ Repository Skillz own reusable operating rules, not private recipient dumps.
 Use Google Drive for mutable human/0102 working artifacts; do not create parallel private drafts in Git.
 
 - Discover the current Drive structure live by folder/file name rather than hard-coding personal Drive IDs.
-- Current eSingularity working hierarchy: `eSingularity — Working Documents` with `01 — Correspondence — Working Drafts`, `02 — Editorial — Newsletters & Articles`, `03 — Partnership & Business Development`, and `99 — Archive — Superseded Drafts`.
-- Substantive unsent stakeholder email drafts that 012 and 0102 are collaboratively revising belong in `01 — Correspondence — Working Drafts`.
-- Partnership strategy/reference material belongs in `03 — Partnership & Business Development`; do not duplicate the live email manuscript there.
+- Treat broad `eSingularity` search results as mixed-era by default. Current Fukui/YUMORI/AI Koban work and historical Educational Singularity/eSingularity material are separate retrieval scopes; historical material is context/provenance until explicitly promoted by the current project authority.
+- Reserve numeric prefixes for the canonical current-project document spine; operational folders use semantic prefixes.
+- Current eSingularity working hierarchy: `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents` with `WORK — Correspondence Drafts`, `EDITORIAL — Newsletters & Articles`, `PARTNERS — Partnership & Business Development`, and `ARCHIVE — Superseded Current-Project Drafts`.
+- Substantive unsent stakeholder email drafts that 012 and 0102 are collaboratively revising belong in `WORK — Correspondence Drafts`.
+- Partnership strategy/reference material belongs in `PARTNERS — Partnership & Business Development`; do not duplicate the live email manuscript there.
 - Gmail remains canonical for sent/thread history. A Drive draft is a working artifact, never proof of send, receipt, approval, or current recipient routing.
 - Before creating a new draft, search Drive for the current stakeholder/topic manuscript and update it in place when appropriate.
 - Preserve private recipient/BCC state in the live CRM/Gmail surfaces, not in public Git.
