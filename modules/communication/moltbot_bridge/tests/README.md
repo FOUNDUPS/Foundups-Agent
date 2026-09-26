@@ -27,6 +27,37 @@ execution, race-proof isolation or retained benefit. Python guards are diagnosti
 all fixture effects stay in explicit external disposable paths. Exact bindings,
 test receipts and the freshly ranked next action are in the canonical RSI backlog.
 
+### Windows fixture runner lessons — 2026-09-27
+
+The historical PR1877 callback/chain qualification exposed four runner failures
+before product acceptance. Reuse these lessons only after fresh source, runtime
+and effect review; the archived runner pins a retired worktree and historical
+interpreter path and is not a current invocation recipe.
+
+| Failure | Reviewed correction |
+|---|---|
+| Capture initialization had no permitted temporary directory; zero tests ran. | Allocate a fresh owned capture directory before guarded pytest; bind `TEMP`, `TMP`, `TMPDIR` and `tempfile.tempdir`. `--basetemp` alone did not cover capture startup. |
+| Inherited pytest logging wrote outside the owned evidence directory; zero tests ran. | Override `log_file` to an owned artifact path, alongside the fresh capture directory. Preserve the write guard. |
+| Windows subprocess audit supplied a null executable and serialized command line; all 15 fixtures failed before Git launch. | Validate original explicit argv at `Popen` entry, pin the qualified Git executable, and compare audited executable/command line/cwd against the pending launch. Preserve finite operation/target restrictions. |
+| Extended local-drive paths caused 13 denials; replacing `Popen` with a function broke two `asyncio` imports. | Preserve class shape through subclassing. Normalize supported extended local-drive paths before and after resolution, retain owned-path containment and the described UNC/device rejection, and use fresh artifact paths. |
+
+The unchanged 15 unique cases then passed in primary and independent runs, with
+165 real disposable Git commands per run, zero denied events, 16 deselected cases
+and two known configuration warnings. The historical verifier authored the final
+harness corrections; the coordinator separately reviewed them. Product tests
+were authored separately and frozen. This is finite compatibility evidence:
+Python hooks are diagnostics, not OS/process confinement or general Windows
+namespace/race safety. No live provider, native admission, concurrent-worker
+qualification, automatic lesson reuse or retained RSI benefit is established.
+
+Use the existing WRE [isolation gate](../../../infrastructure/wre_core/tests/README.md#isolation-gate),
+[bounded Git I/O tier](../../../infrastructure/wre_core/tests/README.md#bounded-git-io-tier),
+[exact-ID collector](../../../infrastructure/wre_core/src/wre_pytest_exact_id_collector.py)
+and [differential runtime](../../../infrastructure/wre_core/src/wre_test_differential_runtime.py)
+as their respective owners. The [canonical backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json)
+binds preserved attempts, corrections and successful receipts; this documentation
+retention sprint adds no runner or tests and reruns no historical test cases.
+
 ## RSI adapter acquisition and LinkedIn previews
 
 `test_dae_runtime_adapter.py`:28 frozen `test_dae_acquisition_` regressions;

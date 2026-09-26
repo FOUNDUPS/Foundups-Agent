@@ -1873,57 +1873,60 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
-    "selected_action": "linkedin-manager-admission-repair-20260924",
-    "status": "locally_and_independently_validated_publication_pending",
+    "base_commit": "585c963f92822c6f041d06469ab323ec7846fca3",
+    "selected_action": "rsi-runner-lessons-20260927",
+    "status": "documentation_prepared_review_publication_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 3,
-      "deferability": 4,
+      "deferability": 3,
       "impact": 3,
-      "total": 13,
-      "priority": "P1"
+      "total": 11,
+      "priority": "P2"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "linkedin-manager-admission-repair-20260924",
-    "base": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
+    "observation_id": "rsi-runner-lessons-20260927",
+    "base": "585c963f92822c6f041d06469ab323ec7846fca3",
     "self": "0102",
     "role": "architect/coordinator",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Repair manager-result admission before LinkedIn Connect UI",
+    "selected": "Retain reusable bounded Windows test-runner compatibility lessons",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 3,
-      "deferability": 4,
+      "deferability": 3,
       "impact": 3,
-      "total": 13,
-      "priority": "P1"
+      "total": 11,
+      "priority": "P2"
     },
     "previous_closed": {
-      "pr": 1901,
-      "merge": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
-      "record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
+      "pr": 1902,
+      "merge": "34504d84257f2a731514f0b736991fa10cda91bb",
+      "record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json",
+      "binding": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json",
+        "sha256": "c189b7754d4a6fdf797ad1cfdcffefdee56b02b084aadfdfe84f349f1f8e2318"
+      }
     },
     "previous_observation": {
-      "git_ref": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf:docs/roadmaps/rsi_swarm_backlog.json",
+      "git_ref": "585c963f92822c6f041d06469ab323ec7846fca3:docs/roadmaps/rsi_swarm_backlog.json",
       "field": "current_observation"
     },
     "retrieval": {
       "quality": "degraded",
-      "noise": "Scoped owner and fixture reads; ignore historical completion claims.",
-      "ordering": "WSP00/15/97, prior closure and fresh ownership, canonical queue, module contracts/tests and source, manifest owner.",
+      "noise": "Broad inventories were noisy/truncated; narrowed to exact canary paragraph, four historical attempt receipts and existing collector/isolation owners.",
+      "ordering": "WSP00 gate; historical bootstrap; actual WSP15/97/CORE; verified previous closure and fresh main/94peer scope; existing module/test contracts; exact failure corrections.",
       "missing": [
-        "browser_actions/requirements.txt",
-        "browser_actions/memory/README.md",
-        "linkedin_agent/memory/README.md"
+        "modules/communication/moltbot_bridge/requirements.txt",
+        "modules/communication/moltbot_bridge/memory/README.md"
       ],
-      "tier0": "README and INTERFACE present for both owners",
-      "staleness": "Base55d983fb6 and94peer heads unchanged; only owned hygiene delta since qualified sources. Same Holo host/authority mismatch reused.",
-      "duplication": "Reuse existing connection source/result projection,36-case existing test owner and established runner; no new module,skill,test file or scheduler."
+      "tier0": "README and INTERFACE present; no stub needed for documentation-only work.",
+      "staleness": "Historical passes bind retired source/interpreter/runner; never copy as a current runnable command or native runtime proof. Holo failure reused only after unchanged host/authority/source scope check.",
+      "duplication": "Existing WRE exact-ID/differential collectors and bounded Git I/O remain owners; update existing test README, no new runner/skill/module or duplicate manifest-staging guidance."
     },
     "holo": {
       "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
@@ -1935,75 +1938,239 @@
       "repeated": false
     },
     "allocation": {
-      "wsp15": {
-        "complexity": 3,
-        "importance": 3,
-        "deferability": 4,
-        "impact": 3,
-        "total": 13,
-        "priority": "P1"
-      },
-      "execution_plane": "Local source repair with independent fixture verification; no native WRE/model/account admission.",
-      "effort_cost": "One coherent guard, bounded same-file error projection, fixed local+independent tests, standard manifest and existing docs; no provider calls.",
-      "manual_reason": "Deterministic source repair; native model binding/admission remains unverified. Existing fixture and peer verifier are reused.",
-      "verification": "Freeze36 cases before red baseline, candidate and independent same cases. Preserve23 AST compatibility controls. Refresh runtime digest/pins and run established manifest/package/registry checks.",
-      "dialectic": "A status-only guard admits old PENDING work; IDs alone cannot prove current object/freshness. Use pre-call target state plus typed PENDING, matching target/current stored object; no new manager or scheduler. File/class/method must not grow."
+      "execution_plane": "Documentation-only historical lesson retention; no candidate tests, model/provider/service calls or native WRE admission.",
+      "effort_cost": "One short recipe and required existing logs/backlog; static link/hash/source validation and independent review.",
+      "manual_reason": "Evidence interpretation and documentation; native model route remains unverified, local read-only coordinator/verifier sufficient.",
+      "verification": "Each recipe statement bound to preserved failure/correction and successful same15-case receipts; no rerun of historical or blocked tests; exact7doc scope and unchanged production/tests/manifest/registry.",
+      "dialectic": "Do not generalize Python hooks into an OS sandbox or copy a retired interpreter command. Existing shared tooling owns execution; this fills discoverability only."
     },
+    "resume_reconciliation": "Fast-forward clean owned branch: PR1903 verification measurements retained; three YUMORI commits remain external. New PR1906 only esingularity source-of-truth/tests, no seven-file overlap; prior94 heads unchanged. Shared and Holo roots unchanged. Existing runner recipe absent at fresh main.",
     "validation": {
-      "independent_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\independent-review.json",
-        "sha256": "2b17e571baa1aa13d182cd4c53f135a9460d246108d49386ae34bd255988e71a"
+      "method": "Static documentation, historical evidence hash, link, score and unchanged-source verification; independent final review and remote publication recorded externally after preparation.",
+      "lesson_evidence_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\lesson-evidence-review.json",
+        "sha256": "20904e0bff6f6138760d6bf74535c347ba0844ec4d5a4307e429b79081d9a7da"
       },
-      "baseline": {
-        "passed": 25,
-        "failed": 11
-      },
-      "primary_passed": 36,
-      "independent_same_cases_passed": 36,
-      "legacy_deselected": 4,
-      "known_warnings": 2,
-      "manifest_tests": 8,
-      "package_files": 67,
-      "registry_files": 1659,
-      "quarantined": 269,
-      "manifest_binding": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\manifest-binding.json",
-        "sha256": "4530aab50733c8ad576750eec5189586c45c1fece7be65417970e9d9b0e5f62f"
-      },
-      "premature_manifest_attempt": {
-        "passed": 7,
-        "failed": 1,
-        "reason": "Test module loaded old digest pin before generation/pin update completed; preserved, sequential rerun passed.",
-        "log": {
-          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\manifest-tests-premature.log",
-          "sha256": "949e74e276df86d79cb43af3441624d857d6840c8113bd5b44fb83cbae8c362e"
+      "preserved_attempts": [
+        {
+          "attempt": 1,
+          "failure": "Before collection, pytest capture could not find a usable temporary directory because candidate temp writes were outside the owned evidence directory. Zero test cases executed.",
+          "correction": "Allocate a fresh owned capture directory before guarded pytest; set TEMP, TMP, TMPDIR and tempfile.tempdir to it. Pytest basetemp alone did not cover capture initialization.",
+          "refs": [
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt1-failure.json",
+              "sha256": "5a79c99a542fe9ce138f44bc538d96673e64854fc59c9f33cdb736c947be82e7"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt1.log",
+              "sha256": "84af94b6903e8e88da66ea767d507828f94ae411b02f7d4bfb01ca7413c91d7e"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt1.py",
+              "sha256": "7024c2edbaf8d753ac74e92a54091e629f631f46d2bfa2a2849485386fe11dd3"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt2.py",
+              "sha256": "1b1a00bd7bde65d73ecc9c4653f1b80c4fa536d497f9599db1a8b6b5a5ef9a73"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review-v2.json",
+              "sha256": "0c4bd529511662259b7fe0edbf4c24b9a3b1d419f96db917a6e168419b240d5d"
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "failure": "Pytest logging initialization attempted a file write outside the owned evidence directory before tests executed.",
+          "correction": "Supply an explicit owned pytest log_file override and a fresh capture directory; keep the write guard and acceptance criteria.",
+          "refs": [
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt2-failure.json",
+              "sha256": "beb28de0393c03ef510d7b97c923c83f2d9cbf12aca8ac4ad277d242d78d6158"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt2.log",
+              "sha256": "3f5ce204a284713194828663da548a71f6cc7b9e6926b4f0f9c1f8b9edac4b15"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt2.py",
+              "sha256": "1b1a00bd7bde65d73ecc9c4653f1b80c4fa536d497f9599db1a8b6b5a5ef9a73"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt3.py",
+              "sha256": "98fc8f08b77bf5ccf835832351c74938c974cc3617a9a8a2f6d82214043847c2"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review-v3.json",
+              "sha256": "e87d5eac869a07c5b2723be7fadeabe3a08bfdef26606c39d21212275a44a4c7"
+            }
+          ]
+        },
+        {
+          "attempt": 3,
+          "failure": "All 15 selected cases failed in fixture setup before the first Git launch; Windows audit executable was None and command arguments were serialized text, contrary to the original audit-handler assumptions.",
+          "correction": "Validate the original explicit argv list at Popen entry, inject the qualified Git executable, then compare audited executable, serialized commandline and cwd to that pending launch. Preserve existing finite disposable Git operation/target restrictions.",
+          "refs": [
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt3-failure.json",
+              "sha256": "4e197311a83898f2f0c6c864f8e2da7f2d7e93d9593b9fe4ee7ea36e0c084c52"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt3.log",
+              "sha256": "32289fb6a0508bdfac5450936060461c9e36415da7ac294de4de22b982221b39"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt3.xml",
+              "sha256": "8ebb00e127c01a71459aad6fb18bebc68013add8642020a51556d5f759918baa"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt3-invocation.json",
+              "sha256": "e232f6612de88ebff19c0b84df6f1136c6d09fe030107df5412439033d2dafd6"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt3.py",
+              "sha256": "98fc8f08b77bf5ccf835832351c74938c974cc3617a9a8a2f6d82214043847c2"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt4.py",
+              "sha256": "59f81ab3d7e4e90659e6f8a1096411352e3195bc8a99f2f01b45d5ec18d5cba6"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review-v4.json",
+              "sha256": "18bbdc0aaef5b568ae09000b57024bbe81485dc31eeef242dd65799337e79abb"
+            }
+          ]
+        },
+        {
+          "attempt": 4,
+          "failure": "All 15 cases failed in fixture setup/imports: 13 extended-local-drive write denials and two callback-witness import failures after replacing Popen with a function (asyncio subclasses it).",
+          "correction": "Preserve Popen class shape with a subclass. Normalize supported local-drive extended paths before and after resolve, retain owned-directory containment, reject the described UNC/device namespaces, and use fresh v5 artifact paths.",
+          "refs": [
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt4-failure.json",
+              "sha256": "177499f758b7941b0d80b433765c889fe090daf74597ea1b14d2b0e8ebd70e15"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt4.log",
+              "sha256": "8dc2b9ecc863e436297861a6b8f81a3566cbeb4aa66bd67d22f7d2ec8f05ed07"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt4.xml",
+              "sha256": "1201721c7c60698ddd43fe9a4f0a59048a2fe82fd7c6c4c3bd8aeb90ea7fab8d"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt4-invocation.json",
+              "sha256": "d2b8eacc3e8bcfd3dea6a5d804301c2ffe2c7e452c35a06162ed2e98d32f8055"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt4.py",
+              "sha256": "59f81ab3d7e4e90659e6f8a1096411352e3195bc8a99f2f01b45d5ec18d5cba6"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests.py",
+              "sha256": "03747a177ba52dd5843420fe32628994d38f2603eac5999e64598beb589147c9"
+            },
+            {
+              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review.json",
+              "sha256": "8c25d4b026608779b94d7e6a80d091a263052bff72c4c0de502fb2b8751afb50"
+            }
+          ]
         }
+      ],
+      "historical_successful_proof": {
+        "counts": {
+          "primary": {
+            "passed": 15,
+            "failed": 0,
+            "errors": 0,
+            "skips": 0,
+            "git_commands": 165,
+            "denied_events": 0
+          },
+          "independent": {
+            "passed": 15,
+            "failed": 0,
+            "errors": 0,
+            "skips": 0,
+            "git_commands": 165,
+            "denied_events": 0
+          }
+        },
+        "unique_cases": 15,
+        "primary_independent_identical_cases": true,
+        "source_test_binding_maps_identical": true,
+        "refs": [
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\canary-test-freeze.json",
+            "sha256": "5ff002c0e31c1af96ec36873ac0ef745307b723c881c67896f576f50b87de73e"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests.py",
+            "sha256": "03747a177ba52dd5843420fe32628994d38f2603eac5999e64598beb589147c9"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-tests.xml",
+            "sha256": "aa3d4063c6420a2a20c14b342398f177c859e9c0784aa8f7655a183a2cc277f3"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-tests.log",
+            "sha256": "6cce0179c3894f0784c39333573e8c2f963387339c45a2f201d23b62316925d6"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-invocation.json",
+            "sha256": "1cadb5eb2c40c22753ed8af4e364a09a10bf52c23d56751effac426e685a2f1e"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-tests.xml",
+            "sha256": "e3efbaaa60e877fc1ca151bc387b2de0e71a1f5b6758ea04cd270b51cd88ad06"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-tests.log",
+            "sha256": "5f51a4335c0f4282d28886753b02dfccde1074df56dd413106b7b6d1f537ca84"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-invocation.json",
+            "sha256": "d86a2ad9d615c4ec2c7c02b643568b44056298a5c1adef22dd49ad5e75577198"
+          },
+          {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-review.json",
+            "sha256": "df197cdee2c78ebe15554c1f38dec1be05c32b8c493135a2dd4c5b0b208dbdef"
+          }
+        ]
       },
-      "partial_index_manifest_attempt": {
-        "passed": 7,
-        "failed": 1,
-        "reason": "Only extension pin was staged; source/manifest/pins now staged coherently before final validation.",
-        "log": {
-          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\manifest-tests-partial-index.log",
-          "sha256": "8d2f0c3c96700a91be0eebb5efe86ecccf7401ebcae72d022a8fac7a833f51ea"
-        }
-      },
-      "source_size": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\source-size.json",
-        "sha256": "906315c2ead45bfcbcc1779698cbe328ffae9250e0ed130aa65fa245fa9a0a37"
+      "historical_limits": [
+        "Historical runner is pinned to C:/Python312/python.exe and an already retired worktree, not the current qualified interpreter/worktree. Do not publish its old command as a current invocation.",
+        "All four failures are harness/fixture compatibility evidence, not failed product acceptance. Retain original failure logs and unchanged frozen oracles.",
+        "Fifteen unique synthetic cases passed twice, not thirty unique cases. Sixteen deselected and two configuration warnings are historical limits.",
+        "165 disposable Git commands per successful run are real effects under external fixture paths; Python audit guards are not OS/process confinement or generic command authorization.",
+        "No live provider, native admission, retained learning, automatic reuse, concurrency or Windows path security certification.",
+        "Historical verifier authored v4/v5 harness compatibility corrections; coordinator separately reviewed them. Product tests were authored by the other agent and frozen.",
+        "Fresh target/source/runtime/effect review is required before adapting these lessons to another test run. No paused lineage/event-store lane accessed."
+      ],
+      "new_tests": 0,
+      "historical_tests_rerun": 0,
+      "final_review_record": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-review.json",
+      "static_validation_record": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\validation.json",
+      "preserved_static_check_failure": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\static-validation-attempt1.json",
+        "sha256": "9fc6581b492de60f7ec6dcc936496abd862cc05e95606ba60dff6651762dff10"
       }
     },
     "owner_reconciliation": {
       "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\entry.json",
-        "sha256": "6c91f4d985886333af3eb3581f3d24a0c9f0455dfe2aec5add9960c6a31efdca"
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\entry.json",
+        "sha256": "dd555482bc60f1398c64849185ef2ac13418217cee03e551fa78ab4b2f36a37e"
       },
-      "peer_heads": 94,
+      "resume": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\resume-observation-20260927.json",
+        "sha256": "af75edec566af4f60c71045ff4a9f188ecec20c6de399200fa15e8892e9cc4da"
+      },
+      "peer_heads": 95,
       "shared_preserved": true
     },
     "publication": {
-      "state": "not_yet_published_at_document_commit",
-      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json"
+      "state": "prepared_for_independent_final_review_and_publication",
+      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2018,7 +2185,13 @@
             "priority": "P0"
           },
           "state": "blocked",
-          "dependency": "Seven resident trust anchors/absent effect lease and independently admitted production provenance"
+          "dependency": "Seven resident trust anchors and admitted effect-use/provenance binding remain. Existing lease infrastructure is present; the resident resolver supplies authoritative_use_lease=None.",
+          "next_step": "After existing owners supply the missing authentic authority/effect prerequisites, re-observe/score and admit exactly one existing R06-R09 bounded artifact ticket with independent verifier and simulated entitlement. Do not open a generic orchestrator or implement another lease/consumer framework now.",
+          "blocker_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\next-action-review.json",
+            "sha256": "c466cfc76d642c686b8fd1c1212df7d0f03a9165050530497351d01c8a881db8"
+          },
+          "resume_prerequisite": "Independently admitted verifiers/provenance for the seven named anchors, authentic current-generation evidence and a peer-authenticated effect-bound use lease wired through the existing resolver/valve path. Then re-observe ownership and qualify one bounded artifact ticket; do not fabricate positive authority fixtures as native evidence."
         },
         {
           "task": "Qualify resident canary callback reachability and direct chain evidence",
@@ -2061,6 +2234,49 @@
           }
         },
         {
+          "task": "Establish one complete consumed-profile boundary for AutoResearcher comparisons",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 15,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1898",
+          "source": "Existing wre_research_evaluator.py, wre_auto_researcher.py and unified_sustainability.py owners",
+          "dependency": "Verified PR1898 merge/main checks and owned closure are recorded in the existing closure receipt.",
+          "next_step": "Do not repeat completed profile repair; preserve its explicit ABA limit and distinguish diagnostic reporting from admitted retained outcomes.",
+          "effort_cost": "Moderate shared-source/interface repair and independent regression; no paid model required. D4: observed false improvement blocks trusting next research comparison.",
+          "limits": "Local deterministic comparison only; no economic-validity, oracle authentication, native execution, promotion or retained-learning claim.",
+          "qualification": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\independent-review.json",
+            "sha256": "246269b95a2cd6de67970d04a8c044f5b2644329bcc4b1abf80dce6bc89b9c5e",
+            "state": "actual_profile_drift_qualified_not_repaired"
+          },
+          "preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-preparation.md",
+            "sha256": "65349b3e6ff3cdd5662783e10acda39b3c4b69016e323caf337eb7b9911f87c7",
+            "state": "source_only_not_implemented"
+          },
+          "architecture_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-preparation-review.json",
+            "sha256": "7a8d6995f85e505d9968c96de4f56ad25f149375d815570df465c3559cb508c3",
+            "recommended_option": "explicit drift rejection; immutable consumption/concurrency remain out of scope"
+          },
+          "oracle_preparation_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-oracle-review.json",
+            "sha256": "f0b598cea756a1036781ad3a158af2d5d6f2375b07c58ac03632e21a179870cc",
+            "state": "positive_control_arithmetic_qualified_no_product_test"
+          },
+          "result": "Persistent consumed-profile drift rejects; genuine improvement passes. Explicit ABA case remains a limit, not immutable execution.",
+          "closure": {
+            "pr": 1898,
+            "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\final-accounting.json"
+          }
+        },
+        {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
           "wsp15": {
             "complexity": 3,
@@ -2072,7 +2288,8 @@
           },
           "state": "contract_specified_domain_policy_blocked",
           "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\next-role-source-audit.json",
-          "next_step": "Obtain explicitly delegated proof.verify issuer/scope/independence/revocation policy before integration; R24 records prospective existing-owner handoff. Qualify persistence separately without creating authority."
+          "next_step": "Obtain explicitly delegated proof.verify issuer/scope/independence/revocation policy before integration; R24 records prospective existing-owner handoff. Qualify persistence separately without creating authority.",
+          "resume_prerequisite": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy."
         },
         {
           "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
@@ -2117,7 +2334,149 @@
           "state": "blocked_pending_product_owner_and_merge_deployment_boundary",
           "source": "modules/foundups/gotjunk/frontend/package-lock.json::packages[node_modules/protobufjs]",
           "next_step": "Reconcile exact overlapping heads with existing product owner; choose one narrowly scoped patch-version lock candidate satisfying the advisory and existing semver constraints, validate graph/integrity and separately authorized isolated npm ci/build compatibility. No PR merge until deployment effects and rollback acceptance are explicitly covered. Do not repeat the completed source qualification.",
-          "dependency": "Product metadata names 012; no named active lane or Dependabot authorship proves deploy authority. Existing module-wide main push workflow can deploy a lock or documentation change. Current read-only task authorizes neither installs/builds nor merge/deploy."
+          "dependency": "Product metadata names 012; no named active lane or Dependabot authorship proves deploy authority. Existing module-wide main push workflow can deploy a lock or documentation change. Current read-only task authorizes neither installs/builds nor merge/deploy.",
+          "resume_prerequisite": "Existing product owner resolves overlapping heads and explicitly covers deployment/rollback and bounded install/build effects before a GotJunk lock change; do not repeat its source qualification."
+        },
+        {
+          "task": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1894",
+          "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+          "dependency": "Closed by PR1894; exact-head PR and main checks passed; owned lane retired. Domain issuer and WRE delivery remain separate prerequisites.",
+          "next_step": "No further atomicity sprint work; preserve verified closure evidence and select the highest eligible current task.",
+          "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
+          "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend.",
+          "evidence": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\independent\\receipt.json",
+            "sha256": "70f82de7ad9460a2664ec6dabdcff0f92fd1c5dd780d68ea3ddef73f8c2cb9c2"
+          },
+          "closure": {
+            "pr": 1894,
+            "merge": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Freeze consumed cost-catalog values per AutoResearcher invocation",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1896",
+          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
+          "dependency": "Closed PR1896; exact PR/main checks and owned-lane retirement verified.",
+          "next_step": "No further cost-only repair; preserve qualified behavior in full-profile work.",
+          "limits": "Cost-catalog comparability only; other mutable ROI economics and concurrent host mutation are not full oracle/environment identity. No unused hash, provider, native admission, activation or retained-learning claim.",
+          "effort_cost": "Small existing-owner interface/loop extension and fixed regressions plus independent replay; no external spend. Higher14/P1 than adjacent12/11; native18/domain14/product14 retain external prerequisites.",
+          "preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\next-repair-preparation.md",
+            "sha256": "18631256b2adb8ef58fc9b7c1949ee9d5880c524216feb1bd9fc3ec50b6b7ef9",
+            "state": "source_preparation_only_no_repair_executed"
+          },
+          "result": "One invocation consumes fixed cost values/names.22focused and136existing cases pass; no complete oracle/profile claim.",
+          "closure": {
+            "pr": 1896,
+            "merge": "fa2972b2015a305ad7428fa78fe1893a116919d4",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-cost-snapshot\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Qualify remaining ROC evaluation assumptions as one comparison profile",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1897",
+          "source": "modules/infrastructure/wre_core/src/wre_research_evaluator.py; modules/foundups/simulator/economics/unified_sustainability.py and consumed economics leaves",
+          "dependency": "Verified merge cdd80ef; ten PR checks/main CI/CodeQL passed and owned lane retired.",
+          "next_step": "Do not repeat historical profile qualification; preserve exact observations in PR1897.",
+          "limits": "Synthetic local qualification only; no economic-validity, authenticated oracle, native/runtime admission or retention authority.",
+          "effort_cost": "Moderate source/oracle qualification plus independent replay; no provider spend. Core14/P1 outranks adjacent12/11 while native18/domain14/product14/backend13 remain gated.",
+          "preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-cost-snapshot\\next-profile-preparation.md",
+            "sha256": "d82fa5fec48edb85a77b98f08e9396316dfc894c5b335dc27112de643b94b5d5",
+            "state": "historical_source_preparation_followed_by_this_qualification"
+          },
+          "preparation_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-cost-snapshot\\next-profile-review.json",
+            "sha256": "a0e8dc98a7dc53c88aa3ec2e6e79f40ade76c78fb8cbe6f1ee58ac2cba28666f",
+            "state": "independent_source_and_arithmetic_review_only_no_tests_executed"
+          },
+          "result": "Seven isolated plus one combined ambient profile changes produce five-point false improvement with identical text; producer/evaluator unchanged.",
+          "closure": {
+            "pr": 1897,
+            "merge": "cdd80ef734770f625079dfa0133f2acfad7da36c",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Determine and qualify the intended existing WRE diagnostic/outcome consumer boundary for ROC reports",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "source_adjudication_complete_no_runtime_handoff_or_retention_verified",
+          "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
+          "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
+          "next_step": "Source adjudication complete. Do not repeat the known missing-caller audit or add an unconsumed adapter. Advance only when existing upstream runtime admission, independent verification and publication evidence supply an actual authorized handoff.",
+          "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
+          "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
+          "independent_preparation_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-action-review.json",
+            "sha256": "ec7291721f8977819c564d1141dbece16826e88a621785eb045ca6ccb88387d7"
+          },
+          "alternatives": [
+            {
+              "task": "Immutable profile consumption",
+              "decision": "defer automatic rewrite; retain ABA limit until actual admitted workload requires stronger isolation"
+            },
+            {
+              "task": "Parent program/oracle/environment identity",
+              "decision": "qualify at intended consumer; avoid another disconnected hash or unused API"
+            },
+            {
+              "task": "LinkedIn manager-result qualification12/P2",
+              "decision": "executable adjacent fallback after core selection, subject to fresh ownership"
+            },
+            {
+              "task": "Parity diagnostics12/P2",
+              "decision": "consumer not bound; avoid unconsumed receipt API"
+            },
+            {
+              "task": "Native admitted ticket18/P0",
+              "decision": "blocked by existing trust/effect prerequisites; do not bypass"
+            }
+          ],
+          "handoff_preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-preparation.md",
+            "sha256": "f85a68db4ff155ab9d9a286c4f06d3508cb363c8c2b376fd2470286770ca0b8d",
+            "state": "source_only_not_an_executed_second_sprint"
+          },
+          "handoff_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-review.json",
+            "sha256": "b000772daa0807a2f1ddda747bc9250cf8e25ca80568dab36138c54c81201615"
+          },
+          "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted.",
+          "resume_prerequisite": "Actual authorized upstream runtime handoff, independent evaluation/resource evidence and publication evidence become available for an existing outcome consumer; advisory display does not supply retention authority."
         },
         {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
@@ -2145,7 +2504,8 @@
             "priority": "P1"
           },
           "state": "deferred_qualification",
-          "dependency": "Actual PostgreSQL runtime/admission not established; SQLite-only rejection now explicit"
+          "dependency": "Actual PostgreSQL runtime/admission not established; SQLite-only rejection now explicit",
+          "resume_prerequisite": "An admitted disposable PostgreSQL runtime and defined parity acceptance become available."
         },
         {
           "task": "LinkedIn dry-run boundary qualification",
@@ -2196,6 +2556,158 @@
           }
         },
         {
+          "task": "Qualify canary PatternMemory receipt, canonical readback and context projection with finite disposable evidence",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1882",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
+          "dependency": "Only the synthetic canary PatternMemory receipt/readback projection is closed: exact reviewed tree merged, all10 PR checks and exact-merge CI/CodeQL passed. Authenticated activation, native execution and retained benefit remain separate.",
+          "next_step": "Do not repeat synthetic PatternMemory projection qualification; freshly re-score remaining lineage and execution prerequisites before the next core action.",
+          "closure": {
+            "pr": 1882,
+            "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1882",
+            "merge": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8"
+          }
+        },
+        {
+          "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1884",
+          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
+          "dependency": "Exact reviewed tree merged at228ecbe0; PR/main checks passed; owned lane retired.",
+          "next_step": "Do not repeat closed qualification."
+        },
+        {
+          "task": "Record actual per-backend-call rendered program-text diagnostic identity",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1887",
+          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
+          "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; before this repair, the report had no program-consumption field.",
+          "next_step": "MainCI/CodeQL successful at47d6269; exact reviewed tree merged, owned lane retired; do not repeat tests.",
+          "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
+          "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
+        },
+        {
+          "task": "Qualify AutoResearcher comparison consistency across mutable evaluator dependencies",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1895",
+          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_run_loop; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
+          "dependency": "Closed PR1895, exact PR/main checks and lane retirement verified.",
+          "next_step": "No further characterization work; preserve historical acceptance evidence.",
+          "limits": "Dry-run synthetic research qualification only; no paid calls, automatic commit, runtime authority or retained improvement. Do not repeat the closed single-evaluator sensitivity test or add an unused hash field.",
+          "effort_cost": "Small existing-owner test/effect review plus independent replay; no external spend. This core RSI comparison outranks lower adjacent12/P2 work after blocked native18/domain14/product14 and backend13 are excluded.",
+          "preparation": {
+            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\research-comparison-preparation.md",
+            "sha256": "49503a578bb85e16c17d73dd689e758877cdfa8bd5227cc4b1b0bfb45b8a08ca",
+            "status": "source_inspection_only_no_research_execution"
+          },
+          "result": "Stable same-text proposal rejects; dependency-only changed cost accepts with identical text digest, improvement975/6592. Existing producer explicitly does not claim independent retention. Three fixed cases, no production change.",
+          "closure": {
+            "pr": 1895,
+            "merge": "6a237b56af4750c866191c91d75c4de4eb87df11",
+            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Wire advisory AutoResearcher report display into existing WRE startup owner",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 4,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1899",
+          "dependency": "Explicit local report selection and expected baseline identity, no runtime admission or retention grant",
+          "next_step": "Closed in PR1899 with PR/main checks and lane retirement; do not repeat the display implementation/qualification. Admitted campaigns, runtime identity and retained outcome acceptance remain separate dependencies.",
+          "effort_cost": "One bounded parser/display integration, two existing test owners, no provider spend. C3 integration, I3 launch visibility, D3 current launch plan, impact4 reusable diagnostics.",
+          "closure": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json"
+        },
+        {
+          "task": "Repair manager-result admission before LinkedIn Connect UI",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 4,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1902",
+          "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
+          "dependency": "Exact reviewed tree, ten PR checks, main CI/CodeQL and owned-lane retirement verified.",
+          "next_step": "Do not repeat this closed guard repair.",
+          "effort_cost": "Small existing-owner guard/helpers plus fixed acceptance and unchanged regressions/backend binding; local CPU only.",
+          "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim.",
+          "validation": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\independent-review.json",
+            "sha256": "2b17e571baa1aa13d182cd4c53f135a9460d246108d49386ae34bd255988e71a"
+          },
+          "closure": {
+            "pr": 1902,
+            "merge": "34504d84257f2a731514f0b736991fa10cda91bb",
+            "record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json",
+            "binding": {
+              "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json",
+              "sha256": "c189b7754d4a6fdf797ad1cfdcffefdee56b02b084aadfdfe84f349f1f8e2318"
+            }
+          }
+        },
+        {
+          "task": "Remove credential-shaped examples from existing LinkedIn module instructions",
+          "wsp15": {
+            "complexity": 1,
+            "importance": 4,
+            "deferability": 5,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1901",
+          "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
+          "evidence": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
+            "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
+          },
+          "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
+          "next_step": "Do not repeat source redaction; account validity/rotation remains outside this closure.",
+          "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
+          "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3.",
+          "closure": {
+            "pr": 1901,
+            "merge": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
+            "record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
+          }
+        },
+        {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
           "wsp15": {
             "complexity": 2,
@@ -2207,7 +2719,8 @@
           },
           "state": "deferred_consumer_qualification",
           "evidence": "Central verify_parity has no production caller in scoped search; equal-count malformed/different JSONL passes; inherited class-size debt",
-          "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API"
+          "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API",
+          "resume_prerequisite": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit."
         },
         {
           "task": "Broker truthful stop acknowledgment",
@@ -2324,125 +2837,6 @@
           }
         },
         {
-          "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 2,
-            "total": 11,
-            "priority": "P2"
-          },
-          "state": "required_before_further_scanner_growth_remaining_debt",
-          "dependency": "Current outcome extraction may shrink owner but does not resolve all existing input/config responsibility debt; pursue when next scanner growth is proposed."
-        },
-        {
-          "task": "Remove broker creation from existing observer runtime lookup",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3,
-            "total": 11,
-            "priority": "P2"
-          },
-          "state": "closed_merged_PR1871",
-          "dependency": "Closed: identical fixed cases independently verified, exact reviewed merge and main CI/CodeQL success.",
-          "next_step": "Do not repeat this observer lookup repair.",
-          "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
-        },
-        {
-          "task": "Qualify ambiguous LinkedIn Connect/Send acknowledgment with finite fake UI outcomes",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3,
-            "total": 11,
-            "priority": "P2"
-          },
-          "state": "closed_merged_PR1875",
-          "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-          "next_step": "Do not repeat this acknowledgment qualification; note ordering and acknowledgment repair is separately scoped.",
-          "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
-        },
-        {
-          "task": "Retain reusable bounded Windows test-runner compatibility lessons",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3,
-            "total": 11,
-            "priority": "P2"
-          },
-          "state": "eligible_documentation_retention_after_guard_closure",
-          "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
-          "dependency": "Fresh source/owner reconciliation after current closure; self-audit decomposition remains conditional on future scanner growth.",
-          "next_step": "Bind four preserved runner failures/corrections to existing successful receipts, then retain one concise Windows compatibility recipe and limits in the existing moltbot_bridge tests README/TestModLog; no new runner or framework.",
-          "effort_cost": "Documentation-only reuse of existing governed test tooling and preserved receipts; local static validation, no provider calls.",
-          "review": {
-            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\next-action-review.json",
-            "sha256": "4c45ce598e3429ed41ab47d7f4c89746d46b4569e568d1a6d06d594fcffeb08e"
-          },
-          "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification."
-        },
-        {
-          "task": "Avoid generation supplier acquisition on an independently rejected use-time resolution",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 3,
-            "deferability": 3,
-            "impact": 3,
-            "total": 11,
-            "priority": "P2"
-          },
-          "state": "closed_merged_PR1889",
-          "source": "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py::_reverify_and_bind",
-          "dependency": "Exact reviewed tree merged; all10 PR checks and exact-merge CI/CodeQL passed; owned lane retired.",
-          "next_step": "Do not repeat qualification or repair.",
-          "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\independent-invocation.json",
-          "closure": {
-            "pr": 1889,
-            "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
-          }
-        },
-        {
-          "task": "Qualify canary PatternMemory receipt, canonical readback and context projection with finite disposable evidence",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3,
-            "total": 13,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1882",
-          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_pattern_memory_evidence",
-          "dependency": "Only the synthetic canary PatternMemory receipt/readback projection is closed: exact reviewed tree merged, all10 PR checks and exact-merge CI/CodeQL passed. Authenticated activation, native execution and retained benefit remain separate.",
-          "next_step": "Do not repeat synthetic PatternMemory projection qualification; freshly re-score remaining lineage and execution prerequisites before the next core action.",
-          "closure": {
-            "pr": 1882,
-            "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1882",
-            "merge": "bc6ad42d0a8b1e41eb3bd1c5ddad177536e504c8"
-          }
-        },
-        {
-          "task": "Qualify canary registered-worktree evidence against disposable Git registry and HEAD",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3,
-            "total": 13,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1884",
-          "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_worktree_evidence",
-          "dependency": "Exact reviewed tree merged at228ecbe0; PR/main checks passed; owned lane retired.",
-          "next_step": "Do not repeat closed qualification."
-        },
-        {
           "task": "Qualify canary receipt-lineage and draft-only evidence predicates with pure fixed controls",
           "wsp15": {
             "complexity": 2,
@@ -2456,7 +2850,8 @@
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_lineage_blockers",
           "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
           "dependency": "Independent receipt command rejected by automatic approval before execution; no specific reason.29 cases unexecuted. Clean separate branch agent/rsi-lineage-draft-20260923 at6f70893bb; no retry/substitute.",
-          "next_step": "Resume only after permitted independent review and fresh source/ownership reconciliation; preserve local draft."
+          "next_step": "Resume only after permitted independent review and fresh source/ownership reconciliation; preserve local draft.",
+          "resume_prerequisite": "Permitted independent review plus fresh source/ownership reconciliation required; no paused-lane access, retry or substitute."
         },
         {
           "task": "Qualify AutoResearcher program-instruction consumption",
@@ -2471,23 +2866,6 @@
           "state": "closed_merged_PR1885",
           "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
           "next_step": "Do not repeat characterization; merged6ae4dd1, mainCI/CodeQL verified and owned lane retired."
-        },
-        {
-          "task": "Record actual per-backend-call rendered program-text diagnostic identity",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 3,
-            "total": 13,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1887",
-          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_propose_via_llm",
-          "dependency": "Consumption is characterized by seven fixed controls. Preserve existing three-argument proposal callback signatures and Optional[str] results. Define exact call-boundary accounting and restoration before implementation; before this repair, the report had no program-consumption field.",
-          "next_step": "MainCI/CodeQL successful at47d6269; exact reviewed tree merged, owned lane retired; do not repeat tests.",
-          "limits": "Diagnostic rendered-text identity only; not raw-file provenance, full prompt/model/environment identity, authenticated oracle or retained learning. Broad report15/P1 stays partial; production/runtime admission remains separate.",
-          "effort_cost": "Small existing-owner implementation plus regression tests and required packaging checks. Complexity3 accounts for callback compatibility and call-scoped accounting. No external model spend planned; actual cost unknown."
         },
         {
           "task": "Qualify actual AutoResearcher evaluator inputs and dependency identity boundary",
@@ -2536,32 +2914,6 @@
           }
         },
         {
-          "task": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1894",
-          "source": "modules/foundups/agent_market/src/task_pipeline.py::verify_proof; modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
-          "dependency": "Closed by PR1894; exact-head PR and main checks passed; owned lane retired. Domain issuer and WRE delivery remain separate prerequisites.",
-          "next_step": "No further atomicity sprint work; preserve verified closure evidence and select the highest eligible current task.",
-          "limits": "Local SQLite persistence only; no signed issuer/WRE activation, PostgreSQL, payout or reward.",
-          "effort_cost": "Bounded existing-owner repair plus independently replayed rollback/retry acceptance; no provider spend.",
-          "evidence": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\independent\\receipt.json",
-            "sha256": "70f82de7ad9460a2664ec6dabdcff0f92fd1c5dd780d68ea3ddef73f8c2cb9c2"
-          },
-          "closure": {
-            "pr": 1894,
-            "merge": "686fb8658b2059cad2f641d6a8a7192af97a50eb",
-            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\final-accounting.json"
-          }
-        },
-        {
           "task": "Qualify shared ORM cohesion extraction inside existing FAM persistence module",
           "wsp15": {
             "complexity": 2,
@@ -2588,276 +2940,125 @@
           }
         },
         {
-          "task": "Qualify AutoResearcher comparison consistency across mutable evaluator dependencies",
+          "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 2,
+            "total": 11,
+            "priority": "P2"
+          },
+          "state": "required_before_further_scanner_growth_remaining_debt",
+          "dependency": "Current outcome extraction may shrink owner but does not resolve all existing input/config responsibility debt; pursue when next scanner growth is proposed.",
+          "resume_prerequisite": "A concrete scanner-growth change is proposed that requires the documented cohesion prerequisite; no such proposal evidenced now."
+        },
+        {
+          "task": "Remove broker creation from existing observer runtime lookup",
           "wsp15": {
             "complexity": 2,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 13,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1895",
-          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py::_run_loop; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
-          "dependency": "Closed PR1895, exact PR/main checks and lane retirement verified.",
-          "next_step": "No further characterization work; preserve historical acceptance evidence.",
-          "limits": "Dry-run synthetic research qualification only; no paid calls, automatic commit, runtime authority or retained improvement. Do not repeat the closed single-evaluator sensitivity test or add an unused hash field.",
-          "effort_cost": "Small existing-owner test/effect review plus independent replay; no external spend. This core RSI comparison outranks lower adjacent12/P2 work after blocked native18/domain14/product14 and backend13 are excluded.",
-          "preparation": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-verification-atomic\\research-comparison-preparation.md",
-            "sha256": "49503a578bb85e16c17d73dd689e758877cdfa8bd5227cc4b1b0bfb45b8a08ca",
-            "status": "source_inspection_only_no_research_execution"
-          },
-          "result": "Stable same-text proposal rejects; dependency-only changed cost accepts with identical text digest, improvement975/6592. Existing producer explicitly does not claim independent retention. Three fixed cases, no production change.",
-          "closure": {
-            "pr": 1895,
-            "merge": "6a237b56af4750c866191c91d75c4de4eb87df11",
-            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\final-accounting.json"
-          }
-        },
-        {
-          "task": "Freeze consumed cost-catalog values per AutoResearcher invocation",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1896",
-          "source": "modules/infrastructure/wre_core/src/wre_auto_researcher.py; src/wre_research_evaluator.py; tests/test_wre_research_evaluator_inputs.py",
-          "dependency": "Closed PR1896; exact PR/main checks and owned-lane retirement verified.",
-          "next_step": "No further cost-only repair; preserve qualified behavior in full-profile work.",
-          "limits": "Cost-catalog comparability only; other mutable ROI economics and concurrent host mutation are not full oracle/environment identity. No unused hash, provider, native admission, activation or retained-learning claim.",
-          "effort_cost": "Small existing-owner interface/loop extension and fixed regressions plus independent replay; no external spend. Higher14/P1 than adjacent12/11; native18/domain14/product14 retain external prerequisites.",
-          "preparation": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-comparison\\next-repair-preparation.md",
-            "sha256": "18631256b2adb8ef58fc9b7c1949ee9d5880c524216feb1bd9fc3ec50b6b7ef9",
-            "state": "source_preparation_only_no_repair_executed"
-          },
-          "result": "One invocation consumes fixed cost values/names.22focused and136existing cases pass; no complete oracle/profile claim.",
-          "closure": {
-            "pr": 1896,
-            "merge": "fa2972b2015a305ad7428fa78fe1893a116919d4",
-            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-cost-snapshot\\final-accounting.json"
-          }
-        },
-        {
-          "task": "Qualify remaining ROC evaluation assumptions as one comparison profile",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1897",
-          "source": "modules/infrastructure/wre_core/src/wre_research_evaluator.py; modules/foundups/simulator/economics/unified_sustainability.py and consumed economics leaves",
-          "dependency": "Verified merge cdd80ef; ten PR checks/main CI/CodeQL passed and owned lane retired.",
-          "next_step": "Do not repeat historical profile qualification; preserve exact observations in PR1897.",
-          "limits": "Synthetic local qualification only; no economic-validity, authenticated oracle, native/runtime admission or retention authority.",
-          "effort_cost": "Moderate source/oracle qualification plus independent replay; no provider spend. Core14/P1 outranks adjacent12/11 while native18/domain14/product14/backend13 remain gated.",
-          "preparation": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-cost-snapshot\\next-profile-preparation.md",
-            "sha256": "d82fa5fec48edb85a77b98f08e9396316dfc894c5b335dc27112de643b94b5d5",
-            "state": "historical_source_preparation_followed_by_this_qualification"
-          },
-          "preparation_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-cost-snapshot\\next-profile-review.json",
-            "sha256": "a0e8dc98a7dc53c88aa3ec2e6e79f40ade76c78fb8cbe6f1ee58ac2cba28666f",
-            "state": "independent_source_and_arithmetic_review_only_no_tests_executed"
-          },
-          "result": "Seven isolated plus one combined ambient profile changes produce five-point false improvement with identical text; producer/evaluator unchanged.",
-          "closure": {
-            "pr": 1897,
-            "merge": "cdd80ef734770f625079dfa0133f2acfad7da36c",
-            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\final-accounting.json"
-          }
-        },
-        {
-          "task": "Establish one complete consumed-profile boundary for AutoResearcher comparisons",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4,
-            "total": 15,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1898",
-          "source": "Existing wre_research_evaluator.py, wre_auto_researcher.py and unified_sustainability.py owners",
-          "dependency": "66 fixed plus136 regression cases pass locally and independently; exact-head publication and closure pending.",
-          "next_step": "Close exact-head publication and main checks; re-observe consumer/evidence boundary without assuming the prior second task wins.",
-          "effort_cost": "Moderate shared-source/interface repair and independent regression; no paid model required. D4: observed false improvement blocks trusting next research comparison.",
-          "limits": "Local deterministic comparison only; no economic-validity, oracle authentication, native execution, promotion or retained-learning claim.",
-          "qualification": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\independent-review.json",
-            "sha256": "246269b95a2cd6de67970d04a8c044f5b2644329bcc4b1abf80dce6bc89b9c5e",
-            "state": "actual_profile_drift_qualified_not_repaired"
-          },
-          "preparation": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-preparation.md",
-            "sha256": "65349b3e6ff3cdd5662783e10acda39b3c4b69016e323caf337eb7b9911f87c7",
-            "state": "source_only_not_implemented"
-          },
-          "architecture_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-preparation-review.json",
-            "sha256": "7a8d6995f85e505d9968c96de4f56ad25f149375d815570df465c3559cb508c3",
-            "recommended_option": "explicit drift rejection; immutable consumption/concurrency remain out of scope"
-          },
-          "oracle_preparation_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-20260923\\next-repair-oracle-review.json",
-            "sha256": "f0b598cea756a1036781ad3a158af2d5d6f2375b07c58ac03632e21a179870cc",
-            "state": "positive_control_arithmetic_qualified_no_product_test"
-          },
-          "result": "Persistent consumed-profile drift rejects; genuine improvement passes. Explicit ABA case remains a limit, not immutable execution.",
-          "closure": {
-            "pr": 1898,
-            "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
-            "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\final-accounting.json"
-          }
-        },
-        {
-          "task": "Determine and qualify the intended existing WRE diagnostic/outcome consumer boundary for ROC reports",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "source_adjudication_complete_no_runtime_handoff_or_retention_verified",
-          "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
-          "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
-          "next_step": "Source adjudication complete. Do not repeat the known missing-caller audit or add an unconsumed adapter. Advance only when existing upstream runtime admission, independent verification and publication evidence supply an actual authorized handoff.",
-          "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
-          "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
-          "independent_preparation_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-action-review.json",
-            "sha256": "ec7291721f8977819c564d1141dbece16826e88a621785eb045ca6ccb88387d7"
-          },
-          "alternatives": [
-            {
-              "task": "Immutable profile consumption",
-              "decision": "defer automatic rewrite; retain ABA limit until actual admitted workload requires stronger isolation"
-            },
-            {
-              "task": "Parent program/oracle/environment identity",
-              "decision": "qualify at intended consumer; avoid another disconnected hash or unused API"
-            },
-            {
-              "task": "LinkedIn manager-result qualification12/P2",
-              "decision": "executable adjacent fallback after core selection, subject to fresh ownership"
-            },
-            {
-              "task": "Parity diagnostics12/P2",
-              "decision": "consumer not bound; avoid unconsumed receipt API"
-            },
-            {
-              "task": "Native admitted ticket18/P0",
-              "decision": "blocked by existing trust/effect prerequisites; do not bypass"
-            }
-          ],
-          "handoff_preparation": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-preparation.md",
-            "sha256": "f85a68db4ff155ab9d9a286c4f06d3508cb363c8c2b376fd2470286770ca0b8d",
-            "state": "source_only_not_an_executed_second_sprint"
-          },
-          "handoff_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\next-handoff-review.json",
-            "sha256": "b000772daa0807a2f1ddda747bc9250cf8e25ca80568dab36138c54c81201615"
-          },
-          "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted."
-        },
-        {
-          "task": "Wire advisory AutoResearcher report display into existing WRE startup owner",
-          "wsp15": {
-            "complexity": 3,
             "importance": 3,
             "deferability": 3,
-            "impact": 4,
-            "total": 13,
-            "priority": "P1"
-          },
-          "state": "closed_merged_PR1899",
-          "dependency": "Explicit local report selection and expected baseline identity, no runtime admission or retention grant",
-          "next_step": "Closed in PR1899 with PR/main checks and lane retirement; do not repeat the display implementation/qualification. Admitted campaigns, runtime identity and retained outcome acceptance remain separate dependencies.",
-          "effort_cost": "One bounded parser/display integration, two existing test owners, no provider spend. C3 integration, I3 launch visibility, D3 current launch plan, impact4 reusable diagnostics.",
-          "closure": "O:\\Foundups-Agent-audits\\20260924-rsi-research-handoff\\final-accounting.json"
-        },
-        {
-          "task": "Repair manager-result admission before LinkedIn Connect UI",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 3,
-            "deferability": 4,
             "impact": 3,
-            "total": 13,
-            "priority": "P1"
+            "total": 11,
+            "priority": "P2"
           },
-          "state": "locally_and_independently_validated_publication_pending",
+          "state": "closed_merged_PR1871",
+          "dependency": "Closed: identical fixed cases independently verified, exact reviewed merge and main CI/CodeQL success.",
+          "next_step": "Do not repeat this observer lookup repair.",
+          "source": "modules/infrastructure/dae_daemon/src/dae_observer.py::DAEObserver._get_runtime_status"
+        },
+        {
+          "task": "Qualify ambiguous LinkedIn Connect/Send acknowledgment with finite fake UI outcomes",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 11,
+            "priority": "P2"
+          },
+          "state": "closed_merged_PR1875",
           "source": "modules/infrastructure/browser_actions/src/linkedin_actions.py::LinkedInActions.send_connection_request",
-          "dependency": "Finish exact-head review, remote checks, verified merge and owned cleanup; no live sends.",
-          "next_step": "Close this owned repair before selecting another lane; acceptance gap is repaired, do not repeat qualification.",
-          "effort_cost": "Small existing-owner guard/helpers plus fixed acceptance and unchanged regressions/backend binding; local CPU only.",
-          "limits": "No rollback of existing manager bookkeeping, concurrent exactly-once, live delivery or quota repair claim.",
-          "validation": {
-            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\independent-review.json",
-            "sha256": "2b17e571baa1aa13d182cd4c53f135a9460d246108d49386ae34bd255988e71a"
-          }
+          "next_step": "Do not repeat this acknowledgment qualification; note ordering and acknowledgment repair is separately scoped.",
+          "dependency": "Identical frozen ordinary cases independently verified, exact reviewed tree and PR/main checks passed."
         },
         {
-          "task": "Remove credential-shaped examples from existing LinkedIn module instructions",
+          "task": "Retain reusable bounded Windows test-runner compatibility lessons",
           "wsp15": {
-            "complexity": 1,
-            "importance": 4,
-            "deferability": 5,
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
             "impact": 3,
-            "total": 13,
-            "priority": "P1"
+            "total": 11,
+            "priority": "P2"
           },
-          "state": "closed_merged_PR1901",
-          "source": "modules/platform_integration/linkedin_agent/CLAUDE.md",
-          "evidence": {
-            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-admission\\instruction-hygiene-finding.json",
-            "sha256": "b13f988618cf7b77a2565f79bcc36c097f15fbf3aade726b1f67facf84799439"
+          "state": "documentation_prepared_review_publication_pending",
+          "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
+          "dependency": "Independent final source review, exact-head checks, publication and owned closure remain.",
+          "next_step": "Finish this seven-document sprint; then refresh eligibility. No test rerun or runtime work.",
+          "effort_cost": "Documentation-only reuse of existing governed test tooling and preserved receipts; local static validation, no provider calls.",
+          "review": {
+            "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\lesson-evidence-review.json",
+            "sha256": "20904e0bff6f6138760d6bf74535c347ba0844ec4d5a4307e429b79081d9a7da"
           },
-          "dependency": "Source-only redaction in existing owner; no credential use, account changes or validation of authenticity. Account owner must assess revocation if the value is real.",
-          "next_step": "Do not repeat source redaction; account validity/rotation remains outside this closure.",
-          "effort_cost": "One instruction file and required existing logs/backlog; static validation, no external spend.",
-          "selection_reason": "Tie13/P1 with manager guard: explicit repository memory boundary forbids credential material in worker context; smaller prerequisite prevents repeated propagation during subsequent work. Complexity1, importance4, urgency5 from active instruction retrieval, impact3.",
+          "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification."
+        },
+        {
+          "task": "Avoid generation supplier acquisition on an independently rejected use-time resolution",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 11,
+            "priority": "P2"
+          },
+          "state": "closed_merged_PR1889",
+          "source": "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py::_reverify_and_bind",
+          "dependency": "Exact reviewed tree merged; all10 PR checks and exact-merge CI/CodeQL passed; owned lane retired.",
+          "next_step": "Do not repeat qualification or repair.",
+          "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-supplier-admission\\independent-invocation.json",
           "closure": {
-            "pr": 1901,
-            "merge": "55d983fb6d8fc78b341c2dc76f6d997d28666bcf",
-            "record": "O:\\Foundups-Agent-audits\\20260924-rsi-instruction-hygiene\\final-accounting.json"
+            "pr": 1889,
+            "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
           }
         }
       ],
-      "selected_next": {
-        "task": "Retain reusable bounded Windows test-runner compatibility lessons",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 3,
-          "impact": 3,
-          "total": 11,
-          "priority": "P2"
-        },
-        "state": "eligible_documentation_retention_after_guard_closure",
-        "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
-        "dependency": "Fresh source/owner reconciliation after current closure; self-audit decomposition remains conditional on future scanner growth.",
-        "next_step": "Bind four preserved runner failures/corrections to existing successful receipts, then retain one concise Windows compatibility recipe and limits in the existing moltbot_bridge tests README/TestModLog; no new runner or framework.",
-        "effort_cost": "Documentation-only reuse of existing governed test tooling and preserved receipts; local static validation, no provider calls.",
-        "review": {
-          "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\next-action-review.json",
-          "sha256": "4c45ce598e3429ed41ab47d7f4c89746d46b4569e568d1a6d06d594fcffeb08e"
-        },
-        "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification."
+      "selected_next": null,
+      "rationale": "After verified closure, none of these42 documented candidates is independently eligible on current evidence; this is not a claim that no work exists elsewhere. Preserve authority/runtime/owner/consumer and paused-review blockers. Re-observe changed prerequisites, do not invent busywork.",
+      "eligibility_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\next-action-review.json",
+        "sha256": "c466cfc76d642c686b8fd1c1212df7d0f03a9165050530497351d01c8a881db8"
       },
-      "rationale": "Guard13/P1 repair awaits closure. Existing11/P2 test-runner instruction retention is the highest demonstrated unblocked follow-up; self-audit11/P2 requires future scanner growth, while native/domain/product/PostgreSQL/ROC/parity and paused lineage dependencies remain unresolved. Re-observe after closure."
+      "native_anchor_reasons": [
+        "canonical_consensus_receipt_verifier_missing",
+        "canonical_sovereign_authorization_verifier_missing",
+        "canonical_principal_subject_key_attestation_missing",
+        "canonical_model_signed_evidence_trust_anchor_incomplete",
+        "canonical_model_selection_signed_evidence_verifier_missing",
+        "canonical_memex_supply_signed_evidence_verifier_missing",
+        "canonical_signer_client_peer_handshake_verifier_missing"
+      ],
+      "anchor_condition": "These seven remain after a valid current-generation receipt removes only the three manifest-selection/replay/current-generation reasons. Without that receipt, all ten remain. Readiness independently retains the missing client-side signer challenge/handshake.",
+      "existing_owners": {
+        "admission_and_audit": "GovernedValveUseTimeAuthorityResolver.resolve in reddog_execution_valve_use_time_authority.py",
+        "current_generation": "SignerCurrentGenerationUseTimeEvidence and collect_signer_current_generation_use_time_evidence",
+        "readiness": "validate_reddog_resident_runtime_artifacts; server client-credential checking is not a fresh client-side signer-peer challenge",
+        "effect_issuer_adapter": "ExternalSignerAuthoritativeUseLeaseIssuer.issue in reddog_external_signer_authoritative_use_lease.py",
+        "effect_capability": "AuthoritativeUseLease and _rehydrate_external_authoritative_use_lease in reddog_authoritative_use_lease.py",
+        "lease_contract": "reddog_authoritative_use_lease_contract.py; exact effect/request digest, nonce, requester/current-generation and replay-store bindings",
+        "pure_valve": "reddog_wre_execution_valve.py; evaluation alone performs no effect"
+      },
+      "lease_boundary": "The existing external-signer adapter verifies a signed response/current-generation binding and durable replay consumption before yielding a process-local, nonserializable one-shot capability bound to effect kind/request digest. The resident resolver currently assigns authoritative_use_lease=None unconditionally. Existing lease code is not missing wholesale; the independently admitted resident end-to-end issuance/binding remains absent. Audit receipts, serialized acceptance, generation evidence and signed work orders do not substitute for this capability.",
+      "resume_delta": {
+        "measurement_change": "PR1903 adds the WSP48 measurement hierarchy and wre_rsi_measurements.v1 to AutoResearcher/display. Source class remains execution_feedback; production_rsi_eligible is False. Reader rejects stronger self-asserted class, held-out/independent claims and non-null verification/retention/resource/rollback/generation evidence.",
+        "eligibility_effect": "Diagnostic measurement improves truthful accounting but supplies none of the seven native trust anchors, effect lease, authenticated outcome consumer or independently retained-generation evidence. No new independent action arises from this bounded source review.",
+        "other_changes": "Three YUMORI commits and new esingularity PR1906 are separately owned product work per coordinator refreshed entry; not absorbed or inspected beyond changed-path inventory.",
+        "previous_anchor_and_lease_sources_unchanged": true,
+        "candidate_identities_and_states_unchanged": true
+      },
+      "fresh_reobservation_required_after_closure": true
     }
   }
 }

@@ -1,3 +1,9 @@
+## 2026-09-27: RSI runner lesson retention and resumed accounting
+
+- PR1902 is closed at `34504d84257f2a731514f0b736991fa10cda91bb`: exact reviewed tree, ten PR checks, main CI/CodeQL and owned-lane retirement verified. Resumed from fresh main `585c963f92822c6f041d06469ab323ec7846fca3`; retain PR1903 measurement hierarchy and separate YUMORI work. Shared checkout and 95 peer heads reconciled.
+- WSP 00/15/22/34/50/84/97 selected the existing 11/P2 Windows fixture lesson retention. Four preserved failures/corrections now live in the bridge test README with exact historical receipts in the backlog. Static documentation validation only; no new runtime, test runner, skill or provider work.
+- Native RSI remains blocked on admitted trust/effect-use binding and independent production provenance. Existing lease infrastructure is present; this sprint neither manufactures its authority nor claims retained learning. Re-observe after publication/closure; do not open speculative work when no eligible action is evidenced.
+
 ## 2026-09-24: RSI manager admission repair
 
 - Closed PR1901 at `55d983fb6d8fc78b341c2dc76f6d997d28666bcf`: independent source review, ten PR checks, exact-merge CI/CodeQL and owned-lane retirement verified. Shared checkout and 94 peer heads preserved.

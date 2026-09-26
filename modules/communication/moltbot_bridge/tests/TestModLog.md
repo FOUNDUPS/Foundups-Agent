@@ -1,3 +1,8 @@
+## 2026-09-27: Retain reviewed Windows fixture runner lessons
+
+- WSP 00/15/22/34/50/84/97; C2/I3/D3/Impact3=11/P2. Extended the existing test README with the four preserved PR1877 capture, logging, subprocess and path/class compatibility failures and their reviewed corrections. Existing WRE isolation/collector owners remain canonical.
+- Historical proof is the same 15 unique cases passing twice, with 165 disposable Git commands per run; original failures, frozen oracles and limited harness-review independence remain explicit. Static hash/link/scope review only in this sprint; zero new or rerun tests, runtime changes or native RSI claims. Exact references and publication state are in the existing backlog.
+
 ## 2026-09-23: Suppress generation acquisition after use-time rejection
 
 - WSP00/6/15/22/50/84/97; C2/I3/D3/Impact3=11/P2. The existing resolver enables the current-generation collector only after signature re-verification and an empty preceding rejection list. Signature truth, rejection diagnostics and the absent effect lease are unchanged.
