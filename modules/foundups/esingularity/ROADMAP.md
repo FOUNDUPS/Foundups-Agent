@@ -41,6 +41,8 @@ These are continuing acceptance gates, not completed features that may later be 
 - [x] Send the first formal eligibility inquiry for the MOE/RCESPA regional-coexistence data-center decarbonization program, framed around a currently closed municipal onsen and a future lawful PPP/lease/SPC structure.
 - [ ] Obtain written clarification from RCESPA on closed-facility status, applicant/operator/SPC structure, property/use-right timing, eligible heat-reuse equipment, stacking, and current-round timing.
 - [ ] Feed only verified eligibility and eligible-cost calculations into the Phase 1 financial model; never book a statutory maximum cap or an unverified model placeholder as committed funding.
+- [x] Add a canonical candidate-site registry and separate FIN workbook tabs for Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu.
+- [ ] Obtain utility and fiber responses for each candidate site; for Hanyu explicitly test 5 MW initial plus 10 MW and 20 MW expansion cases before promoting any capacity into the functional model.
 - [ ] Ask Fukui City to consider Cabinet Office PPP/PFI expert/one-stop support as part of an independent demolition-vs-reuse comparison.
 - [x] Provide Japanese, English, and Portuguese states for the ten-slide presentation.
 - [ ] Complete route-based Japanese, English, and Portuguese localization for every legacy page surface.
