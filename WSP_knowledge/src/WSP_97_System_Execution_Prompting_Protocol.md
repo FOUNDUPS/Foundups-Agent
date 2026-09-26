@@ -202,7 +202,39 @@ Use this sequence unless a narrower protocol overrides it:
 8. Reduce to first principles / simplest valid move
 9. Execute inside the correct plane
 
-### 1.2A Test Inventory / Reuse Gate
+### 1.2A Main-Convergence / PR Closure Gate
+
+Repository work is not complete when a branch or pull request merely exists. For every mutation slice whose intended destination is `main`, WSP 97 requires a terminal convergence state.
+
+Canonical closure loop:
+
+```text
+bounded work
+  -> validate branch
+  -> specialized PR
+  -> inspect mergeability + checks + overlap
+  -> squash merge when qualified
+  -> read back main
+  -> reconcile/close superseded PRs
+  -> classify remaining dirty/open work
+```
+
+Required rules:
+
+1. **Specialized PRs:** keep one coherent concern per PR. Do not accumulate unrelated cleanup, product, WSP, dependency, or historical work merely to reduce PR count.
+2. **Merge is the default completion path:** when the authorized slice is validated, mergeable, has no required failing/pending gate, and does not conflict with newer authoritative work, squash-merge it rather than leaving completed work parked on a branch.
+3. **Verify main after merge:** read back the affected main-branch artifact(s) or resulting commit. A successful PR API response alone is not sufficient evidence that the intended contract survived convergence.
+4. **No blind stale merges:** an old/diverged PR must be compared with current main. Classify it as `SUPERSEDED`, `PARTIALLY_SUPERSEDED`, `NEEDS_REBASE`, `BLOCKED`, or `STILL_CURRENT` before mutation.
+5. **Preserve unique work:** never close/delete a stale PR solely because it is old or non-mergeable. If it contains unique valid delta, preserve that delta and route it through a fresh bounded reconciliation slice or explicit rebase/update.
+6. **Close superseded work:** if current main demonstrably contains the intended behavior and the old PR has no unique valid delta, close it with a reconciliation note rather than leaving repository entropy.
+7. **Dirty-tree safety:** "clean" never means discard unknown state. Classify dirty/untracked work by owner and intent before cleanup. Unknown or concurrent work is preserved and reported, not reset/stashed/deleted by assumption.
+8. **Open-PR hygiene:** before declaring a work cycle complete, inspect related open PRs for overlap. Completed work should not leave a second stale PR claiming the same outcome.
+9. **No false global-clean claim:** connector-visible PR/branch state does not prove a developer's local worktree is clean. Report local cleanliness only from direct worktree evidence.
+10. **Terminal receipt:** record one of `MERGED_VERIFIED_MAIN`, `SUPERSEDED_CLOSED`, `PRESERVED_NEEDS_REBASE`, `BLOCKED_REQUIRED_GATE`, or `ACTIVE_OWNED_WORK`. "PR created" is not a terminal receipt.
+
+This gate governs convergence, not authorization. It never bypasses review requirements, branch protection, CI, security, ownership, or a narrower WSP.
+
+### 1.2B Test Inventory / Reuse Gate
 
 When a task may create, modify, replace, or expand tests, WSP 97 MUST apply the WSP 22 TestModLog pattern before test authoring.
 
