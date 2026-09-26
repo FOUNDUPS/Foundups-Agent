@@ -86,7 +86,7 @@ invalidate an approval that no longer covers the exact action.
 Use the lane's stable Google Docs master moshpit for newest-first issue history
 and private session decisions; each linked issue retains its own manuscript Doc.
 The current shared Drive home for these mutable artifacts is
-`eSingularity — Working Documents/02 — Editorial — Newsletters & Articles`.
+`CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents/EDITORIAL — Newsletters & Articles`.
 Discover it live by name rather than storing a personal Drive folder ID in Git.
 Search before creating either identity, preserve recovered older drafts, and record
 the scope of missing-history searches. The shared research contract owns the
