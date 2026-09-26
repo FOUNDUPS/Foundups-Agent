@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Google Drive Document Index
 
-Last audited: 2026-09-13 JST
+Last audited: 2026-09-26 JST
 
 ## Authority rule
 
@@ -40,7 +40,7 @@ These are durable project documents. Preserve their file IDs and update in place
 | **FIN — YUMORI Phase 1 Financial Model & Grant Audit — 2026-09-12** | Current working grant register and functional financial audit | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
 | **FIN.YUMORI — Integrated Financial + Regional Impact Model.xlsx** | Legacy/integrated model retained as reference; do not let legacy assumptions override current audit | `11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c` |
 
-Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). A statutory maximum or model placeholder is not project funding.
+Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). The current FIN workbook contains separate Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu tabs. A statutory maximum or model placeholder is not project funding.
 
 ## LEGAL / COUNCIL RECORDS
 
