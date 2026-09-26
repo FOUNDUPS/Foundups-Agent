@@ -1,6 +1,6 @@
 # eSingularity.ai source-of-truth ledger
 
-Last audited: 2026-09-11 (Asia/Tokyo)
+Last audited: 2026-09-26 (Asia/Tokyo)
 
 Campaign correction — 2026-09-13: the operator withdrew the fixed review-period proposal. The current request is **VOTE NO** on the budget containing Sukatto demolition preparation at the September 25 vote. Do not reintroduce a 60-day offer through copy, translations, diagrams, captions, or supporting documents. This is a campaign position, not a government finding or a commitment to adopt/fund YUMORI. YUMORI.me is eSingularity.ai's civic/preparatory-committee surface; both homepages stay distinct in one frontend. Support brief 03: https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit
 
@@ -19,6 +19,12 @@ Speech-to-text output is never authoritative for project proper nouns. Normalize
 - Current school-node names: **旧下宇坂小学校** and **旧羽生小学校**.
 
 Forbidden STT substitutions on current truth surfaces include `Scott Lando`, `Kazuri`, `Kazury`, `Kuzuri`, `Kuzuru`, `Owarasa`, and `すかっとらんど九頭竜`. Historical quoted material may retain original wording only when explicitly identified as a historical record.
+
+## Candidate-site reconciliation — 2026-09-26
+
+The canonical site register is [CANDIDATE_SITE_REGISTRY.md](../../docs/CANDIDATE_SITE_REGISTRY.md). The current FIN workbook has separate tabs for Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu. Repository status controls; Drive is the working calculation layer.
+
+For **旧羽生小学校**, the 2026-09-26 field survey supports only the observation that major transmission/substation and utility-telecom infrastructure is immediately nearby. The project may use **5 MW initial** and **10/20 MW expansion** as utility-study scenarios. Do not publish or model them as available, contracted, permitted or deliverable capacity until the utility confirms point of connection, voltage, capacity, cost and schedule. Visible telecom equipment does not prove commercial or dark-fiber availability.
 
 > **INTERNAL — NOT A PUBLIC WEBSITE PAGE.** This ledger is the claim-admission
 > gate for eSingularity.ai and the approved knowledge boundary for Red Dog. It
@@ -86,7 +92,7 @@ drafts into the public site.
 2. [Document 03 — policy alignment and PPP/PFI reuse evidence](https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit) — supporting policy/evidence lane.
 3. [Master project prospectus](https://docs.google.com/document/d/1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM/edit) — integrated project narrative.
 4. [Landowner proposal — External Audit v2](https://docs.google.com/document/d/1WCqidzhU_9qyMxYCKj8UZ3lUv6qudCoWzy3qxClEznE/edit) — landowner-facing proposal and audit.
-5. [Current Phase 1 financial workbook](https://drive.google.com/open?id=11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c) — scenario workbook; figures remain internal until separately audited and admitted above.
+5. [Current Phase 1 financial workbook](https://docs.google.com/spreadsheets/d/1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0/edit) — functional working model and site tabs; figures remain internal until separately audited and admitted above. The older integrated workbook remains reference-only.
 6. [Current build work order](https://docs.google.com/document/d/14xZTRgROhk_kTVaj9KimeenqmQrW26SCleHnKNWz08E/edit) — implementation direction.
 
 ### Separate campaign / legal-action lane
