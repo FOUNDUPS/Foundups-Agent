@@ -162,3 +162,10 @@ With no research retriever connected, JHR fails closed and returns `NO_REPORT` r
 - WSP 49/60: module structure and memory
 - WSP 97: truth-boundary labels, evidence gates, and no implied activation
 - WSP 104: stable `/f/{foundup_id}` namespace and tenant isolation
+
+
+## Drive knowledge boundary — current project vs historical eSingularity
+
+Current Fukui work uses the **YUMORI × eSingularity.ai × AI Koban** project family. Mutable correspondence/editorial/partner drafts live under the Drive container `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents` using semantic folder prefixes. Numeric prefixes remain reserved for the canonical project-document spine in [DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md).
+
+Historical Educational Singularity / eSingularity material (including 2007–2010-era work) is long-term provenance, not current Fukui authority. Agents must not mix it into current retrieval solely because the `eSingularity` term matches; promotion into current work requires an explicit current citation/verification path.
