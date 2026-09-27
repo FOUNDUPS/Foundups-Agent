@@ -69,110 +69,158 @@ result alone admits a signer or native RSI worker.
 
 ## External supervision source contract — 2026-09-27
 
-**Design specified; implementation and runtime qualification remain open.**
-Reuse `reddog_signer_system_service_entrypoint.py` and the root-owned
-`reddog_signer_system_service_manifest_selection_loader.py` as the supervision
-owner. They already select the signer generation; they do not yet supply an
-authenticated supervisor policy. The public entrypoint still uses unavailable
-production dependencies. No signer-specific installed unit or systemd version
-was observed. This contract neither launches a service nor changes an API.
+**Corrected design; authenticated observation transport, canonical consumer
+registration and deployment visibility remain unimplemented.** PR1922 repaired
+socket/VFS association; PR1923 qualified same-UID child visibility and denial.
+Neither qualifies an authenticated supervisor or the full distinct-UID path.
+This correction changes no API, process identity, privilege or service state.
+
+### Three roles and the current source constraint
+
+| Role | Responsibility and boundary |
+|---|---|
+| Isolated signer | Existing system-service entrypoint enforces distinct non-root signer identity, no CAP_SYS_PTRACE, no tracer, core dumps disabled and `PR_SET_DUMPABLE=0` before secret resolution. Preserve these controls. |
+| Authenticated supervisor observer | Observe only the owner-selected signer instance with independently qualified OS visibility; authenticate observation provenance and lifetime. It is not the requesting principal and must not perform the requester's handshake. No such production observer transport is currently admitted. |
+| Actual handshake requester | Unprivileged process running the canonical healthcheck. Its effective UID/GID maps through authenticated current-generation `peer_policy/uid_to_principal`; the signer attests the actual connecting peer. Neither012, work subject nor supervisor identity substitutes. |
+
+`reddog_external_signer_os_observer._validate_policy` currently requires the
+observer's actual UID/GID to equal `policy.requester_uid/gid`. The default
+`reddog_external_signer_lifecycle_admission._verified_admission_values` calls
+that observer and the healthcheck sequentially in one process. Running this
+unchanged path in a supervisor either rejects requester identity or changes the
+connecting principal. Merely adding policy fields cannot resolve this constraint.
+Do not override backend identity, relabel the supervisor, grant requester ptrace
+access, or relax signer dumpability to obtain a positive result.
+
+Keep the current public observer and audit injection behavior. A future distinct
+supervisor path must reuse the kernel observation primitives under an explicit
+observer-identity contract, then authenticate their result at the existing
+lifecycle owner. It must not pretend to be the default requester-local observer.
 
 ### Source and ownership
 
+`reddog_signer_system_service_manifest_selection_loader.py` remains the
+authenticated root-owned configuration/generation owner, and
+`reddog_signer_system_service_entrypoint.py` remains the isolated signer launch
+owner. This code ownership does not make the signer process its own supervisor.
+Public startup still has unavailable production dependencies. No installed
+signer-specific unit, systemd version or privileged observation policy was
+observed. Keep service startup and observation as separate process roles.
+
 Choose read-only observation from an authenticated local systemd **system**
 manager for an explicitly owner-selected, already-loaded service unit. Extend
-the existing root-owned config through a versioned schema when implementing;
-current exact v1-v4 schemas contain no unit selector and must retain compatibility
-and unknown-field rejection. Never guess a unit name, accept a caller-selected
-PID/unit, fall back to the user bus, or start/stop/reload/LoadUnit a service.
+the existing root-owned config through a versioned schema only when implementing;
+exact v1-v4 schemas have no unit selector and must preserve compatibility and
+unknown-field rejection. Never guess a unit, accept caller-selected PID/unit,
+fall back to the user bus, or start/stop/reload/LoadUnit a service.
 
-For the first bounded implementation, require a qualified simple/exec main-process
-service, active/running state, current nonzero `MainPID` and nonempty `InvocationID`.
-Do not select historical `ExecMainPID` or a control process. Pin the process with
-a pidfd, verify selected-unit/invocation membership through `GetUnitByPIDFD`, and
-require capability support rather than assuming a host version. This method
-was added in systemd253; reading the v256 source does not verify the deployed
-runtime. Authenticate the manager connection and reject manager-owner changes.
+Require a qualified simple/exec main-process service, active/running state,
+current nonzero `MainPID` and nonempty `InvocationID`, not historical ExecMainPID
+or a control process. Pin the process with pidfd; verify unit/invocation through
+`GetUnitByPIDFD` and reject manager-owner/lifetime changes. That method's systemd253
+introduction does not prove deployed support. Systemd metadata and a pidfd do
+not grant procfs visibility or authenticate a later observation handoff.
 
 | Existing policy field | Expected provenance and binding |
 |---|---|
-| `pid`, `expected_process_start_identity` | Owner-selected unit's current MainPID; pinned process plus kernel boot ID/start ticks, bracketed by manager/invocation and pidfd-liveness checks. A PID alone is insufficient. |
-| `expected_signer_uid/gid` | Existing authenticated root-owner signer identity, compared with actual manager/kernel process credentials. Preserve separation from requester. |
-| `requester_uid/gid` | Effective identity of the process performing the lifecycle healthcheck, mapped by the authenticated selected `peer_policy/uid_to_principal`; never012, work subject or presumed supervisor identity. |
-| `expected_executable` | Current authenticated run-packet `argv[0]`, constrained by the owner-authorized service launch path/argv. Do not accept whichever executable `/proc` happens to report. |
-| `expected_executable_device/inode` | Descriptor-derived metadata of that expected path, matched to `/proc/PID/exe` and repeated around observation; identity is not code-content attestation. |
-| `socket_path`, `expected_socket_uid/gid/mode` | Current selected config/run packet and explicit root-owned policy, protected ancestry and compatible namespaces; compare actual metadata. Existing fixture0600 is not proof of production mode. |
-| `authority_receipt_id/source_id` | Concrete canonical issuer binding authenticated owner config, generation/revision, config/raw digest, run packet/session, unit/invocation, process/socket identities and observation time. Digests and serialized records cannot confer authority. |
+| `pid`, `expected_process_start_identity` | Owner-selected current MainPID, boot ID/start ticks, pinned lifetime and repeated manager/unit/invocation checks. |
+| `expected_signer_uid/gid` | Authenticated owner signer identity, checked against actual process credentials and kept separate from observer and requester roles. |
+| `requester_uid/gid` | Actual healthcheck process effective identity and owner-selected peer mapping. These fields retain requester-local meaning; they are not supervisor identity fields. |
+| `expected_executable`, `expected_executable_device/inode` | Current authenticated packet argv[0], owner-authorized launch path/argv and descriptor metadata compared with procfs before/after. This is not code-content attestation. |
+| `socket_path`, `expected_socket_uid/gid/mode` | Current selected packet/config and explicit owner policy, protected ancestry, compatible namespaces and actual metadata. Fixture0600 is not production access policy. |
+| `authority_receipt_id/source_id` | Future canonical issuer binding owner/config/generation/packet/session plus observer and signer-instance identities. Existing strings, unkeyed digests and serialized receipts confer no authority. |
 
-The concrete issuer must use the existing policy boundary and lifecycle consumer,
-with actual dependency/provenance qualification. A caller-created
-`VerifiedExternalSignerOsPolicy`, arbitrary `Protocol.require` result, audit
-receipt, or injected callback is not production supervision. Preserve the audit
-injection API, but exclude it from the strict resident path. Do not introduce a
-parallel authority registry or leave a new adapter disconnected from its consumer.
+### Authenticated handoff and canonical consumption (specified, not wired)
+
+The future producer belongs to the existing external-supervision owner above.
+The consumer belongs to `reddog_external_signer_lifecycle_admission.py`: verify
+the authenticated observation before `_verified_admission_values` accepts it
+and before `_make_admit` issues a local capability. Keep the actual healthcheck
+in the requester process. This names extension seams, not an implemented verifier
+or a new parallel authority registry.
+
+The current `_verified_os_policy` checks the shape of an injected
+`ExternalSignerOsPolicyAuthorityBoundary.require` result; it does not authenticate
+a canonical supervisor. `VerifiedExternalSignerOsPolicy` construction or the
+observation receipt's digest verifier cannot close that gap. Implementation must
+bind a concrete producer/consumer pair and independently verify authenticated
+transport, owner-selected issuer identity and replay state. The existing
+verified-outcome root-authority signing service is not an observation authority;
+its presence does not admit reuse of its socket or keys for this purpose.
+
+One attempt must correlate authenticated observer issuer identity, intended
+requester UID/GID/principal, accepted signer profile/public key/epoch, manifest,
+generation/revision, config and raw digests, packet/session, manager/unit/invocation,
+PID/start/boot identity, executable, namespace views, socket VFS identity and
+concrete socket cookie. Bind a fresh requester-generated challenge/attempt ID,
+observation time and expiry to that exchange and the actual handshake result.
+Reject mismatches; never infer expected identities from the offered observation.
+Wire format, transport mechanism, trust provisioning, bounded deadlines and
+replay-store ownership must be frozen and reviewed before implementation.
+
+Lifecycle capabilities are sealed, registered, process-local objects; their
+copy/serialization hooks reject. Do not mint one in the supervisor and send its
+JSON to the requester. Authenticate the observation in the requester process,
+then issue and consume the local capability through
+`consume_verified_external_signer_lifecycle_admission`. A cross-process resident
+would require its own explicit verified handoff; current handles are not portable.
+
+`require_default_dependencies=True` currently means exact captured original
+observer/healthcheck and no clock overrides in the private registry. A future
+authenticated-supervisor route cannot pass this by callback injection, alias,
+boolean, public attribute or receipt label. Qualify a deliberate canonical mode
+in that existing registration/consumer path, preserving current default/audit
+semantics and rejection behavior. Do not silently broaden the meaning of default.
+Resident bootstrap and `GovernedValveUseTimeAuthorityResolver` are downstream
+integration seams only; their supplier and lifecycle consumption are not wired.
 
 ### One-attempt lifetime
 
-1. Load one authenticated owner/config/generation selection and explicitly resolve
-   the accepted signer profile. The current unprofiled resident collector does
-   not provide a profile/public-key/epoch binding.
-2. Pin and recheck manager/unit/invocation, pidfd, process start, executable and
-   credentials before policy issuance. Qualify PID/user/network/mount namespace
-   compatibility; do not reinterpret IDs or paths across namespaces.
-3. Keep the authenticated manager connection and pidfd alive across the existing
-   observer and actual handshake; recheck configuration/generation and identities
-   before issuing the proof. Manager/service restart, exit, PID reuse, executable
-   replacement, generation rotation, or socket replacement rejects. Release all
-   resources on every outcome.
-4. Supply one fresh opaque lifecycle handle and independently selected requester
-   per attempt to the existing resident bootstrap/resolver, after earlier queue
-   checks. Consume once with `require_default_dependencies=True`. The flag alone
-   is not provenance. If use is separated in time, revalidate at use; an observation
-   cannot prevent later exit or exec. The existing effect-bound lease is separate.
+1. Load authenticated owner/config/generation and independently select requester
+   and accepted profile/public key/epoch. The current unprofiled resident
+   generation collector is insufficient for that selection.
+2. Authenticate observer transport/issuer and qualify actual procfs visibility
+   without giving the requester additional privileges. Check compatible
+   PID/user/network/mount views; do not reinterpret IDs or paths across namespaces.
+3. Keep manager connection and pidfd alive across authenticated observation and
+   the requester's actual handshake. Recheck generation/config, invocation,
+   process/executable/credentials and socket before proof issuance. Restart, exit,
+   PID reuse, exec, replacement, rotation, denied visibility or owner drift reject.
+4. Consume only the locally issued capability, once and before expiry, after
+   earlier queue/work checks. Preserve rejection-before-consumption for malformed
+   identities/foreign boundaries and spending on valid owned identity mismatch.
+   Release all resources on every result. Revalidate at use if time has passed;
+   observation cannot prevent later exit/exec. The effect-bound lease is separate.
 
-A connected-peer approach was considered. The current socket client discards peer
-PID and closes each byte-roundtrip connection. Using it would require preserving
-one authenticated connection/lifetime through challenge and policy capture,
-without assuming `SO_PEERCRED` proves current executable or rightful service
-ownership. The system-manager route fits the existing external-owner contract.
+A connected-peer alternative remains more invasive: the current client closes
+each roundtrip and discards peer PID. A preserved connection alone would still
+not prove current executable, rightful service ownership or procfs visibility.
+The external-manager design is retained with the missing handoff made explicit.
 
 ### Socket ownership prerequisite — source defect, not a live incident
 
-`reddog_external_signer_os_observer._require_process_socket_owner` currently
-compares pathname `lstat().st_ino` with `/proc/PID/fd`'s `socket:[inode]`.
-Linux creates the pathname filesystem node separately from the socket's sockfs
-inode. The existing `FakeBackend` assigns202 to both and masks that distinction.
-Distinct values can reject a valid socket; accidental numerical equality is not
-ownership proof. No real signer or Linux runtime was exercised in this sprint.
+**Historical defect repaired by PR1922; this is not an outstanding inode fix.**
+The old pathname-inode/FD-inode equality and fake202/202 assumption are gone.
+The existing observer now uses exact bounded VFS/socket association and concrete
+cookie/namespace continuity. PR1923 main `5578f7bd` additionally records a readable
+same-UID child and a live nondumpable child rejected with real permission errors.
+Its254 candidate cases passed in PR/main;252 parent cases were preserved. This
+qualifies the recorded permission boundary, not production cross-UID supervision.
+See [socket contract](#connected-socket-ownership-observation--2026-09-27) and
+[future connected acceptance](tests/README.md#supervisor-requester-connected-acceptance--2026-09-27).
 
-Before implementing the issuer, qualify an exact filesystem-to-socket identity
-bridge in the existing observer/test owners. A candidate is bounded
-`UNIX_DIAG_VFS` plus process FD ownership, with socket inode/cookie and filesystem
-device/inode treated separately. Primary-source ABI verification must cover
-uint32 inode width, device encoding, namespaces, kernel sender/sequence,
-truncation, bounded replies/deadlines and lifetime. A `/proc/net/unix` pathname-only
-join is insufficient after unlink/rebind. Do not weaken the existing no-network
-observer boundary or add netlink merely because this design names a candidate.
+Before any issuer implementation, freeze the transport/verifier/replay owner and
+deployment observation policy above. Then qualify the connected producer-to-local
+lifecycle consumer with real requester correlation; do not add disconnected
+positive policy fixtures or duplicate the existing requester-mismatch test.
+All seven native trust reasons and `authoritative_use_lease=None` remain.
 
-Fixed next acceptance: distinct-domain valid association; unrelated socket with
-the same numeric inode; absent/ambiguous association; wrong namespace/type/state;
-pathname unlink/rebind or device change; process restart/exec/exit; malformed,
-truncated, foreign or stale evidence; resource cleanup and bounded failure.
-Preserve prior checks with explicit separate fixture domains. Synthetic backend
-success is only source qualification; real Linux qualification belongs on an
-independently admitted disposable runner before production adoption.
-
-Then qualify actual issuer-to-lifecycle consumption: reject forged boundaries,
-wrong manager/unit/invocation, historical/missing PID, unavailable pidfd/method,
-identity or generation drift before handshake; preserve one-use/expiry/replay
-and exact requester/profile checks. All seven native trust reasons and
-`authoritative_use_lease=None` remain. This is not a completed native RSI cycle.
-
-Primary sources: [systemd v256 manager contract](https://raw.githubusercontent.com/systemd/systemd/v256/man/org.freedesktop.systemd1.xml),
+Primary source references retained from the original design:
+[systemd manager](https://raw.githubusercontent.com/systemd/systemd/v256/man/org.freedesktop.systemd1.xml),
 [pidfd lifetime](https://man7.org/linux/man-pages/man2/pidfd_open.2.html),
-[Linux v6.12 pathname bind](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/unix/af_unix.c),
+[Linux pathname bind](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/unix/af_unix.c),
 [socket FD naming](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/socket.c),
-[UNIX diagnostic VFS association](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/unix/diag.c).
+[diagnostic VFS association](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/unix/diag.c).
 
 ## Healthcheck requester selection — 2026-09-27
 
@@ -197,14 +245,17 @@ owner. A same-process lifecycle producer must select from the authenticated
 current-generation config and the actual handshake process's effective identity.
 If another process performs the handshake, the resident process's UID cannot
 substitute: the admitted external lifecycle owner must supply the independently
-bound requester expectation and fresh opaque lifecycle handle for each attempt.
+bound requester expectation and authenticated observation for each attempt; the
+requester-local lifecycle owner must issue the opaque handle after verification.
 Never derive the expectation from the offered receipt, external012 or work subject.
 
 Thread that existing-owner supply through resident bootstrap into
 `GovernedValveUseTimeAuthorityResolver`, after early work/queue checks. Reuse the
 accepted signer profile and correlate manifest, generation/revision, config/raw
 digest, run-packet and session; consume once with
-`require_default_dependencies=True`. This is a future integration contract.
+the current `require_default_dependencies=True` contract. A future authenticated
+supervisor mode needs deliberate canonical registration as specified above;
+it cannot masquerade as the current default observer. This is a future integration contract.
 The healthcheck fix does not fill lifecycle's mandatory requester parameter or
 wire this supplier. All seven resident trust reasons and the absent effect-use
 lease remain. No new profile field, identity registry or launch API is introduced.

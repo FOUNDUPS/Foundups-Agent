@@ -1,3 +1,9 @@
+## 2026-09-27: Freeze connected supervisor/requester acceptance
+
+- WSP00/15/22/50/84/97;13/P1 documentation-only reconciliation. Retrieved existing observer, lifecycle, generation-race and healthcheck owners; no tests, fixtures, registry or assertions change.
+- Correct the obsolete202/202 gap and preserve PR1923's verified252/254 result as historical. Current254/254 identical-ID regression is separate; execution results belong to the current backlog receipts.
+- Future connected acceptance requires authenticated observation into the actual requester-local lifecycle consumer. Keep issuer/profile/generation/socket/lifetime/replay negatives, strict registration, one-use semantics and isolation; existing requester-mismatch coverage is reused.
+
 ## 2026-09-27: Cross-process visibility qualification
 
 - WSP00/6/15/22/50/62/84/97;14/P1. Before authoring, retrieved the existing observer suite, support, TestModLog/README, isolation gate and production mapper. Reuse them for two hosted-only dumpability conditions; preserve all252 prior selected cases and production source.

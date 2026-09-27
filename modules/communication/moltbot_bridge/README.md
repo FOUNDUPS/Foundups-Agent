@@ -1,10 +1,12 @@
 ## Cross-process observer qualification — 2026-09-27
 
-The socket mapper repair is merged and verified (PR1922, main `d6f9458b`).
-The next existing-owner experiment tests readable and nondumpable disposable
-children; see the [fixed effects and acceptance](tests/README.md#cross-process-visibility-qualification--2026-09-27).
-Production remains unchanged; hosted evidence/closure is pending in the canonical
-backlog. Neither this fixture nor the prior same-process proof admits native RSI.
+PR1923 is merged/main-verified at `5578f7bd` with254 candidate cases passing.
+Readable and nondumpable same-UID children qualify the permission boundary;
+authenticated cross-UID supervision is still open. The corrected
+[existing-owner contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
+separates observer, signer and actual handshake requester, and requires verified
+observation handoff before requester-local lifecycle issuance. No runtime API or
+authority changes in this documentation slice; see canonical backlog for closure.
 
 ## Existing observer socket repair — 2026-09-27
 
@@ -27,9 +29,9 @@ canonical RSI backlog. Production observer and native authority remain unchanged
 
 The [existing-owner supervision contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
 now specifies process selection, field provenance, lifetime and consumer ownership.
-Its first prerequisite is qualification of the existing observer's separate
-filesystem/socket inode domains. Current fixtures mask that distinction; they
-do not establish real Linux socket ownership. No service/runtime was activated.
+The inode-domain repair and same-UID visibility qualification are closed in
+PR1922/1923. Its remaining prerequisite is the authenticated observation transport,
+canonical consumer registration and independently qualified deployment visibility. No service/runtime was activated.
 PR1919 requester selection is merged and main-verified; see the canonical RSI
 backlog for exact closure evidence and the next ranked action.
 
