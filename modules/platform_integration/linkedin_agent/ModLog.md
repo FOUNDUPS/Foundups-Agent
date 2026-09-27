@@ -1,3 +1,11 @@
+## 2026-09-28: Consequential-contact professional diligence skill
+
+- WSP 00/15/22/50/95/97; added `linkedin_contact_diligence` as an instruction-only AUDIT child under the existing LinkedIn master rather than extending the title/photo profile evaluator into financial trust decisions.
+- Trigger scope covers consequential investment, family-office, project-finance, government/institutional, infrastructure and sensitive-partnership contacts from connection requests, existing connections or inbox threads.
+- Evidence is separated as VERIFIED / CLAIMED / UNVERIFIED / CONFLICTING; missing public footprint is explicitly not proof of fraud. The skill produces no legitimacy score and does not auto-accept, auto-reject, send, or authorize disclosure.
+- Capital-contact diligence asks for entity/mandate, check size, geography, instrument/project stage, fee model, comparable transactions and relevant regulatory status before non-public financial disclosure. Default disclosure state is PUBLIC_OVERVIEW_ONLY.
+- Routed from the master activity map, engagement master and shared review workflow; extended the existing offline contract owner so the new child/link/privacy/authority boundary is testable. No LinkedIn live action, contact dossier, private message body, runtime executor or autonomous background job is added.
+
 ## 2026-09-24: Browser owner honors manager admission
 
 - WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.
