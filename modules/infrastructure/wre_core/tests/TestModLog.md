@@ -1,3 +1,10 @@
+## 2026-09-27: Merge sentinel prerequisites
+
+- WSP 00/6/15/22/34/50/84/97. Extended the existing sentinel suite; no new test owner.
+- Preserved four guard cases and added 34 cases for named-branch/worktree/status/fetch rejection, force semantics and a clean boundary control. All external command seams are replaced and subprocess escape fails.
+- Validation at preparation: source inspection only; no local candidate test run. The dedicated hosted CI step retains exact JUnit outcomes. Publication receipt: `O:/Foundups-Agent-audits/20260927-rsi-merge-preflight/final-accounting.json` (created only after verified closure).
+- Passing this suite establishes prerequisite behavior only. It does not verify the downstream direct-push, merge, main-readback or cleanup paths.
+
 ## 2026-09-25: RSI verification measurement coverage
 
 - Added focused coverage for `wre_rsi_measurements.v1`: signal hierarchy,

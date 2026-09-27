@@ -48,6 +48,31 @@ jobs:
             modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py::test_research_display_rejects_inconsistent_rsi_measurements \
             modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py::test_research_display_is_read_only_and_sanitized
 
+      - name: Run WRE merge sentinel prerequisite tests
+        id: merge_sentinel
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          FOUNDUPS_DB_PATH: ${{ runner.temp }}/merge-sentinel-foundups.db
+          WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/merge-sentinel-pattern.db
+          ANTIFAFM_LYRICS_DB: ${{ runner.temp }}/merge-sentinel-lyrics.db
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            --import-mode=importlib -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/merge-sentinel-pytest" \
+            --junitxml="$RUNNER_TEMP/merge-sentinel.xml" \
+            modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+
+      - name: Upload merge sentinel prerequisite results
+        if: always() && steps.merge_sentinel.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: merge-sentinel-prerequisites
+          path: ${{ runner.temp }}/merge-sentinel.xml
+          if-no-files-found: error
+
       - name: Run RedDog fast test tier
         working-directory: extensions/reddog
         run: npm test
