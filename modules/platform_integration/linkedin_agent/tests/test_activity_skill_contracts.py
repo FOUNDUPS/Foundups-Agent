@@ -8,8 +8,9 @@ import unittest
 MODULE = Path(__file__).resolve().parents[1]
 ROOT = MODULE.parents[2]
 CHILDREN = (
-    "linkedin_inbox", "linkedin_connections", "linkedin_notifications",
-    "linkedin_group_moderation", "openclaw_group_news", "linkedin_agentic_reply",
+    "linkedin_inbox", "linkedin_connections", "linkedin_contact_diligence",
+    "linkedin_notifications", "linkedin_group_moderation", "openclaw_group_news",
+    "linkedin_agentic_reply",
     "linkedin_newsletters", "linkedin_foundups_newsletter",
     "linkedin_roc_newsletter", "linkedin_jhr_newsletter", "linkedin_publishing",
     "linkedin_article_targeting", "linkedin_outreach", "linkedin_continuity",
@@ -66,6 +67,21 @@ class ActivitySkillContracts(unittest.TestCase):
         for term in ("Focused", "Other", "unread", "composer", "Hold",
                      "read back first", "unknown", "never blindly retry"):
             self.assertIn(term, inbox)
+
+    def test_contact_diligence_is_evidence_bounded_and_non_authorizing(self):
+        text = self.text("skillz/linkedin_contact_diligence/SKILLz.md")
+        for term in (
+            "VERIFIED", "CLAIMED", "UNVERIFIED", "CONFLICTING",
+            "PUBLIC_OVERVIEW_ONLY", "absence", "not proof of fraud",
+            "family-office", "project-finance", "human-review",
+            "does not accept or reject a connection",
+        ):
+            self.assertIn(term.lower(), text.lower())
+        route = self.text("docs/LINKEDIN_ACTIVITY_ROUTING.md")
+        self.assertIn("linkedin_contact_diligence", route)
+        review = self.text("docs/LINKEDIN_REVIEW_WORKFLOW.md")
+        self.assertIn("linkedin_contact_diligence", review)
+        self.assertIn("absence of a public footprint is not proof of fraud", review)
 
     def test_membership_not_implied_by_message(self):
         group = self.text("skillz/linkedin_group_moderation/SKILLz.md")
