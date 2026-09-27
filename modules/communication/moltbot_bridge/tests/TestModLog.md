@@ -1,3 +1,9 @@
+## 2026-09-27: Record OS observer fixture qualification limit
+
+- WSP22/97 existing-owner review: FakeBackend aliases pathname and sockfs inode202, so the current positive observation case cannot establish Linux socket ownership. Source review identifies the defect; no live failure or new test execution is claimed.
+- Tests/README and INTERFACE freeze the next distinct-domain/adversarial qualification scope. No tests, collection, assertions or fixture behavior changed in this documentation-only slice.
+- Prior requester sprint PR1919 is main-verified:144 parent/158 candidate hosted cases, all144 retained,14 additions, zero failures/errors/skips. Current unchanged hosted regression must be reported separately from that historical result.
+
 ## 2026-09-27: Effective requester regression
 
 - Existing healthcheck test owner gains14 cases; all seven prior test bodies/expectations are preserved. Synthetic effective UID/GID are scoped to the healthcheck module, without modifying the shared OS module.

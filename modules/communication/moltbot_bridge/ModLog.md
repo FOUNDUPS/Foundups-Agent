@@ -1,3 +1,9 @@
+## 2026-09-27: Specify existing-owner supervision contract
+
+- WSP00/15/22/50/84/97;13/P1 (2+4+3+4). Reuse existing service loader, OS policy boundary and lifecycle consumer; document field provenance, manager/pidfd lifetime and resident handoff limits in INTERFACE.
+- Independent primary-source review found filesystem/socket inode conflation masked by the current fixture. Record14/P1 qualification prerequisite and fixed adversarial controls; no speculative netlink adapter or production change.
+- PR1919 exact-main closure is reconciled. This slice changes documentation only; no new tests, runtime activation, trust-anchor discharge or effect lease. Acceptance, reviews, publication and closure evidence live in the canonical RSI backlog.
+
 ## 2026-09-27: Correct effective requester selection
 
 - WSP00/6/15/22/50/62/84/97; C2/I3/D3/Impact3=11/P2. Reuse the healthcheck helper and peer-policy parser; omitted identity maps effective UID/GID instead of the first configured entry. Invalid explicit identity no longer falls back.
