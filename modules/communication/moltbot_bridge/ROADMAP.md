@@ -1,9 +1,25 @@
+## Existing healthcheck requester repair — 2026-09-27
+
+WSP15 C2/I3/D3/Impact3=11/P2. Independent owner review found the omitted
+requester selected the lexicographically first configured UID. Correct that
+existing helper with effective UID/GID selection and explicit-None semantics.
+Reuse the peer-policy parser and healthcheck suite;14 new cases preserve the
+seven old test bodies. Hosted144 parent /158 candidate acceptance is pending
+at preparation; current backlog closure receipts govern completion.
+
+The existing signer mapping owner and same-process/external-process handoff
+choices are recorded in INTERFACE. Next is one admitted per-attempt lifecycle
+producer-to-resolver handoff, with independently selected requester and exact
+generation/profile correlation. This repair does not supply that handoff, remove
+any of the seven remaining resident reasons, or issue an effect-use lease.
+
 ## Lifecycle producer dependency qualification — 2026-09-27
 
 WSP15 C2/I4/D3/Impact4 =13/P1. Existing lifecycle handles can originate from
 injected audit/test dependencies. Add a private default-selection record and an
 opt-in requirement to the existing verified consumer before designing resident
-handshake consumption. Source prepared; hosted fixed acceptance remains pending.
+handshake consumption. PR1918 is merged/main-verified at `6dd4f343`;
+113 parent /137 candidate cases passed on PR and main; its owned lane is retired.
 
 This slice preserves the lower-level test API and all seven resident blockers.
 A future handoff still needs admitted producer provenance, exact requester/profile

@@ -1,3 +1,12 @@
+## Effective requester selection — 2026-09-27
+
+Omitted signer-healthcheck requesters now use the current effective UID/GID and
+existing peer policy. Unknown local identity rejects before connection; explicit
+valid identities still require server attestation. See the
+[selection and future handoff contract](INTERFACE.md#healthcheck-requester-selection--2026-09-27)
+and [focused regression](tests/README.md#healthcheck-requester-regression--2026-09-27).
+This source repair grants no native execution authority.
+
 ## Lifecycle dependency selection — 2026-09-27
 
 The existing verified lifecycle consumer can opt into default dependency

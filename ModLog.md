@@ -1,3 +1,10 @@
+## 2026-09-27: RSI requester selection prerequisite
+
+- WSP00/15/22/97 re-observation verified PR1918 on main6dd4f343,113 parent/137 candidate hosted cases, owned-lane retirement and95 unchanged peer heads. Preserve the dirty shared checkout and separately owned FoundUps.
+- Select11/P2 concrete healthcheck repair: effective requester mapping replaces first-entry guessing; malformed explicit inputs fail before connection. Extend existing owners/tests and document the admitted per-attempt handoff still needed.
+- Source prepared; hosted144/158 acceptance and exact-head/main convergence remain pending. Canonical backlog binds current evidence. No resident anchor, native worker, reward or product activation is claimed.
+- Independent review caught the pinned backend dependency before publication. Regenerate its existing manifest and two digest pins; runtime membership and schema stay unchanged. Preserve the initial finding receipt and correct inherited peer-document overlap metadata.
+
 ## 2026-09-27: RSI lifecycle dependency qualification
 
 - PR1917 closed at `8215e584d`:154 identical IDs passed on PR/main, all checks passed and its owned lane retired. Current main/shared snapshot and95 peer heads unchanged.

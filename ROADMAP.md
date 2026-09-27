@@ -12,12 +12,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-27 checkpoint:** PR1917 is merged/main-verified and retired, with
-154 cases passing on PR/main. Fresh ranking selects13/P1 default-dependency
-qualification in the existing lifecycle admission owner. See the
-[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#lifecycle-selection-checkpoint--2026-09-27)
-and canonical backlog for fixed acceptance and closure receipts. This does not
-remove resident trust blockers or complete native RSI admission.
+**2026-09-27 checkpoint:** PR1918 is merged/main-verified at `6dd4f343`,
+with113 parent/137 candidate cases passing on PR/main and its owned lane retired.
+Fresh ranking selects11/P2 correction of omitted signer-healthcheck requester
+selection. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#requester-selection-checkpoint--2026-09-27)
+and canonical backlog for acceptance and closure receipts. The requester owner
+is identified; admitted per-attempt resident handoff and native RSI remain open.
 
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 

@@ -1,3 +1,10 @@
+## 2026-09-27: Correct effective requester selection
+
+- WSP00/6/15/22/50/62/84/97; C2/I3/D3/Impact3=11/P2. Reuse the healthcheck helper and peer-policy parser; omitted identity maps effective UID/GID instead of the first configured entry. Invalid explicit identity no longer falls back.
+- Existing API, receipt schema and server attestation remain. Document the actual requester owner and future per-attempt handoff in INTERFACE; no new module, registry, runtime or authority.
+- Extend the existing test suite with14 cases and a module-only synthetic OS fixture; all seven old test bodies remain. Existing hosted lifecycle regression adds this suite, with144 parent/158 candidate expected. Source prepared; results/closure in the canonical RSI backlog. No host candidate execution.
+- Independent review caught the pinned backend dependency before publication. Regenerate its existing manifest and two digest pins; runtime membership and schema stay unchanged. Preserve the initial finding receipt and correct inherited peer-document overlap metadata.
+
 ## 2026-09-27: Qualify lifecycle dependency selection
 
 - WSP00/6/15/22/50/62/84/97; C2/I4/D3/Impact4=13/P1. Capture original observer/healthcheck selection and absent clock overrides in the existing private boundary registry. Add exact-bool `require_default_dependencies=False` to the existing verified consumer; strict rejection precedes consumption.

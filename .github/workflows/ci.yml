@@ -94,6 +94,7 @@ jobs:
           mkdir "$RUNNER_TEMP/lifecycle-results"
           python -c 'import importlib.metadata as m,json; print(json.dumps({p:m.version(p) for p in ("pytest","cryptography")}))' > "$RUNNER_TEMP/lifecycle-results/packages.json"
           selected=(
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_healthcheck.py
             modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_admission.py
             modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_generation_race.py
             modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py

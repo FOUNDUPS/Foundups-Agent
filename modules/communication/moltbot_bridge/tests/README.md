@@ -1,3 +1,19 @@
+## Healthcheck requester regression — 2026-09-27
+
+Reuse `test_reddog_signer_socket_service_healthcheck.py`; its seven old bodies
+remain unchanged. A module-only synthetic OS fixture makes effective identity
+independent of the host. Fourteen new cases cover two mapped UIDs, six pre-connect
+rejections, four malformed explicit inputs, explicit identity without local APIs
+and unrestricted GIDs. Fake real IDs and supplementary groups must not win.
+
+The existing hosted `lifecycle-dependency-selection` job adds this suite to its
+identical parent/candidate path selection:144 parent /158 candidate authored
+cases. Fresh execution is pending at preparation; inspect exact JUnit case IDs,
+not aggregate counts alone. No candidate tests/collection run under the host
+principal. Fixtures use synthetic keys/connectors and disposable roots; the
+existing unavailable-socket case targets only a nonexistent temporary path.
+No live signer, native worker or kernel-attestation proof is claimed.
+
 ## Lifecycle dependency selection regression — 2026-09-27
 
 Reuse admission and generation-race owners with signer-current-generation,
