@@ -1,3 +1,9 @@
+## 2026-09-27: Make sentinel checkout failure observable
+
+- WSP 00/15/22/34/50/62/84/97; C1/I3/D3/Impact3 = 10/P2. The failed-checkout branch left `error=None`, causing the existing startup consumer to show its normal action-count summary. Populate `cleanup_checkout_failed` in that branch.
+- Preserve command order, actions, prior remote-command success and ENFORCED behavior. The earlier local-main update is not rolled back. No executable main.py change, new owner or runtime activation.
+- PR1916 closure reconciled: 148 exact IDs passed on PR/main, all checks passed, owned lane retired. Six new cases extend the same suite; 154 authored cases await hosted validation. Higher-ranked native and full-cleanup blockers remain open.
+
 ## 2026-09-27: Gate unqualified automatic branch deletion
 
 - WSP 00/15/22/34/50/62/84/97; C1/I4/D3/Impact4 = 12/P2. PR1915 is merged/main-verified and retired. Fresh source/primary Git review leaves full 14/P1 automatic cleanup qualification blocked; it does not become safe through a guessed ref/worktree lock.

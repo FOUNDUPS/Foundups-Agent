@@ -1,3 +1,21 @@
+## Checkout reporting checkpoint — 2026-09-27
+
+PR1916 is `MERGED_VERIFIED_MAIN` at `beff80d2097205d3fe81f37e4ea20625722f9611`:
+148 identical IDs passed on PR/main; all required checks passed; its owned lane
+is retired. Current main, 95 peer heads and shared checkout metadata are unchanged.
+
+Fresh WSP15/97 selection is the 10/P2 checkout-error repair. The existing
+sentinel previously left `error=None` after failed checkout, so its startup
+consumer displayed the normal action-count summary. Set `cleanup_checkout_failed`
+while preserving prior actions, command-success `merged=True`, and
+`passed = not ENFORCED`. No caller change or rollback of the earlier local-main
+update. Extend the existing fake transcript with six cases, preserving all 148
+prior IDs and expectations. The 154-case candidate awaits hosted verification
+and exact-head/main closure; canonical backlog receipt paths govern acceptance.
+
+Native18 and full-cleanup14 remain blocked. This reporting fix grants no merge,
+cleanup, provider, worker or production authority.
+
 ## Merge retention checkpoint — 2026-09-27
 
 PR1915 is `MERGED_VERIFIED_MAIN` at `6255cda690480affeef27d9f043794302a231a99`:

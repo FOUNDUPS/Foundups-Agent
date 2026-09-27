@@ -33,8 +33,12 @@ each passed all 136 IDs. The retention extension keeps those IDs: four clean
 delete-enabled outcomes intentionally change to `cleanup_deletion_unqualified`
 and no delete commands; the other 132 outcomes remain unchanged. Twelve added
 cases cover three routes, two ENFORCED modes and default-unset/forced versus
-explicit deletion requests. Total 148 authored cases; candidate hosted results
-govern acceptance. No live deletion, containment/CAS or native RSI proof.
+explicit deletion requests. PR1916 and exact main `beff80d2097205d3fe81f37e4ea20625722f9611`
+each passed all 148 IDs. The checkout-error extension preserves those IDs and
+expectations, adding six failure cases (three routes × two ENFORCED modes).
+Deletion is requested; successful exact-object update precedes failed checkout,
+which ends the transcript. Total 154 authored cases; candidate hosted results
+govern acceptance. No rollback, live deletion, containment/CAS or native RSI proof.
 
 ## RSI verification measurement contract — 2026-09-25
 

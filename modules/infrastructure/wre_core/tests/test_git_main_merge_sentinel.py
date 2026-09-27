@@ -257,7 +257,7 @@ def _sync_transcript_steps(sync_failure, fetched_commit):
     ]
     if sync_failure:
         stage, response = sync_failure
-        index = {"fetch": 0, "resolve": 1, "late_status": 2, "update": 3}[stage]
+        index = {"fetch": 0, "resolve": 1, "late_status": 2, "update": 3, "checkout": 4}[stage]
         tool, args, _ = steps[index]
         return steps[:index] + [(tool, args, response)]
     return steps
@@ -481,3 +481,31 @@ def test_unqualified_deletion_is_retained_even_when_forced(
                    "--delete-branch" in args or args[:2] in (["branch", "-d"], ["branch", "-D"])
                    for _, args in calls)
     assert not any(action.startswith("deleted ") for action in result["actions"])
+
+
+@pytest.mark.parametrize("route", ["direct", "existing", "new"])
+@pytest.mark.parametrize("enforced", [False, True])
+def test_checkout_failure_reports_structured_error(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str, enforced: bool,
+) -> None:
+    calls, steps = _install_cleanup_transcript(
+        monkeypatch, tmp_path, route, delete_branch=True,
+        sync_failure=("checkout", (False, "checkout rejected")),
+    )
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", str(int(enforced)))
+    result = sentinel.run_main_merge_sentinel(tmp_path)
+    assert result["merged"] is True  # Prior remote command success only.
+    assert result["passed"] is not enforced
+    assert result["error"] == "cleanup_checkout_failed"
+    assert result["actions"][-2:] == ["updated local main", "checkout main failed: checkout rejected"]
+    assert "checked out main" not in result["actions"]
+    assert "blocked: automatic branch deletion is not qualified" not in result["actions"]
+    assert not any(action.startswith("deleted ") for action in result["actions"])
+    assert len(calls) == len(steps)
+    assert calls[-2:] == [
+        ("git", ["branch", "-f", "main", FETCHED_COMMIT]),
+        ("git", ["checkout", "main"]),
+    ]
+    assert not any(args[0] in ("stash", "update-ref") or "--delete" in args or
+                   "--delete-branch" in args or args[:2] in (["branch", "-d"], ["branch", "-D"])
+                   for _, args in calls)

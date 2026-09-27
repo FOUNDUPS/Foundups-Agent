@@ -316,7 +316,6 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
             result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
             return result
 
-        # Checkout main
         ok, output = _git(["checkout", "main"], repo_root)
         if ok:
             result["actions"].append("checked out main")
@@ -330,6 +329,7 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
                 return result
         else:
             result["actions"].append(f"checkout main failed: {output}")
+            result["error"] = "cleanup_checkout_failed"
             result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
     else:
         # Merge failed

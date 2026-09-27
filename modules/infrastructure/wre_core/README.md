@@ -23,6 +23,11 @@ and capture one full 40/64-character hexadecimal object ID. Read status again
 after the fetch/resolution, then update local main using the captured ID.
 Fetch, resolution, status or branch-update failure stops before checkout and
 explicit deletion; there is no cached-target fallback.
+If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
+message in actions and `passed = not ENFORCED`. The earlier local-main update
+is retained; no rollback or later deletion is attempted. `merged=True` still
+means only prior remote-command success. The existing startup error display
+consumes this structured field without a caller change.
 
 These are snapshots, not an atomic worktree/ref lock. Ref movement before
 commit capture and worktree/ref changes after the final status remain races.

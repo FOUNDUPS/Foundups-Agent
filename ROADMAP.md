@@ -12,12 +12,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-27 checkpoint:** PR1915 is merged/main-verified and retired, with
-136 cases passing on PR/main. Full automatic branch retirement remains
-qualification-blocked; fresh ranking selects a smaller 12/P2 retention gate.
-See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#merge-retention-checkpoint--2026-09-27)
-and canonical backlog for primary evidence, fixed acceptance and closure receipts.
-Broader merge authority and native RSI admission remain open.
+**2026-09-27 checkpoint:** PR1916 is merged/main-verified and retired, with
+148 cases passing on PR/main. Fresh ranking selects the 10/P2 checkout-failure
+reporting repair in the existing WRE sentinel. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#checkout-reporting-checkpoint--2026-09-27)
+and canonical backlog for fixed acceptance and closure receipts.
+Full automatic retirement, broader merge authority and native RSI admission remain open.
 
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 

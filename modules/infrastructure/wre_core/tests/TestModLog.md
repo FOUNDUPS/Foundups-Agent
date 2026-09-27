@@ -1,3 +1,10 @@
+## 2026-09-27: Report checkout failure through the existing error field
+
+- WSP 00/6/15/22/34/50/62/84/97. Preserve all 148 case IDs and outcomes; add six controls in the same file/helper (three command-success routes × advisory/ENFORCED).
+- Each deletion-enabled fake transcript reaches successful exact-object local-main update, then failed checkout. Assert `cleanup_checkout_failed`, preserved failure action and `merged=True` command-success meaning, `passed = not ENFORCED`, and no later command or successful checkout/deletion action. No rollback implied.
+- PR1916 is merged/main-verified with the same 148 IDs passing on PR/main. Candidate 154-case hosted validation remains pending at preparation; no host-principal tests, collection or live runtime.
+- Independent fixed acceptance and closure evidence: `O:/Foundups-Agent-audits/20260927-rsi-checkout-error/`. Existing hosted CI and command-denial fixtures remain unchanged.
+
 ## 2026-09-27: Retain branches when automatic cleanup is unqualified
 
 - WSP 00/6/15/22/34/50/62/84/97; frozen 148-case plan. Retained 136 IDs, intentionally changed four clean deletion-enabled outcomes to the retention error; the other 132 outcomes remain unchanged. Twelve new controls cover three routes, advisory/ENFORCED and default-unset+force versus explicit requests.

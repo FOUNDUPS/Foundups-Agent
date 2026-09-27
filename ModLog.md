@@ -1,3 +1,9 @@
+## 2026-09-27: RSI checkout-failure reporting
+
+- PR1916 closed at `beff80d20`: same 148 IDs passed on PR/main, required checks passed, owned branch/worktree retired. Shared checkout and 95 peer heads preserved.
+- Fresh WSP15/97 selection: 10/P2 structured-error repair in the existing WRE merge sentinel. Checkout failures now reach the existing startup error display; no caller or authority change.
+- Existing source/test/roadmap owners reused; 154 authored cases await hosted validation. No native RSI, automated retirement or live merge safety claim.
+
 ## 2026-09-27: RSI automatic-cleanup retention gate
 
 - Closed PR1915 at `6255cda69`: same 136 IDs passed on PR/main, required checks passed, owned branch/worktree retired. Current main, shared snapshot and 95 peer heads remain unchanged.
