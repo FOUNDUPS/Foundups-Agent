@@ -1,3 +1,40 @@
+## Connected socket mapping qualification — 2026-09-27
+
+Reuse the existing observer test owner and identical lifecycle CI path selection.
+PR1921 closed at `c417ccc17`:186 parent/188 candidate passed on PR and main,
+independently inspected original JUnit, all required checks green, owned lane
+retired. This supersedes its preparation-time pending text below.
+
+The candidate preserves the30 previous observer case IDs and all158 adjacent
+case IDs. FakeBackend now separates socket303 from pathname202. Intentional
+changes are the expanded kernel-only source boundary, backend fixture methods,
+and replacement of duplicate test parsers with the production query. Historical
+integer-comparison output is explicitly a replay of the old algorithm, never
+the repaired observer result. Both old kernel oracles remain.
+
+New controls cover framing/error correlation, namespace/PID view, concrete-cookie
+and FD continuity, duplicate/unrelated sockets, ambiguity, widths, deadlines and
+actual bounded-scandir overflow. Inert binary fixture helpers live in
+`reddog_unix_socket_test_support.py` to preserve the existing675-line test-owner
+limit; this is not a new test suite or runtime service. Both new files are listed
+in the existing WSP62 inventory. Canonical registry/manifest generators decide
+whether projection changes are required; no dependency or authority is added.
+
+One new hosted-only case invokes the actual production association seam over
+its own held FD, verifies a concrete-cookie recheck, then rejects a replaced
+pathname. The inherited opt-in and RUNNER_TEMP confinement remain. Only owned
+listeners and exact kernel queries occur; no connect/accept/signer/provider/key.
+JUnit `production_socket_association` records independent held-fstat/path-lstat
+fields for recomputation. Other new cases use inert transports/procfs fixtures.
+No candidate tests or collection execute on the host. Unsupported hosted
+capability fails qualification; skips are not success.
+
+The shared clock contract is monotonic; nonfinite/expired values reject. The
+deadline bounds acceptance, not all syscall wall time or an arbitrary injected
+clock. This does not qualify cross-process/UID visibility, authentic supervisor
+policy, atomic lifetime, native admission or retained RSI. Actual case counts,
+failures, reviews and exact-head closure are in the canonical backlog receipts.
+
 ## Hosted socket identity characterization — 2026-09-27
 
 Two cases extend `test_reddog_external_signer_os_observer.py`, preserving all28

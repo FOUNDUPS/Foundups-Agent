@@ -1,3 +1,41 @@
+## Connected socket ownership observation — 2026-09-27
+
+The existing `observe_external_signer_os_state` now associates process socket
+FDs with pathname metadata using exact Linux `NETLINK_SOCK_DIAG` VFS replies.
+The public policy, receipt v1 and lifecycle entry points are unchanged. The
+backend protocol adds `current_pid()`, `monotonic()` and
+`query_unix_socket(inode, cookie, timeout)`; unsupported custom backends reject.
+The default backend uses bounded `scandir` and the private same-module
+`_reddog_unix_socket_identity.py`. This is an observation, not policy issuance.
+
+The former absolute no-socket restriction is narrowed explicitly: only local
+kernel AF_NETLINK/SOCK_RAW/protocol4, exact per-inode request, no dump, kernel
+address `(0,0)`, one4096-byte response and no retry. No target socket connection,
+service control, namespace switch, key read, provider or authority grant.
+The source-boundary test inspects both files; AST checks are not containment.
+
+At most256 FD entries and16 unique socket candidates are inspected. Duplicate
+FDs are deduplicated. Well-formed unrelated/no-VFS sockets and correlated
+discovery ENOENT can be skipped; malformed replies and ambiguous matches reject.
+VFS inode must fit u32; compare device major/minor without truncation. Matching
+VFS requires AF_UNIX stream/listening state. A concrete returned cookie and the
+original FD are checked on both sides of queries and reused in the second
+observation; replacement discovery is forbidden there.
+
+Require numeric `/proc/self` equals `getpid()`, singleton matching Pid/NSpid in
+self/target status, and equal stable pid/net/mnt/user namespace handles. These
+checks restrict support to the same procfs/PID/namespace view; they do not
+authenticate supervision. A shared2-second acceptance deadline uses the
+backend's monotonic-clock contract, with remaining receive time. Nonfinite or
+expired values reject; this is not a hard wall-clock guarantee for blocking
+kernel/filesystem calls or a detector for every injected backward-clock step.
+
+Source prepared; exact source/hosted/main review remains required. Existing
+process/path checks, audit-only receipt, seven resident reasons and absent
+effect-use lease remain. Snapshots/cookies do not prevent every ABA, FD transfer,
+exit or exec; cross-UID supervision and authentic policy issuance remain open.
+The earlier characterization-only contract below is historical PR1921 scope.
+
 ## Socket characterization boundary — 2026-09-27
 
 Production observer, policy, receipt and lifecycle APIs are unchanged. Two

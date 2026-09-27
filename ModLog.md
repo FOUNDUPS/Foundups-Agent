@@ -1,3 +1,9 @@
+## 2026-09-27: RSI connected socket identity repair
+
+- WSP00/15/97 re-observation confirms PR1921 main closure, unchanged95 peer heads/shared checkout, and52 ranked candidates. Select15/P1 connected ownership repair; native18 remains blocked.
+- Extend existing observer/backend/test owners with a bounded private binary association leaf and inert fixture support, preserving public receipt/authority semantics. Documentation states actual effects and snapshot limitations.
+- Source prepared; no host candidate execution or native activation. Current backlog binds independent review, hosted acceptance, main convergence and cleanup receipts. The earlier kernel experiment is closed, not production supervision.
+
 ## 2026-09-27: RSI kernel qualification experiment
 
 - Re-observe under WSP00/15/97: PR1920 is closed/main-verified,52 ranked candidates and95 peer heads reconciled, shared checkout preserved. Select14/P1 concrete socket qualification instead of repeating completed design work.

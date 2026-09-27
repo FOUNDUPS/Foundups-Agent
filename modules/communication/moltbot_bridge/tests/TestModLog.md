@@ -1,3 +1,9 @@
+## 2026-09-27: Connected socket ownership regression
+
+- WSP00/6/15/22/50/62/84/97;15/P1. Reuse existing observer case IDs and nearby lifecycle selection; distinguish socket303/path202 in the fixture and remove duplicate binary query/parser code in favor of production.
+- Add inert framing, namespace, FD/cookie/budget controls and one own-held-FD hosted production-seam case. Preserve both historical kernel oracles; integer-comparison diagnostic now explicitly replays the old algorithm. Private inert support is required for the existing675-line owner limit; exact WSP62 boundary inventory expanded.
+- Freeze oracles/effects before implementation; no host candidate execution or collection. Fresh hosted acceptance and closure pending; evidence at `O:/Foundups-Agent-audits/20260927-rsi-socket-repair/`. PR1921 is main-verified with186/188 pass and retired owned lane.
+
 ## 2026-09-27: Bounded Linux socket/VFS experiment
 
 - WSP00/6/15/22/50/62/84/97;14/P1. Append two hosted-only cases to the existing OS observer owner, preserving all18 old test functions/28 cases and FakeBackend. No production source change.
