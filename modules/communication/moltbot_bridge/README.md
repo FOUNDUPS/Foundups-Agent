@@ -1,3 +1,11 @@
+## Socket identity experiment — 2026-09-27
+
+PR1920 supervision design is merged/main-verified at `f9988486`. Its concrete
+socket prerequisite now has two bounded hosted characterization cases in the
+[existing observer test owner](tests/README.md#hosted-socket-identity-characterization--2026-09-27).
+The source is prepared; actual execution and closure are receipt-bound in the
+canonical RSI backlog. Production observer and native authority remain unchanged.
+
 ## Supervision implementation boundary — 2026-09-27
 
 The [existing-owner supervision contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)

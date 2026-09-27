@@ -1,3 +1,46 @@
+## Hosted socket identity characterization — 2026-09-27
+
+Two cases extend `test_reddog_external_signer_os_observer.py`, preserving all28
+earlier cases and their fixtures: `test_hosted_kernel_vfs_identity_survives_unlink_rebind`
+and `test_hosted_kernel_rejects_changed_socket_cookie`. No new test owner.
+
+The existing hosted lifecycle selection adds this suite for identical parent/
+candidate paths:186 parent/188 candidate cases expected at source preparation.
+`FOUNDUPS_SOCKET_KERNEL_CHARACTERIZATION=1` selects the reviewed experiment;
+it is not an authorization token. Without opt-in the two cases skip before any
+kernel effect. With opt-in, missing Linux/netlink/runner capability or unsupported
+inode width fails qualification; skips cannot count as successful hosted proof.
+No candidate tests or collection run under the host principal.
+
+Each case uses its own short `TemporaryDirectory` under `RUNNER_TEMP`, held
+AF_UNIX stream listener FDs and exact local NETLINK_SOCK_DIAG requests, never a
+socket dump or a signer/service. Queries request only VFS metadata, with one
+4096-byte datagram and2-second deadline each. No connect/accept, provider, keys,
+privilege changes or explicit module/service management. The kernel may implicitly
+load its diagnostic family on first request. Context managers close every FD and
+remove the exact owned temporary directory on success or failure. Registry
+`network` capability declares these effects; production import restrictions remain.
+
+Oracles compare held FD socket identity/cookie with VFS inode and decoded kernel
+device numbers. The first case keeps an old socket open while unlinking/rebinding
+the same pathname, then rechecks both associations. The second requires a changed
+concrete cookie to produce correlated kernel `-ESTALE`, while the authentic cookie
+still resolves. Check sender port0, reply header local port/sequence, exact size,
+type, family/stream/listen state, queried inode, cookie and VFS attribute bounds.
+No matching pathname or coincident integer is accepted as ownership evidence.
+
+JUnit `socket_kernel_characterization` properties record kernel/machine, this
+process's namespace handles, identities/cookies and old-helper diagnostic outcome.
+Neither old-helper acceptance nor rejection is a desired-production oracle.
+The Linux UAPI gives VFS inode before device and encodes kernel dev_t as12 major/
+20 minor bits; do not copy the reversed field order in the rendered manual.
+
+Results characterize same-process held descriptors on the recorded runner only.
+Cross-process ownership, FD transfer/reuse, different namespaces, malformed-input
+rejection corpus, production parser/backend, supervisor issuance, atomic lifetime
+and native authority remain unqualified. Source prepared; inspect exact-head CI
+artifacts and closure receipts in the canonical RSI backlog for actual results.
+
 ## OS observer qualification gap — 2026-09-27
 
 `test_reddog_external_signer_os_observer.py::FakeBackend` currently uses202 for

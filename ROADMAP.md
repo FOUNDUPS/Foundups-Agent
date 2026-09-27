@@ -12,14 +12,13 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-27 checkpoint:** PR1919 is merged/main-verified at `bba2e752`,
-with144 parent/158 candidate hosted cases passing and its owned lane retired.
-The13/P1 external-supervision source contract now identifies existing owners,
-field provenance and lifetime requirements. Independent review found a14/P1
-socket-ownership qualification prerequisite before the concrete issuer/handoff.
-See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#supervision-source-checkpoint--2026-09-27)
-and canonical backlog for current validation/closure and re-scoring. Native RSI
-and the AmIBot experiment remain unadmitted.
+**2026-09-27 checkpoint:** PR1920 supervision design is merged/main-verified
+at `f9988486`, with its owned lane retired. Fresh52-row ranking selects14/P1
+socket identity characterization: two bounded hosted cases in the existing
+observer suite, before production bridge implementation. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#socket-kernel-checkpoint--2026-09-27)
+and canonical backlog for exact validation and closure. Native RSI and the
+AmIBot experiment remain unadmitted.
 
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 

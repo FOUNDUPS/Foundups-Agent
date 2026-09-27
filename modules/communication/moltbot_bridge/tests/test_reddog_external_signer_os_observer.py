@@ -3,8 +3,14 @@
 from __future__ import annotations
 
 import ast
+import errno
+import json
 import os
+import socket
 import stat
+import struct
+import sys
+import tempfile
 from dataclasses import replace
 from pathlib import Path
 
@@ -29,6 +35,7 @@ from modules.communication.moltbot_bridge.src.reddog_external_signer_os_observer
     FAIL_OS_OBSERVER_UNSUPPORTED_PLATFORM,
     ExternalSignerOsObservationError,
     ExternalSignerOsObservationPolicy,
+    _require_process_socket_owner,
     observe_external_signer_os_state,
     verify_external_signer_os_observation_receipt,
 )
@@ -356,3 +363,201 @@ def test_module_has_no_execution_network_or_service_control_surface() -> None:
     assert calls.isdisjoint(
         {"system", "popen", "spawn", "fork", "execv", "execve", "kill", "connect"}
     )
+
+
+# Characterization only: Linux v6.12 unix_diag.h, diag.c and kdev_t.h.
+# These helpers are not a production observer or a general netlink client.
+_DIAG_NO_COOKIE = (0xFFFFFFFF, 0xFFFFFFFF)
+
+
+def _require_hosted_kernel_characterization() -> Path:
+    if os.environ.get("FOUNDUPS_SOCKET_KERNEL_CHARACTERIZATION") != "1":
+        pytest.skip("Explicitly reviewed hosted kernel characterization required")
+    assert sys.platform == "linux", "Incomplete qualification: Linux required"
+    assert hasattr(socket, "AF_NETLINK"), "Incomplete qualification: netlink absent"
+    root = Path(os.environ["RUNNER_TEMP"]).resolve(strict=True)
+    assert root.is_dir()
+    return root
+
+
+def _kernel_diag_exchange(body: bytes) -> tuple[int, bytes, bytes]:
+    sequence = 0x52534931
+    request = struct.pack("=IHHII", 16 + len(body), 20, 1, sequence, 0) + body
+    # NETLINK_SOCK_DIAG=4; exactly one request for our held socket inode, no dump.
+    with socket.socket(socket.AF_NETLINK, socket.SOCK_RAW, 4) as channel:
+        channel.settimeout(2.0)
+        channel.bind((0, 0))
+        port = channel.getsockname()[0]
+        assert channel.sendto(request, (0, 0)) == len(request)
+        raw, ancillary, flags, sender = channel.recvmsg(4096)
+    assert sender == (0, 0) and not ancillary and flags == 0
+    assert len(raw) >= 16
+    size, kind, reply_flags, reply_sequence, reply_port = struct.unpack_from(
+        "=IHHII", raw
+    )
+    assert size == len(raw) and size % 4 == 0 and reply_flags == 0
+    assert reply_sequence == sequence and reply_port == port
+    assert kind in (2, 20)  # NLMSG_ERROR or SOCK_DIAG_BY_FAMILY, never multipart.
+    return kind, raw[16:], request
+
+
+def _parse_own_socket_vfs(
+    payload: bytes, inode: int, cookie: tuple[int, int]
+) -> dict[str, object]:
+    assert len(payload) >= 16
+    family, kind, state, pad, reply_inode, c0, c1 = struct.unpack_from(
+        "=BBBBIII", payload
+    )
+    assert (family, kind, state, pad) == (socket.AF_UNIX, socket.SOCK_STREAM, 10, 0)
+    assert reply_inode == inode and (c0, c1) != _DIAG_NO_COOKIE
+    assert cookie == _DIAG_NO_COOKIE or cookie == (c0, c1)
+    attributes = {}
+    offset = 16
+    while offset < len(payload):
+        assert offset + 4 <= len(payload)
+        length, attr_type = struct.unpack_from("=HH", payload, offset)
+        end = offset + length
+        aligned_end = offset + ((length + 3) & ~3)
+        assert length >= 4 and end <= aligned_end <= len(payload)
+        assert attr_type not in attributes
+        attributes[attr_type] = payload[offset + 4:end]
+        offset = aligned_end
+    assert offset == len(payload) and 1 in attributes
+    assert len(attributes[1]) == 8  # UNIX_DIAG_VFS=1; request SHOW_VFS bit is2.
+    vfs_inode, vfs_device = struct.unpack("=II", attributes[1])
+    return {"socket_inode": inode, "cookie": (c0, c1),
+            "vfs_inode": vfs_inode, "vfs_device": vfs_device}
+
+
+def _query_held_socket(
+    held: socket.socket, cookie: tuple[int, int] = _DIAG_NO_COOKIE,
+    *, expected_error: int | None = None,
+) -> dict[str, object]:
+    inode = os.fstat(held.fileno()).st_ino
+    assert 0 < inode <= 0xFFFFFFFF, "Incomplete qualification: socket inode width"
+    body = struct.pack("=BBHIIIII", socket.AF_UNIX, 0, 0, 0, inode, 2, *cookie)
+    kind, payload, request = _kernel_diag_exchange(body)
+    if expected_error is not None:
+        assert kind == 2 and len(payload) == 4 + len(request)
+        error = struct.unpack_from("=i", payload)[0]
+        assert error == -expected_error and payload[4:] == request
+        return {"error": error}
+    assert kind == 20, "Incomplete qualification: diagnostic request rejected"
+    return _parse_own_socket_vfs(payload, inode, cookie)
+
+
+def _assert_vfs_association(
+    observation: dict[str, object], metadata: os.stat_result, held: socket.socket
+) -> None:
+    assert stat.S_ISSOCK(metadata.st_mode)
+    assert 0 < metadata.st_ino <= 0xFFFFFFFF, "Incomplete qualification: VFS inode width"
+    assert observation["socket_inode"] == os.fstat(held.fileno()).st_ino
+    assert observation["vfs_inode"] == metadata.st_ino
+    # Kernel dev_t is major:12/minor:20, unlike userspace st_dev encoding.
+    raw_device = observation["vfs_device"]
+    assert (raw_device >> 20, raw_device & 0xFFFFF) == (
+        os.major(metadata.st_dev), os.minor(metadata.st_dev)
+    )
+
+
+def _legacy_held_fd_result(held: socket.socket, metadata: os.stat_result) -> str:
+    root = f"/proc/{os.getpid()}/fd"
+    descriptor = str(held.fileno())
+
+    class HeldFdOnly:
+        def listdir(self, path: str) -> list[str]:
+            assert path == root
+            return [descriptor]
+
+        def readlink(self, path: str) -> str:
+            assert path == f"{root}/{descriptor}"
+            return os.readlink(path)
+
+    try:
+        _require_process_socket_owner(HeldFdOnly(), os.getpid(), metadata)
+    except ExternalSignerOsObservationError as error:
+        assert str(error) == FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED
+        return "rejected_inode_comparison"
+    return "accepted_inode_comparison"
+
+
+def _record_kernel_characterization(record_property, **observations: object) -> None:
+    report = {
+        "kernel_release": os.uname().release,
+        "machine": os.uname().machine,
+        "namespaces": {name: os.readlink(f"/proc/self/ns/{name}")
+                       for name in ("pid", "user", "net", "mnt")},
+        "scope": "same-process test-owned sockets; not external signer authority",
+        "production_bridge_qualified": False,
+        **observations,
+    }
+    record_property("socket_kernel_characterization", json.dumps(report, sort_keys=True))
+
+
+def _held_stat_evidence(held: socket.socket, metadata: os.stat_result) -> dict[str, int]:
+    return {
+        "fd_inode": os.fstat(held.fileno()).st_ino,
+        "path_inode": metadata.st_ino,
+        "path_device_major": os.major(metadata.st_dev),
+        "path_device_minor": os.minor(metadata.st_dev),
+    }
+
+
+def test_hosted_kernel_vfs_identity_survives_unlink_rebind(record_property) -> None:
+    root = _require_hosted_kernel_characterization()
+    with tempfile.TemporaryDirectory(prefix="rsi-sock-", dir=root) as directory:
+        assert Path(directory).resolve().parent == root
+        path = Path(directory) / "signer.sock"
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as old:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as new:
+                old.bind(str(path))
+                old.listen(1)
+                old_stat = path.lstat()
+                first = _query_held_socket(old)
+                _assert_vfs_association(first, old_stat, old)
+                legacy = _legacy_held_fd_result(old, old_stat)
+                path.unlink()  # Only our exact temporary pathname; old FD stays open.
+                new.bind(str(path))
+                new.listen(1)
+                new_stat = path.lstat()
+                second = _query_held_socket(new)
+                repeated = _query_held_socket(old, first["cookie"])
+                _assert_vfs_association(second, new_stat, new)
+                _assert_vfs_association(repeated, old_stat, old)
+                assert first == repeated
+                assert (old_stat.st_dev, old_stat.st_ino) != (new_stat.st_dev, new_stat.st_ino)
+                assert first["socket_inode"] != second["socket_inode"]
+                _record_kernel_characterization(
+                    record_property, before=first, replacement=second,
+                    old_after_rebind=repeated, old_helper_result=legacy,
+                    before_stat=_held_stat_evidence(old, old_stat),
+                    replacement_stat=_held_stat_evidence(new, new_stat),
+                    numeric_domains_happen_to_match=first["socket_inode"] == old_stat.st_ino,
+                    pathname_rebound=True,
+                )
+
+
+def test_hosted_kernel_rejects_changed_socket_cookie(record_property) -> None:
+    root = _require_hosted_kernel_characterization()
+    with tempfile.TemporaryDirectory(prefix="rsi-sock-", dir=root) as directory:
+        assert Path(directory).resolve().parent == root
+        path = Path(directory) / "signer.sock"
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as held:
+            held.bind(str(path))
+            held.listen(1)
+            metadata = path.lstat()
+            first = _query_held_socket(held)
+            _assert_vfs_association(first, metadata, held)
+            cookie = first["cookie"]
+            changed = (cookie[0] ^ 1, cookie[1])
+            if changed == _DIAG_NO_COOKIE:
+                changed = (cookie[0] ^ 2, cookie[1])
+            assert changed not in (cookie, _DIAG_NO_COOKIE)
+            rejection = _query_held_socket(held, changed, expected_error=errno.ESTALE)
+            repeated = _query_held_socket(held, cookie)
+            assert repeated == first
+            _record_kernel_characterization(
+                record_property, before=first, wrong_cookie=rejection,
+                before_stat=_held_stat_evidence(held, metadata),
+                authentic_cookie_after_rejection=repeated,
+            )

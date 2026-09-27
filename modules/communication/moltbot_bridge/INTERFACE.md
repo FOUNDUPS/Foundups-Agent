@@ -1,3 +1,24 @@
+## Socket characterization boundary — 2026-09-27
+
+Production observer, policy, receipt and lifecycle APIs are unchanged. Two
+hosted-only cases in the existing observer test owner characterize kernel socket
+inode/cookie to VFS inode/device association, unlink/rebind and wrong-cookie
+rejection. See [fixed effects and oracles](tests/README.md#hosted-socket-identity-characterization--2026-09-27).
+This is a qualification experiment, not the production bridge or supervisor.
+
+The reviewed test request is exact NETLINK_SOCK_DIAG for held test-created FDs;
+it does not expand the production observer's no-network boundary. The first
+query discovers a cookie; repeated queries use that concrete cookie. Scope is
+one process in its recorded namespaces; it cannot prove external signer process
+ownership or prevent exit/exec/ABA after observation. The old inode-comparison
+helper's outcome is diagnostic and is not an ownership acceptance criterion.
+All seven resident trust reasons and `authoritative_use_lease=None` remain.
+
+Implementation qualification still requires an explicitly reviewed production
+consumer/boundary, malformed/foreign/truncated-input controls, namespace and
+cross-process FD/lifetime handling. No successful synthetic or disposable-kernel
+result alone admits a signer or native RSI worker.
+
 ## External supervision source contract — 2026-09-27
 
 **Design specified; implementation and runtime qualification remain open.**
