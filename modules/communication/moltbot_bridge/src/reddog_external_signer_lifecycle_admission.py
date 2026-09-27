@@ -99,17 +99,17 @@ class ExternalSignerLifecycleAdmissionBoundary(Protocol):
 
 def _build_boundary_registry():
     lock = threading.RLock()
-    records: WeakKeyDictionary[object, tuple[Any, Any]] = WeakKeyDictionary()
+    records: WeakKeyDictionary[object, tuple[Any, Any, bool]] = WeakKeyDictionary()
 
-    def issue(key: object, admit: Any, consume: Any) -> None:
+    def issue(key: object, admit: Any, consume: Any, default_dependencies: bool) -> None:
         with lock:
             if key in records:
                 raise ExternalSignerLifecycleAdmissionError(
                     "external_signer_lifecycle_boundary_already_issued"
                 )
-            records[key] = (admit, consume)
+            records[key] = (admit, consume, default_dependencies)
 
-    def lookup(key: object) -> tuple[Any, Any]:
+    def lookup(key: object) -> tuple[Any, Any, bool]:
         with lock:
             try:
                 return records[key]
@@ -145,16 +145,22 @@ def _build_verified_consumer(lookup: Any, boundary_type: type):
     def consume(
         boundary: object, capability: object, *,
         requester_principal_id: str, signer_profile_id: str,
+        require_default_dependencies: bool = False,
     ) -> ExternalSignerLifecycleAdmissionReceipt:
         """Consume registered proof once, then correlate its exact identities."""
-        if type(boundary) is not boundary_type or not all(
+        if type(require_default_dependencies) is not bool or type(boundary) is not boundary_type or not all(
             type(v) is str and v.strip()
             for v in (requester_principal_id, signer_profile_id)
         ):
             raise ExternalSignerLifecycleAdmissionError(
                 "external_signer_lifecycle_boundary_unverified"
             )
-        receipt = lookup(boundary)[1](capability)
+        _, registered_consume, default_dependencies = lookup(boundary)
+        if require_default_dependencies and not default_dependencies:
+            raise ExternalSignerLifecycleAdmissionError(
+                "external_signer_lifecycle_default_dependencies_required"
+            )
+        receipt = registered_consume(capability)
         if (receipt.requester_principal_id, receipt.signer_profile_id) != (
             requester_principal_id, signer_profile_id
         ):
@@ -176,19 +182,13 @@ def _create_external_signer_lifecycle_admission_boundary(
     repo_root: Path | str,
     manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
     generation_reader_authority: object,
-    generation_reader_authority_boundary: (
-        SignerRuntimeGenerationReaderAuthorityBoundary
-    ),
+    generation_reader_authority_boundary: SignerRuntimeGenerationReaderAuthorityBoundary,
     os_policy_authority: object,
     os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
     requester_principal_id: str,
     signer_profile_id: str = "reddog-work-authority",
-    os_observer: Callable[..., ExternalSignerOsObservationReceipt] = (
-        _DEFAULT_OS_OBSERVER
-    ),
-    healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = (
-        _DEFAULT_HEALTHCHECK_RUNNER
-    ),
+    os_observer: Callable[..., ExternalSignerOsObservationReceipt] = _DEFAULT_OS_OBSERVER,
+    healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = _DEFAULT_HEALTHCHECK_RUNNER,
     trusted_clock: Callable[[], int] | None = None,
     trusted_monotonic_clock: Callable[[], int] | None = None,
     issue_boundary: Any,
@@ -234,24 +234,20 @@ def _create_external_signer_lifecycle_admission_boundary(
 
 
 def _build_lifecycle_factory(create: Any, issue: Any):
+    default_observer, default_healthcheck = _DEFAULT_OS_OBSERVER, _DEFAULT_HEALTHCHECK_RUNNER
+
     def factory(
         *,
         repo_root: Path | str,
         manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
         generation_reader_authority: object,
-        generation_reader_authority_boundary: (
-            SignerRuntimeGenerationReaderAuthorityBoundary
-        ),
+        generation_reader_authority_boundary: SignerRuntimeGenerationReaderAuthorityBoundary,
         os_policy_authority: object,
         os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
         requester_principal_id: str,
         signer_profile_id: str = "reddog-work-authority",
-        os_observer: Callable[..., ExternalSignerOsObservationReceipt] = (
-            _DEFAULT_OS_OBSERVER
-        ),
-        healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = (
-            _DEFAULT_HEALTHCHECK_RUNNER
-        ),
+        os_observer: Callable[..., ExternalSignerOsObservationReceipt] = default_observer,
+        healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = default_healthcheck,
         trusted_clock: Callable[[], int] | None = None,
         trusted_monotonic_clock: Callable[[], int] | None = None,
     ) -> ExternalSignerLifecycleAdmissionBoundary:
@@ -270,7 +266,11 @@ def _build_lifecycle_factory(create: Any, issue: Any):
             healthcheck_runner=healthcheck_runner,
             trusted_clock=trusted_clock,
             trusted_monotonic_clock=trusted_monotonic_clock,
-            issue_boundary=issue,
+            issue_boundary=lambda key, admit, consume: issue(
+                key, admit, consume,
+                os_observer is default_observer and healthcheck_runner is default_healthcheck
+                and trusted_clock is None and trusted_monotonic_clock is None,
+            ),
         )
 
     return factory

@@ -1,3 +1,16 @@
+## Lifecycle producer dependency qualification — 2026-09-27
+
+WSP15 C2/I4/D3/Impact4 =13/P1. Existing lifecycle handles can originate from
+injected audit/test dependencies. Add a private default-selection record and an
+opt-in requirement to the existing verified consumer before designing resident
+handshake consumption. Source prepared; hosted fixed acceptance remains pending.
+
+This slice preserves the lower-level test API and all seven resident blockers.
+A future handoff still needs admitted producer provenance, exact requester/profile
+and current-generation correlation, freshness and one-use ownership. Default
+callable selection alone is insufficient. No separate handshake, service or lease
+framework is introduced. The root backlog owns source/review/closure evidence.
+
 ## Recursive wardrobe cache qualification — 2026-09-21
 
 **Decision: keep current rescanning.** The optional C3/I2/D2/Impact2 = 9/P3

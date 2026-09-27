@@ -1,3 +1,24 @@
+## Lifecycle default-dependency requirement — 2026-09-27
+
+`consume_verified_external_signer_lifecycle_admission` adds keyword-only
+`require_default_dependencies: bool = False`. Omission/False retains the current
+audit/one-use behavior. Non-bool values reject before consuming. With True,
+the captured private registry must record the original default observer and
+healthcheck callables plus no wall/monotonic overrides. Explicit original
+callables and explicit None clocks qualify; wrappers/replacements and any
+non-None clock value (including falsey values) do not. Rebinding module aliases
+after factory creation cannot promote a replacement or demote captured defaults.
+Unqualified selection raises `external_signer_lifecycle_default_dependencies_required`
+before consuming the handle. Malformed identity and foreign-boundary guards still
+precede consumption; a valid owned identity mismatch still spends the handle.
+
+Factory signature, audit receipt schema/digests and false authority flags remain
+unchanged. No public property, serialized label or caller declaration promotes
+selection. The stricter flag requests an additional check; it cannot grant trust.
+This metadata is not full manifest/OS/generation/cryptographic provenance,
+continuous supervision or a hostile-Python boundary. No resident reason is
+removed and no effect lease is issued; resident/bootstrap wiring remains separate.
+
 # OpenClaw Bridge Interface
 
 ## Governed use-time supplier admission
@@ -343,7 +364,7 @@ against that signer-owned binding, configured key, fingerprint, epoch, and
 kernel-attested requester. The response carries a second, domain-separated
 signature covering its audit metadata and acceptance attestations. A matching
 public-key string or serialized `peer_handshake_verified` flag is not
-authority. `ExternalSignerLifecycleAdmissionReceipt` preserves exact nonblank string `requester_principal_id` and `signer_profile_id` from the matching healthcheck in its digest-bound audit payload; receipt IDs change with either identity. These are required fields, not an authorization or a decoder for older receipts. `consume_verified_external_signer_lifecycle_admission(boundary, capability, *, requester_principal_id, signer_profile_id)` captures the canonical registry/exact boundary type and consumes through its registered closure before exact identity correlation; it never trusts public `consume` dispatch or a receipt supplied as a capability. Malformed expected identities and foreign boundaries preserve the original handle; valid owned identity mismatch spends it. Returned flags remain false. Resident integration and live authority remain separate. `reddog_current_generation_manifest_launch_selection.py` now
+authority. `ExternalSignerLifecycleAdmissionReceipt` preserves exact nonblank string `requester_principal_id` and `signer_profile_id` from the matching healthcheck in its digest-bound audit payload; receipt IDs change with either identity. These are required fields, not an authorization or a decoder for older receipts. `consume_verified_external_signer_lifecycle_admission(boundary, capability, *, requester_principal_id, signer_profile_id, require_default_dependencies=False)` captures the canonical registry/exact boundary type and consumes through its registered closure before exact identity correlation; it never trusts public `consume` dispatch or a receipt supplied as a capability. Malformed expected identities and foreign boundaries preserve the original handle; valid owned identity mismatch spends it. Returned flags remain false. Resident integration and live authority remain separate. `reddog_current_generation_manifest_launch_selection.py` now
 supplies the verifier-only selection boundary for an externally managed signer:
 it reads the authenticated durable generation, ignores caller manifest data,
 verifies the content-addressed manifest with the canonical Ed25519 backend,

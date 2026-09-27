@@ -1873,91 +1873,110 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "beff80d2097205d3fe81f37e4ea20625722f9611",
-    "selected_action": "rsi-checkout-error-20260927",
+    "base_commit": "8215e584dda5bdb1c13bb236fccec7ff9cd35a46",
+    "selected_action": "rsi-lifecycle-selection-20260927",
     "status": "implementation_prepared_hosted_validation_pending",
     "wsp15": {
-      "complexity": 1,
-      "importance": 3,
+      "complexity": 2,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 10,
-      "priority": "P2"
+      "impact": 4,
+      "total": 13,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-checkout-error-20260927",
-    "base": "beff80d2097205d3fe81f37e4ea20625722f9611",
+    "observation_id": "rsi-lifecycle-selection-20260927",
+    "base": "8215e584dda5bdb1c13bb236fccec7ff9cd35a46",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Report sentinel checkout failure through its existing structured error field",
+    "selected": "Design and qualify canonical dependency selection at the existing lifecycle admission producer before resident handshake consumption",
     "wsp15": {
-      "complexity": 1,
-      "importance": 3,
+      "complexity": 2,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 10,
-      "priority": "P2"
+      "impact": 4,
+      "total": 13,
+      "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1916,
-      "merge": "beff80d2097205d3fe81f37e4ea20625722f9611",
+      "pr": 1917,
+      "merge": "8215e584dda5bdb1c13bb236fccec7ff9cd35a46",
       "terminal_state": "MERGED_VERIFIED_MAIN",
       "evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-cleanup\\final-accounting.json",
-        "sha256": "382abcc6b3135214e2e61ff1979cd78d5c109374cf19b94a6f757187ec0fa016"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\final-accounting.json",
+        "sha256": "9a8afd63e92d0b09827c17761bd50acaa1cff748cf17cc7657eacfba89464d27"
       }
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\previous-observation.json",
-      "sha256": "c7a76990cb7e624396e417f993fe7e94e690354c0cda61d78044af7b742fc597",
-      "repository_ref": "beff80d2097205d3fe81f37e4ea20625722f9611:docs/roadmaps/rsi_swarm_backlog.json",
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-lifecycle-selection\\previous-observation.json",
+      "sha256": "0d1f198065bba3285eebd0c8d090c3a66e735becf26ac11b974a062c238a4900",
+      "repository_ref": "8215e584dda5bdb1c13bb236fccec7ff9cd35a46:docs/roadmaps/rsi_swarm_backlog.json",
       "json_path": "current_observation"
     },
-    "retrieval": {
-      "holo": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH unchanged at authority5326080d/queryhost0c81418f; no repeated failed query or reindex.",
-      "noise": "Large combined reads trimmed to exact sentinel/test/doc sections.",
-      "ordering": "Actual WSP00/15/97, verified prior closure, owner skill, canonical roadmap/backlog, source/tests and existing main caller.",
-      "missing": "No direct NAVIGATION sentinel entry or module memory/README; caller verified in main.py.",
-      "staleness": "Main,95 peer heads, shared snapshot and Holo authority unchanged.",
-      "duplication": "Extend existing source/helper/test/CI; no new module, skill, docs or runner."
-    },
-    "allocation": {
-      "execution_plane": "Ordinary bounded source repair and hosted focused regression; not native/differential WRE admission.",
-      "effort_cost": "One structured error in existing branch; six cases in existing fake transcript; hosted CI and independent source/head review. No runtime activation.",
-      "manual_reason": "Native worker paths remain unqualified; bounded source adjudication and existing hosted CI use no native execution authority."
+    "design_review": {
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\resident-handoff-design-review.json",
+      "sha256": "52ef851eec91a579be536cb0903d11b846e9c10a39f23fbb273c7d06a1b2ec8d"
     },
     "acceptance_review": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\acceptance-review.json",
-      "sha256": "aa86e3f4225b2998d3bf31d8eb317528172fe1f1ff40b07906a4cd3f75b818c2"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-lifecycle-selection\\acceptance-review.json",
+      "sha256": "a681691a381c3657353bb3eb4da55f0c53fe323533e96b38accee797e75394b6"
+    },
+    "retrieval": {
+      "holo": "Unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH at authority5326080d/queryhost0c81418f; no repeated probe/reindex.",
+      "noise": "Bounded module lifecycle sections and exact test/CI owners; wide output trimmed incrementally.",
+      "ordering": "WSP00 gate, actual WSP15/97, current closure/main/peers, existing test-registry skill, owner/test/docs/CI and independent acceptance.",
+      "missing": "Current CI does not select lifecycle suites; extend existing CI with focused owned artifact. No new test owner.",
+      "staleness": "All12 prior design-source bindings identical to current8215;95peerheads/shared snapshot/Holo roots unchanged.",
+      "duplication": "Handshake/lifecycle/verified-consumer already exist. Extend private dependency selection only; remove no native blocker."
+    },
+    "allocation": {
+      "execution_plane": "Ordinary bounded source qualification and hosted unit regression, not native WRE admission.",
+      "effort_cost": "Existing private registry/factory/verified consumer; opt-in requirement and same-suite synthetic controls, independently reviewed hosted focused CI. No native activation or new framework.",
+      "manual_reason": "Native model/worker admission remains unqualified. Architecture and source-contract qualification need independent review; no Qwen/Gemma runtime authority inferred."
     },
     "owner_reconciliation": {
       "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\entry.json",
-        "sha256": "733e25197fd3fb65754aa318dabb08bcd44443547a6b16ff9b6df623de04695d"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-lifecycle-selection\\entry.json",
+        "sha256": "8eb7d9827b377d8f36e77e28cf227691b9581c873ad2f97d3b3a1217d65f5fd4"
       },
       "peers_unchanged": 95,
       "overlap": [
         {
           "pr": 1860,
           "paths": [
-            "ModLog.md"
+            "ModLog.md",
+            "modules/communication/moltbot_bridge/INTERFACE.md",
+            "modules/communication/moltbot_bridge/ModLog.md"
+          ]
+        },
+        {
+          "pr": 1792,
+          "paths": [
+            "modules/communication/moltbot_bridge/ModLog.md"
           ]
         },
         {
           "pr": 1648,
           "paths": [
-            "ModLog.md"
+            "ModLog.md",
+            "modules/communication/moltbot_bridge/ModLog.md",
+            "modules/communication/moltbot_bridge/README.md"
           ]
         },
         {
           "pr": 1645,
           "paths": [
-            "modules/infrastructure/wre_core/ModLog.md"
+            "modules/communication/moltbot_bridge/INTERFACE.md",
+            "modules/communication/moltbot_bridge/ModLog.md",
+            "modules/communication/moltbot_bridge/README.md",
+            "modules/communication/moltbot_bridge/ROADMAP.md",
+            "modules/communication/moltbot_bridge/tests/README.md",
+            "modules/communication/moltbot_bridge/tests/TestModLog.md"
           ]
         },
         {
@@ -1975,17 +1994,17 @@
       ]
     },
     "validation": {
-      "parent": "148 exact IDs passed on prior main; existing receipt reused, not a fresh run.",
-      "candidate": "154 authored cases; preserve all148 IDs/outcomes plus6 checkout failure cases. Hosted execution pending; no host candidate tests.",
-      "limits": "Structured reporting only; no rollback, live Git effects, automatic retirement, upstream merge authority or native RSI qualification.",
-      "artifact_name": "merge-sentinel-prerequisites",
-      "CI_workflow_unchanged": true
+      "parent": "113 authored cases in connected selection; fresh hosted baseline pending.",
+      "candidate": "137 authored cases;24 additions, all113 prior IDs retained; one consumer signature assertion updated. Hosted pending.",
+      "limits": "Default dependency selection only; synthetic dispatch positive is not real canonical capability, full cryptographic provenance, effect authority or native RSI.",
+      "artifact_name": "lifecycle-dependency-selection",
+      "CI_workflow_unchanged": false
     },
     "publication": {
       "state": "ACTIVE_OWNED_WORK",
-      "branch": "fix/rsi-checkout-error-20260927",
-      "worktree": "O:/Foundups-Agent-worktrees/rsi-checkout-error-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\final-accounting.json",
+      "branch": "fix/rsi-lifecycle-selection-20260927",
+      "worktree": "O:/Foundups-Agent-worktrees/rsi-lifecycle-selection-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-lifecycle-selection\\final-accounting.json",
       "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
@@ -2001,7 +2020,7 @@
             "priority": "P0"
           },
           "state": "blocked",
-          "dependency": "Seven resident trust anchors and admitted effect-use/provenance binding remain. Existing lease infrastructure is present; the resident resolver supplies authoritative_use_lease=None.",
+          "dependency": "Independently admitted verifiers/provenance for the seven named anchors, authentic current-generation evidence and a peer-authenticated effect-bound use lease wired through the existing resolver/valve path. Then re-observe ownership and qualify one bounded artifact ticket; do not fabricate positive authority fixtures as native evidence.",
           "next_step": "After existing owners supply the missing authentic authority/effect prerequisites, re-observe/score and admit exactly one existing R06-R09 bounded artifact ticket with independent verifier and simulated entitlement. Do not open a generic orchestrator or implement another lease/consumer framework now.",
           "blocker_review": {
             "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\next-action-review.json",
@@ -2105,7 +2124,8 @@
           "state": "contract_specified_domain_policy_blocked",
           "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\next-role-source-audit.json",
           "next_step": "Obtain explicitly delegated proof.verify issuer/scope/independence/revocation policy before integration; R24 records prospective existing-owner handoff. Qualify persistence separately without creating authority.",
-          "resume_prerequisite": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy."
+          "resume_prerequisite": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy.",
+          "dependency": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy."
         },
         {
           "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
@@ -2150,7 +2170,7 @@
           "state": "blocked_pending_product_owner_and_merge_deployment_boundary",
           "source": "modules/foundups/gotjunk/frontend/package-lock.json::packages[node_modules/protobufjs]",
           "next_step": "Reconcile exact overlapping heads with existing product owner; choose one narrowly scoped patch-version lock candidate satisfying the advisory and existing semver constraints, validate graph/integrity and separately authorized isolated npm ci/build compatibility. No PR merge until deployment effects and rollback acceptance are explicitly covered. Do not repeat the completed source qualification.",
-          "dependency": "Product metadata names 012; no named active lane or Dependabot authorship proves deploy authority. Existing module-wide main push workflow can deploy a lock or documentation change. Current read-only task authorizes neither installs/builds nor merge/deploy.",
+          "dependency": "Existing product owner resolves overlapping heads and explicitly covers deployment/rollback and bounded install/build effects before a GotJunk lock change; do not repeat its source qualification.",
           "resume_prerequisite": "Existing product owner resolves overlapping heads and explicitly covers deployment/rollback and bounded install/build effects before a GotJunk lock change; do not repeat its source qualification."
         },
         {
@@ -2252,7 +2272,7 @@
           },
           "state": "source_adjudication_complete_no_runtime_handoff_or_retention_verified",
           "source": "Existing WRE AutoResearcher diagnostic, reddog_verified_outcome_ratchet.py and held-out regression gate contracts; existing AI Gateway verifier is a separate typed benchmark owner.",
-          "dependency": "No production ROC-report consumer demonstrated by scoped source search. Raw reports lack independent verification, retention and actual resource evidence. No adapter or authority may be invented to make a test pass.",
+          "dependency": "Actual authorized upstream runtime handoff, independent evaluation/resource evidence and publication evidence become available for an existing outcome consumer; advisory display does not supply retention authority.",
           "next_step": "Source adjudication complete. Do not repeat the known missing-caller audit or add an unconsumed adapter. Advance only when existing upstream runtime admission, independent verification and publication evidence supply an actual authorized handoff.",
           "effort_cost": "Bounded source/contract qualification and applicable existing tests, no provider spend. C3 cross-contract mapping; I4 core evaluation machinery; D3 next integration prerequisite; impact4 reusable outcome boundary.",
           "limits": "Qualification of intended consumer/non-authority only; no native runtime, production reader grant, outcome promotion or retained-learning claim.",
@@ -2416,7 +2436,7 @@
             "priority": "P1"
           },
           "state": "deferred_qualification",
-          "dependency": "Actual PostgreSQL runtime/admission not established; SQLite-only rejection now explicit",
+          "dependency": "An admitted disposable PostgreSQL runtime and defined parity acceptance become available.",
           "resume_prerequisite": "An admitted disposable PostgreSQL runtime and defined parity acceptance become available."
         },
         {
@@ -2620,6 +2640,29 @@
           }
         },
         {
+          "task": "Design and qualify canonical dependency selection at the existing lifecycle admission producer before resident handshake consumption",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "implemented_hosted_validation_pending",
+          "source": "modules/communication/moltbot_bridge/src/reddog_external_signer_lifecycle_admission.py::_create_external_signer_lifecycle_admission_boundary, _build_boundary_registry, _build_verified_consumer",
+          "dependency": "Fixed independent plan accepted; exact source/head review and hosted parent/candidate/main checks required.",
+          "next_step": "Verify connected tests and exact main convergence; re-observe native handoff prerequisites.",
+          "limits": [
+            "Source implementation prepared; hosted qualification pending. No native trust grant.",
+            "Default dependency selection is narrower than full cryptographic/OS/generation provenance and cannot alone remove a resident blocker.",
+            "No blanket defense against arbitrary hostile Python in the same interpreter is claimed.",
+            "Preserve six other anchors and authoritative_use_lease=None; initial slice removes no anchors.",
+            "No new framework, main.py mutation, sockets, production key access, providers, runtime activation or effect admission."
+          ],
+          "effort_cost": "Existing private registry/factory/verified consumer; opt-in requirement and same-suite synthetic controls, independently reviewed hosted focused CI. No native activation or new framework."
+        },
+        {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
           "wsp15": {
             "complexity": 2,
@@ -2632,7 +2675,8 @@
           "state": "deferred_consumer_qualification",
           "evidence": "Central verify_parity has no production caller in scoped search; equal-count malformed/different JSONL passes; inherited class-size debt",
           "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API",
-          "resume_prerequisite": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit."
+          "resume_prerequisite": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit.",
+          "dependency": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit."
         },
         {
           "task": "Broker truthful stop acknowledgment",
@@ -2761,7 +2805,7 @@
           "state": "paused_local_unvalidated_checkpoint",
           "source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_lineage_blockers",
           "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
-          "dependency": "Independent receipt command rejected by automatic approval before execution; no specific reason.29 cases unexecuted. Clean separate branch agent/rsi-lineage-draft-20260923 at6f70893bb; no retry/substitute.",
+          "dependency": "Permitted independent review plus fresh source/ownership reconciliation required; no paused-lane access, retry or substitute.",
           "next_step": "Resume only after permitted independent review and fresh source/ownership reconciliation; preserve local draft.",
           "resume_prerequisite": "Permitted independent review plus fresh source/ownership reconciliation required; no paused-lane access, retry or substitute."
         },
@@ -2884,7 +2928,7 @@
             "priority": "P2"
           },
           "state": "required_before_further_scanner_growth_remaining_debt",
-          "dependency": "Current outcome extraction may shrink owner but does not resolve all existing input/config responsibility debt; pursue when next scanner growth is proposed.",
+          "dependency": "A concrete scanner-growth change is proposed that requires the documented cohesion prerequisite; no such proposal evidenced now.",
           "resume_prerequisite": "A concrete scanner-growth change is proposed that requires the documented cohesion prerequisite; no such proposal evidenced now."
         },
         {
@@ -2977,22 +3021,28 @@
             "total": 10,
             "priority": "P2"
           },
-          "state": "implemented_hosted_validation_pending",
+          "state": "closed_merged_PR1917",
           "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
-          "dependency": "Independent fixed acceptance complete; exact source/head review, hosted CI and main closure required.",
-          "next_step": "Validate hosted regression, converge qualified exact head, re-observe.",
+          "dependency": "Exact reviewed tree merged, main CI/CodeQL passed;154 identical case IDs passed on PR/main; owned lane retired.",
+          "next_step": "Do not repeat completed checkout-error repair; full automatic retirement remains blocked, not completed.",
           "limits": [
             "No rollback of the local main reference already updated before checkout failure.",
             "merged=True remains only prior remote-command success; no verified main-content, native authority or RSI-completion claim.",
             "No executable caller change or live Git/GH, service, provider or native operation is included.",
             "Unresolved upstream merge admission/readback and combined branch-deletion qualification remain open.",
-            "Acceptance remains154 planned cases and WSP15 remains C1/I3/D3/Impact3=10/P2; implementation is prepared; hosted execution remains pending."
+            "PR1917 closed:154 verified unique case IDs passed on PR and main; WSP15 C1/I3/D3/Impact3=10/P2."
           ],
-          "effort_cost": "One structured error in existing branch; six cases in existing fake transcript; hosted CI and independent source/head review. No runtime activation."
+          "effort_cost": "One structured error in existing branch; six cases in existing fake transcript; hosted CI and independent source/head review. No runtime activation.",
+          "closure": {
+            "pr": 1917,
+            "merge": "8215e584dda5bdb1c13bb236fccec7ff9cd35a46",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-checkout-error\\final-accounting.json"
+          }
         }
       ],
       "selected_next": null,
-      "instruction": "Re-observe/rescore after closure. Higher-value blocked capabilities remain open; do not equate reporting with native RSI."
+      "instruction": "Re-observe/score after exact closure. Default dependency selection does not discharge any native reason; qualify producer/handoff authority separately."
     }
   }
 }

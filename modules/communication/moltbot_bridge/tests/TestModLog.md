@@ -1,3 +1,10 @@
+## 2026-09-27: Default dependency selection before strict lifecycle consumption
+
+- Frozen WSP00/6/15/22/50/62/84/97 acceptance: unchanged113 parent case IDs, one intentional signature assertion extension,24 new controls,137 planned candidate cases in the connected selection documented in tests/README.
+- Positive seam uses real factory/default selection with private consume-builder replacement and never calls admit; report as synthetic dispatch only. Real injected audit handles survive strict/malformed rejection and remain one-use under legacy consume. Wrappers, falsey clocks and rebound aliases are discriminated without a new fixture owner.
+- Parent/candidate hosted execution pending at preparation. Ephemeral test signing, temp SQLite/files and disposable Git are permitted fixture effects; no host candidate execution, real socket/service activation, resident blocker removal or native RSI evidence.
+- Exact acceptance/source/check/closure receipts: `O:/Foundups-Agent-audits/20260927-rsi-lifecycle-selection/`. Original tests remain except the explicitly updated consumer signature set.
+
 ## 2026-09-27: Retain reviewed Windows fixture runner lessons
 
 - WSP 00/15/22/34/50/84/97; C2/I3/D3/Impact3=11/P2. Extended the existing test README with the four preserved PR1877 capture, logging, subprocess and path/class compatibility failures and their reviewed corrections. Existing WRE isolation/collector owners remain canonical.
