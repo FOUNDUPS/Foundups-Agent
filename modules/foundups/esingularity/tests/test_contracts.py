@@ -156,7 +156,7 @@ def test_existing_ticker_receives_one_deck_notification() -> None:
     assert "label: { ja: 'NEW', en: 'NEW', pt: 'NOVO' }" in ticker
     assert "YUMORI / COG DC 10枚のプレゼンを見る" in ticker
     assert ticker.count("href: '#yumori-deck'") == 1
-    for existing_label in ("VOTE NO", "市議会", "市長", "声を届ける", "VISIT", "LISTEN", "LEARN", "EXPLORE", "JOIN"):
+    for existing_label in ("PPP/PFI", "市議会", "市長", "声を届ける", "VISIT", "LISTEN", "LEARN", "EXPLORE", "JOIN"):
         assert f"ja: '{existing_label}'" in ticker
     assert "CONNECT" not in ticker and "Monk" not in ticker
     assert "https://yumori.me/vote-no#council" in ticker
@@ -275,7 +275,7 @@ def test_future_route_is_utf8_and_uses_cog_dc_compute() -> None:
     assert "容量、時期、費用、熱利用、収益は未確定" in future
     assert not re.search(r"縺|蜿|蝓|譛|險育", future)
 
-def test_esingularity_current_council_position_is_packet_aligned_and_multilingual() -> None:
+def test_esingularity_post_vote_ppp_position_is_aligned_and_multilingual() -> None:
     page = read("app/page.tsx")
     switcher = read("components/LanguageSwitcher.tsx")
     vision = read("content/yumori-vision.ts")
@@ -283,8 +283,10 @@ def test_esingularity_current_council_position_is_packet_aligned_and_multilingua
     current_surfaces = page + switcher + vision
 
     assert "すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会" in page
-    assert "以前の「60日間の延期」「一定期間の保留」は、現在の要請ではありません。" in page
-    assert "予算判断と、YUMORI案の採否は別の判断です。" in page
+    assert "9月25日の採決は終了しました。" in page
+    assert "PPP/PFIの官民連携ルート" in page
+    assert "令和8年度の財産有効活用民間提案制度は別制度" in page
+    assert "予算の可決と、解体工事の実施、YUMORI案の採否は別の判断です。" in page
     assert "この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。" in page
 
     for url in (
@@ -305,24 +307,25 @@ def test_esingularity_current_council_position_is_packet_aligned_and_multilingua
     ):
         assert obsolete not in current_surfaces
 
-    assert "/ Updated September 23, 2026" in switcher
-    assert "/ Atualizado em 23 de setembro de 2026" in switcher
+    assert "/ Updated September 28, 2026" in switcher
+    assert "/ Atualizado em 28 de setembro de 2026" in switcher
     assert "See the Preparatory Committee’s current request and evidence" in switcher
     assert "Ver o pedido atual e as evidências do Comitê Preparatório" in switcher
     assert "Policy, economics & reuse evidence (03)" in switcher
     assert "Evidências de política, economia e reutilização (03)" in switcher
-    assert "The budget vote and adoption of the YUMORI proposal are separate decisions." in switcher
-    assert "A votação do orçamento e a adoção da proposta YUMORI são decisões separadas." in switcher
+    assert "Budget approval, execution of demolition work, and adoption of the YUMORI proposal are separate decisions." in switcher
+    assert "A aprovação do orçamento, a execução da demolição e a adoção da proposta YUMORI são decisões separadas." in switcher
 
     assert "現在の要請と根拠を見る" in vision
     assert "https://yumori.me/vote-no" in vision
-    assert "Adoption of the reuse proposal is a separate formal decision." in vision
-    assert "A adoção da proposta de reutilização é uma decisão formal separada." in vision
+    assert "PPP/PFI public-private route" in vision
+    assert "via público-privada PPP/PFI" in vision
 
     # Preserve the historical record while making the supersession explicit.
     assert "履歴注記" in vote_no
     assert "その後撤回" in vote_no
-    assert "現在の要請は9月25日の解体準備予算への反対票です。" in vote_no
+    assert "9月25日の反対票要請も採決終了により歴史的記録" in vote_no
+    assert "現在はPPP/PFIによる解体案と再利用案の比較検証" in vote_no
 
 
 
@@ -369,7 +372,7 @@ def test_candidate_site_registry_keeps_capacity_as_scenarios() -> None:
         "Site 1 — 旧すかっとランド九頭竜",
         "Site 2 — 旧下宇坂小学校",
         "Site 3 — 旧羽生小学校",
-        "5 MW initial",
+        "Initial design target for inquiry: **5 MW**",
         "10 MW and 20 MW",
         "does **not** establish deliverable load capacity",
         "1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0",
