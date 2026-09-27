@@ -1,3 +1,11 @@
+## Lifecycle dependency selection — 2026-09-27
+
+The existing verified lifecycle consumer can opt into default dependency
+selection. See the [interface contract](INTERFACE.md#lifecycle-default-dependency-requirement--2026-09-27)
+and [fixed regression scope](tests/README.md#lifecycle-dependency-selection-regression--2026-09-27).
+This distinguishes injected test dependencies; it does not establish production
+provenance or remove resident execution blockers.
+
 # OpenClaw Bridge - Digital Twin Execution Layer
 
 ## Verified-outcome recovery and RSI

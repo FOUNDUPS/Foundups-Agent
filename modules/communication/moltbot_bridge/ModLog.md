@@ -1,3 +1,10 @@
+## 2026-09-27: Qualify lifecycle dependency selection
+
+- WSP00/6/15/22/50/62/84/97; C2/I4/D3/Impact4=13/P1. Capture original observer/healthcheck selection and absent clock overrides in the existing private boundary registry. Add exact-bool `require_default_dependencies=False` to the existing verified consumer; strict rejection precedes consumption.
+- Existing factory/audit schema/digests and default consumer behavior remain. Preserve all resident reasons and absent effect lease; this is dependency selection, not production trust.
+- Extend only the generation-race suite with24 cases; preserve admission suite and prior case IDs, changing only the intentional consumer-signature expectation. Source remains674 lines; inherited private constructor shrinks60 to54. No new module/skill/test owner.
+- Existing CI adds parent/candidate connected regression artifacts. Fixtures use disposable files/SQLite/Git and ephemeral test-key signing; no live signer/socket/provider/native execution. Candidate results pending; exact receipts in the canonical RSI backlog.
+
 ## 2026-09-27: Discoverable runner compatibility lessons
 
 - WSP 00/15/22/34/50/84/97 selected 11/P2 documentation retention after PR1902 closure and fresh main/95-peer reconciliation. Existing tests/README and TestModLog now connect four historical failures to their reviewed corrections and evidence, without adding a runner, module or skill.

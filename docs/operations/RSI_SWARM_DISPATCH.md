@@ -1,3 +1,19 @@
+## Lifecycle selection checkpoint — 2026-09-27
+
+PR1917 is `MERGED_VERIFIED_MAIN` at `8215e584dda5bdb1c13bb236fccec7ff9cd35a46`:
+154 identical case IDs passed on PR/main; required checks passed; owned lane retired.
+Fresh49-candidate reconciliation selects13/P1 lifecycle dependency qualification.
+Native18 and higher domain/product/full-cleanup candidates retain their blockers.
+
+Reuse the existing lifecycle factory/private registry/verified consumer and test
+owners. The opt-in default-dependency requirement distinguishes injected fixtures
+without changing lower-level audit behavior. Source prepared; parent113/candidate137
+connected cases await hosted validation. Actual closure receipts govern completion.
+
+Default dependency selection is not authenticated production provenance. The
+prospective resident handoff still needs exact trusted inputs and current-generation
+correlation; this slice clears no anchor or lease requirement and starts no runtime.
+
 ## Checkout reporting checkpoint — 2026-09-27
 
 PR1916 is `MERGED_VERIFIED_MAIN` at `beff80d2097205d3fe81f37e4ea20625722f9611`:

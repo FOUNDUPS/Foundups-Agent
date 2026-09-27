@@ -73,6 +73,56 @@ jobs:
           path: ${{ runner.temp }}/merge-sentinel.xml
           if-no-files-found: error
 
+      - name: Run lifecycle dependency selection regression
+        id: lifecycle_selection
+        env:
+          LIFECYCLE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          FOUNDUPS_DB_PATH: ${{ runner.temp }}/lifecycle-foundups.db
+          WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/lifecycle-pattern.db
+          ANTIFAFM_LYRICS_DB: ${{ runner.temp }}/lifecycle-lyrics.db
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          python -m pip install cryptography
+          [[ "$LIFECYCLE_BASE" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags origin "$LIFECYCLE_BASE"
+          parent="$RUNNER_TEMP/lifecycle-parent"
+          mkdir "$parent"
+          git archive "$LIFECYCLE_BASE" | tar -x -C "$parent"
+          mkdir "$RUNNER_TEMP/lifecycle-results"
+          python -c 'import importlib.metadata as m,json; print(json.dumps({p:m.version(p) for p in ("pytest","cryptography")}))' > "$RUNNER_TEMP/lifecycle-results/packages.json"
+          selected=(
+            modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_admission.py
+            modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_generation_race.py
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py
+            modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_queue_use_time_binding.py
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py::test_handshake_modules_follow_wsp62_boundaries
+          )
+          failed=0
+          for revision in parent candidate; do
+            export FOUNDUPS_DB_PATH="$RUNNER_TEMP/lifecycle-$revision-foundups.db"
+            export WRE_PATTERN_MEMORY_DB="$RUNNER_TEMP/lifecycle-$revision-pattern.db"
+            export ANTIFAFM_LYRICS_DB="$RUNNER_TEMP/lifecycle-$revision-lyrics.db"
+            root="$GITHUB_WORKSPACE"
+            if [[ "$revision" == parent ]]; then root="$parent"; fi
+            (cd "$root" && python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+              --import-mode=importlib -p no:cacheprovider \
+              --basetemp="$RUNNER_TEMP/lifecycle-$revision-pytest" \
+              --junitxml="$RUNNER_TEMP/lifecycle-results/$revision.xml" \
+              "${selected[@]}") || failed=1
+          done
+          exit "$failed"
+
+      - name: Upload lifecycle dependency selection results
+        if: always() && steps.lifecycle_selection.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-dependency-selection
+          path: ${{ runner.temp }}/lifecycle-results/
+          if-no-files-found: error
+
       - name: Run RedDog fast test tier
         working-directory: extensions/reddog
         run: npm test

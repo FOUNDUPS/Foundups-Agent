@@ -1,3 +1,28 @@
+## Lifecycle dependency selection regression — 2026-09-27
+
+Reuse admission and generation-race owners with signer-current-generation,
+queue-use-time and only mutual-peer-handshake's
+`test_handshake_modules_follow_wsp62_boundaries` node. The whole handshake suite
+contains a socket test and is not this selection. Existing CI runs identical
+file/node selections from the event's exact parent/base and candidate in hosted
+Ubuntu/Python3.12, with conftests/plugin autoload disabled and disposable roots.
+JUnit and pytest/cryptography versions are retained as
+`lifecycle-dependency-selection`; host-principal candidate execution is excluded.
+
+Parent selection has113 authored cases; candidate137 includes24 additions.
+All parent IDs remain, with the consumer-signature assertion deliberately extended.
+Five default modes and nine injected/wrapped/falsey modes use the real factory
+with only its private consume builder replaced; no admit occurs in this seam.
+This proves selection/registered dispatch, not a real canonical capability.
+Other controls use ordinary injected opaque test handles to prove rejection
+preserves legacy consumption, exact-bool validation, alias capture and public
+method bypass. Existing expiry/replay/identity/generation controls remain.
+
+Fixtures write disposable files/SQLite, generate/sign with ephemeral keys and
+perform disposable Git commands through connected generation tests. They do not
+activate a live signer, socket, provider or resident effect. Hosted results, not
+these prospective counts, govern acceptance; no native/provenance claim follows.
+
 ## Use-time generation acquisition — 2026-09-23
 
 `test_reddog_signer_current_generation_use_time_binding.py` retains all seven

@@ -1,3 +1,9 @@
+## 2026-09-27: RSI lifecycle dependency qualification
+
+- PR1917 closed at `8215e584d`:154 identical IDs passed on PR/main, all checks passed and its owned lane retired. Current main/shared snapshot and95 peer heads unchanged.
+- Fresh WSP15/97 selection13/P1: distinguish default from injected dependencies in the existing lifecycle owner before future resident consumption. Preserve factory/audit contracts, all trust blockers and no effect lease.
+- Same source/test owners and existing hosted CI;113 parent/137 candidate cases planned with24 additions. No runtime activation or new module/skill/framework. Canonical backlog carries exact evidence and future handoff limits.
+
 ## 2026-09-27: RSI checkout-failure reporting
 
 - PR1916 closed at `beff80d20`: same 148 IDs passed on PR/main, required checks passed, owned branch/worktree retired. Shared checkout and 95 peer heads preserved.
