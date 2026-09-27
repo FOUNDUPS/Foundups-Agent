@@ -27,11 +27,11 @@ const LIVE_FIELD_STATUS_POLL_MS = 60_000;
 const ALLOWED_STATUS_ORIGINS = new Set(['https://yumori.me', 'https://www.yumori.me', 'https://esingularity.ai']);
 
 const fallbackAction: TickerAction = {
-  label: { ja: 'VOTE NO', en: 'VOTE NO', pt: 'VOTE NÃO' },
+  label: { ja: 'PPP/PFI', en: 'PPP/PFI', pt: 'PPP/PFI' },
   message: {
-    ja: '解体の前に再利用案を比較する時間を。YUMORI.meの市議会・市長へのメッセージを読み、声を届けてください。',
-    en: 'Ask for time to compare reuse before demolition. Read the YUMORI.me messages to the City Council and mayor, then make your voice heard.',
-    pt: 'Peça tempo para comparar o reuso antes da demolição. Leia as mensagens da YUMORI.me ao Conselho Municipal e ao prefeito e faça sua voz ser ouvida.',
+    ja: '9月25日の採決後、次の要請はPPP/PFIによる解体案と再利用案の比較検証です。公開記録と現在の要請を確認してください。',
+    en: 'After the September 25 vote, the next request is a PPP/PFI comparison of demolition and reuse. Read the public record and current request.',
+    pt: 'Após a votação de 25 de setembro, o próximo pedido é comparar demolição e reuso por meio de PPP/PFI. Consulte o registro público e o pedido atual.',
   },
   href: 'https://yumori.me/vote-no',
 };
