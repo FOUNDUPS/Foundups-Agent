@@ -1,3 +1,13 @@
+## Supervision implementation boundary — 2026-09-27
+
+The [existing-owner supervision contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
+now specifies process selection, field provenance, lifetime and consumer ownership.
+Its first prerequisite is qualification of the existing observer's separate
+filesystem/socket inode domains. Current fixtures mask that distinction; they
+do not establish real Linux socket ownership. No service/runtime was activated.
+PR1919 requester selection is merged and main-verified; see the canonical RSI
+backlog for exact closure evidence and the next ranked action.
+
 ## Effective requester selection — 2026-09-27
 
 Omitted signer-healthcheck requesters now use the current effective UID/GID and

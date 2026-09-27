@@ -1,3 +1,19 @@
+## Supervision source design and prerequisite — 2026-09-27
+
+PR1919 closed at main `bba2e752`:144 parent/158 candidate hosted cases passed,
+required PR/main checks passed, and its owned branch/worktree were retired.
+The13/P1 contract-design slice (C2/I4/D3/Impact4) selects the existing external
+system-service owner, with explicit authenticated unit selection, MainPID,
+InvocationID/pidfd lifetime, field provenance and one-use consumer requirements.
+See [INTERFACE](INTERFACE.md#external-supervision-source-contract--2026-09-27).
+
+Independent source review exposed a prerequisite: pathname filesystem and sockfs
+inodes are conflated by the existing observer and its fake backend. Next candidate
+is14/P1 (C3/I4/D3/Impact4): qualify a bounded exact identity bridge and its negative/
+race controls in existing owners. Re-observe before implementation. The concrete
+supervisor issuer follows that qualification, then profiled resident handoff.
+Design/CI closure does not qualify a Linux service or remove native trust reasons.
+
 ## Existing healthcheck requester repair — 2026-09-27
 
 WSP15 C2/I3/D3/Impact3=11/P2. Independent owner review found the omitted

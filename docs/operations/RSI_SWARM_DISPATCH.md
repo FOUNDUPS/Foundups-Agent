@@ -1,3 +1,33 @@
+## Supervision source checkpoint — 2026-09-27
+
+PR1919 is `MERGED_VERIFIED_MAIN` at
+`bba2e752ab1b59eb050b6105808f81bc5591844b`. Hosted144 parent/158 candidate
+cases passed, all144 prior IDs remained, PR/main checks passed, and the owned
+branch/worktree were retired. This supersedes the earlier preparation/pending
+status of the requester-selection checkpoint below.
+
+Current13/P1 source-contract design reuses the existing external system-service
+owner and root-owned config loader. The
+[canonical module contract](../../modules/communication/moltbot_bridge/INTERFACE.md#external-supervision-source-contract--2026-09-27)
+specifies authenticated system-manager selection, MainPID/InvocationID/pidfd,
+policy field provenance, one-attempt lifetime and existing consumer integration.
+It is design, not a commissioned service or a concrete policy issuer.
+
+WSP97 source reconciliation found that the observer compares pathname filesystem
+inode to process socket inode; current FakeBackend aliases them. Independent
+Linux source confirms separate domains; no live incident was inferred. Next14/P1
+candidate is a qualified exact bridge with distinct-domain/negative/race controls,
+before issuer implementation. A pathname-only join or matching integer is not
+proof. Re-observe priorities after this slice closes.
+
+This slice changes ten existing documentation/planning files only. Static checks
+and independent review validate the contract; unchanged hosted lifecycle
+regression is158 parent/158 candidate and proves no new OS/supervisor behavior.
+Publication, required CI, exact-main readback and owned cleanup remain mandatory;
+the canonical backlog binds their actual receipts. All seven native trust reasons
+and the missing effect-bound lease remain. Shared FoundUps and AutoPost are outside
+this scope; AmIBot is still the future test fixture, not a launched experiment.
+
 ## Requester selection checkpoint — 2026-09-27
 
 PR1918 is `MERGED_VERIFIED_MAIN` at `6dd4f343dda48ef427cfee7bc7d40be653a229fa`:

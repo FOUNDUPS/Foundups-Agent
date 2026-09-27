@@ -1873,113 +1873,162 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "6dd4f343dda48ef427cfee7bc7d40be653a229fa",
-    "selected_action": "rsi-requester-selection-20260927",
-    "status": "implementation_prepared_hosted_validation_pending",
+    "base_commit": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+    "selected_action": "rsi-supervision-contract-20260927",
+    "status": "design_prepared_independent_review_and_main_closure_pending",
     "wsp15": {
       "complexity": 2,
-      "importance": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 11,
-      "priority": "P2"
+      "impact": 4,
+      "total": 13,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-requester-selection-20260927",
-    "base": "6dd4f343dda48ef427cfee7bc7d40be653a229fa",
+    "observation_id": "rsi-supervision-contract-20260927",
+    "base": "bba2e752ab1b59eb050b6105808f81bc5591844b",
     "self": "0102",
     "role": "architect",
     "origin": "external_principal",
     "principal_ref": "012",
-    "selected": "Select the current effective requester in the existing signer healthcheck instead of the first configured UID",
+    "selected": "Define the canonical external signer supervision policy source and its socket-ownership prerequisite",
     "wsp15": {
       "complexity": 2,
-      "importance": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 11,
-      "priority": "P2"
+      "impact": 4,
+      "total": 13,
+      "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1918,
-      "merge": "6dd4f343dda48ef427cfee7bc7d40be653a229fa",
+      "utc": "2026-09-27T06:29:17.516354+00:00",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-lifecycle-selection\\final-accounting.json",
-        "sha256": "8869fe59fedb5b3d2f26a15e0759c2e8c7cadeacbacffc4410c5cf4e9507cfbe"
-      }
+      "pr": 1919,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1919",
+      "head": "34a7e9149d427f051def0eb03841f06f257a69d0",
+      "merge": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+      "tree": "96232fd7602657e2057896fa3635ff0fbacac112",
+      "main_readback": "All16 scoped blobs and full tree equal independent exact-head review.",
+      "readback_recovery": null,
+      "pr_checks": "All10 passed at exact head.",
+      "main_checks": {
+        "merge": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+        "runs": [
+          {
+            "conclusion": "success",
+            "databaseId": 36299720079,
+            "event": "push",
+            "headSha": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+            "status": "completed",
+            "workflowName": "CI"
+          },
+          {
+            "conclusion": "success",
+            "databaseId": 36299719771,
+            "event": "dynamic",
+            "headSha": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+            "status": "completed",
+            "workflowName": "CodeQL"
+          }
+        ],
+        "passed": true
+      },
+      "hosted_regression": {
+        "cases": 158,
+        "parent_cases": 144,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "receipt": "hosted-results.json"
+      },
+      "main_hosted_regression": {
+        "merge": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+        "run": 36299720079,
+        "cases": 158,
+        "parent_cases": 144,
+        "exact_test_ids_match_pr": true,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "unique_candidate_cases_across_pr_and_main": 158,
+        "packages": {
+          "pytest": "9.1.1",
+          "cryptography": "50.0.1"
+        },
+        "xml_sha256": {
+          "parent": "44ebe629aa0215a3a71e27dce212ca74996054e20875ce23734dcc03b34e0b0a",
+          "candidate": "ec38d77c4c65f7649d377f7a4244431033804fb4cef047ae72e1b876804d1f3c"
+        }
+      },
+      "local_tests_executed": 0,
+      "owned_worktree_removed": "O:\\Foundups-Agent-worktrees\\rsi-requester-selection-20260927",
+      "owned_local_branch_removed": "fix/rsi-requester-selection-20260927",
+      "owned_remote_branch_removed": "fix/rsi-requester-selection-20260927",
+      "peer_heads_unchanged": 95,
+      "shared_snapshot_unchanged": true,
+      "persistent_observer": {
+        "path": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
+        "head": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+        "state": "ACTIVE_OWNED_WORK",
+        "clean": true
+      },
+      "runtime_effects": "Hosted fixtures only: ephemeral test signing and disposable files/SQLite/Git. No live signer/service/provider/native worker/product activation. Native RSI remains incomplete.",
+      "next_action_review": "next-action-review.json"
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\previous-observation.json",
-      "sha256": "f54c797e2b1e20e518a7c82ecd45a469fed4ce960ff4c5bc96d38af3214eda25",
-      "repository_ref": "6dd4f343dda48ef427cfee7bc7d40be653a229fa:docs/roadmaps/rsi_swarm_backlog.json",
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\previous-observation.json",
+      "sha256": "a5da0d712dacb9a55f7d61f1331bc4ce9fb427626c00d151a5318e0ca3b20692",
+      "repository_ref": "bba2e752ab1b59eb050b6105808f81bc5591844b:docs/roadmaps/rsi_swarm_backlog.json",
       "json_path": "current_observation"
     },
     "design_review": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\requester-owner-review.json",
-      "sha256": "0a72d3156a3b0b51c882569d5ffb5bcc6835a69365ea9afd074ad03e7b9f9399"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\supervision-owner-design-review.json",
+      "sha256": "7a6e29f60d8e36403a5519ec4fd8d6408fcdfa396bc50d188a1fdbf3840f036e"
     },
     "acceptance_review": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\acceptance-review.json",
-      "sha256": "47aa8647ca45808fcc32d211c09006a40136fca048c72ad63406d2c063e6f0c4"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\acceptance-review.json",
+      "sha256": "1d35d20ff4536bf5013f6a5901b6ab7f73fb2651661163e5a4e782e64e4ef6ce"
     },
     "retrieval": {
       "holo": "Authority5326080d/queryhost0c81418f unchanged: previous HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained; explicit degraded Git/rg, no repeated failing probe or reindex.",
-      "noise": "Incremental owner/helper/fixture reads; no full repository dumps.",
-      "ordering": "Actual WSP00/15/97, exact closure/current main/peers, source ownership, TestModLog/test README and existing registry skill.",
-      "missing": "Trusted per-attempt resident lifecycle handoff remains missing; no candidate host execution. Module requirements.txt and memory/README.md are absent; existing root dependency/CI owners retained, no files invented.",
-      "staleness": "Exact main6dd;95peerheads and shared snapshot unchanged.",
-      "duplication": "Reuse healthcheck _default_requester and shared peer-policy rehydrator; no new module/test owner/API/registry."
+      "noise": "Bounded source/function/protocol and existing docs reads. Broader provider/product work not repeated.",
+      "ordering": "WSP00 gate, exact-main/closure and peer/shared evidence, WSP15/97, existing service/observer/lifecycle/client owners and tests, primary systemd/Linux sources.",
+      "missing": "No concrete independently authenticated supervisor policy issuer or tracked signer service unit in scoped source. Module requirements.txt/memory README absent; existing dependency owners retained.",
+      "staleness": "Exact bba2e752 main;95 peer heads/shared snapshot unchanged. No live Linux/systemd capability inferred.",
+      "duplication": "Reuse existing INTERFACE, ROADMAP and backlog; no new design doc, schema, API, test or implementation module."
     },
     "allocation": {
-      "manual_reason": "Qwen/Gemma native providers are not admitted on this path. Source-local architecture correction and independent0102 verifier; hostedCI only.",
-      "verification": "Focused identical path/node parent/candidate selection; inspect exact IDs, dependency versions and all required PR/main checks.",
-      "execution_plane": "Ordinary bounded source repair and hosted fixture verification; native WRE admission remains blocked.",
-      "effort_cost": "Existing private helper and current test owner; reuse existing hosted differential lifecycle job. No model/runtime update or live activation."
+      "manual_reason": "Native Qwen/Gemma workers not admitted for this path. Source architecture with independent0102 review.",
+      "verification": "Documentation links, score arithmetic, source bindings, exact scope/diff, independent review; existing hosted CI158/158 only regression, not new systemd/socket proof.",
+      "execution_plane": "Bounded documentation/source-contract qualification; no product/runtime/test code changes or host candidate execution.",
+      "effort_cost": "Ten existing planning/interface/history files; one independent reviewer; existing hosted checks only. No new service/module/skill or provider cost."
     },
     "owner_reconciliation": {
       "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\entry.json",
-        "sha256": "d27ec17fbdd970044bf0dc2e638220eede53f4bd252eaba65cdbef9e2c7dbbed"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\entry.json",
+        "sha256": "655692d0ed2ab19200dc528ba26f6dcb11667dcdd1d7efc9e0997db93a138d9a"
       },
       "peers_unchanged": 95,
       "overlap": [
         {
-          "pr": 1860,
+          "number": 1860,
           "paths": [
             "ModLog.md",
-            "extensions/reddog/backend_compatibility_constants.js",
             "modules/communication/moltbot_bridge/INTERFACE.md",
-            "modules/communication/moltbot_bridge/ModLog.md",
-            "scripts/reddog_backend_manifest.json"
+            "modules/communication/moltbot_bridge/ModLog.md"
           ]
         },
         {
-          "pr": 1792,
+          "number": 1792,
           "paths": [
             "modules/communication/moltbot_bridge/ModLog.md"
           ]
         },
         {
-          "pr": 1759,
-          "paths": [
-            "extensions/reddog/backend_compatibility_constants.js",
-            "scripts/reddog_backend_manifest.json"
-          ]
-        },
-        {
-          "pr": 1680,
-          "paths": [
-            "extensions/reddog/backend_compatibility_constants.js",
-            "scripts/reddog_backend_manifest.json",
-            "scripts/tests/test_generate_reddog_backend_manifest.py"
-          ]
-        },
-        {
-          "pr": 1648,
+          "number": 1648,
           "paths": [
             "ModLog.md",
             "modules/communication/moltbot_bridge/INTERFACE.md",
@@ -1991,7 +2040,7 @@
           ]
         },
         {
-          "pr": 1645,
+          "number": 1645,
           "paths": [
             "modules/communication/moltbot_bridge/INTERFACE.md",
             "modules/communication/moltbot_bridge/ModLog.md",
@@ -2002,40 +2051,31 @@
           ]
         },
         {
-          "pr": 802,
+          "number": 802,
           "paths": [
             "ModLog.md"
           ]
         },
         {
-          "pr": 782,
+          "number": 782,
           "paths": [
             "ModLog.md"
           ]
         }
-      ],
-      "binding_overlap_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\verifier-binding-overlap.json",
-        "sha256": "26c5a831d76b5c812cec78f4a67d334b92cab969d6c472705a62da8916f0d098"
-      },
-      "disposition": "Exact current-base peer review: unrelated document sections and generated manifest/pin files only. PR1860/1680 other runtime hashes and pins; PR1759 distinct operator-command membership/limit delta. None changes healthcheck member; candidate preserves current1401 members/API/limits, absorbs no peer source. Full path inventory refreshed by verifier."
+      ]
     },
     "validation": {
-      "parent": "144 authored cases; fresh hosted baseline pending.",
-      "candidate": "158 authored cases;14 additions, all144 prior IDs and seven old healthcheck test bodies retained. Hosted pending.",
-      "limits": "Local selection is a hint, not authenticated expected-requester provenance. Server kernel peer check is authoritative; same user namespace and unchanged credentials between selection and connect are required. Mandatory lifecycle requester and resident handoff remain separate.",
-      "artifact_name": "lifecycle-dependency-selection",
-      "CI_workflow_unchanged": false,
-      "backend_binding": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\manifest-binding.json",
-        "sha256": "522582cdaf3ee38874da62e3bf7f7926d968294c9de79a1feee65d7c15510ae6"
-      }
+      "source": "Ten existing documentation/planning files only. No source/test/workflow change.",
+      "contract": "Canonical ownership, per-field provenance, lifetime and socket prerequisite specified; no implementation/production claim.",
+      "local": "Static links/JSON/score arithmetic/scope checks and independent exact-source review; no product imports/tests/collection.",
+      "hosted": "Existing158 parent/158 candidate regression pending; no new OS/supervision proof.",
+      "artifact_name": "lifecycle-dependency-selection"
     },
     "publication": {
       "state": "ACTIVE_OWNED_WORK",
-      "branch": "fix/rsi-requester-selection-20260927",
-      "worktree": "O:/Foundups-Agent-worktrees/rsi-requester-selection-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\final-accounting.json",
+      "branch": "docs/rsi-supervision-contract-20260927",
+      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-supervision-contract-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\final-accounting.json",
       "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
@@ -2057,7 +2097,8 @@
             "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\next-action-review.json",
             "sha256": "c466cfc76d642c686b8fd1c1212df7d0f03a9165050530497351d01c8a881db8"
           },
-          "resume_prerequisite": "Independently admitted verifiers/provenance for the seven named anchors, authentic current-generation evidence and a peer-authenticated effect-bound use lease wired through the existing resolver/valve path. Then re-observe ownership and qualify one bounded artifact ticket; do not fabricate positive authority fixtures as native evidence."
+          "resume_prerequisite": "Independently admitted verifiers/provenance for the seven named anchors, authentic current-generation evidence and a peer-authenticated effect-bound use lease wired through the existing resolver/valve path. Then re-observe ownership and qualify one bounded artifact ticket; do not fabricate positive authority fixtures as native evidence.",
+          "score": 18
         },
         {
           "task": "Qualify resident canary callback reachability and direct chain evidence",
@@ -2156,7 +2197,8 @@
           "evidence": "O:\\Foundups-Agent-audits\\20260922-rsi-persistence-contract\\next-role-source-audit.json",
           "next_step": "Obtain explicitly delegated proof.verify issuer/scope/independence/revocation policy before integration; R24 records prospective existing-owner handoff. Qualify persistence separately without creating authority.",
           "resume_prerequisite": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy.",
-          "dependency": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy."
+          "dependency": "Explicit delegated proof.verify issuer, scope, verifier independence and revocation policy supplied by the existing FAM/WRE authority owner; persistence repair alone does not provide that policy.",
+          "score": 14
         },
         {
           "task": "Repair LinkedIn wrapper dry-run precedence and direct-like early previews",
@@ -2202,7 +2244,8 @@
           "source": "modules/foundups/gotjunk/frontend/package-lock.json::packages[node_modules/protobufjs]",
           "next_step": "Reconcile exact overlapping heads with existing product owner; choose one narrowly scoped patch-version lock candidate satisfying the advisory and existing semver constraints, validate graph/integrity and separately authorized isolated npm ci/build compatibility. No PR merge until deployment effects and rollback acceptance are explicitly covered. Do not repeat the completed source qualification.",
           "dependency": "Existing product owner resolves overlapping heads and explicitly covers deployment/rollback and bounded install/build effects before a GotJunk lock change; do not repeat its source qualification.",
-          "resume_prerequisite": "Existing product owner resolves overlapping heads and explicitly covers deployment/rollback and bounded install/build effects before a GotJunk lock change; do not repeat its source qualification."
+          "resume_prerequisite": "Existing product owner resolves overlapping heads and explicitly covers deployment/rollback and bounded install/build effects before a GotJunk lock change; do not repeat its source qualification.",
+          "score": 14
         },
         {
           "task": "Repair persistent proof-verification atomicity and exact replay in existing SQLite owner",
@@ -2343,7 +2386,8 @@
             "sha256": "b000772daa0807a2f1ddda747bc9250cf8e25ca80568dab36138c54c81201615"
           },
           "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted.",
-          "resume_prerequisite": "Actual authorized upstream runtime handoff, independent evaluation/resource evidence and publication evidence become available for an existing outcome consumer; advisory display does not supply retention authority."
+          "resume_prerequisite": "Actual authorized upstream runtime handoff, independent evaluation/resource evidence and publication evidence become available for an existing outcome consumer; advisory display does not supply retention authority.",
+          "score": 14
         },
         {
           "task": "Fail closed on existing merge sentinel prerequisites",
@@ -2439,7 +2483,25 @@
             "Ref compare operations do not make the entire multi-remote/worktree transaction atomic. In-progress worktree changes and server-side automatic deletion remain distinct risks; retain explicit boundaries.",
             "Direct/backup pushes and unchecked PR merge remain unqualified upstream actions. This cleanup repair neither certifies intended delta/checks nor retroactively authorizes them.",
             "No tests, collection, product imports, Git/GH mutation, provider/service/native invocation performed by this reviewer. Planned acceptance is not observed proof."
-          ]
+          ],
+          "score": 14
+        },
+        {
+          "task": "Qualify exact filesystem-to-socket ownership in the existing external signer OS observer",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "eligible_bounded_source_and_runner_contract_qualification",
+          "source": "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py::_require_process_socket_owner",
+          "dependency": "Fresh ownership and exact bounded bridge acceptance; current no-network observer contract must be reconciled before any netlink implementation. No admitted live signer evidence.",
+          "next_step": "Qualify distinct VFS/sockfs identity, exact association, namespace/lifetime and malformed/ambiguous/race rejection with existing observer tests. Do not substitute pathname matching.",
+          "limits": "Source-supported defect, not observed production failure. Concrete Linux bridge and disposable-runner proof remain to be earned.",
+          "effort_cost": "Existing observer/test owners; bounded Linux ABI research and fixture qualification before producer integration."
         },
         {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
@@ -2468,7 +2530,8 @@
           },
           "state": "deferred_qualification",
           "dependency": "An admitted disposable PostgreSQL runtime and defined parity acceptance become available.",
-          "resume_prerequisite": "An admitted disposable PostgreSQL runtime and defined parity acceptance become available."
+          "resume_prerequisite": "An admitted disposable PostgreSQL runtime and defined parity acceptance become available.",
+          "score": 13
         },
         {
           "task": "LinkedIn dry-run boundary qualification",
@@ -2700,6 +2763,34 @@
           }
         },
         {
+          "task": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 13,
+            "priority": "P1"
+          },
+          "state": "design_prepared_independent_review_and_main_closure_pending",
+          "source": [
+            "reddog_signer_current_generation_use_time_gate.py",
+            "reddog_signer_current_generation_runtime_binding.py",
+            "reddog_execution_valve_use_time_authority.py",
+            "reddog_main_resident_queue_serial_loop_bootstrap.py",
+            "reddog_main_resident_queue_runtime_dependency_bundle.py",
+            "reddog_external_signer_lifecycle_admission.py",
+            "reddog_external_signer_os_observer.py",
+            "reddog_signer_system_service_entrypoint.py",
+            "reddog_signer_system_service_manifest_selection_loader.py",
+            "reddog_signer_socket_service_run_packet_supply.py",
+            "reddog_signer_process_isolation_gate.py"
+          ],
+          "dependency": "Independent source/design review and exact-main documentation convergence; runtime implementation remains blocked on socket qualification.",
+          "next_step": "Close this existing-owner contract; re-observe socket identity qualification before issuer implementation.",
+          "limits": "No concrete issuer, live service, new tests or resident authority from this design."
+        },
+        {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
           "wsp15": {
             "complexity": 2,
@@ -2713,7 +2804,8 @@
           "evidence": "Central verify_parity has no production caller in scoped search; equal-count malformed/different JSONL passes; inherited class-size debt",
           "next_step": "Map the actual consumer and independently declare content/attempt-history semantics before changing this diagnostic or adding an unused receipt API",
           "resume_prerequisite": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit.",
-          "dependency": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit."
+          "dependency": "A real existing consumer and required content/attempt-history contract become bound; no repeat missing-caller audit.",
+          "score": 12
         },
         {
           "task": "Broker truthful stop acknowledgment",
@@ -2844,7 +2936,8 @@
           "related_source": "modules/communication/moltbot_bridge/src/reddog_resident_live_canary_evidence.py::_draft_pr_evidence",
           "dependency": "Permitted independent review plus fresh source/ownership reconciliation required; no paused-lane access, retry or substitute.",
           "next_step": "Resume only after permitted independent review and fresh source/ownership reconciliation; preserve local draft.",
-          "resume_prerequisite": "Permitted independent review plus fresh source/ownership reconciliation required; no paused-lane access, retry or substitute."
+          "resume_prerequisite": "Permitted independent review plus fresh source/ownership reconciliation required; no paused-lane access, retry or substitute.",
+          "score": 12
         },
         {
           "task": "Qualify AutoResearcher program-instruction consumption",
@@ -2966,7 +3059,8 @@
           },
           "state": "required_before_further_scanner_growth_remaining_debt",
           "dependency": "A concrete scanner-growth change is proposed that requires the documented cohesion prerequisite; no such proposal evidenced now.",
-          "resume_prerequisite": "A concrete scanner-growth change is proposed that requires the documented cohesion prerequisite; no such proposal evidenced now."
+          "resume_prerequisite": "A concrete scanner-growth change is proposed that requires the documented cohesion prerequisite; no such proposal evidenced now.",
+          "score": 11
         },
         {
           "task": "Remove broker creation from existing observer runtime lookup",
@@ -3058,12 +3152,18 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "implementation_prepared_hosted_validation_pending",
+          "state": "closed_merged_PR1919",
           "source": "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_healthcheck.py::_default_requester",
-          "dependency": "Independent exact-head review, hosted fixed regression, main convergence and owned cleanup remain.",
-          "next_step": "Qualify14 new cases and existing connected behavior; re-observe requester handoff after closure.",
-          "limits": "Local identity selection only; no authenticated requester provenance, lifecycle/resolver wiring, anchor removal or effect lease.",
-          "effort_cost": "Existing private helper and current test owner; reuse existing hosted differential lifecycle job. No model/runtime update or live activation."
+          "dependency": "Exact reviewed tree merged; all PR/main checks passed; parent144 and candidate158 cases pass on PR/main; owned lane retired.",
+          "next_step": "Do not repeat requester-selection correction; native handoff remains separate.",
+          "limits": "Hosted connected source qualification completed; local requester selection is not production provenance or native admission.",
+          "effort_cost": "Existing private helper and current test owner; reuse existing hosted differential lifecycle job. No model/runtime update or live activation.",
+          "closure": {
+            "pr": 1919,
+            "merge": "bba2e752ab1b59eb050b6105808f81bc5591844b",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-requester-handoff\\final-accounting.json"
+          }
         },
         {
           "task": "Report sentinel checkout failure through its existing structured error field",
@@ -3095,8 +3195,24 @@
           }
         }
       ],
-      "selected_next": null,
-      "instruction": "Re-observe and score after exact closure. Local requester selection does not supply trusted resident expectation or fresh opaque lifecycle handoff; use existing authenticated owner, no new unused adapter."
+      "selected_next": {
+        "task": "Qualify exact filesystem-to-socket ownership in the existing external signer OS observer",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "state": "eligible_bounded_source_and_runner_contract_qualification",
+        "source": "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py::_require_process_socket_owner",
+        "dependency": "Fresh ownership and exact bounded bridge acceptance; current no-network observer contract must be reconciled before any netlink implementation. No admitted live signer evidence.",
+        "next_step": "Qualify distinct VFS/sockfs identity, exact association, namespace/lifetime and malformed/ambiguous/race rejection with existing observer tests. Do not substitute pathname matching.",
+        "limits": "Source-supported defect, not observed production failure. Concrete Linux bridge and disposable-runner proof remain to be earned.",
+        "effort_cost": "Existing observer/test owners; bounded Linux ABI research and fixture qualification before producer integration."
+      },
+      "instruction": "This selection is provisional until fresh exact-main/peer/shared re-observation after closure. Socket identity qualification precedes concrete canonical supervisor producer; higher native/owner/authority blockers remain explicit."
     }
   }
 }

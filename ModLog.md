@@ -1,3 +1,9 @@
+## 2026-09-27: RSI supervision source contract
+
+- WSP00/15/22/97: PR1919 is merged/main-verified at bba2e752; its lane is retired and95 peer heads/shared checkout are preserved. Close requester status drift in current planning.
+- Complete13/P1 source-contract design in existing docs: authenticated external owner, system-manager/process lifetime, per-field provenance and existing lifecycle/resident consumer. Independent review exposed a14/P1 socket identity qualification prerequisite; no duplicate module/skill/design document.
+- Documentation-only slice; actual publication/main closure is receipt-bound in the existing backlog. No native worker/signer/provider activation, token reward, retained RSI result or completed AmIBot build is claimed.
+
 ## 2026-09-27: RSI requester selection prerequisite
 
 - WSP00/15/22/97 re-observation verified PR1918 on main6dd4f343,113 parent/137 candidate hosted cases, owned-lane retirement and95 unchanged peer heads. Preserve the dirty shared checkout and separately owned FoundUps.

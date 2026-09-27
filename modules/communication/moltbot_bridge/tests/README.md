@@ -1,3 +1,18 @@
+## OS observer qualification gap — 2026-09-27
+
+`test_reddog_external_signer_os_observer.py::FakeBackend` currently uses202 for
+both pathname filesystem inode and process socket FD inode. Its positive receipt
+test therefore does not qualify the real Linux ownership relation. Existing
+process/credential/tamper controls retain their fixture scope. No test or fixture
+is changed in this design slice; no fresh OS-observer result is claimed.
+
+Extend this owner after the [identity-bridge contract](../INTERFACE.md#socket-ownership-prerequisite--source-defect-not-a-live-incident)
+is qualified. Keep filesystem device/inode and socket inode/cookie distinct;
+cover coincidence, missing/ambiguous mappings, unlink/rebind, namespace and
+process-lifetime changes. Never use a pathname-only join as proof. Any real Linux
+qualification requires an admitted disposable runner, with host candidate
+execution still prohibited. Existing lifecycle CI regression is not this proof.
+
 ## Healthcheck requester regression — 2026-09-27
 
 Reuse `test_reddog_signer_socket_service_healthcheck.py`; its seven old bodies

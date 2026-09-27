@@ -1,3 +1,110 @@
+## External supervision source contract — 2026-09-27
+
+**Design specified; implementation and runtime qualification remain open.**
+Reuse `reddog_signer_system_service_entrypoint.py` and the root-owned
+`reddog_signer_system_service_manifest_selection_loader.py` as the supervision
+owner. They already select the signer generation; they do not yet supply an
+authenticated supervisor policy. The public entrypoint still uses unavailable
+production dependencies. No signer-specific installed unit or systemd version
+was observed. This contract neither launches a service nor changes an API.
+
+### Source and ownership
+
+Choose read-only observation from an authenticated local systemd **system**
+manager for an explicitly owner-selected, already-loaded service unit. Extend
+the existing root-owned config through a versioned schema when implementing;
+current exact v1-v4 schemas contain no unit selector and must retain compatibility
+and unknown-field rejection. Never guess a unit name, accept a caller-selected
+PID/unit, fall back to the user bus, or start/stop/reload/LoadUnit a service.
+
+For the first bounded implementation, require a qualified simple/exec main-process
+service, active/running state, current nonzero `MainPID` and nonempty `InvocationID`.
+Do not select historical `ExecMainPID` or a control process. Pin the process with
+a pidfd, verify selected-unit/invocation membership through `GetUnitByPIDFD`, and
+require capability support rather than assuming a host version. This method
+was added in systemd253; reading the v256 source does not verify the deployed
+runtime. Authenticate the manager connection and reject manager-owner changes.
+
+| Existing policy field | Expected provenance and binding |
+|---|---|
+| `pid`, `expected_process_start_identity` | Owner-selected unit's current MainPID; pinned process plus kernel boot ID/start ticks, bracketed by manager/invocation and pidfd-liveness checks. A PID alone is insufficient. |
+| `expected_signer_uid/gid` | Existing authenticated root-owner signer identity, compared with actual manager/kernel process credentials. Preserve separation from requester. |
+| `requester_uid/gid` | Effective identity of the process performing the lifecycle healthcheck, mapped by the authenticated selected `peer_policy/uid_to_principal`; never012, work subject or presumed supervisor identity. |
+| `expected_executable` | Current authenticated run-packet `argv[0]`, constrained by the owner-authorized service launch path/argv. Do not accept whichever executable `/proc` happens to report. |
+| `expected_executable_device/inode` | Descriptor-derived metadata of that expected path, matched to `/proc/PID/exe` and repeated around observation; identity is not code-content attestation. |
+| `socket_path`, `expected_socket_uid/gid/mode` | Current selected config/run packet and explicit root-owned policy, protected ancestry and compatible namespaces; compare actual metadata. Existing fixture0600 is not proof of production mode. |
+| `authority_receipt_id/source_id` | Concrete canonical issuer binding authenticated owner config, generation/revision, config/raw digest, run packet/session, unit/invocation, process/socket identities and observation time. Digests and serialized records cannot confer authority. |
+
+The concrete issuer must use the existing policy boundary and lifecycle consumer,
+with actual dependency/provenance qualification. A caller-created
+`VerifiedExternalSignerOsPolicy`, arbitrary `Protocol.require` result, audit
+receipt, or injected callback is not production supervision. Preserve the audit
+injection API, but exclude it from the strict resident path. Do not introduce a
+parallel authority registry or leave a new adapter disconnected from its consumer.
+
+### One-attempt lifetime
+
+1. Load one authenticated owner/config/generation selection and explicitly resolve
+   the accepted signer profile. The current unprofiled resident collector does
+   not provide a profile/public-key/epoch binding.
+2. Pin and recheck manager/unit/invocation, pidfd, process start, executable and
+   credentials before policy issuance. Qualify PID/user/network/mount namespace
+   compatibility; do not reinterpret IDs or paths across namespaces.
+3. Keep the authenticated manager connection and pidfd alive across the existing
+   observer and actual handshake; recheck configuration/generation and identities
+   before issuing the proof. Manager/service restart, exit, PID reuse, executable
+   replacement, generation rotation, or socket replacement rejects. Release all
+   resources on every outcome.
+4. Supply one fresh opaque lifecycle handle and independently selected requester
+   per attempt to the existing resident bootstrap/resolver, after earlier queue
+   checks. Consume once with `require_default_dependencies=True`. The flag alone
+   is not provenance. If use is separated in time, revalidate at use; an observation
+   cannot prevent later exit or exec. The existing effect-bound lease is separate.
+
+A connected-peer approach was considered. The current socket client discards peer
+PID and closes each byte-roundtrip connection. Using it would require preserving
+one authenticated connection/lifetime through challenge and policy capture,
+without assuming `SO_PEERCRED` proves current executable or rightful service
+ownership. The system-manager route fits the existing external-owner contract.
+
+### Socket ownership prerequisite — source defect, not a live incident
+
+`reddog_external_signer_os_observer._require_process_socket_owner` currently
+compares pathname `lstat().st_ino` with `/proc/PID/fd`'s `socket:[inode]`.
+Linux creates the pathname filesystem node separately from the socket's sockfs
+inode. The existing `FakeBackend` assigns202 to both and masks that distinction.
+Distinct values can reject a valid socket; accidental numerical equality is not
+ownership proof. No real signer or Linux runtime was exercised in this sprint.
+
+Before implementing the issuer, qualify an exact filesystem-to-socket identity
+bridge in the existing observer/test owners. A candidate is bounded
+`UNIX_DIAG_VFS` plus process FD ownership, with socket inode/cookie and filesystem
+device/inode treated separately. Primary-source ABI verification must cover
+uint32 inode width, device encoding, namespaces, kernel sender/sequence,
+truncation, bounded replies/deadlines and lifetime. A `/proc/net/unix` pathname-only
+join is insufficient after unlink/rebind. Do not weaken the existing no-network
+observer boundary or add netlink merely because this design names a candidate.
+
+Fixed next acceptance: distinct-domain valid association; unrelated socket with
+the same numeric inode; absent/ambiguous association; wrong namespace/type/state;
+pathname unlink/rebind or device change; process restart/exec/exit; malformed,
+truncated, foreign or stale evidence; resource cleanup and bounded failure.
+Preserve prior checks with explicit separate fixture domains. Synthetic backend
+success is only source qualification; real Linux qualification belongs on an
+independently admitted disposable runner before production adoption.
+
+Then qualify actual issuer-to-lifecycle consumption: reject forged boundaries,
+wrong manager/unit/invocation, historical/missing PID, unavailable pidfd/method,
+identity or generation drift before handshake; preserve one-use/expiry/replay
+and exact requester/profile checks. All seven native trust reasons and
+`authoritative_use_lease=None` remain. This is not a completed native RSI cycle.
+
+Primary sources: [systemd v256 manager contract](https://raw.githubusercontent.com/systemd/systemd/v256/man/org.freedesktop.systemd1.xml),
+[pidfd lifetime](https://man7.org/linux/man-pages/man2/pidfd_open.2.html),
+[Linux v6.12 pathname bind](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/unix/af_unix.c),
+[socket FD naming](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/socket.c),
+[UNIX diagnostic VFS association](https://raw.githubusercontent.com/torvalds/linux/v6.12/net/unix/diag.c).
+
 ## Healthcheck requester selection — 2026-09-27
 
 Only `requester_principal_id=None` requests default selection. The existing
