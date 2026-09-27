@@ -1,3 +1,13 @@
+## Cross-process visibility prerequisite — 2026-09-27
+
+PR1922 is merged/main-verified at `d6f9458b`;188/252 PR and main cases passed,
+independent artifacts and all checks passed, owned lane retired. Re-observation
+retains52 rows and selects the same broad qualifier's next component at14/P1
+(C3/I4/D3/Impact4): actual cross-process permission evidence before supervisor
+issuance. Two existing-owner child cases are prepared; production stays unchanged.
+Fresh hosted/effect review and main closure remain; do not treat the intended
+permission denial as a grant to weaken isolation or enable native work.
+
 ## Connected socket observer repair — 2026-09-27
 
 PR1921 is merged/main-verified at `c417ccc17`;186/188 cases passed, exact PR/main

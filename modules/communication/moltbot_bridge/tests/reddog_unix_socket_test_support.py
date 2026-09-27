@@ -1,10 +1,20 @@
-"""Inert binary-frame and backend mutations for the existing observer suite."""
+"""Binary fixtures and explicitly opted-in hosted child visibility support."""
 import errno
+import hashlib
+import json
+import os
+import select
+import subprocess
+import sys
+import tempfile
+import time
 import struct
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 
 from modules.communication.moltbot_bridge.src import _reddog_unix_socket_identity as diag
+from modules.communication.moltbot_bridge.src import reddog_external_signer_os_observer as observer
 
 
 def frame(request, change):
@@ -145,3 +155,177 @@ def _mutate_view_or_fd(backend, scenario, pid):
             return value + marker
         return value
     backend.readlink, backend.read_bytes = changed_link, changed_read
+
+
+# Fixed child program: no repository imports, command dispatch or service access.
+_VISIBILITY_CHILD = r'''
+import ctypes, json, os, resource, select, socket, sys
+from pathlib import Path
+libc = ctypes.CDLL(None, use_errno=True)
+libc.prctl.argtypes = [ctypes.c_int] + [ctypes.c_ulong] * 4
+libc.prctl.restype = ctypes.c_int
+mode = int(sys.argv[2])
+assert mode in (0, 1)
+resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as held:
+    held.bind(sys.argv[1])
+    held.listen(1)
+    assert libc.prctl(4, mode, 0, 0, 0) == 0
+    def snapshot():
+        status = dict(line.split(':', 1) for line in Path('/proc/self/status').read_text().splitlines())
+        metadata = Path(sys.argv[1]).lstat()
+        report = dict(pid=os.getpid(), ppid=os.getppid(), resuid=os.getresuid(),
+            resgid=os.getresgid(), fd=held.fileno(), fd_inode=os.fstat(held.fileno()).st_ino,
+            path_inode=metadata.st_ino, device_major=os.major(metadata.st_dev),
+            device_minor=os.minor(metadata.st_dev), dumpable=libc.prctl(3, 0, 0, 0, 0),
+            capabilities={k: int(status[k], 16) for k in ('CapEff', 'CapPrm', 'CapAmb')},
+            namespaces={k: os.readlink('/proc/self/ns/' + k) for k in ('pid', 'net', 'mnt', 'user')},
+            nspid=status['NSpid'].split(), core_limit=resource.getrlimit(resource.RLIMIT_CORE))
+        payload = (json.dumps(report, sort_keys=True) + '\n').encode('ascii')
+        assert len(payload) <= 4096 and os.write(1, payload) == len(payload)
+    snapshot()
+    for expected in (b'CHECK\n', b'STOP\n'):
+        assert select.select([0], [], [], 15.0)[0]
+        assert os.read(0, 6) == expected
+        if expected == b'CHECK\n':
+            snapshot()
+'''
+
+
+def _observer_view():
+    payload = Path('/proc/self/status').read_bytes()
+    assert len(payload) <= 65536
+    fields = dict(line.split(':', 1) for line in payload.decode('ascii').splitlines())
+    caps = {k: int(fields[k], 16) for k in ('CapEff', 'CapPrm', 'CapAmb')}
+    assert all(not value & (1 << 19) for value in caps.values())
+    uids, gids = list(os.getresuid()), list(os.getresgid())
+    assert len(set(uids)) == len(set(gids)) == 1 and uids[0] > 0 and gids[0] > 0
+    assert fields['NSpid'].split() == [str(os.getpid())]
+    return dict(pid=os.getpid(), resuid=uids, resgid=gids, capabilities=caps,
+                namespaces={k: os.readlink('/proc/self/ns/' + k)
+                            for k in ('pid', 'net', 'mnt', 'user')})
+
+
+def _child_snapshot(child):
+    deadline, raw = time.monotonic() + 10.0, b''
+    while not raw.endswith(b'\n'):
+        remaining = deadline - time.monotonic()
+        assert remaining > 0 and len(raw) < 4096, 'Bounded child readiness failed'
+        assert select.select([child.stdout], [], [], remaining)[0], 'Child readiness timeout'
+        part = os.read(child.stdout.fileno(), 4096 - len(raw))
+        assert part, 'Child exited before readiness'
+        raw += part
+    assert b'\n' not in raw[:-1]
+    report = json.loads(raw.decode('ascii'))
+    assert type(report) is dict and set(report) == {
+        'pid', 'ppid', 'resuid', 'resgid', 'fd', 'fd_inode', 'path_inode',
+        'device_major', 'device_minor', 'dumpable', 'capabilities', 'namespaces',
+        'nspid', 'core_limit'}
+    assert child.poll() is None
+    return report
+
+
+def _check_child(report, child, own, mode, metadata):
+    assert report['pid'] == child.pid and report['ppid'] == own['pid']
+    assert report['resuid'] == own['resuid'] and report['resgid'] == own['resgid']
+    assert report['namespaces'] == own['namespaces']
+    assert report['capabilities'] == own['capabilities']
+    assert report['nspid'] == [str(child.pid)]
+    assert report['dumpable'] == mode and report['core_limit'] == [0, 0]
+    assert type(report['fd']) is int and report['fd'] >= 3
+    assert type(report['fd_inode']) is int and 0 < report['fd_inode'] <= 0xffffffff
+    assert report['path_inode'] == metadata.st_ino
+    assert (report['device_major'], report['device_minor']) == (
+        os.major(metadata.st_dev), os.minor(metadata.st_dev))
+
+
+def _observe_readable_child(child, path, before):
+    backend = observer.LinuxProcExternalSignerOsBackend()
+    first = observer._require_process_socket_owner(backend, child.pid, path.lstat())
+    second = observer._require_process_socket_owner(
+        backend, child.pid, path.lstat(), previous=first)
+    assert first == second and first.fd == str(before['fd'])
+    identity = first.identity
+    assert identity.socket_inode == before['fd_inode']
+    assert identity.vfs_inode == before['path_inode']
+    assert (identity.vfs_device >> 20, identity.vfs_device & 0xfffff) == (
+        before['device_major'], before['device_minor'])
+    assert identity.cookie != diag.NO_COOKIE
+    return dict(accepted=True, socket_inode=identity.socket_inode,
+                vfs_inode=identity.vfs_inode, vfs_device=identity.vfs_device,
+                cookie=identity.cookie, concrete_cookie_rechecked=True)
+
+
+def _observe_nondumpable_child(child, path, before):
+    fd_path = f"/proc/{child.pid}/fd/{before['fd']}"
+    try:
+        os.readlink(fd_path)
+    except PermissionError as error:
+        fd_errno = error.errno
+        assert fd_errno in (errno.EACCES, errno.EPERM)
+    else:
+        raise AssertionError('Nondumpable child FD unexpectedly readable')
+    try:
+        observer._require_process_socket_owner(
+            observer.LinuxProcExternalSignerOsBackend(), child.pid, path.lstat())
+    except observer.ExternalSignerOsObservationError as error:
+        assert str(error) == observer.FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED
+        cause = error.__context__
+        assert isinstance(cause, PermissionError)
+        assert cause.errno in (errno.EACCES, errno.EPERM)
+        return dict(accepted=False, fd_errno=fd_errno, observer_errno=cause.errno,
+                    rejection=str(error))
+    raise AssertionError('Nondumpable child ownership unexpectedly accepted')
+
+
+def _stop_owned_child(child):
+    try:
+        if child.poll() is None:
+            child.kill()
+        child.wait(timeout=5)
+    finally:
+        for pipe in (child.stdin, child.stdout, child.stderr):
+            pipe.close()
+
+
+def _qualify_child(directory, mode, own, popen):
+    path = Path(directory) / 'socket'
+    child = popen([sys.executable, '-I', '-B', '-c', _VISIBILITY_CHILD, str(path), str(mode)],
+                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                  cwd=directory, env={'LC_ALL': 'C'}, close_fds=True, shell=False, bufsize=0)
+    try:
+        before = _child_snapshot(child)
+        metadata = path.lstat()
+        _check_child(before, child, own, mode, metadata)
+        observe = _observe_readable_child if mode else _observe_nondumpable_child
+        result = observe(child, path, before)
+        assert child.poll() is None
+        assert os.write(child.stdin.fileno(), b'CHECK\n') == 6
+        after = _child_snapshot(child)
+        assert before == after and path.lstat() == metadata
+        assert own == _observer_view()
+        assert os.write(child.stdin.fileno(), b'STOP\n') == 5
+        assert child.wait(timeout=5) == 0
+        assert child.stdout.read(4097) == child.stderr.read(4097) == b''
+        return dict(before=before, after=after, observation=result,
+                    live_after_observation=True, child_exit_code=child.returncode,
+                    path_inode=metadata.st_ino, device_major=os.major(metadata.st_dev),
+                    device_minor=os.minor(metadata.st_dev))
+    finally:
+        _stop_owned_child(child)
+
+
+def qualify_process_visibility(root, mode, *, popen):
+    assert sys.platform == 'linux' and mode in (0, 1)
+    assert os.environ.get('FOUNDUPS_SOCKET_KERNEL_CHARACTERIZATION') == '1'
+    assert root == Path(os.environ['RUNNER_TEMP']).resolve(strict=True)
+    own = _observer_view()
+    with tempfile.TemporaryDirectory(prefix='rsi-proc-', dir=root) as directory:
+        assert Path(directory).resolve().parent == root
+        report = _qualify_child(directory, mode, own, popen)
+    assert not Path(directory).exists()
+    return dict(report, observer=own, requested_dumpable=mode, temporary_removed=True,
+                kernel_release=os.uname().release, machine=os.uname().machine,
+                child_source_sha256=hashlib.sha256(_VISIBILITY_CHILD.encode('utf-8')).hexdigest(),
+                scope='same-UID disposable child; no external signer authority',
+                production_supervision_qualified=False)

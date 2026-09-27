@@ -9,6 +9,7 @@ import os
 import socket
 import stat
 import struct
+import subprocess
 import sys
 import tempfile
 from dataclasses import replace
@@ -18,7 +19,7 @@ import pytest
 from modules.communication.moltbot_bridge.src import _reddog_unix_socket_identity as diag
 from modules.communication.moltbot_bridge.src import reddog_external_signer_os_observer as observer
 from modules.communication.moltbot_bridge.tests.reddog_unix_socket_test_support import (
-    install_wire, mutate_backend,
+    install_wire, mutate_backend, qualify_process_visibility,
 )
 
 from modules.communication.moltbot_bridge.src.reddog_external_signer_os_observer import (
@@ -652,3 +653,10 @@ def test_production_owned_socket_seam(record_property):
                 "path_device_major": os.major(metadata.st_dev), "path_device_minor": os.minor(metadata.st_dev),
                 "scope": "own held FD; namespace and production association seam; no authority",
                 "rebind_rejected": True, "production_supervision_qualified": False}))
+
+
+@pytest.mark.parametrize('dumpable', [1, 0])
+def test_hosted_child_process_visibility(dumpable, record_property):
+    root = _require_hosted_kernel_characterization()
+    report = qualify_process_visibility(root, dumpable, popen=subprocess.Popen)
+    record_property('process_socket_visibility', json.dumps(report, sort_keys=True))

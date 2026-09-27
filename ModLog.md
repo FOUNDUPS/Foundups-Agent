@@ -1,3 +1,9 @@
+## 2026-09-27: RSI cross-process visibility qualification
+
+- WSP00/15/97 re-observation confirms PR1922 main closure and unchanged95 peer heads/shared checkout. Select14/P1 permission-boundary qualification in existing observer tests; native18 remains blocked.
+- Two fixed hosted child cases preserve production and252 previous selected cases. Explicit process capability, bounded lifecycle and independent review precede execution; no new module, workflow or skill.
+- Canonical backlog binds prospective254-case acceptance, exact source/hosted review, publication/main closure and owned cleanup. No native RSI or AmIBot activation.
+
 ## 2026-09-27: RSI connected socket identity repair
 
 - WSP00/15/97 re-observation confirms PR1921 main closure, unchanged95 peer heads/shared checkout, and52 ranked candidates. Select15/P1 connected ownership repair; native18 remains blocked.

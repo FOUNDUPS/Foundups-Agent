@@ -1,3 +1,11 @@
+## Cross-process observer qualification — 2026-09-27
+
+The socket mapper repair is merged and verified (PR1922, main `d6f9458b`).
+The next existing-owner experiment tests readable and nondumpable disposable
+children; see the [fixed effects and acceptance](tests/README.md#cross-process-visibility-qualification--2026-09-27).
+Production remains unchanged; hosted evidence/closure is pending in the canonical
+backlog. Neither this fixture nor the prior same-process proof admits native RSI.
+
 ## Existing observer socket repair — 2026-09-27
 
 The existing external signer OS observer now maps socket FD identities to VFS
