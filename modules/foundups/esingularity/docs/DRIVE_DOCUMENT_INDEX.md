@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Google Drive Document Index
 
-Last audited: 2026-09-26 JST
+Last audited: 2026-09-28 JST
 
 ## Authority rule
 
@@ -32,7 +32,7 @@ These are durable project documents. Preserve their file IDs and update in place
 | 02 | **YUMORI Mayor Request Letter** | Mayor-facing formal request lane | `1Dx6HkdKSKISfxU7QgLvSZ6nFOc_T2MV0HCHVnoYioe4` |
 | 03 | **YUMORI City / Prefecture / Council Evidence — Demolition vs PPP/PFI Reuse** | Policy, evidence, economics and government-facing support material | `1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE` |
 | 04 | **Who Is the Monk? — Kuzuryu Taicho, eSingularity & FoundUps** | Project-founder/background narrative; not a source for government facts | `1u_HMejJJOxU5y4DV2S-OSwaiQOk_QPffbUFna2CfSrE` |
-| 05 | **YUMORI PPP/PFI Private Proposal Master** | Canonical Drive PPP/PFI proposal mechanics and submission draft | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
+| 05 | **YUMORI PPP/PFI Public-Private Partnership Master** | Canonical Drive PPP/PFI project-formation, legal, VFM, risk-allocation and submission-mechanics draft; not the FY2026 財産有効活用民間提案制度 application lane | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
 | 06 | **YUMORI Project Prospectus — eSingularity Case for Support** | Integrated project prospectus / support case | `1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM` |
 | 07 | **YUMORI / eSingularity Three-Site Distributed AI Koban Node Portfolio** | Current candidate-site portfolio: Sukatto Land, former Shimousaka Elementary, former Hanyu Elementary | `1BLGiTe3Z6kR7SZXjcuQ67OiQGBRHF9u6M0VdPDplkls` |
 
