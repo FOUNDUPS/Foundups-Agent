@@ -1,3 +1,9 @@
+## 2026-09-27: Effective requester regression
+
+- Existing healthcheck test owner gains14 cases; all seven prior test bodies/expectations are preserved. Synthetic effective UID/GID are scoped to the healthcheck module, without modifying the shared OS module.
+- Fixed acceptance: two mapped UIDs, six local-identity rejection paths with no connector, four invalid explicit identities, explicit identity without OS APIs, and empty GID allow-list. Existing hosted lifecycle selection adds the suite (expected144 parent/158 candidate); fresh results remain pending at preparation.
+- Acceptance/source/CI/closure receipts: `O:/Foundups-Agent-audits/20260927-rsi-requester-handoff/`. No host test execution, new test file or native authority.
+
 ## 2026-09-27: Default dependency selection before strict lifecycle consumption
 
 - Frozen WSP00/6/15/22/50/62/84/97 acceptance: unchanged113 parent case IDs, one intentional signature assertion extension,24 new controls,137 planned candidate cases in the connected selection documented in tests/README.

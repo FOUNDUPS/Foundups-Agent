@@ -5,6 +5,11 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+import modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck as healthcheck
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -32,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healt
     FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED,
     FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH,
     FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING,
+    FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,
     FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,
     FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_PATH_INVALID,
     FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED,
@@ -219,6 +225,111 @@ def _manifest_bindings() -> dict[str, str]:
         "manifest_id": MANIFEST_ID,
         "artifact_generation_digest": ARTIFACT_GENERATION_DIGEST,
     }
+
+
+@pytest.fixture(autouse=True)
+def synthetic_identity(monkeypatch):
+    identity = SimpleNamespace(
+        geteuid=lambda: 1001, getegid=lambda: 1002,
+        getuid=lambda: 9001, getgid=lambda: 9002, getgroups=lambda: [1002],
+    )
+    monkeypatch.setattr(healthcheck, "os", identity, raising=False)
+    return identity
+
+
+@pytest.mark.parametrize("uid,principal", [(1001, "github:mjtrout"), (2002, "agent:worker")])
+def test_healthcheck_default_selects_effective_uid(tmp_path, synthetic_identity, uid, principal):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    config = _config(runtime / "signer.sock")
+    config["peer_policy"]["uid_to_principal"]["2002"] = "agent:worker"
+    synthetic_identity.geteuid = lambda: uid
+    requests = []
+
+    def connector(*args):
+        requests.append(json.loads(args[1])["request"]["requester_principal_id"])
+        return _accepted_connector(*args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, runtime, config_payload=config),
+        connector=connector, **_manifest_bindings(),
+    )
+    assert result.accepted is True
+    assert result.requester_principal_id == principal
+    assert requests == [principal]
+
+
+def _identity_unavailable():
+    raise OSError("synthetic credential read failure")
+
+
+@pytest.mark.parametrize("mode", [
+    "unmapped_uid", "disallowed_egid", "missing_uid", "missing_gid", "error_uid", "error_gid",
+])
+def test_healthcheck_rejects_unresolved_effective_identity_before_connect(tmp_path, synthetic_identity, mode):
+    repo = _repo(tmp_path)
+    packet = _packet(repo, tmp_path / "runtime")
+    if mode == "unmapped_uid":
+        synthetic_identity.geteuid = lambda: 9999
+    elif mode == "disallowed_egid":
+        synthetic_identity.getegid = lambda: 9999
+    elif mode.startswith("missing_"):
+        delattr(synthetic_identity, "geteuid" if mode.endswith("uid") else "getegid")
+    else:
+        setattr(synthetic_identity, "geteuid" if mode.endswith("uid") else "getegid", _identity_unavailable)
+    requests = []
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=packet, connector=lambda *args: requests.append(args),
+        **_manifest_bindings(),
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,)
+    assert requests == []
+
+
+@pytest.mark.parametrize("requester", ["", False, 0, "\u00e9"])
+def test_healthcheck_invalid_explicit_requester_never_defaults(tmp_path, requester):
+    repo = _repo(tmp_path)
+    requests = []
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, tmp_path / "runtime"),
+        requester_principal_id=requester, connector=lambda *args: requests.append(args),
+        **_manifest_bindings(),
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,)
+    assert requests == []
+
+
+def test_healthcheck_explicit_requester_does_not_require_local_identity(tmp_path, monkeypatch):
+    monkeypatch.setattr(healthcheck, "os", SimpleNamespace())
+    repo = _repo(tmp_path)
+    requests = []
+
+    def connector(*args):
+        requests.append(json.loads(args[1])["request"]["requester_principal_id"])
+        return _accepted_connector(*args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, tmp_path / "runtime"),
+        requester_principal_id="github:mjtrout", connector=connector, **_manifest_bindings(),
+    )
+    assert result.accepted is True
+    assert requests == ["github:mjtrout"]
+
+
+def test_healthcheck_unrestricted_gids_accept_mapped_effective_uid(tmp_path, synthetic_identity):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    config = _config(runtime / "signer.sock")
+    config["peer_policy"]["allowed_gids"] = []
+    synthetic_identity.getegid = lambda: 9999
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, runtime, config_payload=config),
+        connector=_accepted_connector, **_manifest_bindings(),
+    )
+    assert result.accepted is True
+    assert result.requester_principal_id == "github:mjtrout"
 
 
 def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_path: Path) -> None:

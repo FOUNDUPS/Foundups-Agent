@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -33,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import (
     SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
+    rehydrate_peer_credential_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
     signer_run_packet_static_valid,
@@ -177,7 +181,7 @@ def _prepare_healthcheck(
             config_digest=config_digest,
         )
         return None, rejected
-    requester = requester_principal_id or _default_requester(config)
+    requester = _default_requester(config) if requester_principal_id is None else requester_principal_id
     if not _ascii_string(requester):
         rejected = _reject(
             (FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,),
@@ -490,14 +494,17 @@ def _select_profile(config: Mapping[str, Any], signer_profile_id: str) -> Mappin
 
 
 def _default_requester(config: Mapping[str, Any]) -> str | None:
-    peer_policy = config.get("peer_policy")
-    if not isinstance(peer_policy, Mapping):
+    policy = rehydrate_peer_credential_policy(config.get("peer_policy"))
+    if policy is None:
         return None
-    uid_map = peer_policy.get("uid_to_principal")
-    if not isinstance(uid_map, Mapping) or not uid_map:
+    try:
+        uid, gid = os.geteuid(), os.getegid()
+    except (AttributeError, OSError):
         return None
-    first_key = sorted(str(key) for key in uid_map.keys())[0]
-    return str(uid_map.get(first_key) or "")
+    if policy.allowed_gids and gid not in policy.allowed_gids:
+        return None
+    # A local selection hint only; the server attests the connecting peer.
+    return policy.uid_to_principal.get(uid)
 
 
 def _resolve_existing_outside_file(

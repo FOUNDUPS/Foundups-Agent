@@ -1,3 +1,38 @@
+## Healthcheck requester selection — 2026-09-27
+
+Only `requester_principal_id=None` requests default selection. The existing
+healthcheck reuses `rehydrate_peer_credential_policy` and maps the connecting
+process's effective UID, requiring its effective primary GID when `allowed_gids`
+is nonempty. Missing effective-ID APIs, OS read errors, unknown UIDs and denied
+GIDs return `signer_healthcheck_requester_invalid` before connector invocation.
+An empty GID allow-list imposes no GID restriction. Real IDs, supplementary groups
+and the first configured policy entry do not select the requester.
+
+Valid explicit requesters bypass local inference; malformed explicit values do
+not fall back. The existing server must still match the requested principal to
+its kernel-attested peer. Local inference assumes compatible user namespaces
+and unchanged credentials before connect; it is a routing hint, not attestation,
+delegation or authenticated expected-requester provenance.
+
+### Resident handoff ownership (specified, not wired)
+
+The existing signer-owned `peer_policy/uid_to_principal` remains the mapping
+owner. A same-process lifecycle producer must select from the authenticated
+current-generation config and the actual handshake process's effective identity.
+If another process performs the handshake, the resident process's UID cannot
+substitute: the admitted external lifecycle owner must supply the independently
+bound requester expectation and fresh opaque lifecycle handle for each attempt.
+Never derive the expectation from the offered receipt, external012 or work subject.
+
+Thread that existing-owner supply through resident bootstrap into
+`GovernedValveUseTimeAuthorityResolver`, after early work/queue checks. Reuse the
+accepted signer profile and correlate manifest, generation/revision, config/raw
+digest, run-packet and session; consume once with
+`require_default_dependencies=True`. This is a future integration contract.
+The healthcheck fix does not fill lifecycle's mandatory requester parameter or
+wire this supplier. All seven resident trust reasons and the absent effect-use
+lease remain. No new profile field, identity registry or launch API is introduced.
+
 ## Lifecycle default-dependency requirement — 2026-09-27
 
 `consume_verified_external_signer_lifecycle_admission` adds keyword-only

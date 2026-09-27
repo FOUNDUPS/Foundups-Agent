@@ -1,3 +1,22 @@
+## Requester selection checkpoint — 2026-09-27
+
+PR1918 is `MERGED_VERIFIED_MAIN` at `6dd4f343dda48ef427cfee7bc7d40be653a229fa`:
+113 parent/137 candidate cases passed on PR and main, checks passed and owned
+lane retired. Fresh exact-main/95-peer/shared-state reconciliation selects11/P2
+to fix an observed existing-healthcheck defect: default requester used the first
+configured UID instead of the caller's effective identity.
+
+Reuse the healthcheck and peer-policy parser; only None requests local default
+selection. Hosted144 parent/158 candidate fixed acceptance is pending at source
+preparation. Required checks, independent review and exact-main readback remain
+closure gates; actual receipts are bound in the current backlog.
+
+The existing signer-owned mapping is the future requester owner. Effective IDs
+select a local hint; authenticated config, actual handshake-process identity and
+fresh per-attempt opaque handoff remain required for resident integration. The
+server's peer attestation stays authoritative. All seven native trust reasons
+and absent effect lease remain; no live runtime or FoundUp deployment is admitted.
+
 ## Lifecycle selection checkpoint — 2026-09-27
 
 PR1917 is `MERGED_VERIFIED_MAIN` at `8215e584dda5bdb1c13bb236fccec7ff9cd35a46`:
