@@ -15,6 +15,11 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
+from modules.communication.moltbot_bridge.src import _reddog_unix_socket_identity as diag
+from modules.communication.moltbot_bridge.src import reddog_external_signer_os_observer as observer
+from modules.communication.moltbot_bridge.tests.reddog_unix_socket_test_support import (
+    install_wire, mutate_backend,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_external_signer_os_observer import (
     FAIL_OS_OBSERVER_EXECUTABLE_MISMATCH,
@@ -76,18 +81,23 @@ class FakeBackend:
         self.stat_reads = 0
         self.socket_reads = 0
         self.second_socket_inode = 202
+        self.socket_inode = 303
+        self.diagnostic = diag.SocketIdentity(303, (11, 12), 202, 9, 1, 10)
+        self.queries = []
 
     def platform(self) -> str:
         return self.platform_name
 
     def read_bytes(self, path: str) -> bytes:
+        if path == "/proc/self/status":
+            return b"Pid:\t1000\nNSpid:\t1000\n"
         if path == f"/proc/{PID}/stat":
             self.stat_reads += 1
             ticks = START_TICKS if self.stat_reads == 1 else self.second_start_ticks
             return _proc_stat(self.state, ticks, pid=self.reported_pid)
         if path == f"/proc/{PID}/status":
             return (
-                f"Name:\tsigner\nUid:\t{self.uid}\t{self.uid}\t{self.uid}\t{self.uid}\n"
+                f"Pid:\t{PID}\nNSpid:\t{PID}\nName:\tsigner\nUid:\t{self.uid}\t{self.uid}\t{self.uid}\t{self.uid}\n"
                 f"Gid:\t{self.gid}\t{self.gid}\t{self.gid}\t{self.gid}\n"
             ).encode("ascii")
         if path == "/proc/sys/kernel/random/boot_id":
@@ -97,10 +107,14 @@ class FakeBackend:
         raise FileNotFoundError(path)
 
     def readlink(self, path: str) -> str:
+        if path == "/proc/self":
+            return "1000"
+        if "/ns/" in path:
+            return path.rsplit("/", 1)[1] + ":[123]"
         if path == f"/proc/{PID}/exe":
             return self.executable
         if path == f"/proc/{PID}/fd/7" and self.process_owns_socket:
-            inode = 202 if self.socket_reads <= 1 else self.second_socket_inode
+            inode = self.socket_inode
             return f"socket:[{inode}]"
         raise FileNotFoundError(path)
 
@@ -131,6 +145,16 @@ class FakeBackend:
 
     def current_gid(self) -> int:
         return self.requester_gid
+
+    def current_pid(self):
+        return 1000
+
+    def monotonic(self):
+        return 0.0
+
+    def query_unix_socket(self, inode, cookie, timeout):
+        self.queries.append((inode, cookie, timeout))
+        return self.diagnostic
 
 
 def _policy(**changes: object) -> ExternalSignerOsObservationPolicy:
@@ -340,29 +364,23 @@ def test_socket_replacement_during_observation_fails_closed() -> None:
 
 
 def test_module_has_no_execution_network_or_service_control_surface() -> None:
-    source_path = (
-        Path(__file__).parents[1]
-        / "src"
-        / "reddog_external_signer_os_observer.py"
-    )
-    tree = ast.parse(source_path.read_text(encoding="utf-8"))
-    imports = {
-        alias.name.split(".")[0]
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.Import, ast.ImportFrom))
-        for alias in node.names
-    }
-    calls = {
-        node.func.attr
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-    }
-    assert imports.isdisjoint(
-        {"subprocess", "socket", "requests", "urllib", "httpx", "ctypes"}
-    )
-    assert calls.isdisjoint(
-        {"system", "popen", "spawn", "fork", "execv", "execve", "kill", "connect"}
-    )
+    root = Path(__file__).parents[1] / "src"
+    for name in ("reddog_external_signer_os_observer.py", "_reddog_unix_socket_identity.py"):
+        tree = ast.parse((root / name).read_text(encoding="utf-8"))
+        imports = {alias.name.split(".")[0] for node in ast.walk(tree)
+                   if isinstance(node, (ast.Import, ast.ImportFrom)) for alias in node.names}
+        forbidden = {"subprocess", "requests", "urllib", "httpx", "ctypes"}
+        assert imports.isdisjoint(forbidden)
+        calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)]
+        assert not {n.func.attr for n in calls if isinstance(n.func, ast.Attribute)} & {
+            "system", "popen", "spawn", "fork", "execv", "execve", "kill", "connect", "accept", "listen"}
+        socket_calls = [n for n in calls if isinstance(n.func, ast.Attribute) and n.func.attr == "socket"]
+        assert len(socket_calls) == int(name.startswith("_"))
+        for node in socket_calls:
+            assert ast.unparse(node) == "socket.socket(socket.AF_NETLINK, socket.SOCK_RAW, 4)"
+        for node in calls:
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "sendto":
+                assert ast.literal_eval(node.args[1]) == (0, 0)
 
 
 # Characterization only: Linux v6.12 unix_diag.h, diag.c and kdev_t.h.
@@ -380,70 +398,20 @@ def _require_hosted_kernel_characterization() -> Path:
     return root
 
 
-def _kernel_diag_exchange(body: bytes) -> tuple[int, bytes, bytes]:
-    sequence = 0x52534931
-    request = struct.pack("=IHHII", 16 + len(body), 20, 1, sequence, 0) + body
-    # NETLINK_SOCK_DIAG=4; exactly one request for our held socket inode, no dump.
-    with socket.socket(socket.AF_NETLINK, socket.SOCK_RAW, 4) as channel:
-        channel.settimeout(2.0)
-        channel.bind((0, 0))
-        port = channel.getsockname()[0]
-        assert channel.sendto(request, (0, 0)) == len(request)
-        raw, ancillary, flags, sender = channel.recvmsg(4096)
-    assert sender == (0, 0) and not ancillary and flags == 0
-    assert len(raw) >= 16
-    size, kind, reply_flags, reply_sequence, reply_port = struct.unpack_from(
-        "=IHHII", raw
-    )
-    assert size == len(raw) and size % 4 == 0 and reply_flags == 0
-    assert reply_sequence == sequence and reply_port == port
-    assert kind in (2, 20)  # NLMSG_ERROR or SOCK_DIAG_BY_FAMILY, never multipart.
-    return kind, raw[16:], request
 
 
-def _parse_own_socket_vfs(
-    payload: bytes, inode: int, cookie: tuple[int, int]
-) -> dict[str, object]:
-    assert len(payload) >= 16
-    family, kind, state, pad, reply_inode, c0, c1 = struct.unpack_from(
-        "=BBBBIII", payload
-    )
-    assert (family, kind, state, pad) == (socket.AF_UNIX, socket.SOCK_STREAM, 10, 0)
-    assert reply_inode == inode and (c0, c1) != _DIAG_NO_COOKIE
-    assert cookie == _DIAG_NO_COOKIE or cookie == (c0, c1)
-    attributes = {}
-    offset = 16
-    while offset < len(payload):
-        assert offset + 4 <= len(payload)
-        length, attr_type = struct.unpack_from("=HH", payload, offset)
-        end = offset + length
-        aligned_end = offset + ((length + 3) & ~3)
-        assert length >= 4 and end <= aligned_end <= len(payload)
-        assert attr_type not in attributes
-        attributes[attr_type] = payload[offset + 4:end]
-        offset = aligned_end
-    assert offset == len(payload) and 1 in attributes
-    assert len(attributes[1]) == 8  # UNIX_DIAG_VFS=1; request SHOW_VFS bit is2.
-    vfs_inode, vfs_device = struct.unpack("=II", attributes[1])
-    return {"socket_inode": inode, "cookie": (c0, c1),
-            "vfs_inode": vfs_inode, "vfs_device": vfs_device}
 
 
-def _query_held_socket(
-    held: socket.socket, cookie: tuple[int, int] = _DIAG_NO_COOKIE,
-    *, expected_error: int | None = None,
-) -> dict[str, object]:
+def _query_held_socket(held, cookie=diag.NO_COOKIE, *, expected_error=None):
     inode = os.fstat(held.fileno()).st_ino
-    assert 0 < inode <= 0xFFFFFFFF, "Incomplete qualification: socket inode width"
-    body = struct.pack("=BBHIIIII", socket.AF_UNIX, 0, 0, 0, inode, 2, *cookie)
-    kind, payload, request = _kernel_diag_exchange(body)
     if expected_error is not None:
-        assert kind == 2 and len(payload) == 4 + len(request)
-        error = struct.unpack_from("=i", payload)[0]
-        assert error == -expected_error and payload[4:] == request
-        return {"error": error}
-    assert kind == 20, "Incomplete qualification: diagnostic request rejected"
-    return _parse_own_socket_vfs(payload, inode, cookie)
+        with pytest.raises(diag.SocketDiagnosticError) as raised:
+            diag.query_unix_socket(inode, cookie, 2.0)
+        assert raised.value.errno == expected_error
+        return {"error": -raised.value.errno}
+    result = diag.query_unix_socket(inode, cookie, 2.0)
+    return {"socket_inode": result.socket_inode, "cookie": result.cookie,
+            "vfs_inode": result.vfs_inode, "vfs_device": result.vfs_device}
 
 
 def _assert_vfs_association(
@@ -460,25 +428,11 @@ def _assert_vfs_association(
     )
 
 
-def _legacy_held_fd_result(held: socket.socket, metadata: os.stat_result) -> str:
-    root = f"/proc/{os.getpid()}/fd"
-    descriptor = str(held.fileno())
-
-    class HeldFdOnly:
-        def listdir(self, path: str) -> list[str]:
-            assert path == root
-            return [descriptor]
-
-        def readlink(self, path: str) -> str:
-            assert path == f"{root}/{descriptor}"
-            return os.readlink(path)
-
-    try:
-        _require_process_socket_owner(HeldFdOnly(), os.getpid(), metadata)
-    except ExternalSignerOsObservationError as error:
-        assert str(error) == FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED
-        return "rejected_inode_comparison"
-    return "accepted_inode_comparison"
+def _legacy_held_fd_result(held, metadata):
+    # Historical PR1921 integer-comparison replay, NOT the repaired observer.
+    old_target = f"socket:[{metadata.st_ino}]"
+    link = os.readlink(f"/proc/{os.getpid()}/fd/{held.fileno()}")
+    return "accepted_inode_comparison" if link == old_target else "rejected_inode_comparison"
 
 
 def _record_kernel_characterization(record_property, **observations: object) -> None:
@@ -561,3 +515,140 @@ def test_hosted_kernel_rejects_changed_socket_cookie(record_property) -> None:
                 before_stat=_held_stat_evidence(held, metadata),
                 authentic_cookie_after_rejection=repeated,
             )
+
+
+@pytest.mark.parametrize("inode", [303, 202])
+def test_distinct_and_coincident_numbers_require_vfs_mapping(inode):
+    backend = FakeBackend()
+    backend.socket_inode = inode
+    backend.diagnostic = replace(backend.diagnostic, socket_inode=inode)
+    receipt = observe_external_signer_os_state(_policy(), backend=backend)
+    assert receipt.socket_inode == 202 and not receipt.authority_granted
+    assert [q[1] for q in backend.queries] == [diag.NO_COOKIE, (11, 12)]
+    backend.diagnostic = replace(backend.diagnostic, vfs_inode=999)
+    _assert_rejected(FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED, _policy(), backend)
+
+
+@pytest.mark.parametrize("scenario", [
+    "vfs_inode", "vfs_device", "missing_vfs", "socket_type", "state", "nan", "deadline",
+    "fd_limit", "invalid_fd", "socket_limit", "ambiguous", "timeout", "unsupported", "cookie_change",
+    "self_pid", "namespace", "namespace_change", "fd_change", "self_status_missing",
+    "self_status_multiple", "self_status_duplicate", "target_status",
+    "target_status_missing", "target_status_multiple", "target_status_duplicate",
+    "second_enoent", "late_deadline", "fd_disappears",
+])
+def test_production_ownership_adversarial_backend_controls(scenario):
+    backend = FakeBackend()
+    mutate_backend(backend, scenario, PID)
+    _assert_rejected(FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED, _policy(), backend)
+
+
+@pytest.mark.parametrize("change", [
+    {"family": 2}, {"pad": 1}, {"inode": 304}, {"kind": 99}, {"state": 0},
+    {"c0": 99}, {"c0": 0xffffffff, "c1": 0xffffffff}, {"short_attr": True},
+    {"duplicate_vfs": True}, {"unknown_attr": True}, {"length_delta": 4},
+    {"flags": 2}, {"sequence": 1}, {"port": 0}, {"message_kind": 3},
+    {"truncate": True}, {"recv_flags": 32}, {"ancillary": [1]}, {"sender": (1, 0)},
+    {"short_send": True}, {"timeout": True}, {"error": 0},
+    {"error": errno.ENOENT, "wrong_echo": True}, {"error": errno.EOPNOTSUPP},
+])
+def test_exact_kernel_protocol_rejects_uncorrelated_or_malformed_data(monkeypatch, change):
+    channel = install_wire(monkeypatch, change)
+    with pytest.raises((OSError, ValueError)):
+        diag.query_unix_socket(303, (11, 12), 1.0)
+    assert channel.closed
+
+
+def test_exact_kernel_query_and_default_observer_wiring(monkeypatch):
+    channel = install_wire(monkeypatch, {})
+    result = diag.query_unix_socket(303, diag.NO_COOKIE, 1.0)
+    assert result == diag.SocketIdentity(303, (11, 12), 202, 9, 1, 10)
+    assert channel.request == struct.pack("=IHHIIBBHIIIII",
+        40, 20, 1, 0x52534931, 0, 1, 0, 0, 0, 303, 2, *diag.NO_COOKIE)
+    assert [c[1] for c in channel.calls if c[0] == "timeout"] == [1.0, 1.0, 1.0]
+    assert ("recvmsg", 4096) in channel.calls and channel.closed
+    backend = FakeBackend()
+    monkeypatch.setattr(observer, "LinuxProcExternalSignerOsBackend", lambda: backend)
+    assert observe_external_signer_os_state(_policy()).socket_owned_by_process
+    assert len(backend.queries) == 2
+
+
+@pytest.mark.parametrize("unrelated", ["absent", "foreign_vfs", "unbound", "connected"])
+def test_duplicate_fds_and_unrelated_socket_are_bounded(unrelated):
+    backend = FakeBackend()
+    link = backend.readlink
+    backend.listdir = lambda p: ["7", "8", "9", "10"]
+    backend.readlink = lambda p: {f"/proc/{PID}/fd/8": "socket:[303]",
+        f"/proc/{PID}/fd/9": "socket:[404]", f"/proc/{PID}/fd/10": "/tmp/ordinary"}.get(p) or link(p)
+    query = backend.query_unix_socket
+    def with_unrelated(inode, cookie, timeout):
+        if inode == 404:
+            if unrelated == "absent":
+                raise diag.SocketDiagnosticError(errno.ENOENT, "fixture")
+            return replace(backend.diagnostic, socket_inode=404,
+                           vfs_inode=999 if unrelated == "foreign_vfs" else None,
+                           state=1 if unrelated == "connected" else 10)
+        return query(inode, cookie, timeout)
+    backend.query_unix_socket = with_unrelated
+    assert observe_external_signer_os_state(_policy(), backend=backend).socket_owned_by_process
+    assert len(backend.queries) == 2  # duplicate FD never issues another query
+
+
+@pytest.mark.parametrize("inode", [0, 0x100000000])
+def test_unrepresentable_inode_rejects_before_query(inode):
+    backend = FakeBackend()
+    metadata = _stat_result(stat.S_IFSOCK | 0o600, SIGNER_UID, SIGNER_GID, 9, inode)
+    with pytest.raises(ExternalSignerOsObservationError):
+        _require_process_socket_owner(backend, PID, metadata)
+    assert not backend.queries
+
+
+@pytest.mark.parametrize("limit", [256, 257])
+def test_default_fd_scan_stops_at_budget(monkeypatch, limit):
+    from types import SimpleNamespace
+    class Entries:
+        def __enter__(self):
+            return iter(SimpleNamespace(name=str(i)) for i in range(limit))
+        def __exit__(self, *_args):
+            self.closed = True
+    entries = Entries()
+    monkeypatch.setattr(observer, "os", SimpleNamespace(scandir=lambda p: entries))
+    backend = observer.LinuxProcExternalSignerOsBackend()
+    if limit == 257:
+        with pytest.raises(ValueError):
+            backend.listdir("/proc/4242/fd")
+    else:
+        assert len(backend.listdir("/proc/4242/fd")) == 256
+    assert entries.closed
+
+
+def test_production_owned_socket_seam(record_property):
+    root = _require_hosted_kernel_characterization()
+    with tempfile.TemporaryDirectory(prefix="rsi-map-", dir=root) as directory:
+        path = Path(directory) / "socket"
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as held:
+            held.bind(str(path))
+            held.listen(1)
+            class HeldBackend(observer.LinuxProcExternalSignerOsBackend):
+                def listdir(self, requested):
+                    assert requested == f"/proc/{os.getpid()}/fd"
+                    return [str(held.fileno())]
+            backend = HeldBackend()
+            metadata = path.lstat()
+            held_metadata = os.fstat(held.fileno())
+            first = _require_process_socket_owner(backend, os.getpid(), metadata)
+            second = _require_process_socket_owner(backend, os.getpid(), path.lstat(), previous=first)
+            assert first == second and first.identity.socket_inode == os.fstat(held.fileno()).st_ino
+            path.unlink()
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as replacement:
+                replacement.bind(str(path))
+                replacement.listen(1)
+                with pytest.raises(ExternalSignerOsObservationError):
+                    _require_process_socket_owner(backend, os.getpid(), path.lstat(), previous=first)
+            record_property("production_socket_association", json.dumps({
+                "socket_inode": first.identity.socket_inode, "vfs_inode": first.identity.vfs_inode,
+                "cookie": first.identity.cookie, "path_inode": metadata.st_ino,
+                "fd_inode": held_metadata.st_ino, "vfs_device": first.identity.vfs_device,
+                "path_device_major": os.major(metadata.st_dev), "path_device_minor": os.minor(metadata.st_dev),
+                "scope": "own held FD; namespace and production association seam; no authority",
+                "rebind_rejected": True, "production_supervision_qualified": False}))

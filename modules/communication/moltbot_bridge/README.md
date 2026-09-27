@@ -1,3 +1,12 @@
+## Existing observer socket repair — 2026-09-27
+
+The existing external signer OS observer now maps socket FD identities to VFS
+metadata through bounded exact kernel diagnostics and concrete-cookie rechecks.
+See the [contract and limits](INTERFACE.md#connected-socket-ownership-observation--2026-09-27)
+and [hosted qualification](tests/README.md#connected-socket-mapping-qualification--2026-09-27).
+Source is prepared; actual validation/closure belongs to the canonical backlog.
+PR1921 characterization is merged/main-verified. Native RSI remains incomplete.
+
 ## Socket identity experiment — 2026-09-27
 
 PR1920 supervision design is merged/main-verified at `f9988486`. Its concrete

@@ -1,3 +1,9 @@
+## 2026-09-27: Connect bounded Linux socket/VFS association
+
+- WSP00/6/15/22/50/62/84/97;15/P1. Replace the existing pathname-inode/FD-inode equality check with an immediately consumed private kernel association helper. Preserve public policy, receipt and authority flags; expand backend methods and documented kernel-only boundary explicitly.
+- Bound process FD discovery, exact kernel messages and acceptance time; preserve selected concrete cookie/FD and compare procfs/PID/namespace views. No wildcard rediscovery on recheck, target connection, namespace switch or authority issuance.
+- Existing test owner gains inert negatives and one bounded hosted production-seam case. Independent original stat evidence supports artifact recomputation. All188 prior selected IDs remain expected; no host tests. PR1921 closure and current52-row ranking are reconciled in the existing backlog.
+
 ## 2026-09-27: Characterize kernel socket identity before bridge repair
 
 - WSP00/6/15/22/50/62/84/97;14/P1. Extend existing OS observer tests with two explicitly admitted hosted cases, preserving28 old cases. Use exact test-owned kernel requests, distinct VFS/sockfs fields and fixed unlink/rebind/cookie oracles; no production implementation.

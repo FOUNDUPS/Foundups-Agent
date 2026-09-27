@@ -1,3 +1,23 @@
+## Socket repair checkpoint — 2026-09-27
+
+PR1921 is `MERGED_VERIFIED_MAIN` at
+`c417ccc1710c06f6a1f56f774dce5ef2730d5930`:186 parent/188 candidate passed on
+PR and main, independent original JUnit review and required CI/CodeQL passed,
+exact reviewed tree matched main, owned branch/worktree retired. This supersedes
+the previous characterization-pending checkpoint below.
+
+Fresh52-row/95-peer/shared-checkout reconciliation selects15/P1 connected socket
+ownership repair. The existing observer consumes bounded exact kernel VFS
+mapping and concrete-cookie/namespace continuity. Public policy/receipt and all
+native gates remain. See [fixed test boundaries](../../modules/communication/moltbot_bridge/tests/README.md#connected-socket-mapping-qualification--2026-09-27).
+
+No host tests or production invocation. Source/hosted independent review,
+exact-head checks, main readback and owned cleanup remain required. The prior
+compound design-receipt write was rejected by automatic review; a reduced
+external-only write completed before the pause. That history is retained in
+the external entry receipt and does not approve implementation or runtime use.
+Re-observe after actual closure/failure; no synthetic proof grants native RSI.
+
 ## Socket kernel checkpoint — 2026-09-27
 
 PR1920 is `MERGED_VERIFIED_MAIN` at

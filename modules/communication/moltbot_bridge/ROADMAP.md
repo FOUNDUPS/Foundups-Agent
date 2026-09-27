@@ -1,3 +1,15 @@
+## Connected socket observer repair — 2026-09-27
+
+PR1921 is merged/main-verified at `c417ccc17`;186/188 cases passed, exact PR/main
+checks and independent artifact review completed, owned lane retired. Fresh
+52-row ranking selects the same broad qualifier at15/P1 (C4/I4/D3/Impact4) for
+connected production repair, accounting for binary protocol and lifetime costs.
+
+Reuse the existing backend/observer/receipt and tests. Source now carries
+concrete FD/cookie/VFS/namespace identity across observations. Hosted review and
+closure remain pending; authentic external policy issuance and later resident
+handoff remain separate. No native blocker or effect-lease requirement clears.
+
 ## Socket identity characterization — 2026-09-27
 
 PR1920 design closed at `f9988486`; main CI/CodeQL and unchanged158/158 regression
