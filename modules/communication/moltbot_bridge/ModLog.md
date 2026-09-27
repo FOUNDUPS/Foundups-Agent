@@ -1,3 +1,9 @@
+## 2026-09-27: Characterize kernel socket identity before bridge repair
+
+- WSP00/6/15/22/50/62/84/97;14/P1. Extend existing OS observer tests with two explicitly admitted hosted cases, preserving28 old cases. Use exact test-owned kernel requests, distinct VFS/sockfs fields and fixed unlink/rebind/cookie oracles; no production implementation.
+- Registry declares network capability. Existing hosted differential selection becomes186 parent/188 candidate; xunit1 retains bounded kernel-evidence properties. Unsupported capability fails the experiment. No host tests, process launch, signer/key/provider/service action or authority claim.
+- Close PR1920 design status drift and document the remaining production/cross-process boundary. Independent source/effect review and actual CI/main closure remain pending at preparation; existing backlog binds the evidence.
+
 ## 2026-09-27: Specify existing-owner supervision contract
 
 - WSP00/15/22/50/84/97;13/P1 (2+4+3+4). Reuse existing service loader, OS policy boundary and lifecycle consumer; document field provenance, manager/pidfd lifetime and resident handoff limits in INTERFACE.

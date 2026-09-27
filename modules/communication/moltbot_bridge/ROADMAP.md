@@ -1,3 +1,17 @@
+## Socket identity characterization — 2026-09-27
+
+PR1920 design closed at `f9988486`; main CI/CodeQL and unchanged158/158 regression
+passed, owned lane retired. Fresh52-row ranking selects14/P1 (C3/I4/D3/Impact4)
+to obtain Linux evidence before a production bridge. Two existing-owner cases
+cover held-descriptor unlink/rebind and changed-cookie rejection. Source prepared;
+186/188 hosted acceptance is pending, with unsupported infrastructure an explicit
+incomplete result. See tests/README and canonical backlog receipts.
+
+Even successful same-process characterization leaves cross-process ownership,
+hostile/malformed diagnostic data, production backend integration and lifetime
+controls open. Re-observe after this slice; do not equate a diagnostic fixture
+with the canonical supervisor issuer, resident handoff or a native RSI cycle.
+
 ## Supervision source design and prerequisite — 2026-09-27
 
 PR1919 closed at main `bba2e752`:144 parent/158 candidate hosted cases passed,

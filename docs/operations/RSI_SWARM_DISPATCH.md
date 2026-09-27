@@ -1,3 +1,24 @@
+## Socket kernel checkpoint — 2026-09-27
+
+PR1920 is `MERGED_VERIFIED_MAIN` at
+`f99884864726396b526efdc96d711feae1a4d7bb`: ten reviewed documentation blobs/full
+tree matched main, CI/CodeQL and existing158/158 regression passed, owned lane
+retired. This supersedes its preparation/closure-pending checkpoint below.
+
+Fresh52-row/95-peer/shared-checkout reconciliation selects14/P1 socket identity
+characterization. Extend the existing observer test owner with two held-FD kernel
+experiments; retain all28 prior cases. Existing hosted selection adds the suite,
+with186 parent/188 candidate expected and bounded JUnit evidence. Fixed effects,
+oracles and limits are in [tests/README](../../modules/communication/moltbot_bridge/tests/README.md#hosted-socket-identity-characterization--2026-09-27).
+No host candidate execution or generic socket inventory; no production change.
+
+Missing capability, unsupported widths or failed association is a controlled
+incomplete result, not green proof. Even successful same-process/rebind/cookie
+observations do not establish external process ownership, an admitted supervisor,
+an effect lease or native RSI. Re-observe before the next production/fixture slice;
+all seven trust reasons remain. Actual PR/check/main/cleanup state is bound by the
+canonical backlog, not this preparation-time expectation.
+
 ## Supervision source checkpoint — 2026-09-27
 
 PR1919 is `MERGED_VERIFIED_MAIN` at

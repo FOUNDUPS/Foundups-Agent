@@ -77,6 +77,7 @@ jobs:
         id: lifecycle_selection
         env:
           LIFECYCLE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          FOUNDUPS_SOCKET_KERNEL_CHARACTERIZATION: '1'
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
           FOUNDUPS_DB_PATH: ${{ runner.temp }}/lifecycle-foundups.db
@@ -94,6 +95,7 @@ jobs:
           mkdir "$RUNNER_TEMP/lifecycle-results"
           python -c 'import importlib.metadata as m,json; print(json.dumps({p:m.version(p) for p in ("pytest","cryptography")}))' > "$RUNNER_TEMP/lifecycle-results/packages.json"
           selected=(
+            modules/communication/moltbot_bridge/tests/test_reddog_external_signer_os_observer.py
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_healthcheck.py
             modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_admission.py
             modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_generation_race.py
@@ -110,6 +112,7 @@ jobs:
             if [[ "$revision" == parent ]]; then root="$parent"; fi
             (cd "$root" && python -B -m pytest -q --tb=short -c /dev/null --noconftest \
               --import-mode=importlib -p no:cacheprovider \
+              -o junit_family=xunit1 \
               --basetemp="$RUNNER_TEMP/lifecycle-$revision-pytest" \
               --junitxml="$RUNNER_TEMP/lifecycle-results/$revision.xml" \
               "${selected[@]}") || failed=1

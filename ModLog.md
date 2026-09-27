@@ -1,3 +1,9 @@
+## 2026-09-27: RSI kernel qualification experiment
+
+- Re-observe under WSP00/15/97: PR1920 is closed/main-verified,52 ranked candidates and95 peer heads reconciled, shared checkout preserved. Select14/P1 concrete socket qualification instead of repeating completed design work.
+- Two cases in the existing observer suite exercise bounded test-owned Linux sockets in hosted CI; no new module or production parser. Declaration, test history, effect bounds and fixed oracles are documented before execution.
+- Planned186/188 hosted acceptance and exact-head/main closure remain pending; no live signer, native RSI, retained learning or AmIBot deployment claim. Existing canonical backlog owns actual state/evidence.
+
 ## 2026-09-27: RSI supervision source contract
 
 - WSP00/15/22/97: PR1919 is merged/main-verified at bba2e752; its lane is retired and95 peer heads/shared checkout are preserved. Close requester status drift in current planning.

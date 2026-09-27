@@ -1,3 +1,10 @@
+## 2026-09-27: Bounded Linux socket/VFS experiment
+
+- WSP00/6/15/22/50/62/84/97;14/P1. Append two hosted-only cases to the existing OS observer owner, preserving all18 old test functions/28 cases and FakeBackend. No production source change.
+- Freeze unlink/rebind with held descriptors and correlated wrong-cookie -ESTALE as independent kernel oracles; old helper outcome is diagnostic only. Explicit network capability, opt-in, finite own-socket requests and resource cleanup are reviewed before execution.
+- Existing lifecycle CI adds the owner:186 parent/188 candidate planned. No host collection/tests. Hosted unsupported/failure is incomplete qualification, never converted into a green result. JUnit records own-process/runner limits; tests/README describes effects and fixed acceptance.
+- Evidence: `O:/Foundups-Agent-audits/20260927-rsi-socket-qualification/`; source/hosted/main closure remains pending at preparation.
+
 ## 2026-09-27: Record OS observer fixture qualification limit
 
 - WSP22/97 existing-owner review: FakeBackend aliases pathname and sockfs inode202, so the current positive observation case cannot establish Linux socket ownership. Source review identifies the defect; no live failure or new test execution is claimed.
