@@ -1,3 +1,44 @@
+## Cross-process visibility qualification — 2026-09-27
+
+PR1922 is merged/main-verified at `d6f9458b`:188 parent/252 candidate cases
+passed on PR and main, independent original artifacts and all CI/CodeQL passed,
+and its owned lane retired. This supersedes its prepared/pending text below.
+
+Two parametrized cases extend the same observer suite; all252 old selected case
+IDs/bodies remain. Reuse `reddog_unix_socket_test_support.py`, now explicitly
+hosting child-process fixtures as well as inert wire fixtures. The canonical
+registry declares both network and process capabilities. No production or CI
+workflow change; expected252 parent/254 candidate, not yet observed at preparation.
+
+With the existing hosted opt-in, create one same-UID Python child per condition
+in an owned `RUNNER_TEMP` directory. Fixed stdlib-only text uses exact
+`sys.executable -I -B -c`, cwd there, env only `LC_ALL=C`, close_fds and no shell.
+Child owns one AF_UNIX listener, disables core dumps, sets/reads back its own
+dumpability to1 or0, and keeps that FD until STOP/timeout. No connect/accept,
+signer/key/provider/service, UID/GID/capability/sysctl/namespace/ptracer changes.
+
+Require non-root matching real/effective/saved credentials, absent CAP_SYS_PTRACE
+and same singleton PID/namespace views. Readable-child proof uses unmodified
+default discovery and concrete-cookie recheck, matched with independent child
+fstat and parent lstat/device fields. Nondumpable-child proof requires exact FD
+readlink EACCES/EPERM plus the production wrapper's PermissionError context.
+Identical snapshots before/after and Popen liveness reject disappearance as proof.
+
+Each JSON snapshot is at most4096 bytes with a10-second parent deadline; child
+waits at most15 seconds for each fixed CHECK/STOP command. Normal exit waits5s;
+exception cleanup kills only this still-live child and waits5s, then closes pipes
+and removes its directory. Blocking OS calls are not a hard wall-clock guarantee.
+JUnit `process_socket_visibility` retains identities, permissions, source digest,
+kernel/view and cleanup facts. Unsupported capability fails qualification;
+skips are not hosted success. No host candidate tests or collection.
+
+This isolates the dumpability boundary using same-UID disposable children. It
+does not satisfy the full public observer's distinct-requester-UID rule or
+authenticate a supervisor, issuer, signer or native RSI run. Do not weaken signer
+isolation to manufacture a positive result. The next scope follows actual evidence.
+Sources: [procfs access](https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html),
+[dumpability](https://man7.org/linux/man-pages/man2/PR_SET_DUMPABLE.2const.html).
+
 ## Connected socket mapping qualification — 2026-09-27
 
 Reuse the existing observer test owner and identical lifecycle CI path selection.

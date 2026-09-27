@@ -12,12 +12,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-27 checkpoint:** PR1921 kernel characterization is merged/main-verified
-at `c417ccc17`, with its owned lane retired. Fresh52-row ranking selects the
-connected production observer repair at15/P1. See the
-[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#socket-repair-checkpoint--2026-09-27)
-and canonical backlog for source/hosted/main closure. Native RSI and the AmIBot
-experiment remain unadmitted.
+**2026-09-27 checkpoint:** PR1922 connected socket ownership repair is
+merged/main-verified at `d6f9458b`, with its owned lane retired. Fresh52-row
+ranking selects cross-process visibility qualification at14/P1 in existing test
+owners. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#process-visibility-checkpoint--2026-09-27)
+and canonical backlog for actual hosted evidence and closure. Native RSI and
+the AmIBot experiment remain unadmitted.
 
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 

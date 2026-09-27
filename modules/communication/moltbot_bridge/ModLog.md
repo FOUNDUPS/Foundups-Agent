@@ -1,3 +1,9 @@
+## 2026-09-27: Qualify cross-process socket visibility
+
+- WSP00/6/15/22/50/62/84/97;14/P1. Extend existing observer/support tests with two bounded same-UID child conditions. Positive uses default discovery/cookie continuity; negative requires live nondumpable child and real permission errors. No production or workflow changes.
+- Registry declares process capability; fixed child source, IPC/timeouts/cleanup and independent original-stat evidence are documented before hosted execution. No host candidate tests, signer activation or authority grant.
+- Reconcile PR1922 exact-main closure and retain52-row planning authority. Authenticated cross-UID supervision and native admission remain separate.
+
 ## 2026-09-27: Connect bounded Linux socket/VFS association
 
 - WSP00/6/15/22/50/62/84/97;15/P1. Replace the existing pathname-inode/FD-inode equality check with an immediately consumed private kernel association helper. Preserve public policy, receipt and authority flags; expand backend methods and documented kernel-only boundary explicitly.

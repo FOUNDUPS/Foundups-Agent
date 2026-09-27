@@ -1,3 +1,13 @@
+## Process visibility qualification boundary — 2026-09-27
+
+PR1922's connected socket mapper is merged/main-verified at `d6f9458b` with252
+candidate cases passing. Its public policy, backend, receipt and lifecycle APIs
+remain unchanged in this test-only slice. Two hosted child conditions exercise
+the existing private association seam; [test contract](tests/README.md#cross-process-visibility-qualification--2026-09-27).
+Same-UID readability/denial does not satisfy the public distinct-requester rule
+or supply authenticated supervisor policy. Keep PR_SET_DUMPABLE=0 and all existing
+signer restrictions. No new receipt schema, issuer or execution authority.
+
 ## Connected socket ownership observation — 2026-09-27
 
 The existing `observe_external_signer_os_state` now associates process socket

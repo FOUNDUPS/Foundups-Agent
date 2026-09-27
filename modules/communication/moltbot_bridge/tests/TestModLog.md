@@ -1,3 +1,9 @@
+## 2026-09-27: Cross-process visibility qualification
+
+- WSP00/6/15/22/50/62/84/97;14/P1. Before authoring, retrieved the existing observer suite, support, TestModLog/README, isolation gate and production mapper. Reuse them for two hosted-only dumpability conditions; preserve all252 prior selected cases and production source.
+- Fixed acceptance: a living same-UID child holds one owned listener; the unmodified default backend must observe/recheck the readable child and reject the nondumpable child with real permission-denial evidence. Bounded snapshots before/after prevent disappearance from passing as isolation evidence.
+- Exact child text, minimal environment, owned temporary cwd, IPC deadlines and cleanup require independent source/effect review before hosted execution. No host candidate tests or collection. Expected252 parent/254 candidate; results pending at preparation in `O:/Foundups-Agent-audits/20260927-rsi-process-visibility/`. PR1922 is merged/main-verified and its owned lane retired.
+
 ## 2026-09-27: Connected socket ownership regression
 
 - WSP00/6/15/22/50/62/84/97;15/P1. Reuse existing observer case IDs and nearby lifecycle selection; distinguish socket303/path202 in the fixture and remove duplicate binary query/parser code in favor of production.

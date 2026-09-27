@@ -1,3 +1,19 @@
+## Process visibility checkpoint — 2026-09-27
+
+PR1922 is `MERGED_VERIFIED_MAIN` at `d6f9458b06ae5bc15dc688acdfce2e29a7526fa2`:
+188 parent/252 candidate passed on PR/main, all CI/CodeQL and independent
+original-artifact reviews passed, exact tree matched, owned lane retired.
+This supersedes its prepared/pending checkpoint below.
+
+Reconciled52-row/95-peer/shared-state selection is14/P1 cross-process visibility.
+Two existing-owner child cases isolate dumpability without touching signer
+production: [fixed contract](../../modules/communication/moltbot_bridge/tests/README.md#cross-process-visibility-qualification--2026-09-27).
+No host candidate execution, service, privilege grant or new framework. Unsupported
+environment or missing permission-denial evidence is a controlled failure.
+Source/effect review, original hosted artifacts, exact checks/main and owned
+cleanup remain required. Re-observe the actual result before supervisor issuance;
+all seven native reasons and absent effect-use lease persist.
+
 ## Socket repair checkpoint — 2026-09-27
 
 PR1921 is `MERGED_VERIFIED_MAIN` at

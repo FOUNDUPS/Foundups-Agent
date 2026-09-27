@@ -1873,140 +1873,136 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
-    "selected_action": "rsi-socket-repair-20260927",
-    "status": "connected_repair_prepared_hosted_pending",
+    "base_commit": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+    "selected_action": "rsi-process-visibility-20260927",
+    "status": "cross_process_visibility_prepared_hosted_pending",
     "wsp15": {
-      "complexity": 4,
+      "complexity": 3,
       "importance": 4,
       "deferability": 3,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-socket-repair-20260927",
-    "base": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
+    "observation_id": "rsi-process-visibility-20260927",
+    "base": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
     "selected": {
       "task": "Qualify exact filesystem-to-socket ownership in the existing external signer OS observer",
-      "component": "Replace the connected production observer ownership comparison with bounded exact Linux diagnostic association and continuity checks.",
+      "component": "Qualify cross-process procfs visibility at the existing signer nondumpability boundary using a disposable hosted fixture.",
       "wsp15": {
-        "complexity": 4,
+        "complexity": 3,
         "importance": 4,
         "deferability": 3,
         "impact": 4,
-        "total": 15,
+        "total": 14,
         "priority": "P1"
       },
-      "state": "existing_broad_candidate_partially_complete_next_connected_repair_design_ready",
+      "state": "finite_design_ready_requires_fresh_effect_and_test_acceptance",
       "source": [
-        "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py",
+        "modules/communication/moltbot_bridge/src/reddog_signer_process_isolation_gate.py",
         "modules/communication/moltbot_bridge/src/reddog_external_signer_lifecycle_admission.py",
-        "modules/communication/moltbot_bridge/tests/test_reddog_external_signer_os_observer.py",
-        "modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py"
+        "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py",
+        "modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py"
       ],
-      "eligibility": "Bounded source repair and disposable hosted qualification are eligible after fresh main/ownership reconciliation and fixed interface/effect acceptance. No authentic production signer or native execution permission is inferred. Update the existing broad row rather than adding a parser micro-slice row.",
-      "rationale": "Actual own-socket kernel evidence now demonstrates the observer compares different inode domains and rejects the valid observed association. The existing lifecycle default observer consumes this check. A disconnected parser or repeat characterization would not repair that consumer. Complexity rises from C3 to C4 for production parsing, finite process-FD search, namespace and cookie continuity plus compatibility; I4/D3/impact4 stay unchanged. Higher native18 remains authority-blocked.",
+      "eligibility": "Source/test design can proceed after current repair closes. Hosted child-process effects require explicit bounded review before execution; no local or production runtime granted. Retain the same broad qualifier as partial rather than adding a duplicate micro-slice row.",
+      "rationale": "Existing isolation gate disables dumpability before key resolution and requires non-root signer identity distinct from consumer mappings. Observer reads exe, FD and namespace links governed by ptrace read-access checks. Current own-process fixture bypasses that cross-process permission boundary. Existing isolation tests use FakeIsolationBackend, so there is a concrete missing environmental qualification before authentic supervisor issuance. C3 for bounded child/IPC/lifetime fixture, I4 core prerequisite, D3 next integration step, impact4 reusable observation boundary.",
       "smallest_coherent_scope": [
-        "Keep the public observe_external_signer_os_state entry point, existing policy and audit receipt schema. Implement the association behind the existing backend/ownership owner and thread the resulting socket inode/cookie/VFS identity through both existing observations.",
-        "Use only exact per-inode AF_UNIX NETLINK_SOCK_DIAG requests derived from the specified process FD entries; no dump, pathname-to-name join, service/socket connection, namespace switch, privilege elevation or process launch.",
-        "The 542-line observer and 563-line test owner need an explicit WSP62 size plan. A narrowly private same-module implementation leaf is acceptable only if connected immediately by the existing default backend and independently tested; do not create a generic discovery service, authority API, or unused parser. Preserve original test coverage and update exact source-boundary inventories transparently.",
-        "Deliberately revise the existing no-socket AST/contract restriction to admit this fixed local-kernel diagnostic operation only. Preserve bans on external service connections, command execution, secret access and effect grants. Registry/CI effects must name the new production path rather than hiding it behind a helper.",
-        "Use existing observer tests/connected CI selection and canonical module/root documentation. Retain PR1921 kernel observations as historical evidence; future tests must exercise the production mapper, not merely the old test-only duplicate."
+        "Extend existing observer test owner/support with a fixed disposable listener child and two conditions: dumpable1 positive, child-only dumpable0 negative. Production observer/isolation code unchanged.",
+        "Use the actual production association seam for the created child PID. Same UID is deliberate to isolate nondumpability without privileged account changes. This is not full public observer or cross-UID supervisor qualification.",
+        "Reuse reviewed CI and registry tooling; explicitly account for subprocess/network fixture capabilities and file-size inventory. Preserve identical parent/candidate test selections where feasible; no new harness/service/lease framework.",
+        "Keep signer UID separation, PR_SET_DUMPABLE=0 and capability restrictions unchanged. Do not grant CAP_SYS_PTRACE to an AI/requester as an automatic repair."
       ],
       "fixed_acceptance_before_edit": [
-        "Freeze exact backend seam, finite FD-entry/candidate counts, total monotonic time budget, per-datagram 4096-byte cap and no-dump transport before editing. Exceeding a limit rejects; no unbounded retry or fallback inventory. One transport response must validate kernel sender, local reply port, sequence, type, lengths/alignment/attributes and truncation flags.",
-        "Positive production-path control uses deliberately distinct filesystem and socket inode numbers. A second numeric-coincidence control still requires the kernel VFS association; equality alone never suffices. Compare VFS device through major/minor and reject filesystem inode values that cannot fit the u32 diagnostic field rather than masking them.",
-        "Finite process-FD discovery must treat duplicate FDs to the same socket as one identity, ignore ordinary non-socket FDs, and handle well-formed unrelated socket candidates without accidentally admitting them. Exact-query ENOENT for an unrelated/non-AF_UNIX inode does not itself establish target ownership. No matching qualified association rejects; malformed or ambiguous evidence never becomes a positive match.",
-        "Before and after association, require the selected process FD link still names the queried socket inode. Query initially with discovery cookie only once for a candidate; save a concrete non-bypass cookie and use that exact cookie for the later continuity query. Compare the matching identity across existing before/after observations; do not rediscover a replacement with a fresh all-ones query and call it unchanged.",
-        "Namespace support is conservative and explicit: inspect the requested process and observer namespace identities before/after, reject unsupported/mismatched/changing views, and do not claim PID namespace equality alone validates a procfs PID view. The existing captured process start/PID/executable/credentials remain required. Namespace equality is a compatibility guard, not authenticated supervision.",
-        "Adversarial association controls: wrong filesystem inode, wrong major/minor, unrelated live socket, missing VFS field, duplicate/conflicting VFS attribute, out-of-width inode, wrong family/type/state, malformed framing, sender/port/sequence mismatch, truncation/multipart, timeout, unsupported diagnostic family, and unexpected errors reject without fallback.",
-        "Lifetime controls: changed concrete cookie/ESTALE, disappearing or rebound selected FD, pathname unlink/rebind, changed process start identity, changed namespace and association changes between observations reject. Preserve existing process and filesystem ownership/mode validations.",
-        "Hosted own-created listeners invoke the actual production association seam and prove distinct-domain positive mapping, held-old-socket unlink/rebind behavior and concrete-cookie rejection/recovery. This remains own-process kernel qualification; no signer launch, cross-UID/namespace claim, provider/key access or resident integration. Keep unsupported admitted environments as failures, not green skips.",
-        "Existing audit receipt/signature semantics and authority_granted=False/valve_unlocked=False remain unchanged. Lifecycle regression must demonstrate the connected default observer route still fails closed; synthetic fixtures remain test evidence and cannot mint authentic supervisor authority.",
-        "Freeze prospective tests and exact hosted effects after source/API design but before implementation. Run parent/candidate identical connected selections and independently inspect source and artifacts. No new case count is claimed by this design receipt."
+        "Freeze exact child source, interpreter argv, minimal environment, cwd, allowed temporary path, IPC format, deadlines and cleanup identity. Child creates one listener and no key/service/provider; no shell or arbitrary command path.",
+        "Require Linux and observer lacks CAP_SYS_PTRACE; record actual observer/child credentials, kernel and namespace/procfs view. Do not assume UID0 automatically has or lacks capabilities. Unsupported admitted environments fail qualification.",
+        "Positive child reports/independently verifies dumpable1 and holds its FD. Parent uses actual process-FD discovery/production mapper and independent stat fields, then concrete-cookie continuity; its receipt remains audit-only.",
+        "Negative child sets and reads back PR_SET_DUMPABLE=0 in the child only, retains same process/listener until parent completes observation. Parent must fail closed on denied procfs ownership evidence; absence/disappearance cannot masquerade as the intended permission result.",
+        "Coordinate readiness and deterministic lifetime via bounded IPC. Never clear observer environment or alter its dumpability. Cleanup targets only the exact spawned process and owned temporary directory, with deadline and retained error evidence.",
+        "Do not change UID/GID, namespaces, capabilities, sysctls, ptracer permissions or root services. No production signer or signing key. This does not satisfy distinct-UID visibility or trusted supervisor provenance.",
+        "Independently review prospective source/effects before hosted execution and original JUnit afterward. Keep fixture denial evidence separate from native policy authority. No acceptance count or passing result claimed now."
       ],
       "limits": [
-        "This is not an atomic process/FD/path snapshot or a defense against every ABA change between observations. A cookie identifies a socket lifetime; it does not freeze process ownership, prevent exec/exit or provide an effect-use lease. Production admission still requires authentic supervisor policy and the later lifetime-bound producer.",
-        "The current kernel experiment covers own held descriptors in one Linux environment. It does not qualify cross-process/UID/namespace visibility, systemd/pidfd issuance, arbitrary kernels, real signer state or hostile-code containment.",
-        "Any missing safe parser or namespace behavior discovered during fixed acceptance must stop qualification, not be replaced with pathname matching, silent default-backend disabling or a success-shaped DTO.",
-        "Do not activate resident/native runtime or remove any trust-anchor reason. Preserve authoritative_use_lease=None until the separate existing admitted authority path supplies a real lease.",
-        "Implementation is not yet authored/reviewed/tested. The next sprint must freeze the narrow production seam and effect limits before edits; this receipt is a concrete connected design recommendation, not approval of unseen code."
+        "Source contract proposal only. Current PR1922 must first earn hosted/main closure.",
+        "Same-UID cross-process positive and nondumpable negative isolate one concrete kernel boundary; full cross-UID authenticated supervisor path remains open.",
+        "The public observer deliberately requires requester UID different from signer UID, so this test must not weaken that policy merely to obtain a positive fixture.",
+        "A trusted supervisor may need appropriate kernel visibility, but selecting/granting it belongs to the existing authenticated supervisor ownership contract; no automatic permission escalation.",
+        "All seven native reasons and absent effect-use lease remain. Cookie/process snapshots retain ABA/lifetime limits."
       ]
     },
     "wsp15": {
-      "complexity": 4,
+      "complexity": 3,
       "importance": 4,
       "deferability": 3,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "previous_closed": {
-      "utc": "2026-09-27T08:41:02.731622+00:00",
+      "utc": "2026-09-27T09:56:36.889802+00:00",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "pr": 1921,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1921",
-      "head": "5b92ceee6ff846eed9eedfd1f132f7463ebdee3a",
-      "merge": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
-      "tree": "7637e538fbf57c2d423420ed5a2bc0c2c4edcbb3",
-      "main_readback": "All13 scoped blobs and full tree equal independent exact-head review.",
+      "pr": 1922,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1922",
+      "head": "87b243cae7b2b372e31ac3b0068c4fbb553a8483",
+      "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+      "tree": "a637d9c49e11b15523ce49ef4eab0a3ffe6b1ca9",
+      "main_readback": "All15 scoped blobs and full tree equal independent exact-head review.",
       "readback_recovery": null,
       "pr_checks": "All10 passed at exact head.",
       "main_checks": {
-        "merge": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
+        "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
         "runs": [
           {
             "conclusion": "success",
-            "databaseId": 36306352058,
-            "event": "dynamic",
-            "headSha": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
+            "databaseId": 36310406471,
+            "event": "push",
+            "headSha": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
             "status": "completed",
-            "workflowName": "CodeQL"
+            "workflowName": "CI"
           },
           {
             "conclusion": "success",
-            "databaseId": 36306351663,
-            "event": "push",
-            "headSha": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
+            "databaseId": 36310406482,
+            "event": "dynamic",
+            "headSha": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
             "status": "completed",
-            "workflowName": "CI"
+            "workflowName": "CodeQL"
           }
         ],
         "passed": true
       },
       "hosted_regression": {
-        "cases": 188,
-        "parent_cases": 186,
+        "cases": 252,
+        "parent_cases": 188,
         "failures": 0,
         "errors": 0,
         "skipped": 0,
         "receipt": "hosted-results.json"
       },
       "main_hosted_regression": {
-        "merge": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
-        "run": 36306351663,
-        "cases": 188,
-        "parent_cases": 186,
+        "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+        "run": 36310406471,
+        "cases": 252,
+        "parent_cases": 188,
         "exact_test_ids_match_pr": true,
         "failures": 0,
         "errors": 0,
         "skipped": 0,
-        "unique_candidate_cases_across_pr_and_main": 188,
+        "unique_candidate_cases_across_pr_and_main": 252,
         "packages": {
           "pytest": "9.1.1",
           "cryptography": "50.0.1"
         },
         "xml_sha256": {
-          "parent": "b1350523f181a22f6ae8a0e12f534965749600838eb47380d99e7103191d31e5",
-          "candidate": "65140f3bfd4f7b9077c8ff20bcc8ee32f617b2b08d6cbb63182aff943267fa3d"
+          "parent": "96d9164e50f9210a3c5a622367892abea0045551353b4a84b5e41da54150a368",
+          "candidate": "4a2fad4d1a66a16436d0d1fc6d16a9ea9c4ae67207e03a5323d18c68e4b3a127"
         }
       },
       "kernel_characterization": {
@@ -2014,51 +2010,52 @@
         "main_receipt": "main-kernel-results.json",
         "independent_review": "hosted-evidence-review.json",
         "independent_main_review": "main-evidence-review.json",
-        "cases": 2,
-        "production_bridge_qualified": false
+        "historical_cases": 2,
+        "production_association_cases": 1,
+        "production_supervision_qualified": false
       },
       "local_tests_executed": 0,
-      "owned_worktree_removed": "O:\\Foundups-Agent-worktrees\\rsi-socket-kernel-20260927",
-      "owned_local_branch_removed": "test/rsi-socket-kernel-20260927",
-      "owned_remote_branch_removed": "test/rsi-socket-kernel-20260927",
+      "owned_worktree_removed": "O:\\Foundups-Agent-worktrees\\rsi-socket-repair-20260927",
+      "owned_local_branch_removed": "fix/rsi-socket-repair-20260927",
+      "owned_remote_branch_removed": "fix/rsi-socket-repair-20260927",
       "peer_heads_unchanged": 95,
       "shared_snapshot_unchanged": true,
       "persistent_observer": {
         "path": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
-        "head": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
+        "head": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
         "state": "ACTIVE_OWNED_WORK",
         "clean": true
       },
-      "runtime_effects": "Two reviewed hosted same-process own-socket/kernel diagnostic cases plus existing fixtures. No production bridge or cross-process supervision proof. No live signer/service/provider/native worker/product activation. Native RSI remains incomplete.",
+      "runtime_effects": "Three hosted own-socket cases include actual production association; no cross-process supervision proof. No live signer/service/provider/native worker/product activation. Native RSI remains incomplete.",
       "next_action_review": "next-action-review.json"
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-repair\\previous-observation.json",
-      "sha256": "6aab475676a382e5764acc5191e948cdb70a439ffc46a105f6cec329af7d256e",
-      "repository_ref": "c417ccc1710c06f6a1f56f774dce5ef2730d5930:docs/roadmaps/rsi_swarm_backlog.json",
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\previous-observation.json",
+      "sha256": "4b53c47d79c6983405128101df8712bd2be9ccef9c67af9a30308bcf8c4611b8",
+      "repository_ref": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2:docs/roadmaps/rsi_swarm_backlog.json",
       "json_path": "current_observation"
     },
     "acceptance": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-repair\\acceptance.json",
-      "sha256": "6d619ff40333530d530d16114e0b4a62e35ae00e8b3a3148a800ac5e4c2298a3"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\acceptance.json",
+      "sha256": "3e8707e4946048650b0a4491a801e3e72d4c7ad0ce552b75b7d9895a3445f03a"
     },
     "retrieval": {
       "holo": "Authority5326080d/queryhost0c81418f unchanged: previous HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained; explicit degraded Git/rg, no repeated failing probe or reindex.",
-      "noise": "Bounded source/docs/nearest tests; old checkpoint prose is preparation-time history.",
-      "ordering": "WSP00 gate; actual15/97; closure/heads/52 rows; docs/tests; existing caller and Linux primary sources.",
-      "missing": "No qualified connected ownership mapper or authenticated supervisor policy.",
-      "staleness": "Exact main and95peerheads/shared/Holo roots unchanged; no repeated failed probe.",
-      "duplication": "One private implementation leaf in existing module for binary protocol/association; existing test owner reused with inert support only if required by675-line boundary."
+      "noise": "Focused source and nearest tests; stale preparation-time checkpoints reconciled through exact PR1922 closure. Broad readiness search was noisy; narrowed to prctl/Popen/select owners.",
+      "ordering": "WSP00; actual15/97; exact closure/heads/52rows; module/test contracts; production consumer and Linux primary docs.",
+      "missing": "Module memory/README.md and requirements.txt absent; no authenticated supervisor policy or cross-process visibility qualification. No new placeholder docs.",
+      "staleness": "Exact main,95peerheads,shared/Holo roots verified unchanged. Prior Holo failure reused only at unchanged authority/query-host scope.",
+      "duplication": "Reuse existing observer tests and support; two parametrized child cases, no new suite/module/skill/workflow."
     },
     "allocation": {
-      "effort": "C4 integration; no model/provider spend. One bounded production seam and adversarial fixtures.",
-      "verification": "No host candidate execution. Freeze named cases before implementation; source review, exact-head hosted regression/artifacts, main readback and owned cleanup.",
-      "manual_reason": "Native Qwen/Gemma route not admitted;0102 source work and independent0102 review."
+      "effort": "C3 bounded child protocol/permission oracles and cleanup; no provider/model spend.",
+      "verification": "252 parent/254 candidate expected; preserve every old case/body. Independent source/effect and original hosted artifact review, exact PR/main checks, owned retirement.",
+      "manual_reason": "Native Qwen/Gemma execution not admitted;0102 bounded source work and independent0102 verifier."
     },
     "owner_reconciliation": {
       "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-repair\\entry.json",
-        "sha256": "b9d5466f07ed2ddee25423a755f4e6bf9ebd5e8a36cecded661cf7f5805c843e"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\entry.json",
+        "sha256": "b25037a402f28b3330d11a56efa6744ccec424c1b49f407141427e831b9d983d"
       },
       "peers_unchanged": 95,
       "overlap": [
@@ -2066,14 +2063,39 @@
           "number": 1860,
           "paths": [
             "ModLog.md",
+            "WSP_knowledge/WSP_Test_Registry.json",
             "modules/communication/moltbot_bridge/INTERFACE.md",
             "modules/communication/moltbot_bridge/ModLog.md"
+          ]
+        },
+        {
+          "number": 1820,
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
           ]
         },
         {
           "number": 1792,
           "paths": [
             "modules/communication/moltbot_bridge/ModLog.md"
+          ]
+        },
+        {
+          "number": 1759,
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "number": 1688,
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "number": 1680,
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
           ]
         },
         {
@@ -2100,6 +2122,12 @@
           ]
         },
         {
+          "number": 1641,
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
           "number": 802,
           "paths": [
             "ModLog.md"
@@ -2114,18 +2142,18 @@
       ]
     },
     "validation": {
-      "parent": "188 existing selected IDs; fresh hosted pending.",
-      "candidate": "Existing selection retained; new case IDs/counts bound by static inventory and actual hosted JUnit.",
-      "effects": "Hosted only: existing reviewed fixtures, plus own held listeners/pathnames under RUNNER_TEMP and exact local kernel diagnostic requests. No target service connection, signer, provider, key, privilege change, process launch or namespace switch. Host static checks only.",
-      "local": "AST/registry/manifest only; no host candidate collection or tests.",
+      "parent": "252 prior IDs unchanged; hosted pending",
+      "candidate": "254 expected:252 retained plus two child conditions; hosted pending",
+      "effects": "Fixed reviewed stdlib-only text via exact sys.executable -I -B -c; one AF_UNIX listener, no connect/accept; PR_SET_DUMPABLE limited to child, readback; core limit zero; no signer/key/service/provider. Normal path sends STOP and waits5s; exceptional path kills only the exact still-live Popen and waits5s. Finally closes all pipes and removes owned TemporaryDirectory. Cleanup failure remains test failure.",
+      "local": "AST/registry only; no host candidate tests or collection.",
       "artifact_name": "lifecycle-dependency-selection",
-      "production_evidence_property": "production_socket_association"
+      "production_evidence_property": "process_socket_visibility"
     },
     "publication": {
       "state": "ACTIVE_OWNED_WORK",
-      "branch": "fix/rsi-socket-repair-20260927",
-      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-socket-repair-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-repair\\final-accounting.json",
+      "branch": "test/rsi-process-visibility-20260927",
+      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-process-visibility-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\final-accounting.json",
       "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
@@ -2236,29 +2264,29 @@
         {
           "task": "Qualify exact filesystem-to-socket ownership in the existing external signer OS observer",
           "wsp15": {
-            "complexity": 4,
+            "complexity": 3,
             "importance": 4,
             "deferability": 3,
             "impact": 4,
-            "total": 15,
+            "total": 14,
             "priority": "P1"
           },
-          "state": "connected_repair_prepared_hosted_pending",
+          "state": "cross_process_visibility_prepared_hosted_pending",
           "source": "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py::_require_process_socket_owner",
-          "dependency": "Independent source/effect review; exact-head hosted connected regression and main closure. Authentic supervision remains separate.",
-          "next_step": "Validate actual connected observer and original hosted evidence, converge to main, then re-score remaining supervision/native prerequisites.",
-          "limits": "No atomic/ABA/cross-UID supervisor/authority claim; all seven native reasons and absent effect lease retained.",
-          "effort_cost": "Existing observer/test owners; bounded Linux ABI research and fixture qualification before producer integration.",
-          "score": 15,
+          "dependency": "Independent exact source/effect review and real hosted readable/nondumpable child evidence; current main closure before supervisor issuance.",
+          "next_step": "Run the fixed existing-owner qualification through hosted CI, independently inspect original artifacts, converge and re-observe.",
+          "limits": "Same-process production association and cookie/rebind controls; no cross-UID supervisor or native RSI qualification.",
+          "effort_cost": "C3 bounded child lifecycle and permission oracles;252/254 hosted differential plus independent review; no provider spend.",
+          "score": 14,
           "component_closure": {
-            "scope": "Two hosted same-process socket/VFS cases; production bridge not implemented.",
-            "pr": 1921,
-            "merge": "c417ccc1710c06f6a1f56f774dce5ef2730d5930",
+            "scope": "Connected bounded production association qualified; authentic supervision remains open.",
+            "pr": 1922,
+            "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
             "terminal_state": "MERGED_VERIFIED_MAIN",
-            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-qualification\\final-accounting.json"
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-repair\\final-accounting.json"
           },
-          "next_component": "Replace the connected production observer ownership comparison with bounded exact Linux diagnostic association and continuity checks.",
-          "rescoring_rationale": "Actual own-socket kernel evidence now demonstrates the observer compares different inode domains and rejects the valid observed association. The existing lifecycle default observer consumes this check. A disconnected parser or repeat characterization would not repair that consumer. Complexity rises from C3 to C4 for production parsing, finite process-FD search, namespace and cookie continuity plus compatibility; I4/D3/impact4 stay unchanged. Higher native18 remains authority-blocked."
+          "next_component": "Qualify cross-process procfs visibility at the existing signer nondumpability boundary using a disposable hosted fixture.",
+          "rescoring_rationale": "Existing isolation gate disables dumpability before key resolution and requires non-root signer identity distinct from consumer mappings. Observer reads exe, FD and namespace links governed by ptrace read-access checks. Current own-process fixture bypasses that cross-process permission boundary. Existing isolation tests use FakeIsolationBackend, so there is a concrete missing environmental qualification before authentic supervisor issuance. C3 for bounded child/IPC/lifetime fixture, I4 core prerequisite, D3 next integration step, impact4 reusable observation boundary."
         },
         {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
@@ -3262,7 +3290,7 @@
         }
       ],
       "selected_next": null,
-      "instruction": "Re-observe after actual connected qualification/main closure; retain failures, do not equate observation with authentic supervisor or native RSI."
+      "instruction": "Re-observe actual permission qualification after closure/failure. Do not infer authenticated supervision or native admission."
     }
   }
 }
