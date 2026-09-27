@@ -124,6 +124,13 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "Default sign-off" in correspondence_text
     assert "Never imply that 0102 personally performed a field action completed by the monk." in correspondence_text
     assert "RED DOG CANDIDATE" in correspondence_text
+    assert "Correspondence State Capsule" in correspondence_text
+    assert "Build the capsule **before** `create_draft`" in correspondence_text
+    assert "outbound_since_latest_inbound" in correspondence_text
+    assert "new_delta_not_previously_sent" in correspondence_text
+    assert "BLOCK_THIRD_FOLLOWUP" in correspondence_text
+    assert "Gmail remains transaction truth" in correspondence_text
+    assert "not another Moshpit or another contact database" in correspondence_text
 
     for slug, canonical in (
         ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),

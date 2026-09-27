@@ -1,3 +1,10 @@
+## 2026-09-28 — Correspondence continuity / duplicate-send guard
+
+- Added a mandatory ephemeral Correspondence State Capsule to the existing YUMORI.me correspondence parent rather than creating a parallel email Moshpit or contact database.
+- The capsule must be reconstructed before substantive recipient-finalized draft creation/material update and again immediately before send-capable actions.
+- It records provider-backed latest inbound/outbound state, outbound count since the last inbound, sent coverage, held drafts, unresolved asks versus genuinely new delta, routing/sender-boundary state, queue/follow-up gate, next expected event and next allowed action.
+- Provider-sent messages count for duplicate/follow-up suppression even when a separate send-integrity incident prevents promotion to VERIFIED_SENT.
+- Incomplete or contradictory evidence fails closed to HOLD / RECONCILE.
 ## 2026-09-28 — Post-vote PPP/PFI truth-surface correction
 
 - Moved current YUMORI/eSingularity public copy from the completed September 25 VOTE NO campaign to a post-vote request for a formal PPP/PFI public-private comparison and project-formation route before irreversible demolition procurement or physical demolition.
