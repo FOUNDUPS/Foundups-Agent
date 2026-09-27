@@ -1,3 +1,19 @@
+## Merge ownership checkpoint — 2026-09-27
+
+PR1912 is `MERGED_VERIFIED_MAIN` at `1b02ba7a9214b0c3b8128243f24864c1dfbc779d`:
+38 identical case IDs passed on PR and main; all10 PR checks and main CI/CodeQL
+passed; its owned lane is retired. Fresh main/95-peer reconciliation retains
+the seven native trust/admission blockers. WSP15 selects14/P1 to preserve work
+detected by a second status check before the existing sentinel's local cleanup.
+
+Both GH routes stop requesting deletion; automatic stash/pop is removed.
+Dirty/unreadable state blocks local ref/checkout/deletion, while `merged=True`
+retains its command-success meaning. The existing suite has68 authored cases;
+candidate hosted results and closure receipts govern acceptance. Server-side
+auto-delete, post-check races, direct push/PR qualification, main readback and
+unleased clean-path deletion remain open. Re-score after this slice closes;
+do not activate the sentinel or treat these guards as native RSI authority.
+
 ## Merge prerequisite checkpoint — 2026-09-27
 
 The WSP00/WSP97 governance update at main

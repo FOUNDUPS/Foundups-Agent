@@ -1,3 +1,10 @@
+## 2026-09-27: Preserve work detected before sentinel cleanup
+
+- WSP00/6/15/22/34/50/84/97. Retained 38 prerequisite cases and added 30 cases in the existing test file: 18 dirty/unreadable cleanup failures, six clean/deletion controls, six actual terminal GH failures. Direct-push rejection enters GH fallback and is not itself a terminal failed merge.
+- Negative cleanup fixtures enable deletion; one ordered Git/GH transcript asserts the status check precedes all local ref, checkout and explicit deletion commands. Existing subprocess denial remains active. The real sentinel function is exercised with fake Git/GH seams; no external Git/GH subprocess runs.
+- Prior PR1912 and exact-main runs each passed the same38 IDs. This candidate's68 cases await hosted CI; no local host execution. Same existing CI selection/artifact; no new runner or test owner.
+- Exact source review, JUnit outcomes and terminal closure: `O:/Foundups-Agent-audits/20260927-rsi-merge-ownership/final-accounting.json`, created only after verification. Command-success `merged=True` remains distinct from main verification; server-side auto-delete and post-check races are outside scope.
+
 ## 2026-09-27: Merge sentinel prerequisites
 
 - WSP 00/6/15/22/34/50/84/97. Extended the existing sentinel suite; no new test owner.

@@ -18,9 +18,9 @@ Flow:
     4. Push current branch to both remotes (ensure nothing lost)
     5. Try fast-forward: git push origin HEAD:main
     6. If fails (diverged) -> create PR via gh, merge via gh pr merge
-    7. Update local main: git branch -f main origin/main
-    8. Checkout main
-    9. Delete old feature branch (local + both remotes)
+    7. Require a second clean/readable status before local cleanup
+    8. Update local main and checkout main without automatic stash/pop
+    9. Delete old feature branch when configured (local + both remotes)
 
 Environment:
     GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
@@ -247,7 +247,7 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
         ok, pr_check = _gh(["pr", "view", "--json", "state,number"], repo_root)
         if ok and '"state":"OPEN"' in pr_check:
             # PR exists, try to merge it
-            ok, merge_out = _gh(["pr", "merge", "--merge", "--delete-branch"], repo_root, timeout=120)
+            ok, merge_out = _gh(["pr", "merge", "--merge"], repo_root, timeout=120)
             if ok:
                 result["actions"].append("merged via existing PR")
                 result["merged"] = True
@@ -264,7 +264,7 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
                 result["actions"].append(f"created PR: {pr_out}")
 
                 # Merge the PR
-                ok, merge_out = _gh(["pr", "merge", "--merge", "--delete-branch"], repo_root, timeout=120)
+                ok, merge_out = _gh(["pr", "merge", "--merge"], repo_root, timeout=120)
                 if ok:
                     result["actions"].append("merged via new PR")
                     result["merged"] = True
@@ -275,31 +275,24 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
 
     # If merged, update local main and checkout
     if result["merged"]:
+        # Remote command success does not grant ownership of work that appeared
+        # after preflight. Preserve it before any local ref/checkout/deletion.
+        ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
+        if not ok or status.strip():
+            result["error"] = "cleanup_working_tree_dirty" if ok else "cleanup_status_failed"
+            result["actions"].append("blocked: cleanup requires a clean, readable working tree")
+            result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+            return result
+
         # Update local main to match origin/main
         ok, _ = _git(["branch", "-f", "main", "origin/main"], repo_root)
         if ok:
             result["actions"].append("updated local main")
 
-        # Check for uncommitted changes before checkout
-        ok, status = _git(["status", "--porcelain"], repo_root)
-        has_changes = bool(status.strip()) if ok else False
-
-        if has_changes:
-            # Stash changes
-            ok, _ = _git(["stash", "push", "-m", "git-merge-sentinel-auto-stash"], repo_root)
-            if ok:
-                result["actions"].append("stashed changes")
-
         # Checkout main
         ok, output = _git(["checkout", "main"], repo_root)
         if ok:
             result["actions"].append("checked out main")
-
-            # Pop stash if we stashed
-            if has_changes:
-                ok, _ = _git(["stash", "pop"], repo_root)
-                if ok:
-                    result["actions"].append("restored stash")
 
             # Delete the old feature branch if configured
             if _env_bool("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH", default=True):

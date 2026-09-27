@@ -4,8 +4,16 @@ Reuse `test_git_main_merge_sentinel.py`: four original startup guards,
 30 rejection cases (15 conditions with advisory/enforced modes), two force
 controls and two clean-feature controls. Git/GH calls are replaced by exact
 fake responses, and a subprocess sentinel rejects command escape. The clean
-control stops at the first push boundary without executing it. No successful
-merge or downstream cleanup is exercised or claimed safe.
+control stops at the first push boundary without executing it. These 38 cases
+passed on PR1912 and exact main `1b02ba7a9214b0c3b8128243f24864c1dfbc779d`.
+
+The cleanup extension adds 30 cases in the same file: 18 dirty/unreadable
+cleanup cases (three command-success routes, three status failures, two
+enforcement modes), six clean/deletion-setting controls, and six terminal GH
+failure controls. One ordered Git/GH transcript proves the second status check
+precedes branch-force/checkout/deletion. Deletion is enabled in negative cases;
+all commands remain fake. The 68 authored cases do not prove live merge safety,
+repository-side auto-delete control, main readback or post-check race protection.
 
 The existing CI test job selects this registered unit file on its hosted Ubuntu
 runner with no conftests/plugin autoload, temporary database paths and JUnit
@@ -14,7 +22,8 @@ not execution of the WRE differential plan, complete repository promotion
 evidence, native admission or OS-containment qualification of worker code.
 No local host candidate-test execution is part of this slice. Exact CI results
 and publication/cleanup state belong to the canonical RSI backlog's receipt.
-At preparation, 38 cases are authored; no passing run is claimed here.
+At cleanup-slice preparation, 68 cases are authored; only the prior 38-case
+parent result is verified. Fresh candidate CI outcomes govern acceptance.
 
 ## RSI verification measurement contract — 2026-09-25
 
