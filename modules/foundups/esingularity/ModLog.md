@@ -1,3 +1,12 @@
+## 2026-09-28 — Post-vote PPP/PFI truth-surface correction
+
+- Moved current YUMORI/eSingularity public copy from the completed September 25 VOTE NO campaign to a post-vote request for a formal PPP/PFI public-private comparison and project-formation route before irreversible demolition procurement or physical demolition.
+- Kept the FY2026 財産有効活用民間提案制度 as a separate asset-proposal lane; it is not the requested Sukatto procedure.
+- Reframed Document 05 as the PPP/PFI Public-Private Partnership Master rather than a generic/private-proposal application.
+- Preserved historical VOTE NO correspondence as historical public record instead of rewriting sent messages.
+- Added the official 8,099.56 m² property-sheet figure and the later 8,923.56 m² demolition-project scope as separate source-scoped figures. Gym/toilet/auxiliary-building inclusion is recorded only as a plausible explanation pending City confirmation.
+- Updated the public ticker, homepage, vision copy, translations, vote-no record page and JHR current-state wrappers accordingly.
+
 # Project eSingularity ModLog
 
 ## 2026-09-23 — eSingularity.ai current council-position packet concatenation
