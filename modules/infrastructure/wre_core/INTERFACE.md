@@ -1,3 +1,22 @@
+## Merge sentinel prerequisite contract — 2026-09-27
+
+`run_main_merge_sentinel(repo_root, force=False)` keeps its dictionary interface.
+`passed` means startup may continue; it is not merge verification. Failed branch
+resolution, empty/detached branch, unavailable/empty/unrecognizable worktree
+inventory, failed/dirty status and failed fetch all return `merged=False`.
+For these failures, `passed` is false only when
+`GIT_MAIN_MERGE_SENTINEL_ENFORCED` is enabled. Dirty status includes untracked
+files even when Git configuration normally hides them.
+
+Fixed new error values: `named_branch_required`, `worktree_discovery_failed`,
+`working_tree_status_failed`, `working_tree_dirty`, `fetch_failed`.
+The existing branch-resolution and other-main-worktree errors are preserved.
+Default-disabled and already-main calls retain their early skip behavior.
+The private worktree helper uses `None` for unavailable discovery, distinct
+from a readable inventory with no competing main checkout.
+
+This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI.
+
 # WRE Core Interface
 
 ## Advisory AutoResearcher startup display

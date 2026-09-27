@@ -12,6 +12,13 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+**2026-09-27 checkpoint:** PR1908 is merged/main-verified and retired. New
+WSP00/WSP97 rules prompted a concrete merge-sentinel prerequisite repair
+(14/P1), with focused hosted regression in the existing owner. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#merge-prerequisite-checkpoint--2026-09-27)
+and canonical backlog for acceptance/closure receipts. Downstream merge safety
+and native RSI admission remain open.
+
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 
 | Need | Entry |

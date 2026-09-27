@@ -1,3 +1,10 @@
+## 2026-09-27: RSI repository-convergence prerequisite repair
+
+- Reconciled PR1908 as merged/main-verified and retired; current main also contains the new WSP00 recursive-role and WSP97 terminal-closure contracts.
+- WSP15 selected an executable 14/P1 repair in the existing WRE merge sentinel. Its known prerequisite failures now stop before mutation; broader merge safety remains open.
+- Reused existing tests and CI; no new module/skill, native RSI admission or product runtime. Independent review and hosted CI/closure receipts govern acceptance, recorded in the existing RSI backlog.
+- All 95 peer heads were inspected for scope overlap; only chronological ModLogs overlap this slice. Shared and externally owned work remain preserved.
+
 ## 2026-09-27: RSI runner lesson retention and resumed accounting
 
 - PR1902 is closed at `34504d84257f2a731514f0b736991fa10cda91bb`: exact reviewed tree, ten PR checks, main CI/CodeQL and owned-lane retirement verified. Resumed from fresh main `585c963f92822c6f041d06469ab323ec7846fca3`; retain PR1903 measurement hierarchy and separate YUMORI work. Shared checkout and 95 peer heads reconciled.

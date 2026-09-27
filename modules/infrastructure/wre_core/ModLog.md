@@ -1,3 +1,10 @@
+## 2026-09-27: Fail closed on merge sentinel prerequisites
+
+- WSP 00/15/22/34/50/84/97; C3/I4/D3/Impact4=14/P1. Reused the default-off sentinel and existing tests after the new WSP 97 closure rules exposed a concrete source mismatch.
+- Reject unknown/detached branch, failed worktree discovery, unreadable/dirty status and failed fetch before push/PR/cleanup. Keep default-off, force-enable and ENFORCED startup semantics; no new merger or scheduler.
+- Added focused hosted CI coverage and result retention. Source reviewed independently; test results remain unclaimed until CI receipts arrive. No host candidate tests, live sentinel, service, provider, native worker or product action.
+- Downstream concurrency, direct main push, PR qualification/readback and cleanup ownership remain separate work. See the prerequisite contract in INTERFACE.md and the current RSI backlog.
+
 ## 2026-09-25: RSI verification hierarchy and measurement bundle
 
 - Aligned WRE reporting with WSP 48's research verification hierarchy: intrinsic

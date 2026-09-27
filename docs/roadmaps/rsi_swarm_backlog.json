@@ -1873,304 +1873,92 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "585c963f92822c6f041d06469ab323ec7846fca3",
-    "selected_action": "rsi-runner-lessons-20260927",
-    "status": "documentation_prepared_review_publication_pending",
+    "base_commit": "48b7c71198b712c93149af5d9447ffff83c71501",
+    "selected_action": "rsi-merge-preflight-20260927",
+    "status": "implementation_prepared_hosted_validation_pending",
     "wsp15": {
-      "complexity": 2,
-      "importance": 3,
+      "complexity": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 11,
-      "priority": "P2"
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-runner-lessons-20260927",
-    "base": "585c963f92822c6f041d06469ab323ec7846fca3",
+    "observation_id": "rsi-merge-preflight-20260927",
+    "base": "48b7c71198b712c93149af5d9447ffff83c71501",
     "self": "0102",
-    "role": "architect/coordinator",
-    "origin": "autonomous_trigger",
+    "role": "architect",
+    "origin": "external_principal",
     "principal_ref": "012",
-    "selected": "Retain reusable bounded Windows test-runner compatibility lessons",
+    "selected": "Fail closed on existing merge sentinel prerequisites",
     "wsp15": {
-      "complexity": 2,
-      "importance": 3,
+      "complexity": 3,
+      "importance": 4,
       "deferability": 3,
-      "impact": 3,
-      "total": 11,
-      "priority": "P2"
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1902,
-      "merge": "34504d84257f2a731514f0b736991fa10cda91bb",
-      "record": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json",
-      "binding": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-manager-guard\\final-accounting.json",
-        "sha256": "c189b7754d4a6fdf797ad1cfdcffefdee56b02b084aadfdfe84f349f1f8e2318"
+      "pr": 1908,
+      "evidence": {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-accounting.json",
+        "sha256": "a0341b69b38c5c1e1332127f279a11216bb720d1340dc05fb44cb3d86fd32cd0"
       }
     },
     "previous_observation": {
-      "git_ref": "585c963f92822c6f041d06469ab323ec7846fca3:docs/roadmaps/rsi_swarm_backlog.json",
-      "field": "current_observation"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\previous-observation.json",
+      "sha256": "58b0f7b69a9836d6f3340c56f1c8416ba86313acaf098afd8028c81faf07b6d8"
     },
     "retrieval": {
-      "quality": "degraded",
-      "noise": "Broad inventories were noisy/truncated; narrowed to exact canary paragraph, four historical attempt receipts and existing collector/isolation owners.",
-      "ordering": "WSP00 gate; historical bootstrap; actual WSP15/97/CORE; verified previous closure and fresh main/94peer scope; existing module/test contracts; exact failure corrections.",
+      "holo": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained unchanged; no reindex",
+      "noise": "large chronological logs narrowed to exact sentinel owner and sections",
+      "ordering": "canonical WSP, source and caller, module/test docs, independent review",
       "missing": [
-        "modules/communication/moltbot_bridge/requirements.txt",
-        "modules/communication/moltbot_bridge/memory/README.md"
+        "modules/infrastructure/wre_core/memory/README.md"
       ],
-      "tier0": "README and INTERFACE present; no stub needed for documentation-only work.",
-      "staleness": "Historical passes bind retired source/interpreter/runner; never copy as a current runnable command or native runtime proof. Holo failure reused only after unchanged host/authority/source scope check.",
-      "duplication": "Existing WRE exact-ID/differential collectors and bounded Git I/O remain owners; update existing test README, no new runner/skill/module or duplicate manifest-staging guidance."
+      "staleness": "prior historical descriptions not used as runtime proof",
+      "duplication": "extend existing sentinel and test file; no new module/skill"
     },
-    "holo": {
-      "authority_head": "5326080d583625aebbc230242117fb7fcf0044a6",
-      "query_host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
-      "failure": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
-      "freshness": "UNKNOWN",
-      "index_gap_detected": true,
-      "receipt": "O:/Foundups-Agent-audits/20260923-rsi-system-test-entry/holo-query.json",
-      "repeated": false
-    },
-    "allocation": {
-      "execution_plane": "Documentation-only historical lesson retention; no candidate tests, model/provider/service calls or native WRE admission.",
-      "effort_cost": "One short recipe and required existing logs/backlog; static link/hash/source validation and independent review.",
-      "manual_reason": "Evidence interpretation and documentation; native model route remains unverified, local read-only coordinator/verifier sufficient.",
-      "verification": "Each recipe statement bound to preserved failure/correction and successful same15-case receipts; no rerun of historical or blocked tests; exact7doc scope and unchanged production/tests/manifest/registry.",
-      "dialectic": "Do not generalize Python hooks into an OS sandbox or copy a retired interpreter command. Existing shared tooling owns execution; this fills discoverability only."
-    },
-    "resume_reconciliation": "Fast-forward clean owned branch: PR1903 verification measurements retained; three YUMORI commits remain external. New PR1906 only esingularity source-of-truth/tests, no seven-file overlap; prior94 heads unchanged. Shared and Holo roots unchanged. Existing runner recipe absent at fresh main.",
-    "validation": {
-      "method": "Static documentation, historical evidence hash, link, score and unchanged-source verification; independent final review and remote publication recorded externally after preparation.",
-      "lesson_evidence_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\lesson-evidence-review.json",
-        "sha256": "20904e0bff6f6138760d6bf74535c347ba0844ec4d5a4307e429b79081d9a7da"
+    "governance_reviews": [
+      {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\wake-20260927-0845-role-impact-review.json",
+        "sha256": "63eee231862897940ccaaed5448e5557893b087a9bbab410b02fa188a0a319e5"
       },
-      "preserved_attempts": [
-        {
-          "attempt": 1,
-          "failure": "Before collection, pytest capture could not find a usable temporary directory because candidate temp writes were outside the owned evidence directory. Zero test cases executed.",
-          "correction": "Allocate a fresh owned capture directory before guarded pytest; set TEMP, TMP, TMPDIR and tempfile.tempdir to it. Pytest basetemp alone did not cover capture initialization.",
-          "refs": [
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt1-failure.json",
-              "sha256": "5a79c99a542fe9ce138f44bc538d96673e64854fc59c9f33cdb736c947be82e7"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt1.log",
-              "sha256": "84af94b6903e8e88da66ea767d507828f94ae411b02f7d4bfb01ca7413c91d7e"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt1.py",
-              "sha256": "7024c2edbaf8d753ac74e92a54091e629f631f46d2bfa2a2849485386fe11dd3"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt2.py",
-              "sha256": "1b1a00bd7bde65d73ecc9c4653f1b80c4fa536d497f9599db1a8b6b5a5ef9a73"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review-v2.json",
-              "sha256": "0c4bd529511662259b7fe0edbf4c24b9a3b1d419f96db917a6e168419b240d5d"
-            }
-          ]
-        },
-        {
-          "attempt": 2,
-          "failure": "Pytest logging initialization attempted a file write outside the owned evidence directory before tests executed.",
-          "correction": "Supply an explicit owned pytest log_file override and a fresh capture directory; keep the write guard and acceptance criteria.",
-          "refs": [
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt2-failure.json",
-              "sha256": "beb28de0393c03ef510d7b97c923c83f2d9cbf12aca8ac4ad277d242d78d6158"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt2.log",
-              "sha256": "3f5ce204a284713194828663da548a71f6cc7b9e6926b4f0f9c1f8b9edac4b15"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt2.py",
-              "sha256": "1b1a00bd7bde65d73ecc9c4653f1b80c4fa536d497f9599db1a8b6b5a5ef9a73"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt3.py",
-              "sha256": "98fc8f08b77bf5ccf835832351c74938c974cc3617a9a8a2f6d82214043847c2"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review-v3.json",
-              "sha256": "e87d5eac869a07c5b2723be7fadeabe3a08bfdef26606c39d21212275a44a4c7"
-            }
-          ]
-        },
-        {
-          "attempt": 3,
-          "failure": "All 15 selected cases failed in fixture setup before the first Git launch; Windows audit executable was None and command arguments were serialized text, contrary to the original audit-handler assumptions.",
-          "correction": "Validate the original explicit argv list at Popen entry, inject the qualified Git executable, then compare audited executable, serialized commandline and cwd to that pending launch. Preserve existing finite disposable Git operation/target restrictions.",
-          "refs": [
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt3-failure.json",
-              "sha256": "4e197311a83898f2f0c6c864f8e2da7f2d7e93d9593b9fe4ee7ea36e0c084c52"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt3.log",
-              "sha256": "32289fb6a0508bdfac5450936060461c9e36415da7ac294de4de22b982221b39"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt3.xml",
-              "sha256": "8ebb00e127c01a71459aad6fb18bebc68013add8642020a51556d5f759918baa"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt3-invocation.json",
-              "sha256": "e232f6612de88ebff19c0b84df6f1136c6d09fe030107df5412439033d2dafd6"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt3.py",
-              "sha256": "98fc8f08b77bf5ccf835832351c74938c974cc3617a9a8a2f6d82214043847c2"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt4.py",
-              "sha256": "59f81ab3d7e4e90659e6f8a1096411352e3195bc8a99f2f01b45d5ec18d5cba6"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review-v4.json",
-              "sha256": "18bbdc0aaef5b568ae09000b57024bbe81485dc31eeef242dd65799337e79abb"
-            }
-          ]
-        },
-        {
-          "attempt": 4,
-          "failure": "All 15 cases failed in fixture setup/imports: 13 extended-local-drive write denials and two callback-witness import failures after replacing Popen with a function (asyncio subclasses it).",
-          "correction": "Preserve Popen class shape with a subclass. Normalize supported local-drive extended paths before and after resolve, retain owned-directory containment, reject the described UNC/device namespaces, and use fresh v5 artifact paths.",
-          "refs": [
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\attempt4-failure.json",
-              "sha256": "177499f758b7941b0d80b433765c889fe090daf74597ea1b14d2b0e8ebd70e15"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt4.log",
-              "sha256": "8dc2b9ecc863e436297861a6b8f81a3566cbeb4aa66bd67d22f7d2ec8f05ed07"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt4.xml",
-              "sha256": "1201721c7c60698ddd43fe9a4f0a59048a2fe82fd7c6c4c3bd8aeb90ea7fab8d"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-attempt4-invocation.json",
-              "sha256": "d2b8eacc3e8bcfd3dea6a5d804301c2ffe2c7e452c35a06162ed2e98d32f8055"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests-attempt4.py",
-              "sha256": "59f81ab3d7e4e90659e6f8a1096411352e3195bc8a99f2f01b45d5ec18d5cba6"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests.py",
-              "sha256": "03747a177ba52dd5843420fe32628994d38f2603eac5999e64598beb589147c9"
-            },
-            {
-              "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\preexecution-review.json",
-              "sha256": "8c25d4b026608779b94d7e6a80d091a263052bff72c4c0de502fb2b8751afb50"
-            }
-          ]
-        }
-      ],
-      "historical_successful_proof": {
-        "counts": {
-          "primary": {
-            "passed": 15,
-            "failed": 0,
-            "errors": 0,
-            "skips": 0,
-            "git_commands": 165,
-            "denied_events": 0
-          },
-          "independent": {
-            "passed": 15,
-            "failed": 0,
-            "errors": 0,
-            "skips": 0,
-            "git_commands": 165,
-            "denied_events": 0
-          }
-        },
-        "unique_cases": 15,
-        "primary_independent_identical_cases": true,
-        "source_test_binding_maps_identical": true,
-        "refs": [
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\canary-test-freeze.json",
-            "sha256": "5ff002c0e31c1af96ec36873ac0ef745307b723c881c67896f576f50b87de73e"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\run_canary_tests.py",
-            "sha256": "03747a177ba52dd5843420fe32628994d38f2603eac5999e64598beb589147c9"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-tests.xml",
-            "sha256": "aa3d4063c6420a2a20c14b342398f177c859e9c0784aa8f7655a183a2cc277f3"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-tests.log",
-            "sha256": "6cce0179c3894f0784c39333573e8c2f963387339c45a2f201d23b62316925d6"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\primary-invocation.json",
-            "sha256": "1cadb5eb2c40c22753ed8af4e364a09a10bf52c23d56751effac426e685a2f1e"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-tests.xml",
-            "sha256": "e3efbaaa60e877fc1ca151bc387b2de0e71a1f5b6758ea04cd270b51cd88ad06"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-tests.log",
-            "sha256": "5f51a4335c0f4282d28886753b02dfccde1074df56dd413106b7b6d1f537ca84"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-invocation.json",
-            "sha256": "d86a2ad9d615c4ec2c7c02b643568b44056298a5c1adef22dd49ad5e75577198"
-          },
-          {
-            "path": "O:\\Foundups-Agent-audits\\20260923-rsi-system-test-entry\\independent-review.json",
-            "sha256": "df197cdee2c78ebe15554c1f38dec1be05c32b8c493135a2dd4c5b0b208dbdef"
-          }
-        ]
-      },
-      "historical_limits": [
-        "Historical runner is pinned to C:/Python312/python.exe and an already retired worktree, not the current qualified interpreter/worktree. Do not publish its old command as a current invocation.",
-        "All four failures are harness/fixture compatibility evidence, not failed product acceptance. Retain original failure logs and unchanged frozen oracles.",
-        "Fifteen unique synthetic cases passed twice, not thirty unique cases. Sixteen deselected and two configuration warnings are historical limits.",
-        "165 disposable Git commands per successful run are real effects under external fixture paths; Python audit guards are not OS/process confinement or generic command authorization.",
-        "No live provider, native admission, retained learning, automatic reuse, concurrency or Windows path security certification.",
-        "Historical verifier authored v4/v5 harness compatibility corrections; coordinator separately reviewed them. Product tests were authored by the other agent and frozen.",
-        "Fresh target/source/runtime/effect review is required before adapting these lessons to another test run. No paused lineage/event-store lane accessed."
-      ],
-      "new_tests": 0,
-      "historical_tests_rerun": 0,
-      "final_review_record": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-review.json",
-      "static_validation_record": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\validation.json",
-      "preserved_static_check_failure": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\static-validation-attempt1.json",
-        "sha256": "9fc6581b492de60f7ec6dcc936496abd862cc05e95606ba60dff6651762dff10"
+      {
+        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\wake-20260927-0845-closure-impact-review.json",
+        "sha256": "f7b343545eef74974a2c109707ca926060afdf1231066803bb70b338b8c4bfff"
       }
+    ],
+    "allocation": {
+      "execution_plane": "direct bounded repository source repair; hosted CI regression; no WRE differential/native runtime admission",
+      "manual_reason": "Known bounded source defect; native model/worker admission remains unqualified. Independent read-only verifier reviewed scope.",
+      "authority": "Standing bounded source/PR closure authority; no native/provider/product effects."
     },
     "owner_reconciliation": {
-      "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\entry.json",
-        "sha256": "dd555482bc60f1398c64849185ef2ac13418217cee03e551fa78ab4b2f36a37e"
+      "evidence": {
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\peer-paths.json",
+        "sha256": "6ccf15f3ba18bd86ecc6f755aa28160f668c15ca5673509fd8301f6b09195f4f"
       },
-      "resume": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\resume-observation-20260927.json",
-        "sha256": "af75edec566af4f60c71045ff4a9f188ecec20c6de399200fa15e8892e9cc4da"
-      },
-      "peer_heads": 95,
-      "shared_preserved": true
+      "peer_count": 95,
+      "overlap": "Five PRs touch chronological ModLogs only; no source/test/CI overlap. Preserve their unique work."
+    },
+    "validation": {
+      "local": "Static only; no candidate tests executed under host principal.",
+      "hosted": "38 authored cases in existing registered file; execution pending.",
+      "registry": "Existing unit file owner/shard unchanged; canonical CI registry check required.",
+      "limits": "This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI."
     },
     "publication": {
-      "state": "prepared_for_independent_final_review_and_publication",
-      "closure_record": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-accounting.json"
+      "state": "ACTIVE_OWNED_WORK",
+      "branch": "fix/rsi-merge-sentinel-preflight-20260927",
+      "worktree": "O:/Foundups-Agent-worktrees/rsi-merge-sentinel-preflight-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\final-accounting.json",
+      "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2993,16 +2781,25 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "documentation_prepared_review_publication_pending",
+          "state": "closed_merged_PR1908",
           "source": "modules/communication/moltbot_bridge/tests/reddog_resident_live_canary_test_support.py::_git",
           "dependency": "Independent final source review, exact-head checks, publication and owned closure remain.",
-          "next_step": "Finish this seven-document sprint; then refresh eligibility. No test rerun or runtime work.",
+          "next_step": "Do not repeat; retained documentation is merged and exact-main-verified.",
           "effort_cost": "Documentation-only reuse of existing governed test tooling and preserved receipts; local static validation, no provider calls.",
           "review": {
             "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\lesson-evidence-review.json",
             "sha256": "20904e0bff6f6138760d6bf74535c347ba0844ec4d5a4307e429b79081d9a7da"
           },
-          "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification."
+          "limits": "Discoverable instruction retention, not autonomous verified-outcome retention or a sandbox qualification.",
+          "closure": {
+            "pr": 1908,
+            "merge": "be8765e4d7dd76374b6a183d69a2c8d9191c8456",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "evidence": {
+              "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-accounting.json",
+              "sha256": "a0341b69b38c5c1e1332127f279a11216bb720d1340dc05fb44cb3d86fd32cd0"
+            }
+          }
         },
         {
           "task": "Avoid generation supplier acquisition on an independently rejected use-time resolution",
@@ -3023,42 +2820,27 @@
             "pr": 1889,
             "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
           }
+        },
+        {
+          "task": "Fail closed on existing merge sentinel prerequisites",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "implemented_hosted_validation_pending",
+          "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
+          "dependency": "Existing default-off owner; independently reviewed focused repair. Hosted exact-head checks and closure pending.",
+          "next_step": "Validate focused hosted results, exact-head review and required checks; converge and re-observe.",
+          "effort_cost": "Moderate branch/error handling with existing unit fixtures; no model/provider spend.",
+          "limits": "This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI."
         }
       ],
       "selected_next": null,
-      "rationale": "After verified closure, none of these42 documented candidates is independently eligible on current evidence; this is not a claim that no work exists elsewhere. Preserve authority/runtime/owner/consumer and paused-review blockers. Re-observe changed prerequisites, do not invent busywork.",
-      "eligibility_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\next-action-review.json",
-        "sha256": "c466cfc76d642c686b8fd1c1212df7d0f03a9165050530497351d01c8a881db8"
-      },
-      "native_anchor_reasons": [
-        "canonical_consensus_receipt_verifier_missing",
-        "canonical_sovereign_authorization_verifier_missing",
-        "canonical_principal_subject_key_attestation_missing",
-        "canonical_model_signed_evidence_trust_anchor_incomplete",
-        "canonical_model_selection_signed_evidence_verifier_missing",
-        "canonical_memex_supply_signed_evidence_verifier_missing",
-        "canonical_signer_client_peer_handshake_verifier_missing"
-      ],
-      "anchor_condition": "These seven remain after a valid current-generation receipt removes only the three manifest-selection/replay/current-generation reasons. Without that receipt, all ten remain. Readiness independently retains the missing client-side signer challenge/handshake.",
-      "existing_owners": {
-        "admission_and_audit": "GovernedValveUseTimeAuthorityResolver.resolve in reddog_execution_valve_use_time_authority.py",
-        "current_generation": "SignerCurrentGenerationUseTimeEvidence and collect_signer_current_generation_use_time_evidence",
-        "readiness": "validate_reddog_resident_runtime_artifacts; server client-credential checking is not a fresh client-side signer-peer challenge",
-        "effect_issuer_adapter": "ExternalSignerAuthoritativeUseLeaseIssuer.issue in reddog_external_signer_authoritative_use_lease.py",
-        "effect_capability": "AuthoritativeUseLease and _rehydrate_external_authoritative_use_lease in reddog_authoritative_use_lease.py",
-        "lease_contract": "reddog_authoritative_use_lease_contract.py; exact effect/request digest, nonce, requester/current-generation and replay-store bindings",
-        "pure_valve": "reddog_wre_execution_valve.py; evaluation alone performs no effect"
-      },
-      "lease_boundary": "The existing external-signer adapter verifies a signed response/current-generation binding and durable replay consumption before yielding a process-local, nonserializable one-shot capability bound to effect kind/request digest. The resident resolver currently assigns authoritative_use_lease=None unconditionally. Existing lease code is not missing wholesale; the independently admitted resident end-to-end issuance/binding remains absent. Audit receipts, serialized acceptance, generation evidence and signed work orders do not substitute for this capability.",
-      "resume_delta": {
-        "measurement_change": "PR1903 adds the WSP48 measurement hierarchy and wre_rsi_measurements.v1 to AutoResearcher/display. Source class remains execution_feedback; production_rsi_eligible is False. Reader rejects stronger self-asserted class, held-out/independent claims and non-null verification/retention/resource/rollback/generation evidence.",
-        "eligibility_effect": "Diagnostic measurement improves truthful accounting but supplies none of the seven native trust anchors, effect lease, authenticated outcome consumer or independently retained-generation evidence. No new independent action arises from this bounded source review.",
-        "other_changes": "Three YUMORI commits and new esingularity PR1906 are separately owned product work per coordinator refreshed entry; not absorbed or inspected beyond changed-path inventory.",
-        "previous_anchor_and_lease_sources_unchanged": true,
-        "candidate_identities_and_states_unchanged": true
-      },
-      "fresh_reobservation_required_after_closure": true
+      "instruction": "Re-observe exact main/owners/checks after convergence. Native18/P0 retains its seven trust/admission blockers. Re-score the remaining merge qualification separately."
     }
   }
 }

@@ -1,3 +1,13 @@
+## Merge sentinel prerequisite guard — 2026-09-27
+
+The optional `GIT_MAIN_MERGE_SENTINEL=1` startup helper now refuses to proceed
+without a named branch, readable worktree inventory, clean tracked/untracked
+status and successful fetch. Unknown or dirty state returns before push, PR,
+stash, checkout or deletion. `force=True` bypasses enablement only. ENFORCED
+still controls whether rejection also blocks application startup.
+
+This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI.
+
 # WRE Core
 
 ## Research evidence at startup

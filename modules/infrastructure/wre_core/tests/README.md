@@ -1,3 +1,21 @@
+## Merge sentinel prerequisite regression — 2026-09-27
+
+Reuse `test_git_main_merge_sentinel.py`: four original startup guards,
+30 rejection cases (15 conditions with advisory/enforced modes), two force
+controls and two clean-feature controls. Git/GH calls are replaced by exact
+fake responses, and a subprocess sentinel rejects command escape. The clean
+control stops at the first push boundary without executing it. No successful
+merge or downstream cleanup is exercised or claimed safe.
+
+The existing CI test job selects this registered unit file on its hosted Ubuntu
+runner with no conftests/plugin autoload, temporary database paths and JUnit
+artifact `merge-sentinel-prerequisites`. This is focused repository regression,
+not execution of the WRE differential plan, complete repository promotion
+evidence, native admission or OS-containment qualification of worker code.
+No local host candidate-test execution is part of this slice. Exact CI results
+and publication/cleanup state belong to the canonical RSI backlog's receipt.
+At preparation, 38 cases are authored; no passing run is claimed here.
+
 ## RSI verification measurement contract — 2026-09-25
 
 The AutoResearcher tests now require the canonical `wre_rsi_measurements.v1`

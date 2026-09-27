@@ -1,3 +1,19 @@
+## Merge prerequisite checkpoint — 2026-09-27
+
+The WSP00/WSP97 governance update at main
+`48b7c71198b712c93149af5d9447ffff83c71501` triggered a fresh compatibility review.
+Existing signed worker handoffs preserve role/principal lineage; native child
+WSP00 compliance remains unqualified. The optional merge sentinel has a concrete
+closure mismatch. The selected 14/P1 slice repairs its branch/worktree/status/fetch
+prerequisites in the existing owner and adds focused hosted regression coverage.
+
+PR1908's runner lessons are now reconciled as merged/main-verified; do not repeat
+that sprint. Exact independent review, test and publication state is in
+`docs/roadmaps/rsi_swarm_backlog.json`. Hosted regression is separate from WRE
+differential/native admission. After convergence, rescore the remaining merge
+qualification and native ticket prerequisites; do not activate the sentinel or
+treat successful preflight as reviewed merge/cleanup authority.
+
 # RSI hybrid production line: ticket dispatch and cost control
 
 ## Runner lesson checkpoint — 2026-09-27
