@@ -24,12 +24,27 @@ cleanup or rollback. The helper neither auto-stashes/pops work nor supplies
 `--delete-branch` to GitHub CLI. Clean-path deletion retains the configured
 `GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH` behavior.
 
-These are status snapshots, not an atomic worktree lock. Changes after the
-cleanup check, direct main pushes, unchecked PR merging, missing main readback,
-stale local-main updates and unleased clean-path branch deletion remain open.
-Repository-side automatic deletion is outside this helper's control. Default-off
-remains required for ordinary startup; these guards do not certify WSP 97
-terminal convergence or authorize native RSI.
+After the initial cleanup status guard, fetch explicitly from origin
+`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
+and capture one full 40/64-character hexadecimal object ID. Read status again
+after the fetch/resolution, then update local main using the captured ID.
+Fetch, resolution, status or branch-update failure stops before checkout and
+explicit deletion; there is no cached-target fallback.
+
+New synchronization errors are `cleanup_fetch_failed`,
+`cleanup_commit_resolution_failed` and `cleanup_main_update_failed`.
+Late status failures reuse `cleanup_working_tree_dirty`/`cleanup_status_failed`.
+All preserve `merged=True` as prior remote-command success only and
+`passed = not ENFORCED`; no rollback is implied. Commit peeling, not the string
+shape alone, checks commit type. Local branch-force uses the captured ID.
+
+These are snapshots, not an atomic worktree/ref lock. Ref movement before
+commit capture and worktree/ref changes after the final status remain races.
+The fetch updates the remote-tracking ref even if a later check blocks local
+main. Freshness does not prove intended content, checks or merge authority.
+Direct/backup pushes, unchecked PR merging, main readback, unleased branch
+deletion and server-side auto-delete remain open. Default-off remains required;
+this does not certify WSP 97 terminal convergence or authorize native RSI.
 
 # WRE Core Interface
 

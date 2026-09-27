@@ -1,3 +1,17 @@
+## Merge synchronization checkpoint — 2026-09-27
+
+PR1913 is `MERGED_VERIFIED_MAIN` at `fbfc3ce405ca1cf467d66eb0239c0e73688358fd`:
+68 identical cases passed on PR/main; all PR checks and main CI/CodeQL passed;
+its owned branch/worktree is retired. Main advanced only through a separate
+eSingularity Drive document. All 95 peer heads and shared checkout are unchanged.
+
+Fresh WSP 15 selection is 14/P1: bind local-main synchronization to a fresh
+captured commit, with a second cleanup status check after fetch and rejection
+on failed synchronization. Existing source/test/CI owners are reused; 136 cases
+are authored, with candidate hosted validation and closure pending. The current
+backlog binds independent acceptance and terminal receipt paths. Re-score after
+closure. This does not admit native RSI or qualify merge/deletion authority.
+
 ## Merge ownership checkpoint — 2026-09-27
 
 PR1912 is `MERGED_VERIFIED_MAIN` at `1b02ba7a9214b0c3b8128243f24864c1dfbc779d`:

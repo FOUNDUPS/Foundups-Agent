@@ -1,3 +1,10 @@
+## 2026-09-27: Require fresh local-main synchronization
+
+- WSP 00/15/22/34/50/62/84/97; C3/I4/D3/Impact4 = 14/P1. PR1913 is merged/main-verified and retired. Fresh ranking and independent acceptance retain this existing-owner action after one unrelated eSingularity documentation update.
+- Extract the existing cleanup guard into a cohesive synchronization helper: targeted origin/main fetch, commit peeling/full-ID validation, late status check and successful exact-object branch update before checkout/deletion. Failures preserve command-success `merged=True` and ENFORCED startup semantics.
+- Extend the existing fake-command suite to 136 authored cases and reuse hosted CI. New helper remains below 50 lines; the inherited large entry function shrinks. No live sentinel, provider, service or native worker.
+- Ref/status races, intended-content/check authority, server-side deletion and unleased cleanup remain separate; see INTERFACE and canonical backlog receipts.
+
 ## 2026-09-27: Preserve post-preflight work before merge cleanup
 
 - WSP00/15/22/34/50/84/97; C3/I4/D3/Impact4=14/P1. PR1912 is merged/main-verified and its owned lane retired. Re-observation selected this existing-owner repair; no new framework or runtime authority.

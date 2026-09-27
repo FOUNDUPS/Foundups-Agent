@@ -241,10 +241,39 @@ def test_enforced_sentinel_fails_when_main_checked_out_elsewhere(
     assert result["error"] == "main_checked_out_in_another_worktree"
 
 
+FETCHED_COMMIT = "a1" * 20
+
+
+def _sync_transcript_steps(delete_branch, sync_failure, fetched_commit):
+    """Explicit successful transcript, truncated at a declared failing stage."""
+    steps = [
+        ("git", ["fetch", "--no-tags", "--quiet", "origin",
+                 "+refs/heads/main:refs/remotes/origin/main"], (True, "")),
+        ("git", ["rev-parse", "--verify", "refs/remotes/origin/main^{commit}"],
+         (True, fetched_commit)),
+        ("git", ["status", "--porcelain", "--untracked-files=all"], (True, "")),
+        ("git", ["branch", "-f", "main", fetched_commit], (True, "")),
+        ("git", ["checkout", "main"], (True, "")),
+    ]
+    if sync_failure:
+        stage, response = sync_failure
+        index = {"fetch": 0, "resolve": 1, "late_status": 2, "update": 3}[stage]
+        tool, args, _ = steps[index]
+        return steps[:index] + [(tool, args, response)]
+    if delete_branch:
+        steps.extend([
+            ("git", ["branch", "-D", "feature/demo"], (True, "")),
+            ("git", ["push", "origin", "--delete", "feature/demo"], (True, "")),
+            ("git", ["push", "backup", "--delete", "feature/demo"], (True, "")),
+        ])
+    return steps
+
+
 def _cleanup_transcript_steps(
     tmp_path: Path, route: str, *,
     cleanup_response: tuple[bool, str] = (True, ""),
     delete_branch: bool = False, merge_succeeds: bool = True,
+    sync_failure: tuple | None = None, fetched_commit: str = FETCHED_COMMIT,
 ) -> list:
     """Declare ordered command responses for the scoped cleanup contract."""
     assert route in ("direct", "existing", "new", "create_failure")
@@ -276,12 +305,7 @@ def _cleanup_transcript_steps(
     if merged:
         add("git", ["status", "--porcelain", "--untracked-files=all"], cleanup_response)
         if cleanup_response[0] and not cleanup_response[1].strip():
-            add("git", ["branch", "-f", "main", "origin/main"])
-            add("git", ["checkout", "main"])
-            if delete_branch:
-                add("git", ["branch", "-D", "feature/demo"])
-                add("git", ["push", "origin", "--delete", "feature/demo"])
-                add("git", ["push", "backup", "--delete", "feature/demo"])
+            steps.extend(_sync_transcript_steps(delete_branch, sync_failure, fetched_commit))
     return steps
 
 
@@ -289,6 +313,7 @@ def _install_cleanup_transcript(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str, *,
     cleanup_response: tuple[bool, str] = (True, ""),
     delete_branch: bool = False, merge_succeeds: bool = True,
+    sync_failure: tuple | None = None, fetched_commit: str = FETCHED_COMMIT,
 ) -> tuple[list, list]:
     """Install fakes which reject any extra, missing or reordered command."""
     monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "1")
@@ -296,6 +321,7 @@ def _install_cleanup_transcript(
     steps = _cleanup_transcript_steps(
         tmp_path, route, cleanup_response=cleanup_response,
         delete_branch=delete_branch, merge_succeeds=merge_succeeds,
+        sync_failure=sync_failure, fetched_commit=fetched_commit,
     )
     calls = []
 
@@ -356,6 +382,8 @@ def test_clean_cleanup_keeps_explicit_deletion_setting(
     assert len(calls) == len(steps)
     assert not any(args[0] == "stash" or "--delete-branch" in args for _, args in calls)
     assert (("git", ["branch", "-D", "feature/demo"]) in calls) is delete_branch
+    assert ("git", ["branch", "-f", "main", FETCHED_COMMIT]) in calls
+    assert not any(args == ["branch", "-f", "main", "origin/main"] for _, args in calls)
 
 
 @pytest.mark.parametrize("route", ["existing", "new", "create_failure"])
@@ -375,3 +403,58 @@ def test_terminal_merge_failure_never_enters_cleanup(
     assert sum(args[0] == "status" for _, args in calls) == 1
     assert not any(args[0] in ("branch", "checkout", "stash") or
                    "--delete" in args or "--delete-branch" in args for _, args in calls)
+
+
+@pytest.mark.parametrize("route", ["direct", "existing", "new"])
+@pytest.mark.parametrize("enforced", [False, True])
+@pytest.mark.parametrize(
+    "stage,response,error",
+    [("fetch", (False, "fetch rejected"), "cleanup_fetch_failed"),
+     ("resolve", (False, "not a commit"), "cleanup_commit_resolution_failed"),
+     ("resolve", (True, ""), "cleanup_commit_resolution_failed"),
+     ("resolve", (True, "origin/main"), "cleanup_commit_resolution_failed"),
+     ("resolve", (True, "a1a1a1a"), "cleanup_commit_resolution_failed"),
+     ("resolve", (True, FETCHED_COMMIT + "\n" + FETCHED_COMMIT), "cleanup_commit_resolution_failed"),
+     ("resolve", (True, "z" * 40), "cleanup_commit_resolution_failed"),
+     ("late_status", (True, " M concurrent.py"), "cleanup_working_tree_dirty"),
+     ("late_status", (True, "?? concurrent.py"), "cleanup_working_tree_dirty"),
+     ("late_status", (False, "unreadable"), "cleanup_status_failed"),
+     ("update", (False, "main is checked out elsewhere"), "cleanup_main_update_failed")],
+    ids=["fetch", "resolve", "empty", "symbolic", "abbreviated", "multiline",
+         "nonhex", "late-tracked", "late-untracked", "late-unreadable", "update"],
+)
+def test_failed_synchronization_stops_before_checkout_or_deletion(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str, enforced: bool,
+    stage: str, response: tuple[bool, str], error: str,
+) -> None:
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", str(int(enforced)))
+    calls, steps = _install_cleanup_transcript(
+        monkeypatch, tmp_path, route, delete_branch=True, sync_failure=(stage, response),
+    )
+    result = sentinel.run_main_merge_sentinel(tmp_path)
+    assert result["merged"] is True
+    assert result["passed"] is not enforced
+    assert result["error"] == error
+    assert len(calls) == len(steps)
+    assert calls[-1] == steps[-1][:2]
+    assert not any(args[0] in ("checkout", "stash") or
+                   "--delete" in args or "--delete-branch" in args for _, args in calls)
+    updates = [args for tool, args in calls if tool == "git" and args[0] == "branch"]
+    assert updates == ([["branch", "-f", "main", FETCHED_COMMIT]] if stage == "update" else [])
+
+
+@pytest.mark.parametrize("delete_branch", [False, True])
+def test_sha256_fetched_commit_is_passed_as_exact_local_target(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, delete_branch: bool,
+) -> None:
+    commit = "b2" * 32
+    calls, steps = _install_cleanup_transcript(
+        monkeypatch, tmp_path, "existing", delete_branch=delete_branch, fetched_commit=commit,
+    )
+    result = sentinel.run_main_merge_sentinel(tmp_path)
+    assert result["merged"] is True
+    assert result["passed"] is True
+    assert result["error"] is None
+    assert len(calls) == len(steps)
+    assert ("git", ["branch", "-f", "main", commit]) in calls
+    assert (("git", ["branch", "-D", "feature/demo"]) in calls) is delete_branch

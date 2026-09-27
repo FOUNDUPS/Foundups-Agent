@@ -19,7 +19,7 @@ Flow:
     5. Try fast-forward: git push origin HEAD:main
     6. If fails (diverged) -> create PR via gh, merge via gh pr merge
     7. Require a second clean/readable status before local cleanup
-    8. Update local main and checkout main without automatic stash/pop
+    8. Fetch/resolve main, recheck status and require local synchronization
     9. Delete old feature branch when configured (local + both remotes)
 
 Environment:
@@ -30,6 +30,7 @@ Environment:
 
 import logging
 import os
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -132,6 +133,39 @@ def _branch_checkout_paths(
     # A competing main checkout is independently sufficient to block. Otherwise
     # require evidence for this checkout rather than treating an omission as safe.
     return matches if matches or current_seen else None
+
+
+def _synchronize_local_main(repo_root: Path, actions: list[str]) -> str | None:
+    """Refresh and pin a commit before local cleanup; snapshots are not locks."""
+    ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
+    if not ok or status.strip():
+        actions.append("blocked: cleanup requires a clean, readable working tree")
+        return "cleanup_working_tree_dirty" if ok else "cleanup_status_failed"
+
+    ok, _ = _git(
+        ["fetch", "--no-tags", "--quiet", "origin",
+         "+refs/heads/main:refs/remotes/origin/main"], repo_root, timeout=15,
+    )
+    if not ok:
+        return "cleanup_fetch_failed"
+    actions.append("refreshed origin/main")
+    ok, commit = _git(
+        ["rev-parse", "--verify", "refs/remotes/origin/main^{commit}"], repo_root,
+    )
+    if not ok or not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", commit):
+        return "cleanup_commit_resolution_failed"
+
+    # Capture once: later ref movement cannot change this update's target.
+    # Ref changes before capture and changes after status remain separate races.
+    ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
+    if not ok or status.strip():
+        actions.append("blocked: cleanup requires a clean, readable working tree")
+        return "cleanup_working_tree_dirty" if ok else "cleanup_status_failed"
+    ok, _ = _git(["branch", "-f", "main", commit], repo_root)
+    if not ok:
+        return "cleanup_main_update_failed"
+    actions.append("updated local main")
+    return None
 
 
 def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, Any]:
@@ -275,19 +309,12 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
 
     # If merged, update local main and checkout
     if result["merged"]:
-        # Remote command success does not grant ownership of work that appeared
-        # after preflight. Preserve it before any local ref/checkout/deletion.
-        ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
-        if not ok or status.strip():
-            result["error"] = "cleanup_working_tree_dirty" if ok else "cleanup_status_failed"
-            result["actions"].append("blocked: cleanup requires a clean, readable working tree")
+        # Command success is not main verification or cleanup authority.
+        error = _synchronize_local_main(repo_root, result["actions"])
+        if error:
+            result["error"] = error
             result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
             return result
-
-        # Update local main to match origin/main
-        ok, _ = _git(["branch", "-f", "main", "origin/main"], repo_root)
-        if ok:
-            result["actions"].append("updated local main")
 
         # Checkout main
         ok, output = _git(["checkout", "main"], repo_root)

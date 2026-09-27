@@ -1,3 +1,10 @@
+## 2026-09-27: Fresh commit synchronization before sentinel cleanup
+
+- WSP 00/6/15/22/34/50/62/84/97. Reuse all 68 prior case IDs and the ordered Git/GH fake transcript; add 66 negatives covering refresh, commit resolution/invalid output, late status and local update failure, plus two full SHA256 controls. Total 136 authored cases; no new test owner or runner.
+- All negative cases enable deletion. Exact captured commit, strict stop order, advisory/ENFORCED projection and no subprocess escape are required. Earlier dirty guards and terminal merge failures remain unchanged.
+- PR1913 is merged/main-verified, with 68 identical IDs passing on PR/main. Candidate execution is pending existing hosted CI; no host-principal candidate tests. Exact source/hosted/closure receipts: `O:/Foundups-Agent-audits/20260927-rsi-merge-sync/`.
+- Fake command results qualify branch behavior, not live Git synchronization, concurrency, verified merge authority or native RSI admission.
+
 ## 2026-09-27: Preserve work detected before sentinel cleanup
 
 - WSP00/6/15/22/34/50/84/97. Retained 38 prerequisite cases and added 30 cases in the existing test file: 18 dirty/unreadable cleanup failures, six clean/deletion controls, six actual terminal GH failures. Direct-push rejection enters GH fallback and is not itself a terminal failed merge.

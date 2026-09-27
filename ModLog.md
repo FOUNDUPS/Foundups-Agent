@@ -1,3 +1,9 @@
+## 2026-09-27: RSI fresh-main synchronization guard
+
+- PR1913 closed as `MERGED_VERIFIED_MAIN` at `fbfc3ce40`; 68 exact case IDs passed on PR/main, all PR/main checks passed and owned lane retired. Shared checkout and 95 peer heads preserved.
+- Re-observed main `ea6301814` (only a separate eSingularity Drive document changed). WSP 15 selects 14/P1 fresh local-main synchronization in the existing WRE sentinel; independent acceptance frozen before source edits.
+- The same source/test owner and hosted regression path are used. Required canonical roadmap/backlog/module docs retain boundaries and receipt links. Native trust/admission blockers remain unresolved.
+
 ## 2026-09-27: RSI merge cleanup ownership guard
 
 - Reconciled PR1912 as `MERGED_VERIFIED_MAIN` at `1b02ba7a9`;38 identical test IDs passed on PR/main, all10 PR checks and main CI/CodeQL passed, owned branch/worktree retired.
