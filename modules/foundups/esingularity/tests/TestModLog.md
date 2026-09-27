@@ -1,3 +1,9 @@
+## 2026-09-28 — Pre-draft correspondence state capsule
+
+- Extended the existing `test_contracts.py` correspondence contract; no parallel test file or email-memory database was created.
+- Requires the YUMORI correspondence parent to reconstruct a compact state capsule before recipient-finalized draft creation/material update and again before send.
+- Freezes the provider-derived follow-up count, old-ask versus new-delta split, held-draft state, routing/sender-boundary state, next expected event and fail-closed third-follow-up guard.
+- Gmail remains transaction truth; CRM and Moshpits remain their existing projections/learning roles.
 # eSingularity TestModLog
 
 ## 2026-09-23 — Current council-position concatenation regression
