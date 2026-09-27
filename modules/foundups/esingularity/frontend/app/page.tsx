@@ -51,23 +51,23 @@ export default function Home() {
               <a className="button button-ghost" href="/reports/jhr">JHR・最新レポート <span>→</span></a>
             </div>
             <a className="hero-jhr-news" href="/reports/jhr#latest"><span>JHR｜9月12日確認</span><strong>仙台200MW計画、9月11日に資金調達協議の基本合意を発表。</strong><small>ハイパースケーラー＝巨大なクラウド・AI計算基盤を運営する企業。全国の動きと福井への意味を読む →</small></a>
-            <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>解体予算に反対を。VOTE NO</span><b>湯守に登録・準備委員会に参加 →</b></a>
+            <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>採決後は、PPP/PFIで解体案と再利用案を比較する。</span><b>湯守に登録・準備委員会に参加 →</b></a>
           </div>
           <FukuiComparisonMap />
         </section>
 
         <section className="story section current-position" id="current-position" aria-labelledby="current-position-title">
-          <div className="section-index">現在の委員会要請 <span>/ 2026年9月23日更新</span></div>
+          <div className="section-index">現在の委員会要請 <span>/ 2026年9月28日更新</span></div>
           <div className="story-heading">
             <div>
               <p className="eyebrow"><span /> すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会</p>
-              <h2 id="current-position-title">9月25日の採決に向けた<br /><em>現在の立場。</em></h2>
+              <h2 id="current-position-title">9月25日の採決後の<br /><em>現在の立場。</em></h2>
             </div>
-            <p>本委員会の現在の要請は、9月25日の採決で「旧すかっとランド九頭竜解体準備事業」を含む予算案について反対票を求めることです。以前の「60日間の延期」「一定期間の保留」は、現在の要請ではありません。</p>
+            <p>9月25日の採決は終了しました。本委員会の現在の要請は、不可逆な解体調達・工事へ進む前に、福井市がPPP/PFIの官民連携ルートを指定し、解体案と再利用案を同じ証拠で比較検証することです。令和8年度の財産有効活用民間提案制度は別制度であり、旧すかっとランド九頭竜について本委員会が求める手続ではありません。</p>
           </div>
           <div className="evidence-boundary">
-            <strong>予算判断と、YUMORI案の採否は別の判断です。</strong>
-            <p>反対票は、YUMORI案の採用、データセンター建設、市による出資・債務保証、補助金交付、随意契約を承認するものではありません。再利用案の採否は、別途の正式手続、技術・財務検証、地権者・地域との協議、公平な審査を経て判断されるべきだと、本委員会は考えています。</p>
+            <strong>予算の可決と、解体工事の実施、YUMORI案の採否は別の判断です。</strong>
+            <p>本委員会は、YUMORI案の自動採用や随意契約を求めていません。PPP/PFIの正式な案件形成として、建物資料・現地調査へのアクセス、技術・財務・VFM、リスク分担、地権者・地域との協議を含む比較検証を求めています。</p>
             <div className="scenario-links">
               <a href="https://yumori.me/vote-no" target="_blank" rel="noreferrer">公開記録 <b>↗</b></a>
               <a href="https://yumori.info" target="_blank" rel="noreferrer">プロジェクト概要 <b>↗</b></a>
@@ -147,7 +147,7 @@ export default function Home() {
           <div className="story-heading"><div><p className="eyebrow"><span /> 公表資料から始める</p><h2 id="evidence-title">構想と事実を、<br /><em>混ぜない。</em></h2></div><p>1994年に開館した実在施設です。公開資料で確認できる事実、プロジェクトの仮説、まだ必要な検証を分けて表示します。</p></div>
           <div className="fact-rail" role="list" aria-label="施設の公表事実">
             <article role="listitem"><span>46.8億円</span><strong>建設時</strong><p>福井市の公表資料に記載された建設費。</p></article>
-            <article role="listitem"><span>8,099.56㎡</span><strong>延床面積</strong><p>福井市の財産資料に記載された既存建物の規模。</p></article>
+            <article role="listitem"><span>8,099.56㎡</span><strong>財産資料の延床面積</strong><p>福井市の財産資料の数値。2026年9月の解体準備事業資料は8,923.56㎡と記載しており、体育館等を含む範囲差の可能性がありますが、内訳は市へ確認中です。</p></article>
             <article role="listitem"><span>約15.8億円</span><strong>将来の解体見込み</strong><p>2026年6月の市議会質問資料に示された見込みで、確定契約額ではありません。</p></article>
             <article role="listitem"><span>129,649人</span><strong>2018年度利用</strong><p>入館者と宿泊者を合わせた、閉館前の利用実績。</p></article>
           </div>
