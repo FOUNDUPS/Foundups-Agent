@@ -1873,98 +1873,80 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
-    "selected_action": "rsi-observer-requester-contract-20260927",
-    "status": "observer_requester_contract_corrected_review_pending",
-    "wsp15": {
-      "complexity": 2,
+    "base_commit": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
+    "selected_action": null,
+    "status": "backend_blocked_no_executable_followup_without_changed_evidence",
+    "wsp15": null,
+    "remaining_supervisor_wsp15": {
+      "complexity": 3,
       "importance": 4,
       "deferability": 3,
       "impact": 4,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-observer-requester-contract-20260927",
-    "base": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+    "observation_id": "rsi-manager-backend-closure-20260928",
+    "base": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
     "self": "0102",
-    "role": "architect",
-    "origin": "external_principal",
+    "role": "coordinator",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
     "selected": {
-      "task": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
+      "task": "Reconcile existing canonical RSI checkpoint with verified closure and rejected manager-backend qualification",
       "wsp15": {
-        "complexity": 2,
-        "importance": 4,
+        "complexity": 1,
+        "importance": 3,
         "deferability": 3,
-        "impact": 4,
-        "total": 13,
-        "priority": "P1"
+        "impact": 3,
+        "total": 10,
+        "priority": "P2"
       },
-      "state": "observer_requester_contract_corrected_review_pending",
-      "eligibility": "PR1923 is MERGED_VERIFIED_MAIN at5578f7bd with independent original PR/main artifacts and owned cleanup. This documentation correction is executable; runtime implementation requires a separately frozen connected transport/verifier contract and admitted visibility qualification.",
-      "rationale": "C2 for a bounded correction to existing contract/acceptance, I4 because the current same-process requester path cannot simply become an independent supervisor, D3 because admission remains disabled, impact4 for reusable lifecycle integration. Reopen the existing design row as partial instead of adding a 53rd task. Higher executable source repairs have closed; remaining higher rows retain their stated dependencies.",
-      "source": [
-        "reddog_external_signer_os_observer.py::_validate_policy",
-        "reddog_external_signer_lifecycle_admission.py::_verified_admission_values",
-        "reddog_external_signer_lifecycle_admission.py::_build_lifecycle_factory",
-        "reddog_signer_process_isolation_gate.py::enforce_signer_process_isolation",
-        "INTERFACE.md::External supervision source contract"
-      ],
-      "smallest_coherent_scope": "Revise the existing INTERFACE external-supervision contract, required existing roadmap/ModLog and canonical row. Explicitly distinguish the authenticated observer/supervisor identity and procfs visibility from the actual kernel-attested handshake requester. Name the existing owner and canonical producer/consumer before any issuer implementation; preserve public audit injection and strict resident provenance requirements. Do not create another registry, disconnected adapter, repeated requester-mismatch tests, or new design document.",
-      "fixed_acceptance_before_edit": [
-        "Three roles are explicit: isolated non-dumpable signer, authenticated supervisor observer, unprivileged handshake requester. Expected policy fields cannot silently relabel the supervisor as requester.",
-        "Identify exactly where supervisor observations cross into the existing lifecycle consumer, which existing authenticated owner validates their provenance, and how actual requester/profile/generation/socket/start identity and one-attempt time/lifetime are bound. A bool, digest-only receipt, caller-created policy or arbitrary callback is insufficient.",
-        "Keep existing local audit/default observer semantics and requester kernel-identity rejection intact. A future separate authenticated-observation route requires deliberate canonical registration/consumption; injected callbacks must not pass require_default_dependencies=True by assertion or alias.",
-        "A future connected fixture must prove a valid authenticated supervisor observation plus independent correct requester handshake, and reject wrong observer issuer, wrong requester/profile/generation, swapped socket/process/invocation, replay/expiry, observation denial and identity drift before promotion. Test the actual consumer and preserve existing one-use/rejection behavior; do not duplicate the existing forged-requester test.",
-        "Document why systemd MainPID/InvocationID, pidfd and owner-selected expected fields alone do not supply procfs access or authenticate a cross-process observation transport. Actual deployment visibility and privilege policy must be independently qualified.",
-        "No requester CAP_SYS_PTRACE, dumpability weakening, signer/requester identity collapse, live service activation, or native/effect lease grant is part of this correction."
-      ],
-      "limits": [
-        "Design correction, not a completed authenticated issuer or production topology.",
-        "No claim that this same-UID experiment proves distinct-UID public observer operation.",
-        "All seven resident blockers and authoritative_use_lease=None remain; source design does not require pretending that live runtime authority already exists.",
-        "PR1923 same-UID visibility outcomes are verified; current documentation-only regression and closure remain pending."
-      ]
+      "state": "canonical_source_reconciled_publication_receipt_bound",
+      "parent": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
+      "reason": "Current backlog still presents PR1924 review-pending work. Verified merge plus three reviewed failed compositions across two dependencies must be discoverable through the existing canonical entry. All higher unclosed actions retain explicit prerequisites.",
+      "effort_cost": "Small existing-text/JSON status reconciliation; no provider/model/runtime launch.",
+      "verification_burden": "Exact source/receipt links, preserved52-row/26-packet identities, JSON/schema checks, independent diff review and ordinary exact-head/main closure checks.",
+      "implementation_ready": false,
+      "deployment_authority": false,
+      "do_not_redispatch": true
     },
     "wsp15": {
-      "complexity": 2,
-      "importance": 4,
+      "complexity": 1,
+      "importance": 3,
       "deferability": 3,
-      "impact": 4,
-      "total": 13,
-      "priority": "P1"
+      "impact": 3,
+      "total": 10,
+      "priority": "P2"
     },
     "previous_closed": {
-      "utc": "2026-09-27T11:01:45.487350+00:00",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "pr": 1923,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1923",
-      "head": "13d4f774d51763c92666ee48b8c79e733949b1d2",
-      "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
-      "tree": "c4bf78d3efbdb3fc6e147b649195f1e0d8aa9bc1",
-      "main_readback": "All13 scoped blobs and full tree equal independent exact-head review.",
-      "readback_recovery": null,
+      "pr": 1924,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1924",
+      "head": "f37735442805ceb6591dc8f552e013d581e6727e",
+      "merge": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
+      "tree": "264e336fe475033f179dbe522583a28e3864b703",
       "pr_checks": "All10 passed at exact head.",
       "main_checks": {
-        "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+        "merge": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
         "runs": [
           {
             "conclusion": "success",
-            "databaseId": 36313896072,
+            "databaseId": 36317308846,
             "event": "push",
-            "headSha": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+            "headSha": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
             "status": "completed",
             "workflowName": "CI"
           },
           {
             "conclusion": "success",
-            "databaseId": 36313895876,
+            "databaseId": 36317308432,
             "event": "dynamic",
-            "headSha": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+            "headSha": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
             "status": "completed",
             "workflowName": "CodeQL"
           }
@@ -1973,17 +1955,17 @@
       },
       "hosted_regression": {
         "cases": 254,
-        "parent_cases": 252,
+        "parent_cases": 254,
         "failures": 0,
         "errors": 0,
         "skipped": 0,
         "receipt": "hosted-results.json"
       },
       "main_hosted_regression": {
-        "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
-        "run": 36313896072,
+        "merge": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
+        "run": 36317308846,
         "cases": 254,
-        "parent_cases": 252,
+        "parent_cases": 254,
         "exact_test_ids_match_pr": true,
         "failures": 0,
         "errors": 0,
@@ -1994,134 +1976,123 @@
           "cryptography": "50.0.1"
         },
         "xml_sha256": {
-          "parent": "3fda234fe0f560af8e2f1d7c7443b51044d5941289fe28b57e9624e116c94a56",
-          "candidate": "dc0b6a6e681d7c6b9df0f1b6b6093f0200db7a327612c8d985833fa06ed79c02"
+          "parent": "6c7bbb9349b79d7a575a8c956d247761ebe7f7324d04ef3e9ea2a9215a58f4af",
+          "candidate": "23775a0b72972b9ad16dabb5ba967d16d20a4af3220ee86f8999e36ded88a85e"
         }
       },
-      "kernel_characterization": {
-        "pr_receipt": "hosted-kernel-results.json",
-        "main_receipt": "main-kernel-results.json",
-        "independent_review": "hosted-evidence-review.json",
-        "independent_main_review": "main-evidence-review.json",
-        "historical_cases": 2,
-        "production_association_cases": 1,
-        "production_supervision_qualified": false
-      },
-      "process_visibility": {
-        "pr_receipt": "hosted-process-results.json",
-        "main_receipt": "main-process-results.json",
-        "qualified_child_cases": 2,
-        "production_supervision_qualified": false
-      },
-      "local_tests_executed": 0,
-      "owned_worktree_removed": "O:\\Foundups-Agent-worktrees\\rsi-process-visibility-20260927",
-      "owned_local_branch_removed": "test/rsi-process-visibility-20260927",
-      "owned_remote_branch_removed": "test/rsi-process-visibility-20260927",
-      "peer_heads_unchanged": 95,
-      "shared_snapshot_unchanged": true,
-      "persistent_observer": {
-        "path": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
-        "head": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
-        "state": "ACTIVE_OWNED_WORK",
-        "clean": true
-      },
-      "runtime_effects": "Two hosted same-UID child visibility cases plus three prior own-socket cases; no authenticated cross-UID supervision proof. No live signer/service/provider/native worker/product activation. Native RSI remains incomplete.",
-      "next_action_review": "next-action-review.json"
+      "owned_lane_retired": true,
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\final-accounting.json",
+      "closure_receipt_sha256": "61aa53ff114787eb58ace681ae3f32b25516c5be9cffe8a77a313c275b0f8103",
+      "limits": "Historical254 parent/254 candidate cases, not a new source-review test run or production supervision proof."
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\previous-observation.json",
-      "sha256": "f225c0a901e7fca1af924670a3d6cd6580a747bbf4290c3a06325b42eb264fcf",
-      "repository_ref": "5578f7bd75dec3becb78a844bd282b1fd73aea94:docs/roadmaps/rsi_swarm_backlog.json",
+      "path": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\previous-observation.json",
+      "sha256": "781df609283ff696bb3bb071cf114f886d5155df475821bce2acd7bf7d4c1f1d",
+      "git_base": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
+      "git_path": "docs/roadmaps/rsi_swarm_backlog.json",
       "json_path": "current_observation"
     },
-    "acceptance": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\acceptance.json",
-      "sha256": "af97d63232870d3a3606456ae399499201871b1882b84cc92f683321275596ac"
+    "backend_qualification": {
+      "state": "controlled_source_failure_independently_reviewed",
+      "dbus_fast": {
+        "version": "5.0.22",
+        "commit": "350eed7095f58bdae4d0482ebfd4d9f55a919f75",
+        "source": "https://github.com/Bluetooth-Devices/dbus-fast/tree/350eed7095f58bdae4d0482ebfd4d9f55a919f75"
+      },
+      "jeepney": {
+        "version": "0.9.0",
+        "sdist_sha256": "cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732",
+        "source": "https://pypi.org/project/jeepney/0.9.0/"
+      },
+      "rejected_compositions": [
+        {
+          "composition": "dbus-fast MessageBus",
+          "finding": "Pre-authentication and pending received-FD cleanup ownership not established through normal APIs."
+        },
+        {
+          "composition": "Jeepney core Parser",
+          "finding": "Degenerate accepted container grammar permits a non-advancing synchronous parse."
+        },
+        {
+          "composition": "dbus-fast stream-only codec",
+          "finding": "Caller-owned I/O is feasible; strict semantic end equality, wire validity and all-malformed progress are not established by the consumed API."
+        }
+      ],
+      "reviews": [
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\dbus-fast-review.json",
+          "sha256": "46a723d5ccb76d7eb9d633ca59214f6915844c8dc9478f1644776a49b63c579d",
+          "scope": "Independent source/plan review, not execution evidence"
+        },
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\jeepney-review.json",
+          "sha256": "2e7186c926960e32b5586e85013329a9352fb59ff7ebfbceb3902f9fffce99a1",
+          "scope": "Independent source/plan review, not execution evidence"
+        },
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\codec-review.json",
+          "sha256": "b37a0bf4d54198e966fc2c26b5b45594bd03f54217650de5ca12cf1d9a30f52c",
+          "scope": "Independent source/plan review, not execution evidence"
+        },
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\disposition-review.json",
+          "sha256": "c834612035348e1e64b33439818f47e0811ae0750b7430d99e2685660a5ed4ab",
+          "scope": "Independent source/plan review, not execution evidence"
+        }
+      ],
+      "new_tests_run": 0,
+      "package_import_or_install": false,
+      "runtime_or_privilege_actions": 0,
+      "limits": [
+        "No executed exploit/leak/hang or deployed exposure claimed.",
+        "Do not conflate Jeepney zero-progress evidence with dbus-fast unqualified progress.",
+        "No third-library search, parser fork/new grammar or broad containment selected."
+      ],
+      "resume_prerequisite": "Reviewed strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress and usable interpreted/compiled API evidence. Then fresh source/ownership reconciliation and WSP15 selection; deployment visibility, authenticated transport and native authority remain separate."
     },
     "retrieval": {
-      "holo": "Authority5326080d/queryhost0c81418f unchanged: previous HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained; explicit degraded Git/rg, no repeated failing probe or reindex.",
-      "noise": "Narrowed to actual observer/lifecycle/service owner and nearest test contracts; no broad stale transcript conclusions.",
-      "ordering": "WSP00/bootstrap; actual15/97; exact main/PR closure/52rows; module docs; source producer/consumer and independent source review.",
-      "missing": "Module memory/README.md and requirements.txt absent. No canonical authenticated supervisor observation transport, registered consumer, or deployment visibility qualification. Do not create placeholders.",
-      "staleness": "Exact main,95peerheads,shared/Holo roots unchanged; reuse exact failed Holo proof only for this unchanged state. Correct stale active supervision inode diagnosis using merged PR1922 and PR1923 evidence.",
-      "duplication": "Correct existing INTERFACE section and canonical row; no new module, skill, document, test or authority registry."
+      "noise": "Bounded current checkpoint and exact previously reviewed receipts; no full audit.",
+      "ordering": "Fresh WSP00, actual WSP15/97, current ownership/CI and canonical docs.",
+      "missing_artifacts": "Strict-decoder and native authority evidence remain absent; closure does not create them.",
+      "staleness": "Exact prior hashes and fresh current main/peer/shared readback.",
+      "duplication": "Existing six docs/current observation; no new roadmap/module/skill or extra task.",
+      "holo": "Explicit degraded Git/rg at unchanged mismatched authority/query roots; no repeat failed query."
     },
     "allocation": {
-      "effort": "C2 bounded documentation correction using source-grounded owners; no provider spend.",
-      "verification": "Static scope/link/JSON/source mapping, independent exact documentation review; identical254 parent/candidate hosted cases and unchanged effects. PR/main checks and owned cleanup.",
-      "manual_reason": "Native Qwen/Gemma path not admitted;0102 source reconciliation plus independent0102 verifier."
+      "wsp15": {
+        "complexity": 1,
+        "importance": 3,
+        "deferability": 3,
+        "impact": 3,
+        "total": 10,
+        "priority": "P2"
+      },
+      "effort_cost": "Small existing-text/JSON status reconciliation; no provider/model/runtime launch.",
+      "verification_burden": "Exact source/receipt links, preserved52-row/26-packet identities, JSON/schema checks, independent diff review and ordinary exact-head/main closure checks.",
+      "execution_plane": "Owned local docs/metadata work with independent source review; no native WRE admission.",
+      "manual_coordination_reason": "Native Qwen/Gemma/WRE admission remains absent; existing docs and independent0102 review used without claiming native learning retention."
     },
     "owner_reconciliation": {
-      "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\entry.json",
-        "sha256": "365fc5605eff600943ae02896db2b3ff05a6fb5890f67f22dc51e25092567dfe"
-      },
-      "peers_unchanged": 95,
-      "overlap": [
-        {
-          "number": 1860,
-          "paths": [
-            "ModLog.md",
-            "modules/communication/moltbot_bridge/INTERFACE.md",
-            "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1792,
-          "paths": [
-            "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1648,
-          "paths": [
-            "ModLog.md",
-            "modules/communication/moltbot_bridge/INTERFACE.md",
-            "modules/communication/moltbot_bridge/ModLog.md",
-            "modules/communication/moltbot_bridge/README.md",
-            "modules/communication/moltbot_bridge/ROADMAP.md",
-            "modules/communication/moltbot_bridge/tests/README.md",
-            "modules/communication/moltbot_bridge/tests/TestModLog.md"
-          ]
-        },
-        {
-          "number": 1645,
-          "paths": [
-            "modules/communication/moltbot_bridge/INTERFACE.md",
-            "modules/communication/moltbot_bridge/ModLog.md",
-            "modules/communication/moltbot_bridge/README.md",
-            "modules/communication/moltbot_bridge/ROADMAP.md",
-            "modules/communication/moltbot_bridge/tests/README.md",
-            "modules/communication/moltbot_bridge/tests/TestModLog.md"
-          ]
-        },
-        {
-          "number": 802,
-          "paths": [
-            "ModLog.md"
-          ]
-        },
-        {
-          "number": 782,
-          "paths": [
-            "ModLog.md"
-          ]
-        }
-      ]
+      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\entry.json",
+      "entry_sha256": "ef47b1024f30d42a5ac2719a69fe75120d72c0830c33b313f7eee575b6f56ed4",
+      "peer_heads_unchanged": 95,
+      "shared_checkout_preserved": true,
+      "worktree_inventory_unchanged_before_owned_lane": true,
+      "overlap_scope": "Existing historical shared documentation overlaps remain, with unchanged peer heads; only this current checkpoint and existing ModLogs change. Fresh peer overlap review precedes publication/merge."
     },
     "validation": {
-      "parent": "254 existing IDs; hosted pending",
-      "candidate": "254 identical IDs; hosted pending",
-      "effects": "Existing reviewed CI fixtures unchanged; no new effects.",
-      "local": "Static documentation/source mapping only; no host candidate tests or collection.",
-      "artifact_name": "lifecycle-dependency-selection"
+      "local": "Static JSON/identity/score/link/diff checks, with exact results in the closure receipt.",
+      "hosted": "Existing unchanged CI selection; current PR/main result must be observed separately.",
+      "prior_regression": "PR1924 verified254/254; neither dependency source review ran tests.",
+      "artifact_name": "lifecycle-dependency-selection",
+      "new_test_or_registry_change": false
     },
     "publication": {
-      "state": "ACTIVE_OWNED_WORK",
-      "branch": "docs/rsi-observer-requester-contract-20260927",
-      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-observer-requester-contract-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\final-accounting.json",
-      "receipt_state": "not_yet_created"
+      "state": "READ_BOUND_CLOSURE_RECEIPT",
+      "branch": "docs/rsi-manager-backend-closure-20260928",
+      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-manager-backend-closure-20260928",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\final-accounting.json",
+      "truth_boundary": "This source snapshot does not claim its own future PR/merge/CI result. Resolve current publication and owned cleanup from the bound terminal receipt; do not redispatch completed source work."
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2559,6 +2530,108 @@
           "score": 14
         },
         {
+          "task": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "partial_backend_blocked_pending_strict_decoder_evidence",
+          "source": [
+            "reddog_signer_current_generation_use_time_gate.py",
+            "reddog_signer_current_generation_runtime_binding.py",
+            "reddog_execution_valve_use_time_authority.py",
+            "reddog_main_resident_queue_serial_loop_bootstrap.py",
+            "reddog_main_resident_queue_runtime_dependency_bundle.py",
+            "reddog_external_signer_lifecycle_admission.py",
+            "reddog_external_signer_os_observer.py",
+            "reddog_signer_system_service_entrypoint.py",
+            "reddog_signer_system_service_manifest_selection_loader.py",
+            "reddog_signer_socket_service_run_packet_supply.py",
+            "reddog_signer_process_isolation_gate.py"
+          ],
+          "dependency": "A qualified strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress, and usable interpreted/compiled API evidence. No such artifact has been supplied.",
+          "next_step": "Resume backend qualification only after reviewed strict-decoder evidence changes; reconcile current repository/owner state and rescore before selecting any implementation.",
+          "limits": "No parser fork, new grammar, broad containment, third dependency search or native authority from this qualification. Both prior routes and the stream-only composition remain unqualified.",
+          "closure": {
+            "pr": 1920,
+            "merge": "f99884864726396b526efdc96d711feae1a4d7bb",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\final-accounting.json"
+          },
+          "score": 14,
+          "rescoring_rationale": "The completed13/P1 finite review is historical. Remaining supervisor integration is C3/I4/D3/Impact4=14/P1, blocked on a strict decoder. A separate10/P2 closure action within this existing row is eligible because canonical status still invites already-closed/failed work.",
+          "design_reconciliation": {
+            "prior_design_pr": 1920,
+            "retained": "Existing system-manager owner and lifetime requirements.",
+            "remaining": "Observer visibility/identity versus kernel-attested handshake requester and authenticated cross-process handoff."
+          },
+          "effort_cost": "Bounded existing-source review with one independent reviewer; no new provider/model dispatch, dependency installation or runtime spend.",
+          "component_closure": {
+            "scope": "Existing supervisor/requester contract corrected; no runtime/source implementation.",
+            "pr": 1924,
+            "merge": "1033310bc44f44a0e32d84b28efdd3d23fd32df6",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\final-accounting.json"
+          },
+          "decision_evidence": [
+            "O:\\Foundups-Agent-audits\\20260927-rsi-observation-handoff-decision\\architecture-decision.md",
+            "O:\\Foundups-Agent-audits\\20260927-rsi-observation-handoff-decision\\decision-review.json",
+            "O:\\Foundups-Agent-audits\\20260927-rsi-observation-handoff-decision\\backend-source-inventory.json"
+          ],
+          "previous_qualification_score": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 15,
+            "priority": "P1"
+          },
+          "qualification_evidence": [
+            "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\backend-disposition.md",
+            "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\dbus-fast-review.json",
+            "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\jeepney-review.json",
+            "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\disposition-review.json"
+          ],
+          "codec_qualification_closure": {
+            "wsp15": {
+              "complexity": 2,
+              "importance": 4,
+              "deferability": 3,
+              "impact": 4,
+              "total": 13,
+              "priority": "P1"
+            },
+            "state": "controlled_source_failure_independently_reviewed",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\codec-review.json",
+            "disposition": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\codec-disposition.md"
+          },
+          "resume_prerequisite": "A qualified strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress, and usable interpreted/compiled API evidence. No such artifact has been supplied.",
+          "closure_action": {
+            "task": "Reconcile existing canonical RSI checkpoint with verified closure and rejected manager-backend qualification",
+            "wsp15": {
+              "complexity": 1,
+              "importance": 3,
+              "deferability": 3,
+              "impact": 3,
+              "total": 10,
+              "priority": "P2"
+            },
+            "state": "canonical_source_reconciled_publication_receipt_bound",
+            "parent": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
+            "reason": "Current backlog still presents PR1924 review-pending work. Verified merge plus three reviewed failed compositions across two dependencies must be discoverable through the existing canonical entry. All higher unclosed actions retain explicit prerequisites.",
+            "effort_cost": "Small existing-text/JSON status reconciliation; no provider/model/runtime launch.",
+            "verification_burden": "Exact source/receipt links, preserved52-row/26-packet identities, JSON/schema checks, independent diff review and ordinary exact-head/main closure checks.",
+            "implementation_ready": false,
+            "deployment_authority": false,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\final-accounting.json",
+            "do_not_redispatch": true
+          }
+        },
+        {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
           "wsp15": {
             "complexity": 2,
@@ -2816,48 +2889,6 @@
             "terminal_state": "MERGED_VERIFIED_MAIN",
             "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-lifecycle-selection\\final-accounting.json"
           }
-        },
-        {
-          "task": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 13,
-            "priority": "P1"
-          },
-          "state": "observer_requester_contract_corrected_review_pending",
-          "source": [
-            "reddog_signer_current_generation_use_time_gate.py",
-            "reddog_signer_current_generation_runtime_binding.py",
-            "reddog_execution_valve_use_time_authority.py",
-            "reddog_main_resident_queue_serial_loop_bootstrap.py",
-            "reddog_main_resident_queue_runtime_dependency_bundle.py",
-            "reddog_external_signer_lifecycle_admission.py",
-            "reddog_external_signer_os_observer.py",
-            "reddog_signer_system_service_entrypoint.py",
-            "reddog_signer_system_service_manifest_selection_loader.py",
-            "reddog_signer_socket_service_run_packet_supply.py",
-            "reddog_signer_process_isolation_gate.py"
-          ],
-          "dependency": "Canonical authenticated observation transport/verifier/replay ownership and deployment visibility remain unimplemented; current correction requires exact source/CI/main closure.",
-          "next_step": "Review and converge the existing contract correction; then re-observe/score the bounded transport/verifier design before connected implementation.",
-          "limits": "Documentation design only; not implemented or runtime-qualified supervision.",
-          "closure": {
-            "pr": 1920,
-            "merge": "f99884864726396b526efdc96d711feae1a4d7bb",
-            "terminal_state": "MERGED_VERIFIED_MAIN",
-            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\final-accounting.json"
-          },
-          "score": 13,
-          "rescoring_rationale": "C2 for a bounded correction to existing contract/acceptance, I4 because the current same-process requester path cannot simply become an independent supervisor, D3 because admission remains disabled, impact4 for reusable lifecycle integration. Reopen the existing design row as partial instead of adding a 53rd task. Higher executable source repairs have closed; remaining higher rows retain their stated dependencies.",
-          "design_reconciliation": {
-            "prior_design_pr": 1920,
-            "retained": "Existing system-manager owner and lifetime requirements.",
-            "remaining": "Observer visibility/identity versus kernel-attested handshake requester and authenticated cross-process handoff."
-          },
-          "effort_cost": "C2 source-grounded documentation correction;254/254 unchanged hosted regression and independent review; no provider spend."
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -3265,7 +3296,19 @@
         }
       ],
       "selected_next": null,
-      "instruction": "Re-observe current owners and blockers. Freeze concrete authenticated transport/verifier/replay design before implementation; do not equate this documentation correction with admission."
+      "implementation_ready_selected": null,
+      "state": "blocked_pending_changed_prerequisites_after_owned_closure",
+      "rationale": "All52 histories reconciled. Higher open tasks retain explicit authority/runtime/owner/consumer/paused-lane prerequisites. Scanner11 has no proposed-growth trigger. Do not manufacture work or repeat unchanged failed probes. Finish this owned publication/closure before considering another lane.",
+      "native_blockers": [
+        "canonical_consensus_receipt_verifier_missing",
+        "canonical_sovereign_authorization_verifier_missing",
+        "canonical_principal_subject_key_attestation_missing",
+        "canonical_model_signed_evidence_trust_anchor_incomplete",
+        "canonical_model_selection_signed_evidence_verifier_missing",
+        "canonical_memex_supply_signed_evidence_verifier_missing",
+        "canonical_signer_client_peer_handshake_verifier_missing"
+      ],
+      "authoritative_use_lease": null
     }
   }
 }
