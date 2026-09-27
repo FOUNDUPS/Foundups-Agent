@@ -1,3 +1,9 @@
+## 2026-09-28: RSI detects and repairs an omitted LinkedIn contract check
+
+- WSP00/15/22/50/97: refresh to main c32256ea3, preserving separately owned YUMORI changes. The new LinkedIn instruction skill introduces no RSI admission or retention authority; bounded qualification found one failing case in its existing eight-case offline suite.
+- Select C1/I3/D3/Impact3 = 10/P2: reconcile the skill wording with the unchanged test and run that suite in existing CI. Baseline seven pass/one fail; candidate eight pass locally. Independent review and PR/main closure remain separately evidenced.
+- Preserve all 26 packets and 52 historical task identities; add this single concrete regression to the existing queue. Native RSI's seven blockers, absent effect-use lease, backend strict-decoder prerequisite and R25 consent boundary remain unchanged. No live platform, provider or active FoundUp test.
+
 ## 2026-09-28: RSI manager-backend terminal reconciliation
 
 - WSP00/15/22/50/83/97: re-observe main1033310bc,95 unchanged peer heads/shared state and52 existing candidates. Select10/P2 canonical closure after independent source review rejected the remaining codec composition.

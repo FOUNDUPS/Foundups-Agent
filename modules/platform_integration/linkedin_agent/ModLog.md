@@ -1,3 +1,9 @@
+## 2026-09-28: RSI contact-diligence contract and CI repair
+
+- WSP00/15/22/50/95/97; C1/I3/D3/Impact3 = 10/P2. Fresh main inspection found the new offline contract failing despite green PR1927 checks; the CI workflow did not invoke this suite.
+- Align the existing skill's anti-accusation sentence with the unchanged assertion and shared review contract. Add the existing eight-case stdlib suite to CI; no test oracle, suite, runtime API or platform action is added.
+- Baseline seven pass/one fail; candidate eight pass locally. Independent review, exact-head/main CI and owned cleanup are receipt-bound in the canonical RSI backlog. This is instruction validation, not R25 consent, retained RSI learning or autonomous LinkedIn admission.
+
 ## 2026-09-28: Consequential-contact professional diligence skill
 
 - WSP 00/15/22/50/95/97; added `linkedin_contact_diligence` as an instruction-only AUDIT child under the existing LinkedIn master rather than extending the title/photo profile evaluator into financial trust decisions.
