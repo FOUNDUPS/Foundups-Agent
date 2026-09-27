@@ -239,3 +239,139 @@ def test_enforced_sentinel_fails_when_main_checked_out_elsewhere(
     assert result["passed"] is False
     assert result["merged"] is False
     assert result["error"] == "main_checked_out_in_another_worktree"
+
+
+def _cleanup_transcript_steps(
+    tmp_path: Path, route: str, *,
+    cleanup_response: tuple[bool, str] = (True, ""),
+    delete_branch: bool = False, merge_succeeds: bool = True,
+) -> list:
+    """Declare ordered command responses for the scoped cleanup contract."""
+    assert route in ("direct", "existing", "new", "create_failure")
+    assert route != "direct" or merge_succeeds
+    steps = []
+
+    def add(tool, args, response=(True, "")):
+        steps.append((tool, args, response))
+
+    add("git", ["rev-parse", "--abbrev-ref", "HEAD"], (True, "feature/demo"))
+    add("git", ["worktree", "list", "--porcelain"],
+        (True, f"worktree {tmp_path}\nbranch refs/heads/feature/demo\n"))
+    add("git", ["status", "--porcelain", "--untracked-files=all"])
+    add("git", ["fetch", "--all", "--quiet"])
+    add("git", ["push", "origin", "feature/demo"])
+    add("git", ["push", "backup", "feature/demo"])
+    add("git", ["push", "origin", "HEAD:main"], (route == "direct", ""))
+    merged = merge_succeeds and route != "create_failure"
+    if route == "direct":
+        add("git", ["push", "backup", "HEAD:main"])
+    else:
+        add("gh", ["pr", "view", "--json", "state,number"],
+            (True, '{"state":"OPEN","number":42}') if route == "existing" else (False, "no PR"))
+        if route != "existing":
+            add("gh", ["pr", "create", "--fill", "--base", "main"],
+                (route != "create_failure", "fixture PR"))
+        if route != "create_failure":
+            add("gh", ["pr", "merge", "--merge"], (merge_succeeds, "fixture merge"))
+    if merged:
+        add("git", ["status", "--porcelain", "--untracked-files=all"], cleanup_response)
+        if cleanup_response[0] and not cleanup_response[1].strip():
+            add("git", ["branch", "-f", "main", "origin/main"])
+            add("git", ["checkout", "main"])
+            if delete_branch:
+                add("git", ["branch", "-D", "feature/demo"])
+                add("git", ["push", "origin", "--delete", "feature/demo"])
+                add("git", ["push", "backup", "--delete", "feature/demo"])
+    return steps
+
+
+def _install_cleanup_transcript(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str, *,
+    cleanup_response: tuple[bool, str] = (True, ""),
+    delete_branch: bool = False, merge_succeeds: bool = True,
+) -> tuple[list, list]:
+    """Install fakes which reject any extra, missing or reordered command."""
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "1")
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH", str(int(delete_branch)))
+    steps = _cleanup_transcript_steps(
+        tmp_path, route, cleanup_response=cleanup_response,
+        delete_branch=delete_branch, merge_succeeds=merge_succeeds,
+    )
+    calls = []
+
+    def scripted(tool, args, repo_root, timeout):
+        assert repo_root == tmp_path
+        index = len(calls)
+        assert index < len(steps), f"unexpected command: {tool} {args}"
+        expected_tool, expected_args, response = steps[index]
+        assert (tool, args) == (expected_tool, expected_args)
+        calls.append((tool, args))
+        return response
+
+    monkeypatch.setattr(sentinel, "_git", lambda args, repo_root, timeout=30:
+                        scripted("git", args, repo_root, timeout))
+    monkeypatch.setattr(sentinel, "_gh", lambda args, repo_root, timeout=60:
+                        scripted("gh", args, repo_root, timeout))
+    return calls, steps
+
+
+@pytest.mark.parametrize("route", ["direct", "existing", "new"])
+@pytest.mark.parametrize("enforced", [False, True])
+@pytest.mark.parametrize(
+    "cleanup_response,error",
+    [((True, " M concurrent.py"), "cleanup_working_tree_dirty"),
+     ((True, "?? concurrent.py"), "cleanup_working_tree_dirty"),
+     ((False, "unavailable"), "cleanup_status_failed")],
+    ids=["tracked", "untracked", "unreadable"],
+)
+def test_cleanup_preserves_detected_or_unknown_work(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str,
+    enforced: bool, cleanup_response: tuple[bool, str], error: str,
+) -> None:
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", str(int(enforced)))
+    calls, steps = _install_cleanup_transcript(
+        monkeypatch, tmp_path, route, cleanup_response=cleanup_response, delete_branch=True,
+    )
+    result = sentinel.run_main_merge_sentinel(tmp_path)
+    assert result["merged"] is True  # Command success, not independently verified main.
+    assert result["passed"] is not enforced
+    assert result["error"] == error
+    assert result["actions"][-1] == "blocked: cleanup requires a clean, readable working tree"
+    assert len(calls) == len(steps)
+    assert calls[-1] == ("git", ["status", "--porcelain", "--untracked-files=all"])
+    assert not any(args[0] in ("branch", "checkout", "stash") or
+                   "--delete" in args or "--delete-branch" in args for _, args in calls)
+
+
+@pytest.mark.parametrize("route", ["direct", "existing", "new"])
+@pytest.mark.parametrize("delete_branch", [False, True])
+def test_clean_cleanup_keeps_explicit_deletion_setting(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str, delete_branch: bool,
+) -> None:
+    calls, steps = _install_cleanup_transcript(monkeypatch, tmp_path, route, delete_branch=delete_branch)
+    result = sentinel.run_main_merge_sentinel(tmp_path)
+    assert result["merged"] is True
+    assert result["passed"] is True
+    assert result["error"] is None
+    assert len(calls) == len(steps)
+    assert not any(args[0] == "stash" or "--delete-branch" in args for _, args in calls)
+    assert (("git", ["branch", "-D", "feature/demo"]) in calls) is delete_branch
+
+
+@pytest.mark.parametrize("route", ["existing", "new", "create_failure"])
+@pytest.mark.parametrize("enforced", [False, True])
+def test_terminal_merge_failure_never_enters_cleanup(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str, enforced: bool,
+) -> None:
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", str(int(enforced)))
+    calls, steps = _install_cleanup_transcript(
+        monkeypatch, tmp_path, route, delete_branch=True, merge_succeeds=False,
+    )
+    result = sentinel.run_main_merge_sentinel(tmp_path)
+    assert result["merged"] is False
+    assert result["passed"] is not enforced
+    assert result["error"] == "Could not merge to main (conflicts or permissions)"
+    assert len(calls) == len(steps)
+    assert sum(args[0] == "status" for _, args in calls) == 1
+    assert not any(args[0] in ("branch", "checkout", "stash") or
+                   "--delete" in args or "--delete-branch" in args for _, args in calls)

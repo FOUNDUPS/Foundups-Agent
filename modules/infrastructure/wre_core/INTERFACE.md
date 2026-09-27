@@ -15,7 +15,21 @@ Default-disabled and already-main calls retain their early skip behavior.
 The private worktree helper uses `None` for unavailable discovery, distinct
 from a readable inventory with no competing main checkout.
 
-This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI.
+The post-merge cleanup check also explicitly includes untracked files and runs
+before local branch-force, checkout or explicit branch deletion. New errors
+`cleanup_working_tree_dirty` and `cleanup_status_failed` return immediately,
+with `passed = not ENFORCED`. The compatibility field `merged=True` means only
+that a remote command reported success; it does not mean verified main, complete
+cleanup or rollback. The helper neither auto-stashes/pops work nor supplies
+`--delete-branch` to GitHub CLI. Clean-path deletion retains the configured
+`GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH` behavior.
+
+These are status snapshots, not an atomic worktree lock. Changes after the
+cleanup check, direct main pushes, unchecked PR merging, missing main readback,
+stale local-main updates and unleased clean-path branch deletion remain open.
+Repository-side automatic deletion is outside this helper's control. Default-off
+remains required for ordinary startup; these guards do not certify WSP 97
+terminal convergence or authorize native RSI.
 
 # WRE Core Interface
 

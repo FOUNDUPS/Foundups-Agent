@@ -1,3 +1,9 @@
+## 2026-09-27: RSI merge cleanup ownership guard
+
+- Reconciled PR1912 as `MERGED_VERIFIED_MAIN` at `1b02ba7a9`;38 identical test IDs passed on PR/main, all10 PR checks and main CI/CodeQL passed, owned branch/worktree retired.
+- Fresh WSP15 selection14/P1 repairs detected concurrent-work preservation in the existing WRE sentinel. Remove assumed stash/pop and GH-requested merge-time deletion; recheck status before local cleanup.
+- Existing tests/CI and canonical backlog retain the source, acceptance and closure evidence. Shared checkout and95 unchanged peer heads remain preserved; only existing chronological ModLogs overlap scope. Native RSI trust/admission prerequisites are unchanged.
+
 ## 2026-09-27: RSI repository-convergence prerequisite repair
 
 - Reconciled PR1908 as merged/main-verified and retired; current main also contains the new WSP00 recursive-role and WSP97 terminal-closure contracts.

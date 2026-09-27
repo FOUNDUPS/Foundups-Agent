@@ -1873,8 +1873,8 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "48b7c71198b712c93149af5d9447ffff83c71501",
-    "selected_action": "rsi-merge-preflight-20260927",
+    "base_commit": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
+    "selected_action": "rsi-merge-ownership-20260927",
     "status": "implementation_prepared_hosted_validation_pending",
     "wsp15": {
       "complexity": 3,
@@ -1888,13 +1888,13 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-merge-preflight-20260927",
-    "base": "48b7c71198b712c93149af5d9447ffff83c71501",
+    "observation_id": "rsi-merge-ownership-20260927",
+    "base": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
     "self": "0102",
     "role": "architect",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Fail closed on existing merge sentinel prerequisites",
+    "selected": "Preserve detected post-preflight work before the existing merge sentinel performs checkout or branch cleanup",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1904,60 +1904,88 @@
       "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1908,
+      "pr": 1912,
+      "merge": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
+      "terminal_state": "MERGED_VERIFIED_MAIN",
       "evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\final-accounting.json",
-        "sha256": "a0341b69b38c5c1e1332127f279a11216bb720d1340dc05fb44cb3d86fd32cd0"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\final-accounting.json",
+        "sha256": "376787c7a0028908689b6c2a03af91fa1620c3a8995f0b9a6878ca9e4f55ff1a"
       }
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\previous-observation.json",
-      "sha256": "58b0f7b69a9836d6f3340c56f1c8416ba86313acaf098afd8028c81faf07b6d8"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\previous-observation.json",
+      "sha256": "e9848b5b3043262a18bd8590dfdbc5dec27e756d5aff755b7095370cfe107da6",
+      "repository_ref": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d:docs/roadmaps/rsi_swarm_backlog.json",
+      "json_path": "current_observation"
     },
     "retrieval": {
-      "holo": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained unchanged; no reindex",
-      "noise": "large chronological logs narrowed to exact sentinel owner and sections",
-      "ordering": "canonical WSP, source and caller, module/test docs, independent review",
-      "missing": [
-        "modules/infrastructure/wre_core/memory/README.md"
-      ],
-      "staleness": "prior historical descriptions not used as runtime proof",
-      "duplication": "extend existing sentinel and test file; no new module/skill"
+      "holo": "Unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH: authority5326080d vs queryhost0c81418f. No repeated failed probe/reindex.",
+      "noise": "Bounded owner/function and document sections; no full-repo dump.",
+      "ordering": "Current WSP, roadmap/receipts, caller/source/test owner, independent review.",
+      "missing": "Existing memory/README.md absent; not created.",
+      "staleness": "Main and95peer heads unchanged since prior closure; native source contract bindings reused at exact base.",
+      "duplication": "Existing sentinel, test fixture and hosted CI step reused; no new module/skill/job."
     },
-    "governance_reviews": [
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\wake-20260927-0845-role-impact-review.json",
-        "sha256": "63eee231862897940ccaaed5448e5557893b087a9bbab410b02fa188a0a319e5"
-      },
-      {
-        "path": "O:\\Foundups-Agent-audits\\20260924-rsi-runner-lessons\\wake-20260927-0845-closure-impact-review.json",
-        "sha256": "f7b343545eef74974a2c109707ca926060afdf1231066803bb70b338b8c4bfff"
-      }
-    ],
     "allocation": {
-      "execution_plane": "direct bounded repository source repair; hosted CI regression; no WRE differential/native runtime admission",
-      "manual_reason": "Known bounded source defect; native model/worker admission remains unqualified. Independent read-only verifier reviewed scope.",
-      "authority": "Standing bounded source/PR closure authority; no native/provider/product effects."
+      "execution_plane": "Ordinary bounded source repair and hosted focused regression; not WRE differential/native admission.",
+      "effort_cost": "Moderate existing-source repair; one hosted focused suite, existing CI. No model/provider spend or native runtime.",
+      "manual_reason": "Native model/worker admission remains unqualified; existing-source repair with independent verifier and hosted regression."
+    },
+    "acceptance_review": {
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\acceptance-review.json",
+      "sha256": "4d75dce23b5e95bdac17cc352120ed67f312245c2d5be3d894543c9448edf090"
     },
     "owner_reconciliation": {
-      "evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\peer-paths.json",
-        "sha256": "6ccf15f3ba18bd86ecc6f755aa28160f668c15ca5673509fd8301f6b09195f4f"
+      "entry": {
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\entry.json",
+        "sha256": "2a12c4456e389c9d4e722d21fa72048482a5409bbaeed90ea3c2b77db9cd0f06"
       },
-      "peer_count": 95,
-      "overlap": "Five PRs touch chronological ModLogs only; no source/test/CI overlap. Preserve their unique work."
+      "peers_unchanged": 95,
+      "overlap": [
+        {
+          "pr": 1860,
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "pr": 1648,
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "pr": 1645,
+          "paths": [
+            "modules/infrastructure/wre_core/ModLog.md"
+          ]
+        },
+        {
+          "pr": 802,
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "pr": 782,
+          "paths": [
+            "ModLog.md"
+          ]
+        }
+      ]
     },
     "validation": {
-      "local": "Static only; no candidate tests executed under host principal.",
-      "hosted": "38 authored cases in existing registered file; execution pending.",
-      "registry": "Existing unit file owner/shard unchanged; canonical CI registry check required.",
-      "limits": "This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI."
+      "parent": "38 exact cases passed on parent main; receipt retained, not a new run.",
+      "candidate": "68 authored cases; source-only preparation, hosted execution pending. No local host candidate tests.",
+      "limits": "These are status snapshots, not an atomic worktree lock. Changes after the\ncleanup check, direct main pushes, unchecked PR merging, missing main readback,\nstale local-main updates and unleased clean-path branch deletion remain open.\nRepository-side automatic deletion is outside this helper's control. Default-off\nremains required for ordinary startup; these guards do not certify WSP 97\nterminal convergence or authorize native RSI.",
+      "artifact_name": "merge-sentinel-prerequisites",
+      "CI_workflow_unchanged": true
     },
     "publication": {
       "state": "ACTIVE_OWNED_WORK",
-      "branch": "fix/rsi-merge-sentinel-preflight-20260927",
-      "worktree": "O:/Foundups-Agent-worktrees/rsi-merge-sentinel-preflight-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\final-accounting.json",
+      "branch": "fix/rsi-merge-ownership-20260927",
+      "worktree": "O:/Foundups-Agent-worktrees/rsi-merge-ownership-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\final-accounting.json",
       "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
@@ -2265,6 +2293,46 @@
           },
           "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted.",
           "resume_prerequisite": "Actual authorized upstream runtime handoff, independent evaluation/resource evidence and publication evidence become available for an existing outcome consumer; advisory display does not supply retention authority."
+        },
+        {
+          "task": "Fail closed on existing merge sentinel prerequisites",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "closed_merged_PR1912",
+          "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
+          "dependency": "Verified merge1b02ba7a9214b0c3b8128243f24864c1dfbc779d, all10 exact-head checks and both main workflows passed;38 identical cases passed on PR/main. Owned lane retired; closure receipt retained.",
+          "next_step": "Do not repeat; 38 fixed cases passed on PR and exact main, independent review and cleanup complete.",
+          "effort_cost": "Moderate branch/error handling with existing unit fixtures; no model/provider spend.",
+          "limits": "This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI.",
+          "closure": {
+            "pr": 1912,
+            "merge": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Preserve detected post-preflight work before the existing merge sentinel performs checkout or branch cleanup",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "implemented_hosted_validation_pending",
+          "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
+          "dependency": "ParentPR1912 fully closed; fresh peer/owner reconciliation complete. Exact-head source review and hosted candidate CI/closure required.",
+          "next_step": "Run existing hosted focused regression after independent review, converge exact qualified head, then re-observe.",
+          "limits": "This detects persistent state at the explicit check; it is not an atomic worktree lock or protection against mutations after that check. Direct main push, unchecked PR merge, absent exact head/check/remote-main readback, clean-path stale local-main update and unleased deletion remain separate open gaps. It does not establish MERGED_VERIFIED_MAIN.",
+          "effort_cost": "Moderate existing-source repair; one hosted focused suite, existing CI. No model/provider spend or native runtime."
         },
         {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
@@ -2820,27 +2888,10 @@
             "pr": 1889,
             "merge": "eb3b66820d1ec50864a3c4470790ddc9b761b95c"
           }
-        },
-        {
-          "task": "Fail closed on existing merge sentinel prerequisites",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "implemented_hosted_validation_pending",
-          "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
-          "dependency": "Existing default-off owner; independently reviewed focused repair. Hosted exact-head checks and closure pending.",
-          "next_step": "Validate focused hosted results, exact-head review and required checks; converge and re-observe.",
-          "effort_cost": "Moderate branch/error handling with existing unit fixtures; no model/provider spend.",
-          "limits": "This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI."
         }
       ],
       "selected_next": null,
-      "instruction": "Re-observe exact main/owners/checks after convergence. Native18/P0 retains its seven trust/admission blockers. Re-score the remaining merge qualification separately."
+      "instruction": "After exact-head/main closure, re-observe owners and rescore. Native18/P0 retains seven trust/admission prerequisites; remaining convergence gaps do not authorize runtime activation."
     }
   }
 }

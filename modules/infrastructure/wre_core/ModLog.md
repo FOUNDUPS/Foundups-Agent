@@ -1,3 +1,10 @@
+## 2026-09-27: Preserve post-preflight work before merge cleanup
+
+- WSP00/15/22/34/50/84/97; C3/I4/D3/Impact4=14/P1. PR1912 is merged/main-verified and its owned lane retired. Re-observation selected this existing-owner repair; no new framework or runtime authority.
+- Both GH merge routes stop requesting branch deletion. After reported remote success, dirty/unreadable status blocks before local branch-force, checkout and explicit deletion. Removed automatic stash/pop; ENFORCED still controls application startup.
+- Extended the same unit suite from38 to68 authored cases; reuse the existing hosted CI step. Fresh execution/closure receipts govern acceptance. `merged=True` remains remote-command-success only, not verified main or completed cleanup.
+- Clean-path deletion, direct push/PR qualification, main readback and races after status sampling remain separate gaps. No live sentinel/service/provider/native worker or product action.
+
 ## 2026-09-27: Fail closed on merge sentinel prerequisites
 
 - WSP 00/15/22/34/50/84/97; C3/I4/D3/Impact4=14/P1. Reused the default-off sentinel and existing tests after the new WSP 97 closure rules exposed a concrete source mismatch.

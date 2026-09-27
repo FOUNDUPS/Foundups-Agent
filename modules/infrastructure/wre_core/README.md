@@ -6,7 +6,18 @@ status and successful fetch. Unknown or dirty state returns before push, PR,
 stash, checkout or deletion. `force=True` bypasses enablement only. ENFORCED
 still controls whether rejection also blocks application startup.
 
-This closes prerequisite failures only. Concurrent changes after preflight, direct main pushes, unchecked PR merging, missing main readback, stash migration and unleased branch deletion remain unqualified downstream. Default-off remains required for ordinary startup; passing preflight does not certify WSP 97 terminal convergence or authorize native RSI.
+After remote command success, the helper checks status again before changing
+local main, checking out or explicitly deleting branches. Dirty or unreadable
+status preserves the detected work and reports incomplete cleanup. It never
+automatically stashes/pops work or asks GitHub CLI to delete the branch as part
+of PR merge. Clean-path deletion still follows the existing explicit setting.
+
+These are status snapshots, not an atomic worktree lock. Changes after the
+cleanup check, direct main pushes, unchecked PR merging, missing main readback,
+stale local-main updates and unleased clean-path branch deletion remain open.
+Repository-side automatic deletion is outside this helper's control. Default-off
+remains required for ordinary startup; these guards do not certify WSP 97
+terminal convergence or authorize native RSI.
 
 # WRE Core
 
