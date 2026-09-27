@@ -1,3 +1,9 @@
+## 2026-09-28: Close manager-backend qualification state
+
+- WSP00/15/22/50/83/97; C1/I3/D3/Impact3=10/P2. Reconcile PR1924's verified merge and reviewed source-only backend failures in the existing contract/checkpoint/backlog; no new document or interface.
+- Three compositions across two dependencies remain unqualified. The remaining supervisor integration is14/P1, blocked on strict-decoder evidence; native authority, deployment visibility and effect-use lease remain separate.
+- No source, test, registry, dependency, service or privilege changes. Source-review sprints ran zero tests/runtime; current documentation publication and existing CI regression are recorded separately in the bound closure receipt.
+
 ## 2026-09-27: Separate supervisor observation from handshake requester
 
 - WSP00/15/22/50/84/97;13/P1. Correct the existing INTERFACE contract: current default observer and healthcheck share requester identity; a supervisor needs an authenticated observation handoff, not identity relabeling or a serialized lifecycle handle.

@@ -1,3 +1,9 @@
+## 2026-09-28: RSI manager-backend terminal reconciliation
+
+- WSP00/15/22/50/83/97: re-observe main1033310bc,95 unchanged peer heads/shared state and52 existing candidates. Select10/P2 canonical closure after independent source review rejected the remaining codec composition.
+- Close PR1924's stale review-pending status; retain its verified254/254 regression and owned cleanup as historical evidence. Existing roadmap/runbook/module contract now state the three source-only backend rejections and strict-decoder resume condition.
+- Preserve26 packets and all52 task identities. Supervisor integration remains14/P1 blocked; no implementation, native RSI, AmIBot, privilege or runtime activation. Current docs validation, PR/main convergence and cleanup are separately receipt-bound.
+
 ## 2026-09-27: RSI supervisor/requester contract reconciliation
 
 - WSP00/15/97 confirms PR1923 main closure, unchanged95 peers/shared state and52-row ranking. Select13/P1 existing-contract correction while native18 remains blocked.

@@ -69,11 +69,23 @@ result alone admits a signer or native RSI worker.
 
 ## External supervision source contract — 2026-09-27
 
-**Corrected design; authenticated observation transport, canonical consumer
-registration and deployment visibility remain unimplemented.** PR1922 repaired
+**Corrected design merged in PR1924 at `1033310bc`; authenticated observation
+transport, canonical consumer registration and deployment visibility remain
+unimplemented.** PR1922 repaired
 socket/VFS association; PR1923 qualified same-UID child visibility and denial.
 Neither qualifies an authenticated supervisor or the full distinct-UID path.
 This correction changes no API, process identity, privilege or service state.
+
+**Backend qualification, 2026-09-28:** source review rejected dbus-fast 5.0.22
+MessageBus (pre-auth/received-FD ownership), Jeepney 0.9.0 Parser (non-advancing
+container parse), and dbus-fast's stream-only codec (missing strict consumed-byte
+and wire-validity evidence). No package/runtime was exercised; this changes no
+API or dependency pin. The existing owner must receive reviewed strict-decoder
+evidence for complete frame/container consumption, terminator/header validity,
+bounded malformed-length progress and usable interpreted/compiled APIs before
+implementation can be selected. No parser fork, new grammar, third-library
+search or unchanged retry is selected. The [canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#manager-backend-qualification-closure--2026-09-28)
+binds the findings, source identities and remaining separate runtime gates.
 
 ### Three roles and the current source constraint
 

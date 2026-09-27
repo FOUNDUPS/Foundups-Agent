@@ -12,13 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-27 checkpoint:** PR1923 same-UID process-visibility qualification is
-merged/main-verified at `5578f7bd`, with its owned lane retired. Fresh52-row ranking
-selects the supervisor/requester contract correction at13/P1. See the
-[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#observer-requester-contract-checkpoint--2026-09-27)
-and canonical backlog for exact validation and closure. Authenticated supervisor
-transport and requester-local consumption remain open; native RSI and AmIBot
-remain unadmitted.
+**2026-09-28 checkpoint:** PR1924 supervisor/requester contract correction is
+merged/main-verified at `1033310bc`, with its owned lane retired and 254/254
+parent/candidate cases passing. Subsequent source-only review rejected three
+manager-backend compositions across two dependencies. Supervisor integration
+remains blocked at 14/P1; the 10/P2 canonical status reconciliation has separate
+publication/closure receipts. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#manager-backend-qualification-closure--2026-09-28)
+and canonical backlog. No backend implementation is selected: resume only with
+reviewed strict-decoder evidence, then re-observe and rescore. Native RSI and
+AmIBot remain unadmitted; a source failure is not production runtime evidence.
 
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 

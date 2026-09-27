@@ -1,4 +1,48 @@
+## Manager backend qualification closure — 2026-09-28
+
+PR1924 is `MERGED_VERIFIED_MAIN` at
+`1033310bc44f44a0e32d84b28efdd3d23fd32df6`: 254 parent/254 candidate cases passed
+on PR and main with identical IDs, all ten PR checks and both main workflows
+passed, independent source/original-artifact reviews completed, and the owned
+branch/worktree retired. This closes the review-pending checkpoint below.
+
+Read-only dependency qualification then rejected three compositions:
+
+| Pinned dependency/composition | Source finding that blocks this profile |
+|---|---|
+| dbus-fast 5.0.22 MessageBus | Normal APIs do not establish pre-auth peer inspection and all-path cleanup ownership of received FD integers. |
+| Jeepney 0.9.0 core Parser | Accepted degenerate container grammar permits a non-advancing parse; byte limits and socket deadlines do not bound that synchronous path. |
+| dbus-fast 5.0.22 stream-only codec | Caller-owned transport removes the FD ownership problem, but the API does not establish complete semantic consumption or preserve all malformed-wire evidence. |
+
+Exact dbus-fast source is commit `350eed7095f58bdae4d0482ebfd4d9f55a919f75`;
+Jeepney source SHA256 is
+`cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732`.
+Independent source reviews and hashes are bound in the canonical backlog.
+Neither dependency was installed, imported or executed for these reviews.
+There were no new tests or deployed vulnerability/retained-learning claims.
+Do not conflate Jeepney's identified progress failure with dbus-fast's
+unqualified malformed-length/progress behavior.
+
+**Stop/resume:** no backend implementation is selected. Require a reviewed
+strict-decoding capability in an existing upstream/owner path: complete
+frame/container consumption, terminator/header validity, bounded progress under
+malformed lengths, and usable interpreted/compiled API evidence. Re-observe and
+rescore only when that evidence or another recorded task prerequisite changes.
+Do not repeat these failed reviews, add a third dependency search, fork a parser,
+hand-roll D-Bus grammar or add broad containment to conceal the failed gate.
+Deployment visibility, authenticated observation transport and requester-local
+consumption still require their own qualification.
+
+Fresh reconciliation preserves 52 task identities and 26 packets. The remaining
+supervisor integration is 14/P1, blocked; this terminal-state consolidation is
+10/P2, with its own publication receipt. Higher open rows retain their explicit
+prerequisites; scanner decomposition has no proposed-growth trigger. The
+post-closure queue selects no implementation or unchanged retry. All seven native
+authority blockers and `authoritative_use_lease=None` remain; AmIBot stays at G0.
+
 ## Observer-requester contract checkpoint — 2026-09-27
+
+Historical preparation state; superseded by the verified closure above.
 
 PR1923 is `MERGED_VERIFIED_MAIN` at `5578f7bd75dec3becb78a844bd282b1fd73aea94`:
 252 parent/254 candidate cases passed on PR/main; all CI/CodeQL, independent
