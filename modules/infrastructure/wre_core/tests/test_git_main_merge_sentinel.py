@@ -244,7 +244,7 @@ def test_enforced_sentinel_fails_when_main_checked_out_elsewhere(
 FETCHED_COMMIT = "a1" * 20
 
 
-def _sync_transcript_steps(delete_branch, sync_failure, fetched_commit):
+def _sync_transcript_steps(sync_failure, fetched_commit):
     """Explicit successful transcript, truncated at a declared failing stage."""
     steps = [
         ("git", ["fetch", "--no-tags", "--quiet", "origin",
@@ -260,19 +260,13 @@ def _sync_transcript_steps(delete_branch, sync_failure, fetched_commit):
         index = {"fetch": 0, "resolve": 1, "late_status": 2, "update": 3}[stage]
         tool, args, _ = steps[index]
         return steps[:index] + [(tool, args, response)]
-    if delete_branch:
-        steps.extend([
-            ("git", ["branch", "-D", "feature/demo"], (True, "")),
-            ("git", ["push", "origin", "--delete", "feature/demo"], (True, "")),
-            ("git", ["push", "backup", "--delete", "feature/demo"], (True, "")),
-        ])
     return steps
 
 
 def _cleanup_transcript_steps(
     tmp_path: Path, route: str, *,
     cleanup_response: tuple[bool, str] = (True, ""),
-    delete_branch: bool = False, merge_succeeds: bool = True,
+    merge_succeeds: bool = True,
     sync_failure: tuple | None = None, fetched_commit: str = FETCHED_COMMIT,
 ) -> list:
     """Declare ordered command responses for the scoped cleanup contract."""
@@ -305,7 +299,7 @@ def _cleanup_transcript_steps(
     if merged:
         add("git", ["status", "--porcelain", "--untracked-files=all"], cleanup_response)
         if cleanup_response[0] and not cleanup_response[1].strip():
-            steps.extend(_sync_transcript_steps(delete_branch, sync_failure, fetched_commit))
+            steps.extend(_sync_transcript_steps(sync_failure, fetched_commit))
     return steps
 
 
@@ -320,7 +314,7 @@ def _install_cleanup_transcript(
     monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH", str(int(delete_branch)))
     steps = _cleanup_transcript_steps(
         tmp_path, route, cleanup_response=cleanup_response,
-        delete_branch=delete_branch, merge_succeeds=merge_succeeds,
+        merge_succeeds=merge_succeeds,
         sync_failure=sync_failure, fetched_commit=fetched_commit,
     )
     calls = []
@@ -378,10 +372,10 @@ def test_clean_cleanup_keeps_explicit_deletion_setting(
     result = sentinel.run_main_merge_sentinel(tmp_path)
     assert result["merged"] is True
     assert result["passed"] is True
-    assert result["error"] is None
+    assert result["error"] == ("cleanup_deletion_unqualified" if delete_branch else None)
     assert len(calls) == len(steps)
     assert not any(args[0] == "stash" or "--delete-branch" in args for _, args in calls)
-    assert (("git", ["branch", "-D", "feature/demo"]) in calls) is delete_branch
+    assert not any("--delete" in args or args[:2] == ["branch", "-D"] for _, args in calls)
     assert ("git", ["branch", "-f", "main", FETCHED_COMMIT]) in calls
     assert not any(args == ["branch", "-f", "main", "origin/main"] for _, args in calls)
 
@@ -454,7 +448,36 @@ def test_sha256_fetched_commit_is_passed_as_exact_local_target(
     result = sentinel.run_main_merge_sentinel(tmp_path)
     assert result["merged"] is True
     assert result["passed"] is True
-    assert result["error"] is None
+    assert result["error"] == ("cleanup_deletion_unqualified" if delete_branch else None)
     assert len(calls) == len(steps)
     assert ("git", ["branch", "-f", "main", commit]) in calls
-    assert (("git", ["branch", "-D", "feature/demo"]) in calls) is delete_branch
+    assert not any("--delete" in args or args[:2] == ["branch", "-D"] for _, args in calls)
+
+
+@pytest.mark.parametrize("route", ["direct", "existing", "new"])
+@pytest.mark.parametrize("enforced", [False, True])
+@pytest.mark.parametrize("request_mode", ["default_forced", "explicit"])
+def test_unqualified_deletion_is_retained_even_when_forced(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, route: str,
+    enforced: bool, request_mode: str,
+) -> None:
+    calls, steps = _install_cleanup_transcript(monkeypatch, tmp_path, route, delete_branch=True)
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", str(int(enforced)))
+    forced = request_mode == "default_forced"
+    if forced:
+        monkeypatch.delenv("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH")
+        monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "0")
+    result = sentinel.run_main_merge_sentinel(tmp_path, force=forced)
+    assert result["merged"] is True  # Prior remote command success only.
+    assert result["passed"] is not enforced
+    assert result["error"] == "cleanup_deletion_unqualified"
+    assert result["actions"][-2:] == [
+        "checked out main", "blocked: automatic branch deletion is not qualified",
+    ]
+    assert "updated local main" in result["actions"]
+    assert len(calls) == len(steps)
+    assert calls[-1] == ("git", ["checkout", "main"])
+    assert not any(args[0] in ("stash", "update-ref") or "--delete" in args or
+                   "--delete-branch" in args or args[:2] in (["branch", "-d"], ["branch", "-D"])
+                   for _, args in calls)
+    assert not any(action.startswith("deleted ") for action in result["actions"])

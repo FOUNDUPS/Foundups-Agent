@@ -28,8 +28,13 @@ the six clean transcripts, adds 66 rejection cases (11 stages × three routes ×
 two enforcement modes), and two SHA256/deletion-setting controls: 136 authored
 cases. Negative cases enable deletion and require the exact stopping command.
 Explicit fetch/ref resolution, late status and exact object target are ordered
-in the existing fake transcript. Candidate hosted results remain pending at
-preparation; they govern acceptance, not this prospective count.
+in the existing fake transcript. PR1915 and exact main `6255cda690480affeef27d9f043794302a231a99`
+each passed all 136 IDs. The retention extension keeps those IDs: four clean
+delete-enabled outcomes intentionally change to `cleanup_deletion_unqualified`
+and no delete commands; the other 132 outcomes remain unchanged. Twelve added
+cases cover three routes, two ENFORCED modes and default-unset/forced versus
+explicit deletion requests. Total 148 authored cases; candidate hosted results
+govern acceptance. No live deletion, containment/CAS or native RSI proof.
 
 ## RSI verification measurement contract — 2026-09-25
 

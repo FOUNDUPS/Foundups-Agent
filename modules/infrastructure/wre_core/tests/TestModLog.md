@@ -1,3 +1,11 @@
+## 2026-09-27: Retain branches when automatic cleanup is unqualified
+
+- WSP 00/6/15/22/34/50/62/84/97; frozen 148-case plan. Retained 136 IDs, intentionally changed four clean deletion-enabled outcomes to the retention error; the other 132 outcomes remain unchanged. Twelve new controls cover three routes, advisory/ENFORCED and default-unset+force versus explicit requests.
+- Existing unified fake transcript now ends after checkout; every branch-delete, raw update-ref, stash or extra command is rejected. Preserve successful synchronization actions and command-success `merged=True`; force cannot bypass retention. No new fixture owner or runner.
+- Independent source review caught pytest's reserved `request` parameter before CI. Renamed it to `request_mode`; values and the 148-case acceptance stayed fixed. The rejected draft finding is retained in the audit receipt.
+- PR1915 is merged/main-verified with 136 exact IDs passing on PR/main. Candidate hosted regression is pending at preparation; no host-principal candidate tests or live Git/service/native runtime.
+- Independent source acceptance and closure receipts: `O:/Foundups-Agent-audits/20260927-rsi-merge-cleanup/`. This is an explicit safety gate, not completed automatic retirement or a remote branch-existence claim.
+
 ## 2026-09-27: Fresh commit synchronization before sentinel cleanup
 
 - WSP 00/6/15/22/34/50/62/84/97. Reuse all 68 prior case IDs and the ordered Git/GH fake transcript; add 66 negatives covering refresh, commit resolution/invalid output, late status and local update failure, plus two full SHA256 controls. Total 136 authored cases; no new test owner or runner.

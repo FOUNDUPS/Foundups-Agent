@@ -1,3 +1,23 @@
+## Merge retention checkpoint — 2026-09-27
+
+PR1915 is `MERGED_VERIFIED_MAIN` at `6255cda690480affeef27d9f043794302a231a99`:
+136 identical IDs passed on PR/main; all PR/main checks passed; its owned lane
+is retired. Current main, 95 peer heads and shared checkout metadata are unchanged.
+
+Fresh selection changes from the proposed 14/P1 full deletion repair to a
+12/P2 safe-retention gate. The full repair remains blocked: version-matched
+[Git branch source](https://raw.githubusercontent.com/git-for-windows/git/v2.47.1.windows.2/builtin/branch.c)
+and [ref deletion source](https://raw.githubusercontent.com/git-for-windows/git/v2.47.1.windows.2/refs.c)
+do not establish the required combined expected-ref/worktree-ownership contract.
+Historical dry-run cleanup owners do not supply it. No replacement lock service
+is introduced. The helper issues no branch-deletion commands when requested,
+reports unqualified cleanup after successful checkout and keeps ENFORCED behavior.
+
+The existing suite has 148 authored cases, including four explicitly changed
+deletion expectations. Candidate hosted execution and terminal closure remain
+pending at preparation; current backlog receipt paths govern acceptance.
+Server-side auto-delete, upstream merge authority and native RSI remain separate.
+
 ## Merge synchronization checkpoint — 2026-09-27
 
 PR1913 is `MERGED_VERIFIED_MAIN` at `fbfc3ce405ca1cf467d66eb0239c0e73688358fd`:
