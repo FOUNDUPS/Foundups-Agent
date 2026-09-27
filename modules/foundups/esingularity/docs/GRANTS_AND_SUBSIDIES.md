@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-09-20 JST
+Last verified: 2026-09-28 JST
 
 ## Purpose and truth boundary
 
@@ -20,9 +20,9 @@ Use this section to prevent drift between codebase truth and Drive working docum
 
 ### Drive working/derived documents
 
-1. **PPP/PFI Private Proposal Master Draft**  
+1. **PPP/PFI Public-Private Partnership Master Draft**  
    Drive ID: `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc`  
-   Purpose: formal PPP/PFI mechanics, legal/submission framing, City-facing proposal structure.  
+   Purpose: formal PPP/PFI project-formation mechanics, legal/VFM/risk-allocation framing, City-facing public-private partnership structure. This is not the FY2026 財産有効活用民間提案制度 application lane.  
    Rule: may consume grant-status facts from this repo registry; must not independently promote program status.
 
 2. **City / Prefecture / Council Support Brief**  
@@ -124,7 +124,7 @@ This is not YUMORI.me construction CAPEX. It supports local-government study of 
 
 The FY2026 call seeks private proposals that reduce City fiscal burden, improve citizen services, or revitalize the region, and states that an adopted proposal may proceed to direct contracting with the proposer if subsequent coordination succeeds.
 
-**Critical boundary:** the current call lists only former Shimousaka Elementary School and former Hanyu Elementary School. Former Sukatto Land Kuzuryu is not a listed eligible asset in this round, and the FY2026 page does not state why. This does not establish categorical ineligibility: Fukui City's FY2025 results record two rejected Sukatto proposals, and its FY2021 results record a partial-use Sukatto proposal that reached preferred-negotiator status and contract. The current FY2026 call is not presently a Sukatto application route. YUMORI.me should ask the Facility Utilization Promotion Division in writing why Sukatto was omitted, whether it can be added during the current call, and, if not, which formal PPP/PFI/private-proposal route will accept the proposal.
+**Critical boundary:** the current call lists only former Shimousaka Elementary School and former Hanyu Elementary School. Former Sukatto Land Kuzuryu is not a listed eligible asset in this round, and the FY2026 page does not state why. This does not establish categorical ineligibility: Fukui City's FY2025 results record two rejected Sukatto proposals, and its FY2021 results record a partial-use Sukatto proposal that reached preferred-negotiator status and contract. The current FY2026 call is not presently a Sukatto application route. **Do not frame YUMORI's Sukatto request as an application to this program.** The current project asks Fukui City to identify and sponsor the appropriate executive-side **PPP/PFI public-private project-formation route** for Sukatto, including whether the City's PPP/PFI basic policy, PFI Act Article 6-equivalent proposal handling, sounding/market dialogue, the ふくい地域プラットフォーム, Cabinet Office PPP/PFI support, or another lawful mechanism should be used. Ask the Facility Utilization Promotion Division in writing which route the City will designate, which department owns it, and what pre-consultation/access/evidence the City requires.
 
 ## Other tracked programs
 

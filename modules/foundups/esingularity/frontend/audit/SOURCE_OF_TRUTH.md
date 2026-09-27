@@ -1,6 +1,8 @@
 # eSingularity.ai source-of-truth ledger
 
-Last audited: 2026-09-26 (Asia/Tokyo)
+Last audited: 2026-09-28 (Asia/Tokyo)
+
+Post-vote correction — 2026-09-28: the September 25 vote is complete. Do not present **VOTE NO** as the current ask. The current committee position is to request a **PPP/PFI public-private comparison and project-formation route for former Sukatto Land Kuzuryu before irreversible demolition procurement or physical demolition proceeds**. Keep Fukui City's FY2026 財産有効活用民間提案制度 separate: it currently lists former Shimousaka and Hanyu elementary schools, not Sukatto, and it is not the route YUMORI is asking the City to use for Sukatto. Historical sent messages and pre-vote campaign material remain historical records and must not be rewritten as if they were current.
 
 Campaign correction — 2026-09-13: the operator withdrew the fixed review-period proposal. The current request is **VOTE NO** on the budget containing Sukatto demolition preparation at the September 25 vote. Do not reintroduce a 60-day offer through copy, translations, diagrams, captions, or supporting documents. This is a campaign position, not a government finding or a commitment to adopt/fund YUMORI. YUMORI.me is eSingularity.ai's civic/preparatory-committee surface; both homepages stay distinct in one frontend. Support brief 03: https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit
 
@@ -43,7 +45,8 @@ Claim classes:
 | --- | --- | --- | --- | --- |
 | Original construction cost: ¥4.68B | A | Fukui City, *市政のあらまし* (FY2024 and earlier), `aramasi6.pdf` | Verified | May be shown as historical construction cost, not current market value. |
 | Site area: 33,717.36 m², all leased land | A | Fukui City property sheet, `SUKATTO.pdf`, p.2 | Verified | Use exact figure when precision helps; otherwise “約3.37万㎡”. |
-| Total floor area: 8,099.56 m² | A | Fukui City property sheet, `SUKATTO.pdf`, p.2 | Verified | May be shown as existing-building scale. |
+| Property-sheet total floor area: 8,099.56 m² | A | Fukui City property sheet, `SUKATTO.pdf`, p.2 | Verified for the property-sheet scope | Label the source/scope explicitly. Do not silently equate it with the later demolition-project scope. |
+| September 2026 demolition-project scope: 8,923.56 m² | A-limited | Fukui City FY2026 September supplementary-budget material for 旧すかっとランド九頭竜解体準備事業 | Verified as the area stated for that demolition-preparation project; scope reconciliation pending | May be shown only beside the 8,099.56 m² property-sheet figure with a scope note. A difference caused by gym/toilet/auxiliary structures is plausible but **not confirmed** until the City identifies the included buildings. |
 | Facility opened 1994-04-06 | A | Fukui City, *市政のあらまし* | Verified | May be shown in history. |
 | FY2018 users: 129,649 | A | Fukui City, *市政のあらまし* FY2019 | Verified | May be shown with fiscal-year label. |
 | Visitor direct-spending screen: ¥129.649M–¥719.033M/year; ¥3.889B–¥21.571B over 30 years | B / calculated from A + official benchmark | 129,649 FY2018 users × ¥1,000 project assumption through Fukui Prefecture's 2025 average day-trip spend of ¥5,546 | Arithmetic verified. The 30-year total holds visits and spend constant, is undiscounted, and is not an I-O analysis. | Label prominently as a project screening scenario, not a forecast. Do not add demolition cost, asset value, compute revenue, or multiplier effects into one total. |
@@ -72,7 +75,8 @@ release. The table above remains the human-readable admission decision.
 
 - `project.reuse_vision` — reuse is a conditional project vision, not completed construction.
 - `facility.opened_1994` — opened 1994-04-06.
-- `facility.floor_area` — total floor area 8,099.56 m².
+- `facility.floor_area` — property-sheet total floor area 8,099.56 m²; source scope must be named.
+- `facility.demolition_scope_area_2026_09` — 8,923.56 m² stated in the September 2026 demolition-preparation budget material; the reason for the difference is not yet confirmed.
 - `facility.users_fy2018` — FY2018 users 129,649.
 - `council.demolition_estimate_2026_06` — approximately ¥1.58B, narrowly attributed to the June 2026 council question outline; not a final contract price.
 - `architecture.cogdc_separate` — proposed COG DC is separate from the retained onsen building.

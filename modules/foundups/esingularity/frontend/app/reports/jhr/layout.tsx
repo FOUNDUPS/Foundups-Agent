@@ -59,12 +59,12 @@ export default function JhrLayout({ children }: { children: ReactNode }) {
             <p>旧すかっとランド九頭竜には、すでに建物があります。温浴設備があります。地域があります。そして、再利用できるかどうかをまだ検証できる段階にあります。新しい土地を造成し、新しい巨大建物を建てる前に、既存の公共資産をAI時代の地域インフラへ転換できるかを調べることには、政策上の意味があります。</p>
             <p>構想は、1MW級から検証を始め、需要と成立性が確認できた場合に段階的に拡張するものです。計算資源を教育、大学・研究、農業、製造、起業、行政などへつなぎ、技術的に成立するならサーバー排熱を温泉、給湯、暖房、融雪、農業などに再利用する。<strong>建物を保存すること自体が目的ではなく、既存資産を新しい生産インフラへ変えられるかを検証することが目的です。</strong></p>
 
-            <h2>9月25日に何を決めるのか</h2>
-            <p>YUMORIが9月25日に求めているのは、COGDCの事業承認でも、市の出資でも、AI交番への公費投入でもありません。</p>
+            <h2>9月25日の採決後に何を求めるのか</h2>
+            <p>9月25日の採決は終了しました。YUMORIが現在求めているのは、COGDCの自動承認でも、市の出資でも、随意契約でもありません。</p>
             <p><strong>解体を前提とする予算判断を先に確定させないことです。</strong></p>
             <p>成立するかどうかは、技術、構造、アスベスト、電力、通信、資金、収益、運営主体、地域便益を検証しなければ分かりません。だからこそ、再利用案を解体案と同じテーブルに載せ、同じ事実と基準で比較する必要があります。</p>
             <p style={{ fontSize: "1.2rem", fontWeight: 900 }}>解体は後からでもできます。解体した後に、この選択肢を検証することはできません。</p>
-            <p><strong>9月25日：VOTE NO.</strong> YUMORI案に賛成する票ではありません。比較検証を終える前に、福井が持っている物理的な選択肢を消さないための票です。</p>
+            <p><strong>現在：PPP/PFIで比較検証。</strong> 不可逆な解体調達・工事へ進む前に、福井市が官民連携の案件形成ルートを指定し、解体案と再利用案を同じ証拠で比較することを求めています。</p>
             <p>数字、政策整合、技術、法務、PPP/PFI再利用案、予算論点は、<a href={EVIDENCE_03} target="_blank" rel="noreferrer"><strong>公式キャンペーン文書03「解体準備予算反対・支援資料」</strong></a>に集約しています。賛成する前に、反対する前に、まず根拠を確認してください。</p>
 
             <hr style={{ margin: "50px 0" }} />
@@ -78,9 +78,9 @@ export default function JhrLayout({ children }: { children: ReactNode }) {
               <p><strong>AI Koban does not mean police authority or resident surveillance.</strong> It is a structural metaphor for small, distributed infrastructure close to the community.</p>
               <h3>Why test the option before demolition?</h3>
               <p>AI is physical infrastructure. It requires chips, buildings, transmission, cooling, electricity, land and capital. The former Sukatto Land Kuzuryu is an existing physical asset. The question is whether it can be repurposed before Fukui eliminates that option.</p>
-              <p>YUMORI is not asking Fukui City to approve COGDC on September 25, and it is not asking the city to fund an AI Koban. It is asking for the reuse alternative to be tested against demolition using the same evidence and standards.</p>
+              <p>The September 25 vote is complete. YUMORI is not asking Fukui City to automatically approve COGDC, fund an AI Koban, or award a non-competitive contract. It is asking the City to designate a PPP/PFI public-private project-formation route and test reuse against demolition using the same evidence and standards.</p>
               <p style={{ fontSize: "1.2rem", fontWeight: 900 }}>Demolition can happen later. Once demolished, this option cannot be tested.</p>
-              <p><strong>September 25: VOTE NO.</strong> Preserve the option, test the evidence, then decide. The supporting economic, policy, technical, legal and PPP/PFI record is collected in <a href={EVIDENCE_03} target="_blank" rel="noreferrer">Campaign Document 03</a>.</p>
+              <p><strong>Current request: PPP/PFI comparison.</strong> Compare demolition and reuse before irreversible demolition procurement or work proceeds. The supporting economic, policy, technical, legal and PPP/PFI record is collected in <a href={EVIDENCE_03} target="_blank" rel="noreferrer">Campaign Document 03</a>.</p>
             </div>
           </div>
         </article>

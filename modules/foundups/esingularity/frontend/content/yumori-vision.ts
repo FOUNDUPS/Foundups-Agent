@@ -35,9 +35,9 @@ const source: VisionSource[] = [
     },
     title: { ja: '壊す前に、未来を比べる。', en: 'Before Demolition, Compare the Future.', pt: 'Antes de demolir, compare o futuro.' },
     summary: {
-      ja: '設立準備委員会の現在の要請は、9月25日の採決で解体準備事業を含む予算案について反対票を求めることです。再利用案の採否は別の正式手続で判断されます。',
-      en: 'The Preparatory Committee’s current request is a NO vote on the budget containing demolition preparation at the September 25 vote. Adoption of the reuse proposal is a separate formal decision.',
-      pt: 'O pedido atual do Comitê Preparatório é um voto NÃO ao orçamento que inclui a preparação da demolição na votação de 25 de setembro. A adoção da proposta de reutilização é uma decisão formal separada.',
+      ja: '9月25日の採決後、設立準備委員会は、不可逆な解体調達・工事へ進む前に、PPP/PFIの官民連携ルートで解体案と再利用案を比較検証することを求めています。',
+      en: 'After the September 25 vote, the Preparatory Committee is asking Fukui City to use a PPP/PFI public-private route to compare demolition and reuse before irreversible demolition procurement or work proceeds.',
+      pt: 'Após a votação de 25 de setembro, o Comitê Preparatório pede que a cidade de Fukui use uma via público-privada PPP/PFI para comparar demolição e reutilização antes de uma contratação ou obra de demolição irreversível.',
     },
     action: { ja: '現在の要請と根拠を見る', en: 'See the current request and evidence', pt: 'Ver o pedido atual e as evidências' },
     evidence: {

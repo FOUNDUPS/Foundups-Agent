@@ -26,7 +26,7 @@ The current eSingularity redesign brief calls for three to four primary content 
 | --- | --- |
 | `/` | eSingularity project/vision landing on eSingularity.ai |
 | `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
-| `/vote-no` | YUMORI.me civic-action record: current VOTE NO position, privacy-bounded council/mayor messages, and official contact routes |
+| `/vote-no` | YUMORI.me civic-action record: historical September 25 VOTE NO campaign, current post-vote PPP/PFI request, privacy-bounded council/mayor messages, and official contact routes |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |

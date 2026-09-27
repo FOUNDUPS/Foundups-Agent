@@ -31,7 +31,7 @@ The live YUMORI.me Contacts / Correspondence Routing sheet remains the current r
 
 ## Public architecture — one project, two focused sites
 
-YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. Its current council request is **VOTE NO** on demolition preparation; the fixed review-period proposal has been withdrawn. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) for local checkout locations, QR provenance, and the supporting Google Doc.
+YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. The September 25 demolition-preparation budget vote is now historical. The current executive-side request is a **PPP/PFI public-private comparison and project-formation route for Sukatto before irreversible demolition procurement or physical demolition proceeds**, including lawful access to the information needed for feasibility review. Fukui City's FY2026 財産有効活用民間提案制度 is a separate asset-proposal lane and is not the requested Sukatto route. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) only as the historical pre-vote record.
 
 The module deliberately publishes two different public experiences from one canonical frontend and one existing Sites project. Shared hosting does **not** mean a shared homepage.
 
