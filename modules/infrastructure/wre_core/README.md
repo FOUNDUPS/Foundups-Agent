@@ -10,7 +10,12 @@ After remote command success, the helper checks status again before changing
 local main, checking out or explicitly deleting branches. Dirty or unreadable
 status preserves the detected work and reports incomplete cleanup. It never
 automatically stashes/pops work or asks GitHub CLI to delete the branch as part
-of PR merge. Clean-path deletion still follows the existing explicit setting.
+of PR merge. When deletion is requested (including the current unset default),
+successful synchronization/checkout now ends with `cleanup_deletion_unqualified`.
+The helper issues no local or remote branch-deletion commands. `passed` remains
+true in advisory mode and false with ENFORCED; prior actions are retained.
+`DELETE_BRANCH=0` keeps the successful no-delete path. `force=True` cannot
+bypass this retention gate. Server-side auto-delete may still occur independently.
 
 After the initial cleanup status guard, fetch explicitly from origin
 `refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
@@ -23,9 +28,11 @@ These are snapshots, not an atomic worktree/ref lock. Ref movement before
 commit capture and worktree/ref changes after the final status remain races.
 The fetch updates the remote-tracking ref even if a later check blocks local
 main. Freshness does not prove intended content, checks or merge authority.
-Direct/backup pushes, unchecked PR merging, main readback, unleased branch
-deletion and server-side auto-delete remain open. Default-off remains required;
-this does not certify WSP 97 terminal convergence or authorize native RSI.
+Direct/backup pushes, unchecked PR merging, main readback and server-side
+auto-delete remain open. Automatic branch retirement is blocked pending a
+qualified combined containment/expected-ref/worktree-ownership contract.
+Default-off remains required; this does not certify WSP 97 terminal convergence
+or authorize native RSI.
 
 # WRE Core
 

@@ -20,12 +20,12 @@ Flow:
     6. If fails (diverged) -> create PR via gh, merge via gh pr merge
     7. Require a second clean/readable status before local cleanup
     8. Fetch/resolve main, recheck status and require local synchronization
-    9. Delete old feature branch when configured (local + both remotes)
+    9. Retain branches when deletion is requested but not qualified
 
 Environment:
     GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
     GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
-    GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
+    GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Request cleanup (currently retained)
 """
 
 import logging
@@ -321,22 +321,13 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
         if ok:
             result["actions"].append("checked out main")
 
-            # Delete the old feature branch if configured
+            # Ref comparison and checked-out-worktree protection have not been
+            # qualified together. Preserve refs instead of guessing ownership.
             if _env_bool("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH", default=True):
-                # Delete local branch
-                ok, _ = _git(["branch", "-D", current_branch], repo_root)
-                if ok:
-                    result["actions"].append(f"deleted local {current_branch}")
-
-                # Delete remote branch (origin)
-                ok, _ = _git(["push", "origin", "--delete", current_branch], repo_root, timeout=30)
-                if ok:
-                    result["actions"].append(f"deleted origin/{current_branch}")
-
-                # Delete remote branch (backup)
-                ok, _ = _git(["push", "backup", "--delete", current_branch], repo_root, timeout=30)
-                if ok:
-                    result["actions"].append(f"deleted backup/{current_branch}")
+                result["actions"].append("blocked: automatic branch deletion is not qualified")
+                result["error"] = "cleanup_deletion_unqualified"
+                result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+                return result
         else:
             result["actions"].append(f"checkout main failed: {output}")
             result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)

@@ -1,3 +1,9 @@
+## 2026-09-27: RSI automatic-cleanup retention gate
+
+- Closed PR1915 at `6255cda69`: same 136 IDs passed on PR/main, required checks passed, owned branch/worktree retired. Current main, shared snapshot and 95 peer heads remain unchanged.
+- Re-evaluated the proposed 14/P1 deletion repair against existing owners and version-matched Git source. No qualified combined ref/worktree retirement primitive exists in the inspected path; preserve that blocker. Selected a smaller executable 12/P2 retention gate, with independent fixed acceptance.
+- Same sentinel/tests/CI and canonical roadmap/backlog carry evidence. Caller help changes are documentation only. No new skill, module, service, token activation or native RSI authority.
+
 ## 2026-09-27: RSI fresh-main synchronization guard
 
 - PR1913 closed as `MERGED_VERIFIED_MAIN` at `fbfc3ce40`; 68 exact case IDs passed on PR/main, all PR/main checks passed and owned lane retired. Shared checkout and 95 peer heads preserved.

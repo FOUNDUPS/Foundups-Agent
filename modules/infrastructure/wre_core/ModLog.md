@@ -1,3 +1,10 @@
+## 2026-09-27: Gate unqualified automatic branch deletion
+
+- WSP 00/15/22/34/50/62/84/97; C1/I4/D3/Impact4 = 12/P2. PR1915 is merged/main-verified and retired. Fresh source/primary Git review leaves full 14/P1 automatic cleanup qualification blocked; it does not become safe through a guessed ref/worktree lock.
+- Replace automatic local/origin/backup branch-deletion commands with explicit retention after successful synchronization/checkout. Report `cleanup_deletion_unqualified`, retain prior actions and preserve ENFORCED semantics. Explicit no-delete behavior remains; no new module/service/lease abstraction.
+- Existing source/test/hosted CI owners reused with 148 authored cases. Caller docstring updated only; main.py is a backend repository marker, not a pinned runtime member, so no manifest mutation is required.
+- Higher native/domain/product/consumer tasks retain their blockers. No live deletion, runtime activation, automatic retirement or retained-RSI claim.
+
 ## 2026-09-27: Require fresh local-main synchronization
 
 - WSP 00/15/22/34/50/62/84/97; C3/I4/D3/Impact4 = 14/P1. PR1913 is merged/main-verified and retired. Fresh ranking and independent acceptance retain this existing-owner action after one unrelated eSingularity documentation update.
