@@ -1,7 +1,7 @@
 ---
 name: yumori_contact_ledger
 description: Ground YUMORI.me correspondence in live Gmail/CRM state, preserve routing consent, write in the canonical 0102 proxy voice, reconcile receipts, and promote repeated operator failures into reusable rules.
-version: 0.6.0
+version: 0.7.0
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -13,6 +13,7 @@ category: workflow
 wsp_chain: [WSP_00, WSP_15, WSP_22, WSP_50, WSP_95, WSP_97]
 evals:
   - sent_first_reconciliation
+  - pre_draft_correspondence_state_capsule
   - routing_consent_enforced
   - canonical_0102_proxy_voice
   - monk_third_person_reference
@@ -64,12 +65,13 @@ For every substantive YUMORI.me correspondence task:
 1. Resolve the person / organization from live Contacts.
 2. Read Correspondence Routing for current consent and route state.
 3. Search Gmail Sent before claiming an ask is unsent or unanswered.
-4. Read the complete relevant thread and exact current draft when one exists.
-5. Reconcile the latest real state against Email Log / Action Queue / Moshpit.
-6. Draft or act only within current authorization.
-7. Verify provider state after mutation.
-8. Reconcile the canonical records.
-9. If the run exposed a meaningful error, near-miss, stale assumption, duplicate, coverage failure, or reusable improvement, update the operating rule and 0102 learning log.
+4. Read the complete relevant thread and every current draft for the same recipient/topic scope.
+5. Reconcile the latest real state against Email Log / Action Queue / Correspondence Routing / relevant Moshpit receipts.
+6. Build the **Correspondence State Capsule** below. No substantive recipient-finalized draft may be created or materially updated before the capsule resolves.
+7. Draft or act only within the capsule's current authorization and next-allowed-action state.
+8. Verify provider state after mutation.
+9. Reconcile the canonical records.
+10. If the run exposed a meaningful error, near-miss, stale assumption, duplicate, coverage failure, or reusable improvement, update the operating rule and 0102 learning log.
 
 Do not replace these reads with memory.
 
@@ -170,6 +172,85 @@ Before claiming that a message is unanswered, an ask is unsent, or a draft is pe
 6. Missing Moshpit receipt after a verified send is a logging repair, not permission to resend.
 7. Incomplete pagination / ambiguous evidence means HOLD.
 
+## Correspondence State Capsule — mandatory pre-draft continuity receipt
+
+The fastest safe cross-session memory is **not another Moshpit or another contact database**.
+Before creating, materially updating, forwarding, or sending substantive recipient-finalized
+correspondence, reconstruct one ephemeral state capsule from the existing authorities.
+
+The capsule is a working receipt for the current execution only. Do **not** persist raw
+email bodies or private recipient dumps in Git. Gmail remains transaction truth; Email Log
+is the event index; Contacts / Action Queue carry current operational state; Correspondence
+Routing carries recipient authorization; Moshpits carry campaign history or reusable
+learning.
+
+Minimum capsule schema:
+
+```text
+scope_key:
+  stakeholder_or_org:
+  topic_or_ask:
+active_thread_ids:
+latest_inbound:
+  message_id:
+  occurred_at:
+  answered_asks:
+latest_outbound:
+  message_id:
+  occurred_at:
+  purpose:
+outbound_since_latest_inbound:
+sent_coverage_state:
+  SAME_MESSAGE_SENT | EARLIER_SENT_NEW_DRAFT | PARTIAL_RECIPIENT_COVERAGE |
+  NO_SENT_MATCH_IN_CHECKED_SCOPE | UNKNOWN
+current_drafts:
+  - draft_id:
+    thread_id:
+    status: ACTIVE | HOLD | SUPERSEDED
+    delta_vs_sent:
+open_asks:
+new_delta_not_previously_sent:
+routing_state:
+sender_boundary_state:
+queue_state:
+follow_up_gate:
+  CLEAR | WAIT | ESCALATE | BLOCK_DUPLICATE | BLOCK_THIRD_FOLLOWUP | UNKNOWN
+next_expected_event:
+next_allowed_action:
+evidence_checked:
+  gmail_sent:
+  full_thread:
+  drafts:
+  email_log:
+  action_queue:
+  correspondence_routing:
+  relevant_moshpit:
+```
+
+Rules:
+
+1. Build the capsule **before** `create_draft`, before a material `update_draft`, and again
+   immediately before any send-capable action.
+2. Count follow-ups from provider evidence, not memory or labels. A provider-sent message
+   still counts for duplicate/follow-up suppression even when a separate send-integrity
+   incident means it cannot be promoted to `VERIFIED_SENT`.
+3. Separate **old unresolved asks** from **new delta**. New facts may be retained for the
+   next legitimate event without re-sending the entire prior request.
+4. `Action Queue` is an operational projection, not sufficient by itself. If it conflicts
+   with Gmail / Email Log / Routing, repair the stale projection and fail closed until the
+   conflict is understood.
+5. A Moshpit receipt can accelerate continuity but cannot prove a send. Missing narrative
+   logging never creates resend authority.
+6. If `follow_up_gate` is `WAIT`, `ESCALATE`, `BLOCK_DUPLICATE`,
+   `BLOCK_THIRD_FOLLOWUP`, or `UNKNOWN`, do not create a new send-ready draft. An existing
+   draft may be marked `HOLD` while preserving genuinely new delta.
+7. If any required evidence check is incomplete or contradictory, `next_allowed_action`
+   is `HOLD / RECONCILE`, never `SEND`.
+8. A fresh inbound, a newly provider-sent message, a changed draft, recipient-routing
+   mutation, or a materially changed ask invalidates the old capsule and requires rebuild.
+
+This capsule is the session-to-session concatenation layer. It intentionally references
+stable provider/CRM IDs and compact ask state rather than copying correspondence prose.
 ## Gmail filing and queue semantics
 
 Use the established YUMORI labels and current live evidence.
