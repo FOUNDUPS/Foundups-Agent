@@ -39,6 +39,9 @@ jobs:
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
 
+      - name: Run LinkedIn offline activity contracts
+        run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
+
       - name: Run WRE RSI measurement contract tests
         run: |
           python -m pytest -q --tb=short \

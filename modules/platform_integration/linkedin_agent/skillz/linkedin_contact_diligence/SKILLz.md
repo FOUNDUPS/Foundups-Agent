@@ -48,7 +48,7 @@ use bounded public professional evidence appropriate to the claim, such as:
 Search aliases or name variants only when necessary to resolve identity. Do not
 collect sensitive personal data, family information, home addresses, private
 accounts, unrelated litigation, or other material that is not needed to assess
-the professional claim. Never treat search-result absence as evidence of fraud.
+the professional claim. Absence of a public footprint is not proof of fraud.
 
 ## Evidence labels
 
