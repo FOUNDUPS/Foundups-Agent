@@ -1,3 +1,9 @@
+## 2026-09-27: Separate supervisor observation from handshake requester
+
+- WSP00/15/22/50/84/97;13/P1. Correct the existing INTERFACE contract: current default observer and healthcheck share requester identity; a supervisor needs an authenticated observation handoff, not identity relabeling or a serialized lifecycle handle.
+- Name existing service/config producer ownership and lifecycle verifier/issuance/consumer seams; preserve strict default/audit semantics. Transport, canonical registration, replay ownership and deployment visibility remain specified prerequisites, not implemented authority.
+- Reconcile PR1922/1923 completion in active guidance, freeze connected future acceptance and update existing roadmap/backlog. No source, test, registry, service, privilege or native execution change.
+
 ## 2026-09-27: Qualify cross-process socket visibility
 
 - WSP00/6/15/22/50/62/84/97;14/P1. Extend existing observer/support tests with two bounded same-UID child conditions. Positive uses default discovery/cookie continuity; negative requires live nondumpable child and real permission errors. No production or workflow changes.

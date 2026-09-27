@@ -1,3 +1,9 @@
+## 2026-09-27: RSI supervisor/requester contract reconciliation
+
+- WSP00/15/97 confirms PR1923 main closure, unchanged95 peers/shared state and52-row ranking. Select13/P1 existing-contract correction while native18 remains blocked.
+- Separate isolated signer, authenticated observer and actual requester; require requester-local lifecycle issuance after canonical observation verification. Correct stale inode-gap guidance instead of adding another design document/module.
+- Ten existing planning/interface/log files only. Independent source review, unchanged254/254 hosted selection and exact PR/main convergence remain required; no native RSI, AmIBot, privileges or service activation.
+
 ## 2026-09-27: RSI cross-process visibility qualification
 
 - WSP00/15/97 re-observation confirms PR1922 main closure and unchanged95 peer heads/shared checkout. Select14/P1 permission-boundary qualification in existing observer tests; native18 remains blocked.

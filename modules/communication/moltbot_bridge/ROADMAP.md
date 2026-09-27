@@ -1,3 +1,18 @@
+## Supervisor/requester contract reconciliation — 2026-09-27
+
+PR1923 closed at main `5578f7bd`:252/254 cases passed on PR/main, all checks and
+independent artifacts passed, owned lane retired. Fresh52-row WSP15 reconciliation
+selects13/P1 (C2/I4/D3/Impact4) to correct the existing supervision contract.
+INTERFACE now identifies three process roles, requester-local capability issuance,
+canonical registration and remaining authenticated transport/visibility blockers.
+This source-design correction is documentation-only, with254/254 unchanged hosted
+regression expected. It does not implement an issuer or qualify native RSI.
+
+Next candidate: freeze a concrete existing-owner transport/verifier/replay and
+visibility design before connected implementation, then re-score against current
+repository evidence. Preserve isolated signer controls and the actual requester;
+do not create another authority registry or repeat closed inode/child tests.
+
 ## Cross-process visibility prerequisite — 2026-09-27
 
 PR1922 is merged/main-verified at `d6f9458b`;188/252 PR and main cases passed,

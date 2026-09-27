@@ -1,3 +1,23 @@
+## Observer-requester contract checkpoint — 2026-09-27
+
+PR1923 is `MERGED_VERIFIED_MAIN` at `5578f7bd75dec3becb78a844bd282b1fd73aea94`:
+252 parent/254 candidate cases passed on PR/main; all CI/CodeQL, independent
+original-artifact reviews, exact-tree readback and owned cleanup completed.
+This supersedes its prepared/pending checkpoint below. Same-UID permission
+evidence does not qualify production cross-UID supervision.
+
+Reconciled52-row/95-peer/shared-state selection is13/P1 existing-contract repair.
+The [corrected contract](../../modules/communication/moltbot_bridge/INTERFACE.md#external-supervision-source-contract--2026-09-27)
+separates signer, observer and requester and locates authenticated verification
+before requester-local lifecycle issuance. Existing registered/default semantics
+cannot be bypassed by serialization or callback injection. No implementation,
+new framework, host candidate execution, service or privilege change.
+
+Ten existing documents carry the correction and future connected acceptance.
+Unchanged254/254 hosted regression, independent exact review and main closure
+remain required. Re-observe before transport/verifier design or implementation;
+all seven native trust reasons and absent effect-use lease remain.
+
 ## Process visibility checkpoint — 2026-09-27
 
 PR1922 is `MERGED_VERIFIED_MAIN` at `d6f9458b06ae5bc15dc688acdfce2e29a7526fa2`:

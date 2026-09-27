@@ -1873,105 +1873,98 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
-    "selected_action": "rsi-process-visibility-20260927",
-    "status": "cross_process_visibility_prepared_hosted_pending",
+    "base_commit": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+    "selected_action": "rsi-observer-requester-contract-20260927",
+    "status": "observer_requester_contract_corrected_review_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 3,
       "impact": 4,
-      "total": 14,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-process-visibility-20260927",
-    "base": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+    "observation_id": "rsi-observer-requester-contract-20260927",
+    "base": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
     "self": "0102",
     "role": "architect",
-    "origin": "autonomous_trigger",
+    "origin": "external_principal",
     "principal_ref": "012",
     "selected": {
-      "task": "Qualify exact filesystem-to-socket ownership in the existing external signer OS observer",
-      "component": "Qualify cross-process procfs visibility at the existing signer nondumpability boundary using a disposable hosted fixture.",
+      "task": "Define and qualify canonical external-supervision policy issuance into the existing lifecycle admission path before resident handshake consumption",
       "wsp15": {
-        "complexity": 3,
+        "complexity": 2,
         "importance": 4,
         "deferability": 3,
         "impact": 4,
-        "total": 14,
+        "total": 13,
         "priority": "P1"
       },
-      "state": "finite_design_ready_requires_fresh_effect_and_test_acceptance",
+      "state": "observer_requester_contract_corrected_review_pending",
+      "eligibility": "PR1923 is MERGED_VERIFIED_MAIN at5578f7bd with independent original PR/main artifacts and owned cleanup. This documentation correction is executable; runtime implementation requires a separately frozen connected transport/verifier contract and admitted visibility qualification.",
+      "rationale": "C2 for a bounded correction to existing contract/acceptance, I4 because the current same-process requester path cannot simply become an independent supervisor, D3 because admission remains disabled, impact4 for reusable lifecycle integration. Reopen the existing design row as partial instead of adding a 53rd task. Higher executable source repairs have closed; remaining higher rows retain their stated dependencies.",
       "source": [
-        "modules/communication/moltbot_bridge/src/reddog_signer_process_isolation_gate.py",
-        "modules/communication/moltbot_bridge/src/reddog_external_signer_lifecycle_admission.py",
-        "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py",
-        "modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py"
+        "reddog_external_signer_os_observer.py::_validate_policy",
+        "reddog_external_signer_lifecycle_admission.py::_verified_admission_values",
+        "reddog_external_signer_lifecycle_admission.py::_build_lifecycle_factory",
+        "reddog_signer_process_isolation_gate.py::enforce_signer_process_isolation",
+        "INTERFACE.md::External supervision source contract"
       ],
-      "eligibility": "Source/test design can proceed after current repair closes. Hosted child-process effects require explicit bounded review before execution; no local or production runtime granted. Retain the same broad qualifier as partial rather than adding a duplicate micro-slice row.",
-      "rationale": "Existing isolation gate disables dumpability before key resolution and requires non-root signer identity distinct from consumer mappings. Observer reads exe, FD and namespace links governed by ptrace read-access checks. Current own-process fixture bypasses that cross-process permission boundary. Existing isolation tests use FakeIsolationBackend, so there is a concrete missing environmental qualification before authentic supervisor issuance. C3 for bounded child/IPC/lifetime fixture, I4 core prerequisite, D3 next integration step, impact4 reusable observation boundary.",
-      "smallest_coherent_scope": [
-        "Extend existing observer test owner/support with a fixed disposable listener child and two conditions: dumpable1 positive, child-only dumpable0 negative. Production observer/isolation code unchanged.",
-        "Use the actual production association seam for the created child PID. Same UID is deliberate to isolate nondumpability without privileged account changes. This is not full public observer or cross-UID supervisor qualification.",
-        "Reuse reviewed CI and registry tooling; explicitly account for subprocess/network fixture capabilities and file-size inventory. Preserve identical parent/candidate test selections where feasible; no new harness/service/lease framework.",
-        "Keep signer UID separation, PR_SET_DUMPABLE=0 and capability restrictions unchanged. Do not grant CAP_SYS_PTRACE to an AI/requester as an automatic repair."
-      ],
+      "smallest_coherent_scope": "Revise the existing INTERFACE external-supervision contract, required existing roadmap/ModLog and canonical row. Explicitly distinguish the authenticated observer/supervisor identity and procfs visibility from the actual kernel-attested handshake requester. Name the existing owner and canonical producer/consumer before any issuer implementation; preserve public audit injection and strict resident provenance requirements. Do not create another registry, disconnected adapter, repeated requester-mismatch tests, or new design document.",
       "fixed_acceptance_before_edit": [
-        "Freeze exact child source, interpreter argv, minimal environment, cwd, allowed temporary path, IPC format, deadlines and cleanup identity. Child creates one listener and no key/service/provider; no shell or arbitrary command path.",
-        "Require Linux and observer lacks CAP_SYS_PTRACE; record actual observer/child credentials, kernel and namespace/procfs view. Do not assume UID0 automatically has or lacks capabilities. Unsupported admitted environments fail qualification.",
-        "Positive child reports/independently verifies dumpable1 and holds its FD. Parent uses actual process-FD discovery/production mapper and independent stat fields, then concrete-cookie continuity; its receipt remains audit-only.",
-        "Negative child sets and reads back PR_SET_DUMPABLE=0 in the child only, retains same process/listener until parent completes observation. Parent must fail closed on denied procfs ownership evidence; absence/disappearance cannot masquerade as the intended permission result.",
-        "Coordinate readiness and deterministic lifetime via bounded IPC. Never clear observer environment or alter its dumpability. Cleanup targets only the exact spawned process and owned temporary directory, with deadline and retained error evidence.",
-        "Do not change UID/GID, namespaces, capabilities, sysctls, ptracer permissions or root services. No production signer or signing key. This does not satisfy distinct-UID visibility or trusted supervisor provenance.",
-        "Independently review prospective source/effects before hosted execution and original JUnit afterward. Keep fixture denial evidence separate from native policy authority. No acceptance count or passing result claimed now."
+        "Three roles are explicit: isolated non-dumpable signer, authenticated supervisor observer, unprivileged handshake requester. Expected policy fields cannot silently relabel the supervisor as requester.",
+        "Identify exactly where supervisor observations cross into the existing lifecycle consumer, which existing authenticated owner validates their provenance, and how actual requester/profile/generation/socket/start identity and one-attempt time/lifetime are bound. A bool, digest-only receipt, caller-created policy or arbitrary callback is insufficient.",
+        "Keep existing local audit/default observer semantics and requester kernel-identity rejection intact. A future separate authenticated-observation route requires deliberate canonical registration/consumption; injected callbacks must not pass require_default_dependencies=True by assertion or alias.",
+        "A future connected fixture must prove a valid authenticated supervisor observation plus independent correct requester handshake, and reject wrong observer issuer, wrong requester/profile/generation, swapped socket/process/invocation, replay/expiry, observation denial and identity drift before promotion. Test the actual consumer and preserve existing one-use/rejection behavior; do not duplicate the existing forged-requester test.",
+        "Document why systemd MainPID/InvocationID, pidfd and owner-selected expected fields alone do not supply procfs access or authenticate a cross-process observation transport. Actual deployment visibility and privilege policy must be independently qualified.",
+        "No requester CAP_SYS_PTRACE, dumpability weakening, signer/requester identity collapse, live service activation, or native/effect lease grant is part of this correction."
       ],
       "limits": [
-        "Source contract proposal only. Current PR1922 must first earn hosted/main closure.",
-        "Same-UID cross-process positive and nondumpable negative isolate one concrete kernel boundary; full cross-UID authenticated supervisor path remains open.",
-        "The public observer deliberately requires requester UID different from signer UID, so this test must not weaken that policy merely to obtain a positive fixture.",
-        "A trusted supervisor may need appropriate kernel visibility, but selecting/granting it belongs to the existing authenticated supervisor ownership contract; no automatic permission escalation.",
-        "All seven native reasons and absent effect-use lease remain. Cookie/process snapshots retain ABA/lifetime limits."
+        "Design correction, not a completed authenticated issuer or production topology.",
+        "No claim that this same-UID experiment proves distinct-UID public observer operation.",
+        "All seven resident blockers and authoritative_use_lease=None remain; source design does not require pretending that live runtime authority already exists.",
+        "PR1923 same-UID visibility outcomes are verified; current documentation-only regression and closure remain pending."
       ]
     },
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 3,
       "impact": 4,
-      "total": 14,
+      "total": 13,
       "priority": "P1"
     },
     "previous_closed": {
-      "utc": "2026-09-27T09:56:36.889802+00:00",
+      "utc": "2026-09-27T11:01:45.487350+00:00",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "pr": 1922,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1922",
-      "head": "87b243cae7b2b372e31ac3b0068c4fbb553a8483",
-      "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
-      "tree": "a637d9c49e11b15523ce49ef4eab0a3ffe6b1ca9",
-      "main_readback": "All15 scoped blobs and full tree equal independent exact-head review.",
+      "pr": 1923,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1923",
+      "head": "13d4f774d51763c92666ee48b8c79e733949b1d2",
+      "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+      "tree": "c4bf78d3efbdb3fc6e147b649195f1e0d8aa9bc1",
+      "main_readback": "All13 scoped blobs and full tree equal independent exact-head review.",
       "readback_recovery": null,
       "pr_checks": "All10 passed at exact head.",
       "main_checks": {
-        "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+        "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
         "runs": [
           {
             "conclusion": "success",
-            "databaseId": 36310406471,
+            "databaseId": 36313896072,
             "event": "push",
-            "headSha": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+            "headSha": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
             "status": "completed",
             "workflowName": "CI"
           },
           {
             "conclusion": "success",
-            "databaseId": 36310406482,
+            "databaseId": 36313895876,
             "event": "dynamic",
-            "headSha": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+            "headSha": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
             "status": "completed",
             "workflowName": "CodeQL"
           }
@@ -1979,30 +1972,30 @@
         "passed": true
       },
       "hosted_regression": {
-        "cases": 252,
-        "parent_cases": 188,
+        "cases": 254,
+        "parent_cases": 252,
         "failures": 0,
         "errors": 0,
         "skipped": 0,
         "receipt": "hosted-results.json"
       },
       "main_hosted_regression": {
-        "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
-        "run": 36310406471,
-        "cases": 252,
-        "parent_cases": 188,
+        "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
+        "run": 36313896072,
+        "cases": 254,
+        "parent_cases": 252,
         "exact_test_ids_match_pr": true,
         "failures": 0,
         "errors": 0,
         "skipped": 0,
-        "unique_candidate_cases_across_pr_and_main": 252,
+        "unique_candidate_cases_across_pr_and_main": 254,
         "packages": {
           "pytest": "9.1.1",
           "cryptography": "50.0.1"
         },
         "xml_sha256": {
-          "parent": "96d9164e50f9210a3c5a622367892abea0045551353b4a84b5e41da54150a368",
-          "candidate": "4a2fad4d1a66a16436d0d1fc6d16a9ea9c4ae67207e03a5323d18c68e4b3a127"
+          "parent": "3fda234fe0f560af8e2f1d7c7443b51044d5941289fe28b57e9624e116c94a56",
+          "candidate": "dc0b6a6e681d7c6b9df0f1b6b6093f0200db7a327612c8d985833fa06ed79c02"
         }
       },
       "kernel_characterization": {
@@ -2014,48 +2007,54 @@
         "production_association_cases": 1,
         "production_supervision_qualified": false
       },
+      "process_visibility": {
+        "pr_receipt": "hosted-process-results.json",
+        "main_receipt": "main-process-results.json",
+        "qualified_child_cases": 2,
+        "production_supervision_qualified": false
+      },
       "local_tests_executed": 0,
-      "owned_worktree_removed": "O:\\Foundups-Agent-worktrees\\rsi-socket-repair-20260927",
-      "owned_local_branch_removed": "fix/rsi-socket-repair-20260927",
-      "owned_remote_branch_removed": "fix/rsi-socket-repair-20260927",
+      "owned_worktree_removed": "O:\\Foundups-Agent-worktrees\\rsi-process-visibility-20260927",
+      "owned_local_branch_removed": "test/rsi-process-visibility-20260927",
+      "owned_remote_branch_removed": "test/rsi-process-visibility-20260927",
       "peer_heads_unchanged": 95,
       "shared_snapshot_unchanged": true,
       "persistent_observer": {
         "path": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
-        "head": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+        "head": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
         "state": "ACTIVE_OWNED_WORK",
         "clean": true
       },
-      "runtime_effects": "Three hosted own-socket cases include actual production association; no cross-process supervision proof. No live signer/service/provider/native worker/product activation. Native RSI remains incomplete.",
+      "runtime_effects": "Two hosted same-UID child visibility cases plus three prior own-socket cases; no authenticated cross-UID supervision proof. No live signer/service/provider/native worker/product activation. Native RSI remains incomplete.",
       "next_action_review": "next-action-review.json"
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\previous-observation.json",
-      "sha256": "4b53c47d79c6983405128101df8712bd2be9ccef9c67af9a30308bcf8c4611b8",
-      "repository_ref": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2:docs/roadmaps/rsi_swarm_backlog.json",
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\previous-observation.json",
+      "sha256": "f225c0a901e7fca1af924670a3d6cd6580a747bbf4290c3a06325b42eb264fcf",
+      "repository_ref": "5578f7bd75dec3becb78a844bd282b1fd73aea94:docs/roadmaps/rsi_swarm_backlog.json",
       "json_path": "current_observation"
     },
     "acceptance": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\acceptance.json",
-      "sha256": "3e8707e4946048650b0a4491a801e3e72d4c7ad0ce552b75b7d9895a3445f03a"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\acceptance.json",
+      "sha256": "af97d63232870d3a3606456ae399499201871b1882b84cc92f683321275596ac"
     },
     "retrieval": {
       "holo": "Authority5326080d/queryhost0c81418f unchanged: previous HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained; explicit degraded Git/rg, no repeated failing probe or reindex.",
-      "noise": "Focused source and nearest tests; stale preparation-time checkpoints reconciled through exact PR1922 closure. Broad readiness search was noisy; narrowed to prctl/Popen/select owners.",
-      "ordering": "WSP00; actual15/97; exact closure/heads/52rows; module/test contracts; production consumer and Linux primary docs.",
-      "missing": "Module memory/README.md and requirements.txt absent; no authenticated supervisor policy or cross-process visibility qualification. No new placeholder docs.",
-      "staleness": "Exact main,95peerheads,shared/Holo roots verified unchanged. Prior Holo failure reused only at unchanged authority/query-host scope.",
-      "duplication": "Reuse existing observer tests and support; two parametrized child cases, no new suite/module/skill/workflow."
+      "noise": "Narrowed to actual observer/lifecycle/service owner and nearest test contracts; no broad stale transcript conclusions.",
+      "ordering": "WSP00/bootstrap; actual15/97; exact main/PR closure/52rows; module docs; source producer/consumer and independent source review.",
+      "missing": "Module memory/README.md and requirements.txt absent. No canonical authenticated supervisor observation transport, registered consumer, or deployment visibility qualification. Do not create placeholders.",
+      "staleness": "Exact main,95peerheads,shared/Holo roots unchanged; reuse exact failed Holo proof only for this unchanged state. Correct stale active supervision inode diagnosis using merged PR1922 and PR1923 evidence.",
+      "duplication": "Correct existing INTERFACE section and canonical row; no new module, skill, document, test or authority registry."
     },
     "allocation": {
-      "effort": "C3 bounded child protocol/permission oracles and cleanup; no provider/model spend.",
-      "verification": "252 parent/254 candidate expected; preserve every old case/body. Independent source/effect and original hosted artifact review, exact PR/main checks, owned retirement.",
-      "manual_reason": "Native Qwen/Gemma execution not admitted;0102 bounded source work and independent0102 verifier."
+      "effort": "C2 bounded documentation correction using source-grounded owners; no provider spend.",
+      "verification": "Static scope/link/JSON/source mapping, independent exact documentation review; identical254 parent/candidate hosted cases and unchanged effects. PR/main checks and owned cleanup.",
+      "manual_reason": "Native Qwen/Gemma path not admitted;0102 source reconciliation plus independent0102 verifier."
     },
     "owner_reconciliation": {
       "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\entry.json",
-        "sha256": "b25037a402f28b3330d11a56efa6744ccec424c1b49f407141427e831b9d983d"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\entry.json",
+        "sha256": "365fc5605eff600943ae02896db2b3ff05a6fb5890f67f22dc51e25092567dfe"
       },
       "peers_unchanged": 95,
       "overlap": [
@@ -2063,39 +2062,14 @@
           "number": 1860,
           "paths": [
             "ModLog.md",
-            "WSP_knowledge/WSP_Test_Registry.json",
             "modules/communication/moltbot_bridge/INTERFACE.md",
             "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1820,
-          "paths": [
-            "WSP_knowledge/WSP_Test_Registry.json"
           ]
         },
         {
           "number": 1792,
           "paths": [
             "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1759,
-          "paths": [
-            "WSP_knowledge/WSP_Test_Registry.json"
-          ]
-        },
-        {
-          "number": 1688,
-          "paths": [
-            "WSP_knowledge/WSP_Test_Registry.json"
-          ]
-        },
-        {
-          "number": 1680,
-          "paths": [
-            "WSP_knowledge/WSP_Test_Registry.json"
           ]
         },
         {
@@ -2122,12 +2096,6 @@
           ]
         },
         {
-          "number": 1641,
-          "paths": [
-            "WSP_knowledge/WSP_Test_Registry.json"
-          ]
-        },
-        {
           "number": 802,
           "paths": [
             "ModLog.md"
@@ -2142,18 +2110,17 @@
       ]
     },
     "validation": {
-      "parent": "252 prior IDs unchanged; hosted pending",
-      "candidate": "254 expected:252 retained plus two child conditions; hosted pending",
-      "effects": "Fixed reviewed stdlib-only text via exact sys.executable -I -B -c; one AF_UNIX listener, no connect/accept; PR_SET_DUMPABLE limited to child, readback; core limit zero; no signer/key/service/provider. Normal path sends STOP and waits5s; exceptional path kills only the exact still-live Popen and waits5s. Finally closes all pipes and removes owned TemporaryDirectory. Cleanup failure remains test failure.",
-      "local": "AST/registry only; no host candidate tests or collection.",
-      "artifact_name": "lifecycle-dependency-selection",
-      "production_evidence_property": "process_socket_visibility"
+      "parent": "254 existing IDs; hosted pending",
+      "candidate": "254 identical IDs; hosted pending",
+      "effects": "Existing reviewed CI fixtures unchanged; no new effects.",
+      "local": "Static documentation/source mapping only; no host candidate tests or collection.",
+      "artifact_name": "lifecycle-dependency-selection"
     },
     "publication": {
       "state": "ACTIVE_OWNED_WORK",
-      "branch": "test/rsi-process-visibility-20260927",
-      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-process-visibility-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\final-accounting.json",
+      "branch": "docs/rsi-observer-requester-contract-20260927",
+      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-observer-requester-contract-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-observer-requester-contract\\final-accounting.json",
       "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
@@ -2271,22 +2238,22 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "cross_process_visibility_prepared_hosted_pending",
+          "state": "partial_same_uid_visibility_qualified_cross_uid_supervision_blocked",
           "source": "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py::_require_process_socket_owner",
-          "dependency": "Independent exact source/effect review and real hosted readable/nondumpable child evidence; current main closure before supervisor issuance.",
-          "next_step": "Run the fixed existing-owner qualification through hosted CI, independently inspect original artifacts, converge and re-observe.",
-          "limits": "Same-process production association and cookie/rebind controls; no cross-UID supervisor or native RSI qualification.",
-          "effort_cost": "C3 bounded child lifecycle and permission oracles;252/254 hosted differential plus independent review; no provider spend.",
+          "dependency": "Existing supervisor-issuance contract must distinguish authenticated observation identity from actual handshake requester before cross-UID/runtime qualification.",
+          "next_step": "Reconcile existing supervisor row and connected observation-handoff contract; do not repeat this two-condition experiment or weaken isolation.",
+          "limits": "Two real same-UID child conditions, not public distinct-UID requester operation, privileged supervisor policy or native authority.",
+          "effort_cost": "Remaining C3 cross-UID environmental qualification requires authenticated transport and admitted visibility first; prior252/254 child experiment is closed, not this task cost.",
           "score": 14,
           "component_closure": {
-            "scope": "Connected bounded production association qualified; authentic supervision remains open.",
-            "pr": 1922,
-            "merge": "d6f9458b06ae5bc15dc688acdfce2e29a7526fa2",
+            "scope": "Readable/nondumpable same-UID child visibility and default production association qualified; distinct-UID authenticated supervision remains open.",
+            "pr": 1923,
+            "merge": "5578f7bd75dec3becb78a844bd282b1fd73aea94",
             "terminal_state": "MERGED_VERIFIED_MAIN",
-            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-socket-repair\\final-accounting.json"
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-process-visibility\\final-accounting.json"
           },
-          "next_component": "Qualify cross-process procfs visibility at the existing signer nondumpability boundary using a disposable hosted fixture.",
-          "rescoring_rationale": "Existing isolation gate disables dumpability before key resolution and requires non-root signer identity distinct from consumer mappings. Observer reads exe, FD and namespace links governed by ptrace read-access checks. Current own-process fixture bypasses that cross-process permission boundary. Existing isolation tests use FakeIsolationBackend, so there is a concrete missing environmental qualification before authentic supervisor issuance. C3 for bounded child/IPC/lifetime fixture, I4 core prerequisite, D3 next integration step, impact4 reusable observation boundary."
+          "next_component": "Authenticated cross-UID supervision qualification after the existing supervisor row supplies a frozen observation transport/verifier/replay contract and deployment visibility policy.",
+          "rescoring_rationale": "PR1922 repaired distinct inode domains; PR1923 qualified readable and nondumpable same-UID child visibility with actual permission denial. Cross-UID authenticated supervision still depends on canonical observation handoff and admitted OS visibility; keep14/P1 (C3/I4/D3/Impact4) for that remaining environmental qualification. Do not repeat the closed child experiment."
         },
         {
           "task": "Qualify persistent verifier/treasury role and caller authority in existing FAM/WRE owners",
@@ -2860,7 +2827,7 @@
             "total": 13,
             "priority": "P1"
           },
-          "state": "closed_design_merged_PR1920",
+          "state": "observer_requester_contract_corrected_review_pending",
           "source": [
             "reddog_signer_current_generation_use_time_gate.py",
             "reddog_signer_current_generation_runtime_binding.py",
@@ -2874,15 +2841,23 @@
             "reddog_signer_socket_service_run_packet_supply.py",
             "reddog_signer_process_isolation_gate.py"
           ],
-          "dependency": "Existing-owner design is specified, independently reviewed and merged. Concrete issuer still depends on qualified socket bridge.",
-          "next_step": "Do not repeat source-owner discovery. Qualify the identified socket bridge prerequisite, then implement actual producer/consumer together.",
+          "dependency": "Canonical authenticated observation transport/verifier/replay ownership and deployment visibility remain unimplemented; current correction requires exact source/CI/main closure.",
+          "next_step": "Review and converge the existing contract correction; then re-observe/score the bounded transport/verifier design before connected implementation.",
           "limits": "Documentation design only; not implemented or runtime-qualified supervision.",
           "closure": {
             "pr": 1920,
             "merge": "f99884864726396b526efdc96d711feae1a4d7bb",
             "terminal_state": "MERGED_VERIFIED_MAIN",
             "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-supervision-contract\\final-accounting.json"
-          }
+          },
+          "score": 13,
+          "rescoring_rationale": "C2 for a bounded correction to existing contract/acceptance, I4 because the current same-process requester path cannot simply become an independent supervisor, D3 because admission remains disabled, impact4 for reusable lifecycle integration. Reopen the existing design row as partial instead of adding a 53rd task. Higher executable source repairs have closed; remaining higher rows retain their stated dependencies.",
+          "design_reconciliation": {
+            "prior_design_pr": 1920,
+            "retained": "Existing system-manager owner and lifetime requirements.",
+            "remaining": "Observer visibility/identity versus kernel-attested handshake requester and authenticated cross-process handoff."
+          },
+          "effort_cost": "C2 source-grounded documentation correction;254/254 unchanged hosted regression and independent review; no provider spend."
         },
         {
           "task": "Strengthen count-only parity diagnostics when a consumer is bound",
@@ -3290,7 +3265,7 @@
         }
       ],
       "selected_next": null,
-      "instruction": "Re-observe actual permission qualification after closure/failure. Do not infer authenticated supervision or native admission."
+      "instruction": "Re-observe current owners and blockers. Freeze concrete authenticated transport/verifier/replay design before implementation; do not equate this documentation correction with admission."
     }
   }
 }

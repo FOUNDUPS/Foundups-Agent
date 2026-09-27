@@ -1,3 +1,32 @@
+## Supervisor-requester connected acceptance — 2026-09-27
+
+Documentation correction only: test code, registry, workflow and existing effects
+are unchanged. PR1923 is merged/main-verified at `5578f7bd`;252 parent/254 candidate
+cases passed on PR/main, original artifacts were independently reviewed, and the
+owned lane retired. The current documentation regression expects254/254 identical
+IDs; it supplies no new production-supervision evidence.
+
+Before implementation, freeze the [authenticated handoff contract](../INTERFACE.md#authenticated-handoff-and-canonical-consumption-specified-not-wired).
+Then extend the existing observer/lifecycle/generation-race owners with a connected
+producer-to-requester-local-consumer fixture, retaining all existing tests:
+
+- Positive: admitted supervisor observation, independently expected requester and
+  profile, actual requester handshake correlation, local issuance and one-use
+  consumption through the real registered lifecycle consumer.
+- Negative: wrong observer issuer, requester, profile/key/epoch, generation,
+  manager/unit/invocation, process/start, namespace or socket; forged boundary,
+  serialized handle/receipt, swapped response or injected audit callback.
+- Temporal controls: challenge replay, expiry, denied observation, process/socket/
+  generation drift before and after handshake; rejection prevents promotion.
+- Preserve default/audit APIs, strict registered provenance, identity-rejection
+  consumption order, resource bounds and signer isolation. Do not duplicate the
+  existing forged-requester unit test as a substitute for connected evidence.
+
+Inert transport fixtures qualify source behavior only. Deployment visibility,
+authenticated IPC and real cross-UID operation need separately admitted disposable
+qualification. Unsupported conditions fail closed; neither a skip nor a digest
+grants authority. No host candidate execution or privilege/service activation.
+
 ## Cross-process visibility qualification — 2026-09-27
 
 PR1922 is merged/main-verified at `d6f9458b`:188 parent/252 candidate cases
@@ -121,18 +150,12 @@ artifacts and closure receipts in the canonical RSI backlog for actual results.
 
 ## OS observer qualification gap — 2026-09-27
 
-`test_reddog_external_signer_os_observer.py::FakeBackend` currently uses202 for
-both pathname filesystem inode and process socket FD inode. Its positive receipt
-test therefore does not qualify the real Linux ownership relation. Existing
-process/credential/tamper controls retain their fixture scope. No test or fixture
-is changed in this design slice; no fresh OS-observer result is claimed.
-
-Extend this owner after the [identity-bridge contract](../INTERFACE.md#socket-ownership-prerequisite--source-defect-not-a-live-incident)
-is qualified. Keep filesystem device/inode and socket inode/cookie distinct;
-cover coincidence, missing/ambiguous mappings, unlink/rebind, namespace and
-process-lifetime changes. Never use a pathname-only join as proof. Any real Linux
-qualification requires an admitted disposable runner, with host candidate
-execution still prohibited. Existing lifecycle CI regression is not this proof.
+Historical202/202 fixture alias and production inode conflation were repaired in
+PR1922. PR1923 added same-UID dumpability evidence; current fixtures distinguish
+socket303 from pathname202. Do not reopen those closed qualifications. The open
+gap is authenticated cross-UID supervisor observation into the real requester-local
+lifecycle consumer; use the connected acceptance above. Neither prior fixture
+success nor the hosted permission denial supplies that authority.
 
 ## Healthcheck requester regression — 2026-09-27
 
