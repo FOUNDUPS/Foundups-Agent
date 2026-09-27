@@ -34,7 +34,7 @@ These are durable project documents. Preserve their file IDs and update in place
 | 04 | **Who Is the Monk? — Kuzuryu Taicho, eSingularity & FoundUps** | Project-founder/background narrative; not a source for government facts | `1u_HMejJJOxU5y4DV2S-OSwaiQOk_QPffbUFna2CfSrE` |
 | 05 | **YUMORI PPP/PFI Private Proposal Master** | Canonical Drive PPP/PFI proposal mechanics and submission draft | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
 | 06 | **YUMORI Project Prospectus — eSingularity Case for Support** | Integrated project prospectus / support case | `1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM` |
-| 07 | **YUMORI / eSingularity Three-Site Distributed AI Koban Node Portfolio** | Current candidate-site portfolio: Sukatto Land, former Shimousaka Elementary, former Hanyu Elementary | `1BLGiTe3Z6kRHF9u6M0VdPDplkls` |
+| 07 | **YUMORI / eSingularity Three-Site Distributed AI Koban Node Portfolio** | Current candidate-site portfolio: Sukatto Land, former Shimousaka Elementary, former Hanyu Elementary | `1BLGiTe3Z6kR7SZXjcuQ67OiQGBRHF9u6M0VdPDplkls` |
 
 ## OPERATIONS — preserve and find quickly
 
