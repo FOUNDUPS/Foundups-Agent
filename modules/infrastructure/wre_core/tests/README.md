@@ -22,8 +22,14 @@ not execution of the WRE differential plan, complete repository promotion
 evidence, native admission or OS-containment qualification of worker code.
 No local host candidate-test execution is part of this slice. Exact CI results
 and publication/cleanup state belong to the canonical RSI backlog's receipt.
-At cleanup-slice preparation, 68 cases are authored; only the prior 38-case
-parent result is verified. Fresh candidate CI outcomes govern acceptance.
+PR1913 and exact main `fbfc3ce405ca1cf467d66eb0239c0e73688358fd` each passed
+the same 68 cases. The synchronization extension preserves those IDs, expands
+the six clean transcripts, adds 66 rejection cases (11 stages × three routes ×
+two enforcement modes), and two SHA256/deletion-setting controls: 136 authored
+cases. Negative cases enable deletion and require the exact stopping command.
+Explicit fetch/ref resolution, late status and exact object target are ordered
+in the existing fake transcript. Candidate hosted results remain pending at
+preparation; they govern acceptance, not this prospective count.
 
 ## RSI verification measurement contract — 2026-09-25
 

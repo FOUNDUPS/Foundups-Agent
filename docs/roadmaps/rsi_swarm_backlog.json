@@ -1873,8 +1873,8 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
-    "selected_action": "rsi-merge-ownership-20260927",
+    "base_commit": "ea6301814e2e2176889dcd403ba1aee254e89dc6",
+    "selected_action": "rsi-merge-sync-20260927",
     "status": "implementation_prepared_hosted_validation_pending",
     "wsp15": {
       "complexity": 3,
@@ -1888,13 +1888,13 @@
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-merge-ownership-20260927",
-    "base": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
+    "observation_id": "rsi-merge-sync-20260927",
+    "base": "ea6301814e2e2176889dcd403ba1aee254e89dc6",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Preserve detected post-preflight work before the existing merge sentinel performs checkout or branch cleanup",
+    "selected": "Bind sentinel local-main synchronization to a fresh fetched commit and fail closed on synchronization failure",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1904,41 +1904,41 @@
       "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1912,
-      "merge": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d",
+      "pr": 1913,
+      "merge": "fbfc3ce405ca1cf467d66eb0239c0e73688358fd",
       "terminal_state": "MERGED_VERIFIED_MAIN",
       "evidence": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-preflight\\final-accounting.json",
-        "sha256": "376787c7a0028908689b6c2a03af91fa1620c3a8995f0b9a6878ca9e4f55ff1a"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\final-accounting.json",
+        "sha256": "5155fcf0a4e5295829c423a0e49841a6b2b9b0c6e5369bef7eff9d3ad59a35cc"
       }
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\previous-observation.json",
-      "sha256": "e9848b5b3043262a18bd8590dfdbc5dec27e756d5aff755b7095370cfe107da6",
-      "repository_ref": "1b02ba7a9214b0c3b8128243f24864c1dfbc779d:docs/roadmaps/rsi_swarm_backlog.json",
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-sync\\previous-observation.json",
+      "sha256": "436904c2123fe24c3d169be9b714e5513d65f7bd2cbccf653977a05c7d0616d5",
+      "repository_ref": "ea6301814e2e2176889dcd403ba1aee254e89dc6:docs/roadmaps/rsi_swarm_backlog.json",
       "json_path": "current_observation"
     },
     "retrieval": {
-      "holo": "Unchanged HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH: authority5326080d vs queryhost0c81418f. No repeated failed probe/reindex.",
-      "noise": "Bounded owner/function and document sections; no full-repo dump.",
-      "ordering": "Current WSP, roadmap/receipts, caller/source/test owner, independent review.",
-      "missing": "Existing memory/README.md absent; not created.",
-      "staleness": "Main and95peer heads unchanged since prior closure; native source contract bindings reused at exact base.",
-      "duplication": "Existing sentinel, test fixture and hosted CI step reused; no new module/skill/job."
+      "holo": "Same authority5326080d/queryhost0c81418f mismatch requalified by exact roots/unchanged query source. No repeated failed query or reindex.",
+      "noise": "Bounded exact owner/docs/test reads; one truncated combined retrieval replaced by focused chunks.",
+      "ordering": "Current WSP/bootstrap, roadmap/receipts, caller/source/test owner, independent acceptance before edit.",
+      "missing": "Existing memory/README.md absent; NAVIGATION has no direct sentinel entry; caller found in main.py.",
+      "staleness": "Only eSingularity Drive doc advanced main;95peerheads and shared snapshot unchanged. Native bindings rechecked after closure.",
+      "duplication": "Existing sentinel/test fixture/hosted CI reused; no new module, skill or job."
     },
     "allocation": {
       "execution_plane": "Ordinary bounded source repair and hosted focused regression; not WRE differential/native admission.",
-      "effort_cost": "Moderate existing-source repair; one hosted focused suite, existing CI. No model/provider spend or native runtime.",
-      "manual_reason": "Native model/worker admission remains unqualified; existing-source repair with independent verifier and hosted regression."
+      "effort_cost": "Moderate existing-source/test repair, independent source adjudication and existing hosted CI; no model/provider or native runtime spend.",
+      "manual_reason": "Native model/worker admission unqualified; existing source repair with independent verifier and hosted regression."
     },
     "acceptance_review": {
-      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\acceptance-review.json",
-      "sha256": "4d75dce23b5e95bdac17cc352120ed67f312245c2d5be3d894543c9448edf090"
+      "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-sync\\acceptance-review.json",
+      "sha256": "91118761e34daec8eeb421b747c39904e0f6df456885233817f970687c29b370"
     },
     "owner_reconciliation": {
       "entry": {
-        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\entry.json",
-        "sha256": "2a12c4456e389c9d4e722d21fa72048482a5409bbaeed90ea3c2b77db9cd0f06"
+        "path": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-sync\\entry.json",
+        "sha256": "13bdaca484c81f4b467ef6265e6027c8b376540621389c1d33aa27579a6c25a8"
       },
       "peers_unchanged": 95,
       "overlap": [
@@ -1975,17 +1975,17 @@
       ]
     },
     "validation": {
-      "parent": "38 exact cases passed on parent main; receipt retained, not a new run.",
-      "candidate": "68 authored cases; source-only preparation, hosted execution pending. No local host candidate tests.",
-      "limits": "These are status snapshots, not an atomic worktree lock. Changes after the\ncleanup check, direct main pushes, unchecked PR merging, missing main readback,\nstale local-main updates and unleased clean-path branch deletion remain open.\nRepository-side automatic deletion is outside this helper's control. Default-off\nremains required for ordinary startup; these guards do not certify WSP 97\nterminal convergence or authorize native RSI.",
+      "parent": "68 exact IDs passed on prior main; receipt reused, not a new run.",
+      "candidate": "136 authored cases; hosted execution pending. No local host candidate tests.",
+      "limits": "These are snapshots, not an atomic worktree/ref lock. Ref movement before\ncommit capture and worktree/ref changes after the final status remain races.\nThe fetch updates the remote-tracking ref even if a later check blocks local\nmain. Freshness does not prove intended content, checks or merge authority.\nDirect/backup pushes, unchecked PR merging, main readback, unleased branch\ndeletion and server-side auto-delete remain open. Default-off remains required;\nthis does not certify WSP 97 terminal convergence or authorize native RSI.",
       "artifact_name": "merge-sentinel-prerequisites",
       "CI_workflow_unchanged": true
     },
     "publication": {
       "state": "ACTIVE_OWNED_WORK",
-      "branch": "fix/rsi-merge-ownership-20260927",
-      "worktree": "O:/Foundups-Agent-worktrees/rsi-merge-ownership-20260927",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\final-accounting.json",
+      "branch": "fix/rsi-merge-sync-20260927",
+      "worktree": "O:/Foundups-Agent-worktrees/rsi-merge-sync-20260927",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-sync\\final-accounting.json",
       "receipt_state": "not_yet_created"
     },
     "post_sprint_reobservation": {
@@ -2327,12 +2327,40 @@
             "total": 14,
             "priority": "P1"
           },
+          "state": "closed_merged_PR1913",
+          "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
+          "dependency": "Exact reviewed tree merged, main CI/CodeQL passed;68 identical case IDs passed on PR/main; owned lane retired.",
+          "next_step": "Do not repeat completed detected-work preservation; use fresh ranked selection.",
+          "limits": "This detects persistent state at the explicit check; it is not an atomic worktree lock or protection against mutations after that check. Direct main push, unchecked PR merge, absent exact head/check/remote-main readback, clean-path stale local-main update and unleased deletion remain separate open gaps. It does not establish MERGED_VERIFIED_MAIN.",
+          "effort_cost": "Moderate existing-source repair; one hosted focused suite, existing CI. No model/provider spend or native runtime.",
+          "closure": {
+            "pr": 1913,
+            "merge": "fbfc3ce405ca1cf467d66eb0239c0e73688358fd",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260927-rsi-merge-ownership\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Bind sentinel local-main synchronization to a fresh fetched commit and fail closed on synchronization failure",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
           "state": "implemented_hosted_validation_pending",
           "source": "modules/infrastructure/wre_core/src/git_main_merge_sentinel.py",
-          "dependency": "ParentPR1912 fully closed; fresh peer/owner reconciliation complete. Exact-head source review and hosted candidate CI/closure required.",
-          "next_step": "Run existing hosted focused regression after independent review, converge exact qualified head, then re-observe.",
-          "limits": "This detects persistent state at the explicit check; it is not an atomic worktree lock or protection against mutations after that check. Direct main push, unchecked PR merge, absent exact head/check/remote-main readback, clean-path stale local-main update and unleased deletion remain separate open gaps. It does not establish MERGED_VERIFIED_MAIN.",
-          "effort_cost": "Moderate existing-source repair; one hosted focused suite, existing CI. No model/provider spend or native runtime."
+          "dependency": "PR1913 closed; source/owner reconciliation and frozen acceptance complete. Exact review and hosted CI/main closure required.",
+          "next_step": "Validate existing hosted suite, converge exact qualified head, re-observe.",
+          "limits": [
+            "Fresh fetched commit is remote state observation, not proof that this invocation's intended delta merged, passed checks, or holds authority. Do not call it MERGED_VERIFIED_MAIN.",
+            "FETCH_HEAD/tracking refs can be concurrently overwritten; capture an exact validated object and document remaining capture races. A snapshot is not an atomic repository lock.",
+            "Direct and backup pushes, unchecked/unbound PR merge, content/main verification, server-side auto-delete and lease-free clean branch deletion remain open; this repair grants none of those capabilities.",
+            "No tests, collection, product imports, native/services/providers or Git/GH mutations run by verifier. Proposed acceptance is unexecuted."
+          ],
+          "effort_cost": "Moderate existing-source/test repair, independent source adjudication and existing hosted CI; no model/provider or native runtime spend."
         },
         {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
@@ -2891,7 +2919,7 @@
         }
       ],
       "selected_next": null,
-      "instruction": "After exact-head/main closure, re-observe owners and rescore. Native18/P0 retains seven trust/admission prerequisites; remaining convergence gaps do not authorize runtime activation."
+      "instruction": "After exact-head/main closure, refresh owners and rescore. Native18/P0 retains seven trust/admission blockers; no runtime authority inferred."
     }
   }
 }

@@ -12,12 +12,20 @@ status preserves the detected work and reports incomplete cleanup. It never
 automatically stashes/pops work or asks GitHub CLI to delete the branch as part
 of PR merge. Clean-path deletion still follows the existing explicit setting.
 
-These are status snapshots, not an atomic worktree lock. Changes after the
-cleanup check, direct main pushes, unchecked PR merging, missing main readback,
-stale local-main updates and unleased clean-path branch deletion remain open.
-Repository-side automatic deletion is outside this helper's control. Default-off
-remains required for ordinary startup; these guards do not certify WSP 97
-terminal convergence or authorize native RSI.
+After the initial cleanup status guard, fetch explicitly from origin
+`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
+and capture one full 40/64-character hexadecimal object ID. Read status again
+after the fetch/resolution, then update local main using the captured ID.
+Fetch, resolution, status or branch-update failure stops before checkout and
+explicit deletion; there is no cached-target fallback.
+
+These are snapshots, not an atomic worktree/ref lock. Ref movement before
+commit capture and worktree/ref changes after the final status remain races.
+The fetch updates the remote-tracking ref even if a later check blocks local
+main. Freshness does not prove intended content, checks or merge authority.
+Direct/backup pushes, unchecked PR merging, main readback, unleased branch
+deletion and server-side auto-delete remain open. Default-off remains required;
+this does not certify WSP 97 terminal convergence or authorize native RSI.
 
 # WRE Core
 

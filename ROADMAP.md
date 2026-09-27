@@ -12,12 +12,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-27 checkpoint:** PR1912's merge-sentinel prerequisite repair is
-merged/main-verified and retired, with38 fixed cases passing on both PR/main.
-Fresh ranking selects the14/P1 existing cleanup ownership guard. See the
-[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#merge-ownership-checkpoint--2026-09-27)
-and canonical backlog for source, acceptance and terminal closure receipts.
-Broader merge verification and native RSI admission remain open.
+**2026-09-27 checkpoint:** PR1913's cleanup ownership guard is merged/main-verified
+and retired, with 68 fixed cases passing on PR/main. Fresh ranking selects the
+14/P1 local-main synchronization repair in the existing sentinel. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#merge-synchronization-checkpoint--2026-09-27)
+and canonical backlog for acceptance, execution and closure receipts. Broader
+merge/deletion authority and native RSI admission remain open.
 
 Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 
