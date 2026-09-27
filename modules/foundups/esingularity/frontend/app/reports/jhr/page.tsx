@@ -223,8 +223,8 @@ export default function JapanHyperscalerReportPage() {
       </section>
 
       <section style={{ marginTop: 36 }}>
-        <h2>8. YUMORI.me — 解体準備予算に反対を（VOTE NO）</h2>
-        <p>YUMORI.meは、eSingularity.aiの市民活動・保存運動を担う設立準備委員会です。現在の要請は、9月25日の採決で旧すかっとランド九頭竜の解体準備事業を含む予算案に反対することです。期限付きの検証期間や採決延期は求めていません。COG DC、温泉、教育、起業、文化の複合拠点としての成立は未検証であり、反対票は再利用案の採用、資金調達や市の出資を承認するものではありません。</p>
+        <h2>8. YUMORI.me — 採決後はPPP/PFIで比較検証</h2>
+        <p>YUMORI.meは、eSingularity.aiの市民活動・保存運動を担う設立準備委員会です。9月25日の採決は終了しました。現在の要請は、不可逆な解体調達・工事へ進む前に、福井市がPPP/PFIの官民連携ルートを指定し、解体案と再利用案を同じ証拠で比較検証することです。COG DC、温泉、教育、起業、文化の複合拠点としての成立は未検証であり、YUMORI案の自動採用、市の出資、随意契約を求めるものではありません。</p>
         <p>要請の対象と根拠：<a href="https://www.city.fukui.lg.jp/sisei/zaisei/yosan/yosan_d/fil/R8-9hosei.pdf#page=10">福井市の補正予算案（印刷頁8）</a> ／ <a href="https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit">市・県・市議会向け支援資料 03</a>。安全確保に必要な調査・保全と、解体を前提とする判断を分けるよう求めます。</p>
         <p>
           <a href={YUMORI_ME} target="_blank" rel="noreferrer" style={button}>YUMORI.me / 参加・現場</a>
@@ -263,7 +263,7 @@ export default function JapanHyperscalerReportPage() {
         <p><span style={tag}>ANALYSIS</span>This does not mean a hyperscale campus is confirmed for Fukui. It means Fukui is already inside a national policy environment connecting clean power, industrial location and digital infrastructure. The YUMORI position is not anti-data-center: large greenfield campuses consuming tens of hectares should not become the only model.</p>
 
         <h3>Community-scale alternative</h3>
-        <p>Campaign update, September 13: YUMORI.me is the preparatory committee carrying the civic and preservation work of eSingularity.ai. The current request is VOTE NO on the budget containing demolition preparation for Sukatto Land Kuzuryu at the September 25 vote. A fixed review period and postponement are no longer requested. A NO vote does not approve the reuse proposal or commit public investment, guarantees, or project funding.</p>
+        <p>Campaign update, September 28: the September 25 vote is complete. YUMORI.me now asks Fukui City to designate a PPP/PFI public-private project-formation route and compare demolition with reuse before irreversible demolition procurement or physical work proceeds. This does not ask the City to automatically adopt YUMORI, commit public investment or guarantees, or award a non-competitive contract.</p>
         <p>Before major land conversion, Fukui can test whether existing public buildings, factories, hotels, warehouses and hot-spring facilities can support modular 1→5→10→20 MW compute where structure, power, fiber, cooling and heat reuse make sense. Distributed compute will not replace every hyperscale facility. The point is to create a third option before communities face a binary accept-or-reject decision.</p>
 
         <p>
