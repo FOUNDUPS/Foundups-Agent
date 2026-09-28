@@ -2,7 +2,8 @@
 
 - WSP00/6/15/22/50/78/84/97; C2/I3/D3/Impact3=11/P2. Extend the existing recipient-preflight owner with nine fixed persisted-read cases; preserve all20 original tests and their SQLite isolation fixture.
 - Cover absent state, digest mismatch, unsupported/missing schema, empty/wrong scope, duplicate asks, dangling delta and negative outbound count. Invalid semantic rows carry matching digests; missing schema retains the original valid digest to expose implicit defaulting. Reads must preserve stored rows/events.
-- Execute only through the existing isolated hosted CI step; original failure evidence and identical-fixture candidate results remain pending. No local application import, provider action, new test owner or native RSI admission. Existing roundtrip remains the positive control.
+- The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 failed in [CI36440777022](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36440777022). The identical fixture against `0f8b3047c8` passed29/29 with zero failures, errors or skips in [CI36442000632](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36442000632) (0.97s). Independent review checked original output, implementation hashes, fixed IDs, matching digests and unchanged persisted rows/events. All ten candidate PR checks and CI/CodeQL passed.
+- Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0. Existing roundtrip remains the positive control.
 
 ## 2026-09-28: Select existing correspondence and recipient baseline in CI
 

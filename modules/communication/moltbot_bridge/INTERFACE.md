@@ -1922,3 +1922,12 @@ credentials, attachments and hidden reasoning. Human Google Sheets/Docs may
 project the state, but Red Dog does not require them as its memory substrate.
 Before consequential send-capable work, provider freshness and current routing
 must be rechecked and `reddog_recipient_preflight` still owns authorization.
+
+`load_state(scope_key)` returns `None` for an absent scope. Before returning a
+cached state, it requires an explicit supported payload schema, the existing
+write-side state invariants, exact requested/payload scope agreement and the
+stored digest. Rejection by these schema, scope, ask, count or digest checks raises
+`ValueError` without rewriting the row; the caller must reconcile from provider
+truth. Arbitrary malformed payload shapes and coercions are not covered by this
+exception guarantee. `provider_refresh_required` uses the same read boundary and
+propagates invalid-state rejection.
