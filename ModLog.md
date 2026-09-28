@@ -1,3 +1,9 @@
+## 2026-09-28: RSI scheduler safe-publication baseline
+
+- WSP15 selects15/P1 repair in the existing social scheduler. WSP97 reuses its fixture/CI and shared atomic writer; no new module or skill.
+- Prior characterization PR1942 is merged and main-verified at12663d7e4f. Current42-method/48-input contract is frozen before production changes; tests/repair status pending.
+- Holo query recovered with CURRENT/no-gap and source/authority12663d7e4f using the task-local helper and primary virtualenv. Shared YUMORI checkout remains preserved; evidence: `O:/Foundups-Agent-audits/20260928-rsi-scheduler-publication/holo-followup-accounting.json`.
+
 ## 2026-09-28: RSI characterizes scheduler persistence
 
 - WSP00/15/22/50/62/84/97: re-observe main 6acb3f55,96 unchanged peer heads, protected shared work and 59 candidates/26 packets. Reconcile PR1941 as merged/main-verified with its owned lane retired; select 14/P1 save/load qualification.

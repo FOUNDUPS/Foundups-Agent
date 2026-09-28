@@ -1,3 +1,9 @@
+## 2026-09-28: Freeze scheduler safe-publication acceptance
+
+- WSP00/5/6/15/22/50/62/84/97: existing save-owner repair scores15/P1 after verified PR1942 closure at main12663d7e4f.
+- Freeze42 methods/48 finite inputs in the existing source-bound fixture and named hosted CI selection. Preserve26 completion and8 unselected legacy bodies. Disposable-file effects and exact publication failure seams require independent review.
+- Production source is unchanged at baseline. Validation is pending; no passing repair, native RSI, external delivery or persistence acknowledgement claim.
+
 ## 2026-09-28: Qualify real scheduler save/load behavior
 
 - WSP00/5/6/15/22/50/62/84/97: C2/I4/D4/Impact4=14/P1 after current ownership/source reconciliation. Reuse the existing scheduler test/CI owners; no production persistence repair.
