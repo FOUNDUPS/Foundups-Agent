@@ -1,3 +1,10 @@
+## 2026-09-28: RSI qualifies social scheduler outcome evidence
+
+- WSP 00/15/22/50/62/84/97: re-observe main `ab9ab47a8`, PR #1933's verified closure, 98 peer PRs and protected concurrent work. Preserve all 26 packets and 59 previously observed task identities, including the recorded push-hook import error.
+- Select existing scheduler evidence qualification at C2/I4/D4/Impact4 = 14/P1. Thirteen fixed cases exercise current behavior with inert dependencies; no production code is changed in this slice.
+- Reuse the existing test file and CI workflow. Preserve eight legacy test bodies and distinguish current-behavior witnesses from passing functional acceptance. Documentation corrects the relevant unsafe historical test-discovery assumptions.
+- Independent review, original hosted results, main convergence and owned cleanup govern completion. Native RSI admission, verified platform outcomes and retention remain unproved.
+
 ## 2026-09-28: RSI includes operational decisions and truthful outcome measurement
 
 - WSP 00/15/22/48/50/73/97/99; C2/I4/D4/Impact4=14/P1. Audit current main `e5600fe1` and the supplied RSI survey plus a targeted primary-research comparison. Use existing WSP 73 Digital Twin ownership instead of another top-level orchestrator.

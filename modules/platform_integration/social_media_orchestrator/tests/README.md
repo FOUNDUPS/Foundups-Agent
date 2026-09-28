@@ -1,6 +1,40 @@
 # Social Media Orchestrator Tests
 
-This directory contains comprehensive tests for the Social Media Orchestrator module.
+## Qualified scheduler evidence slice — 2026-09-28
+
+`test_autonomous_scheduler.py::TestExecutionEvidence` contains 13 isolated
+current-behavior cases for the real scheduler leaf: five logging-only action
+branches, one local reminder, five stream response shapes, an exception and a
+no-due batch. A passing witness can reproduce a defect: it does **not** establish
+that posting succeeded or that RSI improved.
+
+This slice admits only the named hosted CI step after source/effect review.
+Host-local application execution is not qualified. The exact hosted command is:
+
+```bash
+python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v
+```
+
+The fixture loads actual producer enum/dataclass declarations under a private
+module name, denies the posting constructor and loads the unchanged scheduler
+leaf without real package initialization. It uses an awaited posting spy, a
+fixed clock, in-memory actions and a save spy. It does not qualify providers,
+browser execution, durable save/load, replay or the meaning of a real post result.
+The CI step `Run social scheduler execution evidence` selects the same 13 cases.
+Fresh execution and independent evidence receipts determine their result.
+
+The eight methods in `TestAutonomousActionScheduler` are preserved historical
+tests and are **not selected or claimed passing**. Their former import path,
+real constructor and plain-unittest async method were not a qualified baseline.
+Selecting that legacy class now hits the denied constructor rather than opening
+real state. Direct execution defaults to the qualified class.
+
+## Historical inventory and commands
+
+The inventory below is historical: several flat filenames no longer exist, and
+the directory mixes offline tests with live integration scripts. It is not a
+current safe collection list. Use the exact qualified command above for this
+slice; do not infer that `TEST_MODE=True` isolates the other scripts.
 
 ## Test Structure
 
@@ -37,7 +71,7 @@ python -m pytest tests/test_orchestrator.py -v
 python -m pytest tests/test_orchestrator.py --cov=src --cov-report=html
 ```
 
-### All Tests
+### Historical whole-directory command (not qualified by this slice)
 ```bash
 # Run all tests
 python -m pytest tests/ -v
@@ -46,7 +80,7 @@ python -m pytest tests/ -v
 python -m pytest tests/ -v --tb=short
 ```
 
-### Hello World Tests (Safe)
+### Historical Hello World command (execution effects not qualified here)
 ```bash
 # Run hello world tests in dry-run mode (no actual posting)
 python tests/test_hello_world.py

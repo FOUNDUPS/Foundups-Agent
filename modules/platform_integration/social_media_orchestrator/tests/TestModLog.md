@@ -1,3 +1,11 @@
+## 2026-09-28: Fixed scheduler execution-evidence qualification
+
+- WSP 00/5/6/15/22/50/62/84/97; existing `test_autonomous_scheduler.py` extended after retrieving this log, tests README and actual scheduler/producer source. No new test file or production implementation.
+- Add 13 independently specified current-behavior witnesses: five non-effect branches, local reminder, five stream-result shapes, exception and no-due batch. Actual enum/dataclass declarations and unchanged scheduler leaf; private imports, denied constructor, fixed time, awaited spy and memory-only bookkeeping.
+- Preserve all eight legacy test bodies; they are excluded from this qualification and cannot invoke the real constructor through the new fixture. A successful characterization is evidence of observed behavior, including defects, not a truthful-posting acceptance pass.
+- Exact command: `python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v`. Reuse one named step in existing CI. Execution results, original logs and independent review remain in the canonical queue's closure receipt; no result claimed at preparation.
+- No account, browser, provider, native worker or real database/save/load operation is tested. The save spy proves only a requested bookkeeping call.
+
 ﻿# social_media_orchestrator Test Execution Log
 
 ## WSP 34 Test Documentation Protocol

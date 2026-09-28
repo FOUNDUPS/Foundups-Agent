@@ -42,6 +42,11 @@ jobs:
       - name: Run LinkedIn offline activity contracts
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
 
+      - name: Run social scheduler execution evidence
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v
+
       - name: Run RedDog correspondence and recipient contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
