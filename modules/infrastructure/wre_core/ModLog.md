@@ -1,3 +1,9 @@
+## 2026-09-28: Freeze operational correspondence control preparation
+
+- WSP00/15/22/48/50/73/95/97; preparation C2/I4/D3/Impact3=12/P2 within operational14/P1. Reuse canonical correspondence instruction and recipient contracts; add12 synthetic inputs, independent labels and explicit outcome conventions to the existing RSI backlog. Preserve original label evidence and the pre-evaluation correction.
+- Bind a concrete existing local text-proposal entry and full prompt manifests. Import/model/tokenizer/context/resource qualification remains open.12 cases prepared,0 evaluated; correctness/gain/cost unknown. No new runtime schema, module, skill, application tests, providers or authority.
+- Reconcile PR1946 closure and59-row queue; preserve26 packets, seven native blockers and absent effect-use lease. Static/independent review, PR/main checks and owned closure remain receipt-bound in the canonical backlog.
+
 ## 2026-09-28: Operational decision and RSI measurement audit
 
 - WSP 00/15/22/48/50/73/97/99: reconcile the supplied research hierarchy with the existing September 25 measurement implementation. Extend canonical planning under WSP 73; no duplicate master runtime/schema or platform implementation.
