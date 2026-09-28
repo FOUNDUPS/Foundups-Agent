@@ -1,3 +1,21 @@
+## Correspondence and recipient CI baseline — 2026-09-28
+
+The existing `test_reddog_recipient_preflight.py` contains 20 cases: 14 recipient
+contracts and six correspondence-state cases added by PR1930. Its green CI did
+not select this Python owner; the RedDog fast tier runs Node tests. The normal CI
+test job now selects the unchanged Python suite explicitly, with plugin autoload
+and conftest disabled, disposable runner DB/temp paths, and the existing SQLite
+fixture resetting `DatabaseManager` around persistence cases. No new cases or
+assertions are introduced in this baseline sprint.
+
+Actual execution, exact-head checks and main readback are recorded through the
+[canonical RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+No local application import or test execution is claimed. These synthetic tests
+do not establish live provider delivery, send authority, R25 consent, concurrent
+store semantics or retained RSI. Independently reviewed persisted-load schema,
+state-invariant and scope-binding gaps remain a separate follow-on; a passing
+roundtrip is not proof of those rejection paths.
+
 ## Supervisor-requester connected acceptance — 2026-09-27
 
 Documentation correction only: test code, registry, workflow and existing effects

@@ -1,3 +1,9 @@
+## 2026-09-28: Select existing correspondence and recipient baseline in CI
+
+- WSP00/15/22/50/97; C1/I3/D3/Impact3=10/P2. Source and original PR1930 logs show that its new Python persistence cases were not selected by normal CI; the fast tier is Node-only.
+- Add an explicit hosted step for all 20 unchanged cases in the existing recipient-preflight owner, using existing disposable DB/test isolation patterns. No local application imports/tests, new fixtures, assertions, provider calls or product changes.
+- Hosted execution and independent original-result review remain receipt-bound in the canonical backlog. The separately scored11/P2 persisted-load validation gap is source-qualified, not an executed failure or completed repair.
+
 ## 2026-09-28: Red Dog correspondence continuity state
 
 - WSP00/15/22/50/78/91/95/97; new generic correspondence-state capability, separate from recipient authorization.

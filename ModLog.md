@@ -1,3 +1,9 @@
+## 2026-09-28: RSI establishes correspondence test coverage after PR1930
+
+- WSP00/15/22/50/97: re-observe main3dfb68f7,95 unchanged peer heads and separately owned product work. PR1929 is merged/main-verified and its lane retired.
+- Select10/P2 explicit hosted CI coverage for the existing20 recipient/correspondence cases. Original PR1930 CI success did not prove those Python cases ran. Preserve source and assertions; actual results and closure remain separately evidenced.
+- Preserve26 packets/53 existing task identities, add this coverage prerequisite and an11/P2 persisted-load follow-on. Correspondence continuity is not consented R25 intake, native admission or verified learning retention.
+
 ## 2026-09-28: RSI detects and repairs an omitted LinkedIn contract check
 
 - WSP00/15/22/50/97: refresh to main c32256ea3, preserving separately owned YUMORI changes. The new LinkedIn instruction skill introduces no RSI admission or retention authority; bounded qualification found one failing case in its existing eight-case offline suite.
