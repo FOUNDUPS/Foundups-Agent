@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-20T04:25:00+00:00",
-  "total_skills": 33,
+  "last_updated": "2026-09-28T00:00:00+00:00",
+  "total_skills": 34,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -465,6 +465,30 @@
       ],
       "description": "Fail-closed two-pass recipient authorization and provider read-back verification for outbound correspondence"
     },
+    "reddog_correspondence_state": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "MAINTENANCE",
+      "version": "1.0.0",
+      "promotion_state": "prototype",
+      "domain": "communication",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 78",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Persist privacy-bounded correspondence event metadata and scope state so Red Dog can resume from provider deltas instead of replaying complete mailboxes"
+    },
     "yumori_moshpit": {
       "location": "modules/foundups/esingularity/skillz/yumori_moshpit",
       "agents": [
@@ -540,7 +564,7 @@
       ],
       "primary_agent": "0102",
       "intent_type": "MAINTENANCE",
-      "version": "0.6.0",
+      "version": "0.8.0",
       "promotion_state": "prototype",
       "domain": "foundup_campaign_operations",
       "wsp_chain": [
