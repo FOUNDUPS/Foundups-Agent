@@ -1,3 +1,8 @@
+## 2026-09-28: Verify scheduler caller/reload characterization
+
+- Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+- A pre-replace failure returns an in-memory created action absent after reload, an executed action reattempted by a fresh fake dependency, or a cancelled reminder executed after reload. Post-replace errors retain new visible state but leave durability uncertain. No production repair or retained RSI is claimed.
+
 ## 2026-09-28: RSI scheduler caller/reload evidence sprint
 
 - PR1943 is merged/main-verified at6821aac3,42 fixed methods passed; owned lane retired. Holo recovered through existing maintenance to CURRENT/no-gap at the same head; peer work preserved. Exact closure: `O:/Foundups-Agent-audits/20260928-rsi-scheduler-publication/final-accounting.json` and `final-closure-review.json`.

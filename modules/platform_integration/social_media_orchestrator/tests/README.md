@@ -43,7 +43,11 @@ New helpers remain<=50lines and class<=200. No new test module, exemption or
 threshold change. Reassess decomposition before further growth.
 
 Authored fixture and exact hosted effects require independent review before
-execution. Results are pending. Passing witnesses do not establish safe restart,
+execution.
+
+Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+
+Passing witnesses do not establish safe restart,
 Windows/crash behavior, verified delivery, retained learning or native RSI.
 
 ## Historical scheduler safe-publication qualification — 2026-09-28

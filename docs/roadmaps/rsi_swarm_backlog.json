@@ -1885,7 +1885,7 @@
     "base_commit": "6821aac32774f5be36038bb3fb40cc55920a56cd",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
     "selected_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
-    "status": "fixture_prepared_independent_effect_review_pending",
+    "status": "candidate_hosted_verified_final_convergence_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -2186,10 +2186,10 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "caller_fixture_preparation_selected",
+          "state": "candidate_hosted_verified_final_convergence_pending",
           "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
           "dependency": "No remaining PR1943 closure dependency; keep current fresh main/ownership checks and exact effect review before any hosted execution.",
-          "next_step": "Freeze nine caller-by-publication-outcome characterization cases in the existing test owner; preserve current 42 methods and qualify all loader/clock/cleanup effects before hosted execution.",
+          "next_step": "Verify exact final integrated head and main; independently review and retire owned lane. Reobserve current59-row eligibility, including absence of an external scheduler consumer, before further source changes.",
           "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
           "limits": "PR1943 source publication repair is closed under its fixed42-method/48-input fixture. Caller acknowledgement and restart retry policy, Windows/crash behavior, external delivery and retained learning remain unqualified.",
           "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
@@ -3761,7 +3761,7 @@
     },
     "caller_acknowledgement_20260928": {
       "base": "6821aac32774f5be36038bb3fb40cc55920a56cd",
-      "state": "fixture_prepared_independent_effect_review_pending",
+      "state": "candidate_hosted_verified_final_convergence_pending",
       "component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
       "wsp15": {
         "complexity": 3,
@@ -3827,7 +3827,38 @@
         "canonical_memex_supply_signed_evidence_verifier_missing",
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
-      "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json"
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json",
+      "candidate_result": {
+        "head": "8e3c526a2aad35d3d71da30b296dbe19def4ea27",
+        "run": 36412636624,
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624",
+        "selected_methods": 51,
+        "finite_input_cases": 57,
+        "passed_methods": 51,
+        "errors": 0,
+        "skipped": 0,
+        "test_wall_seconds": 0.183,
+        "fixture_git_blob": "de845064c28a0720a923feaac020f16f4d3ef89c",
+        "source_git_blob": "d82defadd75376f7fed4c51fc57f01c1f0baac2c"
+      },
+      "measurement": {
+        "signal": "execution_feedback",
+        "normal_controls": 3,
+        "failure_boundary_witnesses": 6,
+        "primary_file_records": 25,
+        "caller_records": 9,
+        "production_changes": 0,
+        "restored_posting_attempts_after_pre_replace_failure": 1,
+        "restored_local_reminder_after_pre_replace_cancel_failure": 1,
+        "actual_external_deliveries": 0,
+        "retained_learning_gain": null,
+        "tokens": null,
+        "currency_cost": null,
+        "limit": "Passing characterization confirms existing boundaries; not a before/after repair, retained RSI, crash/Windows qualification or real delivery."
+      },
+      "candidate_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\candidate-result-review.json",
+      "candidate_checks": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\candidate-checks.json",
+      "next_step": "Verify exact final integrated head and main; independently review and retire owned lane. Reobserve current59-row eligibility, including absence of an external scheduler consumer, before further source changes."
     }
   }
 }
