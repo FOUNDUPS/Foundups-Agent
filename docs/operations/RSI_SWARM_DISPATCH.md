@@ -1,3 +1,11 @@
+## Operational instruction controls prepared — 2026-09-28
+
+Twelve synthetic instruction controls (six Gmail-shaped, six LinkedIn-shaped) and independently authored labels now reside in the existing [RSI backlog](../roadmaps/rsi_swarm_backlog.json), under `current_observation.operational_controls_20260928`. The packet binds the unchanged correspondence/recipient Skillz, subject-visible response conventions, source hashes, full prompt manifests and a proposed bounded local evaluation route. One draft-versus-response outcome ambiguity was corrected before any model output; original label evidence is retained.
+
+Preparation counts are12 inputs/12 labels/12 prompt artifacts. Subject-model calls and evaluated cases are0; correctness, outcome gain, tokens/cost and retained improvement remain unknown. Existing `local_skill_inference` is a concrete text-proposal entry, but its eager imports, exact model/tokenizer,2048-token prompt fit and enforceable resource bounds remain unqualified. Proposed caps grant no execution authority. No application, test, skill, model, provider or CI behavior changes.
+
+PR1946 is merged/main-verified at `daff2848` with29/29 fixed cases and owned closure. WSP15 rescoring preserves59 task identities/26 packets/native7/nulllease; the completed preparation component is12/P2 within the operational14/P1 work item. Publication/main/Holo/owned closure and subsequent rescoring are bound to the backlog receipts.
+
 ## Correspondence read-validation evidence — 2026-09-28
 
 PR1945 is merged/main-verified at `678e8f87`; its six hook-entrypoint controls and owned closure are recorded. Fresh59-row/26-packet WSP15 reconciliation selects the existing correspondence read boundary at11/P2. Current Holo retrieval is source-bound CURRENT/no-gap at that base.
