@@ -1,3 +1,10 @@
+## 2026-09-28 - YUMORI work-orchestrator registry backend reconciliation
+
+- RedDog fast tier failed closed after `yumori_work_orchestrator` was registered in `skills_registry_v2.json`.
+- The runtime closure remains unchanged; only the registry runtime content hash changed.
+- Registry runtime SHA: `982c1abbaf9b76928ff3f0e4498c918b5ceeba2f4ec1140ab0b36f23de191d85`; canonical backend manifest digest: `e566147f716b6c909d428a090bd77484025b52eb6e3a9e474feccd2758ace5a8`.
+- Refreshed the existing manifest, compatibility constant and generator-test digest pin together. No runtime member, compatibility assertion, authority boundary or send/publish permission was weakened.
+
 ## 2026-09-28 - Correspondence-state Skillz backend manifest reconciliation
 
 - RedDog fast tier initially failed the existing backend compatibility preflight after `skills_registry_v2.json` changed.
