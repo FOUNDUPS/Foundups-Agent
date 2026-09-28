@@ -7,6 +7,7 @@
 - Removed stale preset capacity assumptions from the current site tabs: Hanyu remains the conditional initial-priority grid-first candidate; Shimousaka is the second/future expansion site; Sukatto is the regional human-facing hub.
 - No deliverable kW/MW is claimed for any site until utility and carrier evidence exists.
 - The older integrated XLSX remains reference-only; the current native FIN workbook remains the working formula/interview projection.
+- Reconciled useful unique work from stale PR #1820 before superseding it: demand-capped heat-recovery math, the sourced Japan AI-infrastructure flow ledger, and bounded non-predictive dependency diagnostics are preserved in the new canonical model.
 
 ## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
 
