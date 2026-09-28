@@ -2,7 +2,12 @@ from modules.foundups.esingularity.src.yumori_economic_model import (
     DEFAULT_SERVICE_CATALOG,
     DemandLine,
     DemandSizingInputs,
+    HeatRecoveryInputs,
+    InfrastructureFlow,
+    analyze_infrastructure_flows,
     calculate_demand_led_node_sizing,
+    calculate_heat_recovery,
+    load_japan_infrastructure_flows,
     run_yumori_economic_model,
 )
 
@@ -73,3 +78,49 @@ def test_grid_gate_only_passes_after_confirmed_capacity() -> None:
     )
     assert too_large.grid_fit == "FAIL"
     assert too_large.commercial_readiness == "GRID FAIL"
+
+
+def test_heat_recovery_caps_value_at_real_demand() -> None:
+    result = calculate_heat_recovery(
+        HeatRecoveryInputs(
+            it_load_kw=850,
+            load_fraction=0.65,
+            recovery_fraction=0.80,
+            delivery_efficiency=0.90,
+            thermal_demand_kw=300,
+            annual_availability=0.90,
+            value_jpy_per_thermal_kwh=10,
+            grid_heat_kg_co2_per_kwh=0.2,
+        )
+    )
+    assert abs(result.delivered_heat_kw - 397.8) < 1e-9
+    assert result.usable_heat_kw == 300
+    assert result.annual_usable_thermal_kwh == 2_365_200
+    assert result.annual_value_jpy == 23_652_000
+    assert result.avoided_kg_co2 == 473_040
+
+
+def test_dependency_math_stays_partial_and_non_predictive() -> None:
+    flows = (
+        InfrastructureFlow("1", "A", "B", "compute", "completed", "https://example.com/1"),
+        InfrastructureFlow("2", "B", "A", "equity", "signed", "https://example.com/2"),
+        InfrastructureFlow("3", "B", "C", "compute", "loi", "https://example.com/3"),
+        InfrastructureFlow("4", "C", "A", "partnership", "paused", "https://example.com/4"),
+    )
+    result = analyze_infrastructure_flows(flows)
+    assert result.edge_count == 4
+    assert result.reciprocal_directed_edges == 2
+    assert result.reciprocal_pairs == 1
+    assert result.directed_three_party_cycles == 1
+    assert result.computed_weight_coverage == 0.5
+    assert "Partial dependency diagnostic" in result.truth_boundary
+
+
+def test_japan_infrastructure_seed_is_sourced_without_invented_amounts() -> None:
+    flows = load_japan_infrastructure_flows()
+    result = analyze_infrastructure_flows(flows)
+    assert len(flows) >= 10
+    assert all(flow.source_url.startswith("https://") for flow in flows)
+    assert all(flow.evidence_class == "OFFICIAL" for flow in flows)
+    assert result.known_amount_edges == 0
+    assert result.undisclosed_amount_edges == len(flows)
