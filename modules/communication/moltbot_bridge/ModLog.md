@@ -1,3 +1,9 @@
+## 2026-09-28: RSI qualifies correspondence CI coverage
+
+- Fresh PR1930 inspection found no normal CI selection for its existing 20-case Python recipient/correspondence test owner. Select C1/I3/D3/Impact3=10/P2 to establish the hosted baseline before changing state-read behavior.
+- Extend the existing CI job and test documentation; preserve all production source, 20 test cases and the prototype registry entry. Hosted checks, independent evidence review and closure are tracked in the canonical RSI backlog.
+- Record a separate11/P2 load-validation follow-on: a valid digest does not reapply schema/state invariants or bind the returned scope. This source finding does not establish a live failure, send authority, R25 consent or retained RSI. WSP00/15/22/50/97.
+
 ## 2026-09-28: Add native Red Dog correspondence continuity
 
 - Added a generic provider-agnostic correspondence continuity store under moltbot_bridge using existing WSP78 ModuleDB persistence instead of extending the AgentDB compatibility monolith.

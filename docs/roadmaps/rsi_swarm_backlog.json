@@ -1873,9 +1873,9 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "c32256ea3ceb899ae1ebf5893d2e632fcaa2fe11",
-    "selected_action": "Repair LinkedIn contact-diligence instruction contract and gate the existing offline suite in CI",
-    "status": "owned_source_repair_complete_review_and_closure_pending",
+    "base_commit": "3dfb68f7fcea65a39bbe8d8919d5783277277899",
+    "selected_action": "Select the existing recipient and correspondence suite in hosted CI",
+    "status": "owned_ci_baseline_prepared_review_and_execution_pending",
     "wsp15": {
       "complexity": 1,
       "importance": 3,
@@ -1885,44 +1885,17 @@
       "priority": "P2"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "rsi-linkedin-contract-ci-20260928",
-    "base": "c32256ea3ceb899ae1ebf5893d2e632fcaa2fe11",
+    "observation_id": "20260928-correspondence-ci-baseline",
+    "base": "3dfb68f7fcea65a39bbe8d8919d5783277277899",
     "self": "0102",
-    "role": "coordinator",
+    "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": {
-      "task": "Repair LinkedIn contact-diligence instruction contract and gate the existing offline suite in CI",
-      "wsp15": {
-        "complexity": 1,
-        "importance": 3,
-        "deferability": 3,
-        "impact": 3,
-        "total": 10,
-        "priority": "P2"
-      },
-      "score": 10,
-      "state": "source_repaired_local_8_pass_review_and_publication_pending",
-      "dependency": "Independent exact-diff review, required exact-head CI including this offline suite, main readback and owned lane closure.",
-      "next_step": "Finish this owned slice; read its terminal receipt before redispatch. Then re-observe all remaining prerequisites.",
-      "evidence": [
-        "modules/platform_integration/linkedin_agent/skillz/linkedin_contact_diligence/SKILLz.md",
-        "modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py",
-        ".github/workflows/ci.yml",
-        "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\linkedin1927-offline-tests.json",
-        "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\linkedin1927-source-review.json",
-        "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\candidate-tests.json"
-      ],
-      "effort_cost": "Small seven-file reconciliation; existing stdlib8case suite, static diff/JSON checks, required hosted CI and independent review. No provider/token cost beyond coordination.",
-      "verification_burden": "Unchanged8test oracle; red7/1 baseline and green8/0 candidate; static exact-scope/JSON/score/link checks, independent review, required PR/main checks and original named-step result.",
-      "execution_plane": "Owned local instruction/CI repair. Native WRE execution, platform use and learning retention are not admitted.",
-      "do_not_redispatch": true,
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json"
-    },
+    "selected": "Select the existing recipient and correspondence suite in hosted CI",
     "wsp15": {
       "complexity": 1,
       "importance": 3,
@@ -1932,22 +1905,16 @@
       "priority": "P2"
     },
     "previous_closed": {
+      "pr": 1929,
+      "merge": "bff12de8b24065d6d12da04f8668d0da8699448f",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "pr": 1925,
-      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1925",
-      "head": "28fdce6104eb91c256fc55f293bafc6597c08c7a",
-      "merge": "a0d9570939cd3c902f6959a692dd5896f6fc4443",
-      "tree": "c2d073865c751ebfcfc681d17244ae8c6bc428e7",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\final-accounting.json",
-      "closure_receipt_sha256": "40c8deab88e55ed1f6a9c2d4dc7c54d44673cbb60a427cf76ffa64a717b77645",
-      "owned_lane_retired": true
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json",
+      "sha256": "b7dce7effcba416274b05c9f71092a0991bb3b6e1d9de4f2281c318872862224"
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\previous-observation.json",
-      "sha256": "b6d440e05b71567198c21bb7b4efe520002248e9cdb232763ceabf24d4fc1260",
-      "git_base": "c32256ea3ceb899ae1ebf5893d2e632fcaa2fe11",
-      "git_path": "docs/roadmaps/rsi_swarm_backlog.json",
-      "json_path": "current_observation"
+      "path": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\previous-observation.json",
+      "sha256": "44ffa16b1226f3ca3e3c13b1aca09d56c2ed6ad917701c094a14db9ac5dda7de",
+      "git_lookup": "3dfb68f7fcea65a39bbe8d8919d5783277277899:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "backend_qualification": {
       "state": "controlled_source_failure_independently_reviewed",
@@ -2008,59 +1975,71 @@
       "resume_prerequisite": "Reviewed strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress and usable interpreted/compiled API evidence. Then fresh source/ownership reconciliation and WSP15 selection; deployment visibility, authenticated transport and native authority remain separate."
     },
     "component_changes": {
-      "PR1927": {
-        "merge": "6356cdb44db19c7d01400a019962809e7edb24af",
-        "surface": "Existing LinkedIn master gained an instruction-only AUDIT/prototype diligence child; no executor or automatic learning intake.",
-        "qualification_wsp15": {
-          "complexity": 1,
-          "importance": 3,
-          "deferability": 2,
-          "impact": 3,
-          "total": 9,
-          "priority": "P3"
-        },
-        "result": "Existing offline suite7pass/1fail; literal instruction/test mismatch independently confirmed.",
-        "review": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\linkedin1927-source-review.json",
-        "tests": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\linkedin1927-offline-tests.json",
-        "rsi_boundary": "R25 exact-summary permission/issuer/consumer contracts and native trust/effect-use blockers remain. A private dossier is not a reusable learning artifact."
+      "pr": 1930,
+      "merge": "3dfb68f7fcea65a39bbe8d8919d5783277277899",
+      "inspected": "Generic correspondence source, module/skill/registry contracts, existing test owner and actual CI selection. Separately owned YUMORI paths inventoried only.",
+      "tests": "20 functions:14 recipient plus6 correspondence. Prior green CI and Node fast-tier results do not prove this Python owner ran.",
+      "source_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\pr1930-source-review.json",
+        "sha256": "ac21e8659f86d6019386b8aca39b236442a022771b6eb8e803bfb85e840c82a5"
       },
-      "PR1926_PR1928": {
-        "state": "Externally owned YUMORI/eSingularity changes retained from main; changed paths only inspected.",
-        "product_tests_or_runtime_invoked": false
-      }
+      "hosted_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\pr1930-hosted-state.json",
+      "rsi_boundary": "Private correspondence continuity is prototype; no consented same-FoundUp feedback handoff, independently retained outcome or native admission supplied."
     },
     "retrieval": {
-      "holo": "Authority5326080d/queryhost0c81418f unchanged: previous HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH retained; explicit degraded Git/rg, no repeated failing probe or reindex.",
-      "noise": "Only six new LinkedIn changes and existing adjacent contracts; product PR1926/1928 inspected by paths only.",
-      "ordering": "WSP00/15/97, fresh main/ownership, instructions/tests/CI, exact baseline failure and independent review.",
-      "missing": "No native trust, effect-use or R25 consent evidence.",
-      "staleness": "Exactc32256ea base; LinkedIn tree identical to6356cdb44; later PR1926/1928 are separate product changes.",
-      "duplication": "Reuse the existing skill, unchanged8test oracle and existing CI workflow; no new module/skill/test suite."
+      "mode": "Changed generic source/contracts plus original CI, existing20-case test owner, WSP skill and independent source review. Query/authority heads remain mismatched: explicit bounded Git/rg; no failed query retry or reindex. Product files only path-inventoried.",
+      "noise": "Bounded changed source plus owning CI; no full audit or product test.",
+      "missing_artifacts": "20-case actual execution and fixed persisted-load controls remain unobserved. Module requirements.txt absent; no dependency installed.",
+      "duplication": "Existing20-case test owner and all its assertions unchanged; six existing files only.",
+      "freshness": "Current3dfb source and95 exact unchanged peers; mismatched Holo query/authority roots unchanged."
     },
     "allocation": {
-      "effort_cost": "Small seven-file reconciliation; existing stdlib8case suite, static diff/JSON checks, required hosted CI and independent review. No provider/token cost beyond coordination.",
-      "verification_burden": "Unchanged8test oracle; red7/1 baseline and green8/0 candidate; static exact-scope/JSON/score/link checks, independent review, required PR/main checks and original named-step result.",
-      "execution_plane": "Owned local instruction/CI repair. Native WRE execution, platform use and learning retention are not admitted.",
-      "manual_coordination_reason": "Native admission remains blocked. Reuse deterministic offline checks and independent0102 review; do not claim a native autonomous ticket or retained RSI improvement."
+      "rationale": "Existing higher-ranked actions retain their explicit authority/runtime/owner/consumer prerequisites. New11/P2 load work first needs the unmeasured20-case baseline and fixed acceptance. The10/P2 existing-CI selection is its smallest executable prerequisite.",
+      "effort_cost": "One existing workflow step, no production source/test oracle/model/runtime changes.",
+      "execution_boundary": "Hosted disposable CI only; no local application imports/tests or live provider data. Existing fixture/temporary roots and source assertions preserved."
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\entry.json",
-      "entry_sha256": "9acad204e70bef2d9b136d35fdba7cf4333280209b943ab81b15fe5d254baec5",
-      "peer_heads_reconciled": 95,
-      "shared_checkout_preserved": true,
-      "overlap": [
+      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\entry.json",
+      "peer_count": 95,
+      "scope": [
+        ".github/workflows/ci.yml",
+        "modules/communication/moltbot_bridge/tests/README.md",
+        "modules/communication/moltbot_bridge/tests/TestModLog.md",
+        "modules/communication/moltbot_bridge/ModLog.md",
+        "ModLog.md",
+        "docs/roadmaps/rsi_swarm_backlog.json"
+      ],
+      "overlaps": [
         {
           "number": 1860,
           "head": "74ca647e35446c975d9aabe53f7bf44951bfc9d4",
           "paths": [
-            "ModLog.md"
+            "ModLog.md",
+            "modules/communication/moltbot_bridge/ModLog.md"
+          ]
+        },
+        {
+          "number": 1792,
+          "head": "09d0ad70f6a91f9e9690ee796bf594cb50bb8631",
+          "paths": [
+            "modules/communication/moltbot_bridge/ModLog.md"
           ]
         },
         {
           "number": 1648,
           "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
           "paths": [
-            "ModLog.md"
+            "ModLog.md",
+            "modules/communication/moltbot_bridge/ModLog.md"
+          ]
+        },
+        {
+          "number": 1645,
+          "head": "4b316c976aa3cdba21b901191159716f3d58631d",
+          "paths": [
+            "modules/communication/moltbot_bridge/ModLog.md",
+            "modules/communication/moltbot_bridge/tests/README.md",
+            "modules/communication/moltbot_bridge/tests/TestModLog.md"
           ]
         },
         {
@@ -2078,37 +2057,20 @@
           ]
         }
       ],
-      "scope": "Only new root ModLog entry overlaps existing peer files; their unique work is preserved. No workflow or LinkedIn-skill file overlap was found in the fresh95-PR file inventory."
+      "resolution": "Only additive shared documentation overlap; inspected1645 Mosh Pit and1792 branding entries are distinct. Preserve entire current histories and peer source; prepend one CI-scope entry. No CI or backlog overlap. Initial stricter guard stopped before any worktree creation.",
+      "shared_checkout_preserved": true
     },
     "validation": {
-      "baseline": {
-        "tests": 8,
-        "passed": 7,
-        "failed": 1,
-        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\linkedin1927-offline-tests.json"
-      },
-      "candidate": {
-        "tests": 8,
-        "passed": 8,
-        "failed": 0,
-        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\candidate-tests.json"
-      },
       "new_test_cases": 0,
-      "unchanged_test_oracle": true,
-      "ci_change": "Run LinkedIn offline activity contracts: the same direct stdlib suite with -I -B and verbose case names. No live executor import.",
-      "hosted": "Required exact-head and main checks, including actual named-step result, remain separately observed closure evidence.",
-      "prior_closure": {
-        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-manager-backend-closure\\final-accounting.json",
-        "sha256": "40c8deab88e55ed1f6a9c2d4dc7c54d44673cbb60a427cf76ffa64a717b77645",
-        "owned_lane_retired": true
-      }
+      "existing_test_cases": 20,
+      "unchanged_oracle_blob": "b9f982b452446090d3970cb89e96984d11b47f93",
+      "local_application_tests_run": 0,
+      "hosted_result": "pending",
+      "independent_review": "prepared_diff_review_pending"
     },
     "publication": {
-      "state": "READ_BOUND_CLOSURE_RECEIPT",
-      "branch": "fix/rsi-linkedin-contract-ci-20260928",
-      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-linkedin-contract-20260928",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json",
-      "truth_boundary": "This source snapshot records local validation only. Read the terminal receipt for actual PR, checks, merge and cleanup; do not redispatch completed source work."
+      "state": "not_committed",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2227,8 +2189,8 @@
           },
           "state": "partial_same_uid_visibility_qualified_cross_uid_supervision_blocked",
           "source": "modules/communication/moltbot_bridge/src/reddog_external_signer_os_observer.py::_require_process_socket_owner",
-          "dependency": "Existing supervisor-issuance contract must distinguish authenticated observation identity from actual handshake requester before cross-UID/runtime qualification.",
-          "next_step": "Reconcile existing supervisor row and connected observation-handoff contract; do not repeat this two-condition experiment or weaken isolation.",
+          "dependency": "PR1924 already distinguished observer and requester. Remaining implementation requires authenticated observation transport/verifier/replay, consumer registration, admitted cross-UID visibility and reviewed strict-decoder evidence.",
+          "next_step": "Use the recorded next_component after its actual implementation prerequisites change; do not repeat the completed role-distinction design audit.",
           "limits": "Two real same-UID child conditions, not public distinct-UID requester operation, privileged supervisor policy or native authority.",
           "effort_cost": "Remaining C3 cross-UID environmental qualification requires authenticated transport and admitted visibility first; prior252/254 child experiment is closed, not this task cost.",
           "score": 14,
@@ -3284,6 +3246,38 @@
           }
         },
         {
+          "task": "Qualify and repair stored correspondence state read validation",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 11,
+            "priority": "P2"
+          },
+          "state": "source_gap_qualified_baseline_and_fixed_acceptance_pending",
+          "source": "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py::load_state",
+          "dependency": "Observed isolated20-case baseline and independent fixed invalid-persisted-state acceptance.",
+          "next_step": "After exact20-case baseline, re-observe ownership and freeze persisted invalid-state controls in the existing test owner; reuse _validate_state and existing scope/schema contracts. No provider or concurrent-store redesign.",
+          "evidence": {
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\pr1930-source-review.json",
+            "sha256": "ac21e8659f86d6019386b8aca39b236442a022771b6eb8e803bfb85e840c82a5"
+          },
+          "acceptance": [
+            "valid roundtrip",
+            "absent state",
+            "digest mismatch",
+            "unsupported or missing schema",
+            "duplicate ask IDs",
+            "dangling delta reference",
+            "negative outbound count",
+            "payload scope differs from lookup scope"
+          ],
+          "limits": "Source-qualified behavior only; no executed invalid-state failure, live provider use, R25 consent or retained RSI. Current writer rejection is distinct from persisted read validation.",
+          "effort_cost": "Small existing-reader/fixture qualification and repair; no new store, module, authority or model spend.",
+          "verification_burden": "Fixed persisted SQLite controls, all existing20 cases preserved, independent source/evidence review, exact PR/main CI."
+        },
+        {
           "task": "Report sentinel checkout failure through its existing structured error field",
           "wsp15": {
             "complexity": 1,
@@ -3323,9 +3317,9 @@
             "priority": "P2"
           },
           "score": 10,
-          "state": "source_repaired_local_8_pass_review_and_publication_pending",
-          "dependency": "Independent exact-diff review, required exact-head CI including this offline suite, main readback and owned lane closure.",
-          "next_step": "Finish this owned slice; read its terminal receipt before redispatch. Then re-observe all remaining prerequisites.",
+          "state": "closed_merged_PR1929",
+          "dependency": "All10 PR checks and both main workflows passed; unchanged8cases passed in PR/main CI; owned lane retired.",
+          "next_step": "Do not repeat this repair; re-observe changed prerequisites before selecting further work.",
           "evidence": [
             "modules/platform_integration/linkedin_agent/skillz/linkedin_contact_diligence/SKILLz.md",
             "modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py",
@@ -3338,13 +3332,39 @@
           "verification_burden": "Unchanged8test oracle; red7/1 baseline and green8/0 candidate; static exact-scope/JSON/score/link checks, independent review, required PR/main checks and original named-step result.",
           "execution_plane": "Owned local instruction/CI repair. Native WRE execution, platform use and learning retention are not admitted.",
           "do_not_redispatch": true,
-          "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json"
+          "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json",
+          "closure": {
+            "pr": 1929,
+            "merge": "bff12de8b24065d6d12da04f8668d0da8699448f",
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json",
+            "terminal_state": "MERGED_VERIFIED_MAIN"
+          }
+        },
+        {
+          "task": "Select the existing recipient and correspondence suite in hosted CI",
+          "wsp15": {
+            "complexity": 1,
+            "importance": 3,
+            "deferability": 3,
+            "impact": 3,
+            "total": 10,
+            "priority": "P2"
+          },
+          "state": "owned_ci_prepared_independent_review_and_execution_pending",
+          "source": ".github/workflows/ci.yml; modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py",
+          "dependency": "Independent scope/effect review then actual hosted20-case execution, exact-head PR checks, main verification and owned cleanup.",
+          "next_step": "Finish this owned coverage prerequisite; inspect its terminal receipt before redispatch and re-score after result.",
+          "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
+          "do_not_redispatch": true,
+          "effort_cost": "One scoped CI step plus existing required docs/backlog. Reuse20 unchanged tests on hosted disposable environment; no local application imports or provider/model spend.",
+          "verification_burden": "Unchanged test source/20 IDs, exact-diff review, original20-case PR/main output with no skips/failures, full checks and clean owned closure.",
+          "limits": "Test selection is not proof of untested load rejection, runtime/provider authority, R25 consent or retained RSI."
         }
       ],
       "selected_next": null,
       "implementation_ready_selected": null,
-      "state": "await_owned_closure_then_reobserve",
-      "rationale": "Preserve52 historical identities and add one concrete new regression. After this owned repair closes or blocks, re-observe all53 rows. Unchanged higher candidates retain their recorded prerequisites; no automatic follow-on is selected.",
+      "state": "await_owned_baseline_then_reobserve",
+      "rationale": "Preserve53 prior identities and26 packets; two related new rows separate observed CI omission from source-qualified persisted-load behavior. Fresh observed results and ownership determine follow-on eligibility.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
