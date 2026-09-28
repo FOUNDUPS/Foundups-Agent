@@ -294,7 +294,8 @@ def test_future_route_is_utf8_and_uses_cog_dc_compute() -> None:
     future = read("app/future/page.tsx")
     assert "福井に、" in future
     assert "私たちのCOG DCコンピュート" in future
-    assert "まず約1 MWを検討単位" in future
+    assert "最初から容量を決めて建てません" in future
+    assert "必要量だけ導入" in future
     assert "容量、時期、費用、熱利用、収益は未確定" in future
     assert not re.search(r"縺|蜿|蝓|譛|險育", future)
 
@@ -389,16 +390,23 @@ def test_yumori_stt_protected_vocabulary_has_no_current_surface_artifacts() -> N
         assert forbidden not in current_surfaces
 
 
-def test_candidate_site_registry_keeps_capacity_as_scenarios() -> None:
+def test_candidate_site_registry_is_demand_led_and_capacity_unverified() -> None:
     registry = (MODULE_ROOT / "docs" / "CANDIDATE_SITE_REGISTRY.md").read_text(encoding="utf-8")
     for required in (
         "Site 1 — 旧すかっとランド九頭竜",
         "Site 2 — 旧下宇坂小学校",
         "Site 3 — 旧羽生小学校",
-        "Initial design target for inquiry: **5 MW**",
-        "10 MW and 20 MW",
-        "does **not** establish deliverable load capacity",
+        "**Do not choose MW first.**",
+        "initial-priority, grid-first school node candidate",
+        "Compute capacity: **UNVERIFIED**",
+        "financial-floor equivalent",
         "1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0",
     ):
         assert required in registry
+    for superseded in (
+        "Initial design target for inquiry: **5 MW**",
+        "10 MW and 20 MW",
+        "approximately 1 MW initial target",
+    ):
+        assert superseded not in registry
     assert "Only `AWARDED` grants may reduce base-case financing need." in registry

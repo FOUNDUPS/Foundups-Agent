@@ -69,8 +69,9 @@ def test_yumori_language_switcher_has_complete_english_and_portuguese_copy() -> 
 def test_yumori_is_pro_community_compute_not_blanket_anti_dc() -> None:
     text = source()
     assert "YUMORIはデータセンターそのものに反対する運動ではありません" in text
-    assert "地域の学校、大学、農業、病院、自治体、ものづくり、企業" in text
-    assert "1MWから始め、地域需要に合わせて5→10→20MW" in text
+    assert "学校、大学、農業、病院、自治体、ものづくり、企業" in text
+    assert "MWを先に決めて建てる構想ではありません" in text
+    assert "実際に必要とする計算サービスと契約需要" in text
     assert "地域の知" in text
 
 
@@ -97,7 +98,8 @@ def test_yumori_truth_boundary_uses_candidate_language() -> None:
     text = source()
     assert "成立する場所では" in text
     assert "技術検証する" in text
-    assert "構想です" in text
+    assert "実在の完成施設ではありません" in text
+    assert "MWを先に決めて建てる構想ではありません" in text
 
 
 def test_yumori_official_qr_asset_is_canonical_png() -> None:

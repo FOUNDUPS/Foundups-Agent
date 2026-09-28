@@ -52,10 +52,10 @@ These are durable project documents. Preserve their file IDs and update in place
 
 | Drive file | Role | Drive ID |
 | --- | --- | --- |
-| **FIN — YUMORI Phase 1 Financial Model & Grant Audit — 2026-09-12** | Current working grant register and functional financial audit | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
+| **FIN — YUMORI Demand-Led Financial Model & Grant Audit — 2026-09-28** | Current formula-driven working projection, grant register, demand/service discovery and financial audit. Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizing`, and three site tabs. | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
 | **FIN.YUMORI — Integrated Financial + Regional Impact Model.xlsx** | Legacy/integrated model retained as reference; do not let legacy assumptions override current audit | `11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c` |
 
-Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). The current FIN workbook contains separate Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu tabs. A statutory maximum or model placeholder is not project funding.
+Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). Calculation and node-sizing logic is governed by [`YUMORI_ECONOMIC_MODEL.md`](YUMORI_ECONOMIC_MODEL.md) and `../src/yumori_economic_model.py`. The Drive FIN workbook is the working formula/interview projection, not the source of truth. A statutory maximum, legacy 1 MW scenario, financial-floor kW, or other model output is not project funding or permission to build.
 
 ## LEGAL / COUNCIL RECORDS
 

@@ -56,6 +56,23 @@ The current eSingularity redesign brief calls for three to four primary content 
 - The Japanese surface uses Japanese section labels for building value, visitor economy, council decision, AI rice-field explanation, community participation, meetings, and calls to action instead of decorative English headings.
 - `frontend/components/JapaneseSurfacePolisher.tsx` is the bounded compatibility layer for legacy hard-coded labels while route-by-route copy is migrated to a true structured locale source. It must preserve English and Portuguese equivalents when the language switcher changes `html.lang`.
 
+## YUMORI economic and node-sizing contract
+
+The repository calculation authority is `src/yumori_economic_model.py`; the current Drive FIN workbook is the formula-driven working projection and feasibility-interview surface.
+
+The current sizing chain is:
+
+`customer/service demand → annual revenue/resource demand → GPU/CPU/storage/network → IT kW → facility kW → utility-confirmed capacity`.
+
+- No current site has a confirmed deliverable kW/MW value.
+- Hanyu is the conditional initial-priority grid-first candidate, not a 5 MW commitment.
+- Shimousaka is the second/future expansion candidate; its larger site does not establish electrical capacity.
+- Sukatto remains the regional human-facing hub; its compute size is also demand-led.
+- The financial-floor facility-kW output is a viability metric under the current pricing/Opex/debt scenario, not a build target.
+- The legacy 1 MW / 384-GPU scenario remains only for audit parity.
+- Heat value is capped by recoverable, deliverable, actually demanded thermal energy.
+- The JHR infrastructure-flow ledger keeps undisclosed amounts null and does not convert relationships into YUMORI revenue or funding.
+
 ## FoundUps shell contract
 
 | Field | Value |
