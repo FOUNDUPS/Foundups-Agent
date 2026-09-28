@@ -49,7 +49,12 @@ Claim classes:
 | September 2026 demolition-project scope: 8,923.56 m² | A-limited | Fukui City FY2026 September supplementary-budget material for 旧すかっとランド九頭竜解体準備事業 | Verified as the area stated for that demolition-preparation project; scope reconciliation pending | May be shown only beside the 8,099.56 m² property-sheet figure with a scope note. A difference caused by gym/toilet/auxiliary structures is plausible but **not confirmed** until the City identifies the included buildings. |
 | Facility opened 1994-04-06 | A | Fukui City, *市政のあらまし* | Verified | May be shown in history. |
 | FY2018 users: 129,649 | A | Fukui City, *市政のあらまし* FY2019 | Verified | May be shown with fiscal-year label. |
-| Visitor direct-spending screen: ¥129.649M–¥719.033M/year; ¥3.889B–¥21.571B over 30 years | B / calculated from A + official benchmark | 129,649 FY2018 users × ¥1,000 project assumption through Fukui Prefecture's 2025 average day-trip spend of ¥5,546 | Arithmetic verified. The 30-year total holds visits and spend constant, is undiscounted, and is not an I-O analysis. | Label prominently as a project screening scenario, not a forecast. Do not add demolition cost, asset value, compute revenue, or multiplier effects into one total. |
+| Documented FY2005–FY2019 use: 2,081,902 visits | A-derived | Fukui City annual/monitoring records; two published five-year averages are multiplied by five | Arithmetic verified from City figures | May be shown as **documented use for FY2005–FY2019**, not lifetime unique visitors. |
+| Lifetime use above 3.0M by FY2019 | B-inference | 2,081,902 documented FY2005–FY2019 visits plus the threshold test for FY1994–FY2004 | Early-year total needed is 918,098, or 83,464/year; plausible against later history but FY1994–FY2004 records are not yet verified | **Do not state as a verified City total.** Phrase only as an inference/threshold until early-year records are obtained. |
+| Fukui 2025 tourism-spend benchmarks: ¥5,546 day-trip / ¥30,221 overnight per person | C-official benchmark | Fukui Prefecture 2025 tourism statistics | Verified provincial averages; not Sukatto-specific | May be used only as named/date-labeled benchmark inputs. |
+| FY2018 attendance mix × Fukui 2025 spend benchmark: approx. ¥1.104B/year equivalent | B / calculated from A + C | 114,028 day users × ¥5,546 + 15,621 overnight users × ¥30,221 | Arithmetic verified | Illustrative demand-scale benchmark only; **not FY2018 facility revenue or measured FY2018 regional spending**. |
+| 100,000 annual visits × ¥5,546 benchmark: ¥554.6M/year; ¥16.638B over 30 years; approx. ¥10.870B 30-year NPV at 3% | B / scenario from C | Current FIN `Regional Impact` tab | Formula verified. Attendance, spend, and 3% rate are scenario inputs; no I-O multiplier is admitted. | May be shown as a clearly labeled feasibility screen, not a forecast, GDP estimate, project revenue, or benefit-cost ratio. |
+| Innovation-space payroll scenarios: ¥160M / ¥240M / ¥480M per year | B-unverified | 20 / 30 / 60 firms × 2 FTE × ¥4M payroll assumption | Arithmetic verified; firms, jobs and payroll are unverified scenarios | Internal/feasibility use only until occupancy, hiring and compensation evidence exists. |
 | Public-facility function abolished 2021-06-24 | A | Fukui City property sheet, `SUKATTO.pdf`, p.3 | Verified | Use exact date only when useful. |
 | Demolition figure: approximately ¥1.58B | A-limited | Fukui City Council June 2026 general-question outline, `0806a.pdf` | Verified only as a figure raised in a council question; not yet verified as an adopted budget or contractor price | Phrase narrowly and date it. Do not call it an awarded contract, final cost, or project funding source. |
 | Indexed 2025 construction-cost reference: about ¥6.8B | C / calculated from A | ¥4.68B × MLIT 2025 non-residential index 121.6 / 1994 index 83.7 = ¥6.799B | Arithmetic verified against MLIT annual deflator dated 2026-06-30 | Label as an indexed construction-cost reference, not appraisal, market value, or certified replacement cost. |
@@ -78,6 +83,9 @@ release. The table above remains the human-readable admission decision.
 - `facility.floor_area` — property-sheet total floor area 8,099.56 m²; source scope must be named.
 - `facility.demolition_scope_area_2026_09` — 8,923.56 m² stated in the September 2026 demolition-preparation budget material; the reason for the difference is not yet confirmed.
 - `facility.users_fy2018` — FY2018 users 129,649.
+- `facility.documented_visits_fy2005_fy2019` — 2,081,902 documented visits across FY2005–FY2019; period-average derivation must be preserved.
+- `regional.fukui_2025_daytrip_spend_benchmark` — ¥5,546/person, provincial 2025 day-trip benchmark; not Sukatto actual spend.
+- `regional.visitor_spend_100k_screen` — 100,000 visits/year × ¥5,546 = ¥554.6M/year; scenario only, with no multiplier or project-revenue interpretation.
 - `council.demolition_estimate_2026_06` — approximately ¥1.58B, narrowly attributed to the June 2026 council question outline; not a final contract price.
 - `architecture.cogdc_separate` — proposed COG DC is separate from the retained onsen building.
 - `architecture.heat_reuse_hypothesis` — useful heat recovery requires engineering validation.
@@ -85,7 +93,7 @@ release. The table above remains the human-readable admission decision.
 - `program.foundup_semantics` — a FoundUp is a problem-solving project, not a person.
 - `program.sixty_project_target` — 60 FoundUp projects is a proposed operating target, not current occupancy.
 - `domains.project_campaign_split` — eSingularity.ai/YUMORI.info explain the project; YUMORI.me is the participation and civic-action surface.
-- `validation.public_exclusions` — unaudited financial outputs and draft legal arguments are excluded from public answers.
+- `validation.public_exclusions` — unaudited financial outputs and draft legal arguments are excluded from public answers. The inferred 3M+ lifetime total, innovation payroll scenarios, economic multipliers, demolition-deferral timing value, and aggregate Community ROI remain excluded unless separately admitted.
 
 ## Canonical Drive chain
 
