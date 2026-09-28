@@ -1,5 +1,24 @@
 # GitPushDAE Development Roadmap
 
+## RSI runner entrypoint checkpoint — 2026-09-28
+
+WSP 15: Complexity2 + Importance3 + Deferability3 + Impact4 = **12/P2**.
+The actual configured consumer and preserved import-failure logs make this a
+bounded executable qualification; changing imports before examining dispatch
+would expose effects currently outside the test scope.
+
+- [x] Source/owner and duplicate search; canonical test inventory retrieved.
+- [x] Six fixed controls authored in the existing runner test file; production
+  runner, router and shared hook unchanged.
+- [x] Independently review fixture effects and candidate original output:6/6
+  fixed cases, zero errors/skips; all candidate CI/CodeQL and ten PR checks passed.
+- [ ] Verify main convergence and owned-lane closure; then re-observe and rescore.
+
+The earlier module-wide MVP label below does not certify this hook/entrypoint
+path. Select any later mode/import repair only after the measured outcome and
+current consumer/authority boundary are reconciled. Preserve higher-priority
+runtime prerequisites and active FoundUp ownership.
+
 ## Current Status: MVP Complete [OK]
 - WSP 91 compliant daemon implemented
 - Autonomous push decisions based on agentic parameters

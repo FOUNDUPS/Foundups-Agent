@@ -47,6 +47,11 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v
 
+      - name: Run post-commit runner entrypoint evidence
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v
+
       - name: Run RedDog correspondence and recipient contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

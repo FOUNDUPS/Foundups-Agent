@@ -1,4 +1,21 @@
 # GitPushDAE Module Change Log
+
+## 2026-09-28 — Bounded post-commit entrypoint qualification
+
+WSP00/15/22/49/50/62/84/97. Selected12/P2 using the existing runner/test owner.
+Six fixed controls cover restricted missing-root/default and enqueue-only,
+inert default and enqueue-only, inert dispatch failure, and unsupported direct
+flag. The fixture uses disposable Git, empty hooks, isolated Python and temporary
+spools. Original three pytest function bodies are unchanged; a direct source
+loader avoids importing the daemon package during the named fixture launch.
+
+The existing CI selects only `TestEntrypointEvidence`; the canonical registry
+adds the existing file's `process` capability. Documentation records actual CLI
+and return semantics. No production implementation or shared hook/config change.
+
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Exact final-head/main validation and owned closure remain receipt-bound. No production repair, ambient Windows reproduction, social delivery or retained RSI improvement is claimed. The original three pytest functions were preserved but not selected by this six-case command. Local application tests:0.
 - **Status**: Active
 - **Created**: 2025-10-12
 - **Purpose**: Autonomous git push daemon with WSP 91 observability

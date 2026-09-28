@@ -1,3 +1,20 @@
+## 2026-09-28 — RSI Git-hook entrypoint qualification
+
+Fresh WSP00/15/97 observation at `799cf786` preserves96 peer heads and the shared
+checkout. PR1944 is main-verified:51 characterization cases passed; its owned
+worktree/refs are retired, with two inert config entries explicitly retained after
+a permission error. Holo retrieval remains CURRENT/no-gap at that exact main.
+
+The59-item queue selects existing GitPushDAE runner qualification at12/P2.
+Six bounded controls are authored in the current test owner with named hosted CI
+and one registry-capability projection. Source-first inspection prevents a naive
+import repair from activating real router/dependency/posting effects. No production
+runner, shared hook, active FoundUp, provider or native authority changes.
+
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Exact final-head/main validation and owned closure remain receipt-bound. No production repair, ambient Windows reproduction, social delivery or retained RSI improvement is claimed. The original three pytest functions were preserved but not selected by this six-case command. The canonical backlog links immutable source, acceptance, original result and review receipts.
+
 ## 2026-09-28: Verify scheduler caller/reload characterization
 
 - Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
