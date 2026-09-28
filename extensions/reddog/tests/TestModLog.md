@@ -1,3 +1,9 @@
+## 2026-09-28 - Correspondence-state Skillz backend manifest reconciliation
+
+- RedDog fast tier initially failed the existing backend compatibility preflight after `skills_registry_v2.json` changed.
+- Reused the canonical generator contract: the runtime closure remains 1,401 files; only the registry runtime SHA changed. Refreshed `scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, and the existing generator-test digest pin together.
+- Expected manifest digest after repair: `663ec92531dda7c601bfdd269659b6984e72500b5f793f31b993dc5d4255dc60`. No compatibility assertion was weakened or removed.
+
 # Foundups(R)Agent TestModLog
 
 ## 2026-09-24 - Research-display manifest validation
