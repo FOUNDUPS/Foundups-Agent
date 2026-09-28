@@ -70,7 +70,8 @@ def test_yumori_is_pro_community_compute_not_blanket_anti_dc() -> None:
     text = source()
     assert "YUMORIはデータセンターそのものに反対する運動ではありません" in text
     assert "地域の学校、大学、農業、病院、自治体、ものづくり、企業" in text
-    assert "1MWから始め、地域需要に合わせて5→10→20MW" in text
+    assert "MWを先に決めて建てる構想ではありません" in text
+    assert "実際に必要とする計算サービスと契約需要" in text
     assert "地域の知" in text
 
 
