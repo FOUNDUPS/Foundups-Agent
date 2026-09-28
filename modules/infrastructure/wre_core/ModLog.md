@@ -1,3 +1,10 @@
+## 2026-09-28: Operational decision and RSI measurement audit
+
+- WSP 00/15/22/48/50/73/97/99: reconcile the supplied research hierarchy with the existing September 25 measurement implementation. Extend canonical planning under WSP 73; no duplicate master runtime/schema or platform implementation.
+- Record source-qualified social no-op success signals, simulator/fidelity/quality-placeholder distinctions and the difference between transmission and desired outcome. Define proposed paired operational measures and a bounded synthetic pilot; all unmeasured gains/resources remain unknown.
+- Account for PR #1931's 20 unique cases passing on both PR/main without claiming 40 unique tests, held-out operational improvement or native RSI retention. Current audit is documentation only; independent review, static validation and PR/main closure are separately receipt-bound.
+- Preserve seven native blockers, absent effect-use lease, protected product lanes and existing work packets. No model/provider updates, live platform actions, new tests or runtime activation in this slice.
+
 ## 2026-09-27: Make sentinel checkout failure observable
 
 - WSP 00/15/22/34/50/62/84/97; C1/I3/D3/Impact3 = 10/P2. The failed-checkout branch left `error=None`, causing the existing startup consumer to show its normal action-count summary. Populate `cleanup_checkout_failed` in that branch.
