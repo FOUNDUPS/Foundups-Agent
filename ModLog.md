@@ -1,3 +1,8 @@
+## 2026-09-28: Validate scheduler safe publication under fixed controls
+
+- WSP00/5/6/15/22/50/62/84/97: Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+- Reuse17-line explicit posting-result projection and unchanged atomic writer. Live response/disposition and load/return contracts remain unchanged. Positive evidence is synthetic execution feedback, not independent external delivery, crash proof or retained RSI. Save acknowledgement/restart replay and Windows behavior remain unqualified.
+
 ## 2026-09-28: RSI scheduler safe-publication baseline
 
 - WSP15 selects15/P1 repair in the existing social scheduler. WSP97 reuses its fixture/CI and shared atomic writer; no new module or skill.

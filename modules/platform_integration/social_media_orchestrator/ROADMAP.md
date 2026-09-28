@@ -17,7 +17,9 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 PR1942 characterization is closed on main12663d7e4f with successful main CI and
 CodeQL. WSP15 C3/I4/D4/Impact4=15/P1 selects explicit result projection and the
 existing shared atomic writer. The fixed42-method/48-input hosted contract is
-frozen; baseline and candidate outcomes remain pending until recorded below.
+frozen.
+
+Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
 
 This layer preserves action disposition and existing JSON load compatibility.
 Save acknowledgement across `understand_command`, `execute_pending_actions` and

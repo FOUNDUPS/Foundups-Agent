@@ -28,7 +28,9 @@ No local application execution, real posting, accounts or native admission.
 Qualified selection after independent fixture/effect review:
 `python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence -v`
 
-Baseline/candidate results are pending. Save acknowledgement, concurrent writers,
+Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+
+Save acknowledgement, concurrent writers,
 restart retry safety, Windows behavior and native RSI remain separate.
 
 ## Historical scheduler persistence characterization — 2026-09-28
