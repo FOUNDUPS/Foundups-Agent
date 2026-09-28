@@ -1,3 +1,10 @@
+## 2026-09-28: Red Dog correspondence continuity state
+
+- WSP00/15/22/50/78/91/95/97; new generic correspondence-state capability, separate from recipient authorization.
+- Extended the existing recipient-preflight owner with privacy-bounded provider-event metadata, stable ask accounting, materialized scope-state roundtrip, provider-watermark refresh, digest integrity and idempotent event insertion; no parallel correspondence test file remains.
+- Runtime persistence uses the existing ModuleDB/DatabaseManager boundary; AgentDB is not expanded. Tests use a disposable SQLite path and reset the singleton around each persistence case.
+- No provider send, Gmail mutation, mailbox-body ingestion, Google Sheet write, or external side effect is exercised. Cached state never grants send authority.
+
 ## 2026-09-27: Freeze connected supervisor/requester acceptance
 
 - WSP00/15/22/50/84/97;13/P1 documentation-only reconciliation. Retrieved existing observer, lifecycle, generation-race and healthcheck owners; no tests, fixtures, registry or assertions change.

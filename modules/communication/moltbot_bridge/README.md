@@ -1103,3 +1103,23 @@ OpenClaw now follows a facade + delegated-module design.
 Current refactor result:
 - `openclaw_dae.py` is currently `1580` lines and remains inherited WSP 62 hard-limit debt
 - remaining file content is predominantly facade wrappers, dataclasses, and the honeypot surface
+
+
+## Red Dog correspondence continuity
+
+Red Dog correspondence continuity is owned by
+`src/reddog_correspondence_state.py` and the canonical
+`skillz/reddog_correspondence_state/SKILLz.md`.
+
+The runtime model is provider-first but not provider-replay-first:
+
+```text
+provider truth -> normalized event metadata -> materialized scope state
+              -> provider-watermark delta refresh -> state capsule
+```
+
+The private module-owned DB is the machine continuity surface. Gmail/Slack/
+LinkedIn remain transaction truth. Google Sheets/Docs are optional human-facing
+projections and must be rebuildable. Raw mailbox bodies and complete recipient
+address dumps are not persisted in this state layer. A cached state never grants
+send authority; current routing and recipient preflight remain mandatory.

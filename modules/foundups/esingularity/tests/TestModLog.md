@@ -1,3 +1,9 @@
+## 2026-09-28 — Native Red Dog correspondence continuity dependency
+
+- Extended the existing `test_contracts.py` operational-skill contract to require the generic `reddog_correspondence_state` registry entry, YUMORI dependency, native-store boundary and thin operator projection.
+- YUMORI remains the domain adapter for proxy voice, CRM/routing and campaign semantics; provider transaction truth and send preflight remain separate.
+- No new YUMORI test file or private correspondence fixture was created.
+
 ## 2026-09-28 — Pre-draft correspondence state capsule
 
 - Extended the existing `test_contracts.py` correspondence contract; no parallel test file or email-memory database was created.

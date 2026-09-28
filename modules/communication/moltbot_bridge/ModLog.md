@@ -1,3 +1,10 @@
+## 2026-09-28: Add native Red Dog correspondence continuity
+
+- Added a generic provider-agnostic correspondence continuity store under moltbot_bridge using existing WSP78 ModuleDB persistence instead of extending the AgentDB compatibility monolith.
+- Persist only privacy-bounded provider event metadata, stable ask/status accounting, materialized scope state, watermarks and digests; raw mailbox bodies, recipient dumps, credentials and hidden reasoning remain outside the store.
+- Added reusable Skillz + operator projections. Provider truth still wins, cached state never authorizes send, and existing recipient preflight remains mandatory.
+- YUMORI consumes this capability as a domain adapter; Google Sheets/Docs stay optional human projections rather than Red Dog's memory substrate.
+
 ## 2026-09-28: Close manager-backend qualification state
 
 - WSP00/15/22/50/83/97; C1/I3/D3/Impact3=10/P2. Reconcile PR1924's verified merge and reviewed source-only backend failures in the existing contract/checkpoint/backlog; no new document or interface.

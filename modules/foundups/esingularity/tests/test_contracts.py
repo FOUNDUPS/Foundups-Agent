@@ -17,6 +17,7 @@ MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
 CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
+REDDOG_CORRESPONDENCE_SKILL_PATH = REPOSITORY_ROOT / "modules" / "communication" / "moltbot_bridge" / "skillz" / "reddog_correspondence_state" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -104,6 +105,12 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert correspondence["location"] == "modules/foundups/esingularity/skillz/yumori_contact_ledger"
     assert correspondence["primary_agent"] == "0102"
     assert correspondence["intent_type"] == "MAINTENANCE"
+    assert correspondence["version"] == "0.8.0"
+
+    reddog_state = registry["skills"]["reddog_correspondence_state"]
+    assert reddog_state["location"] == "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state"
+    assert reddog_state["primary_agent"] == "0102"
+    assert reddog_state["intent_type"] == "MAINTENANCE"
 
     fukui_text = FUKUI_PROCEDURE_SKILL_PATH.read_text(encoding="utf-8")
     assert "reddog_recipient_preflight/SKILLz.md" in fukui_text
@@ -131,8 +138,17 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "BLOCK_THIRD_FOLLOWUP" in correspondence_text
     assert "Gmail remains transaction truth" in correspondence_text
     assert "not another Moshpit or another contact database" in correspondence_text
+    assert "reddog_correspondence_state/SKILLz.md" in correspondence_text
+    assert "native correspondence store is the durable M2M continuity layer" in correspondence_text
+
+    reddog_text = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
+    assert "Provider systems remain transaction truth." in reddog_text
+    assert "The state cache never grants permission to send." in reddog_text
+    assert "Do not create a correspondence Moshpit" in reddog_text
+    assert "RedDogCorrespondenceStateStore" in reddog_text
 
     for slug, canonical in (
+        ("reddog-correspondence-state", "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state/SKILLz.md"),
         ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),
         ("yumori-funding-ppp-intelligence", "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence/SKILLz.md"),
         ("yumori-contact-ledger", "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md"),

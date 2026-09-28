@@ -1,7 +1,7 @@
 ---
 name: yumori_contact_ledger
 description: Ground YUMORI.me correspondence in live Gmail/CRM state, preserve routing consent, write in the canonical 0102 proxy voice, reconcile receipts, and promote repeated operator failures into reusable rules.
-version: 0.7.0
+version: 0.8.0
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -172,11 +172,28 @@ Before claiming that a message is unanswered, an ask is unsent, or a draft is pe
 6. Missing Moshpit receipt after a verified send is a logging repair, not permission to resend.
 7. Incomplete pagination / ambiguous evidence means HOLD.
 
-## Correspondence State Capsule — mandatory pre-draft continuity receipt
+## Correspondence State Capsule — native continuity first, provider delta second
 
 The fastest safe cross-session memory is **not another Moshpit or another contact database**.
+YUMORI consumes the generic Red Dog correspondence-state capability at
+`modules/communication/moltbot_bridge/skillz/reddog_correspondence_state/SKILLz.md`.
+
 Before creating, materially updating, forwarding, or sending substantive recipient-finalized
-correspondence, reconstruct one ephemeral state capsule from the existing authorities.
+correspondence:
+
+1. load the persisted Red Dog scope state when available;
+2. compare its provider watermark/freshness with the live provider;
+3. when unchanged and VALID, use the native scope state as the continuity starting point;
+4. when changed/unknown/stale, reconcile only the provider delta needed for that scope;
+5. rebuild the state capsule below from provider truth + current routing/CRM evidence;
+6. persist the repaired materialized state after reconciliation.
+
+The native correspondence store is the durable M2M continuity layer. It is a rebuildable
+continuity projection, not send authority. Gmail/provider records remain transaction truth,
+and live recipient/routing preflight remains mandatory before every send-capable action.
+
+If native correspondence state is unavailable, fall back to the full reconciliation sequence
+below rather than inventing state.
 
 The capsule is a working receipt for the current execution only. Do **not** persist raw
 email bodies or private recipient dumps in Git. Gmail remains transaction truth; Email Log
@@ -249,8 +266,10 @@ Rules:
 8. A fresh inbound, a newly provider-sent message, a changed draft, recipient-routing
    mutation, or a materially changed ask invalidates the old capsule and requires rebuild.
 
-This capsule is the session-to-session concatenation layer. It intentionally references
-stable provider/CRM IDs and compact ask state rather than copying correspondence prose.
+This capsule is the session-to-session operational view. The generic Red Dog native
+correspondence store is the durable M2M continuity layer; this YUMORI skill adds project
+voice, routing, CRM and campaign semantics. The capsule intentionally references stable
+provider/CRM IDs and compact ask state rather than copying correspondence prose.
 ## Gmail filing and queue semantics
 
 Use the established YUMORI labels and current live evidence.
@@ -318,6 +337,7 @@ Routine successful runs do not create learning entries.
 
 ## Dependencies
 
+- `reddog_correspondence_state` for provider-delta continuity, stable ask IDs, watermarks and private runtime persistence.
 - `yumori_moshpit` for campaign-vs-agent logging.
 - `fukui_city_procedure` for municipal procedure lanes and official-form fidelity.
 - `reddog_recipient_preflight` for consequential outbound recipient authorization.
@@ -346,5 +366,7 @@ Execution remains bounded by:
 - procedure/form requirements;
 - WSP controls;
 - applicable platform and safety policy.
+
+Google Sheets / Docs remain human-facing working projections. They are not required as Red Dog's memory substrate and must be rebuildable from provider truth plus native runtime state.
 
 Documentation is not proof that an action was sent, filed, received, accepted, or deployed.

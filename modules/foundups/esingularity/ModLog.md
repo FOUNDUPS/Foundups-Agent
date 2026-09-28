@@ -1,3 +1,9 @@
+## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
+
+- Promoted the previously ephemeral Correspondence State Capsule onto the generic Red Dog correspondence-state persistence layer rather than creating an email Moshpit or YUMORI-specific database.
+- YUMORI now loads native scope state first, checks provider watermark/freshness, reconciles only changed provider delta when possible, then applies its existing Gmail/CRM/routing and proxy-voice rules.
+- Google Contacts/Email Log/Action Queue/Docs remain human-facing working projections; provider truth + native state are sufficient for machine continuity. Send authorization remains live recipient preflight.
+
 ## 2026-09-28 — Correspondence continuity / duplicate-send guard
 
 - Added a mandatory ephemeral Correspondence State Capsule to the existing YUMORI.me correspondence parent rather than creating a parallel email Moshpit or contact database.
