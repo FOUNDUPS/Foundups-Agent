@@ -1,3 +1,10 @@
+## 2026-09-28 — YUMORI verified backlog and Work-handoff contract
+
+- Reused `test_contracts.py`; no parallel test file was created.
+- Registered the YUMORI work orchestrator and thin Claude/Codex projections.
+- Regression requires canonical WSP 15 scoring, explicit 012 physical versus WORK_CLOUD ownership, a bounded `YUMORI WORK HANDOFF` packet, and a no-authority/no-parallel-executor boundary.
+- The contract reuses current correspondence/state owners rather than treating a backlog snapshot or chat memory as execution truth.
+
 ## 2026-09-28 — Native Red Dog correspondence continuity dependency
 
 - Extended the existing `test_contracts.py` operational-skill contract to require the generic `reddog_correspondence_state` registry entry, YUMORI dependency, native-store boundary and thin operator projection.
