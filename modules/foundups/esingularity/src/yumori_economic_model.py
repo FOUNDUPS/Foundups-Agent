@@ -11,11 +11,21 @@ Repository truth:
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import json
 from math import inf
-from typing import Any, Mapping, Sequence
+from pathlib import Path
+from typing import Any, Iterable, Mapping, Sequence
 
 MODEL_YEARS = 5
 HOURS_PER_YEAR = 8_760.0
+METHODOLOGY_URL = "https://ai-circular-economy.com/"
+PAPER_STATUS_WEIGHTS: Mapping[str, float] = {
+    "completed": 0.0,
+    "operating": 0.0,
+    "signed": 0.5,
+    "loi": 1.0,
+    "paused": 1.0,
+}
 
 
 @dataclass(frozen=True)
@@ -547,4 +557,264 @@ def run_yumori_economic_model(inputs: YumoriEconomicInputs | None = None) -> Yum
             "sizing": "Use calculate_demand_led_node_sizing; do not choose MW first.",
             "commercial_inputs": "Tariff, utilization, service pricing, demand, debt, CapEx, and heat value remain VERIFY/MODEL until evidenced.",
         },
+    )
+
+
+@dataclass(frozen=True)
+class HeatRecoveryInputs:
+    it_load_kw: float
+    load_fraction: float
+    recovery_fraction: float
+    delivery_efficiency: float
+    thermal_demand_kw: float
+    annual_availability: float
+    value_jpy_per_thermal_kwh: float
+    grid_heat_kg_co2_per_kwh: float = 0.0
+    hours_per_year: float = HOURS_PER_YEAR
+
+    def validate(self) -> None:
+        if self.it_load_kw < 0 or self.thermal_demand_kw < 0:
+            raise ValueError("heat loads and demand cannot be negative")
+        if self.value_jpy_per_thermal_kwh < 0:
+            raise ValueError("heat value cannot be negative")
+        for value in (
+            self.load_fraction,
+            self.recovery_fraction,
+            self.delivery_efficiency,
+            self.annual_availability,
+        ):
+            if not 0.0 <= value <= 1.0:
+                raise ValueError("heat fractions must stay between zero and one")
+
+
+@dataclass(frozen=True)
+class HeatRecoveryResult:
+    source_heat_kw: float
+    recovered_heat_kw: float
+    delivered_heat_kw: float
+    usable_heat_kw: float
+    annual_usable_thermal_kwh: float
+    annual_value_jpy: float
+    avoided_kg_co2: float
+
+
+def calculate_heat_recovery(inputs: HeatRecoveryInputs) -> HeatRecoveryResult:
+    """Value only heat that can be recovered, delivered, and actually used."""
+
+    inputs.validate()
+    source = inputs.it_load_kw * inputs.load_fraction
+    recovered = source * inputs.recovery_fraction
+    delivered = recovered * inputs.delivery_efficiency
+    usable = min(delivered, inputs.thermal_demand_kw)
+    annual_kwh = usable * inputs.hours_per_year * inputs.annual_availability
+    return HeatRecoveryResult(
+        source_heat_kw=source,
+        recovered_heat_kw=recovered,
+        delivered_heat_kw=delivered,
+        usable_heat_kw=usable,
+        annual_usable_thermal_kwh=annual_kwh,
+        annual_value_jpy=annual_kwh * inputs.value_jpy_per_thermal_kwh,
+        avoided_kg_co2=annual_kwh * inputs.grid_heat_kg_co2_per_kwh,
+    )
+
+
+@dataclass(frozen=True)
+class InfrastructureFlow:
+    flow_id: str
+    source: str
+    target: str
+    flow_type: str
+    status: str
+    source_url: str
+    evidence_class: str = "OFFICIAL"
+    announced_at: str = ""
+    amount_jpy: float | None = None
+    amount_status: str = "UNDISCLOSED"
+    note: str = ""
+
+    @classmethod
+    def from_mapping(cls, value: Mapping[str, Any]) -> "InfrastructureFlow":
+        return cls(
+            **{
+                field_name: value[field_name]
+                for field_name in cls.__dataclass_fields__
+                if field_name in value
+            }
+        )
+
+
+@dataclass(frozen=True)
+class DependencyAnalysis:
+    edge_count: int
+    participant_count: int
+    reciprocal_directed_edges: int
+    reciprocal_share: float
+    reciprocal_pairs: int
+    directed_three_party_cycles: int
+    paper_share: float
+    paper_and_circular_edges: int
+    endpoint_hhi: float
+    effective_participants: float
+    concentration_raw: float
+    circularity_score: float
+    announced_vs_paid_score: float
+    counterparty_concentration_score: float
+    computed_component_score: float
+    computed_weight_coverage: float
+    known_amount_jpy: float
+    known_amount_edges: int
+    undisclosed_amount_edges: int
+    truth_boundary: str
+
+
+def _bounded_scale(value: float, low: float, high: float) -> float:
+    if high <= low:
+        raise ValueError("scale high must exceed low")
+    return max(0.0, min(1.0, (value - low) / (high - low))) * 100.0
+
+
+def _directed_three_cycles(pairs: set[tuple[str, str]]) -> int:
+    cycles: set[tuple[str, str, str]] = set()
+    for first, second in pairs:
+        for middle, third in pairs:
+            if middle != second:
+                continue
+            if len({first, second, third}) != 3 or (third, first) not in pairs:
+                continue
+            rotations = (
+                (first, second, third),
+                (second, third, first),
+                (third, first, second),
+            )
+            cycles.add(min(rotations))
+    return len(cycles)
+
+
+def analyze_infrastructure_flows(
+    flows: Iterable[InfrastructureFlow],
+) -> DependencyAnalysis:
+    """Return only reproducible network indicators; never a market forecast."""
+
+    records = tuple(
+        flow for flow in flows if flow.source.strip() and flow.target.strip()
+    )
+    if not records:
+        return DependencyAnalysis(
+            0,
+            0,
+            0,
+            0.0,
+            0,
+            0,
+            0.0,
+            0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.50,
+            0.0,
+            0,
+            0,
+            "Empty ledger; no market inference is available.",
+        )
+
+    pairs = {(flow.source.strip(), flow.target.strip()) for flow in records}
+    reciprocal_edges = sum(
+        (target, source) in pairs
+        for source, target in (
+            (flow.source.strip(), flow.target.strip()) for flow in records
+        )
+    )
+    reciprocal_share = reciprocal_edges / len(records)
+    reciprocal_pairs = len(
+        {
+            frozenset((source, target))
+            for source, target in pairs
+            if (target, source) in pairs
+        }
+    )
+    paper_weights = [
+        PAPER_STATUS_WEIGHTS.get(flow.status.strip().lower(), 0.5)
+        for flow in records
+    ]
+    paper_share = sum(paper_weights) / len(paper_weights)
+    paper_and_circular = sum(
+        weight >= 1.0 and (flow.target.strip(), flow.source.strip()) in pairs
+        for flow, weight in zip(records, paper_weights)
+    )
+
+    degree: dict[str, int] = {}
+    for flow in records:
+        degree[flow.source.strip()] = degree.get(flow.source.strip(), 0) + 1
+        degree[flow.target.strip()] = degree.get(flow.target.strip(), 0) + 1
+    total_endpoints = len(records) * 2
+    endpoint_hhi = sum(
+        (count / total_endpoints) ** 2 for count in degree.values()
+    )
+    effective_participants = 1.0 / endpoint_hhi if endpoint_hhi else 0.0
+    participant_count = len(degree)
+    concentration = (
+        max(0.0, 1.0 - (effective_participants / participant_count))
+        if participant_count
+        else 0.0
+    )
+
+    circularity_score = _bounded_scale(reciprocal_share, 0.10, 0.60)
+    paper_score = _bounded_scale(paper_share, 0.15, 0.70)
+    concentration_score = _bounded_scale(concentration, 0.25, 0.70)
+    component_score = (
+        circularity_score * 0.25
+        + paper_score * 0.15
+        + concentration_score * 0.10
+    ) / 0.50
+    known_amounts = [
+        flow.amount_jpy for flow in records if flow.amount_jpy is not None
+    ]
+
+    return DependencyAnalysis(
+        edge_count=len(records),
+        participant_count=participant_count,
+        reciprocal_directed_edges=reciprocal_edges,
+        reciprocal_share=reciprocal_share,
+        reciprocal_pairs=reciprocal_pairs,
+        directed_three_party_cycles=_directed_three_cycles(pairs),
+        paper_share=paper_share,
+        paper_and_circular_edges=paper_and_circular,
+        endpoint_hhi=endpoint_hhi,
+        effective_participants=effective_participants,
+        concentration_raw=concentration,
+        circularity_score=circularity_score,
+        announced_vs_paid_score=paper_score,
+        counterparty_concentration_score=concentration_score,
+        computed_component_score=component_score,
+        computed_weight_coverage=0.50,
+        known_amount_jpy=sum(known_amounts),
+        known_amount_edges=len(known_amounts),
+        undisclosed_amount_edges=len(records) - len(known_amounts),
+        truth_boundary=(
+            "Partial dependency diagnostic only: reproducible indicators cover "
+            "50% of the referenced methodology. Revenue-gap, financing-quality, "
+            "and market-behavior judgements are omitted."
+        ),
+    )
+
+
+def load_japan_infrastructure_flows(
+    path: str | Path | None = None,
+) -> tuple[InfrastructureFlow, ...]:
+    ledger_path = (
+        Path(path)
+        if path
+        else Path(__file__).resolve().parents[1]
+        / "jhr"
+        / "data"
+        / "japan_ai_infrastructure_flows.json"
+    )
+    payload = json.loads(ledger_path.read_text(encoding="utf-8"))
+    return tuple(
+        InfrastructureFlow.from_mapping(item) for item in payload["flows"]
     )
