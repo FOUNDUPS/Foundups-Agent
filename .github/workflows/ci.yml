@@ -45,7 +45,7 @@ jobs:
       - name: Run social scheduler execution evidence
         env:
           PYTHONDONTWRITEBYTECODE: '1'
-        run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v
+        run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence -v
 
       - name: Run RedDog correspondence and recipient contracts
         env:
