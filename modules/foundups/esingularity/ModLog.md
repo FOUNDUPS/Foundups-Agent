@@ -1,3 +1,12 @@
+## 2026-09-28 — Regional economic-impact ledger added to current FIN
+
+- Reconciled the current functional FIN workbook rather than promoting the older integrated workbook. Added a dedicated `Regional Impact` tab and Dashboard/Audit projections.
+- Added verified/derived historical demand: FY2018 129,649 users, FY2019 124,561, and 2,081,902 documented visits across FY2005–FY2019. The 3M+ lifetime figure remains an inference pending FY1994–FY2004 records; the model stores the exact 918,098 / 83,464-per-year threshold instead of promoting it to verified fact.
+- Added Fukui Prefecture 2025 tourism-spend benchmarks (¥5,546 day-trip; ¥30,221 overnight) as external benchmark inputs, including a clearly labeled FY2018-mix equivalent and 75k/100k/125k visitor scenarios with 10/30-year and 3% NPV screens.
+- Added innovation-space payroll scenarios aligned to the 60-company / 120-seat concept, plus separate public/asset comparison metrics for historic construction cost, the discussed demolition estimate, approved demolition-preparation budget, and a timing-only demolition-deferral illustration.
+- Explicitly prohibited automatic summation of visitor spending, project revenue, payroll, private capital and public-cost avoidance. Fukui input-output multiplier, local procurement, leverage and aggregate Community ROI remain HOLD until their evidence perimeter and double-counting rules are defined.
+- Synchronized Document 03's NCDS-style feasibility section to the same visitor benchmark and 20/30/60-company × 2-FTE payroll scenarios.
+
 ## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
 
 - Promoted the previously ephemeral Correspondence State Capsule onto the generic Red Dog correspondence-state persistence layer rather than creating an email Moshpit or YUMORI-specific database.
