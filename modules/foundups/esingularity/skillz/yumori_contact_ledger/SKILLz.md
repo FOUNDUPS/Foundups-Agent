@@ -188,9 +188,9 @@ correspondence:
 5. rebuild the state capsule below from provider truth + current routing/CRM evidence;
 6. persist the repaired materialized state after reconciliation.
 
-The native store is a rebuildable continuity projection, not send authority. Gmail/provider
-records remain transaction truth, and live recipient/routing preflight remains mandatory
-before every send-capable action.
+The native correspondence store is the durable M2M continuity layer. It is a rebuildable
+continuity projection, not send authority. Gmail/provider records remain transaction truth,
+and live recipient/routing preflight remains mandatory before every send-capable action.
 
 If native correspondence state is unavailable, fall back to the full reconciliation sequence
 below rather than inventing state.
