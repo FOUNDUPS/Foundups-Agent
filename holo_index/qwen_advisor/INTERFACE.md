@@ -6,6 +6,19 @@
 
 ## Public API (Modular Architecture)
 
+### Import boundary
+
+Importing this package or its `llm_engine` leaf does not load the coordinator,
+services, UI or native inference library. The existing 20 names in `__all__`
+remain discoverable through `dir()` and resolve from their original modules on
+first access. Resolved objects are cached; `from` and star imports retain their
+public identities. Missing attributes raise `AttributeError`, and provider
+import failures propagate without caching a failed result.
+
+Explicitly requesting an export still loads its original module and its
+dependencies. Constructing or initializing an engine remains a separate effect;
+this import boundary does not establish model readiness or inference quality.
+
 ### Main Coordinator (New Primary Interface)
 
 #### HoloDAECoordinator

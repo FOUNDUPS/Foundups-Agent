@@ -1545,7 +1545,7 @@
     "holo_index/query_receipt.py": "cd81e3b5299011b4904e1dfe183ec14597f55e7c7ab4c4487319e2df3f1ed4f6",
     "holo_index/query_result_contract.py": "c2814ac31f702de0f67fec7dc2cc671cbe7d68160c3b902f650851f89c284f77",
     "holo_index/query_result_contract_schema.py": "1f445a4a3bba96c2c3ab3e7b66ca7c4b3e4afd8857dbad77b1d3e6d230359cff",
-    "holo_index/qwen_advisor/__init__.py": "9b497a2c96911d5da207f6558b81e30256f9e1d99dbd0eb64d1a3771d337d472",
+    "holo_index/qwen_advisor/__init__.py": "4280b3a6794b8cbdcadb89e4eb86a0b50989f62aad7d43c4bb2ebdb8c8da600b",
     "holo_index/qwen_advisor/advisor.py": "dd7c4e85f3a90a0ff9365b438be5f5273faa2b9d4a9b300c33ea5ad9be28a279",
     "holo_index/qwen_advisor/agent_detection.py": "2a6229b3de964432c382c2ddffeea1647d91910569f797008db77bdb0b08d59b",
     "holo_index/qwen_advisor/arbitration/mps_arbitrator.py": "ef0fe0b753dbd967d244d6c59f0c1270ca1b35ce1f1c7fd38588a3060f5eefe4",

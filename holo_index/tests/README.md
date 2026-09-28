@@ -1,5 +1,16 @@
 # HoloIndex Tests
 
+## Qwen package import boundary
+
+Run `python -I -S -B holo_index/tests/test_qwen_package_import.py -v`.
+Eight fixed controls use fresh children with scratch directories and a minimal
+environment. Real package/engine imports reject other application modules before
+execution; no model, coordinator constructor or service is invoked. Synthetic
+owners test all 20 public exports, original module mapping, identity caching,
+`dir`, unknown attributes, from/star imports and dependency failure propagation.
+They do not certify the real exported providers. Python effect guards supplement
+the reviewed source boundary; they are not an operating-system sandbox.
+
 ## R03 source and entry qualification
 
 The three existing suites named in the [entry matrix](../CLI_REFERENCE.md#qualification-matrix-and-evidence-scope)
