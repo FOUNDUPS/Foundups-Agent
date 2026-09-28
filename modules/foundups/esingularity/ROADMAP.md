@@ -44,6 +44,10 @@ These are continuing acceptance gates, not completed features that may later be 
 - [x] Add a canonical candidate-site registry and separate FIN workbook tabs for Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu.
 - [x] Add the repository-owned demand-led YUMORI economic model, 24-offer service catalog, formula-driven Demand & Capacity / Node Sizing workbook projection, demand-capped heat calculation, and sourced JHR infrastructure-flow ledger.
 - [ ] Obtain utility and fiber responses for each candidate site; for Hanyu submit demand-derived initial and expansion load cases from the canonical economic model. Do not promote any fixed kW/MW into the functional model before demand, engineering and utility evidence support it.
+- [x] Verify Fukui City's FY2026 school-asset official form bundle and filing sequence: mandatory Form 1 prior consultation/site survey through 2026-11-30; Forms 2/3/4 proposal package due 2026-12-15. Preserve the official binaries and keep the school ASSET_PROPOSAL lane separate from Sukatto PPP/PFI.
+- [x] Capture official Fukui City floor-plan evidence for Shimousaka and Hanyu in the three-site documentation and define the site-selection rule as utility/fiber/building-land/permitting/cost-schedule viability, not substation proximity alone.
+- [ ] Submit the school Form 1 prior-consultation filing using the exact official form after resolving the applicant address/contact fields and whether Fukui City requires one Form 1 per property or permits both schools on one consultation filing. Do not guess either field.
+- [ ] Obtain Fukui City's written Sukatto receiving route/material list (PFI Act Article 6 or other PPP/PFI project-formation route) before treating the Sukatto package as formally filed.
 - [ ] Ask Fukui City to consider Cabinet Office PPP/PFI expert/one-stop support as part of an independent demolition-vs-reuse comparison.
 - [x] Provide Japanese, English, and Portuguese states for the ten-slide presentation.
 - [ ] Complete route-based Japanese, English, and Portuguese localization for every legacy page surface.
