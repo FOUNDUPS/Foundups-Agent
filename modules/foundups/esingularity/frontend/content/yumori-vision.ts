@@ -145,9 +145,9 @@ const source: VisionSource[] = [
     summary: { ja: '巨大集中型だけではなく、地域に役立つ小さなAIインフラを検証する福井プロトタイプです。', en: 'Fukui is a prototype for testing smaller, region-serving AI infrastructure alongside hyperscale systems.', pt: 'Fukui é um protótipo para testar infraestrutura de IA menor e voltada à região ao lado de sistemas hiperscale.' },
     action: { ja: '福井発の地域再生モデルを、一緒につくる', en: 'Build a regional regeneration model from Fukui', pt: 'Construa um modelo de regeneração regional a partir de Fukui' },
     evidence: {
-      ja: ['1→5→10→20+MWは段階的な構想レンジで、確定容量・契約・許認可ではありません。', '他地域への展開は各地の建物、安全、電力、通信、需要、土地、運営主体ごとに検証します。'],
-      en: ['1→5→10→20+MW is a staged vision range, not contracted or permitted capacity.', 'Replication elsewhere requires site-specific validation of buildings, safety, power, network, demand, land and operators.'],
-      pt: ['1→5→10→20+MW é uma faixa de visão por etapas, não capacidade contratada ou licenciada.', 'Replicação em outros locais exige validação específica de edifícios, segurança, energia, rede, demanda, terreno e operadores.'],
+      ja: ['容量はMWを先に固定せず、実需・売上条件・電力・通信・建物条件から逆算して段階導入します。', '他地域への展開は各地の建物、安全、電力、通信、需要、土地、運営主体ごとに検証します。'],
+      en: ['Capacity is not preset in MW; it is derived from real demand, revenue conditions, power, network and building constraints and then deployed in stages.', 'Replication elsewhere requires site-specific validation of buildings, safety, power, network, demand, land and operators.'],
+      pt: ['A capacidade não é predefinida em MW; ela é derivada da demanda real, condições de receita, energia, rede e edifícios e implantada por etapas.', 'Replicação em outros locais exige validação específica de edifícios, segurança, energia, rede, demanda, terreno e operadores.'],
     },
     link: { label: { ja: '福井の未来を見る', en: 'See Fukui’s future', pt: 'Ver o futuro de Fukui' }, href: '/future' },
   },
