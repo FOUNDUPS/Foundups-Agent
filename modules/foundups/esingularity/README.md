@@ -70,6 +70,19 @@ Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the reposito
 
 A program's existence is not project funding. Keep the progression explicit: verified program → eligibility inquiry → eligible → application → selected → awarded. Only an awarded amount may be represented as committed subsidy revenue. The current highest-priority inquiry concerns the MOE/RCESPA regional-coexistence data-center decarbonization program and whether a currently closed municipal onsen can qualify after Fukui City accepts a lawful PPP/lease/use structure and an eligible operator/SPC satisfies the program conditions.
 
+## Economic and node-sizing authority
+
+YUMORI compute capacity is **demand-led, not MW-first**.
+
+- Canonical calculation/sizing code: [src/yumori_economic_model.py](src/yumori_economic_model.py).
+- Model contract and evidence boundary: [docs/YUMORI_ECONOMIC_MODEL.md](docs/YUMORI_ECONOMIC_MODEL.md).
+- Candidate-site status: [docs/CANDIDATE_SITE_REGISTRY.md](docs/CANDIDATE_SITE_REGISTRY.md).
+- Drive FIN workbook: formula-driven working projection / feasibility-interview surface.
+
+The sizing path is customer/service demand → revenue/resource demand → compute/storage/network requirements → IT kW → facility kW → utility-confirmed cap. A separately calculated financial-floor kW is a viability metric under the current scenario, not a build target. No current site has utility-confirmed deliverable kW/MW.
+
+The legacy 1 MW / 384-GPU workbook scenario is retained for audit continuity only. Current public/project truth must not present a fixed 1→5→10→20 MW rollout.
+
 ## Google Drive document authority
 
 Use [docs/DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md) before creating, renaming, deleting, or searching for YUMORI Drive material. It maps the numbered 01–06 spine plus `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, finance, press, landowner and legal lanes to their stable Drive IDs and roles.
