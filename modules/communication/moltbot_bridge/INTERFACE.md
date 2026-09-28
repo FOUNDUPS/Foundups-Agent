@@ -1895,3 +1895,30 @@ composition and before provider transmission. After a successful provider send,
 Search snippets, memory, autocomplete, and visually similar addresses are not exact
 routing evidence. A one-character or punctuation difference blocks rather than being
 silently corrected.
+
+### RedDog Correspondence Continuity State
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_correspondence_state import (
+    AskRecord,
+    AskStatus,
+    CorrespondenceEvent,
+    CorrespondenceState,
+    FollowUpGate,
+    Freshness,
+    RedDogCorrespondenceStateStore,
+    build_scope_key,
+)
+```
+
+`reddog_correspondence_state.py` provides the private M2M continuity layer for
+provider-backed correspondence. It stores append-only provider event metadata
+and one materialized state per stakeholder/topic scope through WSP 78
+`ModuleDB`. Provider systems remain transaction truth; cached state is
+rebuildable and never authorizes a send.
+
+The store intentionally excludes raw message bodies, complete recipient dumps,
+credentials, attachments and hidden reasoning. Human Google Sheets/Docs may
+project the state, but Red Dog does not require them as its memory substrate.
+Before consequential send-capable work, provider freshness and current routing
+must be rechecked and `reddog_recipient_preflight` still owns authorization.
