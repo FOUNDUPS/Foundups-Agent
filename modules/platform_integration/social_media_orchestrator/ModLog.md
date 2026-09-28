@@ -3,7 +3,9 @@
 - PR1936 qualification is merged/main-verified at `cd7e62d680`:13/13 original witnesses passed on both PR and main. Preserve that closure and replace the stale preparation-only reading above the historical entry below.
 - Fresh WSP15 C3/I4/D4/Impact4=15/P1 selects the existing in-memory completion owner; native18/P0 retains its seven actual prerequisites. New main `870849a74` changes only separately owned eSingularity paths.
 - Freeze26 methods/32 input cases in the existing hosted fixture before repairing unsupported success and incomplete/malformed posting disposition. No new scheduler, producer, schema, account action, persistence owner or runtime gate.
-- Current state: acceptance prepared, hosted baseline and repair pending. Exact source/results/publication are tracked by the canonical RSI backlog. WSP00/15/22/50/62/84/97.
+- Hosted baseline CI36379506634 at `34ed9b69ae` ran the frozen26 methods/32 inputs: 5 methods passed,21 failed with27 assertion failures,0 errors/skips. This reproduces incorrect completion against unchanged production source.
+- Candidate repair rejects unsupported branches and incomplete/malformed results, preserves original responses, snapshots validated targets and leaves failures terminal. Independent source review requested exact response/string types and captured post-await classification; corrected without changing the frozen tests.
+- Current state: baseline reproduced; repaired hosted execution and main convergence pending. Exact source/results/publication are tracked by the canonical RSI backlog. WSP00/15/22/50/62/84/97.
 
 ## 2026-09-28: Qualify scheduler completion evidence before RSI use
 

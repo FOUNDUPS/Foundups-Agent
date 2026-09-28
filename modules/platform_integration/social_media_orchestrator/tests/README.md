@@ -21,8 +21,9 @@ declarations under a private module name, denies the posting constructor and
 loads only the scheduler leaf. Awaited posting and save spies, fixed time and
 in-memory actions exclude accounts, browsers, providers and real persistence.
 The existing CI step `Run social scheduler execution evidence` is unchanged.
-Exact baseline and repaired execution receipts determine the outcome; preparation
-is not a passing test result. Finite variants are not extra independent test methods.
+Baseline CI36379506634 reproduced21 failing methods/27 assertion failures and
+5 passing controls (0 errors/skips). The same frozen fixture will judge the repair;
+repaired-source execution is pending. Finite variants are not extra independent test methods.
 
 The eight `TestAutonomousActionScheduler` methods are preserved historical tests
 and remain unselected/unqualified. Direct execution defaults to the isolated class.

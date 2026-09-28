@@ -25,7 +25,12 @@ or incoherent posting responses; preserve exact response objects and terminal
 no-retry behavior. Validate and snapshot unique nonempty targets before effects.
 Duplicate targets, including duplicates produced by overlapping natural-language
 matches, reject explicitly rather than silently posting to a substituted list.
-Preparation alone is not a passing repair. Durable save/replay, independent
+Baseline CI36379506634 confirms21 failing methods/27 assertion failures and5
+passing controls with no errors/skips. The same26-method fixture is unchanged
+for candidate validation; source repair is implemented, hosted proof pending.
+Source review also tightened exact response/string types and preserved posting
+classification across the await; those safeguards are source-reviewed, not
+additional independent test scenarios. Durable save/replay, independent
 delivery evidence, runtime admission and retained RSI remain separate.
 
 ### Scheduler evidence qualification — 2026-09-28

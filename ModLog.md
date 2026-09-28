@@ -2,6 +2,7 @@
 
 - Reconciled PR1936 (`cd7e62d680`) as merged/main-verified:13 passing defect/control witnesses, no production repair yet. Existing Holo recovery separately verified CURRENT/no-gap and33 replica artifacts at `215393869`; subsequent product-only main `870849a74` requires its own freshness evidence.
 - Re-observed96 peer PRs; no scheduler/backlog owner overlap, only unrelated generated-registry rows. WSP15 selects the existing scheduler completion repair15/P1 ahead of eligible12/P2 hook and11/P2 correspondence work; native18/P0 and other blocked owner dependencies remain unchanged.
+- Hosted baseline CI36379506634 at `34ed9b69ae` ran the frozen26 methods/32 inputs: 5 methods passed,21 failed with27 assertion failures,0 errors/skips. This reproduces incorrect completion against unchanged production source. Candidate repair and interface contract now address the measured in-memory gap; hosted repaired-source proof is pending.
 - Freeze26 hosted test methods/32 fixed input cases before production edits. Preserve protected shared/product/AutoPost work, all26 roadmap packets and the59-row queue. No host-local application tests or account effects; no native RSI/promotion claim. Current receipts live in the existing canonical backlog. WSP00/15/22/50/62/84/97.
 
 ## 2026-09-28: RSI qualifies social scheduler outcome evidence
