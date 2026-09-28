@@ -1,3 +1,21 @@
+## Qwen import boundary qualified locally — 2026-09-29
+
+The eager package-import prerequisite below is repaired in the existing Qwen
+initializer. The same8 controls move from0/8 to8/8 locally;20 public exports and
+their8 original owners remain compatible. Source review and deterministic
+manifest/test-registry projections preserve existing ownership. Hosted/main
+checks and lane closure are separate gates in the canonical RSI backlog under
+`current_observation.qwen_lazy_import_20260929`.
+
+Operational RSI remains14/P1 and incomplete. The next12/P2 component is native
+runtime/resolver provenance and a qualified tokenizer-only boundary before the
+unchanged12 full-prompt counts. The repository dependency pin0.2.72 and observed
+installed llama_cpp_python0.3.20 differ; reconcile their intended ownership
+without silently changing the environment. No model/native execution, retained
+gain, new WRE grant or AmIBot build is established. PR1948's metadata preparation
+is merged/main-verified and its owned lane retired; its closure receipt remains
+linked in the existing backlog.
+
 ## Local inference readiness qualification — 2026-09-29
 
 The existing local WRE proposal route now has source and artifact evidence in

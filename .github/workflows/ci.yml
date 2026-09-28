@@ -42,6 +42,9 @@ jobs:
       - name: Run LinkedIn offline activity contracts
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
 
+      - name: Run Qwen package import contracts
+        run: python -I -S -B holo_index/tests/test_qwen_package_import.py -v
+
       - name: Run social scheduler execution evidence
         env:
           PYTHONDONTWRITEBYTECODE: '1'

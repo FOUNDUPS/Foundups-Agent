@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1660,
+  "total_tests": 1661,
   "quarantined_tests": 269,
   "tests": [
     {
@@ -1806,6 +1806,21 @@
       "description": "Test Qwen -> HoloIndex Integration (P0 Fix Verification)\n========================================================\n\nTests that AutonomousRefactoringOrchestrator can now use HoloAdapter\nfor semantic search, enabling the Deep Think -> HoloIndex -> Occam's Razor chain.\n\nWSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action Verification)\n\nNote: UTF-8 enforcement removed from module level to fix pytest capture teardown error.\nThe sys.stdout/stderr wrapping at import time conflicts with pytes"
     },
     {
+      "id": "test::holo_index::tests::test_qwen_package_import",
+      "path": "holo_index/tests/test_qwen_package_import.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-03",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Model-free Qwen package boundary and fixed public API controls.\n\nReal package/leaf imports are guarded before other application imports execute.\nSynthetic owners prove export dispatch only; no real coordinator is exercised.\nRun directly with Python -I -S -B; every case uses a fresh isolated child."
+    },
+    {
       "id": "test::holo_index::tests::test_reddog_extension_bundle_recall",
       "path": "holo_index/tests/test_reddog_extension_bundle_recall.py",
       "owner": "holo_index",
@@ -1828,7 +1843,7 @@
       "path": "holo_index/tests/test_repo_audit_discovery.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "process"
       ],

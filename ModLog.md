@@ -1,3 +1,10 @@
+## 2026-09-29: Bound Qwen package imports for RSI qualification
+
+- WSP00/15/22/48/50/62/84/97; existing operational14/P1, import component12/P2. Defer the existing20 Qwen exports until requested; preserve original8 owners, identities, version, dir/from/star imports and dependency failures.
+- Same8 independently reviewed controls: baseline0/8, candidate8/8 locally. Actual package/engine imports remain free of coordinator/native model loads; synthetic owners qualify dispatch only. No model evaluation, retained RSI gain or native execution readiness is claimed.
+- Regenerate the existing backend manifest/digest pins and test registry; add the focused CI invocation. The canonical backlog binds exact local evidence and pending hosted/main/owned-closure receipts. Prior PR1948/main1a8cc62 is independently closed.
+- Next after fresh rescoring: qualify resolver/native version provenance and an enforceable tokenizer-only boundary, then the unchanged12 prompt counts. No environment update, WRE admission or AmIBot launch occurs in this slice.
+
 ## 2026-09-29: Qualify existing local inference prerequisites
 
 - WSP00/15/22/48/50/84/97; C2/I4/D3/Impact3=12/P2 within operational14/P1. Bind one existing GGUF,29 metadata entries,36 runtime/source files and12 unchanged prompts using read-only inspection. No model, native tokenizer or application import ran; evaluated cases and generated responses remain0.
