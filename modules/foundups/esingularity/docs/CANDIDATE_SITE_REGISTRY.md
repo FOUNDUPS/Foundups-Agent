@@ -8,7 +8,7 @@ This repository record is the canonical project-status and site-assumption autho
 
 **Do not choose MW first.** Node size is derived from customer/service demand, the revenue required to support the operating/finance case, equipment power characteristics, PUE, and finally the utility-confirmed site capacity. Until the utility confirms a deliverable capacity, school-site kW/MW remains **UNVERIFIED**.
 
-Current Drive working model: **FIN — YUMORI Phase 1 Financial Model & Grant Audit — 2026-09-12** (`1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`).
+Current Drive working model: **FIN — YUMORI Demand-Led Financial Model & Grant Audit — 2026-09-28** (`1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`).
 
 Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizing`, and one candidate-site tab per site. The older integrated XLSX remains reference-only.
 
