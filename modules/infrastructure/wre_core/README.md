@@ -1,3 +1,12 @@
+## Measurement reader compatibility — 2026-09-29
+
+The existing explicitly selected research-report reader now rejects nested
+Boolean/number substitutions, nonfinite relative gain and omitted unknown
+fields. Complete v1 producer reports remain supported. Producer-to-file-to-reader
+controls and advisory output assertions are in the existing tests; see
+[the measurement interface](INTERFACE.md#advisory-autoresearcher-startup-display).
+This hardening supplies no independent verification or learning authority.
+
 ## Merge sentinel prerequisite guard — 2026-09-27
 
 The optional `GIT_MAIN_MERGE_SENTINEL=1` startup helper now refuses to proceed

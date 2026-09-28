@@ -360,7 +360,7 @@ def check_dashboard_health() -> Dict:
 def _local_research_report_path(value):
     """Check the selected/embedded path lexically, never resolve a network path."""
     text = os.fspath(value)
-    if not isinstance(text, str) or text.startswith(("\\\\", "//")):
+    if not isinstance(text, str) or text.startswith(("\\\\", "//", "\\/", "/\\")):
         raise ValueError("local path required")
     path = Path(text)
     if (not path.is_absolute() or path.drive.startswith("\\\\")
@@ -432,16 +432,27 @@ def _research_report_numbers(report):
         "crashed_candidates": counts["crashed"],
         "no_proposal_attempts": counts["no_proposal"],
     }
-    if any(rsi.get(k) != v for k, v in required_rsi.items()):
-        raise ValueError("inconsistent RSI measurements")
+    for key, expected in required_rsi.items():
+        value = rsi.get(key)
+        # JSON booleans compare equal to 0/1 in Python. Preserve the contract's
+        # integer counters and Boolean policy flags while allowing numeric fitness.
+        types = ((int, float) if key in ("baseline_fitness", "best_fitness", "absolute_gain")
+                 else (type(expected),))
+        if type(value) not in types or value != expected:
+            raise ValueError("inconsistent RSI measurements")
     hierarchy = rsi.get("verification_hierarchy_weak_to_strong")
     if hierarchy != ["intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"]:
         raise ValueError("invalid verification hierarchy")
     relative_gain = rsi.get("relative_gain")
     expected_relative = improvement / abs(baseline) if baseline != 0 else None
-    if relative_gain != expected_relative:
+    if ("relative_gain" not in rsi
+            or (expected_relative is not None and (
+                type(relative_gain) not in (int, float)
+                or not math.isfinite(relative_gain)
+                or not math.isfinite(expected_relative)))
+            or relative_gain != expected_relative):
         raise ValueError("inconsistent relative gain")
-    if any(rsi.get(k) is not None for k in (
+    if any(k not in rsi or rsi[k] is not None for k in (
             "independently_verified", "retained_improvements", "resource_usage",
             "activation_rollback_verified", "successive_generation_gain")):
         raise ValueError("self-asserted RSI authority")

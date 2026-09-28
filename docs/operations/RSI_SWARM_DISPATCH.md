@@ -1,3 +1,45 @@
+## Hosted measurement portability follow-up — 2026-09-29
+
+Expanded CI on PR1950 head `5449bcde` ran308 cases:306 passed, two failed.
+The existing mixed-slash path test exposed a Linux-only filesystem read; reject
+both mixed UNC-style prefixes lexically. The existing startup test imported all
+of main and hit an unrelated missing Chroma dependency; reuse the established
+two-function AST fixture while preserving actual report-reader/output assertions.
+No tests were removed. Updated connected local307 pass; final hosted execution
+and publication remain bound to the canonical backlog. The earlier103-case
+comparison is retained as the initial scalar-repair evidence, not rewritten.
+
+## RSI measurement reader reconciliation — 2026-09-29
+
+The PR #1903 handoff was checked against current main `7c2e0b6f`, not its
+historical merge. Existing producer, persisted invocation report, dashboard and
+startup owners remain in place. Fix the demonstrated nested Boolean/number
+confusion, missing explicit unknowns and overflowed relative-gain acceptance in
+the existing reader. WSP15 C2/I4/D4/Impact4=14/P1; this is a bounded R10
+measurement prerequisite, not another orchestrator or production RSI grant.
+
+Frozen103 controls: baseline80 passed/23 failed; candidate103 passed, no errors
+or skips. Connected local regression307 passed, no errors/skips; three abrupt
+process-exit cases were excluded by the local no-child guard and remain in the
+hosted full-file selection. Real dry-run producer/evaluator → saved JSON → reader
+and asserted advisory output pass for accepted/rejected/invalid/absent proposals
+over repeated invocations; aborted and cleanup-failed persisted reports stay
+unknown. Startup wiring is tested through two exact function bodies, not a live
+main launch. No model/provider/memory/retention execution occurred.
+
+Complete historical v1 reports remain compatible; malformed partial bundles
+reject. Finite gains do not authenticate independence, resources, rollback or
+retention. Existing sampled evaluator drift/ABA limits remain. The producer's
+behavior under synthetic extreme evaluator outputs is a separate unqualified
+robustness question; this slice does not claim its numerical domain is closed.
+
+Canonical evidence and pending PR/main/owned-lane closure:
+`docs/roadmaps/rsi_swarm_backlog.json`,
+`current_observation.measurement_seam_20260929`. After closure re-score the
+existing G1–G4 queue: native ticket18/P0 remains blocked by seven trust anchors
+and absent effect-use lease; the prior runtime/model/tokenizer qualification
+component12/P2 remains the next eligible operational14/P1 preparation.
+
 ## Qwen import boundary qualified locally — 2026-09-29
 
 The eager package-import prerequisite below is repaired in the existing Qwen

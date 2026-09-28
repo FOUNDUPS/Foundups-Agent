@@ -225,6 +225,85 @@ def test_auto_researcher_rejects_impossible_allocation(temp_research_env, tmp_pa
     assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
 
 
+@pytest.mark.parametrize("proposal_kind,expected", [
+    ("same", "rejected"), ("absent", "no_proposal"),
+    ("invalid", "failed_validation"), ("accepted", "accepted"),
+])
+def test_research_producer_persisted_dashboard_round_trip(
+    temp_research_env, tmp_path, monkeypatch, capsys, proposal_kind, expected,
+):
+    from modules.infrastructure.wre_core.src import dashboard_alerts
+
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    proposals = {
+        "same": original,
+        "absent": None,
+        "invalid": "AGENT_ALLOCATION = {'basic_search': -1.0}\nAGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0}\n",
+        "accepted": "AGENT_ALLOCATION = {'basic_search': 1.0}\nAGENT_PREMIUM_MULTIPLIERS = {'basic_search': 5.0}\n",
+    }
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: proposals[proposal_kind])
+    for _ in range(2):
+        report = researcher.run()
+        saved = json.loads(Path(report["report_path"]).read_text(encoding="utf-8"))
+        assert saved == report
+        summary = dashboard_alerts.read_research_report_summary(
+            report["report_path"], hashlib.sha256(original.encode("utf-8")).hexdigest(),
+        )
+        assert summary["state"] == "unverified_diagnostic"
+        assert summary["outcome_counts"][expected] == 1
+        assert summary["improvement"] == report["optimized"]["fitness"] - report["baseline"]["fitness"]
+        assert summary["production_rsi_eligible"] is False
+        assert all(summary[key] is None for key in (
+            "independently_verified", "retained_improvements", "resource_usage",
+        ))
+        monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", report["report_path"])
+        monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", report["baseline_input_sha256"])
+        capsys.readouterr()
+        dashboard_alerts.print_research_report_summary()
+        displayed = capsys.readouterr().out
+        assert "[WRE-RESEARCH] unverified_diagnostic" in displayed
+        assert "signal=execution_feedback" in displayed
+        assert "production_rsi_eligible=false" in displayed
+        assert "verified=unknown retained=unknown resource_usage=unknown" in displayed
+        assert researcher.working_target_path.read_text(encoding="utf-8") == original
+    assert len(list(researcher.results_dir.glob("invocation-*/report.json"))) == 2
+    assert target.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize("cleanup_fails", [False, True])
+def test_research_producer_persisted_dashboard_failure(
+    temp_research_env, tmp_path, monkeypatch, cleanup_fails,
+):
+    from modules.infrastructure.wre_core.src import dashboard_alerts
+
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    def interrupted(*args):
+        raise KeyboardInterrupt("synthetic interruption")
+    def cleanup_error(*args):
+        raise OSError("synthetic cleanup failure")
+    monkeypatch.setattr(researcher, "_propose_change", interrupted)
+    if cleanup_fails:
+        monkeypatch.setattr(researcher, "_rollback", cleanup_error)
+    with pytest.raises(OSError if cleanup_fails else KeyboardInterrupt):
+        researcher.run()
+    path = next(researcher.results_dir.glob("invocation-*/report.json"))
+    report = json.loads(path.read_text(encoding="utf-8"))
+    assert report["status"] == "aborted"
+    assert report["cleanup"] == ("failed" if cleanup_fails else "restored")
+    assert report["failure"]["type"] == "KeyboardInterrupt"
+    assert report["attempts_started"] == 1 and report["attempts_finished"] == 0
+    assert report["candidate_evaluations"] == 0
+    result = dashboard_alerts.read_research_report_summary(path, report["baseline_input_sha256"])
+    assert result["state"] == "unknown"
+    assert result["rsi_absolute_gain"] is None
+    assert result["independently_verified"] is None
+    assert target.read_text(encoding="utf-8") == original
+
+
 def test_evaluator_does_not_execute_target_code(tmp_path):
     """Target parsing is literal-only; import side effects must not run."""
     marker = tmp_path / "side_effect.txt"

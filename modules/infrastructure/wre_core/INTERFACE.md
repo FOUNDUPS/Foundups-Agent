@@ -92,6 +92,21 @@ Independent verification, retained improvements and actual resource usage remain
 `None`. This checks displayed accounting and RSI truth labels, not economic
 validity or the complete report/proposal/program provenance.
 
+Mixed slash network-style prefixes (`/\\` and `\\/`) are rejected lexically on
+all hosts, before filesystem access.
+
+Measurement scalar hardening (2026-09-29): nested counters require integers,
+policy flags require Booleans, and fitness/gain numbers exclude Booleans.
+Finite integer/float fitness representations remain interoperable. Absolute
+gain is `best - baseline` in simulator fitness units (higher is better);
+relative gain is the dimensionless fraction `gain / abs(baseline)`, not a
+percentage. A zero baseline requires explicit `null`; negative baselines use
+their magnitude. Nonfinite derived relative gain rejects as `unknown`.
+The five unavailable verification/resource/rollback/retention fields must also
+be present as `null`. Complete PR #1903 v1 reports already provide these fields;
+partial bundles reject rather than silently gaining the same status. These
+checks validate diagnostic accounting, not authentication or economic validity.
+
 `print_research_report_summary()` reads `WRE_RESEARCH_REPORT_PATH` and
 `WRE_RESEARCH_BASELINE_SHA256`, then prints sanitized advisory output without raw
 paths/content/errors. `main.py:run_wre_dashboard_preflight` invokes it when that
