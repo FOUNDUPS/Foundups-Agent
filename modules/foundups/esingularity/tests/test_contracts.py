@@ -19,6 +19,8 @@ FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligen
 CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
 REDDOG_CORRESPONDENCE_SKILL_PATH = REPOSITORY_ROOT / "modules" / "communication" / "moltbot_bridge" / "skillz" / "reddog_correspondence_state" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
+SOURCE_OF_TRUTH_PATH = FRONTEND_ROOT / "audit" / "SOURCE_OF_TRUTH.md"
+DRIVE_DOCUMENT_INDEX_PATH = MODULE_ROOT / "docs" / "DRIVE_DOCUMENT_INDEX.md"
 
 
 def load_json(path: Path) -> dict:
@@ -156,6 +158,19 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
         for root in (".agents", ".claude"):
             projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
             assert canonical in projected
+
+
+
+def test_regional_impact_truth_boundary_is_explicit() -> None:
+    truth = SOURCE_OF_TRUTH_PATH.read_text(encoding="utf-8")
+    drive_index = DRIVE_DOCUMENT_INDEX_PATH.read_text(encoding="utf-8")
+    assert "2,081,902 documented visits" in truth
+    assert "Do not state as a verified City total" in truth
+    assert "¥5,546 day-trip / ¥30,221 overnight" in truth
+    assert "¥554.6M/year" in truth
+    assert "no multiplier or project-revenue interpretation" in truth
+    assert "Regional Impact" in drive_index
+    assert "visitor spending, project revenue, payroll, private capital, and public-cost avoidance separate" in drive_index
 
 
 
