@@ -1,3 +1,9 @@
+## 2026-09-28: Qualify persisted correspondence reads
+
+- WSP00/6/15/22/50/78/84/97; C2/I3/D3/Impact3=11/P2. Extend the existing recipient-preflight owner with nine fixed persisted-read cases; preserve all20 original tests and their SQLite isolation fixture.
+- Cover absent state, digest mismatch, unsupported/missing schema, empty/wrong scope, duplicate asks, dangling delta and negative outbound count. Invalid semantic rows carry matching digests; missing schema retains the original valid digest to expose implicit defaulting. Reads must preserve stored rows/events.
+- Execute only through the existing isolated hosted CI step; original failure evidence and identical-fixture candidate results remain pending. No local application import, provider action, new test owner or native RSI admission. Existing roundtrip remains the positive control.
+
 ## 2026-09-28: Select existing correspondence and recipient baseline in CI
 
 - WSP00/15/22/50/97; C1/I3/D3/Impact3=10/P2. Source and original PR1930 logs show that its new Python persistence cases were not selected by normal CI; the fast tier is Node-only.

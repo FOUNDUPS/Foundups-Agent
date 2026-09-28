@@ -1,4 +1,7 @@
+import hashlib
+import inspect
 import json
+from pathlib import Path
 
 import pytest
 
@@ -387,3 +390,89 @@ def test_correspondence_serialized_state_contains_codes_not_raw_message_content(
     assert "raw_body" not in encoded
     assert "recipient_addresses" not in encoded
     assert "PROCUREMENT_STAGE" in encoded
+
+
+def _persist_read_case(store, case):
+    """Seed synthetic cache corruption without going through writer validation."""
+    if case == "absent":
+        return
+    state = CorrespondenceState(
+        scope_key="ORG::TOPIC",
+        asks=(AskRecord("ASK-1", AskStatus.OPEN),),
+        provider_watermark="fixture-watermark",
+        freshness=Freshness.VALID,
+    )
+    initial_digest = store.upsert_state(state)
+    payload = state_payload(state)
+    if case == "unsupported_schema":
+        payload["schema_version"] = "unsupported.v99"
+    elif case == "missing_schema":
+        del payload["schema_version"]
+    elif case == "empty_scope":
+        payload["scope_key"] = ""
+    elif case == "scope_mismatch":
+        payload["scope_key"] = "ORG::OTHER"
+    elif case == "duplicate_ask_ids":
+        payload["asks"].append(dict(payload["asks"][0]))
+    elif case == "dangling_delta":
+        payload["new_delta_ask_ids"] = ["ASK-UNKNOWN"]
+    elif case == "negative_outbound_count":
+        payload["outbound_since_latest_inbound"] = -1
+    encoded = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    digest = "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+    if case == "missing_schema":
+        digest = initial_digest  # Expose implicit schema defaulting, not a hash error.
+    elif case == "digest_mismatch":
+        digest = "sha256:" + "0" * 64
+    store.update(
+        "state", {"state_json": encoded, "state_digest": digest},
+        "scope_key = ?", (state.scope_key,),
+    )
+
+
+@pytest.mark.parametrize("case,expected_error", [
+    ("absent", None),
+    ("digest_mismatch", "correspondence state digest mismatch"),
+    ("unsupported_schema", "unsupported correspondence state schema"),
+    ("missing_schema", "unsupported correspondence state schema"),
+    ("empty_scope", "scope_key is required"),
+    ("scope_mismatch", "correspondence state scope mismatch"),
+    ("duplicate_ask_ids", "ask_id values must be unique within a scope"),
+    ("dangling_delta", "new_delta_ask_ids must refer to declared asks"),
+    ("negative_outbound_count", "outbound_since_latest_inbound must be >= 0"),
+], ids=[
+    "absent", "digest_mismatch", "unsupported_schema", "missing_schema",
+    "empty_scope", "scope_mismatch", "duplicate_ask_ids", "dangling_delta",
+    "negative_outbound_count",
+])
+def test_correspondence_persisted_read_validation(
+    isolated_correspondence_db, tmp_path, case, expected_error,
+):
+    store = RedDogCorrespondenceStateStore()
+    source = Path(inspect.getfile(RedDogCorrespondenceStateStore)).resolve()
+    assert source == Path(__file__).resolve().parents[1] / "src/reddog_correspondence_state.py"
+    assert store.db._backend["engine"] == "sqlite"
+    assert Path(store.db._backend["db_path"]).resolve() == tmp_path / "correspondence.db"
+    _persist_read_case(store, case)
+    before = store.select("state")
+    events_before = store.select("events")
+    restored, error = None, None
+    try:
+        restored = store.load_state("ORG::TOPIC")
+    except ValueError as exc:
+        error = str(exc)
+    after = store.select("state")
+    events_after = store.select("events")
+    print("CORRESPONDENCE_READ_EVIDENCE " + json.dumps({
+        "case": case,
+        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "expected_error": expected_error, "observed_error": error,
+        "returned_state": state_payload(restored) if restored is not None else None,
+        "rows_before": before, "rows_after": after,
+        "events_before": events_before, "events_after": events_after,
+        "sqlite_isolated": True,
+    }, sort_keys=True))
+    assert after == before
+    assert events_after == events_before == []
+    assert restored is None
+    assert error == expected_error

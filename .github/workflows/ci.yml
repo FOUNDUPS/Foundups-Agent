@@ -64,7 +64,7 @@ jobs:
           TMP: ${{ runner.temp }}
           TEMP: ${{ runner.temp }}
         run: |
-          python -B -m pytest -v --tb=short -c /dev/null --noconftest \
+          python -B -m pytest -v -s --tb=short -c /dev/null --noconftest \
             -o pythonpath=. -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/correspondence-pytest" \
             modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py
