@@ -37,6 +37,8 @@ Provider systems remain transaction truth.
 
 Do **not** create a correspondence Moshpit or a second contact database.
 
+Do not create a correspondence Moshpit or parallel contact database.
+
 ## Canonical layers
 
 1. **Provider truth** — Gmail / Slack / LinkedIn / other provider records prove
