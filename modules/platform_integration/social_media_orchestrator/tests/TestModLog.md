@@ -1,3 +1,20 @@
+## 2026-09-28: Validate scheduler safe publication under fixed controls
+
+- WSP00/5/6/15/22/50/62/84/97: Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+- Reuse17-line explicit posting-result projection and unchanged atomic writer. Live response/disposition and load/return contracts remain unchanged. Positive evidence is synthetic execution feedback, not independent external delivery, crash proof or retained RSI. Save acknowledgement/restart replay and Windows behavior remain unqualified.
+
+## 2026-09-28: Implement bounded schedule publication repair
+
+- WSP15=15/P1; WSP97/84 reuse the existing scheduler and unchanged shared atomic writer. Project explicit PostResponse fields without mutating the live object, then serialize the full schedule before any destination write.
+- Preserve action disposition, original response identity, JSON archival reload and existing logged-error/None return. Use configured parent rather than hardcoded memory. Before-replace failure preserves old bytes; after-replace sync failure can leave new complete bytes with uncertain durability.
+- Frozen42-method/48-input hosted acceptance is unchanged; baseline/candidate results pending. No local application execution or live posting. Caller acknowledgement, restart replay safety, Windows publication and retained RSI remain open.
+
+## 2026-09-28: Freeze scheduler safe-publication acceptance
+
+- WSP00/5/6/15/22/50/62/84/97: existing save-owner repair scores15/P1 after verified PR1942 closure at main12663d7e4f.
+- Freeze42 methods/48 finite inputs in the existing source-bound fixture and named hosted CI selection. Preserve26 completion and8 unselected legacy bodies. Disposable-file effects and exact publication failure seams require independent review.
+- Production source is unchanged at baseline. Validation is pending; no passing repair, native RSI, external delivery or persistence acknowledgement claim.
+
 ## 2026-09-28: Qualify real scheduler save/load behavior
 
 - WSP00/5/6/15/22/50/62/84/97: C2/I4/D4/Impact4=14/P1 after current ownership/source reconciliation. Reuse the existing scheduler test/CI owners; no production persistence repair.

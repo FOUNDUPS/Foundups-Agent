@@ -1,6 +1,39 @@
 # Social Media Orchestrator Tests
 
-## Scheduler persistence characterization — 2026-09-28
+## Scheduler safe-publication qualification — 2026-09-28
+
+PR1942 closed the six-case persistence characterization on exact main
+`12663d7e4f`. Its main CI36393612150 and CodeQL36393612401 passed;
+the owned lane was preserved and retired. Four passing defect witnesses
+confirmed typed-response serialization could truncate a synthetic schedule.
+
+WSP15 C3/I4/D4/Impact4=15/P1 now selects the existing save owner. Freeze the
+same26 completion methods/32 inputs, two persistence controls, four full-field
+typed-result round trips and ten publication/compatibility cases:42 methods,
+48 finite inputs. All eight legacy methods remain unchanged and unselected.
+The unchanged production baseline is expected to fail the repaired contract.
+
+Acceptance preserves all PostResponse fields, ordering and in-memory identities;
+old JSON-compatible records; first saves; configured parent paths; rejection of
+unsupported values before writing; old bytes through temporary write, file-sync
+and replacement failure; and complete new JSON when parent-sync fails after
+replacement. That last case does not establish crash durability.
+
+The source-bound fixture loads the unchanged stdlib atomic writer with inert
+package parents. Actual file operations stay beneath per-case scratch roots.
+The fsync patch is process-wide only during one synchronous save in the named
+sequential hosted process; patches/cwd are restored before scratch removal.
+No local application execution, real posting, accounts or native admission.
+
+Qualified selection after independent fixture/effect review:
+`python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence -v`
+
+Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+
+Save acknowledgement, concurrent writers,
+restart retry safety, Windows behavior and native RSI remain separate.
+
+## Historical scheduler persistence characterization — 2026-09-28
 
 Extend the existing fixture with `TestPersistenceEvidence`: two positive controls
 and four defect witnesses exercise actual `save_schedule`/`load_schedule` in

@@ -301,9 +301,28 @@ response in both the returned tuple and `action.result`, and set `action.error`.
 Dependency exceptions retain the existing failed/error return path. Failed
 actions are terminal within the pending-only loop; no automatic retry is added.
 
-These are in-memory disposition contracts. The existing JSON save path does not
-establish serialization of typed responses, durable completion or restart replay
-safety. A save request is not a persistence receipt; those gaps remain separate.
+`save_schedule()` projects known `PostResponse` values into archival JSON:
+request ID, ordered platform results (success/platform/message/timestamp/URL),
+counts and response timestamp. Enum values and ISO timestamps are preserved;
+live response objects are unchanged. On reload, results remain JSON dictionaries,
+not reconstructed typed responses. Existing JSON-compatible results remain valid.
+
+The entire schedule is serialized before calling the existing shared atomic
+writer at the configured schedule path. Unsupported objects reject before file
+publication. Before-replacement failures preserve old bytes; after replacement,
+a parent-directory sync failure can leave complete new JSON visible while
+durability is uncertain. No temporary files are intentionally retained.
+
+The shared writer uses same-directory temporary files. On POSIX, replacement
+files have mode0600 and a newly created leaf parent uses0700; existing destination
+permissions are not preserved. Windows publication uses the existing helper but
+is not proven by the Linux hosted fixture. Symlinks, concurrent writers and
+power-loss behavior are outside this acceptance scope.
+
+`save_schedule()` still returns `None` and logs errors; callers do not consume
+a persistence acknowledgement. In-memory completion is not a durable receipt.
+A failed save can leave a prior pending record, which may execute after restart.
+This repair does not add retries or provide exactly-once delivery.
 
 ### Human Scheduling Interface (012 Mode)
 ```python
