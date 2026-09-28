@@ -67,11 +67,11 @@ const staticActions: TickerAction[] = [
   {
     label: { ja: 'JHR', en: 'JHR', pt: 'JHR' },
     message: {
-      ja: 'UPDATE 9/14｜なぜ福井に「AI交番」が必要なのか｜日本語＋English',
-      en: 'UPDATE 9/14 | Why Fukui needs an “AI koban” | Japanese + English',
-      pt: 'ATUALIZAÇÃO 14/9 | Por que Fukui precisa de um “koban de IA” | Japonês + inglês',
+      ja: 'UPDATE 9/28｜誰が日本の「AI田んぼ」を持つのか｜ハイパースケーラー・チャンピオン・AI交番',
+      en: 'UPDATE 9/28 | Who owns Japan’s “AI rice fields”? | Latest report published in Japanese',
+      pt: 'ATUALIZAÇÃO 28/9 | Quem é dono dos “campos de IA” do Japão? | Relatório mais recente em japonês',
     },
-    href: '/reports/jhr#jhr-002',
+    href: '/reports/jhr#jhr-003',
   },
   {
     label: { ja: 'NEW', en: 'NEW', pt: 'NOVO' },

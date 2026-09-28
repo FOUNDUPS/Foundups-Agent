@@ -1,5 +1,14 @@
 ## 2026-09-28 — Demand-led YUMORI economics becomes repository authority
 
+## 2026-09-28 — JHR #003 Japanese-only web issue prepared
+
+- Reconciled the canonical JHR skill, live archive history, Drive working manuscript and current website route before assigning the issue number. JHR #001 and #002 remain historical archive entries; the current AI rice-field / Champion / AI Koban manuscript becomes JHR #003.
+- Added the newest-first Japanese-only #003 web issue above #002 using the full Japanese Google Doc manuscript as editorial authority. Extracted and embedded the Doc's two actual images: the AI田んぼ concept graphic and the 2026-09-26 Hanyu-area transmission/substation field photograph. The concept image is labeled as conceptual; the field photograph is explicitly bounded to visible proximity, not utility capacity.
+- Preserved primary-source and field-observation boundaries for Fukui grid proximity, closed-school GPU reuse, Intelligent Internet Champion ownership, watt-bit coordination, and the three-site YUMORI architecture. No City approval, utility capacity, award, funding or fixed MW rollout is implied.
+- Updated the shared ticker and existing JHR/public contract tests to target #jhr-003. Updated the JHR skill language rule so an explicit 012 Japanese-only instruction overrides the legacy bilingual default while preserving older bilingual archive issues.
+- Synced the repository-side JHR #003 report record under jhr/reports to the same Japanese Google Doc article body and image assets. Website publication and LinkedIn publication remain separate gates; this slice publishes the web source first.
+
+
 - Replaced MW-first site assumptions with demand-led sizing: customer/service orders → revenue/resource demand → IT kW → facility kW → verified utility cap.
 - Added a 24-offer candidate Service Catalog and formula-driven Demand & Capacity / Node Sizing projection to the current FIN workbook.
 - Added repository `src/yumori_economic_model.py` as the calculation/sizing authority while preserving the legacy five-year FIN scenario only for audit continuity.
