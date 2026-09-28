@@ -1885,7 +1885,7 @@
     "base_commit": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
     "selected_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
-    "status": "fixture_reviewed_hosted_execution_pending",
+    "status": "candidate_hosted_verified_final_convergence_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -2022,7 +2022,7 @@
       "runtime_environment_exact_closure_verified": false
     },
     "validation": {
-      "state": "fixture_reviewed_hosted_execution_pending",
+      "state": "candidate_hosted_verified_final_convergence_pending",
       "test_methods": 32,
       "fixed_input_cases": 38,
       "new_controls": 2,
@@ -2034,16 +2034,42 @@
       "acceptance_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\acceptance-review.md",
       "fixture_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
       "registry": "current:1660 entries/269 quarantined",
-      "meaning": "Green defect witnesses demonstrate failure in disposable files; they do not establish correct persistence or production loss."
+      "meaning": "Green defect witnesses demonstrate failure in disposable files; they do not establish correct persistence or production loss.",
+      "candidate_hosted_result": {
+        "head": "e8e06ea86fdba1bfb3e9b7f0aab02338caaac3b8",
+        "run": 36390957294,
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294",
+        "method_count": 32,
+        "fixed_input_cases": 38,
+        "passed_methods": 32,
+        "errors": 0,
+        "skipped": 0,
+        "controls": 2,
+        "defect_witnesses": 4,
+        "file_evidence_records": 6,
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
+        "original_step_log_sha256": "063bea62877a4c48576f11cc03f45adeb650fb4960817702ae9e1baaf05421e0"
+      },
+      "candidate_ci_verified": true,
+      "candidate_codeql_verified": true,
+      "observed_defect": "All four typed-response witnesses replace valid pending JSON with malformed bytes; fresh load restores no actions. The mixed witness preserves the future action in memory but loses reload of both disposable records.",
+      "measurement": {
+        "signal": "execution_feedback",
+        "production_persistence_correct": false,
+        "production_data_loss_observed": false,
+        "retained_rsi_gain": null
+      }
     },
     "publication": {
       "terminal_state": "ACTIVE_OWNED_WORK",
       "branch": "test/rsi-scheduler-persistence-20260928",
       "worktree": "O:\\Foundups-Agent-worktrees\\rsi-scheduler-persistence-20260928",
       "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\final-accounting.json",
-      "pr": null,
+      "pr": 1942,
       "final_head_verified": false,
-      "main_verified": false
+      "main_verified": false,
+      "pr_url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1942",
+      "candidate_head": "e8e06ea86fdba1bfb3e9b7f0aab02338caaac3b8"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2160,16 +2186,20 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "six_case_fixture_reviewed_hosted_execution_pending",
+          "state": "candidate_persistence_characterization_passed_final_convergence_pending",
           "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
-          "dependency": "Current fixture/effect review accepted; canonical docs and final exact-scope packaging required before named hosted CI.",
-          "next_step": "Run the reviewed32-method/38-input hosted selection, retain six real-file evidence records, independently reconcile and close before choosing any persistence repair.",
+          "dependency": "Final exact-head CI/CodeQL and independent result/source review, then verified main and owned cleanup.",
+          "next_step": "Close this characterization on exact merged main; re-observe and rescore before admitting a persistence repair.",
           "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
           "limits": "In-memory repair closed; durable state/restart, external delivery, native admission and retained learning remain unqualified.",
           "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
           "qualification": {
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\prepared-tests.json",
-            "case_count": 13,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
+            "method_count": 32,
+            "fixed_input_cases": 38,
+            "controls": 2,
+            "defect_witnesses": 4,
+            "observed_record_count": 6,
             "production_source_changes": 0,
             "local_application_tests_run": 0
           },
@@ -2197,7 +2227,7 @@
             "new_controls": 2,
             "new_defect_witnesses": 4,
             "local_application_tests_run": 0,
-            "state": "exact_fixture_reviewed_before_hosted_execution"
+            "state": "candidate_hosted_verified"
           }
         },
         {

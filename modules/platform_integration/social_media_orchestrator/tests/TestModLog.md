@@ -4,7 +4,7 @@
 - PR1941 is merged/main-verified at `6acb3f55c2`: the frozen26 methods/32 inputs passed on final PR CI36380808132 and main CI36381188667; both CodeQL runs passed. Its owned branch/worktree were retired after recovery preservation.
 - Freeze six independently reviewed cases: two round-trip controls and four typed-result serialization/reload witnesses, including future-action preservation in memory versus invalid file replacement. Preserve all 26 completion methods,32 existing inputs and eight unselected legacy bodies.
 - Actual save/load effects stay under one disposable directory per case. Exact before/after synthetic bytes and hashes are retained in hosted output. Clock/logger/cwd are restored before scratch deletion; no real posting, account or runtime activation.
-- Hosted persistence execution is pending; preparation and source review are not test results.
+- Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
 - Passing witnesses establish the characterized defect, not corrected persistence, external delivery, native admission or retained RSI. Exact PR/main and cleanup evidence remains in the canonical backlog closure receipt.
 
 ## 2026-09-28: Freeze scheduler completion repair acceptance

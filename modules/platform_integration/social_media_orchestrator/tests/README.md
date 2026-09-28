@@ -35,7 +35,7 @@ restores patches/cwd before scratch removal, with cleanup assertions. This is
 not a generally concurrent async fixture. Host-local application tests and
 whole-directory discovery remain unqualified; `-I -B` is not an OS sandbox.
 
-Hosted persistence execution is pending; preparation and source review are not test results.
+Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
 
 ## In-memory completion repair — closed 2026-09-28
 
