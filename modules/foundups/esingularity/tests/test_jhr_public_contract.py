@@ -44,6 +44,9 @@ def test_jhr_003_is_latest_japanese_only() -> None:
     assert "/jhr/jhr-003-hanyu-grid-field.svg" in latest
     assert 'lang="en"' not in latest
     assert "ENGLISH / SECONDARY" not in latest
+    assert "Digital Future構想" not in latest
+    assert "The Intelligence Age Must Be Built Right" not in latest
+    assert "The AI Company Founding Thesis" not in latest
     assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-ai-rice-fields.svg").is_file()
     assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-hanyu-grid-field.svg").is_file()
 
