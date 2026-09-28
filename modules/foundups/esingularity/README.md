@@ -27,6 +27,7 @@ YUMORI operations use repository-owned skills instead of rebuilding procedure fr
 - `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.
 - [YUMORI funding / PPP intelligence](skillz/yumori_funding_ppp_intelligence/SKILLz.md): current grant/subsidy/PPP status with primary-source and no-false-funding boundaries.
 - [YUMORI Moshpit](skillz/yumori_moshpit/SKILLz.md): campaign-history versus 0102-learning routing and JST ordering.
+- [YUMORI work orchestrator](skillz/yumori_work_orchestrator/SKILLz.md): conversational intake → live-state reconciliation → WSP 15 backlog → 012 physical-action split → bounded RedDog/ChatGPT Work handoff.
 
 The live YUMORI.me Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
 
