@@ -11,8 +11,9 @@ and one registry-capability projection. Source-first inspection prevents a naive
 import repair from activating real router/dependency/posting effects. No production
 runner, shared hook, active FoundUp, provider or native authority changes.
 
-Validation pending; the canonical backlog links immutable source/acceptance and
-subsequent publication receipts. No new module, skill, master schema or RSI claim.
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Exact final-head/main validation and owned closure remain receipt-bound. No production repair, ambient Windows reproduction, social delivery or retained RSI improvement is claimed. The original three pytest functions were preserved but not selected by this six-case command. The canonical backlog links immutable source, acceptance, original result and review receipts.
 
 ## 2026-09-28: Verify scheduler caller/reload characterization
 

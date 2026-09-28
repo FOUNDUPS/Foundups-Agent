@@ -15,7 +15,8 @@ keeps the production runner and shared hooks unchanged.
 
 Six controls in the [existing test owner](tests/test_post_commit_social_runner.py)
 exercise CLI parsing, real disposable Git context, event/result spools and the
-unchanged getter with an inert router. Hosted validation is pending. The fixture
+unchanged getter with an inert router. Candidate6/6 hosted results are independently
+verified; exact final-head/main checks remain pending. The fixture
 uses isolated Python and does not reproduce the ambient Windows hook or qualify
 real router dependencies/delivery. See [fixed acceptance](tests/README.md#runner-entrypoint-evidence--2026-09-28).
 

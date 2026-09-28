@@ -37,7 +37,9 @@ case emits one `HOOK_EVIDENCE` record with the child-observed source hash,
 expected synthetic payload and exact JSONL text/digests for independent review. The fake
 result says `delivered=false`; exit0 is not verified social delivery.
 
-Validation is pending. This is restricted hosted entrypoint evidence, not the
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Final-head/main checks remain required. This is restricted hosted entrypoint evidence, not the
 ambient Windows shell hook, production router dependencies, durable crash recovery,
 spool replay, native work admission or retained learning. No real hook is run.
 

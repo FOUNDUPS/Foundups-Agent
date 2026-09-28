@@ -1,6 +1,6 @@
 # GitPushDAE Test Module Log
 
-## 2026-09-28 — Six entrypoint controls authored; execution pending
+## 2026-09-28 — Six entrypoint controls independently verified in hosted CI
 
 WSP5/15/22/97. Existing `test_post_commit_social_runner.py` is extended rather
 than creating another test file. Its three original pytest function ASTs are
@@ -10,10 +10,9 @@ unchanged. New `TestEntrypointEvidence` has six fixed case IDs and emits six
 Named hosted command:
 `python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v`.
 
-Status: authored, not yet executed. Local application tests0. Required: independent
-fixture/effect review, original hosted log and exact case/result/source checks,
-CI/CodeQL, main readback and owned closure. A passing negative control demonstrates
-the qualified failure boundary; it does not repair a production hook.
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Exact final-head/main validation and owned closure remain receipt-bound. No production repair, ambient Windows reproduction, social delivery or retained RSI improvement is claimed. The original three pytest functions were preserved but not selected by this six-case command. Local application tests:0. A passing negative control demonstrates the qualified failure boundary.
 
 ## [2026-03-08] Post-Commit Social Runner Coverage
 **WSP Protocol**: WSP 5 (Testing Standards), WSP 22 (Documentation), WSP 91 (Operational Reliability)

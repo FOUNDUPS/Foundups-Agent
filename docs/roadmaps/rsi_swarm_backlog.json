@@ -1885,7 +1885,7 @@
     "base_commit": "799cf786ffd9d58c7d3003516b990b4671162f78",
     "selected_action": "Qualify linked-worktree Git push dispatch import failure",
     "selected_component": "Six fixed restricted entrypoint/import and inert dispatch controls",
-    "status": "authored_independent_fixture_review_and_hosted_validation_pending",
+    "status": "candidate_verified_final_main_and_owned_closure_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 3,
@@ -2051,12 +2051,23 @@
       "runtime_exact_closure": false
     },
     "validation": {
-      "state": "authored_independent_fixture_review_and_hosted_validation_pending",
+      "state": "candidate_verified_final_main_and_owned_closure_pending",
+      "head": "5935983ef80c5bde14df041401b1ee9e79e49f72",
       "methods": 6,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "test_wall_seconds": 1.11,
+      "ci": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965",
+      "ci_and_codeql_passed": true,
+      "required_pr_checks_passed": 10,
       "local_application_tests": 0
     },
     "publication": {
-      "state": "not_published",
+      "state": "draft_pr1945_candidate_verified",
+      "pr": 1945,
+      "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1945",
       "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\final-accounting.json"
     },
     "post_sprint_reobservation": {
@@ -3167,11 +3178,11 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "source_qualified_fixed_hosted_acceptance_review_pending",
+          "state": "candidate_verified_final_main_and_owned_closure_pending",
           "source": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\hook-log-preservation.json",
-          "dependency": "PR1944 closure verified. Existing hook and runner scoped source/effect review complete; frozen inert hosted fixture review required. No live hook, router import, product path repair or shared config edit.",
-          "next_step": "Qualify six fixed runner main/getter/spool controls in the existing test owner under an isolated hosted child, with disposable Git and inert router. Preserve production source and original three tests.",
-          "limits": "One task-local hook error after successful Git push. No failure rate, general outage, platform outcome or repaired behavior established.",
+          "dependency": "Six fixed controls independently verified; exact final/main and owned closure pending. Later hook mode/import repair requires a separately reviewed existing-owner/effect contract.",
+          "next_step": "Complete exact final/main checks, independent review and owned closure; then fresh59-row WSP15/97 selection. Do not automatically repair imports or enable real router.",
+          "limits": "Six isolated hosted controls, not ambient Windows hook reproduction or production repair. Preserved historical repeated import errors are not replayed.",
           "effort_cost": "Bounded source/entrypoint qualification using the existing runner and three-test owner; no live hook dispatch. Later implementation is separately scoped.",
           "additional_observation": {
             "source": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\hook-log-preservation.json",
@@ -3179,7 +3190,37 @@
             "no_replay": true
           },
           "rationale": "Repeated observed import failure has an actual configured consumer. Current runner tests replace the import getter and do not qualify direct-file launch. Fixing path resolution alone may activate social posting because the enqueue-labelled hook omits --enqueue-only. This reusable WRE event/dispatch boundary ranks above the11/P2 load-validation repair and below the14/P1 operational pilot in strategic value, but it has a concrete source-qualified next step today.",
-          "next_component": "Qualify the active hook-to-runner import and dispatch boundary using preserved failure evidence and the existing runner/test owner"
+          "next_component": "Qualify the active hook-to-runner import and dispatch boundary using preserved failure evidence and the existing runner/test owner",
+          "evidence": {
+            "fixture-package-review.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\fixture-package-review.json",
+              "sha256": "90c569981ab74fb6bd879a65ede46604380791c606418ba7542d32e38b3741ea"
+            },
+            "candidate-commit.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-commit.json",
+              "sha256": "262cd7c876d99a0cd36ab77c86c634dbd9e00856c68a360239813683083b4cdc"
+            },
+            "candidate-checks.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-checks.json",
+              "sha256": "aafa50f324334eb014757750116ea4b58cb690db55842aca0fb5b4ff9c2bd416"
+            },
+            "candidate-hook-run-metadata.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-hook-run-metadata.json",
+              "sha256": "899cdab27322d0827544a566421b1c6f5c065107cac6fa107436b159eb37a618"
+            },
+            "candidate-hook-step.log": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-hook-step.log",
+              "sha256": "c2230cadbabecdd604101edd9c9fb6fb943b26e12ea1e5eed8b42a3610d2234b"
+            },
+            "candidate-hook-evidence.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-hook-evidence.json",
+              "sha256": "cd4e4e26165a1b8fb52feaaf4451dca46246705c40e521e1b367da4567e3d229"
+            },
+            "candidate-result-review.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-result-review.json",
+              "sha256": "8cf816651dcfd4bd38880576060422042a6905635e2880773637ddb83e42547a"
+            }
+          }
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -3509,8 +3550,8 @@
       ],
       "selected_next": "Qualify linked-worktree Git push dispatch import failure",
       "implementation_ready_selected": null,
-      "state": "fresh_observation_selection",
-      "rationale": "Fresh96peer/159worktree/base/CI/source reconciliation confirms actual configured consumer and preserved missing-modules failures.12/P2 hook evidence is highest ready bounded action; pilot14 needs identified consumed surface and independent labels, other higher rows retain actual gates; correspondence11 is lower. No unchanged native probe.",
+      "state": "candidate_evidence_reconciled_final_closure_pending",
+      "rationale": "Six fixed hosted controls qualify the selected runner boundary. Complete current publication before a fresh59-row selection. Higher rows retain actual evidence/authority/owner prerequisites; no new native grant or automatic production repair follows.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3892,7 +3933,7 @@
     },
     "hook_entrypoint_20260928": {
       "base": "799cf786ffd9d58c7d3003516b990b4671162f78",
-      "state": "authored_independent_fixture_review_and_hosted_validation_pending",
+      "state": "candidate_verified_final_main_and_owned_closure_pending",
       "component": "Six fixed restricted entrypoint/import and inert dispatch controls",
       "wsp15": {
         "complexity": 2,
@@ -3926,11 +3967,16 @@
       "original_pytest_functions_freshly_run": false,
       "production_changed": false,
       "measurement": {
-        "hosted_passed": null,
+        "hosted_passed": 6,
         "native_jobs": 0,
         "retained_improvement": null,
         "tokens": null,
-        "currency": null
+        "currency": null,
+        "hosted_failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "hook_evidence_records": 6,
+        "wall_seconds": 1.11
       },
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
@@ -3943,7 +3989,43 @@
       ],
       "authoritative_use_lease": null,
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\final-accounting.json",
-      "next_step": "Review exact fixture/CI effects, run six named controls, independently verify original artifacts and exact final/main, then close/reobserve/rescore."
+      "next_step": "Complete exact final/main checks, independent review and owned closure; then fresh59-row WSP15/97 selection. Do not automatically repair imports or enable real router.",
+      "evidence": {
+        "fixture-package-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\fixture-package-review.json",
+          "sha256": "90c569981ab74fb6bd879a65ede46604380791c606418ba7542d32e38b3741ea"
+        },
+        "candidate-commit.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-commit.json",
+          "sha256": "262cd7c876d99a0cd36ab77c86c634dbd9e00856c68a360239813683083b4cdc"
+        },
+        "candidate-checks.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-checks.json",
+          "sha256": "aafa50f324334eb014757750116ea4b58cb690db55842aca0fb5b4ff9c2bd416"
+        },
+        "candidate-hook-run-metadata.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-hook-run-metadata.json",
+          "sha256": "899cdab27322d0827544a566421b1c6f5c065107cac6fa107436b159eb37a618"
+        },
+        "candidate-hook-step.log": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-hook-step.log",
+          "sha256": "c2230cadbabecdd604101edd9c9fb6fb943b26e12ea1e5eed8b42a3610d2234b"
+        },
+        "candidate-hook-evidence.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-hook-evidence.json",
+          "sha256": "cd4e4e26165a1b8fb52feaaf4451dca46246705c40e521e1b367da4567e3d229"
+        },
+        "candidate-result-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\candidate-result-review.json",
+          "sha256": "8cf816651dcfd4bd38880576060422042a6905635e2880773637ddb83e42547a"
+        }
+      },
+      "findings": [
+        "Missing-root default writes one event then one import error and exits1; enqueue-only writes event without router import.",
+        "Inert default executes unchanged getter, constructor and handoff; exit0 includes delivered=false and cannot certify social delivery.",
+        "Inert failure records one dispatch error; unsupported --dispatch-direct exits2 before Git context/spool.",
+        "Configured untracked hook enqueue label omits --enqueue-only; future hook/import policy requires separately bound ownership and effect scope. No real hook or router replay."
+      ]
     }
   }
 }

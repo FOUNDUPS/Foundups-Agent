@@ -19,7 +19,8 @@ Existing owner: `scripts/post_commit_social_runner.py`.
   not consume its spool or enforce deduplication merely by naming the key.
 
 The six [hosted entrypoint controls](tests/README.md#runner-entrypoint-evidence--2026-09-28)
-are authored, validation pending. They preserve production source and substitute
+passed6/6 on the candidate with independent original-artifact review; exact
+final-head/main checks remain pending. They preserve production source and substitute
 only a synthetic router namespace. A fake result has `delivered=false` explicitly.
 No real dependency readiness, delivery, replay policy or native RSI is established.
 

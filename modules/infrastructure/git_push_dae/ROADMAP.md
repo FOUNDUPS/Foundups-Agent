@@ -10,7 +10,8 @@ would expose effects currently outside the test scope.
 - [x] Source/owner and duplicate search; canonical test inventory retrieved.
 - [x] Six fixed controls authored in the existing runner test file; production
   runner, router and shared hook unchanged.
-- [ ] Independently review fixture effects, exact named hosted output and checks.
+- [x] Independently review fixture effects and candidate original output:6/6
+  fixed cases, zero errors/skips; all candidate CI/CodeQL and ten PR checks passed.
 - [ ] Verify main convergence and owned-lane closure; then re-observe and rescore.
 
 The earlier module-wide MVP label below does not certify this hook/entrypoint
