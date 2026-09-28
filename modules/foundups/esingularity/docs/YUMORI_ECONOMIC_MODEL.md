@@ -94,3 +94,18 @@ The older integrated XLSX remains reference-only.
 - A price marked `VERIFY` or `TBD` is not an offer or forecast.
 - Financial-floor kW is not permission to build.
 - Re-run CapEx and debt terms after a real phase size is selected.
+
+
+## Heat-recovery calculation
+
+Heat is not booked as revenue merely because servers reject heat. The code values only the minimum of recoverable/deliverable heat and actual thermal demand:
+
+`IT load -> recovered heat -> delivered heat -> usable heat capped by demand -> annual thermal value`.
+
+This is intended for Sukatto/onsen feasibility and similar local heat users. Recovery fraction, delivery efficiency, thermal demand, availability and avoided heat cost all remain engineering/evidence inputs.
+
+## Japan AI infrastructure evidence ledger
+
+`jhr/data/japan_ai_infrastructure_flows.json` preserves a small official-source seed of Japan AI-infrastructure relationships used by JHR research. Undisclosed deal amounts remain null.
+
+`analyze_infrastructure_flows()` computes only reproducible network indicators from that ledger. Its output is explicitly a partial dependency diagnostic, not a Japan market score, investment ranking, election/policy recommendation, or forecast.
