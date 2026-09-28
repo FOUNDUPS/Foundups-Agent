@@ -1,3 +1,13 @@
+## 2026-09-28 — Demand-led YUMORI economics becomes repository authority
+
+- Replaced MW-first site assumptions with demand-led sizing: customer/service orders → revenue/resource demand → IT kW → facility kW → verified utility cap.
+- Added a 24-offer candidate Service Catalog and formula-driven Demand & Capacity / Node Sizing projection to the current FIN workbook.
+- Added repository `src/yumori_economic_model.py` as the calculation/sizing authority while preserving the legacy five-year FIN scenario only for audit continuity.
+- The model separately computes demand-backed capacity and a financial-floor equivalent. The financial floor is a viability warning, not permission to build.
+- Removed stale preset capacity assumptions from the current site tabs: Hanyu remains the conditional initial-priority grid-first candidate; Shimousaka is the second/future expansion site; Sukatto is the regional human-facing hub.
+- No deliverable kW/MW is claimed for any site until utility and carrier evidence exists.
+- The older integrated XLSX remains reference-only; the current native FIN workbook remains the working formula/interview projection.
+
 ## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
 
 - Promoted the previously ephemeral Correspondence State Capsule onto the generic Red Dog correspondence-state persistence layer rather than creating an email Moshpit or YUMORI-specific database.
