@@ -33,6 +33,8 @@ The repository remembers **how to remember**. A private module-owned runtime
 database remembers the compact current state. Provider systems remain transaction
 truth. Human-facing Sheets / Docs are projections.
 
+Provider systems remain transaction truth.
+
 Do **not** create a correspondence Moshpit or a second contact database.
 
 ## Canonical layers
