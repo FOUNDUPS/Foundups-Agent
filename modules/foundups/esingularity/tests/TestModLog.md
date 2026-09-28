@@ -1,3 +1,11 @@
+## 2026-09-28 — Demand-led economics, site sizing, heat and JHR evidence contracts
+
+- Retrieved the existing test inventory, README, `test_contracts.py`, and YUMORI landing tests before finalizing the new economic-model regression.
+- Added the materially distinct `test_yumori_economic_model.py` for repository-owned project-finance and node-sizing math; reused existing public/site contract files for the site-registry, /future, and YUMORI copy changes.
+- Covers 24 unique service offers, no-demand fail-closed behavior, demand→revenue→GPU/IT/facility-kW translation, unpriced active-service failure, utility-capacity gating, legacy FIN parity, demand-capped heat recovery, and the official-source Japan infrastructure ledger boundary.
+- Updated the canonical WSP test registry to 1,660 tracked tests / 269 quarantined after adding the new file.
+- Fixed stale tests that encoded the superseded Hanyu 5/10/20 MW and fixed-1MW public language; the replacement assertions require demand-led sizing and unverified utility capacity rather than weakening the truth gate.
+
 ## 2026-09-28 — Native Red Dog correspondence continuity dependency
 
 - Extended the existing `test_contracts.py` operational-skill contract to require the generic `reddog_correspondence_state` registry entry, YUMORI dependency, native-store boundary and thin operator projection.
