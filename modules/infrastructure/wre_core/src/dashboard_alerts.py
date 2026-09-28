@@ -360,7 +360,7 @@ def check_dashboard_health() -> Dict:
 def _local_research_report_path(value):
     """Check the selected/embedded path lexically, never resolve a network path."""
     text = os.fspath(value)
-    if not isinstance(text, str) or text.startswith(("\\\\", "//")):
+    if not isinstance(text, str) or text.startswith(("\\\\", "//", "\\/", "/\\")):
         raise ValueError("local path required")
     path = Path(text)
     if (not path.is_absolute() or path.drive.startswith("\\\\")

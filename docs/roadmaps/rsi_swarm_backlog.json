@@ -5972,6 +5972,32 @@
         "dependency": "Current import repair must complete reviewed projections, exact-head/main CI and owned closure; then fresh source/ownership/runtime metadata and independently reviewed resolver/native boundary acceptance. This receipt grants no native execution.",
         "next_step": "First bind the existing resolve_model_selection(code) consumer under a fixed noncredential environment and bounded read-only filesystem scope; distinguish actual result from default-folder inference. Reconcile both root and Holo requirements pins0.2.72 against previously observed installed0.3.20 with the existing dependency owner, without install/downgrade/version edits. Reuse existing qualification-plan-v2 and LlamaModel seam to specify exact allowed runtime artifacts, dependency resolution and externally enforceable process/time/memory/network/failure limits before any native import or twelve frozen prompt counts. Stop at a concrete unsupported prerequisite rather than issuing another generic plan or changing prompt/model/context.",
         "rationale": "Observed8/8 bounded import/API controls remove one concrete source obstacle, while the actual WRE adapter immediately proceeds to resolver and native initialization. The next missing facts are consumed model/runtime identity and enforced tokenizer effect limits, not another package-import repair. Existing resolver and tokenizer owner suffice; no evaluator/module/task is needed."
+      },
+      "ci_followup": {
+        "first_head": "5449bcde3d6d90fc09e66d0557d12cf037c6bf97",
+        "run": 36486519336,
+        "job": 109144639526,
+        "passed": 306,
+        "failed": 2,
+        "total": 308,
+        "findings": [
+          "Mixed slash prefix not rejected lexically on Linux.",
+          "Existing startup test imported whole main and required unrelated chromadb."
+        ],
+        "repair": "Existing path guard rejects all two-slash forms; same startup test now binds two actual AST function bodies without main import-time effects.",
+        "local_regression_passed": 307,
+        "tests_removed": 0,
+        "hosted_repair_verified": false,
+        "evidence": {
+          "pr-test-job.log": {
+            "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\pr-test-job.log",
+            "sha256": "482bc5f2fb2df99f557cee8719e65e0e1e680abcbe8600107ea4a651fafa2d75"
+          },
+          "regression-portability/receipt.json": {
+            "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\regression-portability\\receipt.json",
+            "sha256": "e93fbd4d1091dfbdf728b4b5a77087a6174f2b30dde305c7d50c667be8e63aad"
+          }
+        }
       }
     }
   }

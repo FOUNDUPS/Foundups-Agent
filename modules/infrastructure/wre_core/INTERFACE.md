@@ -92,6 +92,9 @@ Independent verification, retained improvements and actual resource usage remain
 `None`. This checks displayed accounting and RSI truth labels, not economic
 validity or the complete report/proposal/program provenance.
 
+Mixed slash network-style prefixes (`/\\` and `\\/`) are rejected lexically on
+all hosts, before filesystem access.
+
 Measurement scalar hardening (2026-09-29): nested counters require integers,
 policy flags require Booleans, and fitness/gain numbers exclude Booleans.
 Finite integer/float fitness representations remain interoperable. Absolute

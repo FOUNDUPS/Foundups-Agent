@@ -1,3 +1,14 @@
+## Hosted measurement portability follow-up — 2026-09-29
+
+Expanded CI on PR1950 head `5449bcde` ran308 cases:306 passed, two failed.
+The existing mixed-slash path test exposed a Linux-only filesystem read; reject
+both mixed UNC-style prefixes lexically. The existing startup test imported all
+of main and hit an unrelated missing Chroma dependency; reuse the established
+two-function AST fixture while preserving actual report-reader/output assertions.
+No tests were removed. Updated connected local307 pass; final hosted execution
+and publication remain bound to the canonical backlog. The earlier103-case
+comparison is retained as the initial scalar-repair evidence, not rewritten.
+
 ## 2026-09-29: Persisted RSI measurement boundary
 
 - Existing test owners cover strict nested scalar types, explicit nulls, finite relative gain, zero/negative baseline semantics and real repeated producer→JSON→reader/advisory output; aborted/cleanup-failed reports remain unknown.

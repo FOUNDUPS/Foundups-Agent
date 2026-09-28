@@ -1,3 +1,8 @@
+## 2026-09-29: Close hosted RSI reader portability failures
+
+- Expanded308-case hosted selection caught two failures: mixed-slash local-path handling on Linux and an unrelated whole-main import in the startup fixture. Reject mixed UNC-style prefixes before filesystem access; bind only the actual two preflight function bodies in the existing test. Preserve every test and output assertion.
+- Connected local307 pass after repair. Preserve first failed CI log/head and pending final hosted verification in the existing measurement backlog record; no main-launch or dependency-install claim.
+
 ## 2026-09-29: Harden existing RSI persisted-measurement reader
 
 - WSP00/5/6/11/15/22/48/50/62/97/99: reconcile merged PR1903 against main7c2e0b6f. Repair nested JSON scalar confusion, omitted unknown evidence and overflowed relative-gain acceptance in the existing dashboard owner; preserve valid v1 reports and explicit unverified status.

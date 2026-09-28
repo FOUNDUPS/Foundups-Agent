@@ -328,7 +328,17 @@ def test_research_display_invalid_age_budget_is_unknown(tmp_path, age_limit):
 
 
 def test_main_dashboard_reads_actual_selected_report(tmp_path, monkeypatch, capsys):
-    import main
+    # Exercise current function bodies without main's unrelated import-time
+    # model, environment and service effects (same scope as the local runner).
+    import ast
+    import logging
+    main_path = Path(__file__).resolve().parents[4] / "main.py"
+    tree = ast.parse(main_path.read_text(encoding="utf-8"))
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                 and node.name in ("run_wre_dashboard_preflight", "_wre_dashboard_auto_enforce_enabled")]
+    assert len(functions) == 2
+    namespace = {"os": os, "Path": Path, "logger": logging.getLogger("research-preflight-test")}
+    exec(compile(ast.Module(body=functions, type_ignores=[]), str(main_path), "exec"), namespace)
     path, report = _research_report(tmp_path)
     _write_research(path, report)
     monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", str(path))
@@ -336,7 +346,7 @@ def test_main_dashboard_reads_actual_selected_report(tmp_path, monkeypatch, caps
     monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
     monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
     monkeypatch.setattr(dashboard_alerts, "check_dashboard_health", lambda: {"healthy": True})
-    assert main.run_wre_dashboard_preflight(tmp_path) is True
+    assert namespace["run_wre_dashboard_preflight"](tmp_path) is True
     output = capsys.readouterr().out
     assert "[WRE-RESEARCH] unverified_diagnostic" in output
     assert "attempts=0" in output and "retained=unknown" in output
