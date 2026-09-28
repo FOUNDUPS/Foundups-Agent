@@ -1,3 +1,14 @@
+## 2026-09-28: Verify scheduler caller/reload characterization
+
+- Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+- A pre-replace failure returns an in-memory created action absent after reload, an executed action reattempted by a fresh fake dependency, or a cancelled reminder executed after reload. Post-replace errors retain new visible state but leave durability uncertain. No production repair or retained RSI is claimed.
+
+## 2026-09-28: RSI scheduler caller/reload evidence sprint
+
+- PR1943 is merged/main-verified at6821aac3,42 fixed methods passed; owned lane retired. Holo recovered through existing maintenance to CURRENT/no-gap at the same head; peer work preserved. Exact closure: `O:/Foundups-Agent-audits/20260928-rsi-scheduler-publication/final-accounting.json` and `final-closure-review.json`.
+- WSP15/97 freshly select14/P1 caller acknowledgement characterization. Reuse scheduler fixture and named hosted CI: nine bounded current-behavior witnesses, no production edit or native authority. Tests/results remain pending at preparation.
+- Canonical backlog retains59 rows/26 packets and exact selection/evidence. Native trust anchors and effect lease remain unresolved; passing fixtures cannot certify production RSI.
+
 ## 2026-09-28: Validate scheduler safe publication under fixed controls
 
 - WSP00/5/6/15/22/50/62/84/97: Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.

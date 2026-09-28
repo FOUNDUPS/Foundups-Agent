@@ -1,6 +1,56 @@
 # Social Media Orchestrator Tests
 
-## Scheduler safe-publication qualification — 2026-09-28
+## Caller acknowledgement and reload characterization — 2026-09-28
+
+PR1943 is merged and main-verified at `6821aac32774f5be36038bb3fb40cc55920a56cd`.
+Its unchanged42 methods/48 inputs passed on final PR and main; independent
+closure verified its exact tree, owned retirement and preserved peer state.
+
+Fresh WSP15 C3/I4/D3/Impact4=14/P1 selects nine current-behavior cases in the
+existing fixture. Three callers (`understand_command`, `execute_pending_actions`,
+`cancel_action`) each receive normal publication, replacement failure, and
+parent-sync failure after replacement. Production code remains unchanged.
+
+Observe actual returns/identities, caller logs, statuses, exact primary file
+bytes/hash and independent reload before any replay changes the file. Creation
+uses the actual reminder/default +5-minute path with fixed UUID/time, preserving
+an unrelated future reminder. Execution uses a coherent fake typed response.
+Cancellation targets a due local reminder. Before-replace errors preserve old
+state despite success-shaped caller returns; post-replace errors leave complete
+new visible JSON with uncertain durability. These are characterization witnesses,
+not a new persistence acknowledgement guarantee.
+
+After fault release, the same instance performs no repeated action. A fresh
+instance replays exactly one fake posting only for pre-replace execution failure,
+or one local reminder for pre-replace cancellation failure. Creation stays future;
+normal/post-replace terminal actions do not repeat. No real posting or clock advance.
+
+Reuse the source-bound leaf/DTO loader, denied constructor, `_PersistenceFixture`
+and real shared atomic writer. Writes remain under per-case disposable roots;
+restore faults/cwd before removal. Scoped UUID and private writer patches are
+sequential hosted effects, not a general async/concurrency guarantee. No host-local
+application execution, accounts, provider, service or native dispatch is admitted.
+
+Fixed selection:51 methods/57 finite inputs (42/48 unchanged plus9/9); eight legacy
+bodies remain unchanged and unselected. Emit25 `PERSISTENCE_EVIDENCE` records and
+nine `CALLER_EVIDENCE` records; preserve primary bytes before replay.
+
+`python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v`
+
+WSP62 cohesion review: the existing780-line fixture grows within the800–1000
+guideline range, retaining one source loader, file fixture and caller boundary.
+New helpers remain<=50lines and class<=200. No new test module, exemption or
+threshold change. Reassess decomposition before further growth.
+
+Authored fixture and exact hosted effects require independent review before
+execution.
+
+Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+
+Passing witnesses do not establish safe restart,
+Windows/crash behavior, verified delivery, retained learning or native RSI.
+
+## Historical scheduler safe-publication qualification — 2026-09-28
 
 PR1942 closed the six-case persistence characterization on exact main
 `12663d7e4f`. Its main CI36393612150 and CodeQL36393612401 passed;

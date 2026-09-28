@@ -323,6 +323,8 @@ power-loss behavior are outside this acceptance scope.
 a persistence acknowledgement. In-memory completion is not a durable receipt.
 A failed save can leave a prior pending record, which may execute after restart.
 This repair does not add retries or provide exactly-once delivery.
+The [caller/reload characterization](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28)
+fixes nine synthetic observations; passing witnesses do not change these API guarantees.
 
 ### Human Scheduling Interface (012 Mode)
 ```python

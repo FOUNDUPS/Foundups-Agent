@@ -44,7 +44,7 @@ The existing autonomous scheduler archives typed posting results to JSON and
 serializes the complete schedule before shared atomic publication. Save errors
 remain logged without caller acknowledgement; restart retry safety and external
 delivery are not established. See [the scheduling contract](INTERFACE.md#natural-language-scheduling-0102-mode)
-and [the fixed hosted acceptance](tests/README.md#scheduler-safe-publication-qualification--2026-09-28).
+and [the fixed hosted acceptance](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28).
 
 ## Architecture
 

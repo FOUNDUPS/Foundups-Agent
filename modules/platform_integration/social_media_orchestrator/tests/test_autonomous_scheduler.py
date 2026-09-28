@@ -674,6 +674,181 @@ class TestPublicationEvidence(_PersistenceFixture):
         self.post.assert_not_called()
 
 
+def _caller_seed(test, caller):
+    future = test._action(ActionType.REMIND, {'message': 'unrelated future'}, delay=3600)
+    del test.scheduler.scheduled_actions[future.id]
+    future.id = 'fixture-future'
+    test.scheduler.scheduled_actions[future.id] = future
+    action = None
+    if caller == 'execute':
+        action = test._action(ActionType.POST_SOCIAL, {
+            'platforms': ['linkedin', 'x_twitter'], 'content': 'synthetic content',
+            'metadata': {'stream_url': 'https://example.invalid/stream', 'stream_title': 'fixture'}})
+    elif caller == 'cancel':
+        action = test._action(ActionType.REMIND, {'message': 'cancel fixture'})
+    before = test._seed()
+    test.log.reset_mock()
+    return action, future, before
+
+
+async def _call_mutator(test, caller, action):
+    if caller == 'create':
+        test.scheduler.time_patterns = {}
+        with patch('uuid.uuid4', return_value=types.SimpleNamespace(hex='0123456789abcdef' * 2)):
+            return test.scheduler.understand_command('remind me to review fixture')
+    if caller == 'execute':
+        return await test.scheduler.execute_pending_actions()
+    return test.scheduler.cancel_action(action.id)
+
+
+def _caller_return(test, caller, action, returned, response):
+    test.assertIs(test.scheduler.scheduled_actions[action.id], action)
+    test.assertIsNone(action.error)
+    info = [call.args[0] for call in test.log.info.call_args_list]
+    if caller == 'create':
+        test.assertIs(returned, action)
+        test.assertEqual(vars(action), dict(
+            id='action_01234567', action_type=ActionType.REMIND,
+            description='remind me to review fixture', parameters={'message': 'review fixture'},
+            scheduled_time=_FixedClock.now() + timedelta(minutes=5), requested_by='012',
+            requested_at=_FixedClock.now(), status='pending', result=None, error=None))
+        test.assertEqual(sum('Scheduled as: ' + action.id in line for line in info), 1)
+    elif caller == 'execute':
+        test.assertEqual(len(returned), 1)
+        test.assertEqual(returned[0][0], action.id)
+        test.assertIs(returned[0][1], response)
+        test.assertIs(action.result, response)
+        test.assertEqual(action.status, 'executed')
+        test.post.assert_awaited_once_with(stream_title='fixture',
+            stream_url='https://example.invalid/stream',
+            platforms=[_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER])
+        test.assertEqual(sum('[OK] Completed scheduled operation ' + action.id in line for line in info), 1)
+    else:
+        test.assertIs(returned, True)
+        test.assertEqual(action.status, 'cancelled')
+        test.assertIsNone(action.result)
+        test.assertEqual(sum('Cancelled action ' + action.id in line for line in info), 1)
+    test.assertEqual(test.post.await_count, int(caller == 'execute'))
+    test.assertEqual(test.post.call_count, int(caller == 'execute'))
+    return info
+
+
+async def _caller_reload_attempt(test, restored, action, caller, mode, primary_bytes):
+    test.log.reset_mock()
+    test.assertEqual(await test.scheduler.execute_pending_actions(), [])
+    test.assertEqual(test.path.read_bytes(), primary_bytes)
+    test.assertEqual(test.post.await_count, int(caller == 'execute'))
+    test.log.info.assert_not_called()
+    replay = mode == 'pre' and caller in ('execute', 'cancel')
+    fresh_post = restored.orchestrator.post_stream_notification
+    fresh_response = _stored_response([True, True])
+    if replay and caller == 'execute':
+        fresh_post.side_effect, fresh_post.return_value = None, fresh_response
+    result = await restored.execute_pending_actions()
+    test.assertEqual(len(result), int(replay))
+    if replay:
+        test.assertEqual(result[0][0], action.id)
+        test.assertEqual(restored.scheduled_actions[action.id].status, 'executed')
+        if caller == 'execute':
+            test.assertIs(result[0][1], fresh_response)
+            fresh_post.assert_awaited_once_with(stream_title='fixture',
+                stream_url='https://example.invalid/stream',
+                platforms=[_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER])
+        else:
+            test.assertEqual(result[0][1], {'reminded': True, 'message': 'cancel fixture'})
+    else:
+        test.assertEqual(test.path.read_bytes(), primary_bytes)
+    test.assertEqual(fresh_post.await_count, int(replay and caller == 'execute'))
+    test.assertEqual(fresh_post.call_count, int(replay and caller == 'execute'))
+    reminders = sum('REMINDER: cancel fixture' in call.args[0] for call in test.log.info.call_args_list)
+    test.assertEqual(reminders, int(replay and caller == 'cancel'))
+    test.log.error.assert_not_called()
+    return {'attempts': len(result), 'attempt_ids': [row[0] for row in result],
+            'posting_awaits': fresh_post.await_count,
+            'local_reminders': reminders, 'after_replay_sha256': hashlib.sha256(test.path.read_bytes()).hexdigest()}
+
+
+async def _caller_case(test, caller, mode):
+    action, future, before = _caller_seed(test, caller)
+    future_fields = deepcopy(vars(future))
+    response = _stored_response([True, True])
+    if caller == 'execute':
+        test.post.side_effect, test.post.return_value = None, response
+    with ExitStack() as stack:
+        fault = None
+        if mode != 'normal':
+            seam = '_atomic_replace_path' if mode == 'pre' else '_fsync_parent_directory'
+            fault = stack.enter_context(patch.object(_atomic_writer, seam,
+                side_effect=OSError('caller fixture ' + mode)))
+        save = stack.enter_context(patch.object(test.scheduler, 'save_schedule', wraps=test.scheduler.save_schedule))
+        returned = await _call_mutator(test, caller, action)
+        save.assert_called_once_with()
+        if fault is not None:
+            fault.assert_called_once()
+    action = returned if caller == 'create' else action
+    info = _caller_return(test, caller, action, returned, response)
+    after, restored = test.path.read_bytes(), test._reload()
+    _persistence_record(test, before, after, restored)
+    errors = _persistence_errors(test, 'saving')
+    test.assertEqual(len(errors), int(mode != 'normal'))
+    if errors:
+        test.assertIn('caller fixture ' + mode, errors[0])
+    test.assertEqual(_persistence_errors(test, 'loading'), [])
+    expected = json.loads(before) if mode == 'pre' else {
+        key: dict(vars(item), action_type=item.action_type.value,
+                  scheduled_time=item.scheduled_time.isoformat(), requested_at=item.requested_at.isoformat(),
+                  result=_expected_post([True, True]) if key == action.id and caller == 'execute' else item.result)
+        for key, item in test.scheduler.scheduled_actions.items()}
+    test.assertEqual(json.loads(after), expected)
+    test.assertEqual(after == before, mode == 'pre')
+    test.assertEqual(set(restored.scheduled_actions), set(expected))
+    for key, row in expected.items():
+        test.assertEqual(vars(restored.scheduled_actions[key]), dict(row,
+            action_type=ActionType(row['action_type']), scheduled_time=datetime.fromisoformat(row['scheduled_time']),
+            requested_at=datetime.fromisoformat(row['requested_at'])))
+    test.assertIs(test.scheduler.scheduled_actions[future.id], future)
+    test.assertEqual(vars(future), future_fields)
+    primary = {'case': test._testMethodName, 'caller': caller, 'mode': mode,
+               'returned_identity_verified': True, 'return_kind': type(returned).__name__,
+               'memory_status': action.status, 'memory_error': action.error,
+               'fault_call_count': 0 if fault is None else fault.call_count,
+               'reloaded_status': {key: item.status for key, item in restored.scheduled_actions.items()},
+               'primary_posting_awaits': test.post.await_count, 'primary_info': info, 'save_errors': errors}
+    primary['reload_attempt'] = await _caller_reload_attempt(test, restored, action, caller, mode, after)
+    print('CALLER_EVIDENCE ' + json.dumps(primary, sort_keys=True))
+
+
+class TestCallerPersistenceEvidence(_PersistenceFixture):
+    """Nine current-behavior witnesses, not durable acknowledgement acceptance."""
+
+    async def test_create_normal(self):
+        await _caller_case(self, 'create', 'normal')
+
+    async def test_create_pre_replace_failure(self):
+        await _caller_case(self, 'create', 'pre')
+
+    async def test_create_post_replace_failure(self):
+        await _caller_case(self, 'create', 'post')
+
+    async def test_execute_normal(self):
+        await _caller_case(self, 'execute', 'normal')
+
+    async def test_execute_pre_replace_failure(self):
+        await _caller_case(self, 'execute', 'pre')
+
+    async def test_execute_post_replace_failure(self):
+        await _caller_case(self, 'execute', 'post')
+
+    async def test_cancel_normal(self):
+        await _caller_case(self, 'cancel', 'normal')
+
+    async def test_cancel_pre_replace_failure(self):
+        await _caller_case(self, 'cancel', 'pre')
+
+    async def test_cancel_post_replace_failure(self):
+        await _caller_case(self, 'cancel', 'post')
+
+
 class TestAutonomousActionScheduler(unittest.TestCase):
     """Test natural language understanding for 0102"""
 

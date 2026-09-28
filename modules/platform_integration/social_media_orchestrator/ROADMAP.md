@@ -12,7 +12,18 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
-### Current safe-publication repair — 2026-09-28
+### Current caller/reload characterization — 2026-09-28
+
+PR1943 safe-publication repair is closed on main6821aac3 with42 fixed methods
+passing on final/main and independently reviewed owned cleanup. Fresh14/P1
+selection qualifies the three caller/save/reload boundaries with nine cases in
+the existing fixture; source remains unchanged. See
+[fixed acceptance](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28).
+Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+Re-observe before selecting
+acknowledgement policy or a production repair. No exactly-once or retained RSI claim.
+
+### Historical safe-publication repair — 2026-09-28
 
 PR1942 characterization is closed on main12663d7e4f with successful main CI and
 CodeQL. WSP15 C3/I4/D4/Impact4=15/P1 selects explicit result projection and the
