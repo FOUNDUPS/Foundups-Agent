@@ -5,7 +5,8 @@
 - Freeze26 methods/32 input cases in the existing hosted fixture before repairing unsupported success and incomplete/malformed posting disposition. No new scheduler, producer, schema, account action, persistence owner or runtime gate.
 - Hosted baseline CI36379506634 at `34ed9b69ae` ran the frozen26 methods/32 inputs: 5 methods passed,21 failed with27 assertion failures,0 errors/skips. This reproduces incorrect completion against unchanged production source.
 - Candidate repair rejects unsupported branches and incomplete/malformed results, preserves original responses, snapshots validated targets and leaves failures terminal. Independent source review requested exact response/string types and captured post-await classification; corrected without changing the frozen tests.
-- Current state: baseline reproduced; repaired hosted execution and main convergence pending. Exact source/results/publication are tracked by the canonical RSI backlog. WSP00/15/22/50/62/84/97.
+- Repaired candidate `9bc31ed6e0` passed the identical26 methods/32 inputs in CI36380266749 (0 failures/errors/skips); CI and CodeQL succeeded. Final integrated-head and merged-main validation remain required; exact closure is receipt-bound.
+- Current state: bounded repair validated on candidate; final integrated-head/main convergence pending. Exact source/results/publication are tracked by the canonical RSI backlog. WSP00/15/22/50/62/84/97.
 
 ## 2026-09-28: Qualify scheduler completion evidence before RSI use
 

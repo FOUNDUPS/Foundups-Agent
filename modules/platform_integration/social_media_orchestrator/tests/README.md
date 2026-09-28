@@ -23,7 +23,8 @@ in-memory actions exclude accounts, browsers, providers and real persistence.
 The existing CI step `Run social scheduler execution evidence` is unchanged.
 Baseline CI36379506634 reproduced21 failing methods/27 assertion failures and
 5 passing controls (0 errors/skips). The same frozen fixture will judge the repair;
-repaired-source execution is pending. Finite variants are not extra independent test methods.
+candidate `9bc31ed6e0` passes all26 methods/32 inputs in CI36380266749
+(0 failures/errors/skips). Final integrated-head/main proof remains receipt-bound. Finite variants are not extra independent test methods.
 
 The eight `TestAutonomousActionScheduler` methods are preserved historical tests
 and remain unselected/unqualified. Direct execution defaults to the isolated class.

@@ -27,7 +27,9 @@ Duplicate targets, including duplicates produced by overlapping natural-language
 matches, reject explicitly rather than silently posting to a substituted list.
 Baseline CI36379506634 confirms21 failing methods/27 assertion failures and5
 passing controls with no errors/skips. The same26-method fixture is unchanged
-for candidate validation; source repair is implemented, hosted proof pending.
+for candidate validation: `9bc31ed6e0` passes all26 methods/32 inputs in
+CI36380266749, with0 failures/errors/skips and green CI/CodeQL. Final integrated
+PR head/main convergence is recorded in the canonical backlog closure receipt.
 Source review also tightened exact response/string types and preserved posting
 classification across the await; those safeguards are source-reviewed, not
 additional independent test scenarios. Durable save/replay, independent
