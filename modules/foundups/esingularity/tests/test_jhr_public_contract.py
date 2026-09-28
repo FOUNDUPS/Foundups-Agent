@@ -40,10 +40,12 @@ def test_jhr_003_is_latest_japanese_only() -> None:
     assert "誰が日本の「AI田んぼ」を持つのか" in latest
     assert "廃校7,612校" in latest
     assert "旧下宇坂小学校" in latest and "旧羽生小学校" in latest
-    assert "/yumori-compute-field.webp" in latest
-    assert "/yumori-inzai-fukui-comparison.webp" in latest
+    assert "/jhr/jhr-003-ai-rice-fields.svg" in latest
+    assert "/jhr/jhr-003-hanyu-grid-field.svg" in latest
     assert 'lang="en"' not in latest
     assert "ENGLISH / SECONDARY" not in latest
+    assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-ai-rice-fields.svg").is_file()
+    assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-hanyu-grid-field.svg").is_file()
 
 
 def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() -> None:
