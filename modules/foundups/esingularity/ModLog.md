@@ -1,3 +1,10 @@
+## 2026-09-28 — Verified backlog / Red Dog → Work orchestration
+
+- Added `yumori_work_orchestrator` as the YUMORI domain adapter from 012/Red Dog planning conversation to live-state-reconciled work items, canonical WSP 15 ordering, explicit 012 physical/decision actions, and bounded ChatGPT Work / RedDog work packets.
+- Reuses existing project truth owners, correspondence state, Fukui procedure, funding intelligence, Moshpit writeback, RedDog governed work-order/conversation-promotion and AgentDB/WRE execution. It does not create a second project ledger, executor, signer, queue, or chat database.
+- Work handoff is dependency-wave based: protect/evidence → organization → public mobilization → partner/capital, with current evidence allowed to re-score the order.
+- Added thin Claude/Codex projections, WRE registry discovery and regression coverage.
+
 ## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
 
 - Promoted the previously ephemeral Correspondence State Capsule onto the generic Red Dog correspondence-state persistence layer rather than creating an email Moshpit or YUMORI-specific database.
