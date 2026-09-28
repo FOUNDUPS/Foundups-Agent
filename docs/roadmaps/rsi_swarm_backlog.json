@@ -1882,235 +1882,92 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "b1240b53e6a01928902567d8235166813aa6dd2e",
+    "base_commit": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
-    "status": "owned_qualification_prepared_execution_pending",
+    "selected_component": "Reject unsupported or incomplete action completion while preserving dependency results",
+    "status": "owned_repair_acceptance_prepared",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 14,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "20260928-social-scheduler-execution-evidence",
-    "base": "b1240b53e6a01928902567d8235166813aa6dd2e",
+    "observation_id": "20260928-social-scheduler-completion-repair",
+    "base": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
     "self": "0102",
     "role": "architect",
-    "origin": "external_principal",
+    "origin": "autonomous_trigger",
     "principal_ref": "012",
     "selected": "Qualify truthful completion evidence in the existing social action scheduler",
+    "selected_component": "Reject unsupported or incomplete action completion while preserving dependency results",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 14,
+      "total": 15,
       "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1933,
-      "merge": "ab9ab47a8bec92720a156fea0696a545381ccc9c",
+      "pr": 1936,
+      "merge": "cd7e62d680b6cd874351f07d8ea8a6bac002b3df",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\final-accounting.json",
-      "sha256": "ac12ef20b34b7e80330daa1c53630f05fa9bb81240af45113cb40d99916a5f1f"
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\final-accounting.json",
+      "unique_cases": 13,
+      "pr_passes": 13,
+      "main_passes": 13,
+      "meaning": "Nine misleading-completion behavior witnesses and four controls; production source unchanged."
     },
-    "previous_observation": {
-      "git_lookup": "ab9ab47a8bec92720a156fea0696a545381ccc9c:docs/roadmaps/rsi_swarm_backlog.json",
-      "postclosure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\postclosure-reobservation.json"
-    },
-    "backend_qualification": {
-      "state": "controlled_source_failure_independently_reviewed",
-      "dbus_fast": {
-        "version": "5.0.22",
-        "commit": "350eed7095f58bdae4d0482ebfd4d9f55a919f75",
-        "source": "https://github.com/Bluetooth-Devices/dbus-fast/tree/350eed7095f58bdae4d0482ebfd4d9f55a919f75"
-      },
-      "jeepney": {
-        "version": "0.9.0",
-        "sdist_sha256": "cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732",
-        "source": "https://pypi.org/project/jeepney/0.9.0/"
-      },
-      "rejected_compositions": [
-        {
-          "composition": "dbus-fast MessageBus",
-          "finding": "Pre-authentication and pending received-FD cleanup ownership not established through normal APIs."
-        },
-        {
-          "composition": "Jeepney core Parser",
-          "finding": "Degenerate accepted container grammar permits a non-advancing synchronous parse."
-        },
-        {
-          "composition": "dbus-fast stream-only codec",
-          "finding": "Caller-owned I/O is feasible; strict semantic end equality, wire validity and all-malformed progress are not established by the consumed API."
-        }
-      ],
-      "reviews": [
-        {
-          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\dbus-fast-review.json",
-          "sha256": "46a723d5ccb76d7eb9d633ca59214f6915844c8dc9478f1644776a49b63c579d",
-          "scope": "Independent source/plan review, not execution evidence"
-        },
-        {
-          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\jeepney-review.json",
-          "sha256": "2e7186c926960e32b5586e85013329a9352fb59ff7ebfbceb3902f9fffce99a1",
-          "scope": "Independent source/plan review, not execution evidence"
-        },
-        {
-          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\codec-review.json",
-          "sha256": "b37a0bf4d54198e966fc2c26b5b45594bd03f54217650de5ca12cf1d9a30f52c",
-          "scope": "Independent source/plan review, not execution evidence"
-        },
-        {
-          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\disposition-review.json",
-          "sha256": "c834612035348e1e64b33439818f47e0811ae0750b7430d99e2685660a5ed4ab",
-          "scope": "Independent source/plan review, not execution evidence"
-        }
-      ],
-      "new_tests_run": 0,
-      "package_import_or_install": false,
-      "runtime_or_privilege_actions": 0,
-      "limits": [
-        "No executed exploit/leak/hang or deployed exposure claimed.",
-        "Do not conflate Jeepney zero-progress evidence with dbus-fast unqualified progress.",
-        "No third-library search, parser fork/new grammar or broad containment selected."
-      ],
-      "resume_prerequisite": "Reviewed strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress and usable interpreted/compiled API evidence. Then fresh source/ownership reconciliation and WSP15 selection; deployment visibility, authenticated transport and native authority remain separate."
-    },
-    "component_changes": {
-      "production_source_changes": 0,
-      "native_state": "Seven blockers unchanged; authoritative_use_lease=null.",
-      "legacy_test_methods_preserved": 8,
-      "selected_new_cases": 13,
-      "prior_audit_closed": "PR1933 independently reviewed, merged and main-verified; do not redispatch the completed operational architecture audit.",
-      "hook_observation": "Incorporate prior owned push-hook import error as a separate12/P2 source-qualification row; no hook replay or platform action."
-    },
+    "previous_observation": "Git history and PR1936; O:/Foundups-Agent-audits/20260928-rsi-scheduler-evidence/final-accounting.json",
     "retrieval": {
-      "mode": "WSP00 bootstrap/gate, canonical WSP97/WSP15 and foundups-wsp skill; owner Holo query failed exactly, then bounded Git/rg source retrieval.",
-      "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
-      "noise": "Historical module status and TEST_MODE guidance separated from actual source, imports and tests.",
-      "ordering": "Canonical protocols and module contracts, exact scheduler/producer/import path, then fixed acceptance and independent review.",
-      "missing_artifacts": "No module memory/README.md or current Holo generation proof; no held-out operational outcome/cost/retention baseline.",
-      "staleness_risk": "Source and public owner heads checked at entry; recheck before publication/merge. Historical documentation is not a current execution claim.",
-      "duplication": "Reuse existing test file, existing CI and canonical backlog; no new scheduler, schema, skill or module.",
-      "freshness": "ab9ab47a8bec92720a156fea0696a545381ccc9c;98 open peer PRs at entry."
+      "reference_ok": true,
+      "reference_sha": "2153938699c0416ef37c225b52cd5907d795f5cc",
+      "current_head": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
+      "same_selected_module_blobs": true,
+      "noise": "Historical completion checklists separated from source and frozen13case evidence",
+      "ordering": "WSP00/97/15 then source-bound Holo/contracts/TestModLog and existing fixture",
+      "missing_artifacts": "No module memory README and no fresh index receipt at870; reference freshness scoped215 only",
+      "staleness": "One intervening product-only commit; current affected blobs read directly",
+      "duplication": "Same scheduler/status/result/test owner reused; no new schema or outcome store"
     },
     "allocation": {
-      "rationale": "C2 bounded isolated test extension; I4 truthful shared completion evidence; D4 misleading success obstructs measurement; Impact4 across operational adapters. Highest executable evidence step after native18/P0 prerequisites remain blocked.",
-      "effort_cost": "13 fixed stdlib cases on hosted CI; no provider spend or account effects. Direct0102 source/fixture work is required to resolve actual async/import/API behavior; independent0102 verification is used rather than claiming unavailable native Qwen/Gemma execution.",
-      "execution_boundary": "Hosted test class only. Actual scheduler leaf, source-derived producer result declarations, inert import dependency, denied constructor and in-memory state. Eight legacy methods preserved but not selected; broad-suite and host-local execution unqualified."
+      "rationale": "Scheduler15/P1 currently eligible and directly repairs measured false success; native18/P0 and14/P1 owners retain actual dependencies; lower12/P2 hook and11/P2 correspondence work do not displace this fix.",
+      "execution_plane": "Existing local single-surface source repair plus qualified hosted tests; no native WRE dispatch or runtime authority created. Actual orchestration/retention still gated.",
+      "effort_cost": "One scheduler leaf and existing isolated hosted fixture; deterministic implementation plus independent review; no provider calls/spend.",
+      "verification_burden": "Exact fixtures before baseline, same frozen criteria after repair, PR/main checks and independent closure."
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\entry.json",
-      "peer_count": 98,
-      "scope": [
-        "modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py",
-        "modules/platform_integration/social_media_orchestrator/tests/README.md",
-        "modules/platform_integration/social_media_orchestrator/tests/TestModLog.md",
-        "modules/platform_integration/social_media_orchestrator/ROADMAP.md",
-        "modules/platform_integration/social_media_orchestrator/ModLog.md",
-        ".github/workflows/ci.yml",
-        "docs/roadmaps/rsi_swarm_backlog.json",
-        "ModLog.md",
-        "WSP_knowledge/WSP_Test_Registry.json"
-      ],
-      "overlaps": "Older root ModLog additive histories; PR1934 also updates the generated test registry for different product test rows. Preserve their rows; our deterministic correction targets only the scheduler test entry.",
-      "resolution": "Preserve protected shared checkout, all peer branches and YUMORI/eSingularity/AutoPost work; new1934/1935 product peers are inventory only.",
-      "shared_checkout_preserved": true,
-      "integration": {
-        "merged_peer_pr": 1934,
-        "main_commit": "41a1ac8a368bff16d9d4de2cb1fca92c6698e1cb",
-        "preserved": "All peer product paths and its new generated registry row; selected source/test/CI remain unchanged.",
-        "registry_reconciliation": "Regenerate using combined tracked tree; do not copy peer registry wholesale.",
-        "additional_readme_only_pr": 1937,
-        "latest_main": "b1240b53e6a01928902567d8235166813aa6dd2e"
-      }
+      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\entry.json",
+      "peer_count": 96,
+      "overlaps": "Five peer PRs touch unrelated registry rows; none touch scheduler, canonical backlog or existing CI owner. Preserve shared/product/AutoPost lanes."
     },
-    "research": {
-      "as_of": "2026-09-28",
-      "exhaustive": false,
-      "sources": [
-        {
-          "url": "https://arxiv.org/html/2607.07663v2",
-          "read_depth": "Main taxonomy, evaluator, research and discussion sections; supplied paper identified."
-        },
-        {
-          "url": "https://arxiv.org/html/2609.24663v1",
-          "read_depth": "Methods/evaluation sections."
-        },
-        {
-          "url": "https://arxiv.org/html/2606.08106v1",
-          "read_depth": "Acceptance method/limitations."
-        },
-        {
-          "url": "https://arxiv.org/abs/2604.08988",
-          "read_depth": "Abstract only."
-        },
-        {
-          "url": "https://arxiv.org/abs/2608.06144",
-          "read_depth": "Abstract only."
-        },
-        {
-          "url": "https://arxiv.org/html/2608.04003v1",
-          "read_depth": "Evaluation pipeline and limitations; matched persistence/fresh-session/mechanism evidence."
-        },
-        {
-          "url": "https://arxiv.org/html/2609.26457v1",
-          "read_depth": "Abstract and method; fixed task budgets and private grading."
-        },
-        {
-          "url": "https://arxiv.org/abs/2609.15364",
-          "read_depth": "Abstract only."
-        }
-      ]
-    },
-    "measured_baseline": {
-      "source_pr": 1931,
-      "unique_case_ids": 20,
-      "pr_passes": 20,
-      "main_passes": 20,
-      "failures": 0,
-      "new_cases": 0,
-      "production_source_changes": 0,
-      "platform_actions": 0,
-      "native_activation": false,
-      "held_out_operational_evaluation": false,
-      "operational_outcome_baseline": null,
-      "operational_candidate_gain": null,
-      "avoided_012_interventions": null,
-      "authenticated_cost": null,
-      "held_out_transfer_gain": null,
-      "retained_multi_generation_gain": null
+    "holo_recovery": {
+      "receipt": "O:/Foundups-Agent-audits/20260928-holo-authority-recovery/closure-review.md",
+      "verified_source": "2153938699c0416ef37c225b52cd5907d795f5cc",
+      "artifacts_verified": 33,
+      "current_main_freshness_claim": false,
+      "runtime_exact_closure_verified": false
     },
     "validation": {
-      "new_test_cases": 13,
-      "case_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\prepared-tests.json",
+      "state": "prepared_not_executed",
+      "test_methods": 26,
+      "fixed_input_cases": 32,
       "legacy_methods_preserved": 8,
-      "production_source_changes": 0,
       "local_application_tests_run": 0,
-      "static_validation": "pending",
-      "hosted_result": "pending",
-      "independent_review": "pending",
-      "interpretation": "Characterization is a behavior witness. A passing misleading-success case confirms a defect; all-success doubles do not prove real posting.",
-      "unqualified": "Persistence/serialization, real provider delivery, whole legacy suite, operational learning and retained RSI.",
-      "initial_hosted_attempt": {
-        "pr": 1936,
-        "head": "ed4db740be61afa50129c9977da96335dc2f9dd0",
-        "ci_run": 36372027207,
-        "failure": "Canonical registry stale at pre-test check",
-        "scheduler_cases_executed": 0,
-        "scheduler_step": "skipped",
-        "repair": "Refresh existing canonical registry through unchanged static generator; no registry policy/allowlist exception."
-      }
+      "native_readiness_changed": false
     },
     "publication": {
-      "state": "prepared_not_published",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\final-accounting.json"
+      "terminal_state": "ACTIVE_OWNED_WORK",
+      "branch": "fix/rsi-scheduler-completion-20260928",
+      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-scheduler-repair-20260928",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2215,6 +2072,52 @@
             "pr": 1898,
             "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
             "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\final-accounting.json"
+          }
+        },
+        {
+          "task": "Qualify truthful completion evidence in the existing social action scheduler",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 15,
+            "priority": "P1"
+          },
+          "state": "qualification_closed_repair_acceptance_prepared",
+          "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
+          "dependency": "Independent exact fixture/effect review, hosted baseline, focused implementation and repaired hosted/main proof. No live account or native authority inferred.",
+          "next_step": "Execute the frozen26-method/32-input comparison in the existing hosted CI owner, then implement the smallest same-file result/status repair and independently verify before merge.",
+          "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
+          "limits": "In-memory disposition and logging only. Persistence/serialization, external effect verification and retained RSI remain unqualified.",
+          "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
+          "qualification": {
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\prepared-tests.json",
+            "case_count": 13,
+            "production_source_changes": 0,
+            "local_application_tests_run": 0
+          },
+          "next_component": "Reject unsupported or incomplete action completion while preserving dependency results",
+          "component_closure": {
+            "pr": 1936,
+            "merge": "cd7e62d680b6cd874351f07d8ea8a6bac002b3df",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\final-accounting.json",
+            "unique_cases": 13,
+            "pr_passes": 13,
+            "main_passes": 13,
+            "meaning": "Nine misleading-completion behavior witnesses and four controls; production source unchanged."
+          },
+          "next_component_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\next-action-review.md",
+            "sha256": "eb8d6ac2efbefc0dc1959ddf359107eef62a6532d77c19baa99f7dc5ac8bd8ca"
+          },
+          "preparation": {
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\prepared-tests.json",
+            "test_methods": 26,
+            "fixed_input_cases": 32,
+            "state": "tests_prepared_source_unchanged",
+            "local_application_tests_run": 0
           }
         },
         {
@@ -2674,30 +2577,6 @@
             "merge": "ab9ab47a8bec92720a156fea0696a545381ccc9c",
             "terminal_state": "MERGED_VERIFIED_MAIN",
             "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\final-accounting.json"
-          }
-        },
-        {
-          "task": "Qualify truthful completion evidence in the existing social action scheduler",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "fixed_13_case_qualification_prepared_execution_pending",
-          "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
-          "dependency": "Independent exact-byte review and hosted isolated stdlib execution; no live posting or local application imports.",
-          "next_step": "Execute the 13 fixed characterization cases; preserve current defect witnesses, then re-score the smallest existing-owner repair after qualified closure.",
-          "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
-          "limits": "Production sources unchanged. Passing characterization reproduces current behavior; it is not repaired semantics, successful external posting, held-out operational gain or retained RSI.",
-          "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
-          "qualification": {
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\prepared-tests.json",
-            "case_count": 13,
-            "production_source_changes": 0,
-            "local_application_tests_run": 0
           }
         },
         {
@@ -3249,7 +3128,12 @@
           "dependency": "Read existing hook/dispatcher ownership and invocation before diagnosis; no repair or redispatch authority inferred.",
           "next_step": "Qualify why the owned push dispatch could not import modules; preserve the original event and failure; never replay an event into live platform actions as a test.",
           "limits": "One task-local hook error after successful Git push. No failure rate, general outage, platform outcome or repaired behavior established.",
-          "effort_cost": "Bounded existing-entrypoint import/path inspection; existing scheduler14/P1 qualification still ranks higher."
+          "effort_cost": "Bounded existing-entrypoint import/path inspection; existing scheduler14/P1 qualification still ranks higher.",
+          "additional_observation": {
+            "source": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\hook-log-preservation.json",
+            "same_error_repeated": true,
+            "no_replay": true
+          }
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -3492,10 +3376,10 @@
           }
         }
       ],
-      "selected_next": null,
+      "selected_next": "Qualify truthful completion evidence in the existing social action scheduler",
       "implementation_ready_selected": null,
-      "state": "await_owned_qualification_closure_then_reobserve",
-      "rationale": "Preserve59 observed task identities and26 packets. The scheduler14/P1 is unblocked for bounded qualification; native18/P0 and other owner/runtime-dependent work remain blocked. Re-score after execution and closure.",
+      "state": "fresh_source_repair_selected",
+      "rationale": "Scheduler15/P1 currently eligible and directly repairs measured false success; native18/P0 and14/P1 owners retain actual dependencies; lower12/P2 hook and11/P2 correspondence work do not displace this fix.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3506,10 +3390,124 @@
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
       "authoritative_use_lease": null,
-      "base": "ab9ab47a8bec92720a156fea0696a545381ccc9c",
+      "base": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
       "candidate_count": 59,
-      "packets_preserved": 26
+      "packets_preserved": 26,
+      "selected_next_component": "Reject unsupported or incomplete action completion while preserving dependency results"
     },
-    "entry_observation_base": "ab9ab47a8bec92720a156fea0696a545381ccc9c"
+    "research": {
+      "as_of": "2026-09-28",
+      "exhaustive": false,
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2607.07663v2",
+          "read_depth": "Main taxonomy, evaluator, research and discussion sections; supplied paper identified."
+        },
+        {
+          "url": "https://arxiv.org/html/2609.24663v1",
+          "read_depth": "Methods/evaluation sections."
+        },
+        {
+          "url": "https://arxiv.org/html/2606.08106v1",
+          "read_depth": "Acceptance method/limitations."
+        },
+        {
+          "url": "https://arxiv.org/abs/2604.08988",
+          "read_depth": "Abstract only."
+        },
+        {
+          "url": "https://arxiv.org/abs/2608.06144",
+          "read_depth": "Abstract only."
+        },
+        {
+          "url": "https://arxiv.org/html/2608.04003v1",
+          "read_depth": "Evaluation pipeline and limitations; matched persistence/fresh-session/mechanism evidence."
+        },
+        {
+          "url": "https://arxiv.org/html/2609.26457v1",
+          "read_depth": "Abstract and method; fixed task budgets and private grading."
+        },
+        {
+          "url": "https://arxiv.org/abs/2609.15364",
+          "read_depth": "Abstract only."
+        }
+      ]
+    },
+    "measured_baseline": {
+      "source_pr": 1931,
+      "unique_case_ids": 20,
+      "pr_passes": 20,
+      "main_passes": 20,
+      "failures": 0,
+      "new_cases": 0,
+      "production_source_changes": 0,
+      "platform_actions": 0,
+      "native_activation": false,
+      "held_out_operational_evaluation": false,
+      "operational_outcome_baseline": null,
+      "operational_candidate_gain": null,
+      "avoided_012_interventions": null,
+      "authenticated_cost": null,
+      "held_out_transfer_gain": null,
+      "retained_multi_generation_gain": null
+    },
+    "backend_qualification": {
+      "state": "controlled_source_failure_independently_reviewed",
+      "dbus_fast": {
+        "version": "5.0.22",
+        "commit": "350eed7095f58bdae4d0482ebfd4d9f55a919f75",
+        "source": "https://github.com/Bluetooth-Devices/dbus-fast/tree/350eed7095f58bdae4d0482ebfd4d9f55a919f75"
+      },
+      "jeepney": {
+        "version": "0.9.0",
+        "sdist_sha256": "cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732",
+        "source": "https://pypi.org/project/jeepney/0.9.0/"
+      },
+      "rejected_compositions": [
+        {
+          "composition": "dbus-fast MessageBus",
+          "finding": "Pre-authentication and pending received-FD cleanup ownership not established through normal APIs."
+        },
+        {
+          "composition": "Jeepney core Parser",
+          "finding": "Degenerate accepted container grammar permits a non-advancing synchronous parse."
+        },
+        {
+          "composition": "dbus-fast stream-only codec",
+          "finding": "Caller-owned I/O is feasible; strict semantic end equality, wire validity and all-malformed progress are not established by the consumed API."
+        }
+      ],
+      "reviews": [
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\dbus-fast-review.json",
+          "sha256": "46a723d5ccb76d7eb9d633ca59214f6915844c8dc9478f1644776a49b63c579d",
+          "scope": "Independent source/plan review, not execution evidence"
+        },
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\jeepney-review.json",
+          "sha256": "2e7186c926960e32b5586e85013329a9352fb59ff7ebfbceb3902f9fffce99a1",
+          "scope": "Independent source/plan review, not execution evidence"
+        },
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\codec-review.json",
+          "sha256": "b37a0bf4d54198e966fc2c26b5b45594bd03f54217650de5ca12cf1d9a30f52c",
+          "scope": "Independent source/plan review, not execution evidence"
+        },
+        {
+          "path": "O:\\Foundups-Agent-audits\\20260927-rsi-manager-backend-qualification\\codec-feasibility\\disposition-review.json",
+          "sha256": "c834612035348e1e64b33439818f47e0811ae0750b7430d99e2685660a5ed4ab",
+          "scope": "Independent source/plan review, not execution evidence"
+        }
+      ],
+      "new_tests_run": 0,
+      "package_import_or_install": false,
+      "runtime_or_privilege_actions": 0,
+      "limits": [
+        "No executed exploit/leak/hang or deployed exposure claimed.",
+        "Do not conflate Jeepney zero-progress evidence with dbus-fast unqualified progress.",
+        "No third-library search, parser fork/new grammar or broad containment selected."
+      ],
+      "resume_prerequisite": "Reviewed strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress and usable interpreted/compiled API evidence. Then fresh source/ownership reconciliation and WSP15 selection; deployment visibility, authenticated transport and native authority remain separate."
+    }
   }
 }

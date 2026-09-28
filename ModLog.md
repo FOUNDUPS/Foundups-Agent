@@ -1,3 +1,9 @@
+## 2026-09-28: RSI scheduler completion repair selected
+
+- Reconciled PR1936 (`cd7e62d680`) as merged/main-verified:13 passing defect/control witnesses, no production repair yet. Existing Holo recovery separately verified CURRENT/no-gap and33 replica artifacts at `215393869`; subsequent product-only main `870849a74` requires its own freshness evidence.
+- Re-observed96 peer PRs; no scheduler/backlog owner overlap, only unrelated generated-registry rows. WSP15 selects the existing scheduler completion repair15/P1 ahead of eligible12/P2 hook and11/P2 correspondence work; native18/P0 and other blocked owner dependencies remain unchanged.
+- Freeze26 hosted test methods/32 fixed input cases before production edits. Preserve protected shared/product/AutoPost work, all26 roadmap packets and the59-row queue. No host-local application tests or account effects; no native RSI/promotion claim. Current receipts live in the existing canonical backlog. WSP00/15/22/50/62/84/97.
+
 ## 2026-09-28: RSI qualifies social scheduler outcome evidence
 
 - Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.

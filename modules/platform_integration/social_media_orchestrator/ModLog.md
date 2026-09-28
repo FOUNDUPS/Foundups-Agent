@@ -1,3 +1,10 @@
+## 2026-09-28: Admit bounded scheduler completion repair
+
+- PR1936 qualification is merged/main-verified at `cd7e62d680`:13/13 original witnesses passed on both PR and main. Preserve that closure and replace the stale preparation-only reading above the historical entry below.
+- Fresh WSP15 C3/I4/D4/Impact4=15/P1 selects the existing in-memory completion owner; native18/P0 retains its seven actual prerequisites. New main `870849a74` changes only separately owned eSingularity paths.
+- Freeze26 methods/32 input cases in the existing hosted fixture before repairing unsupported success and incomplete/malformed posting disposition. No new scheduler, producer, schema, account action, persistence owner or runtime gate.
+- Current state: acceptance prepared, hosted baseline and repair pending. Exact source/results/publication are tracked by the canonical RSI backlog. WSP00/15/22/50/62/84/97.
+
 ## 2026-09-28: Qualify scheduler completion evidence before RSI use
 
 - Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.
