@@ -1,3 +1,9 @@
+## 2026-09-28 - YUMORI work-orchestrator Skillz backend inventory refresh
+
+- Registered the YUMORI verified-backlog / Work-handoff Skillz without expanding the executable backend closure.
+- Refreshed the existing backend manifest entry for `skills_registry_v2.json` and both canonical manifest digest pins. Registry runtime SHA: `982c1abbaf9b76928ff3f0e4498c918b5ceeba2f4ec1140ab0b36f23de191d85`; manifest digest: `e566147f716b6c909d428a090bd77484025b52eb6e3a9e474feccd2758ace5a8`.
+- Compatibility metadata only: no backend API/version, executable member, permission rule, external-effect authority or Work execution path changed.
+
 ## 2026-09-28 - Correspondence-state Skillz backend inventory refresh
 
 - Registered the generic Red Dog correspondence-state Skillz and changed the WRE Skillz registry content without expanding the executable backend closure.
