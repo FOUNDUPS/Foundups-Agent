@@ -1,3 +1,11 @@
+## Persisted correspondence read acceptance — 2026-09-28
+
+The existing recipient-preflight owner now has29 case IDs (21 test functions): all20 original cases plus nine persisted-read cases. Reuse its isolated SQLite fixture and named CI step. `-s` retains synthetic `CORRESPONDENCE_READ_EVIDENCE` records with actual imported-source SHA, returned state/errors and before/after row/event snapshots. No live correspondence records enter the fixture.
+
+The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 failed in [CI36440777022](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36440777022). The identical fixture against `0f8b3047c8` passed29/29 with zero failures, errors or skips in [CI36442000632](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36442000632) (0.97s). Independent review checked original output, implementation hashes, fixed IDs, matching digests and unchanged persisted rows/events. All ten candidate PR checks and CI/CodeQL passed.
+
+Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0.
+
 ## Correspondence and recipient CI baseline — 2026-09-28
 
 The existing `test_reddog_recipient_preflight.py` contains 20 cases: 14 recipient

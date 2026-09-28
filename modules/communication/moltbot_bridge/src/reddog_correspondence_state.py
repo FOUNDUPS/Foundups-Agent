@@ -329,7 +329,12 @@ class RedDogCorrespondenceStateStore(ModuleDB):
             return None
         row = rows[0]
         payload = json.loads(row["state_json"])
+        if payload.get("schema_version") != SCHEMA_VERSION:
+            raise ValueError("unsupported correspondence state schema")
         state = _state_from_payload(payload)
+        _validate_state(state)
+        if state.scope_key != scope_key:
+            raise ValueError("correspondence state scope mismatch")
         if state_digest(state) != row["state_digest"]:
             raise ValueError("correspondence state digest mismatch")
         return state

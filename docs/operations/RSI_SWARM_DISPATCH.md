@@ -1,3 +1,13 @@
+## Correspondence read-validation evidence — 2026-09-28
+
+PR1945 is merged/main-verified at `678e8f87`; its six hook-entrypoint controls and owned closure are recorded. Fresh59-row/26-packet WSP15 reconciliation selects the existing correspondence read boundary at11/P2. Current Holo retrieval is source-bound CURRENT/no-gap at that base.
+
+The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 failed in [CI36440777022](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36440777022). The identical fixture against `0f8b3047c8` passed29/29 with zero failures, errors or skips in [CI36442000632](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36442000632) (0.97s). Independent review checked original output, implementation hashes, fixed IDs, matching digests and unchanged persisted rows/events. All ten candidate PR checks and CI/CodeQL passed.
+
+Reads now require an explicit supported payload schema, reuse the writer's state validation and bind the returned scope to the requested scope. Existing digest rejection and valid roundtrip remain. Cached state never authorizes a send; rejected cache state requires provider reconciliation.
+
+Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0. The seven native authority prerequisites and null effect-use lease remain; AmIBot stays at G0. See the existing [backlog](../roadmaps/rsi_swarm_backlog.json) for full ranking and immutable receipts.
+
 ## Manager backend qualification closure — 2026-09-28
 
 PR1924 is `MERGED_VERIFIED_MAIN` at

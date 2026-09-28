@@ -1,3 +1,11 @@
+## 2026-09-28: Validate persisted correspondence before reuse
+
+Reads now require an explicit supported payload schema, reuse the writer's state validation and bind the returned scope to the requested scope. Existing digest rejection and valid roundtrip remain. Cached state never authorizes a send; rejected cache state requires provider reconciliation.
+
+The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 failed in [CI36440777022](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36440777022). The identical fixture against `0f8b3047c8` passed29/29 with zero failures, errors or skips in [CI36442000632](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36442000632) (0.97s). Independent review checked original output, implementation hashes, fixed IDs, matching digests and unchanged persisted rows/events. All ten candidate PR checks and CI/CodeQL passed.
+
+Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0.
+
 ## 2026-09-28: RSI qualifies correspondence CI coverage
 
 - Fresh PR1930 inspection found no normal CI selection for its existing 20-case Python recipient/correspondence test owner. Select C1/I3/D3/Impact3=10/P2 to establish the hosted baseline before changing state-read behavior.
