@@ -294,7 +294,8 @@ def test_future_route_is_utf8_and_uses_cog_dc_compute() -> None:
     future = read("app/future/page.tsx")
     assert "福井に、" in future
     assert "私たちのCOG DCコンピュート" in future
-    assert "まず約1 MWを検討単位" in future
+    assert "最初から容量を決めて建てません" in future
+    assert "必要量だけ導入" in future
     assert "容量、時期、費用、熱利用、収益は未確定" in future
     assert not re.search(r"縺|蜿|蝓|譛|險育", future)
 
