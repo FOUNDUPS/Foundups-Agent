@@ -1881,11 +1881,11 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.operational_controls_20260928",
-    "base_commit": "daff2848c7226208f2b1d67aed6b8de68f23f823",
+    "observation_path": "current_observation.local_inference_qualification_20260928",
+    "base_commit": "793fc736b0fd79355c1742a6ae95757fab196bf6",
     "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
-    "selected_component": "Freeze synthetic inputs, independent labels and a source-bound evaluation plan for the existing correspondence instruction consumer",
-    "status": "prepared_independent_labels_bound_publication_pending",
+    "selected_component": "Qualify existing local inferencer import effects, exact model/tokenizer identity and complete prompt-fit prerequisites",
+    "status": "metadata_and_source_reviewed_execution_unqualified_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1903,24 +1903,24 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "correspondence_read_validation_20260928",
-    "base": "678e8f87c45d5bd08f2b17d860c266973a5f4c63",
+    "observation_id": "local-inference-qualification-20260928",
+    "base": "793fc736b0fd79355c1742a6ae95757fab196bf6",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Qualify and repair stored correspondence state read validation",
-    "selected_component": "Existing persisted-state read boundary",
+    "selected": "Qualify the operational decision contract with fixed synthetic controls",
+    "selected_component": "Qualify existing local inferencer import effects, exact model/tokenizer identity and complete prompt-fit prerequisites",
     "wsp15": {
       "complexity": 2,
-      "importance": 3,
+      "importance": 4,
       "deferability": 3,
       "impact": 3,
-      "total": 11,
+      "total": 12,
       "priority": "P2"
     },
     "previous_closed": {
@@ -1930,14 +1930,28 @@
     },
     "previous_observation": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\postclosure-reobservation.json",
     "retrieval": {
-      "noise": "Unrelated generic schema/resident hits; direct canonical owner reads resolve them.",
-      "ordering": "Target owner below generic hit; module and must-include docs prioritized.",
-      "missing_artifacts": [
-        "module requirements.txt",
-        "module memory/README.md"
+      "evidence": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\holo-query.json",
+      "sha256": "f051347f2880dcd8567e5801b6553a984a579a8a6255c4e403867cbba6bc1579",
+      "freshness": "CURRENT",
+      "source_commit": "793fc736b0fd79355c1742a6ae95757fab196bf6",
+      "index_gap_detected": false,
+      "ordered_hit_paths": [
+        "modules/infrastructure/wre_core/src/local_skill_inference.py",
+        "modules/infrastructure/wre_core/src/skill_selector.py",
+        "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py",
+        "holo_index/qwen_advisor/llm_engine.py",
+        "modules/infrastructure/wre_core/tests/test_qwen_inference_wiring.py"
       ],
-      "freshness": "Exact base CURRENT; source/skill docs independently read.",
-      "duplication": "Alias hit arrays deduplicated by path; existing test owner reused."
+      "noise": "Five distinct hits: exact local adapter, adjacent skill selector, actual master caller, exact engine and wiring tests; no unrelated top hits. Advisor Skillz is an unqualified prototype, not execution proof.",
+      "ordering": "Read adapter and actual caller, then engine/package initializers, resolver, relevant tests and model/runtime metadata. Preserve prior correspondence controls unchanged.",
+      "missing_required_artifacts": [],
+      "duplicate_top_hit_paths": 0,
+      "staleness_risk": "Current committed main only. Embedded lexical bundle UNKNOWN is not semantic proof and does not cover dirty peer work.",
+      "improvement": "WRE hint and required module documentation supplied; directly retrieved package initializers/model resolver absent from top five. NAVIGATION lookup had no dedicated local adapter entry.",
+      "optional_missing_artifacts": [
+        "memory/README.md"
+      ],
+      "new_duplicate_owner_needed": false
     },
     "allocation": {
       "wsp15": {
@@ -2552,10 +2566,10 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "controls_prepared_evaluation_unqualified",
+          "state": "source_qualified_candidate_requires_fixed_import_fixture_and_owner_review",
           "source": "ROADMAP.md#operational-decision-contract-and-rsi-audit--2026-09-28; modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28",
-          "dependency": "Independent labels, instruction source hashes, actual local inference import/model/prompt-fit/deadline/resource qualification. No native admission or provider authority inferred.",
-          "next_step": "After publication closure, re-observe and qualify exact local import/model/tokenizer, full prompt fit and enforceable resource bounds before any model call.",
+          "dependency": "Current preparation closure, fresh ownership/source observation and exact finite no-model import/API acceptance before any fixture or production execution. Native tokenizer/model/provenance prerequisites remain separate.",
+          "next_step": "Within existing holo_index qwen_advisor package/test owners, freeze isolated import-effect and public-export compatibility controls before a minimal lazy-export candidate using the existing holo_index.__getattr__ pattern. Preserve all __all__ exports, object identities, lazy first access and unknown-attribute behavior; prove leaf import avoids coordinator, filesystem/path/root-logging effects without loading models. Review fixture isolation and hosted effect scope before execution.",
           "effort_cost": "Proposed12case offline qualification first. Later40held-out and20transfer/retention scenarios require declared numeric resource caps and evaluator route; none have run.",
           "limits": "No paid-provider dispatch, live mail/social use or retained-learning claim from a planning record.",
           "wsp97_action": "Reuse DigitalTwin, correspondence, style/trajectory and WRE evaluation owners.",
@@ -2567,7 +2581,26 @@
             "total": 12,
             "priority": "P2"
           },
-          "next_component": "Bind independent synthetic decision labels and an effect-free evaluation route to the existing RedDog correspondence instruction entry"
+          "next_component": "Qualify and narrowly defer eager qwen_advisor package exports for the existing local proposal import route",
+          "state_after_current_closure": "controls_prepared_source_import_model_prompt_fit_unqualified",
+          "preserve_whole_wsp15": true,
+          "completed_component": "Twelve synthetic controls, independent AI labels with corrected objective convention, full prompt manifests and proposed evaluation limits",
+          "remaining_component_wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 3,
+            "total": 12,
+            "priority": "P2"
+          },
+          "completed_preparation": {
+            "pr": 1947,
+            "merge": "793fc736b0fd79355c1742a6ae95757fab196bf6",
+            "cases": 12,
+            "labels": 12,
+            "evaluated_cases": 0,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\final-accounting.json"
+          }
         },
         {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
@@ -3460,8 +3493,8 @@
       ],
       "selected_next": "Qualify the operational decision contract with fixed synthetic controls",
       "implementation_ready_selected": false,
-      "state": "controls_prepared_publication_pending",
-      "rationale": "Fresh main, CI, peer heads and prior closure are unchanged. The seven native/authority prerequisites, protected-product ownership, upstream decoder/handoff prerequisites and paused lineage remain unresolved at their exact reviewed source. The correspondence repair is closed. The concrete existing instruction consumer permits a bounded operational measurement-preparation component without inventing a runtime consumer or dispatching providers. Tied parity/lineage controls lack a bound consumer or remain paused. No scanner growth triggers decomposition. Prepare the controls; do not confuse preparation with evaluation or native admission.",
+      "state": "metadata_preparation_reviewed_publication_pending",
+      "rationale": "Ordinary local adapter call currently pulls coordinator/services via package initializer before resolving the leaf. Concrete path/logging/CWD effects can be reduced and tested without native loading; this advances the actual consumer and removes a known source obstacle. Another abstract tokenizer plan cannot supply native provenance/enforcement and would repeat preparation. This is a prospective existing-owner compatibility repair, not a claim that current native loading is safe.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3472,15 +3505,15 @@
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
       "authoritative_use_lease": null,
-      "base": "daff2848c7226208f2b1d67aed6b8de68f23f823",
+      "base": "793fc736b0fd79355c1742a6ae95757fab196bf6",
       "candidate_count": 59,
       "packets_preserved": 26,
-      "selected_next_component": "Freeze synthetic inputs, independent labels and a source-bound evaluation plan for the existing correspondence instruction consumer",
+      "selected_next_component": "Qualify and narrowly defer eager qwen_advisor package exports for the existing local proposal import route",
       "selection_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\selection-review.json",
-        "sha256": "1d5b1297e2a068753978a3994c73cc398e78b055b454317d18f1e7574af0cc87"
+        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\next-action-review.json",
+        "sha256": "6a5b9ff5eedfc4757d960db3a75a4f9a4ae6279376230c68329f9f420330cda8"
       },
-      "observation_utc": "2026-09-28T16:43:53.676784+00:00",
+      "observation_utc": "2026-09-28T17:23:50.054212+00:00",
       "provenance_correction_consumed": {
         "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\postclosure-provenance-correction.json",
         "sha256": "b243a527e21e199bc7e8a740e44fb1e15a2b3678fc98746c168b788e32beb52d"
@@ -3493,41 +3526,45 @@
         "total": 12,
         "priority": "P2"
       },
-      "observed_utc": "2026-09-28T16:43:53.676784+00:00",
-      "preparation_ready_selected": false,
+      "observed_utc": "2026-09-28T17:59:13.900844+00:00",
+      "preparation_ready_selected": true,
       "retrieval": {
-        "evidence": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\holo-query.json",
-        "sha256": "93f6ec66e939d6a5f6bccee349ad05e667bf2dd290a441a4d0e6dc7a471ededf",
+        "evidence": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\holo-query.json",
+        "sha256": "f051347f2880dcd8567e5801b6553a984a579a8a6255c4e403867cbba6bc1579",
         "freshness": "CURRENT",
-        "source_commit": "daff2848c7226208f2b1d67aed6b8de68f23f823",
+        "source_commit": "793fc736b0fd79355c1742a6ae95757fab196bf6",
         "index_gap_detected": false,
         "ordered_hit_paths": [
-          "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
-          "modules/ai_intelligence/ai_overseer/README.md",
-          "modules/infrastructure/wre_core/ROADMAP.md",
-          "WSP_framework/src/WSP_96_MCP_Governance_and_Consensus_Protocol.md",
-          "WSP_framework/src/WSP_101_UPS_Utility_Classification_Protocol.md"
+          "modules/infrastructure/wre_core/src/local_skill_inference.py",
+          "modules/infrastructure/wre_core/src/skill_selector.py",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py",
+          "holo_index/qwen_advisor/llm_engine.py",
+          "modules/infrastructure/wre_core/tests/test_qwen_inference_wiring.py"
         ],
-        "noise": "Judge correspondence/recipient/decision hits against the exact instruction owner; lexical bundle aliases and adjacent orchestration hits are not independent evidence.",
-        "ordering": "Use canonical skill wrapper -> Skillz -> recipient dependency -> WRE measurement plan; explicit source reads take precedence over ranked snippets.",
+        "noise": "Five distinct hits: exact local adapter, adjacent skill selector, actual master caller, exact engine and wiring tests; no unrelated top hits. Advisor Skillz is an unqualified prototype, not execution proof.",
+        "ordering": "Read adapter and actual caller, then engine/package initializers, resolver, relevant tests and model/runtime metadata. Preserve prior correspondence controls unchanged.",
         "missing_required_artifacts": [],
         "duplicate_top_hit_paths": 0,
         "staleness_risk": "Current committed main only. Embedded lexical bundle UNKNOWN is not semantic proof and does not cover dirty peer work.",
-        "improvement": "Existing module hint and must-include README/INTERFACE/test docs, followed by direct reads of both Skillz contracts and source-bound evaluator candidates."
+        "improvement": "WRE hint and required module documentation supplied; directly retrieved package initializers/model resolver absent from top five. NAVIGATION lookup had no dedicated local adapter entry.",
+        "optional_missing_artifacts": [
+          "memory/README.md"
+        ],
+        "new_duplicate_owner_needed": false
       },
       "cost_and_verification": {
         "effort": "One bounded source/acceptance preparation slice; no model or provider run.",
         "paid_provider_dispatches_planned": 0,
         "actual_tokens": null,
         "currency_cost": null,
-        "independent_work": "Existing reviewer binds route and labels without evaluating model outputs.",
-        "verification_burden": "JSON/source/hash checks and independent label review; no application imports or fixture execution."
+        "independent_work": "Existing independent reviewer audits import/effect scope and exact metadata evidence; no subject model runs.",
+        "verification_burden": "Read-only source/AST/Git/hash/model metadata; no application or native tokenizer imports, tests or inference."
       },
       "previous_closure": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-read-validation\\final-closure-review.json",
-        "sha256": "a9c6fa5d21b21223cafd928a0eb66e4cfd6598bac173c20a355c51bd6ada7ac5"
+        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\final-closure-review.json",
+        "sha256": "d6581f4edcc4f04e778b5fc9f4e91d264f566f8cbe6614c93afb4839ff13748d"
       },
-      "postclosure_reobservation_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\postclosure-reobservation.json"
+      "postclosure_reobservation_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\postclosure-reobservation.json"
     },
     "research": {
       "as_of": "2026-09-28",
@@ -5227,6 +5264,416 @@
         "subject_session": "Not created; must be fresh and exclude labels and this conversation before any evaluated run.",
         "coordination_model_tokens": null,
         "coordination_currency_cost": null
+      },
+      "closure": {
+        "pr": 1947,
+        "merge": "793fc736b0fd79355c1742a6ae95757fab196bf6",
+        "main_ci_and_codeql": "verified_success",
+        "owned_lane_retired": true,
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\final-accounting.json",
+        "sha256": "42b7fd1a0fb48fd1cbadac9a0df5c363f8d0babcb734abeeb424bb15820f9183",
+        "independent_closure_review": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\final-closure-review.json",
+        "review_sha256": "d6581f4edcc4f04e778b5fc9f4e91d264f566f8cbe6614c93afb4839ff13748d"
+      }
+    },
+    "local_inference_qualification_20260928": {
+      "observed_utc": "2026-09-28T18:05:43.625578+00:00",
+      "scope": "Read-only readiness qualification of the existing local WRE proposal route",
+      "dispatchable": false,
+      "execution_ready": false,
+      "model_artifact": {
+        "path": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        "size": 4683073536,
+        "mtime_ns": 1771776647443894700,
+        "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c"
+      },
+      "runtime_distribution": "llama_cpp_python 0.3.20",
+      "candidate_binding": "Existing default-folder candidate under observed pre-import routing; actual production resolver outcome not executed or certified.",
+      "runtime_bindings": {
+        "_ctypes_extensions.py": "9e5241832feb61e3c439b0e9e4d9a9ff4e7a6a54b0809a8f5995f0175d841876",
+        "_internals.py": "770b7e974e5c3835b4c2987d088d0651767e0dcd9dd1913c76eae75ff1243a9c",
+        "llama.py": "3cd93b5d381391026bdda7c971f4374e3c676909015b8469b463115762f367f0",
+        "llama_cpp.py": "0101bba0fe3046cdb04a7cc68b0daf54f3e0cf074a91b64f3bd0a715af3cea8a",
+        "llama_tokenizer.py": "482e57da563dd537fba8c5d2ae09dc352c3054dfd8622957a2cb919b8478ca9f"
+      },
+      "prompt_manifest": [
+        {
+          "case_id": "G01",
+          "sha256": "8daa4bddd42cf2ac9463593e090a3f622cac052cbddc783706d2802d6c9b21c3",
+          "utf8_bytes": 19839,
+          "unicode_characters": 19817,
+          "token_count": null
+        },
+        {
+          "case_id": "G02",
+          "sha256": "ccf1f6158e9ebf6d9e6bc5346e0e6d9b51bc4f698f1ad829e0afd9e52f25e167",
+          "utf8_bytes": 19794,
+          "unicode_characters": 19772,
+          "token_count": null
+        },
+        {
+          "case_id": "G03",
+          "sha256": "255b057cac27a76563e4d2b3babe972e845df4e0514bc0ca3782e4726b8ba34f",
+          "utf8_bytes": 19845,
+          "unicode_characters": 19823,
+          "token_count": null
+        },
+        {
+          "case_id": "G04",
+          "sha256": "28a589195b601c678e5b7e615ecb434115527a17fbd4b47f838d96eb63436efa",
+          "utf8_bytes": 19950,
+          "unicode_characters": 19928,
+          "token_count": null
+        },
+        {
+          "case_id": "G05",
+          "sha256": "21af01fffba668b683bbdeb6a453f835147f53e4701ad683a6da619826fe837f",
+          "utf8_bytes": 19878,
+          "unicode_characters": 19856,
+          "token_count": null
+        },
+        {
+          "case_id": "G06",
+          "sha256": "e0d21f0cc0c090d0c6a288b313f644749b5d0f5df922f35d24bc63db7b3d4e08",
+          "utf8_bytes": 19967,
+          "unicode_characters": 19945,
+          "token_count": null
+        },
+        {
+          "case_id": "L01",
+          "sha256": "1c8ef7d67921d322e44fb8cf776616450bfd6c4f3e68e8747137417327adaa30",
+          "utf8_bytes": 19843,
+          "unicode_characters": 19821,
+          "token_count": null
+        },
+        {
+          "case_id": "L02",
+          "sha256": "48b2869856ade41dcf0be69c1190f65c48458c6c5d99056348e1c20e29069f43",
+          "utf8_bytes": 19815,
+          "unicode_characters": 19793,
+          "token_count": null
+        },
+        {
+          "case_id": "L03",
+          "sha256": "d87174f1f123b85419273384795a7b8085ad469e1206ef7ca083476a4df360e4",
+          "utf8_bytes": 19782,
+          "unicode_characters": 19760,
+          "token_count": null
+        },
+        {
+          "case_id": "L04",
+          "sha256": "5bec8cc50e2d9ad86617c080d6a0419665c7670229676f5a622989f708d7e3fd",
+          "utf8_bytes": 20009,
+          "unicode_characters": 19987,
+          "token_count": null
+        },
+        {
+          "case_id": "L05",
+          "sha256": "1e0f8067c09dbe8f33642bd8984e3dce1a33be8309b3cfa4777d613d2ae7528a",
+          "utf8_bytes": 19885,
+          "unicode_characters": 19863,
+          "token_count": null
+        },
+        {
+          "case_id": "L06",
+          "sha256": "8bae2c7fac2402d5c44d02261e9f09ac6997530236b4d1dd0f85f8f5739bda99",
+          "utf8_bytes": 19844,
+          "unicode_characters": 19822,
+          "token_count": null
+        }
+      ],
+      "prior_controls": {
+        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls\\prepared-packet-v2.json",
+        "sha256": "2bb367d0406d30e56ff1846fb4bcfd6d288a2ff62aabd76d1ef3f82535f42835",
+        "labels_sha256": "579b5aa76ca99099d124844efe759b1e12aee95352aac61b53d96054b69c577a",
+        "label_correction_sha256": "db63807fb65944636ec261103261d47c6428779497878c1e25256409ce4f8d4e"
+      },
+      "established": [
+        "Exact existing GGUF bytes and bounded metadata read without native or application imports.",
+        "Five noncredential route overrides absent before product imports; one file in the default code-role directory.",
+        "GGUF qwen2/gpt2 pre=qwen2 tokenizer:152064 tokens,151387 merges; array metadata hashed.",
+        "Installed Python/llama_cpp source and DLL files bound; this is not complete transitive runtime provenance.",
+        "All12 frozen prompt digests and byte lengths match the previous independently reviewed preparation.",
+        "Adapter requests context2048/output512 even though GGUF metadata advertises context131072; no setting changed."
+      ],
+      "blocked_or_unverified": [
+        "Normal import graph/effects and post-import resolver environment need independent qualification.",
+        "Native library/dependency resolution includes ambient DLL path controls; installed version/digests alone do not prove confinement or origin.",
+        "Exact full-prompt token counts and actual completion special-token behavior have not been executed.",
+        "No enforced local tokenizer-only process/time/memory/network boundary is qualified by this metadata receipt.",
+        "No subject evaluation, quality/cost baseline, held-out gain, promotion or native WRE admission established.",
+        "Partial native model construction and second allocation need separately qualified containment; no claim of all-path native closure."
+      ],
+      "tokenizer_only_followup_design": {
+        "status": "nonexecutable source/effect design; fresh exact-boundary review required before implementation or execution",
+        "existing_owner": "Installed llama_cpp._internals.LlamaModel, llama_model_default_params and model vocabulary/tokenization APIs",
+        "why_not_high_level_helper": "LlamaTokenizer.from_ggml_file invokes Llama(vocab_only=True), but installed Llama.__init__ still constructs LlamaContext and LlamaBatch.",
+        "inputs": "Exact model digest, native/runtime source bindings, all12 full original prompt bytes; no expected labels or subject answers.",
+        "proposed_call_sequence": [
+          "Independently qualify a fresh disposable child using exact dependencies and controlled DLL resolution, enforced output/time/memory/network bounds, and no application package imports.",
+          "Within that admitted child only: existing llama_backend_init; model_default_params with vocab_only=true,n_gpu_layers=0,use_mmap=false,use_mlock=false; construct existing LlamaModel with exact model path. No Llama/LlamaContext/LlamaBatch, generation, sampling or model weight evaluation.",
+          "Read native vocabulary BOS/EOS/CLS/SEP IDs and add flags; bound the vocabulary/training-context sizes before allocation. For each exact nonempty prompt use existing tokenize(bytes,add_bos=false,special=true).",
+          "Match installed completion layout: prepend cls-or-bos only if add_bos and validID; append sep-or-eos only if add_eos or validSEP; no suffix/infill, no chat template. Record raw count, special count, final count and exact prompt digest.",
+          "Require every final_count+512<=2048 for the frozen route to fit. Library clamping of output is failure to meet the proposed full-output budget, not successful fit.",
+          "Close the exact model and backend on every path, verify child exit and no surviving owned resources; redact exception payloads. Preserve failed counts and return precise blocked result."
+        ],
+        "proposed_caps_not_enforced": {
+          "cases": 12,
+          "native_processes": 1,
+          "concurrency": 1,
+          "retries": 0,
+          "model_generations": 0,
+          "cpu_threads": 1,
+          "wall_seconds_total": 120,
+          "resident_memory_bytes": 1073741824,
+          "network": false,
+          "tools": [],
+          "receipt_bytes_max": 65536,
+          "provider_dispatches": 0
+        },
+        "required_evidence": [
+          "Exact executable/dependency/DLL provenance and environment boundary or explicit rejection",
+          "Independent source/effect review of the final concrete child/controller before invocation",
+          "All12 per-prompt counts with special-token policy, zero generation, duration/peak memory or unknown",
+          "Cleanup/timeout/failure evidence and full frozen manifest equality",
+          "Prove partial-constructor failure and second token-buffer allocation remain contained; successful-path close alone is insufficient."
+        ],
+        "on_failure": "Stop with exact prerequisite. Do not shorten prompts, enlarge context, change models, rewrite labels or bypass normal application import defects.",
+        "known_lifecycle_limits": [
+          "Installed _internals.LlamaModel:54-76 registers free_model only after model_get_vocab succeeds; failed partial construction is not proven cleaned by object.close(). A reviewed external child termination/cleanup boundary is required.",
+          "Installed _internals.LlamaModel.tokenize:167-176 allocates n_ctx_train then reallocates abs(native negative return); bounding training context alone does not bound retry allocation. Enforced external memory/time caps and validated native return bounds remain unqualified."
+        ]
+      },
+      "metrics": {
+        "model_files_metadata_inspected": 1,
+        "runtime_files_hashed": 36,
+        "frozen_prompts_verified": 12,
+        "tokenized_prompts": 0,
+        "subject_model_calls": 0,
+        "evaluated_cases": 0,
+        "fit_cases": null,
+        "correct_cases": null,
+        "retained_improvement": null,
+        "model_tokens": null,
+        "currency_cost": null
+      },
+      "evidence_hashes": {
+        "model-runtime-metadata.json": "4f07469d774e4e2d906ad39b20654e2cfec67f97e59ea4ae3b0b7f5046ce4703",
+        "inspect_model.py": "7224a566fc171ef970dfb879d3a28d203a7862aa81a30869cbb1ef17995b29c5",
+        "source-bindings.json": "378dd0aa1f7d88ea63d8a0e4080162128cc1b590346fef0d7a4a3ac0bf0cf6c2",
+        "previous-evaluation-plan.json": "ae01ea1b8af9e51de41224db9e8a45247b557d46afbd89d65692f187f7786bfc"
+      },
+      "pre_execution_review_amendment": {
+        "prior_plan_sha256": "fa17306df4c3342519e8b59a2b6f51eb41c3f949663be5d89463ead374ba86f2",
+        "reason": "Independent installed-source review found partial-constructor cleanup and native token-buffer retry allocation limits; no native call has run."
+      },
+      "base_commit": "793fc736b0fd79355c1742a6ae95757fab196bf6",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 3,
+        "total": 12,
+        "priority": "P2"
+      },
+      "whole_work_item_wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "import_audit": {
+        "ordinary_import_fully_qualified": false,
+        "static_repo_graph_modules": 108,
+        "graph_is_execution_trace": false,
+        "findings": [
+          "Qwen leaf import first executes qwen_advisor/__init__.py:27 coordinator export and a broad optional/conditional dependency graph.",
+          "pattern_coach.py:43-46 inserts ric_dae source into sys.path; intended holodae_gemma_integration.py:19-20 appends CWD-relative paths.",
+          "tools/shared/module_scoring_engine.py:53 invokes logging.basicConfig; holo_index/utils/helpers.py:229 resolves default WSP paths from environment/filesystem at import.",
+          "Coordinator/service construction is a later caller effect, not claimed as import-time execution.",
+          "Native llama_cpp import loads DLLs, mutates PATH/DLL search and registers llama_log_set; complete dependency and native closure remain unqualified.",
+          "Existing mock-based adapter tests establish proposal/error semantics, not real model identity, prompt fit or import confinement."
+        ],
+        "source_bindings": {
+          "modules/__init__.py": {
+            "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+          },
+          "modules/infrastructure/wre_core/__init__.py": {
+            "raw_sha256": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+            "git_blob": "7fe5bab5af0b225c1a6edadd9ae49e98b87fdcff"
+          },
+          "modules/infrastructure/wre_core/src/__init__.py": {
+            "raw_sha256": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
+            "git_blob": "a5a91280e64cebb077cc8a51cf7d78f4c3a00ed0"
+          },
+          "modules/infrastructure/wre_core/src/local_skill_inference.py": {
+            "raw_sha256": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+            "git_blob": "d6c344752a20a3e2832a6a7ab1b151a3cbabbfbe"
+          },
+          "holo_index/__init__.py": {
+            "raw_sha256": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+            "git_blob": "a6df23d932d06fd56ca2a2fcacc0a36c9f355964"
+          },
+          "holo_index/qwen_advisor/__init__.py": {
+            "raw_sha256": "b6f2f68182cf4dac66fc287e8e682d7af4114521e950b1104eac97fd0959685c",
+            "git_blob": "781076eeb659cb9b129e236476ab7ff635425e0a"
+          },
+          "holo_index/qwen_advisor/llm_engine.py": {
+            "raw_sha256": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+            "git_blob": "0a1fc97f8a871145925e7b3c9db6017d23d69315"
+          },
+          "holo_index/qwen_advisor/holodae_coordinator.py": {
+            "raw_sha256": "cb6d1c5f5efb99067a30ad59d8c1a69930aadae92965ba1c071151c8616fe97f",
+            "git_blob": "f7df72b22a36127a8860859f8935a8df24fe7a36"
+          },
+          "holo_index/qwen_advisor/orchestration/qwen_orchestrator.py": {
+            "raw_sha256": "32ac51d5a7495febbab16778d3882b60fb43a1cbc97a662b1113074307b5f6bd",
+            "git_blob": "dc3ee8f10dd7bc4fd4d4f944600024cd832ca79e"
+          },
+          "holo_index/qwen_advisor/pattern_coach.py": {
+            "raw_sha256": "42f9fc91c264561346425ca2f2fa71f377b839aa7f41eb250d3a07000fc234d7",
+            "git_blob": "1c656ad28961df0d56059a64f1485cdf3d65fdeb"
+          },
+          "holo_index/core/__init__.py": {
+            "raw_sha256": "2be1a2ad5e9e8aafe7f257bc130df062236b9563a7d20d39fa141c1b4e691dec",
+            "git_blob": "c6e59b5fbdbfebfe5baa2c45f8e1843decaa9037"
+          },
+          "holo_index/core/holo_index.py": {
+            "raw_sha256": "f7be72faba4785c998e55577d6e5a99d0f9e2456b4d7d185431b83d2375dbf23",
+            "git_blob": "14329dcd2f48a089bd598c1d19a1b97a262f8cb9"
+          },
+          "holo_index/utils/helpers.py": {
+            "raw_sha256": "4195e1ed17347e99c871c218e70a83ae5e7db527118eedca6851ceb42c02fcb8",
+            "git_blob": "e3c2371d9525d34520823f79afc44233e016deb8"
+          },
+          "tools/shared/module_scoring_engine.py": {
+            "raw_sha256": "c99d44650d13088e847fc889cf4dff005027476040c79acb911d2e6e88e070e5",
+            "git_blob": "fc5597a69e44574716bcf893be228243d26caa35"
+          },
+          "modules/ai_intelligence/ric_dae/src/holodae_gemma_integration.py": {
+            "raw_sha256": "4f2a057bb2de67dfa188df90c80f02b0590f4902e8fa0aa1e23cc6ac0ccd979a",
+            "git_blob": "e91581042b98d4d7bb7e337fe61d47369f697eea"
+          },
+          "modules/ai_intelligence/ric_dae/src/mcp_tools.py": {
+            "raw_sha256": "d9b7c4e775672ea4d2cd0e83ac18c9b4e59cef35e3283bcbf2baf6b8dd2648c0",
+            "git_blob": "f83909000ea526aa842742d20f4c3c004824539c"
+          },
+          "modules/ai_intelligence/ric_dae/src/__init__.py": {
+            "raw_sha256": "b2d8e1e456f76460f4c976fd2df65b9dd2bff47aaab4ac727dac773c1b1b059a",
+            "git_blob": "5d878935c0a0caf36f6e7a13ccdeb1d1c8547357"
+          },
+          "modules/communication/livechat/src/automation_gates.py": {
+            "raw_sha256": "deeb5dcde5dc1652d23ad2e4dfd76f62271ec809128e4491683fd82e7787489a",
+            "git_blob": "b9045ad80f55df802a64b4b5cb7450bad9ced61c"
+          },
+          "modules/infrastructure/shared_utilities/local_model_selection.py": {
+            "raw_sha256": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+            "git_blob": "8a3fe70c12fa23f69fa4bd692fc212d2347f1230"
+          },
+          "modules/infrastructure/wre_core/tests/test_qwen_inference_wiring.py": {
+            "raw_sha256": "14c493df36ff3e4c509f2e8eb138cb4e98a41ab5d68479fff5b8e1daa9c7fd43",
+            "git_blob": "38b5ac1ccb346520ea5304b5e504b58f01d9f491"
+          },
+          "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py": {
+            "raw_sha256": "0e4cc6d142a81093c333e63320e615443ff82964d8c239a269ec480b72186357",
+            "git_blob": "bc217eed8bc81e065e9f18c1e65787fabd821fbe"
+          },
+          "holo_index/tests/integration/test_llm_integration.py": {
+            "raw_sha256": "4ae208327decdc07badcf49aed3127d48c3d4867336af0152e4b1f1f296daf5d",
+            "git_blob": "51702071f3e900f81318ec4e6ce2423b2cb736fc"
+          },
+          "holo_index/tests/integration/test_llm_functionality.py": {
+            "raw_sha256": "dac0c1565806aeadea738ef1e02560d1300ca92bf381806ead1cbad1655fa9bc",
+            "git_blob": "8d91535fb1f245ade4ead960f849c493edf466d3"
+          }
+        },
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\import-source-review.json",
+        "sha256": "d39403fb7146089eb6914277a757ee53168d47c209b3d2014c27ae940134d506"
+      },
+      "preparation_metrics": {
+        "model_files_metadata_inspected": 1,
+        "runtime_files_hashed": 36,
+        "frozen_prompts_verified": 12,
+        "tokenized_prompts": 0,
+        "subject_model_calls": 0,
+        "evaluated_cases": 0,
+        "fit_cases": null,
+        "correct_cases": null,
+        "retained_improvement": null,
+        "model_tokens": null,
+        "currency_cost": null
+      },
+      "independent_evidence": {
+        "selection-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\selection-review.json",
+          "sha256": "f9f28d7216094206650298c5bb43a884d3a76bbbe9d3a49e0f57d7f4dda8fef0"
+        },
+        "import-source-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\import-source-review.json",
+          "sha256": "d39403fb7146089eb6914277a757ee53168d47c209b3d2014c27ae940134d506"
+        },
+        "qualification-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\qualification-review.json",
+          "sha256": "bb7da7b6f33c504544099a1952457e9ed265406a097d0bb0b61435aec02137e7"
+        },
+        "qualification-review-v2.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\qualification-review-v2.json",
+          "sha256": "6954f407ac3ee4ae2b88ac8fd2e869115641363fe98eb724c762178d3b946f40"
+        },
+        "next-action-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\next-action-review.json",
+          "sha256": "6a5b9ff5eedfc4757d960db3a75a4f9a4ae6279376230c68329f9f420330cda8"
+        },
+        "model-runtime-metadata.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\model-runtime-metadata.json",
+          "sha256": "4f07469d774e4e2d906ad39b20654e2cfec67f97e59ea4ae3b0b7f5046ce4703"
+        },
+        "qualification-plan.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\qualification-plan.json",
+          "sha256": "fa17306df4c3342519e8b59a2b6f51eb41c3f949663be5d89463ead374ba86f2"
+        },
+        "qualification-plan-v2.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\qualification-plan-v2.json",
+          "sha256": "2abedf460da99d77c02cd8678c20504fb35816e5303f0cc5e263654732d020d4"
+        }
+      },
+      "validation": {
+        "kind": "Static source, metadata, JSON/hash/manifest and independent review; no application imports or model tests",
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\static-validation.json",
+        "subject_model_calls": 0,
+        "tokenized_prompts": 0,
+        "evaluated_cases": 0
+      },
+      "publication": {
+        "status": "pending_exact_pr_main_checks_and_owned_closure",
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\final-accounting.json"
+      },
+      "next_action": {
+        "task": "Qualify the operational decision contract with fixed synthetic controls",
+        "component": "Qualify and narrowly defer eager qwen_advisor package exports for the existing local proposal import route",
+        "state": "source_qualified_candidate_requires_fixed_import_fixture_and_owner_review",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "component_wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
+        },
+        "dependency": "Current preparation closure, fresh ownership/source observation and exact finite no-model import/API acceptance before any fixture or production execution. Native tokenizer/model/provenance prerequisites remain separate.",
+        "next_step": "Within existing holo_index qwen_advisor package/test owners, freeze isolated import-effect and public-export compatibility controls before a minimal lazy-export candidate using the existing holo_index.__getattr__ pattern. Preserve all __all__ exports, object identities, lazy first access and unknown-attribute behavior; prove leaf import avoids coordinator, filesystem/path/root-logging effects without loading models. Review fixture isolation and hosted effect scope before execution.",
+        "rationale": "Ordinary local adapter call currently pulls coordinator/services via package initializer before resolving the leaf. Concrete path/logging/CWD effects can be reduced and tested without native loading; this advances the actual consumer and removes a known source obstacle. Another abstract tokenizer plan cannot supply native provenance/enforcement and would repeat preparation. This is a prospective existing-owner compatibility repair, not a claim that current native loading is safe."
       }
     }
   }
