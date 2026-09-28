@@ -1,3 +1,12 @@
+## 2026-09-28: Freeze scheduler completion repair acceptance
+
+- PR1936 qualification is closed: all13 fixed witnesses passed on reviewed PR and merged main `cd7e62d680`; source was unchanged. Its nine misleading-success witnesses are defects, not verified posting.
+- Reuse the same inert loader, denied constructor, fixed clock, memory actions and save spy. Correct the13 prior scenario oracles, add8 malformed-response controls,4 invalid-target controls and1 target-mutation control:26 test methods /32 fixed input cases including finite container/counter variants.
+- Old `claims_success` / `still_claims_executed` methods now use `rejects_unsupported` / `rejects_preserving_response` names for the same five unsupported and four negative stream scenarios. Reminder, complete success, dependency exception and no-due controls remain; eight legacy bodies are unchanged and unselected.
+- Acceptance is frozen before production edits. No host-local application execution is qualified. The existing hosted command remains `python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v`; fixture/effect review and exact red/green receipts govern results.
+- Hosted baseline CI36379506634 at `34ed9b69ae` ran the frozen26 methods/32 inputs: 5 methods passed,21 failed with27 assertion failures,0 errors/skips. This reproduces incorrect completion against unchanged production source. Repaired candidate `9bc31ed6e0` passed the identical26 methods/32 inputs in CI36380266749 (0 failures/errors/skips); CI and CodeQL succeeded. Final integrated-head and merged-main validation remain required; exact closure is receipt-bound.
+- Status/result/error, original response identity, save requests, success/failure logs and terminal no-retry are observed in memory only. No delivery, durable persistence, native admission, retained RSI or authority expansion is inferred. WSP00/5/6/15/22/50/62/84/97.
+
 ## 2026-09-28: Fixed scheduler execution-evidence qualification
 
 - Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.

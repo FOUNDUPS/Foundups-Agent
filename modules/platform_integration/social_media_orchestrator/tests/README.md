@@ -1,12 +1,13 @@
 # Social Media Orchestrator Tests
 
-## Qualified scheduler evidence slice — 2026-09-28
+## Scheduler completion repair acceptance — 2026-09-28
 
-`test_autonomous_scheduler.py::TestExecutionEvidence` contains 13 isolated
-current-behavior cases for the real scheduler leaf: five logging-only action
-branches, one local reminder, five stream response shapes, an exception and a
-no-due batch. A passing witness can reproduce a defect: it does **not** establish
-that posting succeeded or that RSI improved.
+PR1936 closed the13 original behavior witnesses on PR and merged main. The same
+`TestExecutionEvidence` now fixes26 test methods /32 input cases for the intended
+repair: unsupported actions, complete/failed/partial/empty/malformed responses,
+exact counter/platform coverage, invalid targets before effects, and target
+mutation during a dependency call. Historical witness receipts remain in the
+canonical RSI backlog; passing them was not evidence of successful posting.
 
 This slice admits only the named hosted CI step after source/effect review.
 Host-local application execution is not qualified. The exact hosted command is:
@@ -15,19 +16,20 @@ Host-local application execution is not qualified. The exact hosted command is:
 python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v
 ```
 
-The fixture loads actual producer enum/dataclass declarations under a private
-module name, denies the posting constructor and loads the unchanged scheduler
-leaf without real package initialization. It uses an awaited posting spy, a
-fixed clock, in-memory actions and a save spy. It does not qualify providers,
-browser execution, durable save/load, replay or the meaning of a real post result.
-The CI step `Run social scheduler execution evidence` selects the same 13 cases.
-Fresh execution and independent evidence receipts determine their result.
+The existing source-bound fixture loads actual producer enum/dataclass
+declarations under a private module name, denies the posting constructor and
+loads only the scheduler leaf. Awaited posting and save spies, fixed time and
+in-memory actions exclude accounts, browsers, providers and real persistence.
+The existing CI step `Run social scheduler execution evidence` is unchanged.
+Baseline CI36379506634 reproduced21 failing methods/27 assertion failures and
+5 passing controls (0 errors/skips). The same frozen fixture will judge the repair;
+candidate `9bc31ed6e0` passes all26 methods/32 inputs in CI36380266749
+(0 failures/errors/skips). Final integrated-head/main proof remains receipt-bound. Finite variants are not extra independent test methods.
 
-The eight methods in `TestAutonomousActionScheduler` are preserved historical
-tests and are **not selected or claimed passing**. Their former import path,
-real constructor and plain-unittest async method were not a qualified baseline.
-Selecting that legacy class now hits the denied constructor rather than opening
-real state. Direct execution defaults to the qualified class.
+The eight `TestAutonomousActionScheduler` methods are preserved historical tests
+and remain unselected/unqualified. Direct execution defaults to the isolated class.
+Result identity is preserved even on failure; durable serialization, restart
+replay, actual delivery verification and retained RSI require separate evidence.
 
 ## Historical inventory and commands
 

@@ -12,6 +12,29 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
+### Current scheduler repair — 2026-09-28
+
+PR1936 closed the qualification below:13/13 witnesses passed on the reviewed PR
+and exact merged main `cd7e62d680`. Nine witnesses demonstrate misleading success;
+the four controls do not establish external delivery. Fresh WSP15 C3/I4/D4/Impact4
+=15/P1 selects a minimal in-memory repair in the existing scheduler.
+
+Freeze26 methods/32 fixed input cases, then compare unchanged and repaired source
+through the existing hosted CI owner. Reject unsupported actions and incomplete
+or incoherent posting responses; preserve exact response objects and terminal
+no-retry behavior. Validate and snapshot unique nonempty targets before effects.
+Duplicate targets, including duplicates produced by overlapping natural-language
+matches, reject explicitly rather than silently posting to a substituted list.
+Baseline CI36379506634 confirms21 failing methods/27 assertion failures and5
+passing controls with no errors/skips. The same26-method fixture is unchanged
+for candidate validation: `9bc31ed6e0` passes all26 methods/32 inputs in
+CI36380266749, with0 failures/errors/skips and green CI/CodeQL. Final integrated
+PR head/main convergence is recorded in the canonical backlog closure receipt.
+Source review also tightened exact response/string types and preserved posting
+classification across the await; those safeguards are source-reviewed, not
+additional independent test scenarios. Durable save/replay, independent
+delivery evidence, runtime admission and retained RSI remain separate.
+
 ### Scheduler evidence qualification — 2026-09-28
 
 The historical phase checklist below is not a current whole-module completion

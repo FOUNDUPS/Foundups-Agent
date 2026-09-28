@@ -76,12 +76,83 @@ class _FixedClock:
         return datetime(2026, 9, 28, 12, 0, 0)
 
 
-class TestExecutionEvidence(unittest.IsolatedAsyncioTestCase):
-    """Current-behavior witnesses, NOT acceptance of truthful posting or delivery.
+_INVALID_RESPONSE = 'Invalid posting response: expected nonempty typed results'
+_INVALID_ITEM = 'Invalid posting response: malformed platform result'
+_INVALID_COVERAGE = 'Invalid posting response: platform coverage mismatch'
+_INVALID_COUNTS = 'Invalid posting response: inconsistent counts'
+_INCOMPLETE = 'Posting did not succeed on all requested platforms'
+_INVALID_TARGETS = ('Invalid posting platforms: expected a nonempty unique '
+                    'list of supported values')
 
-    A pass means the documented defect/control was reproduced against the real
-    scheduler leaf. Save is a spy, so no persistence or external effect is proved.
-    """
+
+def _response(flags):
+    results = [_producer.PostResult(success=success, platform=platform,
+                                   message='synthetic result', timestamp=_FixedClock.now())
+               for platform, success in zip(
+                   [_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER], flags)]
+    return _producer.PostResponse(request_id='fixture-response', results=results,
+                                  success_count=sum(flags), failure_count=len(flags)-sum(flags),
+                                  timestamp=_FixedClock.now())
+
+
+def _assert_completion(test, action, error):
+    test.assertIs(test.scheduler.scheduled_actions[action.id], action)
+    test.assertEqual(action.status, 'failed' if error else 'executed')
+    test.assertEqual(action.error, error)
+    successes = [call for call in test.log.info.call_args_list if '[OK]' in call.args[0]]
+    test.assertEqual(len(successes), 0 if error else 1)
+    test.assertEqual(test.log.error.call_count, 1 if error else 0)
+    test.scheduler.save_schedule.assert_called_once_with()
+
+
+async def _stream_case(test, response, error=None, failure=None, targets=None, mutate=False):
+    platforms = ([_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER]
+                 if targets is None else targets)
+    action = test._action(ActionType.POST_SOCIAL, {
+        'platforms': [p.value for p in platforms], 'content': 'synthetic content',
+        'metadata': {'stream_url': 'https://example.invalid/stream', 'stream_title': 'fixture'}})
+    test.post.side_effect = failure
+    if mutate:
+        async def change_targets(**kwargs):
+            action.parameters['platforms'][:] = ['x_twitter']
+            return response
+        test.post.side_effect = change_targets
+    test.post.return_value = response
+    results = await test.scheduler.execute_pending_actions()
+    test.post.assert_awaited_once_with(stream_title='fixture',
+                                      stream_url='https://example.invalid/stream',
+                                      platforms=platforms)
+    test.assertEqual(test.post.call_count, 1)
+    test.assertEqual(len(results), 1)
+    test.assertEqual(results[0][0], action.id)
+    _assert_completion(test, action, str(failure) if failure else error)
+    if failure:
+        test.assertIsNone(action.result)
+        test.assertEqual(results[0][1], {'error': str(failure)})
+    else:
+        test.assertIs(action.result, response)
+        test.assertIs(results[0][1], response)
+    test.assertEqual(await test.scheduler.execute_pending_actions(), [])
+    test.assertEqual(test.post.call_count, 1)
+    test.scheduler.save_schedule.assert_called_once_with()
+
+
+async def _rejected_action(test, kind, error, parameters=None):
+    action = test._action(kind, parameters)
+    test.assertEqual(await test.scheduler.execute_pending_actions(),
+                     [(action.id, {'error': error})])
+    _assert_completion(test, action, error)
+    test.assertIsNone(action.result)
+    test.post.assert_not_called()
+    test.post.assert_not_awaited()
+    test.assertFalse(any('Would post:' in call.args[0] for call in test.log.info.call_args_list))
+    test.assertEqual(await test.scheduler.execute_pending_actions(), [])
+    test.post.assert_not_called()
+    test.scheduler.save_schedule.assert_called_once_with()
+
+
+class TestExecutionEvidence(unittest.IsolatedAsyncioTestCase):
+    """Fixed in-memory completion contracts; no delivery, save or RSI claim."""
 
     def setUp(self):
         self.scheduler = AutonomousActionScheduler.__new__(AutonomousActionScheduler)
@@ -107,105 +178,129 @@ class TestExecutionEvidence(unittest.IsolatedAsyncioTestCase):
         self.scheduler.scheduled_actions[action.id] = action
         return action
 
-    async def _non_effect(self, kind, expected, parameters=None):
-        action = self._action(kind, parameters)
-        results = await self.scheduler.execute_pending_actions()
-        self.assertEqual(results, [(action.id, expected)])
-        self.assertEqual(action.status, 'executed')
-        self.assertEqual(action.result, expected)
-        self.assertIs(self.scheduler.scheduled_actions[action.id], action)
-        self.assertIs(results[0][1], action.result)
-        self.assertIsNone(action.error)
-        self.post.assert_not_called()
-        self.post.assert_not_awaited()
-        self.scheduler.save_schedule.assert_called_once_with()
-        self.log.info.assert_any_call('[0102 EXECUTOR] [OK] Successfully executed ' + action.id)
-        self.log.error.assert_not_called()
+    async def test_non_stream_post_rejects_unsupported(self):
+        await _rejected_action(self, ActionType.POST_SOCIAL,
+                               'Unsupported scheduled action: post_social',
+                               {'platforms': ['linkedin'], 'content': 'synthetic content'})
 
-    async def test_non_stream_post_claims_success_without_posting(self):
-        await self._non_effect(
-            ActionType.POST_SOCIAL, {'posted': True, 'platforms': ['linkedin']},
-            {'platforms': ['linkedin'], 'content': 'synthetic content'})
-        self.log.info.assert_any_call('[0102 EXECUTOR] Would post: synthetic content')
+    async def test_stream_check_rejects_unsupported(self):
+        await _rejected_action(self, ActionType.CHECK_STREAM,
+                               'Unsupported scheduled action: check_stream')
 
-    async def test_stream_check_claims_success_without_resolver(self):
-        await self._non_effect(ActionType.CHECK_STREAM, {'checked': True})
-        self.log.info.assert_any_call('[0102 EXECUTOR] Checking stream status...')
+    async def test_custom_action_rejects_unsupported(self):
+        await _rejected_action(self, ActionType.CUSTOM, 'Unsupported scheduled action: custom')
 
-    async def test_custom_action_claims_success_without_executor(self):
-        await self._non_effect(ActionType.CUSTOM, {'executed': True})
+    async def test_message_rejects_unsupported(self):
+        await _rejected_action(self, ActionType.SEND_MESSAGE,
+                               'Unsupported scheduled action: send_message')
 
-    async def test_message_claims_success_without_sender(self):
-        await self._non_effect(ActionType.SEND_MESSAGE, {'executed': True})
-
-    async def test_code_action_claims_success_without_executor(self):
-        await self._non_effect(ActionType.EXECUTE_CODE, {'executed': True})
+    async def test_code_action_rejects_unsupported(self):
+        await _rejected_action(self, ActionType.EXECUTE_CODE,
+                               'Unsupported scheduled action: execute_code')
 
     async def test_reminder_records_only_its_documented_local_log(self):
-        await self._non_effect(ActionType.REMIND,
-                               {'reminded': True, 'message': 'synthetic reminder'},
-                               {'message': 'synthetic reminder'})
+        expected = {'reminded': True, 'message': 'synthetic reminder'}
+        action = self._action(ActionType.REMIND, {'message': 'synthetic reminder'})
+        results = await self.scheduler.execute_pending_actions()
+        self.assertEqual(results, [(action.id, expected)])
+        self.assertIs(results[0][1], action.result)
+        _assert_completion(self, action, None)
+        self.post.assert_not_called()
         self.assertTrue(any('REMINDER: synthetic reminder' in call.args[0]
                             for call in self.log.info.call_args_list))
 
-    def _response(self, flags):
-        results = [_producer.PostResult(success=success, platform=platform,
-                                       message='synthetic result', timestamp=_FixedClock.now())
-                   for platform, success in zip(
-                       [_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER], flags)]
-        return _producer.PostResponse(request_id='fixture-response', results=results,
-                                      success_count=sum(flags), failure_count=len(flags)-sum(flags),
-                                      timestamp=_FixedClock.now())
-
-    async def _stream_result(self, response, failure=None):
-        platforms = [_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER]
-        action = self._action(ActionType.POST_SOCIAL, {
-            'platforms': [p.value for p in platforms], 'content': 'synthetic content',
-            'metadata': {'stream_url': 'https://example.invalid/stream', 'stream_title': 'fixture'}})
-        self.post.side_effect = failure
-        self.post.return_value = response
-        results = await self.scheduler.execute_pending_actions()
-        self.post.assert_awaited_once_with(stream_title='fixture',
-                                          stream_url='https://example.invalid/stream',
-                                          platforms=platforms)
-        self.assertEqual(self.post.call_count, 1)
-        self.scheduler.save_schedule.assert_called_once_with()
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0][0], action.id)
-        self.assertIs(self.scheduler.scheduled_actions[action.id], action)
-        if failure:
-            self.assertEqual(action.status, 'failed')
-            self.assertEqual(action.error, str(failure))
-            self.assertIsNone(action.result)
-            self.assertEqual(results[0][1], {'error': str(failure)})
-            self.log.error.assert_called_once()
-            self.assertFalse(any('Successfully executed' in call.args[0]
-                                 for call in self.log.info.call_args_list))
-        else:
-            self.assertEqual(action.status, 'executed')
-            self.assertIs(action.result, response)
-            self.assertIs(results[0][1], response)
-            self.assertIsNone(action.error)
-            self.log.info.assert_any_call('[0102 EXECUTOR] [OK] Successfully executed ' + action.id)
-            self.log.error.assert_not_called()
-
     async def test_stream_all_success_preserves_producer_response(self):
-        await self._stream_result(self._response([True, True]))
+        await _stream_case(self, _response([True, True]))
 
-    async def test_stream_all_failure_still_claims_executed(self):
-        await self._stream_result(self._response([False, False]))
+    async def test_stream_all_failure_rejects_preserving_response(self):
+        await _stream_case(self, _response([False, False]), _INCOMPLETE)
 
-    async def test_stream_partial_result_still_claims_executed(self):
-        await self._stream_result(self._response([True, False]))
+    async def test_stream_partial_rejects_preserving_response(self):
+        await _stream_case(self, _response([True, False]), _INCOMPLETE)
 
-    async def test_stream_empty_result_still_claims_executed(self):
-        await self._stream_result(self._response([]))
+    async def test_stream_empty_rejects_preserving_response(self):
+        await _stream_case(self, _response([]), _INVALID_RESPONSE)
 
-    async def test_stream_none_result_still_claims_executed(self):
-        await self._stream_result(None)
+    async def test_stream_none_rejects(self):
+        await _stream_case(self, None, _INVALID_RESPONSE)
 
     async def test_stream_exception_marks_failure(self):
-        await self._stream_result(None, RuntimeError('synthetic failure'))
+        await _stream_case(self, None, failure=RuntimeError('synthetic failure'))
+
+    async def test_stream_success_dictionary_rejects(self):
+        await _stream_case(self, {'posted': True}, _INVALID_RESPONSE)
+
+    async def test_stream_invalid_result_element_rejects(self):
+        for shape in ('invalid_item', 'tuple', 'none'):
+            with self.subTest(shape=shape):
+                self._reset_case()
+                response = _response([True, True])
+                if shape == 'invalid_item':
+                    response.results[0] = {'success': True, 'platform': 'linkedin'}
+                else:
+                    response.results = tuple(response.results) if shape == 'tuple' else None
+                await _stream_case(self, response,
+                                   _INVALID_ITEM if shape == 'invalid_item' else _INVALID_RESPONSE)
+
+    async def test_stream_nonboolean_success_rejects(self):
+        response = _response([True, True])
+        response.results[0].success = 1
+        await _stream_case(self, response, _INVALID_ITEM)
+
+    async def test_stream_inconsistent_counts_rejects(self):
+        variants = [('success_count', 1, False), ('success_count', 2.0, False),
+                    ('failure_count', False, False), ('failure_count', 0.0, False),
+                    ('success_count', True, True)]
+        for field, value, single in variants:
+            with self.subTest(field=field, value=repr(value), single=single):
+                self._reset_case()
+                response = _response([True] if single else [True, True])
+                setattr(response, field, value)
+                targets = [_producer.Platform.LINKEDIN] if single else None
+                await _stream_case(self, response, _INVALID_COUNTS, targets=targets)
+
+    def _reset_case(self):
+        self.scheduler.scheduled_actions.clear()
+        self.scheduler.save_schedule.reset_mock()
+        self.post.reset_mock()
+        self.log.reset_mock()
+
+    async def test_stream_missing_target_rejects(self):
+        await _stream_case(self, _response([True]), _INVALID_COVERAGE)
+
+    async def test_stream_extra_target_rejects(self):
+        await _stream_case(self, _response([True, True]), _INVALID_COVERAGE,
+                           targets=[_producer.Platform.LINKEDIN])
+
+    async def test_stream_duplicate_target_result_rejects(self):
+        response = _response([True, True])
+        response.results[1].platform = _producer.Platform.LINKEDIN
+        await _stream_case(self, response, _INVALID_COVERAGE)
+
+    async def test_stream_nonplatform_value_rejects(self):
+        response = _response([True, True])
+        response.results[0].platform = 'linkedin'
+        await _stream_case(self, response, _INVALID_ITEM)
+
+    async def _invalid_targets(self, targets):
+        await _rejected_action(self, ActionType.POST_SOCIAL, _INVALID_TARGETS,
+                               {'platforms': targets, 'content': 'synthetic',
+                                'metadata': {'stream_url': 'https://example.invalid/stream'}})
+
+    async def test_request_empty_targets_reject_before_effect(self):
+        await self._invalid_targets([])
+
+    async def test_request_duplicate_targets_reject_before_effect(self):
+        await self._invalid_targets(['linkedin', 'linkedin'])
+
+    async def test_request_unknown_target_reject_before_effect(self):
+        await self._invalid_targets(['unknown'])
+
+    async def test_request_nonlist_targets_reject_before_effect(self):
+        await self._invalid_targets('linkedin')
+
+    async def test_stream_target_snapshot_survives_action_mutation(self):
+        await _stream_case(self, _response([True, True]), mutate=True)
 
     async def test_no_due_actions_have_no_calls_or_mutations(self):
         actions = [self._action(ActionType.POST_SOCIAL, delay=1),

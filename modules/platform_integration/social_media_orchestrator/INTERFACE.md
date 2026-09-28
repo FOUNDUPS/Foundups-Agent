@@ -280,6 +280,31 @@ action = scheduler.understand_command(
 results = await scheduler.execute_pending_actions()
 ```
 
+`execute_pending_actions()` returns attempted `(action_id, result)` pairs. Check
+the corresponding action's `status` and `error`; a returned pair alone does not
+mean success. `executed` means the local reminder was logged, or a stream-posting
+dependency returned a coherent `PostResponse` reporting success for every
+requested platform. It does not establish independently verified delivery.
+
+Posting targets must be a nonempty list of supported, unique platform values.
+They are validated and captured before awaiting the dependency; the dependency
+receives a separate list. Empty, duplicate, unknown or non-list targets fail
+before posting. Overlapping natural-language matches can produce duplicates and
+are rejected explicitly. Non-stream posts, stream checks, messages, code and
+custom actions remain unsupported and fail without invoking an effect adapter.
+
+The response must contain a nonempty list of actual `PostResult` values with
+boolean success fields, valid unique platforms exactly covering the captured
+targets, and integer success/failure counts matching those results. Failed,
+partial, empty or malformed responses mark the action failed, retain the original
+response in both the returned tuple and `action.result`, and set `action.error`.
+Dependency exceptions retain the existing failed/error return path. Failed
+actions are terminal within the pending-only loop; no automatic retry is added.
+
+These are in-memory disposition contracts. The existing JSON save path does not
+establish serialization of typed responses, durable completion or restart replay
+safety. A save request is not a persistence receipt; those gaps remain separate.
+
 ### Human Scheduling Interface (012 Mode)
 ```python
 from modules.platform_integration.social_media_orchestrator.src.human_scheduling_interface import HumanSchedulingInterface
