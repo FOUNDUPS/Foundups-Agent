@@ -1,3 +1,12 @@
+## 2026-09-28: Qualify scheduler completion evidence before RSI use
+
+- Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.
+
+- WSP 00/15/22/50/62/84/97; 14/P1 existing-owner qualification follows PR #1933's operational measurement audit. Native RSI blockers and other platform/project owners remain unchanged.
+- Extend existing test owner with 13 fixed, isolated current-behavior cases and one hosted CI selection. Preserve production source and eight legacy test bodies; clarify historical test inventory and current roadmap scope.
+- Characterization will distinguish logging-only success-shaped results, actual dependency calls, negative/partial/unknown returns and exception handling. Passing witnesses are not repaired behavior, verified external effects or retained improvement.
+- Exact tests/loader/CI require independent effect review before execution; actual PR/main results and clean owned closure are receipt-bound. No new scheduler, posting path, runtime schema or live action.
+
 ﻿# ModLog - Social Media Orchestrator
 
 **WSP Compliance**: WSP 22, WSP 49, WSP 42, WSP 11, WSP 3

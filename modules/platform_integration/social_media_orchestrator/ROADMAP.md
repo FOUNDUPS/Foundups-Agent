@@ -12,6 +12,29 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
+### Scheduler evidence qualification — 2026-09-28
+
+The historical phase checklist below is not a current whole-module completion
+claim. RSI source review at `ab9ab47a8` found that logging-only action branches
+report success, and `execute_pending_actions` marks any non-raising stream
+response executed, including failure/partial/empty responses. These observations
+must not feed verified-success or retained-learning metrics.
+
+WSP 15 C2/I4/D4/Impact4 = **14/P1** selects a bounded qualification in the
+existing scheduler test owner. Thirteen fixed cases exercise the unchanged leaf
+behind inert dependencies and record action/result/error, awaited calls, save
+requests and logs. The eight legacy test bodies remain unqualified. Hosted
+execution and independent review are required before calling the observations
+reproduced; preparation alone is not a test result.
+
+Next, re-observe and select the smallest result-contract repair supported by
+those observations. Preserve partial-result information and distinguish local
+attempt completion, provider-reported success and independently verified effect.
+Do not implement posting, a second scheduler or an outcome store as collateral
+work. Persistence failures and external delivery remain separate qualifications.
+See [test execution guidance](tests/README.md) and the
+[canonical RSI queue](../../../docs/roadmaps/rsi_swarm_backlog.json).
+
 **Phase**: Initial Implementation  
 **WSP Compliance**: WSP 3, WSP 11, WSP 22, WSP 49  
 **Created**: 2025-01-10

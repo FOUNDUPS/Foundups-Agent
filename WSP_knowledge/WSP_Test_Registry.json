@@ -20714,13 +20714,12 @@
       "owner": "modules/platform_integration/social_media_orchestrator",
       "suite_class": "operational",
       "shard_id": "modules-platform-integration-social-media-orchestrator-operational",
-      "capabilities": [
-        "import_path_mutation"
-      ],
+      "capabilities": [],
       "execution_type": "operational",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
+        "module_scope_local_function_invocation",
         "module_scope_process_stream_mutation"
       ],
       "description": "Test suite for AutonomousActionScheduler\nWSP Compliance: WSP 5 (Testing Coverage), WSP 6 (Test Audit)"
