@@ -17,7 +17,16 @@
     "report_schema": "wre_rsi_measurements.v1",
     "current_signal_class": "execution_feedback",
     "production_rsi_eligible": false,
-    "gate_effect": "measurement_truth_only_no_G2_G5_advance"
+    "gate_effect": "measurement_truth_only_no_G2_G5_advance",
+    "operational_projection": {
+      "updated_on": "2026-09-28",
+      "state": "planning_only_not_runtime_schema",
+      "architecture_owner": "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
+      "decision_contract": "ROADMAP.md#operational-decision-contract-and-rsi-audit--2026-09-28",
+      "measurement_design": "modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28",
+      "unknown_semantics": "null with sample count and provenance; observed zero only; placeholders are not measured outcomes",
+      "gate_effect": "no_G2_G5_advance_no_native_activation"
+    }
   },
   "dispatchable": false,
   "packets": [
@@ -1873,48 +1882,46 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "3dfb68f7fcea65a39bbe8d8919d5783277277899",
-    "selected_action": "Select the existing recipient and correspondence suite in hosted CI",
-    "status": "owned_ci_baseline_prepared_review_and_execution_pending",
+    "base_commit": "e5600fe103441c91a81e0220aea9e48496b79b60",
+    "selected_action": "Reconcile operational RSI decision ownership, research and measurable outcomes",
+    "status": "owned_documentation_prepared_review_pending",
     "wsp15": {
-      "complexity": 1,
-      "importance": 3,
-      "deferability": 3,
-      "impact": 3,
-      "total": 10,
-      "priority": "P2"
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "20260928-correspondence-ci-baseline",
-    "base": "3dfb68f7fcea65a39bbe8d8919d5783277277899",
+    "observation_id": "20260928-operational-rsi-measurement",
+    "base": "e5600fe103441c91a81e0220aea9e48496b79b60",
     "self": "0102",
     "role": "architect",
-    "origin": "autonomous_trigger",
+    "origin": "external_principal",
     "principal_ref": "012",
-    "selected": "Select the existing recipient and correspondence suite in hosted CI",
+    "selected": "Reconcile operational RSI decision ownership, research and measurable outcomes",
     "wsp15": {
-      "complexity": 1,
-      "importance": 3,
-      "deferability": 3,
-      "impact": 3,
-      "total": 10,
-      "priority": "P2"
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1929,
-      "merge": "bff12de8b24065d6d12da04f8668d0da8699448f",
+      "pr": 1931,
+      "merge": "e5600fe103441c91a81e0220aea9e48496b79b60",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\final-accounting.json",
-      "sha256": "b7dce7effcba416274b05c9f71092a0991bb3b6e1d9de4f2281c318872862224"
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
+      "sha256": "12723415a2f1ad5af658df966e648b6a5d512354d320f83b5c51e1490057b9ae"
     },
     "previous_observation": {
-      "path": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\previous-observation.json",
-      "sha256": "44ffa16b1226f3ca3e3c13b1aca09d56c2ed6ad917701c094a14db9ac5dda7de",
-      "git_lookup": "3dfb68f7fcea65a39bbe8d8919d5783277277899:docs/roadmaps/rsi_swarm_backlog.json"
+      "git_lookup": "e5600fe103441c91a81e0220aea9e48496b79b60:docs/roadmaps/rsi_swarm_backlog.json"
     },
     "backend_qualification": {
       "state": "controlled_source_failure_independently_reviewed",
@@ -1975,102 +1982,108 @@
       "resume_prerequisite": "Reviewed strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress and usable interpreted/compiled API evidence. Then fresh source/ownership reconciliation and WSP15 selection; deployment visibility, authenticated transport and native authority remain separate."
     },
     "component_changes": {
-      "pr": 1930,
-      "merge": "3dfb68f7fcea65a39bbe8d8919d5783277277899",
-      "inspected": "Generic correspondence source, module/skill/registry contracts, existing test owner and actual CI selection. Separately owned YUMORI paths inventoried only.",
-      "tests": "20 functions:14 recipient plus6 correspondence. Prior green CI and Node fast-tier results do not prove this Python owner ran.",
-      "source_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\pr1930-source-review.json",
-        "sha256": "ac21e8659f86d6019386b8aca39b236442a022771b6eb8e803bfb85e840c82a5"
-      },
-      "hosted_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\pr1930-hosted-state.json",
-      "rsi_boundary": "Private correspondence continuity is prototype; no consented same-FoundUp feedback handoff, independently retained outcome or native admission supplied."
+      "pr1932": "Open peer YUMORI work-orchestrator owner; inventory only, no adoption or changes in this slice.",
+      "native_state": "Seven blockers unchanged; authoritative_use_lease=null.",
+      "source_gaps": [
+        "Social scheduler logging-only branches return success-shaped results.",
+        "PatternMemory success/fidelity and orchestrator placeholder quality are not interchangeable outcome measures."
+      ],
+      "scope": "Bounded source audit, not all connector/runtime deployment certification."
     },
     "retrieval": {
-      "mode": "Changed generic source/contracts plus original CI, existing20-case test owner, WSP skill and independent source review. Query/authority heads remain mismatched: explicit bounded Git/rg; no failed query retry or reindex. Product files only path-inventoried.",
-      "noise": "Bounded changed source plus owning CI; no full audit or product test.",
-      "missing_artifacts": "20-case actual execution and fixed persisted-load controls remain unobserved. Module requirements.txt absent; no dependency installed.",
-      "duplication": "Existing20-case test owner and all its assertions unchanged; six existing files only.",
-      "freshness": "Current3dfb source and95 exact unchanged peers; mismatched Holo query/authority roots unchanged."
+      "mode": "Read canonical WSPs/skill/docs; failed owner query retained exactly, then bounded Git/rg source retrieval.",
+      "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+      "noise": "README vision separated from executable paths and dated receipts; no whole-repo content dump.",
+      "ordering": "Canonical protocols and owners before claims; source and receipts before roadmap status.",
+      "missing_artifacts": "No current Holo proof or independently held-out operational outcome/cost/retention evidence.",
+      "duplication": "WSP73 and WSP48 already own architecture/hierarchy; extend five existing files, preserve all26 packets.",
+      "freshness": "Source e5600fe1;96 open peers at entry; exact publication freshness checked separately."
     },
     "allocation": {
-      "rationale": "Existing higher-ranked actions retain their explicit authority/runtime/owner/consumer prerequisites. New11/P2 load work first needs the unmeasured20-case baseline and fixed acceptance. The10/P2 existing-CI selection is its smallest executable prerequisite.",
-      "effort_cost": "One existing workflow step, no production source/test oracle/model/runtime changes.",
-      "execution_boundary": "Hosted disposable CI only; no local application imports/tests or live provider data. Existing fixture/temporary roots and source assertions preserved."
+      "rationale": "C2 bounded reconciliation; I4 shared decision/evidence correctness; D4 blocks meaningful operational measurement; Impact4 across domain adapters. Native18/P0 remains blocked. Same-score source qualification follows this explicit012 audit request and fixed acceptance.",
+      "effort_cost": "Docs/source research; no application tests or provider/runtime/model updates.",
+      "execution_boundary": "Owned documentation lane, independent review and qualified main convergence only."
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\entry.json",
-      "peer_count": 95,
+      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\entry.json",
+      "peer_count": 96,
       "scope": [
-        ".github/workflows/ci.yml",
-        "modules/communication/moltbot_bridge/tests/README.md",
-        "modules/communication/moltbot_bridge/tests/TestModLog.md",
-        "modules/communication/moltbot_bridge/ModLog.md",
-        "ModLog.md",
-        "docs/roadmaps/rsi_swarm_backlog.json"
+        "ROADMAP.md",
+        "docs/roadmaps/rsi_swarm_backlog.json",
+        "modules/infrastructure/wre_core/ROADMAP.md",
+        "modules/infrastructure/wre_core/ModLog.md",
+        "ModLog.md"
       ],
-      "overlaps": [
-        {
-          "number": 1860,
-          "head": "74ca647e35446c975d9aabe53f7bf44951bfc9d4",
-          "paths": [
-            "ModLog.md",
-            "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1792,
-          "head": "09d0ad70f6a91f9e9690ee796bf594cb50bb8631",
-          "paths": [
-            "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1648,
-          "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
-          "paths": [
-            "ModLog.md",
-            "modules/communication/moltbot_bridge/ModLog.md"
-          ]
-        },
-        {
-          "number": 1645,
-          "head": "4b316c976aa3cdba21b901191159716f3d58631d",
-          "paths": [
-            "modules/communication/moltbot_bridge/ModLog.md",
-            "modules/communication/moltbot_bridge/tests/README.md",
-            "modules/communication/moltbot_bridge/tests/TestModLog.md"
-          ]
-        },
-        {
-          "number": 802,
-          "head": "de63ab95aab0ca11247cf2620cb4bc559bbce16c",
-          "paths": [
-            "ModLog.md"
-          ]
-        },
-        {
-          "number": 782,
-          "head": "b8b90afbab605c396054a8171f7c4ae2399fb2c5",
-          "paths": [
-            "ModLog.md"
-          ]
-        }
-      ],
-      "resolution": "Only additive shared documentation overlap; inspected1645 Mosh Pit and1792 branding entries are distinct. Preserve entire current histories and peer source; prepend one CI-scope entry. No CI or backlog overlap. Initial stricter guard stopped before any worktree creation.",
+      "overlaps": "Root/WRE ModLog additive histories only with inventoried older peers.",
+      "resolution": "Preserve peer branches, shared dirty checkout and product paths; no source overlap with PR1932.",
       "shared_checkout_preserved": true
+    },
+    "research": {
+      "as_of": "2026-09-28",
+      "exhaustive": false,
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2607.07663v2",
+          "read_depth": "Main taxonomy, evaluator, research and discussion sections; supplied paper identified."
+        },
+        {
+          "url": "https://arxiv.org/html/2609.24663v1",
+          "read_depth": "Methods/evaluation sections."
+        },
+        {
+          "url": "https://arxiv.org/html/2606.08106v1",
+          "read_depth": "Acceptance method/limitations."
+        },
+        {
+          "url": "https://arxiv.org/abs/2604.08988",
+          "read_depth": "Abstract only."
+        },
+        {
+          "url": "https://arxiv.org/abs/2608.06144",
+          "read_depth": "Abstract only."
+        },
+        {
+          "url": "https://arxiv.org/html/2608.04003v1",
+          "read_depth": "Evaluation pipeline and limitations; matched persistence/fresh-session/mechanism evidence."
+        },
+        {
+          "url": "https://arxiv.org/html/2609.26457v1",
+          "read_depth": "Abstract and method; fixed task budgets and private grading."
+        },
+        {
+          "url": "https://arxiv.org/abs/2609.15364",
+          "read_depth": "Abstract only."
+        }
+      ]
+    },
+    "measured_baseline": {
+      "source_pr": 1931,
+      "unique_case_ids": 20,
+      "pr_passes": 20,
+      "main_passes": 20,
+      "failures": 0,
+      "new_cases": 0,
+      "production_source_changes": 0,
+      "platform_actions": 0,
+      "native_activation": false,
+      "held_out_operational_evaluation": false,
+      "operational_outcome_baseline": null,
+      "operational_candidate_gain": null,
+      "avoided_012_interventions": null,
+      "authenticated_cost": null,
+      "held_out_transfer_gain": null,
+      "retained_multi_generation_gain": null
     },
     "validation": {
       "new_test_cases": 0,
-      "existing_test_cases": 20,
-      "unchanged_oracle_blob": "b9f982b452446090d3970cb89e96984d11b47f93",
       "local_application_tests_run": 0,
+      "static_validation": "pending",
       "hosted_result": "pending",
-      "independent_review": "prepared_diff_review_pending"
+      "independent_review": "pending"
     },
     "publication": {
-      "state": "not_committed",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json"
+      "state": "prepared_not_published",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2610,6 +2623,61 @@
             "pr": 1925,
             "merge": "a0d9570939cd3c902f6959a692dd5896f6fc4443"
           }
+        },
+        {
+          "task": "Reconcile operational RSI decision ownership, research and measurable outcomes",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "owned_documentation_prepared_review_pending",
+          "source": "ROADMAP.md; modules/infrastructure/wre_core/ROADMAP.md; WSP73; WSP48",
+          "dependency": "Independent source review, static preservation/links/score checks, PR/main convergence and owned closure.",
+          "next_step": "Close this bounded audit before executing source qualification.",
+          "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\final-accounting.json",
+          "do_not_redispatch": true,
+          "effort_cost": "Five existing planning/log files; no model jobs, application imports or new tests.",
+          "limits": "Design and source audit only; not operational learning, native runtime admission or complete literature review."
+        },
+        {
+          "task": "Qualify truthful completion evidence in the existing social action scheduler",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "source_gap_qualified_fixed_acceptance_pending",
+          "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
+          "dependency": "Fresh owner/source reconciliation, existing module/test retrieval, independently fixed no-op/uncertain/real-result controls.",
+          "next_step": "Qualify the non-stream success-shaped no-op using existing tests and scope; repair only after a reproduced isolated failure.",
+          "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
+          "limits": "Current source returns posted:true after logging Would post; no live defect reproduction or production incident claim.",
+          "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work."
+        },
+        {
+          "task": "Qualify the operational decision contract with fixed synthetic controls",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "state": "planned_evidence_prerequisite_pending",
+          "source": "ROADMAP.md#operational-decision-contract-and-rsi-audit--2026-09-28; modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28",
+          "dependency": "Truthful result evidence, existing consumer/owner mapping, fixed independent labels and fresh source admission. Native admission remains necessary for later native execution, not effect-free fixture design.",
+          "next_step": "After evidence qualification, select the smallest existing-owner contract surface for12 synthetic cases; no new master schema implementation by assumption.",
+          "effort_cost": "Proposed12case offline qualification first. Later40held-out and20transfer/retention scenarios require declared numeric resource caps and evaluator route; none have run.",
+          "limits": "No paid-provider dispatch, live mail/social use or retained-learning claim from a planning record.",
+          "wsp97_action": "Reuse DigitalTwin, correspondence, style/trajectory and WRE evaluation owners."
         },
         {
           "task": "Prevent LinkedIn engagement_session dry-run from entering the autonomous session",
@@ -3350,21 +3418,28 @@
             "total": 10,
             "priority": "P2"
           },
-          "state": "owned_ci_prepared_independent_review_and_execution_pending",
+          "state": "closed_merged_PR1931",
           "source": ".github/workflows/ci.yml; modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py",
-          "dependency": "Independent scope/effect review then actual hosted20-case execution, exact-head PR checks, main verification and owned cleanup.",
-          "next_step": "Finish this owned coverage prerequisite; inspect its terminal receipt before redispatch and re-score after result.",
+          "dependency": "All10 PR checks and both main workflows passed;20 unique unchanged cases pass on PR/main; owned lane retired.",
+          "next_step": "Do not repeat the CI selection. Re-observe and qualify remaining source gaps.",
           "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
           "do_not_redispatch": true,
           "effort_cost": "One scoped CI step plus existing required docs/backlog. Reuse20 unchanged tests on hosted disposable environment; no local application imports or provider/model spend.",
           "verification_burden": "Unchanged test source/20 IDs, exact-diff review, original20-case PR/main output with no skips/failures, full checks and clean owned closure.",
-          "limits": "Test selection is not proof of untested load rejection, runtime/provider authority, R25 consent or retained RSI."
+          "limits": "Test selection is not proof of untested load rejection, runtime/provider authority, R25 consent or retained RSI.",
+          "closure": {
+            "pr": 1931,
+            "merge": "e5600fe103441c91a81e0220aea9e48496b79b60",
+            "terminal_state": "MERGED_VERIFIED_MAIN",
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
+            "sha256": "12723415a2f1ad5af658df966e648b6a5d512354d320f83b5c51e1490057b9ae"
+          }
         }
       ],
       "selected_next": null,
       "implementation_ready_selected": null,
-      "state": "await_owned_baseline_then_reobserve",
-      "rationale": "Preserve53 prior identities and26 packets; two related new rows separate observed CI omission from source-qualified persisted-load behavior. Fresh observed results and ownership determine follow-on eligibility.",
+      "state": "await_owned_audit_closure_then_reobserve",
+      "rationale": "Preserve55 prior task identities and26 packets; add this audit plus two sequenced operational qualification rows. All old higher-value blockers remain authoritative. Re-score after closure.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",

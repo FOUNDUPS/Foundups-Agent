@@ -1,3 +1,10 @@
+## 2026-09-28: RSI includes operational decisions and truthful outcome measurement
+
+- WSP 00/15/22/48/50/73/97/99; C2/I4/D4/Impact4=14/P1. Audit current main `e5600fe1` and the supplied RSI survey plus a targeted primary-research comparison. Use existing WSP 73 Digital Twin ownership instead of another top-level orchestrator.
+- Extend root/WRE roadmaps and the canonical backlog with a proposed operational decision contract, source gaps, actual prior-sprint measurements and a staged synthetic/paired evaluation design. Gmail/LinkedIn are adapters; outcome, authority, relationship context and learning evidence belong in shared decision machinery.
+- The social scheduler's success-shaped no-op results are source-qualified, not live-reproduced. PR #1931 is reconciled as merged/main-verified. Preserve all existing packets/task identities and unknown operational gains; planning does not activate native RSI or authorize outreach.
+- Five documentation/planning files only; independent review and exact PR/main convergence govern closure. Separate product work and private account state remain untouched.
+
 ## 2026-09-28: RSI establishes correspondence test coverage after PR1930
 
 - WSP00/15/22/50/97: re-observe main3dfb68f7,95 unchanged peer heads and separately owned product work. PR1929 is merged/main-verified and its lane retired.

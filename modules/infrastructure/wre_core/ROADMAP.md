@@ -1,5 +1,144 @@
 # WRE Core Roadmap
 
+## Operational RSI measurement and experiment design — 2026-09-28
+
+Planning extension of the [canonical operational decision contract](../../../ROADMAP.md#operational-decision-contract-and-rsi-audit--2026-09-28),
+WSP 73 and WSP 48 §4.2. No executable schema, new telemetry store, runtime
+activation or production eligibility is introduced. Keep
+`wre_rsi_measurements.v1` and its existing producer/consumer truthful about their
+current simulator scope; map operational measurements into the existing owners
+only after consumer and provenance qualification.
+
+### Existing measurements that must not be conflated
+
+Source checkpoint: `e5600fe103441c91a81e0220aea9e48496b79b60`.
+
+- `src/wre_auto_researcher.py` records candidate evaluations, baseline/best
+  fitness, candidate hashes and dispositions. Independent/held-out verification
+  and production eligibility are false; unknown resources, rollback and retained
+  gain do not become zero. `src/wre_research_evaluator.py` models economic
+  assumptions; its fitness is not measured revenue, spend or communication quality.
+- `src/dashboard_alerts.py` consumes the bundle as unverified diagnostic
+  evidence. File age alone is not authenticated source freshness or promotion.
+- `src/pattern_memory.py::get_skill_metrics` counts stored success, whereas
+  `get_skill_fidelity_stats` uses a fidelity threshold (0.7) and feeds skill
+  ranking. These use different success definitions and default time windows;
+  the same configured window can yield the same denominator. Empty-history defaults
+  must not be presented as observed performance. `transfer_learning` recalls
+  records; `patterns_transferred` does not prove target application or gain.
+- `wre_master_orchestrator/src/wre_master_orchestrator.py` currently supplies an
+  `outcome_quality=0.0` placeholder in its skill outcome path. That value is not a
+  measured quality failure or baseline. `src/pattern_ab_evidence.py` uses sample
+  and rate rules; its winner is not statistical confidence or native authority.
+- The verified-outcome ratchet and queue-to-PatternMemory admission handlers
+  already enforce stronger evidence boundaries. Their existence does not mean
+  externally coordinated PR work traversed that native path.
+
+### Proposed operational measures
+
+Report each domain, task class and checkpoint separately. Each value needs its
+unit, sample count, source/experiment identity, authority scope and observation
+window. `null` means unavailable; zero requires an observed zero. A percentage
+with an empty denominator is unknown. Do not combine these into a universal RSI
+or consciousness score.
+
+| Measure | Definition and evidence |
+|---|---|
+| Decision correctness | Correctly scoped/routed decisions / eligible labeled cases; frozen independent labels distinguish act, draft, escalate, defer and abstain |
+| Outcome attainment | Independently witnessed declared outcomes / eligible cases whose observation window matured; report pending, censored and failed counts separately. A delivery receipt is only transaction evidence |
+| Truthful completion | False success claims / evaluated attempts, plus coverage of negative/unimplemented/uncertain-result fixtures |
+| Authority and privacy | Unauthorized effects or disclosures / evaluated attempts, with the tested negative-case inventory. Zero observed violations does not prove universal safety |
+| 012 attention | Necessary versus avoidable escalations, corrections and measured review minutes per eligible task; label necessity independently. Legitimate escalation must not be penalized |
+| Efficiency | Authenticated total tokens, currency cost and wall time, including failed proposals and verification, per correctly completed outcome. If no correct outcomes, report totals and an undefined ratio |
+| Paired improvement | Mean per-case candidate outcome minus baseline outcome on the same frozen cases and conditions; report discordant pairs and uncertainty. Relative gain is undefined when the baseline is zero |
+| Transfer and retention | Paired gain on separate unseen task/entity cases; repeat at a later checkpoint after unrelated learning and measure loss/regression against the earlier checkpoint |
+| Learning/admission quality | Candidate proposals, rejects, invalid runs, rollbacks and independently accepted procedure versions; tie later decisions to the version actually used, not just stored |
+| Mechanism attribution | Trace the authorized save → retrieve → apply → correct path for eligible episodes; report each observed stage and missing evidence separately from task score. A memory write alone earns no reuse claim |
+
+Style checks (purpose/request early, necessary context, concision, relationship
+continuity) support decision correctness. Their scores cannot replace outcome
+attainment. A persuasive message may still seek the wrong thing. Preserve 012's
+objective corrections and rejected approaches as evidence of that distinction.
+
+### Smallest bounded pilot, proposed counts rather than results
+
+1. **Qualify evidence first:** independently freeze 12 synthetic contract cases
+   (six Gmail-shaped, six LinkedIn-shaped) in existing test owners. Include
+   ambiguous identity, stale context, absent authority, appropriate escalation,
+   an unresolved substantive ask after a routing reply, uncertain submission and
+   a no-op that must not count as posted. No real account actions or private
+   correspondence are required. Repair only demonstrated existing-owner defects.
+2. **Prepare a comparison:** if qualification passes, predeclare 40 held-out
+   scenarios (20 per domain), separate from development cases. Freeze objective,
+   acceptance rubric, model/tool versions, allowed effects, evaluator identity,
+   random seeds where applicable and total time/token/currency caps before
+   evaluating a candidate. No paid-provider dispatch until those numeric caps
+   and the execution route are actually admitted. These sample counts are a
+   feasibility proposal, not a power calculation or paper-mandated threshold.
+3. **Bound adaptation:** baseline versus at most two candidate procedure versions;
+   score the same cases with a separately controlled evaluator. Keep acceptance
+   data unavailable to the proposer. If acceptance feedback is used to redesign
+   the procedure, reserve a new untouched confirmation set and account for every
+   proposal. No automatic 10 → 20 → 40 cycle escalation.
+4. **Test persistence:** freeze baseline, candidate and post-unrelated-learning
+   checkpoints; add 20 separate transfer/retention cases (10 per domain). Compare
+   with both a non-evolving control and the same candidate with its learned
+   artifact disabled, so base-model skill is not mislabeled as retained learning.
+   Clear volatile conversation context between episodes; preserve only the
+   declared persistent state. Include stale-state, irrelevant-memory and wrong-
+   procedure controls and authenticated read/apply traces.
+5. **Accept narrowly:** require zero observed authority/privacy/false-completion
+   violations and no correctness regression in the declared sample. Report effect
+   size and a prespecified paired uncertainty analysis; repeated selection needs
+   its own error-control plan. Retain as *improved* only if a predeclared meaningful
+   positive gain is supported on the primary outcome (or declared efficiency
+   outcome with correctness preserved). Zero gain is not improvement. An
+   underpowered or mixed result is inconclusive,
+   not production success. Keep evaluator criteria fixed, record rejects, and
+   require the existing independent admission/rollback chain before retention
+   or activation. This pilot alone cannot close G2-G5.
+
+The first 12 cases qualify a contract; they do not run a model or demonstrate
+autonomous learning. Costs, live outcome windows, statistical power and deployment
+authority remain prerequisites of later stages. Re-score with WSP 15 after each
+stage; stop when a real blocker or violated acceptance condition is observed.
+
+### Primary research coverage and limits
+
+Reviewed on 2026-09-28; a targeted research update, not an exhaustive literature
+review. All proposed FoundUps measures/counts above are design choices for this
+system, not results reported by these papers.
+
+- [Chen, Wang and Qu, RSI survey v2](https://arxiv.org/html/2607.07663v2): main
+  taxonomy, evaluation, research and discussion sections reviewed; interpretation
+  and limitations recorded in the root roadmap.
+- [EvoPathBench (21 September)](https://arxiv.org/html/2609.24663v1): methods and
+  evaluation sections reviewed. Fixed models/tools, frozen artifact checkpoints,
+  held-out tasks and artifact-disabled controls help distinguish transfer,
+  retention and adaptation. Its finance setting does not validate our mail or
+  social workflows.
+- [PACE (6 June)](https://arxiv.org/html/2606.08106v1): acceptance method and
+  limitations reviewed. Repeated noisy candidate selection needs explicit
+  statistical controls. Its per-decision guarantees are not a run-wide error
+  guarantee, and this roadmap does not claim to implement PACE.
+- [PAST-Bench (4 August)](https://arxiv.org/html/2608.04003v1): evaluation pipeline
+  and limitations reviewed. Fresh sessions, persistence-on/off comparisons and
+  save/retrieve/update traces directly address personal-agent learning. Hermes+
+  is a research variant, not evidence that our installed Hermes is updated or
+  qualified. Its reported overall gain difference is smaller than run variation;
+  memory accumulation alone is not proof of beneficial reuse.
+- [AIDE² (22 September)](https://arxiv.org/html/2609.26457v1): abstract and method
+  reviewed. Fixed per-task cost budgets and private grading support its research-
+  agent rewrite experiment. Its held-out transfer results motivate testing our
+  retained procedures under fixed resources; they do not prove FoundUps gains.
+- [RSIAgent (14 September)](https://arxiv.org/abs/2609.15364): abstract reviewed
+  only; verifier-assisted exploration and frozen memory are a comparison lead,
+  not a validated replacement for our admission or evaluator path.
+- [SEA-Eval (10 April)](https://arxiv.org/abs/2604.08988) and
+  [FinEvo-Bench (6 August)](https://arxiv.org/abs/2608.06144): abstracts reviewed
+  only, motivating further sequential-task and paired-control comparison.
+  No FoundUps capability claim depends on their reported benchmark scores.
+
 ## RSI verification hierarchy and measurement contract — 2026-09-25
 
 WSP 48 now adopts the research verification hierarchy: intrinsic signals <

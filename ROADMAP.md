@@ -12,6 +12,11 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+**Operational RSI audit (2026-09-28):** the [shared decision contract and measured
+baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
+WSP 73/WRE ownership across daily work. They distinguish verified regression from
+still-unmeasured operational improvement; no new runtime schema is activated.
+
 **2026-09-28 checkpoint:** PR1924 supervisor/requester contract correction is
 merged/main-verified at `1033310bc`, with its owned lane retired and 254/254
 parent/candidate cases passing. Subsequent source-only review rejected three
@@ -827,6 +832,111 @@ classified as **execution feedback**, with
 advances candidate search only; it does not close G2-G5. The next system proof
 must compose independent held-out evaluation, governed activation/rollback and
 retained improvement across successive generations.
+
+## Operational decision contract and RSI audit — 2026-09-28
+
+**Decision:** operational RSI and technical RSI belong to the same system. The
+existing [WSP 73 Digital Twin architecture](WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md)
+already owns the layer above platform skills: 012 sets objectives and authority;
+RedDog is the interaction surface; the principal-scoped 0102 Digital Twin reasons;
+OpenClaw supervises policy; WRE admits and coordinates work; Hermes executes
+bounded leaves. Extend these owners rather than creating another master
+orchestrator, contact database or skill registry.
+
+The **0102 Operational Decision Contract** below is a planning projection of
+those existing owners. It is not a new runtime schema, inherited skill interface,
+signed work order or evidence that all adapters consume these fields today.
+Principal prose still follows Prometheus → ORCH → WSP 99 M2M → admitted workers.
+Its proposed shared flow is:
+
+`input → scoped context → WSP 15 → outcome/pain/action → authority/attention → route → skill → verify effect and outcome → propose a procedure update → independently evaluate → retain or reject`
+
+### Source-grounded owner and gap map
+
+Audit source: `e5600fe103441c91a81e0220aea9e48496b79b60`. Holo's owner query
+returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`; bounded Git/source retrieval
+was used with explicit degraded freshness, without reindexing. This is a scoped
+audit, not a certification of every connector or current deployed runtime.
+
+| Existing owner / evidence | What exists | Remaining qualification |
+|---|---|---|
+| WSP 73; `NAVIGATION.py` Digital Twin decision policy, style guardrails and trajectory logger | Principal/context/intent/effect boundaries and an architectural home for shared cognition | Trace a real consumer across routing, effect receipt, outcome witness and subsequent decision; architecture alone does not prove this chain |
+| [Social Media DAE](modules/ai_intelligence/social_media_dae/README.md) and its `src/social_media_dae.py` | Central-twin vision, YouTube proxy and in-memory interaction history | LinkedIn/X initialization and monitor sections remain placeholders; stored conversations are not demonstrated outcome learning |
+| [Social orchestrator](modules/platform_integration/social_media_orchestrator/README.md), `src/autonomous_action_scheduler.py::_execute_action` | Platform orchestration and a stream-post path | The non-stream branch logs “Would post” but returns `posted: true`; pending-action handling marks returned actions executed. CHECK_STREAM/custom branches also return success-shaped results after logging. Source-qualified finding, not a reproduced live failure: exclude these from verified outcome counts until the existing owner is qualified/repaired |
+| [Correspondence state Skillz](modules/communication/moltbot_bridge/skillz/reddog_correspondence_state/SKILLz.md) | Provider truth, scoped ask state, metadata ledger and recipient preflight; prototype status | Distinguish delivery, routing response and substantive ask resolution; validate persistence and actual provider consumers before claiming end-to-end Gmail RSI |
+| [LinkedIn reply Skillz](modules/platform_integration/linkedin_agent/skillz/linkedin_agentic_reply/SKILLz.md) | Context, exact target/content authority and rendered-result verification; prototype status | Delivery/visibility alone does not establish usefulness, relationship benefit or reusable improvement |
+| WRE AutoResearcher, PatternMemory and dashboard | Existing measurement bundle and outcome/variation storage | Simulator fitness, fidelity thresholds and placeholder quality are different quantities; see the [measurement design and source caveats](modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28) |
+
+[Issue #1522](https://github.com/FOUNDUPS/Foundups-Agent/issues/1522) already
+describes operational, improvement and research loops; its initial canary is
+repository work. It is not the entire RSI system, nor is its intent exclusively
+code maintenance. Use current WSP 73 ownership when older issue terminology
+blurs RedDog and 0102. No issue closure or external owner change is implied here.
+
+### Shared decision fields to qualify in existing owners
+
+| Decision question | Required evidence / existing destination |
+|---|---|
+| Who, from where, and how fresh? | Principal, actor, entity, source reference/time and provenance; WSP 73 scoped context and existing provider receipts |
+| Which relationship, project or FoundUp? | Topic/ask and relationship history, optional FoundUp identifier, purpose/tenant scope. Personal work need not be forced into a FoundUp. Reuse the correspondence state owner |
+| What is sought, why, and what next? | Desired outcome, pain, next action; classify FYI, request, decision, escalation, negotiation or relationship maintenance before composing |
+| What matters now? | Actual WSP 15 complexity/importance/deferability/impact, total and rationale; FoundUp importance informs the existing dimensions, not a new multiplier. Record dependencies, timing and cost separately |
+| May 0102 act, and must 012 attend? | Current delegated authority, scope, effect ceiling, expiry and meaningful attention reason. Preserve valid earlier explicit authorization; priority, confidence and conversational familiarity alone do not grant send/publish authority |
+| Which action and channel? | Act, prepare, escalate, defer or abstain; channel may be none. Compile into existing WSP 99/work-admission contracts without changing ROLE/ORIGIN/PRINCIPAL_REF semantics |
+| What wording serves the outcome? | Put the request or purpose early; preserve necessary context/history; be concise and clear; check authority and recipient. Style checks are process proxies, not outcome success |
+| Did it happen, and did it work? | Separate transaction receipt from an objective-specific outcome witness and observation deadline; record failure, pending and unknown, not just success |
+| What should change next time? | Versioned procedure candidate, source/outcome provenance, independent evaluator, fixed comparison and retention/rejection receipt in existing WRE/PatternMemory owners |
+
+A Gmail reply that supplies a formal submission route can resolve *routing*
+while the substantive request remains open. “Sent,” a reply arriving, a like or
+an LLM's favorable assessment must not silently substitute for the declared
+outcome. No response is pending/censored until the predeclared observation window
+closes. Keep unresolved cases visible to avoid reporting only convenient wins.
+
+Ordinary authorized 012↔0102 operational observation is not automatically blocked
+on R25's multi-principal FoundUp feedback rollout. R25 consent and same-FoundUp
+participation remain necessary for its cross-principal feedback purpose. Neither
+path authorizes copying raw private mail/chat into a global training corpus;
+retain minimal authorized references/metadata under the existing owner.
+
+### Research interpretation and accounting of our own work
+
+The supplied image is from Chen, Wang and Qu's
+[RSI survey, v2 (6 September 2026)](https://arxiv.org/html/2607.07663v2).
+Its verification ordering is qualitative, not a universal numeric RSI score.
+Tests provide incomplete evidence; formal verification covers its specified
+property. Choosing worthwhile objectives remains separate from checking a
+candidate. The review also warns about self-confirming evaluation and improving
+inside the wrong problem frame. This supports fixed outcome definitions and
+independent evidence, not treating a growing pass count as general intelligence.
+The survey's 1,250-paper sample is not a complete census; this audit does not
+claim to have read that corpus.
+
+The existing WSP 48 §4.2 and WRE measurement work already incorporated this
+hierarchy on September 25. This slice extends its **operational application**;
+it does not claim to introduce the hierarchy or demonstrate retained RSI.
+
+| Observed quantity | Actual value and limit |
+|---|---|
+| Previous [PR #1931](https://github.com/FOUNDUPS/Foundups-Agent/pull/1931) regression | **20 unique unchanged cases**: 14 recipient + 6 correspondence; 20/20 on PR and 20/20 on main, zero failures. These are 40 pass observations, not 40 unique tests |
+| Coverage change | Those 20 cases became explicitly selected by hosted CI; zero new test cases and zero production-source changes. No pre-change behavioral failure was established by that slice |
+| Verification | Exact-source/CI evidence reviewed separately; [main CI](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36364834253) passed at `e5600fe1`. This was regression verification, not held-out operational evaluation |
+| Runtime effects in that slice | Zero platform actions and no native WRE activation; seven native admission blockers and no authoritative effect-use lease remain |
+| Operational outcome baseline, candidate gain, avoided 012 interventions | **Unknown (`null`)**; not measured by the 20 tests |
+| Authenticated token/cost efficiency, held-out transfer, retained multi-generation benefit | **Unknown (`null`)**; no fabricated percentages or speedup from PR/main test durations |
+
+The previous LinkedIn instruction correction (PR #1929: seven pass/one fail →
+eight pass with the unchanged oracle) is valid bounded engineering feedback.
+Neither it nor this externally coordinated audit proves native WRE autonomy,
+successful real correspondence or automatic learning retention. A backlog count
+or number of commits is inventory, not an improvement score.
+
+Next: qualify truthful completion evidence in the existing scheduler, then freeze
+synthetic decision/outcome controls before a paired operational experiment.
+Reuse the [WRE pilot design](modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28)
+and canonical backlog. Actual routing, authority and retention consumers must be
+proven before claiming shared schema inheritance. Increase cycles/agent count
+only after measured benefit, resource limits and acceptance gates justify it.
 
 ## Completion gates
 
