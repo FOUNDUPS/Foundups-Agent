@@ -126,6 +126,45 @@ The FY2026 call seeks private proposals that reduce City fiscal burden, improve 
 
 **Critical boundary:** the current call lists only former Shimousaka Elementary School and former Hanyu Elementary School. Former Sukatto Land Kuzuryu is not a listed eligible asset in this round, and the FY2026 page does not state why. This does not establish categorical ineligibility: Fukui City's FY2025 results record two rejected Sukatto proposals, and its FY2021 results record a partial-use Sukatto proposal that reached preferred-negotiator status and contract. The current FY2026 call is not presently a Sukatto application route. **Do not frame YUMORI's Sukatto request as an application to this program.** The current project asks Fukui City to identify and sponsor the appropriate executive-side **PPP/PFI public-private project-formation route** for Sukatto, including whether the City's PPP/PFI basic policy, PFI Act Article 6-equivalent proposal handling, sounding/market dialogue, the ふくい地域プラットフォーム, Cabinet Office PPP/PFI support, or another lawful mechanism should be used. Ask the Facility Utilization Promotion Division in writing which route the City will designate, which department owns it, and what pre-consultation/access/evidence the City requires.
 
+## F-10 — 令和8年度 ZEB実証事業（三次公募）
+
+- Agency: 経済産業省 / 一般社団法人 環境共創イニシアチブ (SII)
+- Status: **VERIFIED PROGRAM / THIRD CALL OPEN 2026-09-18**
+- Third-call window: 2026-09-18 through 2026-10-09 17:00 JST
+- Expected award timing: early December 2026
+- Primary source: https://sii.or.jp/zeb08/jissho_public.html
+- Official FAQ: https://sii.or.jp/zeb08/faq.html
+
+The third call materially relaxed multi-year scheduling. SII states that a multi-year application may have no eligible expenditure in the first fiscal year, and for A.ZEB projects the deadlines for the incremental-cost report, ZEB Leading Owner registration, and BELS/other third-party certification may be completed by the second project year rather than the first. This change may be useful to a phased PPP/public-asset project because the first year can focus on project formation, design and approvals, but it does not establish YUMORI.me eligibility.
+
+Current official FAQ boundaries relevant to YUMORI.me:
+- The program has three tracks: A.ZEB化事業, B.既存テナント事業, and C.未評価技術単独事業, with project periods up to three years.
+- SII states that A.ZEB has a published subsidy rate of up to 1/3 for the general ZEB portion, while WEBPRO-unassessed technology costs may be subsidized up to 1/2; C.未評価技術単独事業 is up to 1/2 for the eligible unassessed-technology scope.
+- B.既存テナント事業 requires an existing building in which more than half of the floor area is intended for tenant leasing, a plan to reach ZEB within 15 years of application, an eligible building use, and generally 2,000 m² or more.
+- Local governments, including local-government independent administrative agencies and public enterprises, cannot apply to this METI/SII program. SII points such public-sector cases toward the Ministry of the Environment's ZEB/CO2 program.
+- A registered nonprofit corporation or cooperative may apply when it owns the building and satisfies the program requirements.
+- Multiple buildings generally cannot be bundled as one application; applications are ordinarily made per building.
+- Costs contracted or construction started before the subsidy award decision are not eligible for subsidy.
+
+**Critical YUMORI.me boundary:** former Sukatto Land Kuzuryu is a City-related public asset and the current PPP/property/use-right structure is unresolved. Do not infer that a future YUMORI nonprofit, master SPC, COGDC SPV, tenant/operator or lease structure can use F-10. The official FAQ makes ownership and applicant identity central, while explicitly excluding local-government applicants. The current status is `VERIFIED PROGRAM` only.
+
+**Unresolved eligibility question:** if Fukui City authorizes a lawful long-term PPP/lease/use structure, can an eligible private/nonprofit/SPC entity that lawfully owns the relevant building or otherwise fits the controlling ownership/application rule use A.ZEB, B.既存テナント or C.未評価技術単独事業 for a separable building-level retrofit? If City ownership remains controlling, should the project instead pursue the Ministry of the Environment's public-building ZEB/CO2 route? Obtain a written or otherwise authoritative program determination before promoting status beyond `VERIFIED PROGRAM`.
+
+Do not book any F-10 subsidy revenue, do not treat the published rates as expected funding, and do not assume that the three YUMORI sites can be aggregated into one ZEB application.
+
+### F-10 application posture
+
+- **Current status remains `VERIFIED PROGRAM`.** YUMORI.me / the Preparatory Committee is not presently an eligible building-owner applicant for the ZEB demonstration grant.
+- If Fukui City remains the building owner, the official SII FAQ says a local government cannot apply to the METI/SII ZEB demonstration program. In that structure, evaluate the Ministry of the Environment public-building ZEB/CO2 route instead.
+- If, through a lawful future PPP/property transaction, a registered nonprofit/private SPC becomes the building owner before application and satisfies the other requirements, an SII application may become possible. Do not assume that a long-term lease or operating right alone satisfies the ownership rule; obtain an SII determination.
+- SII says a registered nonprofit corporation or cooperative may apply when it is the building owner and the project otherwise qualifies.
+- For the separate `ZEB化診断・計画策定支援事業`, the applicant is a registered Phase-3 ZEB Planner and the building owner participates through a joint-project agreement. That program is open through 2026-10-16 17:00 JST and does not require the ZEB construction to proceed after the diagnostic/planning work. Confirm with SII whether a Fukui City-owned building can participate as the owner-side joint party before treating this as usable.
+- SII states that pre-application consultation is generally handled by telephone rather than email. ZEB office: 03-5565-4063, weekdays 10:00-12:00 and 13:00-17:00.
+- ZEB demonstration applications use J-Grants and require a G-Biz ID Prime account. Joint applications cannot use the standard J-Grants route and require early coordination with SII.
+- Do not contract or start subsidy-scope design/construction before the award decision if those costs are intended to be subsidized; SII states such pre-award contracted/started scope is ineligible.
+
+**Immediate YUMORI action:** prepare a two-scenario eligibility package for SII and Fukui City: (A) City retains ownership -> SII demonstration ineligible / MOE public-building route to evaluate; (B) eligible private/nonprofit building-owner structure -> SII demonstration route to evaluate. In parallel, ask a Phase-3 ZEB Planner whether it can lead a `ZEB化診断・計画策定支援事業` application with the current owner. A telephone inquiry to SII changes the registry only to `ELIGIBILITY INQUIRY`; do not promote to `ELIGIBLE` unless SII or the controlling rule establishes the actual applicant/property structure as eligible.
+
 ## Other tracked programs
 
 - METI GX regional-co-creation / decarbonized-power-region investment programs: monitor for scale, regional and applicant fit; potentially relevant to later DC expansion, not assumed for Phase 1.
