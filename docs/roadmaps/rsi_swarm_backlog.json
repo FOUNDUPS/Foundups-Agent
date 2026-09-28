@@ -1882,7 +1882,7 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "ab9ab47a8bec92720a156fea0696a545381ccc9c",
+    "base_commit": "41a1ac8a368bff16d9d4de2cb1fca92c6698e1cb",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
     "status": "owned_qualification_prepared_execution_pending",
     "wsp15": {
@@ -1899,7 +1899,7 @@
   },
   "current_observation": {
     "observation_id": "20260928-social-scheduler-execution-evidence",
-    "base": "ab9ab47a8bec92720a156fea0696a545381ccc9c",
+    "base": "41a1ac8a368bff16d9d4de2cb1fca92c6698e1cb",
     "self": "0102",
     "role": "architect",
     "origin": "external_principal",
@@ -2021,7 +2021,13 @@
       ],
       "overlaps": "Older root ModLog additive histories; PR1934 also updates the generated test registry for different product test rows. Preserve their rows; our deterministic correction targets only the scheduler test entry.",
       "resolution": "Preserve protected shared checkout, all peer branches and YUMORI/eSingularity/AutoPost work; new1934/1935 product peers are inventory only.",
-      "shared_checkout_preserved": true
+      "shared_checkout_preserved": true,
+      "integration": {
+        "merged_peer_pr": 1934,
+        "main_commit": "41a1ac8a368bff16d9d4de2cb1fca92c6698e1cb",
+        "preserved": "All peer product paths and its new generated registry row; selected source/test/CI remain unchanged.",
+        "registry_reconciliation": "Regenerate using combined tracked tree; do not copy peer registry wholesale."
+      }
     },
     "research": {
       "as_of": "2026-09-28",
@@ -3501,6 +3507,7 @@
       "base": "ab9ab47a8bec92720a156fea0696a545381ccc9c",
       "candidate_count": 59,
       "packets_preserved": 26
-    }
+    },
+    "entry_observation_base": "ab9ab47a8bec92720a156fea0696a545381ccc9c"
   }
 }
