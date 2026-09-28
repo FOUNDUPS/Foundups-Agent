@@ -1,5 +1,7 @@
 ## 2026-09-28: Fixed scheduler execution-evidence qualification
 
+- Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.
+
 - WSP 00/5/6/15/22/50/62/84/97; existing `test_autonomous_scheduler.py` extended after retrieving this log, tests README and actual scheduler/producer source. No new test file or production implementation.
 - Add 13 independently specified current-behavior witnesses: five non-effect branches, local reminder, five stream-result shapes, exception and no-due batch. Actual enum/dataclass declarations and unchanged scheduler leaf; private imports, denied constructor, fixed time, awaited spy and memory-only bookkeeping.
 - Preserve all eight legacy test bodies; they are excluded from this qualification and cannot invoke the real constructor through the new fixture. A successful characterization is evidence of observed behavior, including defects, not a truthful-posting acceptance pass.

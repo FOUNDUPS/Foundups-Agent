@@ -2016,9 +2016,10 @@
         "modules/platform_integration/social_media_orchestrator/ModLog.md",
         ".github/workflows/ci.yml",
         "docs/roadmaps/rsi_swarm_backlog.json",
-        "ModLog.md"
+        "ModLog.md",
+        "WSP_knowledge/WSP_Test_Registry.json"
       ],
-      "overlaps": "Older root ModLog additive histories only; no selected source/CI overlap.",
+      "overlaps": "Older root ModLog additive histories; PR1934 also updates the generated test registry for different product test rows. Preserve their rows; our deterministic correction targets only the scheduler test entry.",
       "resolution": "Preserve protected shared checkout, all peer branches and YUMORI/eSingularity/AutoPost work; new1934/1935 product peers are inventory only.",
       "shared_checkout_preserved": true
     },
@@ -2088,7 +2089,16 @@
       "hosted_result": "pending",
       "independent_review": "pending",
       "interpretation": "Characterization is a behavior witness. A passing misleading-success case confirms a defect; all-success doubles do not prove real posting.",
-      "unqualified": "Persistence/serialization, real provider delivery, whole legacy suite, operational learning and retained RSI."
+      "unqualified": "Persistence/serialization, real provider delivery, whole legacy suite, operational learning and retained RSI.",
+      "initial_hosted_attempt": {
+        "pr": 1936,
+        "head": "ed4db740be61afa50129c9977da96335dc2f9dd0",
+        "ci_run": 36372027207,
+        "failure": "Canonical registry stale at pre-test check",
+        "scheduler_cases_executed": 0,
+        "scheduler_step": "skipped",
+        "repair": "Refresh existing canonical registry through unchanged static generator; no registry policy/allowlist exception."
+      }
     },
     "publication": {
       "state": "prepared_not_published",

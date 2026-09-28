@@ -1,5 +1,7 @@
 ## 2026-09-28: RSI qualifies social scheduler outcome evidence
 
+- Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.
+
 - WSP 00/15/22/50/62/84/97: re-observe main `ab9ab47a8`, PR #1933's verified closure, 98 peer PRs and protected concurrent work. Preserve all 26 packets and 59 previously observed task identities, including the recorded push-hook import error.
 - Select existing scheduler evidence qualification at C2/I4/D4/Impact4 = 14/P1. Thirteen fixed cases exercise current behavior with inert dependencies; no production code is changed in this slice.
 - Reuse the existing test file and CI workflow. Preserve eight legacy test bodies and distinguish current-behavior witnesses from passing functional acceptance. Documentation corrects the relevant unsafe historical test-discovery assumptions.
