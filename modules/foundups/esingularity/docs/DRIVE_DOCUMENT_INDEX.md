@@ -52,10 +52,10 @@ These are durable project documents. Preserve their file IDs and update in place
 
 | Drive file | Role | Drive ID |
 | --- | --- | --- |
-| **FIN — YUMORI Phase 1 Financial Model & Grant Audit — 2026-09-12** | Current working grant register and functional financial audit | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
+| **FIN — YUMORI Demand-Led Financial Model & Grant Audit — 2026-09-28** | Current functional financial model: demand-led sizing, grants, site tabs, and separate `Regional Impact` / public-value ledger | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
 | **FIN.YUMORI — Integrated Financial + Regional Impact Model.xlsx** | Legacy/integrated model retained as reference; do not let legacy assumptions override current audit | `11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c` |
 
-Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). The current FIN workbook contains separate Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu tabs. A statutory maximum or model placeholder is not project funding.
+Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). The current FIN workbook contains separate Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu tabs plus a `Regional Impact` ledger. That ledger keeps visitor spending, project revenue, payroll, private capital, and public-cost avoidance separate; it does not permit those measures to be summed without an explicit overlap/double-counting bridge. A statutory maximum, economic-impact multiplier, financing assumption, or model placeholder is not project funding or verified economic output.
 
 ## LEGAL / COUNCIL RECORDS
 
