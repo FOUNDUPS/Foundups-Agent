@@ -11,7 +11,8 @@ The test suite verifies the monorepo and public-presentation contracts:
 - the Japanese canonical source has ten slides with complete derived language states;
 - the YUMORI movement page keeps Japanese as its source language and has complete English and Portuguese selector copy;
 - floor allocation, COG DC ownership, economics labels, timed controls, assets, and outreach provenance remain truth-bound;
-- the `/future` source remains valid UTF-8 and free of the superseded speculative capacity schedule.
+- the `/future` source remains valid UTF-8 and free of superseded speculative capacity schedules;
+- the repository economic model preserves functional-FIN parity while demand-led sizing fails closed on missing demand, unpriced active services, and unverified grid capacity.
 
 Run from the repository root:
 
@@ -39,3 +40,14 @@ node --experimental-strip-types --test modules/foundups/esingularity/tests/test_
 Use Node >=22.13.0, matching the frontend engine contract. The existing Validate eSingularity workflow runs this command after Node setup and retains the Python tests, catalog validation, lint and build.
 
 These are configuration contracts, not proof of HTTP routing or publication. Before production acceptance, test fresh direct and client-side navigation against the actual Sites runtime: YUMORI.me `/` must show the movement while preserving the visible host; eSingularity.ai `/` must retain the project page; YUMORI.info must retain its redirect. Check query parameters, canonical metadata, JHR, signup, assets and browser cache behavior. See `../INTERFACE.md` for the domain and publication boundary.
+
+
+## Economic model
+
+Run the demand-led economic/model regression directly:
+
+```powershell
+python -m pytest modules/foundups/esingularity/tests/test_yumori_economic_model.py -q
+```
+
+The test protects the 24-offer service catalog, functional-FIN parity, demand-to-kW translation, the financial-floor distinction, and the utility-capacity gate. It must never turn an unverified site MW value into a build target.
