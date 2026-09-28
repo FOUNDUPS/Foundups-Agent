@@ -12,6 +12,14 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+**2026-09-29 first-layer experiment:** actual local model testing has begun on
+synthetic correspondence. None of the original 12 prompts fit; all 12 compact
+prompts fit. Three adaptive attempts cover only one decision case, with preserved
+failures and independent evaluation. Start from the [current experiment and
+layer gates](modules/infrastructure/wre_core/ROADMAP.md#first-local-operational-rsi-experiment--2026-09-29),
+not another product build. Full decision coverage, retained improvement and
+admitted OpenClaw/Hermes execution remain open.
+
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
 WSP 73/WRE ownership across daily work. They distinguish verified regression from
@@ -22,7 +30,7 @@ merged/main-verified at `1033310bc`, with its owned lane retired and 254/254
 parent/candidate cases passing. Subsequent source-only review rejected three
 manager-backend compositions across two dependencies. Supervisor integration
 remains blocked at 14/P1; the 10/P2 canonical status reconciliation has separate
-publication/closure receipts. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#manager-backend-qualification-closure--2026-09-28)
+publication/closure receipts. See the [historical checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#manager-backend-qualification-closure--2026-09-28)
 and canonical backlog. No backend implementation is selected: resume only with
 reviewed strict-decoder evidence, then re-observe and rescore. Native RSI and
 AmIBot remain unadmitted; a source failure is not production runtime evidence.

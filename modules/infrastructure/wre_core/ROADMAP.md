@@ -1,3 +1,45 @@
+## First local operational RSI experiment — 2026-09-29
+
+Use the existing synthetic correspondence fixture before building another FoundUp.
+WSP 97 classifies this as directly supervised local qualification, not native
+multi-agent admission. The existing operational work item remains 14/P1;
+native 18/P0 still has its separate seven authority blockers and no effect-use lease.
+
+| Check | Observed result |
+|---|---|
+| Original twelve full prompts | 4,233–4,281 input tokens; 0/12 fit 2048 with 512 output reserved |
+| Experimental compact M2M packet | 1,001–1,049 tokens; 12/12 fit; same cases/labels |
+| Existing WRE adapter, C1 G01 | Native generation returned; non-JSON instruction echo; 1 failed, 11 not run |
+| Existing local chat backend, C2 G01 | 1,035 input/123 output tokens; Markdown and incorrect objective status; rejected |
+| JSON-mode and draft-rule candidate, C3 G01 | Valid JSON; 0/1 correct (objective status wrong); 1,062 input/95 output tokens |
+
+Three generation attempts cover **one known development case**, not twelve
+successful decisions. No held-out or retained gain is established. C2/C3 call
+the existing generic backend directly; the production WRE adapter is unchanged.
+No live Gmail/LinkedIn action, new orchestrator, skill promotion or FoundUp launch.
+The local guard enforces time/tree/stdout bounds, not OS memory/network isolation.
+Runtime pin mismatch 0.3.20 installed versus 0.2.72 declared remains explicit.
+
+PR #1950 measurement repair is merged/main-verified at 83b06897; hosted PR and main
+each passed the same 308 connected cases. Earlier pending/failed entries below
+are historical checkpoints, not the current measurement closure state.
+
+Canonical inputs, raw synthetic outputs, counts, judgments and artifact bindings:
+`docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.operational_first_loop_20260929`. Publication and owned-lane
+closure have separate receipts; native inference was local, not CI execution.
+
+Build the next layer only after the preceding gate passes:
+
+1. Frozen full 12-case decision baseline and semantic acceptance; preserve failures and stop tuning G01.
+   Wire a qualified candidate into the existing WRE adapter only after its acceptance gates pass.
+2. Independently frozen held-out/transfer comparison, later-invocation retained use and rollback.
+3. One admitted OpenClaw/Hermes ticket, independent verification and observable receipt chain.
+4. Isolated AmIBot fixture; then 2→10 worker scaling with measured collisions, cost and rejection rates.
+
+Do not expand into active eSingularity/YUMORI or separately owned AutoPost work.
+Resolve the exact Mind FoundUp owner before selection; no guessed module or duplicate plan.
+
 ## Hosted measurement portability follow-up — 2026-09-29
 
 Expanded CI on PR1950 head `5449bcde` ran308 cases:306 passed, two failed.
