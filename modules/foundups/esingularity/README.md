@@ -81,6 +81,8 @@ YUMORI compute capacity is **demand-led, not MW-first**.
 
 The sizing path is customer/service demand → revenue/resource demand → compute/storage/network requirements → IT kW → facility kW → utility-confirmed cap. A separately calculated financial-floor kW is a viability metric under the current scenario, not a build target. No current site has utility-confirmed deliverable kW/MW.
 
+The same repository model also keeps demand-capped heat-recovery calculations and the sourced JHR Japan infrastructure-flow ledger. Heat value is limited by usable thermal demand; infrastructure relationships with undisclosed amounts remain null and do not become YUMORI revenue or funding.
+
 The legacy 1 MW / 384-GPU workbook scenario is retained for audit continuity only. Current public/project truth must not present a fixed 1→5→10→20 MW rollout.
 
 ## Google Drive document authority
