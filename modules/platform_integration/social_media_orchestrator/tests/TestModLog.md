@@ -1,3 +1,10 @@
+## 2026-09-28: Qualify scheduler caller acknowledgement and reload
+
+- WSP00/5/6/15/22/50/62/84/97: fresh14/P1 selection after PR1943 verified main closure; preserve its42 fixed methods/48 inputs.
+- Extend the same fixture with nine current-behavior cases across create/execute/cancel and normal/pre-/post-replace publication. Observe exact returns/logs/file bytes/reload and bounded fake replay. Production unchanged.
+- Named hosted selection is51 methods/57 finite inputs;25 file and9 caller records. Existing50 test bodies unchanged, including8 unselected legacy methods. Fixture/effect review and hosted results pending; no host-local application tests or live effects.
+- WSP62: bounded955-line cohesive file in guideline range; new helpers<=50lines, new class<=200. Existing loader/fixture reused, no new module or exemption. Further growth requires fresh cohesion/decomposition review.
+
 ## 2026-09-28: Validate scheduler safe publication under fixed controls
 
 - WSP00/5/6/15/22/50/62/84/97: Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.

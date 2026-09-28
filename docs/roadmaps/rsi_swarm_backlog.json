@@ -1881,21 +1881,21 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.safe_publication_repair_20260928",
-    "base_commit": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
+    "observation_path": "current_observation.caller_acknowledgement_20260928",
+    "base_commit": "6821aac32774f5be36038bb3fb40cc55920a56cd",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
-    "selected_component": "Repair typed-result JSON projection and safe schedule publication in the existing save owner",
-    "status": "candidate_hosted_verified_final_convergence_pending",
+    "selected_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
+    "status": "fixture_prepared_independent_effect_review_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
-      "deferability": 4,
+      "deferability": 3,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
@@ -2179,19 +2179,19 @@
         {
           "task": "Qualify truthful completion evidence in the existing social action scheduler",
           "wsp15": {
-            "complexity": 2,
+            "complexity": 3,
             "importance": 4,
-            "deferability": 4,
+            "deferability": 3,
             "impact": 4,
             "total": 14,
             "priority": "P1"
           },
-          "state": "candidate_persistence_characterization_passed_final_convergence_pending",
+          "state": "caller_fixture_preparation_selected",
           "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
-          "dependency": "Final exact-head CI/CodeQL and independent result/source review, then verified main and owned cleanup.",
-          "next_step": "Close this characterization on exact merged main; re-observe and rescore before admitting a persistence repair.",
+          "dependency": "No remaining PR1943 closure dependency; keep current fresh main/ownership checks and exact effect review before any hosted execution.",
+          "next_step": "Freeze nine caller-by-publication-outcome characterization cases in the existing test owner; preserve current 42 methods and qualify all loader/clock/cleanup effects before hosted execution.",
           "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
-          "limits": "In-memory repair closed; durable state/restart, external delivery, native admission and retained learning remain unqualified.",
+          "limits": "PR1943 source publication repair is closed under its fixed42-method/48-input fixture. Caller acknowledgement and restart retry policy, Windows/crash behavior, external delivery and retained learning remain unqualified.",
           "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
           "qualification": {
             "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
@@ -2203,22 +2203,31 @@
             "production_source_changes": 0,
             "local_application_tests_run": 0
           },
-          "next_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
+          "next_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
           "component_closure": {
-            "pr": 1941,
-            "merge": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
-            "terminal_state": "MERGED_VERIFIED_MAIN",
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\final-accounting.json",
-            "method_count": 26,
-            "fixed_input_cases": 32,
-            "baseline_passed_methods": 5,
-            "pr_passed_methods": 26,
-            "main_passed_methods": 26,
-            "meaning": "Bounded deterministic in-memory completion repair; same frozen fixtures, no retained RSI gain."
+            "pr": 1943,
+            "merge": "6821aac32774f5be36038bb3fb40cc55920a56cd",
+            "methods": 42,
+            "fixed_inputs": 48,
+            "passed": 42,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
+            "limits": [
+              "Success is representable JSON publication and reload under the fixed fixture, not independent external delivery or power-loss proof.",
+              "Unsupported non-JSON values remain a reported failed save but cannot truncate the prior file. This does not promise durable recording of every malformed arbitrary response object.",
+              "No new automatic action retry; in-memory outcomes and original PostResponse identity remain unchanged.",
+              "Save-failure caller acknowledgement and durable retry policy remain explicitly separate, unresolved contracts; existing save return/error logging may be preserved for this minimal repair.",
+              "A preserved prior pending record can be re-executed after restart; atomic replacement alone cannot prevent that. No exactly-once claim."
+            ]
           },
           "next_component_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\next-action-review.json",
-            "sha256": "e5a4bb4cca2c8cd1f17420df9fc07f2884d7c6e1024c4344997e11cda9fec59d"
+            "selection-acceptance-review.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-review.json",
+              "sha256": "a61a80f472666d1fc4fc267572921f8e0acaf8831be1a8c655dcfbc0c987d9d1"
+            },
+            "selection-acceptance-restart-addendum.json": {
+              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-restart-addendum.json",
+              "sha256": "bf7854cd6b690facdf62fcd0a6f331d0d96c95727742d4dcdbb2f95c417fc810"
+            }
           },
           "preparation": {
             "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
@@ -3488,8 +3497,8 @@
       ],
       "selected_next": "Qualify truthful completion evidence in the existing social action scheduler",
       "implementation_ready_selected": null,
-      "state": "current_repair_closed_next_existing_owner_qualification_selected",
-      "rationale": "Existing writer passes typed PostResponse to ordinary json.dump after opening destination w, then suppresses exception with logging. Current26-case fixture only observes save requests. This finite connected risk outranks equally-scored pilot preparation with no chosen consuming owner/labels yet.",
+      "state": "freshly_reobserved_caller_qualification_selected",
+      "rationale": "Closed publication repair is removed from executable work. Current caller source and shared fixture provide exact nine-case oracles; equal14 operational pilot still requires consumer and fixed independent labels. Higher tasks retain specific unchanged prerequisites. Reused unchanged59-row evidence at exact main6821 and96 unchanged peer heads; no unchanged failed runtime probe.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3500,10 +3509,11 @@
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
       "authoritative_use_lease": null,
-      "base": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
+      "base": "6821aac32774f5be36038bb3fb40cc55920a56cd",
       "candidate_count": 59,
       "packets_preserved": 26,
-      "selected_next_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation"
+      "selected_next_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
+      "selection_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-review.json"
     },
     "research": {
       "as_of": "2026-09-28",
@@ -3748,6 +3758,76 @@
         "ci_codeql_success": true,
         "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\candidate-checks.json"
       }
+    },
+    "caller_acknowledgement_20260928": {
+      "base": "6821aac32774f5be36038bb3fb40cc55920a56cd",
+      "state": "fixture_prepared_independent_effect_review_pending",
+      "component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "previous_closed": {
+        "pr": 1943,
+        "merge": "6821aac32774f5be36038bb3fb40cc55920a56cd",
+        "terminal_state": "MERGED_VERIFIED_MAIN",
+        "methods": 42,
+        "fixed_inputs": 48,
+        "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
+        "independent_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-closure-review.json"
+      },
+      "retrieval": {
+        "ok": true,
+        "freshness": "CURRENT",
+        "gap": false,
+        "noise": "four of five semantic hits unrelated; existing scheduler test ranked second",
+        "ordering": "prefer module must-include contracts, exact caller source and existing fixture",
+        "missing": "optional memory/README absent; required Tier0 present; requirements read directly",
+        "duplication": "no new owner/module/skill; extend existing fixture",
+        "scope": "6821aac32774f5be36038bb3fb40cc55920a56cd"
+      },
+      "allocation": {
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "scope": "nine caller/save/reload cases, no production source change",
+        "effort": "one focused test/documentation sprint",
+        "provider_calls": 0,
+        "cost": "hosted CI and architect/verifier work; tokens and currency unavailable",
+        "verification": "static AST/source/effect review, exact51-method/57-input hosted selection, original-artifact independent review, required checks, main readback"
+      },
+      "selection": {
+        "methods": 51,
+        "fixed_inputs": 57,
+        "new_methods": 9,
+        "legacy_unselected": 8,
+        "command": "python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v"
+      },
+      "acceptance_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-review.json",
+      "restart_addendum": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-restart-addendum.json",
+      "ranked_observation": "current_observation.post_sprint_reobservation",
+      "effects": "Only independently reviewed sequential hosted synthetic file/AsyncMock path; no host-local application tests/live posting/native work.",
+      "source_unchanged": true,
+      "authoritative_use_lease": null,
+      "native_blockers": [
+        "canonical_consensus_receipt_verifier_missing",
+        "canonical_sovereign_authorization_verifier_missing",
+        "canonical_principal_subject_key_attestation_missing",
+        "canonical_model_signed_evidence_trust_anchor_incomplete",
+        "canonical_model_selection_signed_evidence_verifier_missing",
+        "canonical_memex_supply_signed_evidence_verifier_missing",
+        "canonical_signer_client_peer_handshake_verifier_missing"
+      ],
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json"
     }
   }
 }

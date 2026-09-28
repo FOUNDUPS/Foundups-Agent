@@ -12,7 +12,17 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
-### Current safe-publication repair — 2026-09-28
+### Current caller/reload characterization — 2026-09-28
+
+PR1943 safe-publication repair is closed on main6821aac3 with42 fixed methods
+passing on final/main and independently reviewed owned cleanup. Fresh14/P1
+selection qualifies the three caller/save/reload boundaries with nine cases in
+the existing fixture; source remains unchanged. See
+[fixed acceptance](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28).
+Hosted results and exact closure remain pending; re-observe before selecting
+acknowledgement policy or a production repair. No exactly-once or retained RSI claim.
+
+### Historical safe-publication repair — 2026-09-28
 
 PR1942 characterization is closed on main12663d7e4f with successful main CI and
 CodeQL. WSP15 C3/I4/D4/Impact4=15/P1 selects explicit result projection and the
