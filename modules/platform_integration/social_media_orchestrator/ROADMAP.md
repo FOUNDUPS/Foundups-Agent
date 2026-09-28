@@ -12,14 +12,28 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
-### Current scheduler repair — 2026-09-28
+### Current persistence qualification — 2026-09-28
+
+WSP15 C2/I4/D4/Impact4=14/P1 selects a six-case real-file characterization of the
+existing scheduler. Preserve its source and reuse the current fixture: two
+valid round-trip controls and four witnesses for typed response serialization,
+unreadable replacement and future-schedule loss on reload. Scope is disposable
+test data only. A green characterization can demonstrate a defect.
+
+Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
+
+After exact hosted/main qualification and independent closure, re-observe and
+rescore before selecting a production repair. A repair needs explicit durable
+representation, previous-file preservation, load compatibility and save-failure
+acknowledgement contracts; in-memory success is not a durable receipt.
+
+### In-memory scheduler repair — closed 2026-09-28
 
 PR1936 closed the qualification below:13/13 witnesses passed on the reviewed PR
 and exact merged main `cd7e62d680`. Nine witnesses demonstrate misleading success;
-the four controls do not establish external delivery. Fresh WSP15 C3/I4/D4/Impact4
-=15/P1 selects a minimal in-memory repair in the existing scheduler.
+the four controls do not establish external delivery. That 15/P1 in-memory repair is now closed. PR1941 is merged/main-verified at `6acb3f55c2`: the frozen26 methods/32 inputs passed on final PR CI36380808132 and main CI36381188667; both CodeQL runs passed. Its owned branch/worktree were retired after recovery preservation.
 
-Freeze26 methods/32 fixed input cases, then compare unchanged and repaired source
+Freeze 26 methods/32 fixed input cases, then compare unchanged and repaired source
 through the existing hosted CI owner. Reject unsupported actions and incomplete
 or incoherent posting responses; preserve exact response objects and terminal
 no-retry behavior. Validate and snapshot unique nonempty targets before effects.
@@ -27,7 +41,7 @@ Duplicate targets, including duplicates produced by overlapping natural-language
 matches, reject explicitly rather than silently posting to a substituted list.
 Baseline CI36379506634 confirms21 failing methods/27 assertion failures and5
 passing controls with no errors/skips. The same26-method fixture is unchanged
-for candidate validation: `9bc31ed6e0` passes all26 methods/32 inputs in
+for candidate validation: `9bc31ed6e0` passes all 26 methods/32 inputs in
 CI36380266749, with0 failures/errors/skips and green CI/CodeQL. Final integrated
 PR head/main convergence is recorded in the canonical backlog closure receipt.
 Source review also tightened exact response/string types and preserved posting

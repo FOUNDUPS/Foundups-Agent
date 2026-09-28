@@ -1,6 +1,43 @@
 # Social Media Orchestrator Tests
 
-## Scheduler completion repair acceptance — 2026-09-28
+## Scheduler persistence characterization — 2026-09-28
+
+Extend the existing fixture with `TestPersistenceEvidence`: two positive controls
+and four defect witnesses exercise actual `save_schedule`/`load_schedule` in
+disposable directories. Production source and the 26 completion methods remain
+unchanged; all eight legacy methods remain unselected.
+
+| Fixed case | Required observation |
+|---|---|
+| Pending action control | Valid JSON, exact field/type round trip into a fresh instance |
+| Executed reminder control | Valid terminal round trip; no repeat execution after reload |
+| Complete typed posting response | Preserve response/status; record serialization error, invalid replacement bytes and failed fresh reload |
+| Partial typed posting response | Preserve failed disposition and original response; same serialization/reload defect |
+| All-failed typed posting response | Preserve failed disposition and original response; same serialization/reload defect |
+| Typed response plus future action | Future action unchanged in memory; corrupted replacement prevents either record loading |
+
+A passing defect witness confirms broken persistence in a synthetic file. It is
+not a durability acceptance pass or evidence of production data loss/reposting.
+The log emits six `PERSISTENCE_EVIDENCE` JSON records with exact synthetic before/
+after bytes, hashes, save/load errors, memory status and restored IDs.
+
+Only the independently reviewed named hosted process is qualified:
+
+```bash
+python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence -v
+```
+
+This selects 32 methods/38 fixed inputs (26/32 existing plus6/6 new). Inert
+source-bound producer declarations, denied constructor and fake posting remain.
+New effects are limited to `TemporaryDirectory`, sequential process-wide
+`chdir`, and fixed `memory/schedule.json` beneath that scratch root. ExitStack
+restores patches/cwd before scratch removal, with cleanup assertions. This is
+not a generally concurrent async fixture. Host-local application tests and
+whole-directory discovery remain unqualified; `-I -B` is not an OS sandbox.
+
+Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
+
+## In-memory completion repair — closed 2026-09-28
 
 PR1936 closed the13 original behavior witnesses on PR and merged main. The same
 `TestExecutionEvidence` now fixes26 test methods /32 input cases for the intended
@@ -23,8 +60,8 @@ in-memory actions exclude accounts, browsers, providers and real persistence.
 The existing CI step `Run social scheduler execution evidence` is unchanged.
 Baseline CI36379506634 reproduced21 failing methods/27 assertion failures and
 5 passing controls (0 errors/skips). The same frozen fixture will judge the repair;
-candidate `9bc31ed6e0` passes all26 methods/32 inputs in CI36380266749
-(0 failures/errors/skips). Final integrated-head/main proof remains receipt-bound. Finite variants are not extra independent test methods.
+candidate `9bc31ed6e0` passes all 26 methods/32 inputs in CI36380266749
+(0 failures/errors/skips). PR1941 is merged/main-verified at `6acb3f55c2`: the frozen26 methods/32 inputs passed on final PR CI36380808132 and main CI36381188667; both CodeQL runs passed. Its owned branch/worktree were retired after recovery preservation. Finite variants are not extra independent test methods.
 
 The eight `TestAutonomousActionScheduler` methods are preserved historical tests
 and remain unselected/unqualified. Direct execution defaults to the isolated class.

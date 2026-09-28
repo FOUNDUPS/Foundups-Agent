@@ -22,11 +22,16 @@ import importlib.util
 import types
 import unittest
 import asyncio
+import hashlib
+import json
+from contextlib import ExitStack, chdir
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
+from tempfile import TemporaryDirectory
 from unittest.mock import AsyncMock, Mock, patch
 
 
@@ -317,6 +322,190 @@ class TestExecutionEvidence(unittest.IsolatedAsyncioTestCase):
         self.scheduler.save_schedule.assert_not_called()
         self.log.info.assert_not_called()
         self.log.error.assert_not_called()
+
+def _persistence_errors(test, operation):
+    marker = 'Error ' + operation + ' schedule:'
+    return [call.args[0] for call in test.log.error.call_args_list
+            if marker in call.args[0]]
+
+
+def _persistence_record(test, before, after, restored):
+    """Preserve synthetic file bytes in hosted output before scratch cleanup."""
+    print('PERSISTENCE_EVIDENCE ' + json.dumps({
+        'case': test._testMethodName,
+        'before_utf8': before.decode('utf-8') if before is not None else None,
+        'after_utf8': after.decode('utf-8'),
+        'before_sha256': hashlib.sha256(before).hexdigest() if before is not None else None,
+        'after_sha256': hashlib.sha256(after).hexdigest(),
+        'save_errors': _persistence_errors(test, 'saving'),
+        'load_errors': _persistence_errors(test, 'loading'),
+        'in_memory_status': {key: action.status for key, action in test.scheduler.scheduled_actions.items()},
+        'restored_ids': sorted(restored.scheduled_actions),
+    }, sort_keys=True))
+
+
+async def _typed_persistence_witness(test, flags, mixed=False):
+    future = test._action(ActionType.REMIND, {'message': 'future fixture'}, delay=3600) if mixed else None
+    future_fields = deepcopy(vars(future)) if future else None
+    action = test._action(ActionType.POST_SOCIAL, {
+        'platforms': ['linkedin', 'x_twitter'], 'content': 'synthetic content',
+        'metadata': {'stream_url': 'https://example.invalid/stream', 'stream_title': 'fixture'}})
+    before = test._seed()
+    test.assertEqual(set(json.loads(before)), {action.id, future.id} if mixed else {action.id})
+    response = _response(flags)
+    test.post.return_value = response
+    test._contained()
+    result = await test.scheduler.execute_pending_actions()
+    test.assertEqual(len(result), 1)
+    test.assertEqual(result[0][0], action.id)
+    test.assertIs(result[0][1], response)
+    test.assertIs(action.result, response)
+    test.assertEqual([item.success for item in action.result.results], flags)
+    test.assertEqual(action.status, 'executed' if all(flags) else 'failed')
+    test.assertEqual(action.error, None if all(flags) else _INCOMPLETE)
+    test.post.assert_awaited_once_with(stream_title='fixture', stream_url='https://example.invalid/stream',
+                                      platforms=[_producer.Platform.LINKEDIN, _producer.Platform.X_TWITTER])
+    test.assertEqual(test.post.call_count, 1)
+    test.assertEqual(sum('[OK]' in call.args[0] for call in test.log.info.call_args_list), int(all(flags)))
+    errors = _persistence_errors(test, 'saving')
+    test.assertEqual(len(errors), 1)
+    test.assertIn('PostResponse', errors[0])
+    test.assertIn('not JSON serializable', errors[0])
+    test.assertEqual(test.log.error.call_count, 1 if all(flags) else 2)
+    after = test.path.read_bytes()
+    test.assertNotEqual(after, before)
+    with test.assertRaises(json.JSONDecodeError):
+        json.loads(after)
+    test.assertEqual(await test.scheduler.execute_pending_actions(), [])
+    test.assertEqual(test.post.await_count, 1)
+    test.assertEqual(test.path.read_bytes(), after)
+    if future:
+        test.assertIs(test.scheduler.scheduled_actions[future.id], future)
+        test.assertEqual(vars(future), future_fields)
+    restored = test._reload()
+    test.assertEqual(restored.scheduled_actions, {})
+    test.assertEqual(len(_persistence_errors(test, 'loading')), 1)
+    restored.orchestrator.post_stream_notification.assert_not_called()
+    _persistence_record(test, before, after, restored)
+
+
+class TestPersistenceEvidence(unittest.IsolatedAsyncioTestCase):
+    """Two real-file controls and four defect witnesses; no persistence repair."""
+
+    _action = TestExecutionEvidence._action
+
+    def setUp(self):
+        self.initial_cwd, self.root = Path.cwd(), None
+        self.addCleanup(self._released)
+        self.stack = ExitStack()
+        self.addCleanup(self.stack.close)
+        self.root = Path(self.stack.enter_context(TemporaryDirectory(prefix='scheduler-persistence-'))).resolve()
+        self.stack.enter_context(chdir(self.root))
+        self.path = Path('memory/schedule.json')
+        self.log = Mock()
+        clock = types.SimpleNamespace(now=_FixedClock.now, fromisoformat=datetime.fromisoformat)
+        self.stack.enter_context(patch.object(_scheduler_leaf, 'datetime', clock))
+        self.stack.enter_context(patch.object(_scheduler_leaf, 'logger', self.log))
+        self.scheduler = self._fresh()
+        self.post = self.scheduler.orchestrator.post_stream_notification
+
+    def _released(self):
+        self.assertEqual(Path.cwd(), self.initial_cwd)
+        if self.root is not None:
+            self.assertFalse(self.root.exists())
+
+    def tearDown(self):
+        _producer.SimplePostingOrchestrator.assert_not_called()
+        self.assertEqual({p.relative_to(self.root).as_posix() for p in self.root.rglob('*')},
+                         {'memory', 'memory/schedule.json'})
+
+    def _fresh(self):
+        scheduler = AutonomousActionScheduler.__new__(AutonomousActionScheduler)
+        scheduler.schedule_file = 'memory/schedule.json'
+        scheduler.scheduled_actions = {}
+        scheduler.orchestrator = types.SimpleNamespace(
+            post_stream_notification=AsyncMock(side_effect=AssertionError('Unexpected posting call')))
+        return scheduler
+
+    def _contained(self):
+        self.assertEqual(Path.cwd(), self.root)
+        self.assertTrue(self.path.resolve().is_relative_to(self.root))
+        self.assertEqual(self.scheduler.schedule_file, 'memory/schedule.json')
+
+    def _seed(self):
+        self._contained()
+        self.assertIsNone(self.scheduler.save_schedule())
+        self.log.error.assert_not_called()
+        before = self.path.read_bytes()
+        data = json.loads(before)
+        self.assertEqual(set(data), set(self.scheduler.scheduled_actions))
+        self.assertTrue(all(row['status'] == 'pending' and row['result'] is None for row in data.values()))
+        return before
+
+    def _reload(self):
+        self._contained()
+        restored = self._fresh()
+        self.assertEqual(restored.scheduled_actions, {})
+        self.assertEqual(restored.schedule_file, self.scheduler.schedule_file)
+        restored.load_schedule()
+        return restored
+
+    def test_pending_roundtrip_control(self):
+        action = self._action(ActionType.REMIND, {'message': 'pending fixture'}, delay=3600)
+        payload = self._seed()
+        data = json.loads(payload)[action.id]
+        expected = dict(vars(action), action_type=action.action_type.value,
+                        scheduled_time=action.scheduled_time.isoformat(), requested_at=action.requested_at.isoformat())
+        self.assertEqual(data, expected)
+        restored = self._reload()
+        loaded = restored.scheduled_actions[action.id]
+        self.assertEqual(vars(loaded), vars(action))
+        self.assertIsInstance(loaded.scheduled_time, datetime)
+        self.assertIsInstance(loaded.requested_at, datetime)
+        self.assertIs(loaded.action_type, action.action_type)
+        self.log.error.assert_not_called()
+        self.post.assert_not_called()
+        restored.orchestrator.post_stream_notification.assert_not_called()
+        _persistence_record(self, None, payload, restored)
+
+    async def test_reminder_terminal_roundtrip_no_repeat_control(self):
+        action = self._action(ActionType.REMIND, {'message': 'local fixture'})
+        self._contained()
+        result = await self.scheduler.execute_pending_actions()
+        self.assertEqual(result, [(action.id, {'reminded': True, 'message': 'local fixture'})])
+        self.assertIs(result[0][1], action.result)
+        self.assertEqual(action.status, 'executed')
+        self.assertIsNone(action.error)
+        self.assertEqual(sum('REMINDER:' in call.args[0] for call in self.log.info.call_args_list), 1)
+        payload = self.path.read_bytes()
+        self.assertEqual(json.loads(payload)[action.id]['status'], 'executed')
+        restored = self._reload()
+        self.assertEqual(vars(restored.scheduled_actions[action.id]), vars(action))
+        self.log.info.reset_mock()
+        self.assertEqual(await restored.execute_pending_actions(), [])
+        self.log.info.assert_not_called()
+        self.log.error.assert_not_called()
+        self.assertEqual(self.path.read_bytes(), payload)
+        self.post.assert_not_called()
+        restored.orchestrator.post_stream_notification.assert_not_called()
+        _persistence_record(self, None, payload, restored)
+
+    async def test_complete_typed_result_corrupts_schedule_witness(self):
+        self.post.side_effect = None
+        await _typed_persistence_witness(self, [True, True])
+
+    async def test_partial_typed_result_corrupts_schedule_witness(self):
+        self.post.side_effect = None
+        await _typed_persistence_witness(self, [True, False])
+
+    async def test_failed_typed_result_corrupts_schedule_witness(self):
+        self.post.side_effect = None
+        await _typed_persistence_witness(self, [False, False])
+
+    async def test_typed_result_also_loses_future_schedule_witness(self):
+        self.post.side_effect = None
+        await _typed_persistence_witness(self, [True, True], mixed=True)
+
 
 class TestAutonomousActionScheduler(unittest.TestCase):
     """Test natural language understanding for 0102"""

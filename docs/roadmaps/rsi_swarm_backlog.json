@@ -1882,300 +1882,194 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation",
-    "base_commit": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
+    "base_commit": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
-    "selected_component": "Reject unsupported or incomplete action completion while preserving dependency results",
+    "selected_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
     "status": "candidate_hosted_verified_final_convergence_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "20260928-social-scheduler-completion-repair",
-    "base": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
+    "observation_id": "RSI_SCHEDULER_PERSISTENCE_20260928",
+    "base": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
     "selected": "Qualify truthful completion evidence in the existing social action scheduler",
-    "selected_component": "Reject unsupported or incomplete action completion while preserving dependency results",
+    "selected_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "previous_closed": {
-      "pr": 1936,
-      "merge": "cd7e62d680b6cd874351f07d8ea8a6bac002b3df",
+      "pr": 1941,
+      "merge": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
       "terminal_state": "MERGED_VERIFIED_MAIN",
-      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\final-accounting.json",
-      "unique_cases": 13,
-      "pr_passes": 13,
-      "main_passes": 13,
-      "meaning": "Nine misleading-completion behavior witnesses and four controls; production source unchanged."
+      "receipt": "O:/Foundups-Agent-audits/20260928-rsi-scheduler-repair/final-accounting.json",
+      "test_methods": 26,
+      "fixed_input_cases": 32,
+      "pr_passed_methods": 26,
+      "main_passed_methods": 26,
+      "owned_lane_retired": true,
+      "meaning": "Bounded in-memory completion repair, no persistence or RSI retention claim."
     },
-    "previous_observation": "Git history and PR1936; O:/Foundups-Agent-audits/20260928-rsi-scheduler-evidence/final-accounting.json",
+    "previous_observation": {
+      "observation_id": "20260928-social-scheduler-completion-repair",
+      "base": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\prior-main-observation.json"
+    },
     "retrieval": {
-      "reference_ok": true,
-      "reference_sha": "2153938699c0416ef37c225b52cd5907d795f5cc",
-      "current_head": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
-      "same_selected_module_blobs": true,
-      "noise": "Historical completion checklists separated from source and frozen13case evidence",
-      "ordering": "WSP00/97/15 then source-bound Holo/contracts/TestModLog and existing fixture",
-      "missing_artifacts": "No module memory README and no fresh index receipt at870; reference freshness scoped215 only",
-      "staleness": "One intervening product-only commit; current affected blobs read directly",
-      "duplication": "Same scheduler/status/result/test owner reused; no new schema or outcome store"
+      "query_receipt": "wake-query.json",
+      "current": true,
+      "source": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
+      "semantic_scope": "committed_head_only",
+      "local_bundle_scope": "workspace_overlay",
+      "tier0_bundle_ok": true,
+      "noise": "Peripheral idle-automation and CABR hits excluded; scheduler leaf/tests and direct required docs used.",
+      "ordering": "Current contracts and frozen acceptance before historical log entries.",
+      "duplication": "Existing test file/loader/CI owner reused.",
+      "staleness": "Same reviewed main; prior repair docs reconciled to verified PR1941 closure."
     },
     "allocation": {
-      "rationale": "Scheduler15/P1 currently eligible and directly repairs measured false success; native18/P0 and14/P1 owners retain actual dependencies; lower12/P2 hook and11/P2 correspondence work do not displace this fix.",
-      "execution_plane": "Existing local single-surface source repair plus qualified hosted tests; no native WRE dispatch or runtime authority created. Actual orchestration/retention still gated.",
-      "effort_cost": "One scheduler leaf and existing isolated hosted fixture; deterministic implementation plus independent review; no provider calls/spend.",
-      "verification_burden": "Exact fixtures before baseline, same frozen criteria after repair, PR/main checks and independent closure."
+      "rationale": "Finite connected save/load gap at14/P1; equally scored operational pilot still needs a consuming owner and labels. Hook12 and correspondence11 eligible but lower. Native18 and other14 owners retain actual prerequisites.",
+      "execution_plane": "Local single-surface fixture authoring plus independently qualified existing hosted CI. No native WRE/admission or local application/test execution.",
+      "effort_cost": "Six hosted-only disposable-file witnesses using existing fixture; independent effects/oracle review before publishing. No model/provider spend selected.",
+      "verification_burden": "Frozen six-case source/effect review, named hosted32 methods/38 inputs, six exact file-evidence records, final PR/main CI and independent closure."
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\entry.json",
-      "peer_count": 97,
-      "overlaps": "Four unrelated additive historical root ModLog entries reconciled; no source/backlog/CI overlap. Three intervening eSingularity paths integrated unchanged.",
-      "refresh_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\ownership-refresh.json",
-      "integrated_main": "7d5715c145ee1a3f1ee4390b0b47cd9a93aea012"
+      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\wake-observation.json",
+      "peer_count": 96,
+      "overlaps": [
+        {
+          "pr": 1860,
+          "head": "74ca647e35446c975d9aabe53f7bf44951bfc9d4",
+          "paths": [
+            "ModLog.md",
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "pr": 1759,
+          "head": "3f98c1a5df8bb6be56455db515ae8b188d693c76",
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "pr": 1688,
+          "head": "40d71249fe913567ee6f5fa65536d89f2ecb46c3",
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "pr": 1680,
+          "head": "a60ea1e655f5247d871b0e958e7c5387ba40df7e",
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "pr": 1648,
+          "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "pr": 1641,
+          "head": "7faa4e90b9648f30b653e41c2341ac54965b96ef",
+          "paths": [
+            "WSP_knowledge/WSP_Test_Registry.json"
+          ]
+        },
+        {
+          "pr": 802,
+          "head": "de63ab95aab0ca11247cf2620cb4bc559bbce16c",
+          "paths": [
+            "ModLog.md"
+          ]
+        },
+        {
+          "pr": 782,
+          "head": "b8b90afbab605c396054a8171f7c4ae2399fb2c5",
+          "paths": [
+            "ModLog.md"
+          ]
+        }
+      ],
+      "refresh_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\wake-peer-prs.json",
+      "integrated_main": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af"
     },
     "holo_recovery": {
-      "receipt": "O:/Foundups-Agent-audits/20260928-holo-authority-recovery/closure-review.md",
-      "verified_source": "2153938699c0416ef37c225b52cd5907d795f5cc",
-      "artifacts_verified": 33,
-      "current_main_freshness_claim": false,
-      "runtime_exact_closure_verified": false
+      "receipt": "O:/Foundups-Agent-audits/20260928-holo-authority-followup/final-accounting.json",
+      "target": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
+      "whole_R03_complete": false,
+      "runtime_environment_exact_closure_verified": false
     },
     "validation": {
       "state": "candidate_hosted_verified_final_convergence_pending",
-      "test_methods": 26,
-      "fixed_input_cases": 32,
+      "test_methods": 32,
+      "fixed_input_cases": 38,
+      "new_controls": 2,
+      "new_defect_witnesses": 4,
       "legacy_methods_preserved": 8,
       "local_application_tests_run": 0,
+      "production_source_changed": false,
       "native_readiness_changed": false,
-      "baseline": {
-        "head": "34ed9b69ae20ff3282aa5f3df017a46518fad6f7",
-        "run": 36379506634,
-        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36379506634",
-        "job_id": 108792150042,
-        "job_conclusion": "failure",
-        "step": {
-          "completedAt": "2026-09-28T04:54:43Z",
-          "conclusion": "failure",
-          "name": "Run social scheduler execution evidence",
-          "number": 8,
-          "startedAt": "2026-09-28T04:54:43Z",
-          "status": "completed"
-        },
-        "method_count": 26,
-        "fixed_input_cases": 32,
-        "passed_methods": 5,
-        "failed_methods": 21,
-        "assertion_failures": 27,
+      "acceptance_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\acceptance-review.md",
+      "fixture_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
+      "registry": "current:1660 entries/269 quarantined",
+      "meaning": "Green defect witnesses demonstrate failure in disposable files; they do not establish correct persistence or production loss.",
+      "candidate_hosted_result": {
+        "head": "e8e06ea86fdba1bfb3e9b7f0aab02338caaac3b8",
+        "run": 36390957294,
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294",
+        "method_count": 32,
+        "fixed_input_cases": 38,
+        "passed_methods": 32,
         "errors": 0,
         "skipped": 0,
-        "unique_case_ids": [
-          "test_code_action_rejects_unsupported",
-          "test_custom_action_rejects_unsupported",
-          "test_message_rejects_unsupported",
-          "test_no_due_actions_have_no_calls_or_mutations",
-          "test_non_stream_post_rejects_unsupported",
-          "test_reminder_records_only_its_documented_local_log",
-          "test_request_duplicate_targets_reject_before_effect",
-          "test_request_empty_targets_reject_before_effect",
-          "test_request_nonlist_targets_reject_before_effect",
-          "test_request_unknown_target_reject_before_effect",
-          "test_stream_all_failure_rejects_preserving_response",
-          "test_stream_all_success_preserves_producer_response",
-          "test_stream_check_rejects_unsupported",
-          "test_stream_duplicate_target_result_rejects",
-          "test_stream_empty_rejects_preserving_response",
-          "test_stream_exception_marks_failure",
-          "test_stream_extra_target_rejects",
-          "test_stream_inconsistent_counts_rejects",
-          "test_stream_invalid_result_element_rejects",
-          "test_stream_missing_target_rejects",
-          "test_stream_nonboolean_success_rejects",
-          "test_stream_none_rejects",
-          "test_stream_nonplatform_value_rejects",
-          "test_stream_partial_rejects_preserving_response",
-          "test_stream_success_dictionary_rejects",
-          "test_stream_target_snapshot_survives_action_mutation"
-        ],
-        "passed_ids": [
-          "test_no_due_actions_have_no_calls_or_mutations",
-          "test_reminder_records_only_its_documented_local_log",
-          "test_stream_all_success_preserves_producer_response",
-          "test_stream_exception_marks_failure",
-          "test_stream_target_snapshot_survives_action_mutation"
-        ],
-        "failure_labels": [
-          "FAIL: test_code_action_rejects_unsupported (__main__.TestExecutionEvidence.test_code_action_rejects_unsupported)",
-          "FAIL: test_custom_action_rejects_unsupported (__main__.TestExecutionEvidence.test_custom_action_rejects_unsupported)",
-          "FAIL: test_message_rejects_unsupported (__main__.TestExecutionEvidence.test_message_rejects_unsupported)",
-          "FAIL: test_non_stream_post_rejects_unsupported (__main__.TestExecutionEvidence.test_non_stream_post_rejects_unsupported)",
-          "FAIL: test_request_duplicate_targets_reject_before_effect (__main__.TestExecutionEvidence.test_request_duplicate_targets_reject_before_effect)",
-          "FAIL: test_request_empty_targets_reject_before_effect (__main__.TestExecutionEvidence.test_request_empty_targets_reject_before_effect)",
-          "FAIL: test_request_nonlist_targets_reject_before_effect (__main__.TestExecutionEvidence.test_request_nonlist_targets_reject_before_effect)",
-          "FAIL: test_request_unknown_target_reject_before_effect (__main__.TestExecutionEvidence.test_request_unknown_target_reject_before_effect)",
-          "FAIL: test_stream_all_failure_rejects_preserving_response (__main__.TestExecutionEvidence.test_stream_all_failure_rejects_preserving_response)",
-          "FAIL: test_stream_check_rejects_unsupported (__main__.TestExecutionEvidence.test_stream_check_rejects_unsupported)",
-          "FAIL: test_stream_duplicate_target_result_rejects (__main__.TestExecutionEvidence.test_stream_duplicate_target_result_rejects)",
-          "FAIL: test_stream_empty_rejects_preserving_response (__main__.TestExecutionEvidence.test_stream_empty_rejects_preserving_response)",
-          "FAIL: test_stream_extra_target_rejects (__main__.TestExecutionEvidence.test_stream_extra_target_rejects)",
-          "FAIL: test_stream_inconsistent_counts_rejects (__main__.TestExecutionEvidence.test_stream_inconsistent_counts_rejects) (field='success_count', value='1', single=False)",
-          "FAIL: test_stream_inconsistent_counts_rejects (__main__.TestExecutionEvidence.test_stream_inconsistent_counts_rejects) (field='success_count', value='2.0', single=False)",
-          "FAIL: test_stream_inconsistent_counts_rejects (__main__.TestExecutionEvidence.test_stream_inconsistent_counts_rejects) (field='failure_count', value='False', single=False)",
-          "FAIL: test_stream_inconsistent_counts_rejects (__main__.TestExecutionEvidence.test_stream_inconsistent_counts_rejects) (field='failure_count', value='0.0', single=False)",
-          "FAIL: test_stream_inconsistent_counts_rejects (__main__.TestExecutionEvidence.test_stream_inconsistent_counts_rejects) (field='success_count', value='True', single=True)",
-          "FAIL: test_stream_invalid_result_element_rejects (__main__.TestExecutionEvidence.test_stream_invalid_result_element_rejects) (shape='invalid_item')",
-          "FAIL: test_stream_invalid_result_element_rejects (__main__.TestExecutionEvidence.test_stream_invalid_result_element_rejects) (shape='tuple')",
-          "FAIL: test_stream_invalid_result_element_rejects (__main__.TestExecutionEvidence.test_stream_invalid_result_element_rejects) (shape='none')",
-          "FAIL: test_stream_missing_target_rejects (__main__.TestExecutionEvidence.test_stream_missing_target_rejects)",
-          "FAIL: test_stream_nonboolean_success_rejects (__main__.TestExecutionEvidence.test_stream_nonboolean_success_rejects)",
-          "FAIL: test_stream_none_rejects (__main__.TestExecutionEvidence.test_stream_none_rejects)",
-          "FAIL: test_stream_nonplatform_value_rejects (__main__.TestExecutionEvidence.test_stream_nonplatform_value_rejects)",
-          "FAIL: test_stream_partial_rejects_preserving_response (__main__.TestExecutionEvidence.test_stream_partial_rejects_preserving_response)",
-          "FAIL: test_stream_success_dictionary_rejects (__main__.TestExecutionEvidence.test_stream_success_dictionary_rejects)"
-        ],
-        "original_step_output": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\baseline-scheduler-step.log",
-        "sha256": "4f70f22384c9540cbc1faa38ab8f36fd99406268f6fce6850cc49cbb9d16ba53",
-        "local_application_tests_run": 0,
-        "platform_actions": 0,
-        "test_sha256": "bc6cefbfc1e853caa8f2ec1b59b40fb29e4848a102f94cd04e8c33d31235ed84",
-        "interpretation": "In-memory dependency contract only; no delivery, persistence, native admission or retained RSI proof."
+        "controls": 2,
+        "defect_witnesses": 4,
+        "file_evidence_records": 6,
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
+        "original_step_log_sha256": "063bea62877a4c48576f11cc03f45adeb650fb4960817702ae9e1baaf05421e0"
       },
-      "baseline_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\baseline-scheduler-evidence.json",
-      "implementation_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\implementation-review.json",
-      "static_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\repair-static.json",
-      "repaired_hosted_result": {
-        "head": "9bc31ed6e04820e2cbed4c2f21e84e49aca87143",
-        "run": 36380266749,
-        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36380266749",
-        "job_id": 108794406504,
-        "job_conclusion": "success",
-        "step": {
-          "completedAt": "2026-09-28T05:05:53Z",
-          "conclusion": "success",
-          "name": "Run social scheduler execution evidence",
-          "number": 8,
-          "startedAt": "2026-09-28T05:05:53Z",
-          "status": "completed"
-        },
-        "method_count": 26,
-        "fixed_input_cases": 32,
-        "passed_methods": 26,
-        "failed_methods": 0,
-        "assertion_failures": 0,
-        "errors": 0,
-        "skipped": 0,
-        "unique_case_ids": [
-          "test_code_action_rejects_unsupported",
-          "test_custom_action_rejects_unsupported",
-          "test_message_rejects_unsupported",
-          "test_no_due_actions_have_no_calls_or_mutations",
-          "test_non_stream_post_rejects_unsupported",
-          "test_reminder_records_only_its_documented_local_log",
-          "test_request_duplicate_targets_reject_before_effect",
-          "test_request_empty_targets_reject_before_effect",
-          "test_request_nonlist_targets_reject_before_effect",
-          "test_request_unknown_target_reject_before_effect",
-          "test_stream_all_failure_rejects_preserving_response",
-          "test_stream_all_success_preserves_producer_response",
-          "test_stream_check_rejects_unsupported",
-          "test_stream_duplicate_target_result_rejects",
-          "test_stream_empty_rejects_preserving_response",
-          "test_stream_exception_marks_failure",
-          "test_stream_extra_target_rejects",
-          "test_stream_inconsistent_counts_rejects",
-          "test_stream_invalid_result_element_rejects",
-          "test_stream_missing_target_rejects",
-          "test_stream_nonboolean_success_rejects",
-          "test_stream_none_rejects",
-          "test_stream_nonplatform_value_rejects",
-          "test_stream_partial_rejects_preserving_response",
-          "test_stream_success_dictionary_rejects",
-          "test_stream_target_snapshot_survives_action_mutation"
-        ],
-        "passed_ids": [
-          "test_code_action_rejects_unsupported",
-          "test_custom_action_rejects_unsupported",
-          "test_message_rejects_unsupported",
-          "test_no_due_actions_have_no_calls_or_mutations",
-          "test_non_stream_post_rejects_unsupported",
-          "test_reminder_records_only_its_documented_local_log",
-          "test_request_duplicate_targets_reject_before_effect",
-          "test_request_empty_targets_reject_before_effect",
-          "test_request_nonlist_targets_reject_before_effect",
-          "test_request_unknown_target_reject_before_effect",
-          "test_stream_all_failure_rejects_preserving_response",
-          "test_stream_all_success_preserves_producer_response",
-          "test_stream_check_rejects_unsupported",
-          "test_stream_duplicate_target_result_rejects",
-          "test_stream_empty_rejects_preserving_response",
-          "test_stream_exception_marks_failure",
-          "test_stream_extra_target_rejects",
-          "test_stream_inconsistent_counts_rejects",
-          "test_stream_invalid_result_element_rejects",
-          "test_stream_missing_target_rejects",
-          "test_stream_nonboolean_success_rejects",
-          "test_stream_none_rejects",
-          "test_stream_nonplatform_value_rejects",
-          "test_stream_partial_rejects_preserving_response",
-          "test_stream_success_dictionary_rejects",
-          "test_stream_target_snapshot_survives_action_mutation"
-        ],
-        "failure_labels": [],
-        "original_step_output": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\candidate-scheduler-step.log",
-        "sha256": "8a4bb05aa64b089f81177cef93c4e1370bea8537d76260dfcefee9b18019d4bd",
-        "local_application_tests_run": 0,
-        "platform_actions": 0,
-        "test_sha256": "bc6cefbfc1e853caa8f2ec1b59b40fb29e4848a102f94cd04e8c33d31235ed84",
-        "interpretation": "In-memory dependency contract only; no delivery, persistence, native admission or retained RSI proof."
-      },
-      "additional_source_safeguards": "Exact response/string types and captured posting classification; no separate runtime scenario claim.",
       "candidate_ci_verified": true,
       "candidate_codeql_verified": true,
+      "observed_defect": "All four typed-response witnesses replace valid pending JSON with malformed bytes; fresh load restores no actions. The mixed witness preserves the future action in memory but loses reload of both disposable records.",
       "measurement": {
-        "unit": "fixed test method meeting its declared contract",
-        "sample_count": 26,
-        "baseline_passed": 5,
-        "candidate_passed": 26,
-        "improved_methods": 21,
-        "unchanged_passing_methods": 5,
-        "regressed_methods": 0,
-        "fixed_input_cases": 32,
-        "independent_statistical_samples": false,
-        "model_learning_gain": null,
-        "retained_gain": null,
-        "actual_delivery_rate": null,
-        "tokens": null,
-        "currency_cost": null,
-        "scope": "Same frozen fixture; deterministic in-memory code repair, not autonomous procedure adaptation."
+        "signal": "execution_feedback",
+        "production_persistence_correct": false,
+        "production_data_loss_observed": false,
+        "retained_rsi_gain": null
       }
     },
     "publication": {
       "terminal_state": "ACTIVE_OWNED_WORK",
-      "branch": "fix/rsi-scheduler-completion-20260928",
-      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-scheduler-repair-20260928",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\final-accounting.json",
-      "pr": 1941,
-      "pr_url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1941",
-      "baseline_head": "34ed9b69ae20ff3282aa5f3df017a46518fad6f7",
-      "candidate_head": "9bc31ed6e04820e2cbed4c2f21e84e49aca87143",
+      "branch": "test/rsi-scheduler-persistence-20260928",
+      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-scheduler-persistence-20260928",
+      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\final-accounting.json",
+      "pr": 1942,
       "final_head_verified": false,
-      "main_verified": false
+      "main_verified": false,
+      "pr_url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1942",
+      "candidate_head": "e8e06ea86fdba1bfb3e9b7f0aab02338caaac3b8"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2285,47 +2179,55 @@
         {
           "task": "Qualify truthful completion evidence in the existing social action scheduler",
           "wsp15": {
-            "complexity": 3,
+            "complexity": 2,
             "importance": 4,
             "deferability": 4,
             "impact": 4,
-            "total": 15,
+            "total": 14,
             "priority": "P1"
           },
-          "state": "candidate_hosted_verified_final_convergence_pending",
+          "state": "candidate_persistence_characterization_passed_final_convergence_pending",
           "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
-          "dependency": "Final integrated-head independent review, exact required checks, verified main and owned closure.",
-          "next_step": "Close PR1941 on exact reviewed green head; verify merged main, preserve owned recovery and re-observe/rescore remaining work before the next sprint.",
+          "dependency": "Final exact-head CI/CodeQL and independent result/source review, then verified main and owned cleanup.",
+          "next_step": "Close this characterization on exact merged main; re-observe and rescore before admitting a persistence repair.",
           "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
-          "limits": "In-memory disposition and logging only. Persistence/serialization, external effect verification and retained RSI remain unqualified.",
+          "limits": "In-memory repair closed; durable state/restart, external delivery, native admission and retained learning remain unqualified.",
           "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
           "qualification": {
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\prepared-tests.json",
-            "case_count": 13,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
+            "method_count": 32,
+            "fixed_input_cases": 38,
+            "controls": 2,
+            "defect_witnesses": 4,
+            "observed_record_count": 6,
             "production_source_changes": 0,
             "local_application_tests_run": 0
           },
-          "next_component": "Reject unsupported or incomplete action completion while preserving dependency results",
+          "next_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
           "component_closure": {
-            "pr": 1936,
-            "merge": "cd7e62d680b6cd874351f07d8ea8a6bac002b3df",
+            "pr": 1941,
+            "merge": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
             "terminal_state": "MERGED_VERIFIED_MAIN",
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\final-accounting.json",
-            "unique_cases": 13,
-            "pr_passes": 13,
-            "main_passes": 13,
-            "meaning": "Nine misleading-completion behavior witnesses and four controls; production source unchanged."
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\final-accounting.json",
+            "method_count": 26,
+            "fixed_input_cases": 32,
+            "baseline_passed_methods": 5,
+            "pr_passed_methods": 26,
+            "main_passed_methods": 26,
+            "meaning": "Bounded deterministic in-memory completion repair; same frozen fixtures, no retained RSI gain."
           },
           "next_component_review": {
-            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\next-action-review.md",
-            "sha256": "eb8d6ac2efbefc0dc1959ddf359107eef62a6532d77c19baa99f7dc5ac8bd8ca"
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\next-action-review.json",
+            "sha256": "e5a4bb4cca2c8cd1f17420df9fc07f2884d7c6e1024c4344997e11cda9fec59d"
           },
           "preparation": {
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-repair\\prepared-tests.json",
-            "test_methods": 26,
-            "fixed_input_cases": 32,
-            "state": "tests_prepared_source_unchanged",
-            "local_application_tests_run": 0
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
+            "test_methods": 32,
+            "fixed_input_cases": 38,
+            "new_controls": 2,
+            "new_defect_witnesses": 4,
+            "local_application_tests_run": 0,
+            "state": "candidate_hosted_verified"
           }
         },
         {
@@ -3471,9 +3373,9 @@
             "total": 11,
             "priority": "P2"
           },
-          "state": "source_gap_qualified_baseline_and_fixed_acceptance_pending",
+          "state": "source_gap_qualified_hosted_baseline_closed_fixed_acceptance_pending",
           "source": "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py::load_state",
-          "dependency": "Observed isolated20-case baseline and independent fixed invalid-persisted-state acceptance.",
+          "dependency": "PR1931 established the 20-case hosted baseline; fixed invalid persisted-state acceptance and exact effect/scope review remain required before the load-validation change.",
           "next_step": "After exact20-case baseline, re-observe ownership and freeze persisted invalid-state controls in the existing test owner; reuse _validate_state and existing scope/schema contracts. No provider or concurrent-store redesign.",
           "evidence": {
             "path": "O:\\Foundups-Agent-audits\\20260928-rsi-linkedin-contract-ci\\pr1930-source-review.json",
@@ -3586,8 +3488,8 @@
       ],
       "selected_next": "Qualify truthful completion evidence in the existing social action scheduler",
       "implementation_ready_selected": null,
-      "state": "fresh_source_repair_selected",
-      "rationale": "Scheduler15/P1 currently eligible and directly repairs measured false success; native18/P0 and14/P1 owners retain actual dependencies; lower12/P2 hook and11/P2 correspondence work do not displace this fix.",
+      "state": "current_repair_closed_next_existing_owner_qualification_selected",
+      "rationale": "Existing writer passes typed PostResponse to ordinary json.dump after opening destination w, then suppresses exception with logging. Current26-case fixture only observes save requests. This finite connected risk outranks equally-scored pilot preparation with no chosen consuming owner/labels yet.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3598,10 +3500,10 @@
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
       "authoritative_use_lease": null,
-      "base": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
+      "base": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
       "candidate_count": 59,
       "packets_preserved": 26,
-      "selected_next_component": "Reject unsupported or incomplete action completion while preserving dependency results"
+      "selected_next_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation"
     },
     "research": {
       "as_of": "2026-09-28",

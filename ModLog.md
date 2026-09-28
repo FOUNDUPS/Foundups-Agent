@@ -1,3 +1,10 @@
+## 2026-09-28: RSI characterizes scheduler persistence
+
+- WSP00/15/22/50/62/84/97: re-observe main 6acb3f55,96 unchanged peer heads, protected shared work and 59 candidates/26 packets. Reconcile PR1941 as merged/main-verified with its owned lane retired; select 14/P1 save/load qualification.
+- Holo navigation at6acb3f55 was recovered through the existing OpenClaw/WRE maintenance owner. Fresh source-bound query is CURRENT/no-gap; committed semantic evidence and uncommitted workspace bundle remain distinct. Later commits need new publication evidence.
+- Six reviewed disposable-file controls/witnesses extend the existing test file and named CI step. No new scheduler, production persistence change, local application execution, posting or native authority. The canonical registry remains current without regeneration.
+- Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound. Independent review and exact PR/main convergence govern closure. Existing backlog preserves all task identities and native blockers.
+
 ## 2026-09-28: RSI scheduler completion repair selected
 
 - Reconciled PR1936 (`cd7e62d680`) as merged/main-verified:13 passing defect/control witnesses, no production repair yet. Existing Holo recovery separately verified CURRENT/no-gap and33 replica artifacts at `215393869`; subsequent product-only main `870849a74` requires its own freshness evidence.
