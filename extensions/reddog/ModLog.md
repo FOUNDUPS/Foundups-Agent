@@ -1,3 +1,9 @@
+## 2026-09-28 - Correspondence-state Skillz backend inventory refresh
+
+- Registered the generic Red Dog correspondence-state Skillz and changed the WRE Skillz registry content without expanding the executable backend closure.
+- Refreshed the existing 1,401-file backend manifest entry for `skills_registry_v2.json` and both canonical manifest digest pins. Registry runtime SHA: `a8e069ea136924a368f4e9af29fcfc6ab19b1b2b5743919a8bfd05b52d79e415`; manifest digest: `663ec92531dda7c601bfdd269659b6984e72500b5f793f31b993dc5d4255dc60`.
+- This is compatibility metadata only: no extension behavior, backend API/version, permission rule, executable member, package surface, or send authority changed.
+
 # RedDog ModLog
 
 ## 2026-09-24 - WRE research-display backend binding
