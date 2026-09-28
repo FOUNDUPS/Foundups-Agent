@@ -53,7 +53,7 @@ export default function YumoriPage() {
       <p style={{fontWeight:850,letterSpacing:'.15em'}}>02 / WHAT — REUSE BEFORE DEMOLITION</p>
       <h2 style={title}>壊す前に調べる。<br/>地域の建物を、地域のAIインフラへ。</h2>
       <p style={body}>YUMORI.meは、旧すかっとランド九頭竜を守る活動から始まりました。使える可能性のある公共施設、工場、ホテル、倉庫、温浴施設を、解体費を払って消す前に、構造・電力・光回線・冷却・排熱利用を調べる。成立する場所では、解体費を生産的な再生投資へ変えられないか検証します。</p>
-      <p style={body}><strong>COG DC — Community-Owned Green Data Center</strong> は、1MWから始め、地域需要に合わせて5→10→20MWへ育てる構想です。計算力の第一用途は輸出ではなく、地域の学校、大学、農業、病院、自治体、ものづくり、企業です。用途別のオープンソースモデルを使い、地域のデータだけでなく、農業の経験、工程、教材、方言、歴史、文化的記憶を含む「地域の知」を地域で扱える選択肢をつくります。</p>
+      <p style={body}><strong>COG DC — Community-Owned Green Data Center</strong> は、MWを先に決めて建てる構想ではありません。学校、大学、農業、病院、自治体、ものづくり、企業が実際に必要とする計算サービスと契約需要から必要な計算資源を逆算し、電力・光回線・建物条件が成立する範囲で段階的に拡張します。地域のデータだけでなく、農業の経験、工程、教材、方言、歴史、文化的記憶を含む「地域の知」を地域で扱える選択肢をつくります。</p>
       <div style={{marginTop:28}}><Join /></div>
     </section>
 
@@ -61,7 +61,7 @@ export default function YumoriPage() {
       <p style={{fontWeight:850,letterSpacing:'.15em'}}>03 / HOW — TURN COMPUTE INTO REVITALIZATION</p>
       <h2 style={title}>データセンターを箱で終わらせない。<br/>地域再生のハブにする。</h2>
       <p style={body}>COG DCの隣にEducational Singularity Labを置く。学生が地域の計算資源で学び、研究し、地域課題を解く。FoundUpsと地域企業が試作し、起業する。回収可能な熱は、温浴、暖房、農業、融雪など、その地域に合う用途を技術検証する。</p>
-      <p style={body}>そして方法そのものをエージェントで反復可能にします。候補施設 → 構造 → 電力 → 光回線 → 熱需要 → 地域の計算需要 → 規制 → 資金 → ステークホルダー → 1MW実証 → 拡張。福井で学んだ方法を、次の地域が最初から使えるようにする。</p>
+      <p style={body}>そして方法そのものをエージェントで反復可能にします。候補施設 → 構造 → 電力 → 光回線 → 熱需要 → 顧客・地域の計算需要 → 売上・資金条件 → 必要な計算資源 → 段階導入 → 実利用に応じた拡張。福井で学んだ方法を、次の地域が最初から使えるようにする。</p>
       <p><a href={ESINGULARITY_URL} style={link}>eSingularity / 福井の実証を見る →</a></p><Join />
     </section>
 
