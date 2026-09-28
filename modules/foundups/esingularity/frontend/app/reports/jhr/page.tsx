@@ -213,7 +213,7 @@ export default function JapanHyperscalerReportPage() {
         </ul>
         <h3>モデルB — COG DC / 地域分散型</h3>
         <ul>
-          <li>1MWから検証し、5→10→20MWへ需要に応じて拡張</li>
+          <li>MWを先に固定せず、契約需要と電力・通信条件から必要容量を逆算して段階拡張</li>
           <li>既存建物・既存インフラの再利用を優先</li>
           <li>学校、大学、病院、自治体、企業、農業への近距離コンピュート</li>
           <li>排熱を温泉、給湯、暖房、融雪、農業へ活用する可能性</li>
@@ -264,7 +264,7 @@ export default function JapanHyperscalerReportPage() {
 
         <h3>Community-scale alternative</h3>
         <p>Campaign update, September 28: the September 25 vote is complete. YUMORI.me now asks Fukui City to designate a PPP/PFI public-private project-formation route and compare demolition with reuse before irreversible demolition procurement or physical work proceeds. This does not ask the City to automatically adopt YUMORI, commit public investment or guarantees, or award a non-competitive contract.</p>
-        <p>Before major land conversion, Fukui can test whether existing public buildings, factories, hotels, warehouses and hot-spring facilities can support modular 1→5→10→20 MW compute where structure, power, fiber, cooling and heat reuse make sense. Distributed compute will not replace every hyperscale facility. The point is to create a third option before communities face a binary accept-or-reject decision.</p>
+        <p>Before major land conversion, Fukui can test whether existing public buildings, schools, factories, hotels, warehouses and hot-spring facilities can support demand-led modular compute. Capacity should be derived from real customer and community demand, unit economics, and verified power, fiber, cooling and site constraints rather than a preset MW ladder. Distributed compute will not replace every hyperscale facility. The point is to create a third option before communities face a binary accept-or-reject decision.</p>
 
         <p>
           <a href={YUMORI_ME} target="_blank" rel="noreferrer" style={button}>YUMORI.me / Join & field activity</a>
