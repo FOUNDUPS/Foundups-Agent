@@ -22,11 +22,17 @@ Speech-to-text output is never authoritative for project proper nouns. Normalize
 
 Forbidden STT substitutions on current truth surfaces include `Scott Lando`, `Kazuri`, `Kazury`, `Kuzuri`, `Kuzuru`, `Owarasa`, and `すかっとらんど九頭竜`. Historical quoted material may retain original wording only when explicitly identified as a historical record.
 
-## Candidate-site reconciliation — 2026-09-26
+## Candidate-site and economic-model reconciliation — 2026-09-28
 
-The canonical site register is [CANDIDATE_SITE_REGISTRY.md](../../docs/CANDIDATE_SITE_REGISTRY.md). The current FIN workbook has separate tabs for Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu. Repository status controls; Drive is the working calculation layer.
+The canonical site register is [CANDIDATE_SITE_REGISTRY.md](../../docs/CANDIDATE_SITE_REGISTRY.md). The repository economic model at [yumori_economic_model.py](../../src/yumori_economic_model.py) is the calculation/sizing authority. The current FIN workbook is the formula-driven working projection, interview, and audit surface.
 
-For **旧羽生小学校**, the 2026-09-26 field survey supports only the observation that major transmission/substation and utility-telecom infrastructure is immediately nearby. The project may use **5 MW initial** and **10/20 MW expansion** as utility-study scenarios. Do not publish or model them as available, contracted, permitted or deliverable capacity until the utility confirms point of connection, voltage, capacity, cost and schedule. Visible telecom equipment does not prove commercial or dark-fiber availability.
+**Do not choose MW first.** Site size is derived from customer/service demand, revenue/resource requirements, equipment power, PUE, financial viability, and finally utility-confirmed capacity. No deliverable kW/MW is currently confirmed for Sukatto, former Shimousaka Elementary School, or former Hanyu Elementary School.
+
+For **旧羽生小学校**, the 2026-09-26 field survey supports only the observation that major transmission/substation and utility-telecom infrastructure is immediately nearby. That makes Hanyu the current initial-priority grid-first candidate, conditional on formal power, fiber, building, and demand evidence. Proximity does **not** establish deliverable load capacity, connection voltage, redundancy, cost, schedule, or commercial/dark-fiber availability.
+
+For **旧下宇坂小学校**, the larger site remains the second-candidate / future expansion node. It does not carry a preset capacity. **旧すかっとランド九頭竜** remains the regional human-facing hub; its compute size is also demand- and infrastructure-derived rather than preset.
+
+The FIN workbook now contains `Service Catalog`, `Demand & Capacity`, and `Node Sizing` tabs. The product catalog separates physical infrastructure from commercial packaging; demand lines generate revenue/resource requirements; Node Sizing computes both demand-backed facility load and a separate financial-floor equivalent. The financial floor is a viability metric, **not a build target**.
 
 > **INTERNAL — NOT A PUBLIC WEBSITE PAGE.** This ledger is the claim-admission
 > gate for eSingularity.ai and the approved knowledge boundary for Red Dog. It
@@ -56,11 +62,10 @@ Claim classes:
 | Equivalent onsen/thermal greenfield: ¥1.28B–¥1.76B | B | Master proposal + Landowner Proposal (External Audit v2) | Project range located; contractor/engineering basis not independently verified | Show only with “project model — requires engineering/contractor validation”. |
 | Brownfield recommissioning: ¥195M–¥270M | B | Master proposal + Landowner Proposal (External Audit v2) | Project range located; contractor/engineering basis not independently verified | Same project-model label required. |
 | Indicative avoided future CAPEX: approx. ¥1.1B–¥1.5B | B | Difference implied by the two project ranges | Arithmetic direction verified; physical scope remains unverified | Show as indicative comparison, never as cash available to the project. |
-| Phase 1: approximately 1 MW | D supported by B | Phase 1 financial workbook + master proposal | Verified as project starting scenario, not permitted/contracted capacity | Present as Phase 1 target/proof stage. |
-| 384 GPUs | B / configuration assumption | Phase 1 financial workbook | Verified as current model assumption; procurement configuration can change | Always add “current model assumption / subject to procurement”. |
-| ~5 MW total, then ~10 MW, then ~15–20 MW total | D | Current public roadmap required by 2026-08-29 work order | Conditional planning sequence | Use decision gates; do not imply annual doubling or commitments. |
-| Long-term 20–30 MW-class site potential | D | Master + landowner proposal + current work order | Planning range only | Always state grid, permits, zoning, civil/flood, cooling, financing, demand, developable area, and community agreement conditions. |
-| Revenue, EBITDA, IRR, payback, DSCR | B-unverified | Phase 1 financial workbook | **Failed audit:** displayed cells are hard-coded strings; several arithmetic/depreciation/cash-flow inconsistencies exist | Do not publish on the website. |
+| Current node capacity | Unverified | Candidate Site Registry + utility/operator evidence | No deliverable kW/MW confirmed for any current site | Do not publish a fixed starting or expansion MW sequence. State that capacity is derived from verified demand, economics, engineering and utility limits. |
+| Legacy 1 MW / 384-GPU scenario | B — legacy model scenario | Functional FIN workbook + repository economic model | Preserved for audit continuity; not current site-sizing authority | May be described only as a legacy/internal comparison scenario, never as the current build target or confirmed configuration. |
+| Demand-backed node sizing | B — project calculation method | Repository `yumori_economic_model.py` + FIN `Demand & Capacity` / `Node Sizing` | Formula-driven method verified; customer, pricing, CapEx, debt and utility inputs remain evidence-gated | Explain the method, not a guaranteed outcome. No public revenue/return claim without separate admission. |
+| Revenue, EBITDA, IRR, payback, DSCR | B-unverified | Functional FIN workbook + repository parity model | Core workbook is formula-driven and parity-tested; commercial prices, utilization, CapEx, debt, utility and demand assumptions remain unverified | Keep numerical returns internal until inputs are independently evidenced and this ledger explicitly admits the output. |
 | Job counts | B-unverified | Phase 1 financial workbook | Methodology not supplied | Do not publish numeric job estimates. Explain construction/permanent/indirect categories without counts. |
 | Grants, tax holidays, free lease, specific lenders | Unverified | Phase 1 financial workbook assumptions | Current eligibility/agreements not verified | Do not publish as available, committed, or guaranteed. |
 | Data center is separate from the onsen building | D / core architecture | Master + landowner proposal + current work order | Consistent across current sources | Make visually unmistakable: retained building (onsen + Innovation Center) beside new modular campus. |
@@ -96,7 +101,7 @@ drafts into the public site.
 2. [Document 03 — policy alignment and PPP/PFI reuse evidence](https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit) — supporting policy/evidence lane.
 3. [Master project prospectus](https://docs.google.com/document/d/1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM/edit) — integrated project narrative.
 4. [Landowner proposal — External Audit v2](https://docs.google.com/document/d/1WCqidzhU_9qyMxYCKj8UZ3lUv6qudCoWzy3qxClEznE/edit) — landowner-facing proposal and audit.
-5. [Current Phase 1 financial workbook](https://docs.google.com/spreadsheets/d/1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0/edit) — functional working model and site tabs; figures remain internal until separately audited and admitted above. The older integrated workbook remains reference-only.
+5. [Current FIN workbook](https://docs.google.com/spreadsheets/d/1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0/edit) — formula-driven working projection with Service Catalog, Demand & Capacity, Node Sizing and site tabs. Repository code is the calculation/sizing authority; numerical financial outputs remain internal until their inputs are evidenced and separately admitted above. The older integrated workbook remains reference-only.
 6. [Current build work order](https://docs.google.com/document/d/14xZTRgROhk_kTVaj9KimeenqmQrW26SCleHnKNWz08E/edit) — implementation direction.
 
 ### Separate campaign / legal-action lane
