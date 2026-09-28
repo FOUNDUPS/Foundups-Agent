@@ -812,6 +812,15 @@ Existing project and system-service lanes retain their code and connection work.
 6. Index maintenance uses its existing leases and exact-main controller. Concurrent main advancement invalidates a run's authority; replan or repeat the governed transaction against the new target instead of weakening the check.
 7. Do not publish a site, send outreach, train on private conversation data, or activate a service as a side effect of an RSI packet.
 
+## Measurement handoff reconciliation — 2026-09-29
+
+PR1903 remains the existing measurement owner; the current reader hardening and
+producer→persisted-report→consumer evidence are tracked under
+`current_observation.measurement_seam_20260929` in the canonical RSI backlog.
+This closes demonstrated diagnostic type/unknown/overflow defects, subject to
+publication gates. It does not close G1–G4, authenticate simulator gain or replace
+the existing roadmap. See the current WRE roadmap/interface for exact scope.
+
 ## RSI verification hierarchy and canonical measurements
 
 WSP 48 and WRE use one verification vocabulary across RSI work. Machine

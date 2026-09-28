@@ -1,3 +1,11 @@
+## 2026-09-29: Persisted RSI measurement boundary
+
+- Existing test owners cover strict nested scalar types, explicit nulls, finite relative gain, zero/negative baseline semantics and real repeated producer→JSON→reader/advisory output; aborted/cleanup-failed reports remain unknown.
+- Frozen103 controls:80 baseline passes/23 reproduced failures →103 passes. Connected307 local cases pass without errors/skips; three abrupt-exit cases are explicitly deselected locally, retained in hosted CI. The broader set contains the focused cases; do not add the counts together.
+- Local command: `python -I -B O:/Foundups-Agent-audits/20260929-rsi-measurement-reconciliation/run_regression_final.py regression-final-v2`. It uses no plugin autoload/conftests, disposable outputs, actual evaluator leaves and two isolated simulator namespaces; two main function bodies are loaded without launching main. Guards block provider/model/network/DB/child execution. These Python guards are not an OS sandbox. Hosted CI runs four full registered test files including the abrupt-exit controls.
+- Original receipts/XML/source hashes and independent review are bound in the canonical backlog. Early runner receipt wording was corrected in a separate reconciliation; historical artifacts remain intact. PR/main verification is a separate publication gate.
+- WSP00/5/6/11/15/22/48/50/97. No production RSI, authenticated outcome or retained benefit claim.
+
 ## 2026-09-27: Report checkout failure through the existing error field
 
 - WSP 00/6/15/22/34/50/62/84/97. Preserve all 148 case IDs and outcomes; add six controls in the same file/helper (three command-success routes × advisory/ENFORCED).

@@ -1,3 +1,9 @@
+## 2026-09-29: Harden existing RSI persisted-measurement reader
+
+- WSP00/5/6/11/15/22/48/50/62/97/99: reconcile merged PR1903 against main7c2e0b6f. Repair nested JSON scalar confusion, omitted unknown evidence and overflowed relative-gain acceptance in the existing dashboard owner; preserve valid v1 reports and explicit unverified status.
+- Real producer/evaluator, saved-report, advisory output and lifecycle controls; frozen103:80/23 baseline →103/0 candidate; connected307 local pass. Three child-process cases remain hosted-only in this run. Keep signal class, authentication, held-out evaluation, human direction and retained learning separate.
+- Update existing CI, WSP48 mirrors, interfaces, roadmap/backlog and integrity projections. Exact publication/independent review/cleanup receipts are bound in the backlog, not inferred from local tests. Next: re-observe native18/P0 blockers and the eligible operational runtime/tokenizer12/P2 component.
+
 ## 2026-09-29: Bound Qwen package imports for RSI qualification
 
 - WSP00/15/22/48/50/62/84/97; existing operational14/P1, import component12/P2. Defer the existing20 Qwen exports until requested; preserve original8 owners, identities, version, dir/from/star imports and dependency failures.

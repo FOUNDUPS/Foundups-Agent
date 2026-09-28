@@ -73,13 +73,23 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py
 
       - name: Run WRE RSI measurement contract tests
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          FOUNDUPS_DB_ENGINE: sqlite
+          DATABASE_URL: ''
+          FOUNDUPS_DB_PATH: ${{ runner.temp }}/rsi-foundups.db
+          WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/rsi-pattern.db
+          ANTIFAFM_LYRICS_DB: ${{ runner.temp }}/rsi-lyrics.db
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
         run: |
-          python -m pytest -q --tb=short \
-            modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py::test_rsi_measurement_bundle_tracks_signal_strength_and_gain \
-            modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py::test_auto_researcher_rejects_impossible_allocation \
-            modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py::test_research_display_remains_unverified \
-            modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py::test_research_display_rejects_inconsistent_rsi_measurements \
-            modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py::test_research_display_is_read_only_and_sanitized
+          python -B -m pytest -q --tb=short --noconftest -o pythonpath=. -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/rsi-measurement-pytest" \
+            modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py \
+            modules/infrastructure/wre_core/tests/test_wre_research_evaluator_inputs.py \
+            modules/infrastructure/wre_core/tests/test_wre_research_program_consumption.py \
+            modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py
 
       - name: Run WRE merge sentinel prerequisite tests
         id: merge_sentinel

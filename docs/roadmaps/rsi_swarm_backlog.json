@@ -1881,47 +1881,39 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.qwen_lazy_import_20260929",
-    "base_commit": "1a8cc62e6457846f945c850f8ce066f0f199263d",
-    "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
-    "selected_component": "Qualify and narrowly defer eager qwen_advisor package exports for the existing local proposal import route",
-    "status": "local_controls_verified_pr_main_closure_pending",
+    "observation_path": "current_observation.measurement_seam_20260929",
+    "base_commit": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
+    "selected_action": "Harden existing persisted RSI diagnostic measurements",
+    "selected_component": "Strict nested scalar/null/finite-relative-gain reader and connected producer consumption",
+    "status": "locally_verified_independently_reviewed_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
-      "deferability": 3,
-      "impact": 3,
-      "total": 12,
-      "priority": "P2"
-    },
-    "whole_work_item_wsp15": {
-      "complexity": 3,
-      "importance": 4,
-      "deferability": 3,
+      "deferability": 4,
       "impact": 4,
       "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-lazy-import\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "qwen-lazy-import-20260929",
-    "base": "1a8cc62e6457846f945c850f8ce066f0f199263d",
+    "observation_id": "measurement-seam-20260929",
+    "base": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Qualify the operational decision contract with fixed synthetic controls",
-    "selected_component": "Qualify and narrowly defer eager qwen_advisor package exports for the existing local proposal import route",
+    "selected": "Harden existing persisted RSI diagnostic measurements",
+    "selected_component": "Strict nested scalar/null/finite-relative-gain reader and connected producer consumption",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
-      "deferability": 3,
-      "impact": 3,
-      "total": 12,
-      "priority": "P2"
+      "deferability": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "previous_closed": {
       "pr": 1945,
@@ -2335,7 +2327,19 @@
           },
           "reconciliation_constraint": "Missing generic ROC caller is already documented. Qualify the exact intended existing-owner handoff only if new evidence is needed; otherwise reconcile known dependency and re-score. Advisory startup reading and post-publication retained work are distinct. Exporter can initialize PatternMemory when health_data is omitted.",
           "resume_prerequisite": "Actual authorized upstream runtime handoff, independent evaluation/resource evidence and publication evidence become available for an existing outcome consumer; advisory display does not supply retention authority.",
-          "score": 14
+          "score": 14,
+          "measurement_hardening": {
+            "observation_path": "current_observation.measurement_seam_20260929",
+            "state": "locally_verified_independently_reviewed_publication_pending",
+            "wsp15": {
+              "complexity": 2,
+              "importance": 4,
+              "deferability": 4,
+              "impact": 4,
+              "total": 14,
+              "priority": "P1"
+            }
+          }
         },
         {
           "task": "Fail closed on existing merge sentinel prerequisites",
@@ -5748,7 +5752,7 @@
         "candidate_failed": 0,
         "fixture_sha256": "ed1aa1312b54d4cc2ff4a34e582db9a7b930e28659ad9567fad6d646c7512709",
         "local_verified": true,
-        "hosted_verified": false,
+        "hosted_verified": true,
         "limits": "Real package/llm_engine imports only; inert synthetic owners qualify API dispatch, not real coordinator/service runtime safety. Python guards are not an OS sandbox.",
         "baseline_controller_seconds": 2.797000000020489,
         "candidate_controller_seconds": 1.8120000001508743,
@@ -5811,8 +5815,139 @@
         }
       },
       "publication": {
+        "status": "merged_main_verified_owned_lane_closed",
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-lazy-import\\final-accounting.json",
+        "pr": 1949,
+        "merge": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
+        "receipt_sha256": "dc612e4cc5a6d5e4efa6604a232fe8890e47cb7f17a4de6f9f59c67a68ab2994"
+      },
+      "next_action": {
+        "task": "Qualify the operational decision contract with fixed synthetic controls",
+        "component": "Qualify actual code-model resolution, dependency-version provenance and the existing tokenizer-only effect boundary",
+        "state": "conditional_source_metadata_and_fixed_effect_acceptance_preparation",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "component_wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
+        },
+        "dependency": "Current import repair must complete reviewed projections, exact-head/main CI and owned closure; then fresh source/ownership/runtime metadata and independently reviewed resolver/native boundary acceptance. This receipt grants no native execution.",
+        "next_step": "First bind the existing resolve_model_selection(code) consumer under a fixed noncredential environment and bounded read-only filesystem scope; distinguish actual result from default-folder inference. Reconcile both root and Holo requirements pins0.2.72 against previously observed installed0.3.20 with the existing dependency owner, without install/downgrade/version edits. Reuse existing qualification-plan-v2 and LlamaModel seam to specify exact allowed runtime artifacts, dependency resolution and externally enforceable process/time/memory/network/failure limits before any native import or twelve frozen prompt counts. Stop at a concrete unsupported prerequisite rather than issuing another generic plan or changing prompt/model/context.",
+        "rationale": "Observed8/8 bounded import/API controls remove one concrete source obstacle, while the actual WRE adapter immediately proceeds to resolver and native initialization. The next missing facts are consumed model/runtime identity and enforced tokenizer effect limits, not another package-import repair. Existing resolver and tokenizer owner suffice; no evaluator/module/task is needed."
+      }
+    },
+    "measurement_seam_20260929": {
+      "task": "RSI_MEASUREMENT_SEAM_CLOSURE_1903",
+      "base": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
+      "historical_pr": 1903,
+      "historical_merge": "7988d0dc0d23bfdb43936d9430120c792325b75f",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "state": "locally_verified_independently_reviewed_publication_pending",
+      "alignment": "Existing R10 measurement prerequisite and diagnostic/outcome-consumer row; no new packet, orchestrator or measurement store.",
+      "reproduced": [
+        "nested Boolean/numeric substitutions accepted",
+        "missing explicit unknown fields accepted",
+        "overflowed relative gain accepted"
+      ],
+      "already_present": [
+        "atomic completed/aborted report publication after cleanup",
+        "distinct attempt/evaluation/outcome denominators",
+        "separate self-asserted evidence rejection/ignoring",
+        "sampled profile drift rejection with explicit ABA limit",
+        "advisory startup consumer and no memory/retention grant"
+      ],
+      "validation": {
+        "frozen_cases": 103,
+        "baseline_passed": 80,
+        "baseline_failed": 23,
+        "candidate_passed": 103,
+        "candidate_failed": 0,
+        "connected_passed": 307,
+        "errors": 0,
+        "skipped": 0,
+        "local_excluded": "three existing abrupt-exit child cases; included in hosted four-file CI selection",
+        "subject_model_calls": 0,
+        "retained_gain": null
+      },
+      "research": {
+        "id": "arXiv:2607.07663v2",
+        "title": "Recursive Self-Improvement in AI: From Bounded Self-Refinement to Autonomous Research Loops",
+        "authors": [
+          "Mingguang Chen",
+          "Licheng Wang",
+          "Bo Qu"
+        ],
+        "revised": "2026-09-06",
+        "url": "https://arxiv.org/html/2607.07663v2",
+        "interpretation": "Qualitative verification hierarchy, not a numerical RSI standard; FoundUps defines this measurement bundle."
+      },
+      "retrieval": {
+        "freshness": "CURRENT",
+        "index_gap_detected": false,
+        "bundle_ok": true,
+        "noise": "Two dated audit hits, explicitly historical. Three direct producer/test hits; direct navigation adds dashboard/evaluator/current contracts.",
+        "ordering": "Current owner contracts before dated audits.",
+        "missing": "memory/README.md absent; no new memory store created.",
+        "duplication": "No duplicate runtime owner required.",
+        "source_limit": "Committed main only; no shared dirty overlay included."
+      },
+      "evidence": {
+        "holo-retrieval.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\holo-retrieval.json",
+          "sha256": "40fc4366cf36276fd26f9f55055a24bb821aa644350540dec0516ae2195a143f"
+        },
+        "baseline-final/receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\baseline-final\\receipt.json",
+          "sha256": "3cc23a2cc703e9939786577841a0b8dd031c79e37bf9a26904f45c8ef09d4a24"
+        },
+        "candidate-final/receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\candidate-final\\receipt.json",
+          "sha256": "011641b2d7a72be1c295a9553b8cf2c714016223171e852a222203ad8de52fbd"
+        },
+        "regression-final-v2/receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\regression-final-v2\\receipt.json",
+          "sha256": "70dea9e3a4352b2f78b49e611566bb25577029b0a76120cd515f85b9910c1a23"
+        },
+        "independent-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\independent-review.json",
+          "sha256": "6e352d5dc394aff6ec8d89e87aef448306b76453903b8bc4fb9b4ec792dc8757"
+        },
+        "static-validation.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\static-validation.json",
+          "sha256": "96b476dff052113431920cad2f683c9dbdad9f4a482e87bc40fb349b48b45bd1"
+        },
+        "evidence-reconciliation.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\evidence-reconciliation.json",
+          "sha256": "22c1d3ca6e5152b6fa19ace6d06fcacba5ed9171751990a7578236f3892993cc"
+        }
+      },
+      "limits": [
+        "No live main launch; two startup function bodies qualified.",
+        "Two simulator namespaces isolated locally; actual producer/evaluator/reader leaves run.",
+        "Python guards are not an OS sandbox.",
+        "No native admission, held-out model improvement, activation/rollback or retained benefit.",
+        "Producer synthetic extreme-evaluator overflow is a separate unqualified hypothesis, not repaired here."
+      ],
+      "publication": {
         "status": "pending_exact_pr_main_and_owned_closure",
-        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-lazy-import\\final-accounting.json"
+        "receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\final-accounting.json"
       },
       "next_action": {
         "task": "Qualify the operational decision contract with fixed synthetic controls",

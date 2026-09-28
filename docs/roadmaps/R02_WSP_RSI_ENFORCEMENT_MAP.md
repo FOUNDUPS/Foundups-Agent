@@ -20,6 +20,15 @@ The **test references below are inventory**, not assertions that every reference
 
 Normative source key: [WSP catalog](../../WSP_framework/src/WSP_MASTER_INDEX.md), [WSP 46](../../WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md), [WSP 48](../../WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md), [WSP 95](../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md), [WSP 97](../../WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md). Other numbered references resolve through the catalog. Draft WSP 96 is a design reference; its draft status does not confer enforceable authority. WSP 95 §3.1 supplies the seven production-promotion requirements: exact digests, independent held-out outcome evidence, regression/security evidence, runtime binding, authorized receipt, rollback, and immutable independent lineage. They map to R01/R04/R09–R14/R19 below.
 
+## Measurement handoff reconciliation — 2026-09-29
+
+PR1903 remains the existing measurement owner; the current reader hardening and
+producer→persisted-report→consumer evidence are tracked under
+`current_observation.measurement_seam_20260929` in the canonical RSI backlog.
+This closes demonstrated diagnostic type/unknown/overflow defects, subject to
+publication gates. It does not close G1–G4, authenticate simulator gain or replace
+the existing roadmap. See the current WRE roadmap/interface for exact scope.
+
 ## Verification signal and measurement rule — 2026-09-25
 
 WSP 48 now binds every RSI evaluation to the verification hierarchy used by the
