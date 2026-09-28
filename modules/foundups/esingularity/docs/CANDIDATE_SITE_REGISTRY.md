@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Candidate Site Registry
 
-Last audited: 2026-09-28 JST
+Last audited: 2026-09-29 JST
 
 ## Authority and workflow
 
@@ -28,6 +28,7 @@ Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizi
 - Compute capacity: **not preset and not utility-confirmed**.
 - Sizing basis: add capacity only after customer demand and power/fiber/site conditions justify it.
 - BESS-in-gym, fiber, building reuse and interconnection remain concepts requiring engineering and operator confirmation.
+- Official plan evidence: Fukui City publishes the Shimousaka school/gym/pool-management floor plan at `https://www.city.fukui.lg.jp/kyoiku/school/school/haiko-rikatsuyou_d/fil/shimousakasyo-heimenzu.pdf`; the City reuse page also lists the site plan and kindergarten plan. Use these as feasibility basemaps, not final design drawings.
 - Status: pre-feasibility.
 
 ## Site 3 — 旧羽生小学校 / Former Hanyu Elementary School
@@ -38,7 +39,20 @@ Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizi
 - Compute capacity: **UNVERIFIED**. Proximity does not establish deliverable load capacity, connection voltage, redundancy, cost, schedule, or commercial/dark-fiber availability.
 - Sizing basis: customer/service demand -> revenue/resource demand -> GPU/CPU/storage/network requirements -> IT kW -> facility kW -> compare with utility-confirmed capacity.
 - Required next evidence: Hokuriku Electric Power Transmission & Distribution connection response; two-route carrier/fiber study; building/MEP/structural, cooling/water, fire, seismic, flood/landslide, geotechnical, acoustic and access studies; bankable customer/offtake evidence.
+- Official plan evidence: Fukui City publishes the Hanyu school/gym floor plan at `https://www.city.fukui.lg.jp/kyoiku/school/school/haiko-rikatsuyou_d/fil/hanyusyo-heimenzu.pdf`; the City reuse page also lists the site plan and kindergarten plan. Use these as feasibility basemaps, not final design drawings.
 - Status: pre-feasibility. Priority is conditional and must be revised if the formal grid/fiber/site evidence does not support it.
+
+## Site-selection rule — 2026-09-29 clarification
+
+The first compute site is **not** selected by visual proximity to a substation alone. The initial node is the site that first clears all material gates for the demand-derived load: utility-confirmed supply/upgrade path, fiber and redundancy, building/land/fire/disaster/permitting suitability, connection and retrofit cost/schedule, and operating/finance viability. Grid proximity raises investigation priority only.
+
+Facility reuse is staged behind demand. Start with the minimum demand-backed compute/infrastructure footprint that clears the gates; expand education, research, incubation, community and wellness/onsen functions as actual usage and economics justify them. Compute revenue must first cover power/network, operations, maintenance, debt service, equipment renewal and prudent reserves. Only a contractually defined surplus/community-return layer may be modeled as supporting facility redevelopment; no such surplus is currently guaranteed.
+
+## FY2026 school submission lane — 2026-09-29
+
+Former Shimousaka and former Hanyu are the two current properties in Fukui City's FY2026 財産有効活用民間提案制度. The official form bundle is Forms 1–5. Form 1 prior consultation is mandatory; the City lists 2026-11-30 as the prior-consultation/site-survey cutoff and 2026-12-15 as the proposal-document deadline. Keep this ASSET_PROPOSAL lane distinct from Sukatto's PPP/PFI project-formation route. Present the sites as one network concept, but do not assume one combined formal filing until the City confirms whether the singular Form 1 property field can cover both sites or requires one form per property.
+
+Utility/carrier inquiries are feasibility evidence/annexes, not a third City asset-proposal property. Preserve official-form binary fidelity; do not recreate City forms in another format.
 
 ## Demand-led financial-model contract
 
