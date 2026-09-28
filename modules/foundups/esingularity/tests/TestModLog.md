@@ -1,3 +1,9 @@
+## 2026-09-28 — Regional-impact financial truth boundary
+
+- Reused `test_contracts.py`; no new test file was created.
+- Requires the repository truth ledger to retain 2,081,902 as the documented FY2005–FY2019 total while explicitly rejecting the inferred 3M+ lifetime figure as a verified City total.
+- Freezes the Fukui 2025 visitor-spend benchmark labels, the 100k-visit scenario boundary, and the current FIN workbook's separate `Regional Impact` ledger/no-double-counting rule.
+
 ## 2026-09-28 — Native Red Dog correspondence continuity dependency
 
 - Extended the existing `test_contracts.py` operational-skill contract to require the generic `reddog_correspondence_state` registry entry, YUMORI dependency, native-store boundary and thin operator projection.
