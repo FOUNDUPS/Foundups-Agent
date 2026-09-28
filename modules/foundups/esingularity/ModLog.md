@@ -5,6 +5,7 @@
 - Added Fukui Prefecture 2025 tourism-spend benchmarks (¥5,546 day-trip; ¥30,221 overnight) as external benchmark inputs, including a clearly labeled FY2018-mix equivalent and 75k/100k/125k visitor scenarios with 10/30-year and 3% NPV screens.
 - Added innovation-space payroll scenarios aligned to the 60-company / 120-seat concept, plus separate public/asset comparison metrics for historic construction cost, the discussed demolition estimate, approved demolition-preparation budget, and a timing-only demolition-deferral illustration.
 - Explicitly prohibited automatic summation of visitor spending, project revenue, payroll, private capital and public-cost avoidance. Fukui input-output multiplier, local procurement, leverage and aggregate Community ROI remain HOLD until their evidence perimeter and double-counting rules are defined.
+- Verified that Fukui Prefecture publishes the current R2 (2020) 37-sector input-output tables plus a visitor-consumption economic-impact tool. The FIN multiplier remains 1.00x / HOLD until YUMORI's incremental visitor demand is allocated across the tool's sectors; no generic multiplier is imported. The official method is prefecture-wide, not a Fukui-City-only estimator.
 - Synchronized Document 03's NCDS-style feasibility section to the same visitor benchmark and 20/30/60-company × 2-FTE payroll scenarios.
 
 ## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
