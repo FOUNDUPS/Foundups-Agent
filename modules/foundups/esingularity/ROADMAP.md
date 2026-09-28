@@ -42,7 +42,8 @@ These are continuing acceptance gates, not completed features that may later be 
 - [ ] Obtain written clarification from RCESPA on closed-facility status, applicant/operator/SPC structure, property/use-right timing, eligible heat-reuse equipment, stacking, and current-round timing.
 - [ ] Feed only verified eligibility and eligible-cost calculations into the Phase 1 financial model; never book a statutory maximum cap or an unverified model placeholder as committed funding.
 - [x] Add a canonical candidate-site registry and separate FIN workbook tabs for Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu.
-- [ ] Obtain utility and fiber responses for each candidate site; for Hanyu explicitly test 5 MW initial plus 10 MW and 20 MW expansion cases before promoting any capacity into the functional model.
+- [x] Add the repository-owned demand-led YUMORI economic model, 24-offer service catalog, formula-driven Demand & Capacity / Node Sizing workbook projection, demand-capped heat calculation, and sourced JHR infrastructure-flow ledger.
+- [ ] Obtain utility and fiber responses for each candidate site; for Hanyu submit demand-derived initial and expansion load cases from the canonical economic model. Do not promote any fixed kW/MW into the functional model before demand, engineering and utility evidence support it.
 - [ ] Ask Fukui City to consider Cabinet Office PPP/PFI expert/one-stop support as part of an independent demolition-vs-reuse comparison.
 - [x] Provide Japanese, English, and Portuguese states for the ten-slide presentation.
 - [ ] Complete route-based Japanese, English, and Portuguese localization for every legacy page surface.
