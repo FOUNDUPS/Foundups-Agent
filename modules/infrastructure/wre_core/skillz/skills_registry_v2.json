@@ -576,6 +576,29 @@
         "WSP 97"
       ],
       "description": "Ground YUMORI.me correspondence in live Gmail/CRM state, canonical 0102 proxy voice, routing consent, receipt reconciliation, and recursive learning"
+    },
+    "yumori_work_orchestrator": {
+      "location": "modules/foundups/esingularity/skillz/yumori_work_orchestrator",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 77",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Convert 012/Red Dog YUMORI planning conversations into a live-state-verified, deduplicated, WSP 15-ranked backlog and bounded Work handoff"
     }
   }
 }
