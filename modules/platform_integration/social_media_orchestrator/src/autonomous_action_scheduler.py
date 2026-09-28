@@ -28,9 +28,11 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 import re
 
 from .simple_posting_orchestrator import SimplePostingOrchestrator, Platform, PostResponse, PostResult
+from modules.infrastructure.shared_utilities.runtime_atomic_replace import atomic_replace_runtime_text
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,25 @@ def _posting_result_error(response: Any, platforms: Tuple[Platform, ...]) -> Opt
     if failures:
         return 'Posting did not succeed on all requested platforms'
     return None
+
+
+def _archive_posting_result(result: Any) -> Any:
+    """Project known posting evidence without changing the live response object."""
+    if type(result) is not PostResponse:
+        return result
+    return {
+        'request_id': result.request_id,
+        'results': [{
+            'success': item.success,
+            'platform': item.platform.value,
+            'message': item.message,
+            'timestamp': item.timestamp.isoformat(),
+            'url': item.url,
+        } for item in result.results],
+        'success_count': result.success_count,
+        'failure_count': result.failure_count,
+        'timestamp': result.timestamp.isoformat(),
+    }
 
 
 class ActionType(Enum):
@@ -411,10 +432,8 @@ class AutonomousActionScheduler:
                 logger.error(f"[0102 SCHEDULER] Error loading schedule: {e}")
 
     def save_schedule(self):
-        """Save scheduled actions to file"""
+        """Serialize before atomic publication; logged errors are not acknowledgements."""
         try:
-            os.makedirs("memory", exist_ok=True)
-
             data = {}
             for action_id, action in self.scheduled_actions.items():
                 action_dict = {
@@ -426,13 +445,13 @@ class AutonomousActionScheduler:
                     'requested_by': action.requested_by,
                     'requested_at': action.requested_at.isoformat(),
                     'status': action.status,
-                    'result': action.result,
+                    'result': _archive_posting_result(action.result),
                     'error': action.error
                 }
                 data[action_id] = action_dict
 
-            with open(self.schedule_file, 'w', encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+            serialized = json.dumps(data, indent=2)
+            atomic_replace_runtime_text(Path(self.schedule_file), serialized)
 
         except Exception as e:
             logger.error(f"[0102 SCHEDULER] Error saving schedule: {e}")

@@ -1881,21 +1881,21 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation",
-    "base_commit": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
+    "observation_path": "current_observation.safe_publication_repair_20260928",
+    "base_commit": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
     "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
-    "selected_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
-    "status": "candidate_hosted_verified_final_convergence_pending",
+    "selected_component": "Repair typed-result JSON projection and safe schedule publication in the existing save owner",
+    "status": "fixed_acceptance_frozen_candidate_pending_hosted_validation",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 14,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
@@ -3618,6 +3618,71 @@
         "No third-library search, parser fork/new grammar or broad containment selected."
       ],
       "resume_prerequisite": "Reviewed strict decoder in an existing upstream/owner path: complete frame/container consumption, terminator/header validity, bounded malformed-length progress and usable interpreted/compiled API evidence. Then fresh source/ownership reconciliation and WSP15 selection; deployment visibility, authenticated transport and native authority remain separate."
+    },
+    "safe_publication_repair_20260928": {
+      "base": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
+      "component": "Repair typed-result JSON projection and safe schedule publication in the existing save owner",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "state": "fixed_acceptance_frozen_candidate_pending_hosted_validation",
+      "previous_closed": {
+        "pr": 1942,
+        "main": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
+        "main_ci": 36393612150,
+        "main_codeql": 36393612401,
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\final-accounting.json",
+        "receipt_sha256": "14b7d28098f95857a4f502bebfe0dde04d26221a535297dba039e11859369ed8"
+      },
+      "holo": {
+        "source_and_authority": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
+        "freshness": "CURRENT",
+        "index_gap_detected": false,
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\holo-followup-accounting.json",
+        "limit": "Committed source only; shared feature is divergent."
+      },
+      "baseline": {
+        "head": "5d0da3625deae94b700fcdd21f4706eb532d856d",
+        "tree": "1429bf6492a235c479bdba3daf616ff777123a64",
+        "base": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
+        "branch": "fix/rsi-scheduler-publication-20260928",
+        "fixture_review_sha256": "f15a9d32c0068a9b63e6ec1adf4298e732955bf60cfd795fa643d5fdc80910df"
+      },
+      "selection": {
+        "methods": 42,
+        "fixed_inputs": 48,
+        "legacy_unselected": 8,
+        "original_in_memory_methods": 26
+      },
+      "acceptance_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\acceptance-review.json",
+      "fixture_review_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\fixture-review-approved.json",
+      "implementation": "Explicit known PostResponse JSON projection and existing atomic writer; no new module, schema or skill.",
+      "effects": "Named hosted synthetic CI process only; no local application tests, accounts, posting, deployment or native admission.",
+      "limits": [
+        "Success is representable JSON publication and reload under the fixed fixture, not independent external delivery or power-loss proof.",
+        "Unsupported non-JSON values remain a reported failed save but cannot truncate the prior file. This does not promise durable recording of every malformed arbitrary response object.",
+        "No new automatic action retry; in-memory outcomes and original PostResponse identity remain unchanged.",
+        "Save-failure caller acknowledgement and durable retry policy remain explicitly separate, unresolved contracts; existing save return/error logging may be preserved for this minimal repair.",
+        "A preserved prior pending record can be re-executed after restart; atomic replacement alone cannot prevent that. No exactly-once claim.",
+        "POSIX mode0600 replacement/new leaf parent0700; Windows and crash behavior unqualified."
+      ],
+      "next_step": "Compare unchanged baseline and repaired source under the frozen fixture, independently review original results, verify exact PR/main checks and close only the owned lane.",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
+      "authoritative_use_lease": null,
+      "native_blockers": [
+        "canonical_consensus_receipt_verifier_missing",
+        "canonical_sovereign_authorization_verifier_missing",
+        "canonical_principal_subject_key_attestation_missing",
+        "canonical_model_signed_evidence_trust_anchor_incomplete",
+        "canonical_model_selection_signed_evidence_verifier_missing",
+        "canonical_memex_supply_signed_evidence_verifier_missing",
+        "canonical_signer_client_peer_handshake_verifier_missing"
+      ]
     }
   }
 }

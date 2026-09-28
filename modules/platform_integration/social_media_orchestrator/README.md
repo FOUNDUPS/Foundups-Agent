@@ -38,6 +38,14 @@ This keeps the DAE rotation minimal and deterministic for POC validation.
 - **Pattern Learning**: Learns from successful posts and platform responses
 - **Digital Twin Routing**: Accepts Digital Twin drafts/decisions and routes to LinkedIn execution and scheduling
 
+## Scheduler persistence boundary
+
+The existing autonomous scheduler archives typed posting results to JSON and
+serializes the complete schedule before shared atomic publication. Save errors
+remain logged without caller acknowledgement; restart retry safety and external
+delivery are not established. See [the scheduling contract](INTERFACE.md#natural-language-scheduling-0102-mode)
+and [the fixed hosted acceptance](tests/README.md#scheduler-safe-publication-qualification--2026-09-28).
+
 ## Architecture
 
 ### Refactored Modular Architecture (V021)

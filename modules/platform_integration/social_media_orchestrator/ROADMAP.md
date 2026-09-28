@@ -12,7 +12,20 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
-### Current persistence qualification — 2026-09-28
+### Current safe-publication repair — 2026-09-28
+
+PR1942 characterization is closed on main12663d7e4f with successful main CI and
+CodeQL. WSP15 C3/I4/D4/Impact4=15/P1 selects explicit result projection and the
+existing shared atomic writer. The fixed42-method/48-input hosted contract is
+frozen; baseline and candidate outcomes remain pending until recorded below.
+
+This layer preserves action disposition and existing JSON load compatibility.
+Save acknowledgement across `understand_command`, `execute_pending_actions` and
+`cancel_action`, restart duplicate prevention, concurrent writers, independent
+delivery and retained RSI require separately scored work. Atomic publication
+alone does not close them.
+
+### Historical persistence qualification — 2026-09-28
 
 WSP15 C2/I4/D4/Impact4=14/P1 selects a six-case real-file characterization of the
 existing scheduler. Preserve its source and reuse the current fixture: two

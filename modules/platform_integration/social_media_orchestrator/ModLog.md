@@ -1,3 +1,9 @@
+## 2026-09-28: Implement bounded schedule publication repair
+
+- WSP15=15/P1; WSP97/84 reuse the existing scheduler and unchanged shared atomic writer. Project explicit PostResponse fields without mutating the live object, then serialize the full schedule before any destination write.
+- Preserve action disposition, original response identity, JSON archival reload and existing logged-error/None return. Use configured parent rather than hardcoded memory. Before-replace failure preserves old bytes; after-replace sync failure can leave new complete bytes with uncertain durability.
+- Frozen42-method/48-input hosted acceptance is unchanged; baseline/candidate results pending. No local application execution or live posting. Caller acknowledgement, restart replay safety, Windows publication and retained RSI remain open.
+
 ## 2026-09-28: Freeze scheduler safe-publication acceptance
 
 - WSP00/5/6/15/22/50/62/84/97: existing save-owner repair scores15/P1 after verified PR1942 closure at main12663d7e4f.
