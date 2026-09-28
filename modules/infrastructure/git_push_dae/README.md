@@ -1,5 +1,27 @@
 # Git Push DAE - Autonomous Development Publishing
 
+## Post-commit runner qualification — 2026-09-28
+
+The tracked `scripts/post_commit_social_runner.py` first writes a `git_push`
+event, then attempts routing unless `--enqueue-only` is supplied. The observed
+shared hook labels its default mode `enqueue` but supplies no such flag; its
+`direct` mode supplies unsupported `--dispatch-direct`. This is a source-bound
+observation, not proof of the environment that produced earlier hook logs.
+
+Preserved task-local logs contain `No module named 'modules'`. Fixing the import
+path alone could activate real router imports and posting. The router's current
+transitive imports can also install a missing dependency, so this qualification
+keeps the production runner and shared hooks unchanged.
+
+Six controls in the [existing test owner](tests/test_post_commit_social_runner.py)
+exercise CLI parsing, real disposable Git context, event/result spools and the
+unchanged getter with an inert router. Hosted validation is pending. The fixture
+uses isolated Python and does not reproduce the ambient Windows hook or qualify
+real router dependencies/delivery. See [fixed acceptance](tests/README.md#runner-entrypoint-evidence--2026-09-28).
+
+Owned commits continue to use `FOUNDUPS_SKIP_POST_COMMIT=1`. Do not replay the
+preserved spool, repair production imports or enable a live hook from these tests.
+
 ## Module Purpose
 Fully autonomous git push daemon that monitors code changes and publishes development progress to social media platforms. Implements WSP 91 DAEMON observability standards for complete traceability of autonomous development decisions.
 

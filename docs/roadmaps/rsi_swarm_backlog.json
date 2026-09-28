@@ -1881,195 +1881,183 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.caller_acknowledgement_20260928",
-    "base_commit": "6821aac32774f5be36038bb3fb40cc55920a56cd",
-    "selected_action": "Qualify truthful completion evidence in the existing social action scheduler",
-    "selected_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
-    "status": "candidate_hosted_verified_final_convergence_pending",
+    "observation_path": "current_observation.hook_entrypoint_20260928",
+    "base_commit": "799cf786ffd9d58c7d3003516b990b4671162f78",
+    "selected_action": "Qualify linked-worktree Git push dispatch import failure",
+    "selected_component": "Six fixed restricted entrypoint/import and inert dispatch controls",
+    "status": "authored_independent_fixture_review_and_hosted_validation_pending",
     "wsp15": {
-      "complexity": 3,
-      "importance": 4,
+      "complexity": 2,
+      "importance": 3,
       "deferability": 3,
       "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "total": 12,
+      "priority": "P2"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
-    "observation_id": "RSI_SCHEDULER_PERSISTENCE_20260928",
-    "base": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
+    "observation_id": "RSI_HOOK_ENTRYPOINT_20260928",
+    "base": "799cf786ffd9d58c7d3003516b990b4671162f78",
     "self": "0102",
     "role": "architect",
     "origin": "autonomous_trigger",
     "principal_ref": "012",
-    "selected": "Qualify truthful completion evidence in the existing social action scheduler",
-    "selected_component": "Qualify real save/load of terminal typed outcomes and prior-schedule preservation",
+    "selected": "Qualify linked-worktree Git push dispatch import failure",
+    "selected_component": "Six fixed restricted entrypoint/import and inert dispatch controls",
     "wsp15": {
       "complexity": 2,
-      "importance": 4,
-      "deferability": 4,
+      "importance": 3,
+      "deferability": 3,
       "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "total": 12,
+      "priority": "P2"
     },
     "previous_closed": {
-      "pr": 1941,
-      "merge": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
-      "terminal_state": "MERGED_VERIFIED_MAIN",
-      "receipt": "O:/Foundups-Agent-audits/20260928-rsi-scheduler-repair/final-accounting.json",
-      "test_methods": 26,
-      "fixed_input_cases": 32,
-      "pr_passed_methods": 26,
-      "main_passed_methods": 26,
-      "owned_lane_retired": true,
-      "meaning": "Bounded in-memory completion repair, no persistence or RSI retention claim."
+      "pr": 1944,
+      "merge": "799cf786ffd9d58c7d3003516b990b4671162f78",
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json",
+      "receipt_sha256": "9490103eb11b60e76e651db42e7d99eda77c1effacebdd623a8c9942b34b0799",
+      "independent_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-closure-review.json",
+      "review_sha256": "f2948d1046ecb083addad9c02eb40b6d0f0f689b7db1c87b382841ed36ec160d",
+      "cleanup_limitation": "Initial Git config section removal failed with filesystem Permission denied; two inert owned branch entries retained. No ACL, attribute or config replacement attempted."
     },
-    "previous_observation": {
-      "observation_id": "20260928-social-scheduler-completion-repair",
-      "base": "870849a74e3b8f9777abc2df89dd8ef2428be95a",
-      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\prior-main-observation.json"
-    },
+    "previous_observation": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\postclosure-reobservation.json",
     "retrieval": {
-      "query_receipt": "wake-query.json",
-      "current": true,
-      "source": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
-      "semantic_scope": "committed_head_only",
-      "local_bundle_scope": "workspace_overlay",
-      "tier0_bundle_ok": true,
-      "noise": "Peripheral idle-automation and CABR hits excluded; scheduler leaf/tests and direct required docs used.",
-      "ordering": "Current contracts and frozen acceptance before historical log entries.",
-      "duplication": "Existing test file/loader/CI owner reused.",
-      "staleness": "Same reviewed main; prior repair docs reconciled to verified PR1941 closure."
+      "source": "799cf786ffd9d58c7d3003516b990b4671162f78",
+      "freshness": "CURRENT",
+      "index_gap_detected": false,
+      "owner_attempts": 1,
+      "query_sha256": "0e1208a616c13b49d52881fc1521cae6364b4c6210f1ac3d39104e56cdf3bd54",
+      "noise": "Three peripheral integration/posting test hits are outside the inert runner scope and were not executed.",
+      "ordering": "Exact existing runner test is first; dated architecture second. Canonical module README/INTERFACE explicitly included.",
+      "missing_artifacts": {
+        "required": [],
+        "optional_memory_readme": true,
+        "requirements_txt": "Read directly; contains stdlib names plus pytest/black/mypy, not an installation plan."
+      },
+      "staleness_risk": "Source is current at799cf786. Module MVP/fullautonomy and historical architecture claims are not present runtime proof; exact runner/hook/source/receipts govern.",
+      "duplication": "Reuse current3test owner and existing source-file loader pattern from social scheduler tests; no new test file, module, skill, schema or transport.",
+      "navigation_crosscheck": "NAVIGATION.py:314 points to historical Git social architecture; tracked runner and module contracts read directly.",
+      "improvement": "Must-include contracts and bounded source reads supply hook/CLI effects absent from broad semantic test hits. No index or relevance algorithm edit required."
     },
     "allocation": {
-      "rationale": "Finite connected save/load gap at14/P1; equally scored operational pilot still needs a consuming owner and labels. Hook12 and correspondence11 eligible but lower. Native18 and other14 owners retain actual prerequisites.",
-      "execution_plane": "Local single-surface fixture authoring plus independently qualified existing hosted CI. No native WRE/admission or local application/test execution.",
-      "effort_cost": "Six hosted-only disposable-file witnesses using existing fixture; independent effects/oracle review before publishing. No model/provider spend selected.",
-      "verification_burden": "Frozen six-case source/effect review, named hosted32 methods/38 inputs, six exact file-evidence records, final PR/main CI and independent closure."
+      "scope": [
+        ".github/workflows/ci.yml",
+        "ModLog.md",
+        "docs/roadmaps/rsi_swarm_backlog.json",
+        "modules/infrastructure/git_push_dae/README.md",
+        "modules/infrastructure/git_push_dae/INTERFACE.md",
+        "modules/infrastructure/git_push_dae/ROADMAP.md",
+        "modules/infrastructure/git_push_dae/ModLog.md",
+        "modules/infrastructure/git_push_dae/tests/README.md",
+        "modules/infrastructure/git_push_dae/tests/TestModLog.md",
+        "modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py",
+        "WSP_knowledge/WSP_Test_Registry.json"
+      ],
+      "execution_plane": "source audit and reviewed hosted CI fixture only; no native work admission",
+      "effort_cost": "One test-only layer in existing file; six hosted controls plus unchanged existing CI. No runtime/dependency installation beyond current workflow. Token/currency cost unavailable."
     },
     "owner_reconciliation": {
-      "entry": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\wake-observation.json",
-      "peer_count": 96,
-      "overlaps": [
+      "peer_heads": 96,
+      "worktrees": 159,
+      "overlapping_peer_files": [
         {
-          "pr": 1860,
+          "number": 1860,
           "head": "74ca647e35446c975d9aabe53f7bf44951bfc9d4",
           "paths": [
             "ModLog.md",
             "WSP_knowledge/WSP_Test_Registry.json"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained.",
+          "registry_blob": "3445aafab91ebd0674ee2b587a72b07834f57063",
+          "target_row_matches_current_base": true
         },
         {
-          "pr": 1759,
+          "number": 1759,
           "head": "3f98c1a5df8bb6be56455db515ae8b188d693c76",
           "paths": [
             "WSP_knowledge/WSP_Test_Registry.json"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained.",
+          "registry_blob": "fea4596a468bce0170c7791c508ecf6a4a136ca3",
+          "target_row_matches_current_base": true
         },
         {
-          "pr": 1688,
+          "number": 1688,
           "head": "40d71249fe913567ee6f5fa65536d89f2ecb46c3",
           "paths": [
             "WSP_knowledge/WSP_Test_Registry.json"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained.",
+          "registry_blob": "1b3f53e473c89eab71f8dff393606e47b99665e5",
+          "target_row_matches_current_base": true
         },
         {
-          "pr": 1680,
+          "number": 1680,
           "head": "a60ea1e655f5247d871b0e958e7c5387ba40df7e",
           "paths": [
             "WSP_knowledge/WSP_Test_Registry.json"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained.",
+          "registry_blob": "4e3cc314525abe66e5469897cf99167e642f7214",
+          "target_row_matches_current_base": true
         },
         {
-          "pr": 1648,
+          "number": 1648,
           "head": "a77e284b8b72f1e731b97a987e1a48478755fda9",
           "paths": [
             "ModLog.md"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained."
         },
         {
-          "pr": 1641,
+          "number": 1641,
           "head": "7faa4e90b9648f30b653e41c2341ac54965b96ef",
           "paths": [
             "WSP_knowledge/WSP_Test_Registry.json"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained.",
+          "registry_blob": "a6d5b909341cf4a72ff536a162249805ddde4e3a",
+          "target_row_matches_current_base": true
         },
         {
-          "pr": 802,
+          "number": 802,
           "head": "de63ab95aab0ca11247cf2620cb4bc559bbce16c",
           "paths": [
             "ModLog.md"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained."
         },
         {
-          "pr": 782,
+          "number": 782,
           "head": "b8b90afbab605c396054a8171f7c4ae2399fb2c5",
           "paths": [
             "ModLog.md"
-          ]
+          ],
+          "classification": "Shared aggregate files only; no runner, module contract, test owner, workflow or backlog overlap. Root ModLog change prepends one new section; existing content retained."
         }
       ],
-      "refresh_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\wake-peer-prs.json",
-      "integrated_main": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af"
+      "shared_state_preserved": true,
+      "semantic_reconciliation": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\peer-scope-reconciliation.json"
     },
     "holo_recovery": {
-      "receipt": "O:/Foundups-Agent-audits/20260928-holo-authority-followup/final-accounting.json",
-      "target": "6acb3f55c21f4da8f7eb76e98b0f46feee63e5af",
-      "whole_R03_complete": false,
-      "runtime_environment_exact_closure_verified": false
+      "state": "CURRENT_named_source",
+      "source": "799cf786ffd9d58c7d3003516b990b4671162f78",
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\postmerge-holo\\final-accounting.json",
+      "fresh_query": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\holo-query.json",
+      "runtime_exact_closure": false
     },
     "validation": {
-      "state": "candidate_hosted_verified_final_convergence_pending",
-      "test_methods": 32,
-      "fixed_input_cases": 38,
-      "new_controls": 2,
-      "new_defect_witnesses": 4,
-      "legacy_methods_preserved": 8,
-      "local_application_tests_run": 0,
-      "production_source_changed": false,
-      "native_readiness_changed": false,
-      "acceptance_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\acceptance-review.md",
-      "fixture_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
-      "registry": "current:1660 entries/269 quarantined",
-      "meaning": "Green defect witnesses demonstrate failure in disposable files; they do not establish correct persistence or production loss.",
-      "candidate_hosted_result": {
-        "head": "e8e06ea86fdba1bfb3e9b7f0aab02338caaac3b8",
-        "run": 36390957294,
-        "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294",
-        "method_count": 32,
-        "fixed_input_cases": 38,
-        "passed_methods": 32,
-        "errors": 0,
-        "skipped": 0,
-        "controls": 2,
-        "defect_witnesses": 4,
-        "file_evidence_records": 6,
-        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
-        "original_step_log_sha256": "063bea62877a4c48576f11cc03f45adeb650fb4960817702ae9e1baaf05421e0"
-      },
-      "candidate_ci_verified": true,
-      "candidate_codeql_verified": true,
-      "observed_defect": "All four typed-response witnesses replace valid pending JSON with malformed bytes; fresh load restores no actions. The mixed witness preserves the future action in memory but loses reload of both disposable records.",
-      "measurement": {
-        "signal": "execution_feedback",
-        "production_persistence_correct": false,
-        "production_data_loss_observed": false,
-        "retained_rsi_gain": null
-      }
+      "state": "authored_independent_fixture_review_and_hosted_validation_pending",
+      "methods": 6,
+      "local_application_tests": 0
     },
     "publication": {
-      "terminal_state": "ACTIVE_OWNED_WORK",
-      "branch": "test/rsi-scheduler-persistence-20260928",
-      "worktree": "O:\\Foundups-Agent-worktrees\\rsi-scheduler-persistence-20260928",
-      "closure_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\final-accounting.json",
-      "pr": 1942,
-      "final_head_verified": false,
-      "main_verified": false,
-      "pr_url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1942",
-      "candidate_head": "e8e06ea86fdba1bfb3e9b7f0aab02338caaac3b8"
+      "state": "not_published",
+      "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\final-accounting.json"
     },
     "post_sprint_reobservation": {
       "ranked_candidates": [
@@ -2174,69 +2162,6 @@
             "pr": 1898,
             "merge": "c1eeaa08f3f8eecfdf43c2b66a407bb31a0f8019",
             "evidence": "O:\\Foundups-Agent-audits\\20260923-rsi-research-profile-guard\\final-accounting.json"
-          }
-        },
-        {
-          "task": "Qualify truthful completion evidence in the existing social action scheduler",
-          "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
-            "priority": "P1"
-          },
-          "state": "candidate_hosted_verified_final_convergence_pending",
-          "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
-          "dependency": "No remaining PR1943 closure dependency; keep current fresh main/ownership checks and exact effect review before any hosted execution.",
-          "next_step": "Verify exact final integrated head and main; independently review and retire owned lane. Reobserve current59-row eligibility, including absence of an external scheduler consumer, before further source changes.",
-          "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
-          "limits": "PR1943 source publication repair is closed under its fixed42-method/48-input fixture. Caller acknowledgement and restart retry policy, Windows/crash behavior, external delivery and retained learning remain unqualified.",
-          "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
-          "qualification": {
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
-            "method_count": 32,
-            "fixed_input_cases": 38,
-            "controls": 2,
-            "defect_witnesses": 4,
-            "observed_record_count": 6,
-            "production_source_changes": 0,
-            "local_application_tests_run": 0
-          },
-          "next_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
-          "component_closure": {
-            "pr": 1943,
-            "merge": "6821aac32774f5be36038bb3fb40cc55920a56cd",
-            "methods": 42,
-            "fixed_inputs": 48,
-            "passed": 42,
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
-            "limits": [
-              "Success is representable JSON publication and reload under the fixed fixture, not independent external delivery or power-loss proof.",
-              "Unsupported non-JSON values remain a reported failed save but cannot truncate the prior file. This does not promise durable recording of every malformed arbitrary response object.",
-              "No new automatic action retry; in-memory outcomes and original PostResponse identity remain unchanged.",
-              "Save-failure caller acknowledgement and durable retry policy remain explicitly separate, unresolved contracts; existing save return/error logging may be preserved for this minimal repair.",
-              "A preserved prior pending record can be re-executed after restart; atomic replacement alone cannot prevent that. No exactly-once claim."
-            ]
-          },
-          "next_component_review": {
-            "selection-acceptance-review.json": {
-              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-review.json",
-              "sha256": "a61a80f472666d1fc4fc267572921f8e0acaf8831be1a8c655dcfbc0c987d9d1"
-            },
-            "selection-acceptance-restart-addendum.json": {
-              "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-restart-addendum.json",
-              "sha256": "bf7854cd6b690facdf62fcd0a6f331d0d96c95727742d4dcdbb2f95c417fc810"
-            }
-          },
-          "preparation": {
-            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
-            "test_methods": 32,
-            "fixed_input_cases": 38,
-            "new_controls": 2,
-            "new_defect_witnesses": 4,
-            "local_application_tests_run": 0,
-            "state": "candidate_hosted_verified"
           }
         },
         {
@@ -3242,17 +3167,19 @@
             "total": 12,
             "priority": "P2"
           },
-          "state": "observed_hook_error_source_qualification_pending",
+          "state": "source_qualified_fixed_hosted_acceptance_review_pending",
           "source": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-audit\\hook-log-preservation.json",
-          "dependency": "Read existing hook/dispatcher ownership and invocation before diagnosis; no repair or redispatch authority inferred.",
-          "next_step": "Qualify why the owned push dispatch could not import modules; preserve the original event and failure; never replay an event into live platform actions as a test.",
+          "dependency": "PR1944 closure verified. Existing hook and runner scoped source/effect review complete; frozen inert hosted fixture review required. No live hook, router import, product path repair or shared config edit.",
+          "next_step": "Qualify six fixed runner main/getter/spool controls in the existing test owner under an isolated hosted child, with disposable Git and inert router. Preserve production source and original three tests.",
           "limits": "One task-local hook error after successful Git push. No failure rate, general outage, platform outcome or repaired behavior established.",
-          "effort_cost": "Bounded existing-entrypoint import/path inspection; existing scheduler14/P1 qualification still ranks higher.",
+          "effort_cost": "Bounded source/entrypoint qualification using the existing runner and three-test owner; no live hook dispatch. Later implementation is separately scoped.",
           "additional_observation": {
             "source": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-evidence\\hook-log-preservation.json",
             "same_error_repeated": true,
             "no_replay": true
-          }
+          },
+          "rationale": "Repeated observed import failure has an actual configured consumer. Current runner tests replace the import getter and do not qualify direct-file launch. Fixing path resolution alone may activate social posting because the enqueue-labelled hook omits --enqueue-only. This reusable WRE event/dispatch boundary ranks above the11/P2 load-validation repair and below the14/P1 operational pilot in strategic value, but it has a concrete source-qualified next step today.",
+          "next_component": "Qualify the active hook-to-runner import and dispatch boundary using preserved failure evidence and the existing runner/test owner"
         },
         {
           "task": "Continue WRE self-audit input/tail/runtime-configuration decomposition",
@@ -3493,12 +3420,97 @@
             "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-correspondence-ci\\final-accounting.json",
             "sha256": "12723415a2f1ad5af658df966e648b6a5d512354d320f83b5c51e1490057b9ae"
           }
+        },
+        {
+          "task": "Qualify truthful completion evidence in the existing social action scheduler",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 2,
+            "deferability": 2,
+            "impact": 2,
+            "total": 8,
+            "priority": "P3"
+          },
+          "state": "caller_characterization_closed_remaining_consumer_policy_unselected",
+          "source": "modules/platform_integration/social_media_orchestrator/src/autonomous_action_scheduler.py::_execute_action; execute_pending_actions",
+          "dependency": "An identified production caller with an explicit durable acknowledgement/restart/effect policy, or a separately evidenced defect against the current contract. Lack of native admission is not the reason for deferral.",
+          "next_step": "Close current evidence and retain actual boundaries; do not automatically continue scheduler production changes.",
+          "effort_cost": "Bounded existing-owner source/fixture qualification; no live account effects or new scheduler.",
+          "limits": "PR1943 source publication repair is closed under its fixed42-method/48-input fixture. Caller acknowledgement and restart retry policy, Windows/crash behavior, external delivery and retained learning remain unqualified.",
+          "wsp97_action": "Extend the existing scheduler/results contract; preserve independently owned posting work.",
+          "qualification": {
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\candidate-scheduler-evidence.json",
+            "method_count": 32,
+            "fixed_input_cases": 38,
+            "controls": 2,
+            "defect_witnesses": 4,
+            "observed_record_count": 6,
+            "production_source_changes": 0,
+            "local_application_tests_run": 0
+          },
+          "next_component": "Remaining acknowledgement/dispatch/restart policy after existing bounded qualifications",
+          "component_closure": {
+            "pr": 1943,
+            "merge": "6821aac32774f5be36038bb3fb40cc55920a56cd",
+            "methods": 42,
+            "fixed_inputs": 48,
+            "passed": 42,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
+            "limits": [
+              "Success is representable JSON publication and reload under the fixed fixture, not independent external delivery or power-loss proof.",
+              "Unsupported non-JSON values remain a reported failed save but cannot truncate the prior file. This does not promise durable recording of every malformed arbitrary response object.",
+              "No new automatic action retry; in-memory outcomes and original PostResponse identity remain unchanged.",
+              "Save-failure caller acknowledgement and durable retry policy remain explicitly separate, unresolved contracts; existing save return/error logging may be preserved for this minimal repair.",
+              "A preserved prior pending record can be re-executed after restart; atomic replacement alone cannot prevent that. No exactly-once claim."
+            ]
+          },
+          "preparation": {
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-persistence\\fixture-review.md",
+            "test_methods": 32,
+            "fixed_input_cases": 38,
+            "new_controls": 2,
+            "new_defect_witnesses": 4,
+            "local_application_tests_run": 0,
+            "state": "candidate_hosted_verified"
+          },
+          "component": "Remaining acknowledgement/dispatch/restart policy after existing bounded qualifications",
+          "rationale": "Historical14/P1 is retained for completed characterization; remaining optional API/policy work has lower demonstrated impact because no external production scheduler consumer was found. The documented None/log-only save API is confirmed, not a newly broken promised durable acknowledgement. Do not add automatic retries or a receipt API without an actual consumer contract.",
+          "caller_qualification_closure": {
+            "pr": 1944,
+            "merge": "799cf786ffd9d58c7d3003516b990b4671162f78",
+            "methods": 51,
+            "fixed_inputs": 57,
+            "passed": 51,
+            "normal_controls": 3,
+            "failure_boundary_witnesses": 6,
+            "production_changes": 0,
+            "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json",
+            "component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
+            "historical_wsp15": {
+              "complexity": 3,
+              "importance": 4,
+              "deferability": 3,
+              "impact": 4,
+              "total": 14,
+              "priority": "P1"
+            },
+            "acceptance_reviews": {
+              "selection-acceptance-review.json": {
+                "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-review.json",
+                "sha256": "a61a80f472666d1fc4fc267572921f8e0acaf8831be1a8c655dcfbc0c987d9d1"
+              },
+              "selection-acceptance-restart-addendum.json": {
+                "path": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-restart-addendum.json",
+                "sha256": "bf7854cd6b690facdf62fcd0a6f331d0d96c95727742d4dcdbb2f95c417fc810"
+              }
+            }
+          }
         }
       ],
-      "selected_next": "Qualify truthful completion evidence in the existing social action scheduler",
+      "selected_next": "Qualify linked-worktree Git push dispatch import failure",
       "implementation_ready_selected": null,
-      "state": "freshly_reobserved_caller_qualification_selected",
-      "rationale": "Closed publication repair is removed from executable work. Current caller source and shared fixture provide exact nine-case oracles; equal14 operational pilot still requires consumer and fixed independent labels. Higher tasks retain specific unchanged prerequisites. Reused unchanged59-row evidence at exact main6821 and96 unchanged peer heads; no unchanged failed runtime probe.",
+      "state": "fresh_observation_selection",
+      "rationale": "Fresh96peer/159worktree/base/CI/source reconciliation confirms actual configured consumer and preserved missing-modules failures.12/P2 hook evidence is highest ready bounded action; pilot14 needs identified consumed surface and independent labels, other higher rows retain actual gates; correspondence11 is lower. No unchanged native probe.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3509,11 +3521,11 @@
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
       "authoritative_use_lease": null,
-      "base": "6821aac32774f5be36038bb3fb40cc55920a56cd",
+      "base": "799cf786ffd9d58c7d3003516b990b4671162f78",
       "candidate_count": 59,
       "packets_preserved": 26,
-      "selected_next_component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
-      "selection_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\selection-acceptance-review.json"
+      "selected_next_component": "Existing runner entrypoint/import and dispatch evidence",
+      "selection_review": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\selection-source-review.json"
     },
     "research": {
       "as_of": "2026-09-28",
@@ -3640,7 +3652,7 @@
         "total": 15,
         "priority": "P1"
       },
-      "state": "candidate_hosted_verified_final_convergence_pending",
+      "state": "closed_merged_main_verified",
       "previous_closed": {
         "pr": 1942,
         "main": "12663d7e4f5b7b6b9d582d70abed4b0c465c0b45",
@@ -3681,7 +3693,7 @@
         "A preserved prior pending record can be re-executed after restart; atomic replacement alone cannot prevent that. No exactly-once claim.",
         "POSIX mode0600 replacement/new leaf parent0700; Windows and crash behavior unqualified."
       ],
-      "next_step": "Verify exact final documentation-integrated head and main, independently review, close owned lane; then reobserve and rescore59 existing candidates.",
+      "next_step": "Closed; do not repeat. Re-observe current eligibility before another production change.",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
       "authoritative_use_lease": null,
       "native_blockers": [
@@ -3757,11 +3769,20 @@
         "all10_pr_checks_success": true,
         "ci_codeql_success": true,
         "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\candidate-checks.json"
+      },
+      "closure": {
+        "pr": 1943,
+        "merge": "6821aac32774f5be36038bb3fb40cc55920a56cd",
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-accounting.json",
+        "receipt_sha256": "2c7f5f7b1d5d767a7ebc2c1b751ec74bcb8215f43bb336e769b28693fd603d61",
+        "independent_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-publication\\final-closure-review.json",
+        "review_sha256": "3ac9600eae9b7111a45669f0d0935dde2c464e1c784b306863edcfe38c4e6f00",
+        "cleanup_limitation": null
       }
     },
     "caller_acknowledgement_20260928": {
       "base": "6821aac32774f5be36038bb3fb40cc55920a56cd",
-      "state": "candidate_hosted_verified_final_convergence_pending",
+      "state": "closed_merged_main_verified",
       "component": "Characterize caller save acknowledgement and restart-visible outcomes across the three existing scheduler mutation entrypoints",
       "wsp15": {
         "complexity": 3,
@@ -3858,7 +3879,71 @@
       },
       "candidate_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\candidate-result-review.json",
       "candidate_checks": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\candidate-checks.json",
-      "next_step": "Verify exact final integrated head and main; independently review and retire owned lane. Reobserve current59-row eligibility, including absence of an external scheduler consumer, before further source changes."
+      "next_step": "Closed; do not repeat. Re-observe current eligibility before another production change.",
+      "closure": {
+        "pr": 1944,
+        "merge": "799cf786ffd9d58c7d3003516b990b4671162f78",
+        "receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-accounting.json",
+        "receipt_sha256": "9490103eb11b60e76e651db42e7d99eda77c1effacebdd623a8c9942b34b0799",
+        "independent_review": "O:\\Foundups-Agent-audits\\20260928-rsi-scheduler-acknowledgement\\final-closure-review.json",
+        "review_sha256": "f2948d1046ecb083addad9c02eb40b6d0f0f689b7db1c87b382841ed36ec160d",
+        "cleanup_limitation": "Initial Git config section removal failed with filesystem Permission denied; two inert owned branch entries retained. No ACL, attribute or config replacement attempted."
+      }
+    },
+    "hook_entrypoint_20260928": {
+      "base": "799cf786ffd9d58c7d3003516b990b4671162f78",
+      "state": "authored_independent_fixture_review_and_hosted_validation_pending",
+      "component": "Six fixed restricted entrypoint/import and inert dispatch controls",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 3,
+        "deferability": 3,
+        "impact": 4,
+        "total": 12,
+        "priority": "P2"
+      },
+      "acceptance_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\acceptance.json",
+      "acceptance_review": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\acceptance-review.json",
+      "selection_review": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\selection-source-review.json",
+      "retrieval_quality": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\retrieval-quality.json",
+      "ranked_observation": "current_observation.post_sprint_reobservation",
+      "scope": [
+        ".github/workflows/ci.yml",
+        "ModLog.md",
+        "docs/roadmaps/rsi_swarm_backlog.json",
+        "modules/infrastructure/git_push_dae/README.md",
+        "modules/infrastructure/git_push_dae/INTERFACE.md",
+        "modules/infrastructure/git_push_dae/ROADMAP.md",
+        "modules/infrastructure/git_push_dae/ModLog.md",
+        "modules/infrastructure/git_push_dae/tests/README.md",
+        "modules/infrastructure/git_push_dae/tests/TestModLog.md",
+        "modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py",
+        "WSP_knowledge/WSP_Test_Registry.json"
+      ],
+      "effects": "Named reviewed hosted fixture only. No local application tests, real router import, shared hook/config edit, replay or delivery.",
+      "cases": 6,
+      "original_pytest_functions_preserved": 3,
+      "original_pytest_functions_freshly_run": false,
+      "production_changed": false,
+      "measurement": {
+        "hosted_passed": null,
+        "native_jobs": 0,
+        "retained_improvement": null,
+        "tokens": null,
+        "currency": null
+      },
+      "native_blockers": [
+        "canonical_consensus_receipt_verifier_missing",
+        "canonical_sovereign_authorization_verifier_missing",
+        "canonical_principal_subject_key_attestation_missing",
+        "canonical_model_signed_evidence_trust_anchor_incomplete",
+        "canonical_model_selection_signed_evidence_verifier_missing",
+        "canonical_memex_supply_signed_evidence_verifier_missing",
+        "canonical_signer_client_peer_handshake_verifier_missing"
+      ],
+      "authoritative_use_lease": null,
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\final-accounting.json",
+      "next_step": "Review exact fixture/CI effects, run six named controls, independently verify original artifacts and exact final/main, then close/reobserve/rescore."
     }
   }
 }

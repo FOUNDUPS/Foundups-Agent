@@ -17510,7 +17510,9 @@
       "owner": "modules/infrastructure/git_push_dae",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-git-push-dae-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

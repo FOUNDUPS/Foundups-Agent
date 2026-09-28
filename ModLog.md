@@ -1,3 +1,19 @@
+## 2026-09-28 — RSI Git-hook entrypoint qualification
+
+Fresh WSP00/15/97 observation at `799cf786` preserves96 peer heads and the shared
+checkout. PR1944 is main-verified:51 characterization cases passed; its owned
+worktree/refs are retired, with two inert config entries explicitly retained after
+a permission error. Holo retrieval remains CURRENT/no-gap at that exact main.
+
+The59-item queue selects existing GitPushDAE runner qualification at12/P2.
+Six bounded controls are authored in the current test owner with named hosted CI
+and one registry-capability projection. Source-first inspection prevents a naive
+import repair from activating real router/dependency/posting effects. No production
+runner, shared hook, active FoundUp, provider or native authority changes.
+
+Validation pending; the canonical backlog links immutable source/acceptance and
+subsequent publication receipts. No new module, skill, master schema or RSI claim.
+
 ## 2026-09-28: Verify scheduler caller/reload characterization
 
 - Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.

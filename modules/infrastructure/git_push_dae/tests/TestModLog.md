@@ -1,5 +1,20 @@
 # GitPushDAE Test Module Log
 
+## 2026-09-28 — Six entrypoint controls authored; execution pending
+
+WSP5/15/22/97. Existing `test_post_commit_social_runner.py` is extended rather
+than creating another test file. Its three original pytest function ASTs are
+unchanged. New `TestEntrypointEvidence` has six fixed case IDs and emits six
+`HOOK_EVIDENCE` records when successful. See [fixed matrix](README.md#runner-entrypoint-evidence--2026-09-28).
+
+Named hosted command:
+`python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v`.
+
+Status: authored, not yet executed. Local application tests0. Required: independent
+fixture/effect review, original hosted log and exact case/result/source checks,
+CI/CodeQL, main readback and owned closure. A passing negative control demonstrates
+the qualified failure boundary; it does not repair a production hook.
+
 ## [2026-03-08] Post-Commit Social Runner Coverage
 **WSP Protocol**: WSP 5 (Testing Standards), WSP 22 (Documentation), WSP 91 (Operational Reliability)
 
