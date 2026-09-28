@@ -32,6 +32,20 @@ def test_jhr_001_is_updated_in_place_japanese_first_and_bilingual() -> None:
     assert "candidate status, operator intent" in page
 
 
+def test_jhr_003_is_latest_japanese_only() -> None:
+    layout = read(FRONTEND_ROOT / "app" / "reports" / "jhr" / "layout.tsx")
+    assert 'id="jhr-003"' in layout
+    assert layout.index('id="jhr-003"') < layout.index('id="jhr-002"')
+    latest = layout.split('id="jhr-003"', 1)[1].split('id="jhr-002"', 1)[0]
+    assert "誰が日本の「AI田んぼ」を持つのか" in latest
+    assert "廃校7,612校" in latest
+    assert "旧下宇坂小学校" in latest and "旧羽生小学校" in latest
+    assert "/yumori-compute-field.webp" in latest
+    assert "/yumori-inzai-fukui-comparison.webp" in latest
+    assert 'lang="en"' not in latest
+    assert "ENGLISH / SECONDARY" not in latest
+
+
 def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() -> None:
     status = json.loads(read(FRONTEND_ROOT / "content" / "current-field-status.json"))
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
@@ -52,7 +66,7 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     assert "https://esingularity.ai/${action.href}" in ticker
     assert "fieldStatus.message" in ticker
     assert "label: { ja: 'JHR', en: 'JHR', pt: 'JHR' }" in ticker
-    assert "href: '/reports/jhr#jhr-002'" in ticker
+    assert "href: '/reports/jhr#jhr-003'" in ticker
     assert "https://yumori.me/vote-no#council" in ticker
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "Monkとつながる" not in ticker
