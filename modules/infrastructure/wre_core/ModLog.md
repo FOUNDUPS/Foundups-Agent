@@ -1,3 +1,9 @@
+## 2026-09-29: Run the first local operational RSI development experiment
+
+- WSP00/15/22/50/73/95/97/99: reuse12 prepared synthetic correspondence controls, existing model resolver, M2M codec, bounded child and local inference owners. No new application module, skill or orchestrator.
+- Measured original prompt fit0/12 versus compact12/12. Preserve one tokenizer guard failure, C1 instruction echo, C2 format/objective failures and the separately frozen C3 result. Three model attempts cover one known case; independent evaluation stays on unchanged criteria.
+- Reconcile PR1950/main83b06897 measurement closure (308 connected cases on PR/main). Record local runtime/version/containment limits, raw outputs, denominators and next layer in the existing roadmap/backlog. No held-out gain, production WRE integration, retention, live provider action or native admission claim.
+
 ## 2026-09-29: Close hosted RSI reader portability failures
 
 - Expanded308-case hosted selection caught two failures: mixed-slash local-path handling on Linux and an unrelated whole-main import in the startup fixture. Reject mixed UNC-style prefixes before filesystem access; bind only the actual two preflight function bodies in the existing test. Preserve every test and output assertion.

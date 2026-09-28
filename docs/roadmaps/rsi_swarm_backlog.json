@@ -1881,21 +1881,21 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.measurement_seam_20260929",
-    "base_commit": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
-    "selected_action": "Harden existing persisted RSI diagnostic measurements",
-    "selected_component": "Strict nested scalar/null/finite-relative-gain reader and connected producer consumption",
-    "status": "locally_verified_independently_reviewed_publication_pending",
+    "observation_path": "current_observation.operational_first_loop_20260929",
+    "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+    "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
+    "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
+    "status": "bounded_development_experiment_complete_reobserve_before_wiring",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
-      "deferability": 4,
+      "deferability": 3,
       "impact": 4,
       "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true
   },
   "current_observation": {
@@ -2577,10 +2577,10 @@
             "total": 14,
             "priority": "P1"
           },
-          "state": "conditional_source_metadata_and_fixed_effect_acceptance_preparation",
+          "state": "local_native_development_experiment_complete_full_matrix_pending",
           "source": "ROADMAP.md#operational-decision-contract-and-rsi-audit--2026-09-28; modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28",
-          "dependency": "Current import repair must complete reviewed projections, exact-head/main CI and owned closure; then fresh source/ownership/runtime metadata and independently reviewed resolver/native boundary acceptance. This receipt grants no native execution.",
-          "next_step": "First bind the existing resolve_model_selection(code) consumer under a fixed noncredential environment and bounded read-only filesystem scope; distinguish actual result from default-folder inference. Reconcile both root and Holo requirements pins0.2.72 against previously observed installed0.3.20 with the existing dependency owner, without install/downgrade/version edits. Reuse existing qualification-plan-v2 and LlamaModel seam to specify exact allowed runtime artifacts, dependency resolution and externally enforceable process/time/memory/network/failure limits before any native import or twelve frozen prompt counts. Stop at a concrete unsupported prerequisite rather than issuing another generic plan or changing prompt/model/context.",
+          "dependency": "No live account required. Full matrix, WRE adapter integration, independent held-out evaluation and later-invocation retention remain unverified.",
+          "next_step": "Freeze a full-matrix diagnostic run from the final candidate without further G01 tuning; independently score all12 original controls and classify semantic errors. Reuse existing local backend and outcome/authority owners; do not wire or promote a candidate as correct before its acceptance gates pass. Held-out, retention and live FoundUp tests follow separately.",
           "effort_cost": "Proposed12case offline qualification first. Later40held-out and20transfer/retention scenarios require declared numeric resource caps and evaluator route; none have run.",
           "limits": "No paid-provider dispatch, live mail/social use or retained-learning claim from a planning record.",
           "wsp97_action": "Reuse DigitalTwin, correspondence, style/trajectory and WRE evaluation owners.",
@@ -2592,10 +2592,10 @@
             "total": 12,
             "priority": "P2"
           },
-          "next_component": "Qualify actual code-model resolution, dependency-version provenance and the existing tokenizer-only effect boundary",
-          "state_after_current_closure": "controls_prepared_source_import_model_prompt_fit_unqualified",
+          "next_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
+          "state_after_current_closure": "one_known_case_development_only",
           "preserve_whole_wsp15": true,
-          "completed_component": "Twelve synthetic controls, independent AI labels with corrected objective convention, full prompt manifests and proposed evaluation limits",
+          "completed_component": "Actual resolver, original and compact prompt token counts, three independently reviewed single-case candidate attempts",
           "remaining_component_wsp15": {
             "complexity": 2,
             "importance": 4,
@@ -3512,8 +3512,8 @@
       ],
       "selected_next": "Qualify the operational decision contract with fixed synthetic controls",
       "implementation_ready_selected": false,
-      "state": "local_import_controls_verified_publication_pending",
-      "rationale": "Observed8/8 bounded import/API controls remove one concrete source obstacle, while the actual WRE adapter immediately proceeds to resolver and native initialization. The next missing facts are consumed model/runtime identity and enforced tokenizer effect limits, not another package-import repair. Existing resolver and tokenizer owner suffice; no evaluator/module/task is needed.",
+      "state": "first_local_experiment_completed_reobserve_next_slice",
+      "rationale": "Synthetic existing-owner work avoids active FoundUps, exposes actual packet/model failures and needs no native multi-agent grant. Preserve higher-scored blocked native work separately.",
       "native_blockers": [
         "canonical_consensus_receipt_verifier_missing",
         "canonical_sovereign_authorization_verifier_missing",
@@ -3524,19 +3524,10 @@
         "canonical_signer_client_peer_handshake_verifier_missing"
       ],
       "authoritative_use_lease": null,
-      "base": "1a8cc62e6457846f945c850f8ce066f0f199263d",
+      "base": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
       "candidate_count": 59,
       "packets_preserved": 26,
-      "selected_next_component": "Qualify actual code-model resolution, dependency-version provenance and the existing tokenizer-only effect boundary",
-      "selection_review": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-lazy-import\\next-action-review.json",
-        "sha256": "51f70600d4b9a158f9cff1f426e120fc497c494e199ba768ea80fab525ceeec4"
-      },
-      "observation_utc": "2026-09-28T19:07:16.248144+00:00",
-      "provenance_correction_consumed": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\postclosure-provenance-correction.json",
-        "sha256": "b243a527e21e199bc7e8a740e44fb1e15a2b3678fc98746c168b788e32beb52d"
-      },
+      "selected_next_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
       "selected_component_wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -3545,64 +3536,124 @@
         "total": 12,
         "priority": "P2"
       },
-      "observed_utc": "2026-09-28T19:48:05.669050+00:00",
       "preparation_ready_selected": true,
-      "retrieval": {
-        "evidence_sha256": "354031b210fffd29ad2ae8448e9b491b52e8100e068ccb2b3c89af2c2d102765",
-        "source": "1a8cc62e6457846f945c850f8ce066f0f199263d",
-        "freshness": "CURRENT",
-        "index_gap_detected": false,
-        "paths": [
-          "holo_index/qwen_advisor/module_doc_linker.py",
-          "holo_index/qwen_advisor/advisor.py",
-          "holo_index/qwen_advisor/config.py",
-          "holo_index/qwen_advisor/services/module_metrics.py",
-          "modules/ai_intelligence/pqn_alignment/skillz/qwen_pqn_research_coordinator/SKILLz.md"
-        ],
-        "missing_required": [],
-        "missing_optional": [
-          "Tier-0: SPEC.md",
-          "Tier-0: PRD.md",
-          "Tier-0: PROMPTS.md",
-          "Tier-0: prompts/",
-          "Tier-0: RUNBOOK.md",
-          "Tier-2: HOLOINDEX.md",
-          "Tier-2: ADR.md",
-          "Tier-2: adr/",
-          "Tier-2: INCIDENTS.md",
-          "Tier-2: SEV.md"
-        ],
-        "noise": "Five adjacent code/skill hits do not directly retrieve the initializer or engine. The PQN research skill is outside this slice.",
-        "ordering": "Do not treat semantic rank as exact ownership. Read source-bound Qwen initializer, llm_engine, root/CLI lazy exports and existing closed-import test owners.",
-        "duplication": 0,
-        "improvement": "Retain module-hinted Tier0/test contracts; exact symbol/path navigation and direct source reads supply the missing initializer/engine and avoid repeating a broad semantic query.",
-        "staleness_risk": "Current committed main only; no different-commit or dirty overlay acceptance."
-      },
-      "cost_and_verification": {
-        "effort": "One bounded package-import compatibility slice; no provider/model use.",
-        "paid_provider_dispatches_planned": 0,
-        "actual_tokens": null,
-        "currency_cost": null,
-        "verification_burden": "Source-bound stdlib-only isolated children, frozen export expectations, before/after failure evidence, manifest source closure and exact-head hosted CI. No model construction or native import.",
-        "manual_coordination_reason": "Current Qwen/Gemma route itself has unqualified eager import/native effects; do not invoke it to qualify itself. Existing independent reviewer and deterministic source tests are appropriate."
-      },
-      "previous_closure": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\final-closure-review.json",
-        "sha256": "ab830a2c4acd8a204429c8ac0f53894f990259987853edd7351f9fb4c6c2cbba"
-      },
-      "incident_followup": {
-        "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\postrecovery-priority-review.json",
-        "sha256": "58a7b3af2f2a66bc80cdf076669b28948010f6e4f4455c1c66a5ef45457009d8",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 2,
-          "impact": 3,
-          "total": 10,
-          "priority": "P2"
+      "postclosure_reobservation_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
+      "historical_inherited_checkpoint": {
+        "scope": "Preserved prior checkpoint fields; not current experiment evidence",
+        "fields": {
+          "selection_review": {
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-lazy-import\\next-action-review.json",
+            "sha256": "51f70600d4b9a158f9cff1f426e120fc497c494e199ba768ea80fab525ceeec4"
+          },
+          "observation_utc": "2026-09-28T19:07:16.248144+00:00",
+          "observed_utc": "2026-09-28T19:48:05.669050+00:00",
+          "retrieval": {
+            "evidence_sha256": "354031b210fffd29ad2ae8448e9b491b52e8100e068ccb2b3c89af2c2d102765",
+            "source": "1a8cc62e6457846f945c850f8ce066f0f199263d",
+            "freshness": "CURRENT",
+            "index_gap_detected": false,
+            "paths": [
+              "holo_index/qwen_advisor/module_doc_linker.py",
+              "holo_index/qwen_advisor/advisor.py",
+              "holo_index/qwen_advisor/config.py",
+              "holo_index/qwen_advisor/services/module_metrics.py",
+              "modules/ai_intelligence/pqn_alignment/skillz/qwen_pqn_research_coordinator/SKILLz.md"
+            ],
+            "missing_required": [],
+            "missing_optional": [
+              "Tier-0: SPEC.md",
+              "Tier-0: PRD.md",
+              "Tier-0: PROMPTS.md",
+              "Tier-0: prompts/",
+              "Tier-0: RUNBOOK.md",
+              "Tier-2: HOLOINDEX.md",
+              "Tier-2: ADR.md",
+              "Tier-2: adr/",
+              "Tier-2: INCIDENTS.md",
+              "Tier-2: SEV.md"
+            ],
+            "noise": "Five adjacent code/skill hits do not directly retrieve the initializer or engine. The PQN research skill is outside this slice.",
+            "ordering": "Do not treat semantic rank as exact ownership. Read source-bound Qwen initializer, llm_engine, root/CLI lazy exports and existing closed-import test owners.",
+            "duplication": 0,
+            "improvement": "Retain module-hinted Tier0/test contracts; exact symbol/path navigation and direct source reads supply the missing initializer/engine and avoid repeating a broad semantic query.",
+            "staleness_risk": "Current committed main only; no different-commit or dirty overlay acceptance."
+          },
+          "cost_and_verification": {
+            "effort": "One bounded package-import compatibility slice; no provider/model use.",
+            "paid_provider_dispatches_planned": 0,
+            "actual_tokens": null,
+            "currency_cost": null,
+            "verification_burden": "Source-bound stdlib-only isolated children, frozen export expectations, before/after failure evidence, manifest source closure and exact-head hosted CI. No model construction or native import.",
+            "manual_coordination_reason": "Current Qwen/Gemma route itself has unqualified eager import/native effects; do not invoke it to qualify itself. Existing independent reviewer and deterministic source tests are appropriate."
+          },
+          "previous_closure": {
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\final-closure-review.json",
+            "sha256": "ab830a2c4acd8a204429c8ac0f53894f990259987853edd7351f9fb4c6c2cbba"
+          },
+          "incident_followup": {
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-local-inference-qualification\\postrecovery-priority-review.json",
+            "sha256": "58a7b3af2f2a66bc80cdf076669b28948010f6e4f4455c1c66a5ef45457009d8",
+            "wsp15": {
+              "complexity": 2,
+              "importance": 3,
+              "deferability": 2,
+              "impact": 3,
+              "total": 10,
+              "priority": "P2"
+            }
+          },
+          "provenance_correction_consumed": {
+            "path": "O:\\Foundups-Agent-audits\\20260928-rsi-hook-qualification\\postclosure-provenance-correction.json",
+            "sha256": "b243a527e21e199bc7e8a740e44fb1e15a2b3678fc98746c168b788e32beb52d"
+          }
         }
       },
-      "postclosure_reobservation_receipt": "O:\\Foundups-Agent-audits\\20260928-rsi-lazy-import\\postclosure-reobservation.json"
+      "observation_utc": "2026-09-28T23:27:46.146631+00:00",
+      "scope": "Incremental selected operational fixture experiment only;59 task identities and seven recorded native blockers preserved, not a fresh whole-queue/runtime audit",
+      "selection_review": {
+        "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\packet-review.json",
+        "scope": "Final experiment and next bounded layer; publication requires independent review receipt"
+      },
+      "retrieval": {
+        "source_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+        "receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\holo-query.json",
+        "assessment": {
+          "freshness": "CURRENT",
+          "gap": false,
+          "noise": "All five semantic hits are platform-side LinkedIn context; none is the model resolver.",
+          "ordering": "Module-hinted WRE contracts first, exact navigation/symbol search supplied local adapter and shared resolver.",
+          "missing": "Optional memory/README.md and planning artifacts absent; existing source owners found directly.",
+          "duplication": "No new owner required.",
+          "staleness_risk": "Committed main only; no dirty overlay authority."
+        }
+      },
+      "cost_and_verification": {
+        "native_generation_attempts": 3,
+        "unique_cases": 1,
+        "provider_dispatches": 0,
+        "wall_seconds": [
+          39.03100000019185,
+          68.875,
+          70.06300000008196
+        ],
+        "known_chat_usage_tokens": [
+          1158,
+          1157
+        ],
+        "total_generation_usage_tokens": null,
+        "coordinator_and_reviewer_usage": null,
+        "currency_cost": null,
+        "result": "Final JSON format passes, objective-status criterion fails; all outputs independently reviewed; no promotion or retention"
+      },
+      "previous_closure": {
+        "pr": 1950,
+        "merge": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+        "hosted_connected_passed": 308,
+        "main_connected_passed": 308,
+        "terminal_state": "MERGED_VERIFIED_MAIN",
+        "receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\final-accounting.json",
+        "sha256": "578ef050567faebfc946bccac3c99949dd0d2c731f023ef4ef1a2dfcd8a82f05"
+      }
     },
     "research": {
       "as_of": "2026-09-28",
@@ -5859,7 +5910,7 @@
         "total": 14,
         "priority": "P1"
       },
-      "state": "locally_verified_independently_reviewed_publication_pending",
+      "state": "closed_merged_PR1950",
       "alignment": "Existing R10 measurement prerequisite and diagnostic/outcome-consumer row; no new packet, orchestrator or measurement store.",
       "reproduced": [
         "nested Boolean/numeric substitutions accepted",
@@ -5998,7 +6049,675 @@
             "sha256": "e93fbd4d1091dfbdf728b4b5a77087a6174f2b30dde305c7d50c667be8e63aad"
           }
         }
+      },
+      "closure": {
+        "pr": 1950,
+        "merge": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+        "hosted_connected_passed": 308,
+        "main_connected_passed": 308,
+        "terminal_state": "MERGED_VERIFIED_MAIN",
+        "receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-measurement-reconciliation\\final-accounting.json",
+        "sha256": "578ef050567faebfc946bccac3c99949dd0d2c731f023ef4ef1a2dfcd8a82f05"
       }
+    },
+    "operational_first_loop_20260929": {
+      "task": "First supervised operational RSI experiment; synthetic correspondence only",
+      "base": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+      "wsp15": {
+        "task": "Qualify the operational decision contract with fixed synthetic controls",
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1",
+        "selected_component": "Measure prompt fit and one native local proposal before extending the system",
+        "component_wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 3,
+          "total": 12,
+          "priority": "P2"
+        },
+        "why": "Native18/P0 remains gated; active product and AutoPost lanes reserved. Existing twelve synthetic controls exercise used correspondence tools with no live accounts. Direct supervised local plane perWSP97; no new orchestrator."
+      },
+      "state": "bounded_experiment_complete_not_production_RSI",
+      "execution_plane": "supervised local text qualification; no native WRE admission",
+      "signal_classification": {
+        "token_fit": "execution_feedback: tokenizer capacity only",
+        "decision_evaluation": "learned_judge: separate reviewer applying frozen criteria; no cryptographic authority or formal verification",
+        "human_objective": "012 selected practical layer-by-layer system improvement; not a numerical fitness score",
+        "held_out_coverage": false,
+        "promotion_authority": false,
+        "retained_use": null
+      },
+      "recursion": [
+        {
+          "observed": "All original prompts exceed the actual context limit",
+          "selected": "Compact experimental packet using existing M2M codec",
+          "component_score": "2+4+3+3=12/P2",
+          "result": "All12 compact prompts fit"
+        },
+        {
+          "observed": "C1 first actual proposal is non-JSON instruction echo",
+          "selected": "Existing model chat-template backend probe",
+          "component_score": "2+4+3+3=12/P2",
+          "result": "C2 rejected for format and objective status"
+        },
+        {
+          "observed": "C2 contains a draft but malformed outer format and UNKNOWN objective",
+          "selected": "One final existing JSON grammar plus generic objective clarification",
+          "component_score": "2+4+3+3=12/P2",
+          "result": "REJECTED_OBJECTIVE_STATUS"
+        }
+      ],
+      "baseline_prompt_fit": {
+        "cases": [
+          {
+            "case_id": "G01",
+            "prompt_sha256": "8daa4bddd42cf2ac9463593e090a3f622cac052cbddc783706d2802d6c9b21c3",
+            "raw_tokens": 4254,
+            "completion_prompt_tokens": 4254,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "G02",
+            "prompt_sha256": "ccf1f6158e9ebf6d9e6bc5346e0e6d9b51bc4f698f1ad829e0afd9e52f25e167",
+            "raw_tokens": 4251,
+            "completion_prompt_tokens": 4251,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "G03",
+            "prompt_sha256": "255b057cac27a76563e4d2b3babe972e845df4e0514bc0ca3782e4726b8ba34f",
+            "raw_tokens": 4249,
+            "completion_prompt_tokens": 4249,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "G04",
+            "prompt_sha256": "28a589195b601c678e5b7e615ecb434115527a17fbd4b47f838d96eb63436efa",
+            "raw_tokens": 4277,
+            "completion_prompt_tokens": 4277,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "G05",
+            "prompt_sha256": "21af01fffba668b683bbdeb6a453f835147f53e4701ad683a6da619826fe837f",
+            "raw_tokens": 4264,
+            "completion_prompt_tokens": 4264,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "G06",
+            "prompt_sha256": "e0d21f0cc0c090d0c6a288b313f644749b5d0f5df922f35d24bc63db7b3d4e08",
+            "raw_tokens": 4266,
+            "completion_prompt_tokens": 4266,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "L01",
+            "prompt_sha256": "1c8ef7d67921d322e44fb8cf776616450bfd6c4f3e68e8747137417327adaa30",
+            "raw_tokens": 4247,
+            "completion_prompt_tokens": 4247,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "L02",
+            "prompt_sha256": "48b2869856ade41dcf0be69c1190f65c48458c6c5d99056348e1c20e29069f43",
+            "raw_tokens": 4239,
+            "completion_prompt_tokens": 4239,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "L03",
+            "prompt_sha256": "d87174f1f123b85419273384795a7b8085ad469e1206ef7ca083476a4df360e4",
+            "raw_tokens": 4233,
+            "completion_prompt_tokens": 4233,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "L04",
+            "prompt_sha256": "5bec8cc50e2d9ad86617c080d6a0419665c7670229676f5a622989f708d7e3fd",
+            "raw_tokens": 4281,
+            "completion_prompt_tokens": 4281,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "L05",
+            "prompt_sha256": "1e0f8067c09dbe8f33642bd8984e3dce1a33be8309b3cfa4777d613d2ae7528a",
+            "raw_tokens": 4244,
+            "completion_prompt_tokens": 4244,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          },
+          {
+            "case_id": "L06",
+            "prompt_sha256": "8bae2c7fac2402d5c44d02261e9f09ac6997530236b4d1dd0f85f8f5739bda99",
+            "raw_tokens": 4245,
+            "completion_prompt_tokens": 4245,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": false
+          }
+        ],
+        "fit_count": 0,
+        "total": 12,
+        "model_generations": 0,
+        "quality": null
+      },
+      "compact_c1": {
+        "instruction": "{\"A\":\"ANALYZE\",\"F\":[\"Unsupported facts/effects, malformed output, missing evidence or authority: do not invent success.\"],\"I\":{\"rules\":\"Synthetic text proposals only. Use supplied facts; no tools, accounts, sends, retries, code, state writes or label lookup. Unknown stays unknown. Routine reversible preparation is autonomous; strategic commitments need 012. Priority does not grant authority.\\nIdentify entity, scoped stakeholder/topic/ask, objective and next action. Preserve relationship/history; personal work need not name a FoundUp. WSP15 uses complexity+importance+deferability+impact, each1-5; no new multiplier.\\nProvider records are transaction truth; caches and human projections are rebuildable continuity, never send proof. Match schema, scope, digest and provider watermark before cache use. Watermarks are equality-only unless otherwise specified. Unknown/stale/changed/conflicting/duplicate-ask state requires relevant provider-delta reconciliation before action. No duplicate or third identical follow-up.\\nSeparate asks by stable existing ID: NOT_YET_ASKED|OPEN|WAITING_PROVIDER|FORMAL_ROUTE_REQUIRED|ANSWERED|SUPERSEDED|CLOSED. A procedural route answer does not satisfy the substantive records objective.\\nRouting precedence: current explicit provider instruction > binding policy > canonical contact > established thread > authoritative directory. Resolve stable identity; sent-only/no-bounce/autocomplete/BCC history is not independent route evidence or standing BCC authority. Before sending, independently verify exact To/CC/BCC against current policy/evidence and prior coverage; one unknown/stale/conflicting/near-match/closed/duplicate route blocks all. Composer cannot authorize itself. Post-send exact read-back required; missing/extra recipients are an incident, not delivery proof.\\nPrivacy: retain only minimum scoped event metadata/digests/statuses; no raw bodies, recipient dumps, secrets, private attachments, hidden reasoning or unrelated content; no parallel contact database or Moshpit as send proof.\\nDistinguish transaction from objective outcome. Exact transaction witness alone establishes CONFIRMED; trace proving no write establishes NO_EFFECT; ambiguous submission stays UNKNOWN without retry. No response/reaction alone proves objective success; preserve PENDING/UNKNOWN until a declared observation window closes. A compliant requested draft can achieve draft preparation, never sending or downstream response.\\nPropose changes only: no claim of cache/provider/PatternMemory mutation or retained learning. Learning requires versioned procedure, independent evaluation, unchanged comparison criteria and retention evidence. Put request/purpose early; concise wording with necessary context and no invented facts.\"},\"L\":\"A\",\"M\":\"plan\",\"O\":[\"One compact JSON object, no Markdown, reasoning or extra fields. Required: case_id exact; decision=PREPARE_DRAFT|HOLD_RECONCILE|VERIFY_ROUTE|ESCALATE_012|DEFER|RECORD_OUTCOME|NO_ACTION; transaction_status=NOT_ATTEMPTED|CONFIRMED|UNKNOWN|NO_EFFECT; outcome_status=ACHIEVED|PENDING|UNKNOWN|NOT_ACHIEVED; ask_updates=[{ask_id,status}] using only existing IDs/canonical states, or []; next_step string<=240chars; draft string<=500chars only if warranted, otherwise \\\"\\\"; principal_attention boolean for meaningful 012 decision; attention_reason string<=160chars, empty if no attention. For L02/L05/L06 transaction_status concerns prior outbound under inspection; otherwise new proposed outbound. Supplied confirmed facts are synthetic witnesses only. G01/L01 compliant draft satisfies only their draft objective.\"],\"ORIGIN\":\"internal_handoff\",\"PRINCIPAL_REF\":\"012\",\"R\":[0,15,50,73,95,97,99],\"ROLE\":\"worker\",\"S\":\"supplied synthetic correspondence case; text proposal only\",\"T\":\"RSI_OPERATIONAL_COMPACT_C1\",\"schema\":\"0102_m2m_v1\"}",
+        "fit": [
+          {
+            "case_id": "G01",
+            "prompt_sha256": "e6dad6822e01b2d68843931a575b5c140a7ee935714686991ad76fbed98a54a0",
+            "raw_tokens": 1022,
+            "completion_prompt_tokens": 1022,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "G02",
+            "prompt_sha256": "e12433e959bba764eaff4bd4055c1858ab925769295acc87cd373d195514e4dd",
+            "raw_tokens": 1019,
+            "completion_prompt_tokens": 1019,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "G03",
+            "prompt_sha256": "1b5699d35eb5f87f59232400ac09212a5586154e2b95b0b7fa276aa19df6cbe4",
+            "raw_tokens": 1017,
+            "completion_prompt_tokens": 1017,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "G04",
+            "prompt_sha256": "5b8ed0c4d26d8bdddfd3d105725930942268ea89a6dc3eece9b3ba177d8d4ba7",
+            "raw_tokens": 1045,
+            "completion_prompt_tokens": 1045,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "G05",
+            "prompt_sha256": "ea52192c14d9f5df43ea175cb6ce98e710ec9a6099cdf18955d7207b3b40c668",
+            "raw_tokens": 1032,
+            "completion_prompt_tokens": 1032,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "G06",
+            "prompt_sha256": "65e69cd77e22f1b691e12c336d1d447c97aa0cee4ecd4aa79949487bfaf5964a",
+            "raw_tokens": 1034,
+            "completion_prompt_tokens": 1034,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "L01",
+            "prompt_sha256": "3d65580cdbf66ebf3f4b9ac44c97ce1662f8c7d12d73568061a7c33158b72d88",
+            "raw_tokens": 1015,
+            "completion_prompt_tokens": 1015,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "L02",
+            "prompt_sha256": "fda3223c70fe633818b01cd91c1e13d673230ec854326d918f7c275bf4d7cca9",
+            "raw_tokens": 1007,
+            "completion_prompt_tokens": 1007,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "L03",
+            "prompt_sha256": "d1e1d28a33a250e61cbba5f5d9f20ce1233c9daff01a691e7a57fc80c6bfe393",
+            "raw_tokens": 1001,
+            "completion_prompt_tokens": 1001,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "L04",
+            "prompt_sha256": "61249bc33b3b39b949f6aa7329e77b912dc5de7a15a4ae7fe7300be3b90fa989",
+            "raw_tokens": 1049,
+            "completion_prompt_tokens": 1049,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "L05",
+            "prompt_sha256": "b03abc43ea53887d3aa21ef5050e32a7888c7349fe0cdf719d0a559d80e4dc8e",
+            "raw_tokens": 1012,
+            "completion_prompt_tokens": 1012,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          },
+          {
+            "case_id": "L06",
+            "prompt_sha256": "d1b8f3a1593ff589cca13ed15cd98d510643812e02bbec7cfaa2e7bcc1e9b595",
+            "raw_tokens": 1013,
+            "completion_prompt_tokens": 1013,
+            "reserved_output_tokens": 512,
+            "context_length": 2048,
+            "fits": true
+          }
+        ],
+        "fit_count": 12,
+        "total": 12,
+        "attempted": 1,
+        "format_failures": 1,
+        "not_run": 11,
+        "actual_adapter_output": {
+          "case_id": "G01",
+          "prompt_sha256": "e6dad6822e01b2d68843931a575b5c140a7ee935714686991ad76fbed98a54a0",
+          "result": {
+            "success": false,
+            "output": "",
+            "proposal": "Only propose changes to the draft. Do not claim effects.",
+            "steps_completed": 0,
+            "failed_at_step": 1,
+            "error": "Local model output is an unverified proposal, not effect evidence",
+            "error_code": "unverified_model_proposal",
+            "_effect_evidence": false
+          },
+          "generation_seconds": 38.811999999918044,
+          "usage_tokens": null,
+          "finish_reason": null
+        },
+        "review": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-first-result.json",
+          "sha256": "7251e317a766397658008388d091824807cefcc64d248d686ee70c3d853e38e7",
+          "reviewer": "measurement_seam_review",
+          "status": "CONTROLLED_FAILURE_FORMAT_GATE",
+          "approved_accounting": true,
+          "evaluation": {
+            "planned_maximum_cases": 12,
+            "attempted_cases": 1,
+            "returned_cases": 1,
+            "format_valid_cases": 0,
+            "format_failed_cases": 1,
+            "not_run_cases": 11,
+            "not_run_ids": [
+              "G02",
+              "G03",
+              "G04",
+              "G05",
+              "G06",
+              "L01",
+              "L02",
+              "L03",
+              "L04",
+              "L05",
+              "L06"
+            ],
+            "local_text_generation_returned": true,
+            "adapter_effect_success": false,
+            "proposal": "Only propose changes to the draft. Do not claim effects.",
+            "generation_seconds": 38.811999999918044,
+            "controller_wall_seconds": 39.03100000019185,
+            "usage_tokens": null,
+            "finish_reason": null,
+            "peak_memory_bytes": null,
+            "independent_full_semantic_score": null,
+            "baseline_quality": null,
+            "paired_quality_gain": null,
+            "retained_benefit": null
+          }
+        }
+      },
+      "chat_c2": {
+        "actual_response": {
+          "candidate": "chat-c2",
+          "case_id": "G01",
+          "source_head": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+          "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+          "instruction_sha256": "e29a3737ac547049668d9139f58179809c8437c0c9dc50e7de255ccd7e8dcbe8",
+          "messages_sha256": "cd0e9abbf63f5ef01d786a0f81116cd1c2f0337e3de34bcd726a851a7e4d6373",
+          "template_sha256": "d5495a1e5db0611132a97e46a65dbb64a642a499421228b9c8b93229097fa9a4",
+          "rendered_prompt_sha256": "7ee70ff8125795ddda8f52f40ac1cd7310402faa8e8800e04e6050ab6f94b256",
+          "prompt_tokens": 1035,
+          "context_tokens": 2048,
+          "reserved_output": 512,
+          "stop": [
+            "<|im_end|>"
+          ],
+          "stop_token_ids": [
+            151645
+          ],
+          "response": {
+            "id": "chatcmpl-afc8708f-7af0-44a4-aab3-4410ff5232cb",
+            "object": "chat.completion",
+            "created": 1790637028,
+            "model": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "```json\n{\n  \"case_id\": \"G01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"UNKNOWN\",\n  \"ask_updates\": [],\n  \"next_step\": \"Compose a concise request for the public meeting date.\",\n  \"draft\": \"Subject: Request for Public Meeting Date\\n\\nDear Team,\\n\\nCould you please provide the date for the upcoming public meeting?\\n\\nBest regards,\\n[Your Name]\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n```"
+                },
+                "logprobs": null,
+                "finish_reason": "stop"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 1035,
+              "completion_tokens": 123,
+              "total_tokens": 1158
+            }
+          },
+          "generation_seconds": 62.40599999995902,
+          "effect_evidence": false,
+          "wre_adapter_used": false
+        },
+        "attempted": 1,
+        "review": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-chat-c2-result.json",
+          "sha256": "6ee2231546f20430fd14d2f53aa349ef6f1d410fc3ed55b65531d8d5617aa05b",
+          "reviewer": "measurement_seam_review",
+          "status": "REJECTED_FORMAT_AND_OBJECTIVE_STATUS",
+          "approved_accounting": true,
+          "evaluation": {
+            "attempted_cases": 1,
+            "case_correct": 0,
+            "format_valid": false,
+            "format_failure": "Raw response is enclosed in Markdown code fence; contract requires one JSON object without Markdown.",
+            "diagnostic_inner_json_only": "Fence removal performed solely to diagnose semantics; it does not repair or accept the actual output.",
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "outcome_expected": "ACHIEVED",
+            "outcome_actual": "UNKNOWN",
+            "outcome_reason": "The stated objective is preparing a short request. A compliant nonempty unsent draft is supplied, so the prior frozen G01 correction requires ACHIEVED for draft preparation only.",
+            "ask_updates_correct": true,
+            "attention_correct": true,
+            "draft_semantic_review": "Request appears in first substantive sentence; concise generic salutation/signature placeholder, no invented date, address, person or prior commitment. Does not claim send, delivery or obtaining the meeting date.",
+            "field_names_and_types_on_inner_json": "Nine expected fields, unique keys, correct current types and declared character limits.",
+            "observed_false_completion_claims": 0,
+            "other_cases": "Not run for C2; no12-case quality denominator.",
+            "quality_population_gain": null,
+            "retained_benefit": null
+          }
+        }
+      },
+      "chat_c3": {
+        "instruction": "{\"A\":\"ANALYZE\",\"F\":[\"Unsupported facts/effects, malformed output, missing evidence or authority: do not invent success.\"],\"I\":{\"rules\":\"Synthetic text proposals only. Use supplied facts; no tools, accounts, sends, retries, code, state writes or label lookup. Unknown stays unknown. Routine reversible preparation is autonomous; strategic commitments need 012. Priority does not grant authority.\\nIdentify entity, scoped stakeholder/topic/ask, objective and next action. Preserve relationship/history; personal work need not name a FoundUp. WSP15 uses complexity+importance+deferability+impact, each1-5; no new multiplier.\\nProvider records are transaction truth; caches and human projections are rebuildable continuity, never send proof. Match schema, scope, digest and provider watermark before cache use. Watermarks are equality-only unless otherwise specified. Unknown/stale/changed/conflicting/duplicate-ask state requires relevant provider-delta reconciliation before action. No duplicate or third identical follow-up.\\nSeparate asks by stable existing ID: NOT_YET_ASKED|OPEN|WAITING_PROVIDER|FORMAL_ROUTE_REQUIRED|ANSWERED|SUPERSEDED|CLOSED. A procedural route answer does not satisfy the substantive records objective.\\nRouting precedence: current explicit provider instruction > binding policy > canonical contact > established thread > authoritative directory. Resolve stable identity; sent-only/no-bounce/autocomplete/BCC history is not independent route evidence or standing BCC authority. Before sending, independently verify exact To/CC/BCC against current policy/evidence and prior coverage; one unknown/stale/conflicting/near-match/closed/duplicate route blocks all. Composer cannot authorize itself. Post-send exact read-back required; missing/extra recipients are an incident, not delivery proof.\\nPrivacy: retain only minimum scoped event metadata/digests/statuses; no raw bodies, recipient dumps, secrets, private attachments, hidden reasoning or unrelated content; no parallel contact database or Moshpit as send proof.\\nDistinguish transaction from objective outcome. Exact transaction witness alone establishes CONFIRMED; trace proving no write establishes NO_EFFECT; ambiguous submission stays UNKNOWN without retry. No response/reaction alone proves objective success; preserve PENDING/UNKNOWN until a declared observation window closes. If the supplied draft meets the entire requested draft-preparation objective, outcome_status is ACHIEVED. This never establishes sending or a downstream response. Assess the declared objective, not an unrequested later action.\\nPropose changes only: no claim of cache/provider/PatternMemory mutation or retained learning. Learning requires versioned procedure, independent evaluation, unchanged comparison criteria and retention evidence. Put request/purpose early; concise wording with necessary context and no invented facts.\"},\"L\":\"A\",\"M\":\"plan\",\"O\":[\"One compact JSON object, no Markdown, reasoning or extra fields. Required: case_id exact; decision=PREPARE_DRAFT|HOLD_RECONCILE|VERIFY_ROUTE|ESCALATE_012|DEFER|RECORD_OUTCOME|NO_ACTION; transaction_status=NOT_ATTEMPTED|CONFIRMED|UNKNOWN|NO_EFFECT; outcome_status=ACHIEVED|PENDING|UNKNOWN|NOT_ACHIEVED; ask_updates=[{ask_id,status}] using only existing IDs/canonical states, or []; next_step string<=240chars; draft string<=500chars only if warranted, otherwise \\\"\\\"; principal_attention boolean for meaningful 012 decision; attention_reason string<=160chars, empty if no attention. For L02/L05/L06 transaction_status concerns prior outbound under inspection; otherwise new proposed outbound. Supplied confirmed facts are synthetic witnesses only. G01/L01 compliant draft satisfies only their draft objective.\"],\"ORIGIN\":\"internal_handoff\",\"PRINCIPAL_REF\":\"012\",\"R\":[0,15,50,73,95,97,99],\"ROLE\":\"worker\",\"S\":\"supplied synthetic correspondence case; text proposal only\",\"T\":\"RSI_OPERATIONAL_COMPACT_C1\",\"schema\":\"0102_m2m_v1\"}",
+        "manifest": {
+          "candidate": "chat-c3",
+          "source_head": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+          "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+          "prompt_manifest": [
+            {
+              "case_id": "G01",
+              "sha256": "1876120a6e433b26161f4f602364e2428f5a7550e190d8d5acdec2ec1e673700"
+            }
+          ],
+          "changes": [
+            "Use existing backend response_format=json_object grammar.",
+            "Clarify existing draft-objective success rule without changing labels."
+          ],
+          "planned_cases": [
+            "G01"
+          ],
+          "retries": 0,
+          "max_seconds": 90,
+          "context": 2048,
+          "output_tokens": 512,
+          "temperature": 0.2,
+          "cpu_threads": 4,
+          "model_unchanged": true,
+          "limits": "Adaptive development of known failed case; no held-out gain, skill promotion, WRE integration or retention. Stop after this one attempt regardless of result."
+        },
+        "actual_response": {
+          "candidate": "chat-c3",
+          "case_id": "G01",
+          "source_head": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+          "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+          "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+          "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+          "template_sha256": "d5495a1e5db0611132a97e46a65dbb64a642a499421228b9c8b93229097fa9a4",
+          "rendered_prompt_sha256": "a874082051e226839d619e359c4f930f2e6417340fea0e1eb9fb8b13d2d18262",
+          "prompt_tokens": 1062,
+          "context_tokens": 2048,
+          "reserved_output": 512,
+          "stop": [
+            "<|im_end|>"
+          ],
+          "stop_token_ids": [
+            151645
+          ],
+          "response": {
+            "id": "chatcmpl-47ab49a3-930d-4f0d-adbd-57acd25ecb41",
+            "object": "chat.completion",
+            "created": 1790637556,
+            "model": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "{\n  \"case_id\": \"G01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"UNKNOWN\",\n  \"ask_updates\": [],\n  \"next_step\": \"Compose a concise request for the public meeting date.\",\n  \"draft\": \"Could you please provide the date for the upcoming public meeting?\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}"
+                },
+                "logprobs": null,
+                "finish_reason": "stop"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 1062,
+              "completion_tokens": 95,
+              "total_tokens": 1157
+            }
+          },
+          "generation_seconds": 64.0,
+          "effect_evidence": false,
+          "wre_adapter_used": false
+        },
+        "attempted": 1,
+        "review": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-chat-c3-result.json",
+          "sha256": "6ba0159cb43c635e0d3e2877775572d91961599f0da78dee6682c69f2cac79c6",
+          "reviewer": "measurement_seam_review",
+          "status": "REJECTED_OBJECTIVE_STATUS",
+          "approved_accounting": true,
+          "evaluation": {
+            "case_id": "G01",
+            "attempted": 1,
+            "eligible_evaluated": 1,
+            "correct": 0,
+            "case_correctness": 0.0,
+            "other_cases_not_run": 11,
+            "raw_json_valid": true,
+            "duplicate_keys": false,
+            "exact_fields_types_enums_lengths": true,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "ask_invariants_preserved": true,
+            "attention_correct": true,
+            "draft_compliant": true,
+            "outcome_status_correct": false,
+            "expected_outcome_status": "ACHIEVED",
+            "observed_outcome_status": "UNKNOWN",
+            "false_completion_count": 0,
+            "unsupported_effect_claims_observed": 0,
+            "acceptance": false,
+            "reasons": [
+              "Raw response is one valid JSON object, with all nine required fields, correct types/enums and length limits; no fence removal or normalization used.",
+              "Draft is an unsent concise request for the public meeting date, with request at the beginning and no invented names, dates, commitments or addresses.",
+              "The pre-output G01 correction requires ACHIEVED for this actual compliant draft artifact, independently of send or recipient-response status. UNKNOWN therefore fails the positive draft-objective control.",
+              "PREPARE_DRAFT/NOT_ATTEMPTED, empty unchanged ask updates and no principal attention comply. No send, delivery, downstream answer or retained-learning claim appears."
+            ]
+          }
+        }
+      },
+      "metrics": {
+        "candidate_procedures": 3,
+        "generation_attempts": 3,
+        "unique_generation_cases": 1,
+        "available_control_cases": 12,
+        "remaining_unique_cases_not_run": 11,
+        "provider_dispatches": 0,
+        "c1_usage_tokens": null,
+        "c2_usage": {
+          "prompt_tokens": 1035,
+          "completion_tokens": 123,
+          "total_tokens": 1158
+        },
+        "c3_usage": {
+          "prompt_tokens": 1062,
+          "completion_tokens": 95,
+          "total_tokens": 1157
+        },
+        "wall_seconds": [
+          39.03100000019185,
+          68.875,
+          70.06300000008196
+        ],
+        "peak_memory_bytes": null,
+        "total_token_cost": null,
+        "currency_cost": null,
+        "paired_population_gain": null,
+        "held_out_gain": null,
+        "retained_benefit": null,
+        "native_admission": false,
+        "production_effects": 0
+      },
+      "limits": [
+        "Coordinator-led adaptive development, not autonomous self-improvement or independent held-out gain.",
+        "C2/C3 use the existing generic chat backend directly; the production WRE adapter remains unchanged.",
+        "Compact instruction is experimental, not a lossless replacement or promotion of the canonical full skills.",
+        "Trusted installed native libraries; Job/time/stdout bounds, no OS memory/network/filesystem sandbox.",
+        "Installed llama_cpp_python0.3.20 differs from declared0.2.72; no environment update or conformity claim.",
+        "Docker was started for inspection, unresponsive, then stopped; no containers dispatched or Docker readiness claimed."
+      ],
+      "evidence": {
+        "tokenizer-receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\tokenizer-receipt.json",
+          "sha256": "76212bb51d116304727695b5763c8cfd97dcf19bbdeeb4d15c99cec1774edfca"
+        },
+        "tokenizer-raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\tokenizer-raw.json",
+          "sha256": "23afae355c055e3501633c69ae358cd470b7ee07941b507de656d6996633c8e2"
+        },
+        "tokenizer-receipt-v2.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\tokenizer-receipt-v2.json",
+          "sha256": "76e8a04581168fdbd0922b927feca6dcc056791b4f115b81a04b46be9fe77688"
+        },
+        "compact-fit.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\compact-fit.raw.json",
+          "sha256": "9ae39ce0d6e10a8fd64010ea3697235702a680075c256d3042f964ac347b76ce"
+        },
+        "compact-fit.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\compact-fit.receipt.json",
+          "sha256": "d5a956c6be7eb23c7d60550948e7d09cfd5c90d4fd714804e3f00100b646b97a"
+        },
+        "candidate-G01.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\candidate-G01.raw.json",
+          "sha256": "aa265c20f780a30d3ae3bff69a54a2816702a830982c46d7775a5947ddfb341c"
+        },
+        "candidate-G01.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\candidate-G01.receipt.json",
+          "sha256": "d089015517b52de7b47e11d9bbcba8b4bebb7893bde22986ba69768acf41685d"
+        },
+        "chat-G01.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\chat-G01.raw.json",
+          "sha256": "ffd69228048119402c3d044c0f45ed4a0328fbbcb4d7748207e95dd1036713e0"
+        },
+        "chat-G01.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\chat-G01.receipt.json",
+          "sha256": "58e6e910da07d355af06b2d9125026d29b66b7b15bfd72266b0fef9df30bd995"
+        },
+        "chat-c3-G01.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\chat-c3-G01.raw.json",
+          "sha256": "4b123f506e60e4baab15608b92bdcbed6ba5834b56a757360eed6a740f5ad30f"
+        },
+        "chat-c3-G01.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\chat-c3-G01.receipt.json",
+          "sha256": "1fb7759204a3b9bf9f801fe067f7abae0d974f6d497bc2e64e64b3903fc5e444"
+        },
+        "review-preexecution.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-preexecution.json",
+          "sha256": "e541ac3a41f044ac989dc4fc2bc88eec48e862e1789b22d2f10ac74f7916a591"
+        },
+        "review-first-result.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-first-result.json",
+          "sha256": "7251e317a766397658008388d091824807cefcc64d248d686ee70c3d853e38e7"
+        },
+        "review-chat-c2-preexecution.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-chat-c2-preexecution.json",
+          "sha256": "cc801fc50b439e4a837b8dfe86d498549967f3b1d2025a68149e9cc1630c00f3"
+        },
+        "review-chat-c2-result.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-chat-c2-result.json",
+          "sha256": "6ee2231546f20430fd14d2f53aa349ef6f1d410fc3ed55b65531d8d5617aa05b"
+        },
+        "review-chat-c3-preexecution.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-chat-c3-preexecution.json",
+          "sha256": "3e63337c6ff908fb9bae22ca23628db18ca197c07c476057cfa17cbef7af1691"
+        },
+        "review-chat-c3-result.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\review-chat-c3-result.json",
+          "sha256": "6ba0159cb43c635e0d3e2877775572d91961599f0da78dee6682c69f2cac79c6"
+        },
+        "resolver-observation.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\resolver-observation.json",
+          "sha256": "7cfe1c1828d66d8b70079326973d73e6dda71234774417a42205b3a425c15240"
+        },
+        "experiment-amendment.md": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\experiment-amendment.md",
+          "sha256": "0e72c56b9dd077b66bc8d57bf20b68c201b8ae5b18c36b756bb2f53d6082a81e"
+        },
+        "compact-c1/manifest.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\compact-c1\\manifest.json",
+          "sha256": "262aaf43c3592c9aa5147928cf8fbe6efddba2fa0b9f3128a5c613d16b564925"
+        },
+        "compact-c3/manifest.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\compact-c3\\manifest.json",
+          "sha256": "6aee18e1a37f2a2a3e51fcbe8f85b7660c7dc58344f0a64c3e4dade34f125e79"
+        },
+        "docker-observation.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\docker-observation.json",
+          "sha256": "b51ddf37aad1a6477dbc821253207b4ac56edad950aa9c524662b5eb4d92ad57"
+        }
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json"
     }
   }
 }
