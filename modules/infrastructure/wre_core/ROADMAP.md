@@ -1,3 +1,33 @@
+## Local inference readiness qualification — 2026-09-29
+
+The existing local WRE proposal route now has source and artifact evidence in
+the RSI backlog under `current_observation.local_inference_qualification_20260928`.
+One existing 4,683,073,536-byte Qwen2.5 Coder 7B GGUF is SHA-256 bound, with
+29 metadata entries and the installed `llama_cpp_python 0.3.20` source/DLL inventory.
+It is the default-folder candidate under the observed pre-import environment;
+the actual production resolver outcome and complete native environment remain unqualified.
+
+Ordinary Qwen engine import eagerly reaches the coordinator package graph,
+including path/logging mutations. A conservative static graph has108 repository
+modules; this is not a claim that108 modules executed. Native imports also load
+DLLs and register a logging callback. No product or native import ran in this audit.
+
+The12 frozen prompt digests remain unchanged. Token counts, fit, generated
+responses and quality gains remain unmeasured. Model metadata advertises a larger
+context, but the existing adapter still requests2048 tokens with512 reserved for
+output. The proposed counting check must match completion BOS/EOS/special-token
+handling; output-budget clamping cannot count as passing the full-budget check.
+The high-level vocabulary-only helper still constructs a context. The proposed
+lower-level alternative has partial-constructor cleanup and retry-allocation
+limits, so its source/effect plan remains non-executable pending a qualified boundary.
+
+PR1947 is merged/main-verified and its owned lane retired. WSP15 preserves the
+operational14/P1 whole item; this12/P2 metadata preparation does not close it.
+After publication and fresh observation, qualify the smallest lazy-import repair
+in the existing Qwen package using the existing root-package pattern and existing
+test owners. Do not add another evaluator or duplicate the frozen controls.
+The backlog binds independent review, PR/main checks, Holo and cleanup receipts.
+
 ## Operational instruction controls prepared — 2026-09-28
 
 Twelve synthetic instruction controls (six Gmail-shaped, six LinkedIn-shaped) and independently authored labels now reside in the existing [RSI backlog](../../../docs/roadmaps/rsi_swarm_backlog.json), under `current_observation.operational_controls_20260928`. The packet binds the unchanged correspondence/recipient Skillz, subject-visible response conventions, source hashes, full prompt manifests and a proposed bounded local evaluation route. One draft-versus-response outcome ambiguity was corrected before any model output; original label evidence is retained.

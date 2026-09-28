@@ -1,3 +1,9 @@
+## 2026-09-29: Qualify existing local inference prerequisites
+
+- WSP00/15/22/48/50/84/97; C2/I4/D3/Impact3=12/P2 within operational14/P1. Bind one existing GGUF,29 metadata entries,36 runtime/source files and12 unchanged prompts using read-only inspection. No model, native tokenizer or application import ran; evaluated cases and generated responses remain0.
+- Independent source review identifies eager Qwen package path/logging effects and native DLL/callback effects. Record context2048/output512 constraints, completion-special-token counting requirements and partial-constructor/reallocation limits before execution. This is readiness evidence, not retained RSI or runtime admission.
+- Reconcile PR1947 verified closure and rescore59 task identities while preserving26 packets/native7/nulllease. Next conditional12/P2 component qualifies a lazy-import repair in the existing package/test owners. Exact static/independent/PR/main/Holo/owned-closure evidence is linked from the existing canonical backlog.
+
 ## 2026-09-28: Freeze operational correspondence control preparation
 
 - WSP00/15/22/48/50/73/95/97; preparation C2/I4/D3/Impact3=12/P2 within operational14/P1. Reuse canonical correspondence instruction and recipient contracts; add12 synthetic inputs, independent labels and explicit outcome conventions to the existing RSI backlog. Preserve original label evidence and the pre-evaluation correction.
