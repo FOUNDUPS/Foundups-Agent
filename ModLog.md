@@ -1,3 +1,9 @@
+## 2026-09-29: Qualify existing general-role model load and prompt fit
+
+- WSP 00/15/22/48/50/97: re-observe main `4ba9ddd1a`; preserve PR #1960's verified failure baseline and reuse existing general-role resolver, backend and bounded child.
+- One initialization; 12/12 unchanged prompts fit with output reservation. Zero generations/providers; semantic quality and retained gain remain unknown. Independent source/artifact review preserves separate parent and child evidence.
+- Record actual runtime/template identity, limitations and a freshly ranked single decoder canary in existing canonical documents. No application code, dependency update, production action or native WRE admission.
+
 ## 2026-09-29: Measure the frozen operational decision matrix
 
 - WSP00/15/22/48/50/73/95/97/99: re-observe main08eb and preserve prior PR1953 closure; reuse unchanged C3 instructions, original12 controls, local model/backend and bounded child.
