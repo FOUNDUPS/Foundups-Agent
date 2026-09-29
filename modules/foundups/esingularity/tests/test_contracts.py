@@ -312,6 +312,10 @@ def test_esingularity_post_vote_ppp_position_is_aligned_and_multilingual() -> No
     assert "令和8年度の財産有効活用民間提案制度は別制度" in page
     assert "予算の可決と、解体工事の実施、YUMORI案の採否は別の判断です。" in page
     assert "この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。" in page
+    assert 'id="finance"' in page
+    assert "基本ケースでは後続整備に追加資本が必要です。" in page
+    assert "関係者用FIN（閲覧権限が必要）" in page
+    assert "資金計画の検証" in switcher
 
     for url in (
         "https://yumori.me/vote-no",

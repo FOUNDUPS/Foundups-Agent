@@ -70,6 +70,22 @@ export default function Home() {
           <p className="three-sites-note">三地点は共通の構想として市に示し、資産ごとの手続を確認します。福井市の令和8年度民間提案募集の対象は二つの学校跡地です。旧すかっとランド九頭竜は別のPPP/PFI案件形成・比較評価経路を市に確認します。一括申請・一括契約は未確定です。 <a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html" target="_blank" rel="noreferrer">市の募集資料 ↗</a> <a href="/reports/jhr">三地点の技術評価 ↗</a></p>
         </section>
 
+        <section className="story section current-position" id="finance" aria-labelledby="finance-title">
+          <div className="section-index">資金計画 <span>/ 三拠点の段階整備</span></div>
+          <div className="story-heading">
+            <div><p className="eyebrow"><span /> 事業性の検証</p><h2 id="finance-title">まず羽生で、<br /><em>成立条件を確かめる。</em></h2></div>
+            <p>計算需要から初期設備を決め、電力・通信・工事費・運営費・返済・投資家への支払を検証します。余剰が残る場合だけ、羽生の増強、下宇坂、すかっとランドの段階整備へ配分できるかを試算します。</p>
+          </div>
+          <div className="evidence-boundary">
+            <strong>三拠点の費用・収益・自己資金化は、現在も計画上の試算です。</strong>
+            <p>各地点の工事費は見積未取得で、契約需要、受電容量、光回線、建物、権利、融資条件も未確認です。基本ケースでは後続整備に追加資本が必要です。すかっとランドの再利用は羽生の着手条件ではありません。</p>
+            <div className="scenario-links">
+              <a href="https://github.com/FOUNDUPS/Foundups-Agent/blob/main/modules/foundups/esingularity/docs/YUMORI_ECONOMIC_MODEL.md" target="_blank" rel="noreferrer">計算方法と前提を見る <b>↗</b></a>
+              <a href="https://fin.yumori.info" target="_blank" rel="noreferrer">関係者用FIN（閲覧権限が必要） <b>↗</b></a>
+            </div>
+          </div>
+        </section>
+
         <section className="story section current-position" id="current-position" aria-labelledby="current-position-title">
           <div className="section-index">現在の委員会要請 <span>/ 2026年9月28日更新</span></div>
           <div className="story-heading">
@@ -87,7 +103,7 @@ export default function Home() {
               <a href="https://yumori.info" target="_blank" rel="noreferrer">プロジェクト概要 <b>↗</b></a>
               <a href="https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit" target="_blank" rel="noreferrer">政策・経済・再利用エビデンス（03） <b>↗</b></a>
               <a href="https://ppp.yumori.info" target="_blank" rel="noreferrer">PPP/PFI提案資料（05） <b>↗</b></a>
-              <a href="https://fin.yumori.info" target="_blank" rel="noreferrer">財務モデル <b>↗</b></a>
+              <a href="#finance">資金計画の検証 <b>↓</b></a>
             </div>
           </div>
           <p className="hub-caveat">この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。</p>

@@ -74,6 +74,14 @@ Drive workbook:
 
 `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`
 
+Investor review path: the eSingularity.ai finance section links this calculation
+note and the access-controlled current FIN. FIN remains a working model with
+owner-only observed Drive permissions. The `Sensitivity` current-case initial
+Hanyu financing gap uses the corresponding low/base/high Hanyu CapEx, while
+the legacy sensitivity rows are retained as a separately labeled reference.
+The Dashboard's legacy catalog financial floor is a separate sizing diagnostic;
+it is not a Hanyu portfolio financing output.
+
 Current decision tabs:
 
 - `Service Catalog`

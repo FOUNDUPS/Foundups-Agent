@@ -132,3 +132,10 @@ See [execution/verification receipt](YUMORI_PORTFOLIO_REBASELINE_20260929.md).
 ### FIN costed-planning update — 2026-09-29
 
 Same canonical workbook ID and 18 tabs. Site cost tables now hold low/base/high MODEL ONLY allowances. Assumptions 68:122, Revenue 30:68 and Opex 30:124 drive all three 5Y Model waterfalls. This supersedes the empty-input numeric snapshot, not the INSUFFICIENT EVIDENCE investment-readiness boundary.
+
+Investor-path reconciliation: Document 03 keeps policy/economic evidence, 05
+keeps PPP financing gates, 07 keeps site evidence, and 06 explains the case for
+support. FIN alone calculates the current costed scenarios. eSingularity.ai
+points to the repository calculation note and labels its FIN link as
+access-controlled. The old 1 MW workbook is a historical comparison, not a
+second current financial source.
