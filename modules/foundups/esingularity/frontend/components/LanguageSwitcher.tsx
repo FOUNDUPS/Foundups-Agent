@@ -19,6 +19,17 @@ const languageSelectionLabels: Record<Language, string> = {
 };
 
 const copy: Record<string, [string, string]> = {
+  '資金計画': ['Financing plan', 'Plano financeiro'],
+  '/ 三拠点の段階整備': ['/ Phased development across three sites', '/ Desenvolvimento em fases de três locais'],
+  '事業性の検証': ['Testing commercial viability', 'Teste de viabilidade comercial'],
+  'まず羽生で、': ['First, at Hanyu,', 'Primeiro, em Hanyu,'],
+  '成立条件を確かめる。': ['test what makes it viable.', 'testar as condições de viabilidade.'],
+  '計算需要から初期設備を決め、電力・通信・工事費・運営費・返済・投資家への支払を検証します。余剰が残る場合だけ、羽生の増強、下宇坂、すかっとランドの段階整備へ配分できるかを試算します。': ['Size initial equipment from compute demand, then test power, fiber, construction, operations, debt and investor obligations. Only cash remaining after those obligations can be tested for Hanyu expansion and later Shimousaka and Sukatto phases.', 'Dimensionar os equipamentos iniciais conforme a demanda de computação e avaliar energia, fibra, construção, operação, dívida e obrigações com investidores. Somente o caixa remanescente após essas obrigações poderá ser testado para expansão em Hanyu e fases posteriores em Shimousaka e Sukatto.'],
+  '三拠点の費用・収益・自己資金化は、現在も計画上の試算です。': ['Three-site costs, revenue and self-funding remain planning scenarios.', 'Custos, receitas e autofinanciamento dos três locais ainda são cenários de planejamento.'],
+  '各地点の工事費は見積未取得で、契約需要、受電容量、光回線、建物、権利、融資条件も未確認です。基本ケースでは後続整備に追加資本が必要です。すかっとランドの再利用は羽生の着手条件ではありません。': ['Construction quotes, contracted demand, available power, fiber, building condition, rights and financing terms are unverified. The base case requires additional capital for later phases. Sukatto reuse is not a prerequisite for starting Hanyu.', 'Orçamentos de obras, demanda contratada, energia disponível, fibra, estado dos edifícios, direitos e condições financeiras ainda não foram confirmados. O cenário base exige capital adicional para as fases posteriores. A reutilização de Sukatto não é condição para iniciar Hanyu.'],
+  '計算方法と前提を見る': ['See the calculations and assumptions', 'Veja os cálculos e as premissas'],
+  '関係者用FIN（閲覧権限が必要）': ['Working FIN model (access required)', 'Modelo FIN de trabalho (acesso necessário)'],
+  '資金計画の検証': ['Financing plan', 'Plano financeiro'],
   // YUMORI.me movement page. Japanese remains the canonical source language.
   'YUMORI.me / 湯守': ['YUMORI.me / Community guardians', 'YUMORI.me / Guardiões da comunidade'],
   '私は湯守！ / me GUARDIAN! = YUMORI.me': ['私は湯守！ / me GUARDIAN! = YUMORI.me', '私は湯守！ / me GUARDIAN! = YUMORI.me'],

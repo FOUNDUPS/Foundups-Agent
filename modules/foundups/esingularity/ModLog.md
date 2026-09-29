@@ -1,3 +1,8 @@
+## 2026-09-29 — Investor finance path reconciliation
+
+- Corrected current FIN case-specific Hanyu funding gaps and labeled the separate legacy sizing diagnostic. Reconciled 03/05/06 references, the public finance entry, and the repository calculation note.
+- The working workbook remains controlled and its MODEL ONLY estimates are not public investment returns. No grant, City approval or utility capacity was promoted.
+
 ## 2026-09-29 — Three-site portfolio financial / PPP rebaseline
 
 - Retained Site 3 Hanyu / Site 2 Shimousaka / Site 1 Sukatto identities; made Priority 1/2/3 explicit. Sukatto is optional and cannot block an independently viable Hanyu launch.

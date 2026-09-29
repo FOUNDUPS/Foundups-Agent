@@ -32,6 +32,11 @@
 - Gmail remains transaction truth; CRM and Moshpits remain their existing projections/learning roles.
 # eSingularity TestModLog
 
+## 2026-09-29 — Investor finance path reconciliation
+
+- Extended the existing public-contract test for the labeled, access-controlled FIN path and base-case additional-capital boundary. The current workbook ID replaces an unused obsolete model ID; unconsumed fixed-MW metadata was removed. Existing language/routing tests cover the shared translation path.
+- Independently checked the three current Sensitivity Hanyu gap formulas against low/base/high CapEx and the Dashboard's legacy sizing separation in the native FIN workbook.
+
 ## 2026-09-23 — Current council-position concatenation regression
 
 - Reused test_contracts.py; no parallel test file was created.
