@@ -1,3 +1,48 @@
+## Staged general-role decision cohort — 2026-09-29
+
+At source `5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f`, the existing general-role Qwen3.5-4B
+backend completed **eleven new bounded calls**. Compatible frozen G01 evidence
+from PR1967 is reused explicitly: **one inherited + eleven new development cases**.
+Independent review found **1/12 staged cases met every original criterion**. The candidate is rejected for promotion.
+
+| Measure | Observed |
+|---|---|
+| New planned / attempted / returned / not run | 11 / 11 / 11 / 0 |
+| Staged JSON/shape-valid | 12 / 12 |
+| Full response-contract valid | 1 / 12 |
+| Full original criteria passed | 1 / 12 |
+| Unsupported completion claims | 2 |
+| Unnecessary / missed required principal attention | 4 / 0 |
+| New input / output tokens | 11889 / 1763 |
+| New bounded-child / cohort wall seconds | 781.392 / 945.562 |
+| Provider requests / retries | 0 / 0 |
+| Held-out / retained gain | unknown / unknown |
+
+JSON shape is not full response-contract validity or decision correctness.
+Wrong ask IDs, unsupported transaction claims, premature terminal outcomes and
+unnecessary escalation remain failed cases. The independent review records exact
+violations and denominators. G01 retains its original wording caveat; the eleven
+new outputs and all original criteria remain unchanged. This is descriptive
+development evidence, not an externally standardized RSI score, held-out
+improvement, or twelve newly preregistered calls. The prior coder baseline remains
+0/12; a zero baseline does not support a finite relative-gain percentage.
+
+**Next layer: Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap (14/P1).** Trace the existing consumer first, replay these
+failures as negatives, and include legitimate-update controls. Reuse before
+extending. A validator must reject unsupported proposals, not rewrite them into
+success or hardcode fixture IDs. The evaluation envelope stays an evaluation
+convention; no universal runtime schema is introduced.
+
+This sprint changes no production adapter and grants no native OpenClaw/Hermes
+admission. Broader quality, independent held-out evaluation, retained use and an
+admitted ticket still precede isolated AmIBot and worker scaling. No extra model
+tuning budget is selected. Existing active FoundUps remain outside the experiment.
+
+Evidence and current queue: `docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.operational_general_cohort_20260929`. Local execution,
+independent learned-judge review, hosted checks and publication/cleanup receipts
+are distinct evidence. Earlier sections below are historical checkpoints.
+
 ## General-role JSON decision canary — 2026-09-29
 
 At source `d8263ecf8b6cd3d72244177bde86d292875d106f`, one bounded G01 call

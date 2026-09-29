@@ -1,3 +1,20 @@
+## Staged general-role cohort dispatch closure — 2026-09-29
+
+The eleven-call local budget is exhausted: all eleven returned; no retries or
+provider actions. With one compatible inherited G01, 1/12 staged cases met every original criterion.
+No proposal is promoted. JSON/shape validity is distinct from full-contract and
+case correctness; all invalid or incorrect results remain in the denominator.
+
+WSP15/WSP97 selects **Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap (14/P1)**. Trace the existing consumer and prove
+the missing rejection before extending an owner. Use original failures and
+independent positive controls; do not tune labels, hardcode answers or introduce
+another runtime schema. Native admission remains separately blocked.
+
+See [the measured cohort and next gate](../../modules/infrastructure/wre_core/ROADMAP.md#staged-general-role-decision-cohort--2026-09-29)
+and canonical backlog `current_observation.operational_general_cohort_20260929`.
+Re-observe main and ownership after publication before executing that layer.
+Earlier dispatch sections retain their historical scope and budgets.
+
 ## General-role JSON decision canary — 2026-09-29
 
 At source `d8263ecf8b6cd3d72244177bde86d292875d106f`, one bounded G01 call
