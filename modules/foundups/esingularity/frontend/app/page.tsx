@@ -65,7 +65,7 @@ export default function Home() {
           <div className="three-sites-grid" role="list" aria-label="三地点の提案上の役割">
             <article role="listitem"><span>初期優先候補</span><h3>旧羽生小学校</h3><p>近隣の送変電設備を現地で確認。利用できる電力容量や光回線は未確認で、正式な照会が必要です。</p></article>
             <article role="listitem"><span>将来拡張候補</span><h3>旧下宇坂小学校</h3><p>広い敷地を生かす可能性を検討。需要と電力・通信・建物条件がそろうまで整備は前提としません。</p></article>
-            <article role="listitem"><span>地域拠点候補</span><h3>旧すかっとランド九頭竜</h3><p>温泉、交流、教育とイノベーションを結ぶ再利用案。解体案とのPPP/PFI比較を市に求めています。</p></article>
+            <article role="listitem"><span>地域拠点候補</span><h3>旧すかっとランド九頭竜</h3><p>九頭竜川沿いの天然温泉と市公表の敷地33,717.36㎡を生かし、交流・教育につなぐ再利用案。土地の権利や使える範囲を確認し、解体案とのPPP/PFI比較を市に求めています。</p></article>
           </div>
           <p className="three-sites-note">三地点は共通の構想として市に示し、資産ごとの手続を確認します。福井市の令和8年度民間提案募集の対象は二つの学校跡地です。旧すかっとランド九頭竜は別のPPP/PFI案件形成・比較評価経路を市に確認します。一括申請・一括契約は未確定です。 <a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html" target="_blank" rel="noreferrer">市の募集資料 ↗</a> <a href="/reports/jhr">三地点の技術評価 ↗</a></p>
         </section>
