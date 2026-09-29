@@ -1,3 +1,9 @@
+## 2026-09-29: Measure one general-role JSON decision canary
+
+- WSP 00/15/22/48/50/73/95/97: re-observe main `d8263ecf8`, preserve closed PR #1964 and protected peer work; reuse the existing backend, frozen G01 input/criteria and bounded child owner.
+- One call returned: strict JSON and original semantic criteria pass 1/1; 1081 input/163 output tokens, 64.672 seconds child wall. Independent review retains the vague wording caveat and null held-out/retained gain. No provider action or native admission.
+- Update existing canonical owners with the measured result and eleven remaining cases at 13/P1. Reuse compatible G01 evidence with explicit staged 1+11 provenance; no further call, label tuning, module creation or production adapter change in this slice.
+
 ## 2026-09-29: Qualify existing general-role model load and prompt fit
 
 - WSP 00/15/22/48/50/97: re-observe main `4ba9ddd1a`; preserve PR #1960's verified failure baseline and reuse existing general-role resolver, backend and bounded child.

@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-29 current layer:** the existing general-role model loads and all 12 frozen prompts fit; zero generations occurred. See the [compatibility result and next gate](modules/infrastructure/wre_core/ROADMAP.md#general-role-compatibility-layer--2026-09-29). Next is one bounded JSON decoder canary before a full decision comparison. The previous coder baseline remains 0/12 semantically correct. No held-out/retained gain or admitted OpenClaw/Hermes execution is established.
+**2026-09-29 current layer:** one general-role G01 generation passed strict JSON and the original semantic criteria. See the [canary result and next gate](modules/infrastructure/wre_core/ROADMAP.md#general-role-json-decision-canary--2026-09-29). Complete the remaining eleven original cases, reusing compatible frozen G01 evidence and reporting staged 1+11 coverage. The previous coder baseline remains 0/12; the other eleven general-model cases remain unevaluated. No held-out/retained gain or admitted OpenClaw/Hermes execution is established.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

@@ -1,3 +1,38 @@
+## General-role JSON decision canary — 2026-09-29
+
+At source `d8263ecf8b6cd3d72244177bde86d292875d106f`, one bounded G01 call
+through the existing general-role Qwen3.5-4B chat backend passed strict JSON and
+the original independently frozen semantic criteria. This is one known
+development case, not a twelve-case result or retained RSI improvement.
+
+| Measure | Observed |
+|---|---|
+| Attempted / returned / format valid / semantically correct | 1 / 1 / 1 / 1 |
+| Input / output tokens | 1081 / 163 |
+| Native generation / bounded child wall seconds | 60.562 / 64.672 |
+| False completion / unnecessary principal attention | 0 / 0 |
+| Provider requests / retries | 0 / 0 |
+| Held-out gain / retained gain | unknown / unknown |
+
+The proposal supplied an unsent draft and correctly separated draft preparation
+(`ACHIEVED`) from sending (`NOT_ATTEMPTED`). The request appears first. The
+secondary availability sentence is vague and remains a wording caveat; it does
+not invent a fact under the original criteria. No criteria were changed after
+the response. A returned model proposal is never evidence of a provider action.
+
+WSP 15 / WSP 97 selects **the eleven remaining original cases** (13/P1).
+Reuse this immutable G01 only if source/runtime/model/template/procedure remain
+compatible; label aggregate coverage as a staged **1+11 development cohort**.
+Freeze a new budget before any further calls. This canary's one-call budget is
+closed. Avoid another G01 tuning cycle or an unnecessary duplicate call.
+
+Full decision coverage, held-out evaluation, later retained use and one admitted
+OpenClaw/Hermes ticket precede isolated AmIBot and worker scaling. Production
+WRE routing is unchanged. Native admission remains separately blocked.
+Canonical evidence and next queue: `docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.operational_general_canary_20260929`. Publication/main and
+owned-lane closure require separate receipts. Earlier sections are historical.
+
 ## General-role compatibility layer — 2026-09-29
 
 The existing general-role Qwen3.5-4B model loaded through `LlamaCppBackend` at
