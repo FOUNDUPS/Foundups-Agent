@@ -61,3 +61,14 @@ Evaluate a standalone `FOUNDUPS/eSingularity` repository only after contracts, t
 Current Fukui work uses the **YUMORI × eSingularity.ai × AI Koban** project family. Mutable correspondence/editorial/partner drafts live under the Drive container `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents` using semantic folder prefixes. Numeric prefixes remain reserved for the canonical project-document spine in [DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md).
 
 Historical Educational Singularity / eSingularity material (including 2007–2010-era work) is long-term provenance, not current Fukui authority. Agents must not mix it into current retrieval solely because the `eSingularity` term matches; promotion into current work requires an explicit current citation/verification path.
+
+## Three-site capital-allocation rebaseline — 2026-09-29
+
+- [x] Retain canonical Site 3/2/1 identities with Priority 1 Hanyu, Priority 2 Shimousaka, Priority 3 optional Sukatto.
+- [x] Extend the canonical model and existing 18-tab FIN workbook with independent costs, three Hanyu cash scenarios, investor/retained-cash separation and a self-funding test.
+- [x] Rebaseline native Doc 05's opening/decisions and align 07 while preserving six photos.
+- [ ] Gate 1: utility/fiber/building/demand/CapEx/finance/legal evidence for a minimum viable Hanyu node.
+- [ ] Gate 2: additional actual or contracted demand, independent site engineering and acceptable finance metrics for Hanyu expansion / Shimousaka.
+- [ ] Gate 3: lawful City route, rights, rehabilitation/asbestos/MEP and thermal economics for optional Sukatto.
+- [ ] Obtain site quotes and financing terms; replace 51 missing capital inputs and 55 annual cash inputs per scenario before interpreting numerical portfolio feasibility.
+- [ ] Confirm asset-specific City filing units and each grant's applicant/site/equipment application unit. No automatic single three-site filing or award.

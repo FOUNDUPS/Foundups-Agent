@@ -140,3 +140,13 @@ eSingularity.ai.
 - Fukui Prefecture input-output analysis method and tool: https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html
 - Awara Onsen Yukemuri Yokocho official site and photographic reference: https://yukemuriyokocho.com/
 - Akira Hasegawa's official D-K / Digital Kakejiku gallery: https://www.digital-kakejiku.com/
+
+## Current portfolio architecture — 2026-09-29
+
+- **Proposal / conditional priority:** Hanyu = Priority 1 / Site 3; Shimousaka = Priority 2 / Site 2; Sukatto = Priority 3 / Site 1. Identities remain stable.
+- Hanyu's nearby electrical infrastructure is observed; available capacity, connection voltage/cost/schedule/redundancy and fiber are unverified. No site MW target is admitted.
+- Sukatto is optional portfolio upside, not a legal or financial prerequisite to launch an independently viable Hanyu node.
+- The new portfolio model returns **INSUFFICIENT EVIDENCE**. The legacy ¥2.085B case is not a three-site total or Hanyu estimate.
+- Only AWARDED grants enter committed sources. A three-site umbrella does not establish a single grant or City application route.
+- Revenue, investor distributions, retained cash, subsequent-site investment and community/public comparison values remain separate. Demolition avoidance, reused-building value and visitor spending are not financing cash.
+- This ledger update authorizes no new public numerical claim and does not publish either website.

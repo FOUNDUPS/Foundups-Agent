@@ -1,6 +1,6 @@
 # Project eSingularity FoundUp
 
-Project eSingularity is a Japanese-first community campaign and public-information PWA for preserving Sukatto Land Kuzuryu and testing a community-owned green data center (COG DC) alternative for Fukui.
+Project eSingularity combines a Japanese-first community campaign with a staged three-site distributed AI infrastructure / public-asset reuse program for Fukui. Hanyu is Priority 1 (Site 3), Shimousaka Priority 2 (Site 2), and Sukatto Priority 3 (Site 1), an optional onsen/community/education/thermal-reuse opportunity rather than a prerequisite for compute launch.
 
 **FoundUp ID**: `esingularity_001`
 
@@ -66,7 +66,7 @@ The financial models, engineering research, and source audits support the public
 
 ## Grants, subsidies, and PPP support
 
-Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `FIN — YUMORI Phase 1 Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
+Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `FIN — YUMORI Three-Site Portfolio, Demand-Led Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
 
 A program's existence is not project funding. Keep the progression explicit: verified program → eligibility inquiry → eligible → application → selected → awarded. Only an awarded amount may be represented as committed subsidy revenue. The current highest-priority inquiry concerns the MOE/RCESPA regional-coexistence data-center decarbonization program and whether a currently closed municipal onsen can qualify after Fukui City accepts a lawful PPP/lease/use structure and an eligible operator/SPC satisfies the program conditions.
 
@@ -185,3 +185,14 @@ With no research retriever connected, JHR fails closed and returns `NO_REPORT` r
 Current Fukui work uses the **YUMORI × eSingularity.ai × AI Koban** project family. Mutable correspondence/editorial/partner drafts live under the Drive container `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents` using semantic folder prefixes. Numeric prefixes remain reserved for the canonical project-document spine in [DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md).
 
 Historical Educational Singularity / eSingularity material (including 2007–2010-era work) is long-term provenance, not current Fukui authority. Agents must not mix it into current retrieval solely because the `eSingularity` term matches; promotion into current work requires an explicit current citation/verification path.
+
+## Three-site portfolio finance
+
+The existing FIN workbook and [economic contract](docs/YUMORI_ECONOMIC_MODEL.md)
+now distinguish stable site identities from priorities, independent site costs,
+committed sources, investor distributions and retained reinvestment. The bounded
+portfolio engine is `src/yumori_portfolio_model.py`, exposed through the canonical
+economic module. Current self-funding output is **INSUFFICIENT EVIDENCE**; no site
+cost, grid capacity, financing terms or grant award is invented. Document 05 is the
+umbrella PPP/PFI/asset-procedure master; 07 retains technical evidence and photos.
+This rebaseline does not publish website changes or rewrite campaign history.

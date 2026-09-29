@@ -16,6 +16,12 @@ from math import inf
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+# Portfolio allocation is bounded separately; legacy parity and sizing stay intact.
+from modules.foundups.esingularity.src.yumori_portfolio_model import (
+    AnnualCashInputs, GrantAllocation, PortfolioInputs, PortfolioResult,
+    SiteCost, SiteFinancialInputs, default_portfolio_sites, run_portfolio_model,
+)
+
 MODEL_YEARS = 5
 HOURS_PER_YEAR = 8_760.0
 METHODOLOGY_URL = "https://ai-circular-economy.com/"

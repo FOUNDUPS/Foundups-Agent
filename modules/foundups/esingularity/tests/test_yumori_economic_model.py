@@ -1,4 +1,9 @@
+from dataclasses import replace
+import pytest
+
 from modules.foundups.esingularity.src.yumori_economic_model import (
+    AnnualCashInputs, GrantAllocation, PortfolioInputs, SiteCost,
+    SiteFinancialInputs, default_portfolio_sites, run_portfolio_model,
     DEFAULT_SERVICE_CATALOG,
     DemandLine,
     DemandSizingInputs,
@@ -124,3 +129,153 @@ def test_japan_infrastructure_seed_is_sourced_without_invented_amounts() -> None
     assert all(flow.evidence_class == "OFFICIAL" for flow in flows)
     assert result.known_amount_edges == 0
     assert result.undisclosed_amount_edges == len(flows)
+
+
+def portfolio_fixture(revenue=100.0, investor_due=10.0):
+    sites = tuple(
+        SiteFinancialInputs(s.site_id, s.priority, (SiteCost("independent_scope", cost, "MODEL ONLY"),))
+        for s, cost in zip(default_portfolio_sites(), (100.0, 200.0, 300.0))
+    )
+    cash = AnnualCashInputs(revenue, 10, 10, 5, 5, 0, 5, 10, 5, investor_due, 0)
+    return PortfolioInputs(sites=sites, hanyu_cash=(cash,) * 5, hanyu_expansion_capex_jpy=50,
+                           investor_equity_jpy=100)
+
+
+def test_portfolio_defaults_preserve_identity_and_unknowns():
+    sites = default_portfolio_sites()
+    assert [(s.site_id, s.priority) for s in sites] == [("Site 3", 1), ("Site 2", 2), ("Site 1", 3)]
+    assert all(s.utility_confirmed_kw is None and not s.deployable for s in sites)
+    assert sites[0].costs is not sites[1].costs
+    result = run_portfolio_model()
+    assert result.self_funding_result == "INSUFFICIENT EVIDENCE"
+    assert result.total_portfolio_capex_jpy is None
+    assert result.entered_cost_subtotal_jpy == 0
+    assert len(result.missing_inputs) == 106  # 50 site costs + expansion + 55 cash inputs
+    assert result.reinvestable_cash_jpy is None
+    assert result.to_dict()["site_capex_jpy"] == {"Site 3": None, "Site 2": None, "Site 1": None}
+
+
+@pytest.mark.parametrize("status", ["VERIFIED PROGRAM", "ELIGIBILITY INQUIRY", "ELIGIBLE", "APPLICATION", "SELECTED", "AWARDED"])
+def test_portfolio_only_awarded_grants_reduce_committed_need(status):
+    grant = GrantAllocation("F01/site3", "Site 3", 20, status, "award evidence" if status == "AWARDED" else "")
+    result = run_portfolio_model(replace(portfolio_fixture(), grants=(grant,)))
+    assert result.initial_hanyu_funding_gap_jpy == (80 if status == "AWARDED" else 100)
+    assert result.unawarded_grants_excluded_jpy == (0 if status == "AWARDED" else 20)
+
+
+def test_sukatto_exclusion_does_not_block_hanyu_operation():
+    model = portfolio_fixture()
+    failed = replace(model.sites[2], included=False, gates=("FAIL",) * 7)
+    result = run_portfolio_model(replace(model, sites=(*model.sites[:2], failed)))
+    assert result.site_capex_jpy == {"Site 3": 100, "Site 2": 200}
+    assert len(result.years) == 5
+    assert result.initial_hanyu_funding_gap_jpy == 100
+    assert result.total_portfolio_capex_jpy == 350
+
+
+def test_hanyu_scenarios_change_self_funding_without_double_counting():
+    downside = run_portfolio_model(portfolio_fixture(50))
+    base = run_portfolio_model(portfolio_fixture(100))
+    upside = run_portfolio_model(portfolio_fixture(200))
+    assert downside.self_funding_result == "NO — ADDITIONAL CAPITAL REQUIRED"
+    assert base.self_funding_result == "PARTIAL SELF-FUNDING"
+    assert upside.self_funding_result == "YES UNDER CURRENT MODEL ASSUMPTIONS"
+    assert base.total_portfolio_capex_jpy == 650
+    assert base.reinvestable_cash_jpy == 200
+    assert base.residual_financing_gap_jpy == 450
+    assert upside.residual_financing_gap_jpy == 100  # Hanyu start-up still needs capital
+    assert sum(base.affordable_allocations_jpy.values()) == base.reinvestable_cash_jpy
+    assert sum(y.investor_distribution_jpy for y in base.years) == 50
+    assert sum(y.free_cash_after_debt_jpy for y in base.years) == 275
+    assert base.reinvestable_cash_jpy + 50 + 25 == 275  # distributions + reserve deposits
+
+
+def test_investor_obligations_and_cash_deficits_carry_forward():
+    model = portfolio_fixture(200, investor_due=1000)
+    result = run_portfolio_model(model)
+    assert result.self_funding_result == "NO — ADDITIONAL CAPITAL REQUIRED"
+    assert result.years[-1].investor_arrears_jpy == 4250
+    assert result.reinvestable_cash_jpy == 0
+    mixed = replace(portfolio_fixture(200), hanyu_cash=(portfolio_fixture(0).hanyu_cash[0],) + portfolio_fixture(200).hanyu_cash[1:])
+    result = run_portfolio_model(mixed)
+    assert result.peak_cash_bridge_jpy == 50
+    assert result.years[1].investor_distribution_jpy == 20
+    assert result.self_funding_result == "NO — ADDITIONAL CAPITAL REQUIRED"
+    assert not result.affordable_allocations_jpy
+
+
+def test_affordability_does_not_open_deployment_gates():
+    model = portfolio_fixture(200)
+    closed = run_portfolio_model(model)
+    assert closed.affordable_allocations_jpy == {"Hanyu expansion": 50, "Site 2": 200, "Site 1": 300}
+    assert all(v == 0 for v in closed.deployable_allocations_jpy.values())
+    sites = tuple(replace(s, gates=("PASS",) * 7, utility_confirmed_kw=100, demand_facility_kw=80) for s in model.sites)
+    ready = run_portfolio_model(replace(model, sites=sites, expansion_gate_passed=True))
+    assert ready.deployable_allocations_jpy == ready.affordable_allocations_jpy
+    no_grid = replace(sites[0], utility_confirmed_kw=None)
+    assert not no_grid.deployable
+    uncosted = replace(sites[0], costs=(SiteCost("survey"),))
+    assert not uncosted.deployable
+    too_small = replace(sites[0], utility_confirmed_kw=50)
+    assert not too_small.deployable
+    failed_sukatto = replace(sites[2], gates=("FAIL",) * 7)
+    independent = run_portfolio_model(replace(model, sites=(*sites[:2], failed_sukatto)))
+    assert independent.deployment_gates["Site 3"]
+    assert independent.deployable_allocations_jpy["Site 2"] == 200
+    assert independent.deployable_allocations_jpy["Site 1"] == 0
+
+
+def test_project_payback_is_not_investor_or_portfolio_payback():
+    result = run_portfolio_model(portfolio_fixture())
+    assert abs(result.site_payback_years["Site 3"] - 100 / 65) < 1e-9
+    assert result.phase_payback_years[1] == result.site_payback_years["Site 3"]
+    assert result.site_payback_years["Site 1"] is None
+    assert result.portfolio_payback_years is None
+    assert result.investor_payback_years is None  # only 50 returned against 100 equity
+    model = portfolio_fixture(200)
+    sites = tuple(replace(s, unlevered_cash_flows_jpy=(100.0,) * 5) for s in model.sites)
+    result = run_portfolio_model(replace(model, sites=sites, hanyu_expansion_capex_jpy=0))
+    assert result.portfolio_payback_years is not None
+
+
+def test_restricted_funding_cannot_cross_sites_or_duplicate_allocations():
+    model = portfolio_fixture()
+    grant = GrantAllocation("award1", "Site 1", 999, "AWARDED", "official award")
+    result = run_portfolio_model(replace(model, grants=(grant,)))
+    assert result.initial_hanyu_funding_gap_jpy == 100
+    assert result.gross_external_capital_gap_jpy == 350  # surplus Sukatto award not transferable
+    with pytest.raises(ValueError, match="more than once"):
+        run_portfolio_model(replace(model, grants=(grant, grant)))
+    with pytest.raises(ValueError, match="award reference"):
+        run_portfolio_model(replace(model, grants=(replace(grant, award_reference=""),)))
+    excluded = replace(model.sites[2], included=False)
+    assert run_portfolio_model(replace(model, sites=(*model.sites[:2], excluded), grants=(grant,))).committed_sources_jpy == 0
+
+
+@pytest.mark.parametrize("bad", [-1, float("nan"), float("inf"), True])
+def test_invalid_portfolio_amounts_fail_closed(bad):
+    with pytest.raises(ValueError):
+        run_portfolio_model(replace(portfolio_fixture(), hanyu_expansion_capex_jpy=bad))
+
+
+def test_missing_cash_does_not_masquerade_as_zero_and_partial_phases_stay_held():
+    model = portfolio_fixture()
+    result = run_portfolio_model(replace(model, hanyu_cash=(AnnualCashInputs(),)))
+    assert result.self_funding_result == "INSUFFICIENT EVIDENCE"
+    assert len(result.missing_inputs) == 11
+    assert result.total_portfolio_capex_jpy == 650
+    sites = tuple(replace(s, gates=("PASS",) * 7, utility_confirmed_kw=100, demand_facility_kw=80) for s in model.sites)
+    result = run_portfolio_model(replace(model, sites=sites, expansion_gate_passed=True))
+    assert result.affordable_allocations_jpy["Site 2"] == 150
+    assert result.deployable_allocations_jpy["Site 2"] == 0
+
+
+def test_portfolio_schema_rejects_ambiguous_identity_costs_and_evidence():
+    model = portfolio_fixture()
+    with pytest.raises(ValueError, match="Duplicate site"):
+        run_portfolio_model(replace(model, sites=(model.sites[0], model.sites[0])))
+    with pytest.raises(ValueError, match="Hanyu"):
+        run_portfolio_model(replace(model, sites=model.sites[1:]))
+    for costs in [(SiteCost("x", 1),), (SiteCost("x", 1, "SOURCED"),), (SiteCost("x"), SiteCost("x"))]:
+        with pytest.raises(ValueError):
+            run_portfolio_model(replace(model, sites=(replace(model.sites[0], costs=costs),)))

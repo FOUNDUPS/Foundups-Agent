@@ -1,3 +1,11 @@
+## 2026-09-29 — Three-site portfolio financial / PPP rebaseline
+
+- Retained Site 3 Hanyu / Site 2 Shimousaka / Site 1 Sukatto identities; made Priority 1/2/3 explicit. Sukatto is optional and cannot block an independently viable Hanyu launch.
+- Added a bounded portfolio engine alongside unchanged demand-led sizing and legacy parity: independent costs, awarded-only sources, three cash scenarios, deficit/arrears carry, investor-versus-reinvestment separation, gated allocation and distinct payback measures.
+- Rebased native 05's opening and decision architecture; surgically aligned 07, preserving six photos. Extended the original FIN's existing tabs without a second workbook or grant registry.
+- Current financial result: INSUFFICIENT EVIDENCE; 51 capital inputs and 55 annual cash inputs per scenario missing. All site/portfolio totals and financing gap remain TBD. No utility capacity or grant status was promoted.
+- Readback and PR/main receipts are recorded in docs/YUMORI_PORTFOLIO_REBASELINE_20260929.md. No City filing, external correspondence or website publication is claimed.
+
 ## 2026-09-28 — Demand-led YUMORI economics becomes repository authority
 
 ## 2026-09-28 — JHR #003 Japanese-only web issue prepared

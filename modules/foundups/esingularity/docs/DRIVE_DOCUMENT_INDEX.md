@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Google Drive Document Index
 
-Last audited: 2026-09-28 JST
+Last audited: 2026-09-29 JST
 
 ## Authority rule
 
@@ -32,9 +32,9 @@ These are durable project documents. Preserve their file IDs and update in place
 | 02 | **YUMORI Mayor Request Letter** | Mayor-facing formal request lane | `1Dx6HkdKSKISfxU7QgLvSZ6nFOc_T2MV0HCHVnoYioe4` |
 | 03 | **YUMORI City / Prefecture / Council Evidence — Demolition vs PPP/PFI Reuse** | Policy, evidence, economics and government-facing support material | `1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE` |
 | 04 | **Who Is the Monk? — Kuzuryu Taicho, eSingularity & FoundUps** | Project-founder/background narrative; not a source for government facts | `1u_HMejJJOxU5y4DV2S-OSwaiQOk_QPffbUFna2CfSrE` |
-| 05 | **YUMORI PPP/PFI Public-Private Partnership Master** | Canonical Drive PPP/PFI project-formation, legal, VFM, risk-allocation and submission-mechanics draft; not the FY2026 財産有効活用民間提案制度 application lane | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
+| 05 | **YUMORI / eSingularity 三拠点分散型AIインフラ・公共資産活用 PPP/PFI 官民連携案件形成マスター** | Three-site umbrella and asset-specific legal/VFM/finance/gates: school asset proposals and separate Sukatto PPP/PFI receiving route; no common application assumed | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
 | 06 | **YUMORI Project Prospectus — eSingularity Case for Support** | Integrated project prospectus / support case | `1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM` |
-| 07 | **YUMORI / eSingularity Three-Site Distributed AI Koban Node Portfolio** | Current candidate-site portfolio: Sukatto Land, former Shimousaka Elementary, former Hanyu Elementary | `1BLGiTe3Z6kR7SZXjcuQ67OiQGBRHF9u6M0VdPDplkls` |
+| 07 | **YUMORI / eSingularity Three-Site Distributed AI Koban Node Portfolio** | Technical/site evidence and six field photographs. Priority 1 Hanyu (Site 3), Priority 2 Shimousaka (Site 2), Priority 3 optional Sukatto (Site 1) | `1BLGiTe3Z6kR7SZXjcuQ67OiQGBRHF9u6M0VdPDplkls` |
 
 ## OPERATIONS — preserve and find quickly
 
@@ -52,7 +52,7 @@ These are durable project documents. Preserve their file IDs and update in place
 
 | Drive file | Role | Drive ID |
 | --- | --- | --- |
-| **FIN — YUMORI Demand-Led Financial Model & Grant Audit — 2026-09-28** | Current formula-driven working projection, grant register, demand/service discovery and financial audit. Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizing`, and three site tabs. | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
+| **FIN — YUMORI Three-Site Portfolio, Demand-Led Financial Model & Grant Audit — 2026-09-29** | Current three-site capital allocation, independent cost ledgers, five-year Hanyu downside/base/upside cash waterfalls, self-funding test, grant audit, 24-service demand-led sizing and separate `Regional Impact` ledger. Existing 18 tabs retained. | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
 | **FIN.YUMORI — Integrated Financial + Regional Impact Model.xlsx** | Legacy/integrated model retained as reference; do not let legacy assumptions override current audit | `11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c` |
 
 Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). Calculation and node-sizing logic is governed by [`YUMORI_ECONOMIC_MODEL.md`](YUMORI_ECONOMIC_MODEL.md) and `../src/yumori_economic_model.py`. The Drive FIN workbook is the working formula/interview projection, not the source of truth. A statutory maximum, legacy 1 MW scenario, financial-floor kW, or other model output is not project funding or permission to build.
@@ -119,3 +119,12 @@ Before making a new YUMORI Drive document:
 5. Create a new file only when it has a distinct durable role.
 6. If a new durable file is created, add its Drive ID and role here in the same work slice.
 7. Delete only when a live successor or exact duplicate is verified; otherwise rename/move to `ARCHIVE` rather than guessing.
+
+## Three-site rebaseline receipt — 2026-09-29
+
+05 and 07 were edited natively in place; 07 retains all six inline photographs.
+FIN uses the original spreadsheet ID and site-tab identities. Dashboard now shows
+portfolio outputs; its old summary is retained at rows 80–86 as legacy reference.
+`Regional Impact` keeps visitor spending, project revenue, payroll, private capital,
+and public-cost avoidance separate. None becomes cash available for construction.
+See [execution/verification receipt](YUMORI_PORTFOLIO_REBASELINE_20260929.md).

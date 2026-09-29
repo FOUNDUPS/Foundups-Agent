@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Candidate Site Registry
 
-Last audited: 2026-09-28 JST
+Last audited: 2026-09-29 JST
 
 ## Authority and workflow
 
@@ -8,13 +8,14 @@ This repository record is the canonical project-status and site-assumption autho
 
 **Do not choose MW first.** Node size is derived from customer/service demand, the revenue required to support the operating/finance case, equipment power characteristics, PUE, and finally the utility-confirmed site capacity. Until the utility confirms a deliverable capacity, school-site kW/MW remains **UNVERIFIED**.
 
-Current Drive working model: **FIN — YUMORI Demand-Led Financial Model & Grant Audit — 2026-09-28** (`1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`).
+Current Drive working model: **FIN — YUMORI Three-Site Portfolio, Demand-Led Financial Model & Grant Audit — 2026-09-29** (`1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`).
 
 Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizing`, and one candidate-site tab per site. The older integrated XLSX remains reference-only.
 
 ## Site 1 — 旧すかっとランド九頭竜 / Sukatto Land Kuzuryu
 
-- Role: regional human-facing hub: onsen + community + education + innovation + AI交番 / COGDC adaptive reuse.
+- Portfolio Priority: **Priority 3 / tertiary optional adaptive-reuse node**.
+- Role: onsen + community + education + innovation + AI交番 / thermal offtake; compute only if justified. Sukatto acquisition/reuse is **not a prerequisite for Hanyu launch**.
 - Compute capacity: **not preset**.
 - Sizing basis: demand + financial viability + verified utility/fiber/site limits.
 - Expansion: stage-gated only when demand, heat use, grid/fiber, land, cooling, financing, permits, and public/community decisions support it.
@@ -23,7 +24,8 @@ Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizi
 
 ## Site 2 — 旧下宇坂小学校 / Former Shimousaka Elementary School
 
-- Role: second-candidate / future expansion school node.
+- Portfolio Priority: **Priority 2 / secondary node**.
+- Role: second-candidate / future expansion school node, independently costed.
 - Site advantage: materially larger campus and potential room for future education, community, disaster-resilience, incubation, and compute functions.
 - Compute capacity: **not preset and not utility-confirmed**.
 - Sizing basis: add capacity only after customer demand and power/fiber/site conditions justify it.
@@ -33,7 +35,8 @@ Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizi
 ## Site 3 — 旧羽生小学校 / Former Hanyu Elementary School
 
 - Address used for the 2026-09-26 field survey: 福井市大宮町12-31.
-- Role: **initial-priority, grid-first school node candidate**, conditional on formal utility and carrier confirmation.
+- Portfolio Priority: **Priority 1 / primary economic-engine candidate**.
+- Role: **initial-priority, grid-first school node candidate**, conditional on utility, fiber, demand, building, legal-use and financing evidence.
 - Field evidence on 2026-09-26: major substation/switchyard equipment, multiple high-voltage transmission corridors, and utility telecom/microwave equipment are visible in the immediate landscape.
 - Compute capacity: **UNVERIFIED**. Proximity does not establish deliverable load capacity, connection voltage, redundancy, cost, schedule, or commercial/dark-fiber availability.
 - Sizing basis: customer/service demand -> revenue/resource demand -> GPU/CPU/storage/network requirements -> IT kW -> facility kW -> compare with utility-confirmed capacity.
@@ -62,3 +65,30 @@ Only inherited raw-compute scenarios currently have numerical price assumptions.
 ## Field-survey artifact
 
 Document 07 and its embedded field photographs are the current site-evidence/addendum layer. The photographs support observed site context; they do not prove utility capacity, connection rights, fiber availability, land rights, or engineering suitability.
+
+## Portfolio identity, sequencing and independent gates
+
+| Portfolio priority | Stable canonical identity | Role | Required gate |
+| --- | --- | --- | --- |
+| 1 | Site 3 — Hanyu | Minimum viable demand-backed compute node | Utility response, fiber route, building feasibility, demand, independent CapEx, finance case, legal/use route |
+| 2 | Site 2 — Shimousaka | Expansion campus / second compute node | Additional actual/contracted demand, independent grid/fiber and engineering, acceptable lender DSCR/finance metrics |
+| 3 | Site 1 — Sukatto | Optional adaptive reuse, thermal/community/education node | Lawful City route, access/use rights, rehabilitation economics, asbestos/MEP, engineering, thermal-use economics and financing |
+
+Hanyu expansion is a separate Gate 2 budget, never included twice in initial-node
+CapEx. Grid proximity sets investigation priority only. Formal evidence can justify
+changing priority, including investigating Shimousaka first if Hanyu fails; stable
+site IDs do not change. No all-site completion condition or automatic Sukatto
+cross-default is assumed. A failed or excluded Sukatto case leaves Hanyu operable.
+
+Fukui City's current school call lists Hanyu and Shimousaka, not Sukatto. Use one
+umbrella concept plus asset-specific annexes and the City's correct procedures.
+Mandatory school prior consultation and the official form package do not establish
+that two sites can be filed in one application. Obtain that answer from the City.
+Sukatto needs a separately designated PPP/PFI receiving route; PFI Act Article 6
+is an option pending City determination. Source:
+https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html (checked 2026-09-29 JST).
+The minimum physical first phase still needs a lawful whole-property use plan.
+
+The portfolio self-funding test in FIN and `run_portfolio_model()` is a hypothesis,
+not a guarantee that a first data center pays for all assets. Current output:
+**INSUFFICIENT EVIDENCE**. No site-specific CapEx or available capacity is invented.

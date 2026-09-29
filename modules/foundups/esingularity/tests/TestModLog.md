@@ -1,3 +1,10 @@
+## 2026-09-29 — Three-site portfolio regression slice
+
+- Extended the existing test_yumori_economic_model.py; no new test file.
+- Tests preserve canonical identity/priority, unknown capacity, missing-data behavior, exact AWARDED boundaries, restricted sources, Sukatto exclusion, scenario-dependent self-funding, non-overlapping CapEx, cash conservation, investor arrears, peak liquidity, gated later phases, and distinct project/investor payback.
+- Existing legacy parity, 24-service catalog, demand sizing, heat cap and infrastructure-flow tests remain intact.
+- Focused run: 28 passed; new portfolio module coverage 93% including branches after final fail-closed guards. Module-suite and native formula/layout verification receipts follow in the execution receipt.
+
 ## 2026-09-28 — Demand-led economics, site sizing, heat and JHR evidence contracts
 
 - Retrieved the existing test inventory, README, `test_contracts.py`, and YUMORI landing tests before finalizing the new economic-model regression.

@@ -4,7 +4,7 @@ Last verified: 2026-09-28 JST
 
 ## Purpose and truth boundary
 
-This file is the repository-side canonical registry for external grant/subsidy/PPP-support programs relevant to YUMORI.me / former Sukatto Land Kuzuryu. Google Drive financial models and grant-audit sheets are working/derived evidence; this repository record controls project status labels.
+This file is the repository-side canonical registry for external grant/subsidy/PPP-support programs relevant to the YUMORI / eSingularity three-site portfolio (Hanyu, Shimousaka and optional Sukatto). Google Drive financial models and grant-audit sheets are working/derived evidence; this repository record controls project status labels.
 
 Never describe a program as project funding merely because the program exists. Track each item as: `VERIFIED PROGRAM`, `ELIGIBILITY INQUIRY`, `ELIGIBLE`, `APPLICATION`, `SELECTED`, `AWARDED`, or `CLOSED`. Only `AWARDED` may be booked as committed subsidy revenue.
 
@@ -22,7 +22,7 @@ Use this section to prevent drift between codebase truth and Drive working docum
 
 1. **PPP/PFI Public-Private Partnership Master Draft**  
    Drive ID: `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc`  
-   Purpose: formal PPP/PFI project-formation mechanics, legal/VFM/risk-allocation framing, City-facing public-private partnership structure. This is not the FY2026 財産有効活用民間提案制度 application lane.  
+   Purpose: formal PPP/PFI project-formation mechanics, legal/VFM/risk-allocation framing, City-facing public-private partnership structure. The umbrella separates the FY2026 school asset-proposal lane from Sukatto’s independently designated PPP/PFI route; it is not itself a combined application.
    Rule: may consume grant-status facts from this repo registry; must not independently promote program status.
 
 2. **City / Prefecture / Council Support Brief**  
@@ -35,7 +35,7 @@ Use this section to prevent drift between codebase truth and Drive working docum
    Purpose: integrated explanatory/project narrative.  
    Rule: explanatory only; not the authority for live grant eligibility or award status.
 
-4. **Phase 1 Functional Financial Model & Grant Audit**  
+4. **Three-Site Portfolio, Demand-Led Financial Model & Grant Audit**
    Drive ID: `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`  
    Tab: `Grants & Subsidies`  
    Purpose: scenario analysis, caps/rates, timing, model integration, audit notes.  
@@ -186,3 +186,38 @@ The immediate objective is not to ask a ministry to endorse YUMORI.me. It is to 
 Outreach is issued in the name of the **すかっとランド九頭竜 グリーンAI・地域再生設立準備委員会 / YUMORI.me Preparatory Committee**, not as a personal project of 012. City approval is never implied.
 
 Operational distribution rule from 2026-09-13: Councilman Sano should be BCC'd on YUMORI.me operational outreach unless there is a specific legal/privacy reason not to. Media should not be silently BCC'd on routine grant/process emails; send media a direct, concise update when a substantive answer, filing, decision, or other reportable development exists.
+
+## Portfolio mapping — 2026-09-29 application-unit audit
+
+This is an extension of this canonical registry, not a second grant register.
+No project status has been promoted. F-01's existing eligibility inquiry remains
+an inquiry; no new inquiry or application was sent in this rebaseline. Only
+AWARDED amounts with allocation and award evidence enter committed financing.
+One portfolio strategy may require several applications. Do not aggregate costs
+across sites merely to meet a threshold or reuse the same eligible cost twice.
+
+| Program | Eligible component / candidate fit | Possible site(s) | Possible applicant | Application unit / unresolved question |
+| --- | --- | --- | --- | --- |
+| F-01 | Eligible cooling, storage, thermal supply; GPU hardware not assumed eligible | Hanyu first; other nodes or Sukatto offtake only if independently eligible | Eligible corporation/equipment owner/operator; representative/joint structure per guide | Verify multi-site versus site/equipment applications, closed-property baseline, lawful rights, heat pairing and ownership |
+| F-02 | New/retrofit/modular DC decarbonization infrastructure under chosen track | Hanyu; later nodes separately screened | Qualifying private entity/SPC/owner-operator, fit unresolved | Verify site/application unit, renewable supply, rights, equipment, CO2, financing and timing; no automatic combined award |
+| F-03 | Future qualifying GX DC investment | Any future qualifying site; initial size unknown | Qualifying investing electricity-demand business | Current-round guide, scale, location, power conditions and multi-site treatment unresolved |
+| F-04 | Building-constructed AI DC investment under prefectural conditions | Future independently qualifying building project | Qualifying company | Container exclusion remains; do not combine site budgets to manufacture investment threshold; consult prefecture |
+| F-05 | PPP/PFI project-formation advice, not private CapEx | City-defined umbrella plus asset annexes | Fukui City / eligible public body | Which support menu can cover the proposed study scope? |
+| F-06 | Historical SME DX support, not core campus CapEx | Eligible tenants/local firms | Eligible Fukui SME/small business | Closed-round reference; future call and beneficiary fit unresolved |
+| F-07A | Existing-system CO2 retrofit / electrification / heat recovery | Sukatto if baseline qualifies; schools independently screened | Eligible corporate equipment owner and any required building-owner/user/ESCO joint parties | Site/system baseline, closed buildings, reduction threshold, ownership and combined-site treatment unresolved |
+| F-07B | DX operational CO2 measurement/improvement | Independently qualifying systems | Eligible entity under DX guide | Active baseline and applicant/system scope; no duplicate F-07A costs |
+| F-08 | Public/private infrastructure feasibility study, not construction | City-defined infrastructure linked to portfolio | Fukui City / eligible public body, not committee directly | City decision to apply, infrastructure nexus, one study covering several assets requires confirmation |
+| F-09 | School public-asset reuse procedure, **not a subsidy** | Hanyu and Shimousaka only in current call | Stable implementing entity/JV subject to City rules | One Form 1 per property or combined school consultation? Sukatto requires separate receiving route |
+| F-10 | Building-level ZEB retrofit / eligible technology | Each eligible school/Sukatto building independently | Eligible private/nonprofit building owner; City cannot apply in this METI/SII lane | Owner/leaseholder route, joint/multi-building application, track, equipment and pre-award procurement conditions require SII confirmation |
+
+Primary sources rechecked for the material mapping boundaries:
+- City school call and official guidelines: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
+- RCESPA second-call guide: https://rcespa.jp/r08-datacenter/r08-datacenter-no2
+- ENV SHIFT third-call notice: https://www.env.go.jp/press/press_05521.html
+- MLIT local-government study call: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000191.html
+- SII ZEB applicant FAQ: https://sii.or.jp/zeb08/faq.html
+
+Other program rows retain their existing verification dates and status boundaries;
+this mapping does not certify a new round, site eligibility or multi-site permission.
+Grant reimbursement timing, bridging finance and actual award allocation must be
+reconciled with the delivery schedule before a deployment gate can pass.
