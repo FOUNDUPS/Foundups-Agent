@@ -42,6 +42,13 @@
 
 # Project eSingularity ModLog
 
+## 2026-09-29 — Post-vote movement entry and active contact correction
+
+- Audited GitHub main against Sites source version 53: the hosted source still carries the September 25 VOTE NO ticker and homepage, while main already holds the September 28 PPP/PFI correction. The live field-status branch's VOTE NO item expired September 25; the deployed compiled fallback is the stale part.
+- On YUMORI.me, added a concise current PPP/PFI comparison request and public-record link beneath the Japanese movement introduction, with English and Brazilian Portuguese derived from that text. Applied the existing guardian lockup and Japanese JHR name; kept the join form and WHY / WHAT / HOW sequence.
+- Changed only the active `/vote-no` council email subject to the present PPP/PFI comparison topic. The dated September 7 and 10 messages remain historical records.
+- Verified the movement language contracts, JHR public contracts, focused post-vote contract, and 18 routing checks; source publication status is recorded separately from these checks.
+
 ## 2026-09-23 — eSingularity.ai current council-position packet concatenation
 
 - Reconciled the public project homepage against the current five-page YUMORI council packet and the existing September 13 VOTE NO truth boundary. Added an explicitly attributed current-position block for **すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会**: the committee asks for a NO vote on the budget containing demolition preparation; the former 60-day delay/fixed hold is no longer the current request; and that vote is separate from adoption, financing, grants, guarantees, or contracting for the reuse proposal.

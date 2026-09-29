@@ -13,7 +13,7 @@ def source() -> str:
 def test_yumori_landing_exists_and_is_japanese_first() -> None:
     text = source()
     assert "YUMORI.me / 湯守" in text
-    assert "I am a guardian" in text
+    assert "私は湯守！ / me GUARDIAN! = YUMORI.me" in text
     assert "日本の地域を守り、地域のAIをつくる。" in text
     assert "準備委員会の最初の目標：1,000人" in text
     assert "JOIN YUMORI.me / 湯守になる" in text
@@ -34,9 +34,17 @@ def test_yumori_language_switcher_has_complete_english_and_portuguese_copy() -> 
             "Protect Japan’s communities. Build community-owned AI.",
             "Proteger as comunidades do Japão. Criar uma IA que pertença à comunidade.",
         ),
-        "I am a guardian.": (
-            "I am a guardian.",
-            "Sou um guardião.",
+        "私は湯守！ / me GUARDIAN! = YUMORI.me": (
+            "私は湯守！ / me GUARDIAN! = YUMORI.me",
+            "私は湯守！ / me GUARDIAN! = YUMORI.me",
+        ),
+        "9月25日の採決は終了しました。旧すかっとランド九頭竜について、設立準備委員会は解体工事に進む前のPPP/PFIによる解体案と再利用案の比較検証を求めています。": (
+            "The September 25 vote is over.",
+            "A votação de 25 de setembro terminou.",
+        ),
+        "現在の要請と公開記録を見る →": (
+            "Read the current request and public record →",
+            "Leia o pedido atual e o registro público →",
         ),
         "湯守は、本来、湯と場所を守る人。YUMORI.meは、その考えを地域へ広げます。AIインフラは必要です。しかし、土地・電力・知識・文化の未来を、地域の外だけで決めさせない。知る。守る。そして別の形をつくる。": (
             "A yumori traditionally protects the hot spring and the place around it.",
@@ -83,6 +91,7 @@ def test_yumori_remains_the_join_first_three_panel_movement_funnel() -> None:
     assert text.index(why) < text.index(what) < text.index(how)
     assert text.count("<Join") == 5
     assert "ACT / 1,000 YUMORI" in text
+    assert 'href="/vote-no"' in text
 
 
 def test_yumori_connects_jhr_esingularity_and_join_form_without_embedding() -> None:
