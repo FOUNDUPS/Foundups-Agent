@@ -128,3 +128,7 @@ portfolio outputs; its old summary is retained at rows 80–86 as legacy referen
 `Regional Impact` keeps visitor spending, project revenue, payroll, private capital,
 and public-cost avoidance separate. None becomes cash available for construction.
 See [execution/verification receipt](YUMORI_PORTFOLIO_REBASELINE_20260929.md).
+
+### FIN costed-planning update — 2026-09-29
+
+Same canonical workbook ID and 18 tabs. Site cost tables now hold low/base/high MODEL ONLY allowances. Assumptions 68:122, Revenue 30:68 and Opex 30:124 drive all three 5Y Model waterfalls. This supersedes the empty-input numeric snapshot, not the INSUFFICIENT EVIDENCE investment-readiness boundary.

@@ -21,6 +21,9 @@ from modules.foundups.esingularity.src.yumori_portfolio_model import (
     AnnualCashInputs, GrantAllocation, PortfolioInputs, PortfolioResult,
     SiteCost, SiteFinancialInputs, default_portfolio_sites, run_portfolio_model,
 )
+from modules.foundups.esingularity.src.yumori_planning_scenarios import (
+    load_planning_assumptions, run_planning_scenario,
+)
 
 MODEL_YEARS = 5
 HOURS_PER_YEAR = 8_760.0

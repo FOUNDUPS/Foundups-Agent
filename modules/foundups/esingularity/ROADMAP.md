@@ -72,3 +72,10 @@ Historical Educational Singularity / eSingularity material (including 2007–201
 - [ ] Gate 3: lawful City route, rights, rehabilitation/asbestos/MEP and thermal economics for optional Sukatto.
 - [ ] Obtain site quotes and financing terms; replace 51 missing capital inputs and 55 annual cash inputs per scenario before interpreting numerical portfolio feasibility.
 - [ ] Confirm asset-specific City filing units and each grant's applicant/site/equipment application unit. No automatic single three-site filing or award.
+
+## 2026-09-29 — Costed portfolio planning
+
+- [x] Populate independent low/base/high CapEx and demand-led downside/base/upside financial scenarios; publish formulas to existing FIN.
+- [ ] Replace MODEL ONLY scope quantities and rates with surveys/vendor/utility evidence.
+- [ ] Obtain customer orders, carrier route, City use terms and finance/tax review; then select a deployable minimum phase.
+- [ ] Resolve dated drawdowns, VAT bridge, refurbishment scope and actual commissioning sequence. No deployment gate is passed by entering planning estimates.
