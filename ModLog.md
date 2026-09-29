@@ -1,3 +1,9 @@
+## 2026-09-29: Complete staged general-role decision measurement
+
+- WSP00/15/22/48/50/73/95/97: verify main `5b830f1ca`, unchanged source/runtime/model/criteria and peer ownership; reuse the existing backend and bounded child runner.
+- Eleven new calls return within budget; inherited G01 remains distinct. Independent review: 1/12 staged cases met every original criterion; JSON/shape-valid 12/12, full-contract valid 1/12. Preserve false-completion, ask-state and attention failures; no retries, production promotion or retained-gain claim.
+- Next14/P1: qualify existing correspondence/WRE rejection and consumption boundaries with failed proposals plus legitimate-update controls; extend only a demonstrated gap. Keep the evaluation-only envelope separate from runtime authority. Canonical backlog contains exact outputs, source/runtime bindings, review and separate publication/closure receipt references.
+
 ## 2026-09-29: Measure one general-role JSON decision canary
 
 - WSP 00/15/22/48/50/73/95/97: re-observe main `d8263ecf8`, preserve closed PR #1964 and protected peer work; reuse the existing backend, frozen G01 input/criteria and bounded child owner.

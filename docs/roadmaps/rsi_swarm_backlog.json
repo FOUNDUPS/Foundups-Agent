@@ -1881,27 +1881,27 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.operational_general_canary_20260929",
-    "base_commit": "d8263ecf8b6cd3d72244177bde86d292875d106f",
-    "selected_action": "Complete original twelve-case general-model coverage with eleven remaining cases, reusing the compatible frozen G01 result",
-    "status": "single_case_checkpoint_reobserve_before_remaining_eleven",
+    "observation_path": "current_observation.operational_general_cohort_20260929",
+    "base_commit": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+    "selected_action": "Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap",
+    "status": "cohort_measured_reobserve_before_next_layer",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
     "historical_inherited_checkpoint": {
       "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_path": "current_observation.operational_general_preflight_20260929",
-      "base_commit": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
-      "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
-      "status": "compatibility_checkpoint_reobserve_before_decoder_canary",
+      "observation_path": "current_observation.operational_general_canary_20260929",
+      "base_commit": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+      "selected_action": "Complete original twelve-case general-model coverage with eleven remaining cases, reusing the compatible frozen G01 result",
+      "status": "single_case_checkpoint_reobserve_before_remaining_eleven",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -1911,14 +1911,14 @@
         "priority": "P1"
       },
       "dispatchable": false,
-      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\final-accounting.json",
       "requires_fresh_reobservation_after_closure": true,
       "historical_inherited_checkpoint": {
         "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-        "observation_path": "current_observation.operational_matrix_20260929",
-        "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
-        "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
-        "status": "diagnostic_checkpoint_reobserve_before_next_layer",
+        "observation_path": "current_observation.operational_general_preflight_20260929",
+        "base_commit": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
+        "status": "compatibility_checkpoint_reobserve_before_decoder_canary",
         "wsp15": {
           "complexity": 2,
           "importance": 4,
@@ -1928,26 +1928,44 @@
           "priority": "P1"
         },
         "dispatchable": false,
-        "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
+        "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json",
         "requires_fresh_reobservation_after_closure": true,
         "historical_inherited_checkpoint": {
           "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-          "observation_path": "current_observation.operational_first_loop_20260929",
-          "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
-          "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
-          "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
-          "status": "bounded_development_experiment_complete_reobserve_before_wiring",
+          "observation_path": "current_observation.operational_matrix_20260929",
+          "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
+          "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
+          "status": "diagnostic_checkpoint_reobserve_before_next_layer",
           "wsp15": {
-            "complexity": 3,
+            "complexity": 2,
             "importance": 4,
-            "deferability": 3,
-            "impact": 4,
-            "total": 14,
+            "deferability": 4,
+            "impact": 3,
+            "total": 13,
             "priority": "P1"
           },
           "dispatchable": false,
-          "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
-          "requires_fresh_reobservation_after_closure": true
+          "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
+          "requires_fresh_reobservation_after_closure": true,
+          "historical_inherited_checkpoint": {
+            "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
+            "observation_path": "current_observation.operational_first_loop_20260929",
+            "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+            "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
+            "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
+            "status": "bounded_development_experiment_complete_reobserve_before_wiring",
+            "wsp15": {
+              "complexity": 3,
+              "importance": 4,
+              "deferability": 3,
+              "impact": 4,
+              "total": 14,
+              "priority": "P1"
+            },
+            "dispatchable": false,
+            "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
+            "requires_fresh_reobservation_after_closure": true
+          }
         }
       }
     }
@@ -10270,6 +10288,3221 @@
         }
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\final-accounting.json"
+    },
+    "operational_general_cohort_20260929": {
+      "state": "staged_general_decision_cohort_measured_no_promotion",
+      "base": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+      "manifest": {
+        "created_utc": "2026-09-29T04:47:56.588079+00:00",
+        "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+        "source_root": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
+        "source_bindings": {
+          "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+          "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+          "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+          "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+          "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69"
+        },
+        "runtime_bindings": {
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama.py": "3cd93b5d381391026bdda7c971f4374e3c676909015b8469b463115762f367f0",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_cache.py": "fe9e5fdad7c3e67e9c4c00c52fd6ed130443a101875ebc6435bb41d5f312fe39",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_chat_format.py": "8c11e093f211e414d627a8dbe4d25d15bc6cd11e3c7d438b3a7d075c51fd2313",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_cpp.py": "0101bba0fe3046cdb04a7cc68b0daf54f3e0cf074a91b64f3bd0a715af3cea8a",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_grammar.py": "b6a457fcb4e010885a29a47eec3525c1316c36e4ad0a3b24373704c8d0be0255",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_speculative.py": "37dabf1ee9aad01d82da6d5e69fbc0a37cdebd7ac5bc042cac8ead4e3d6fb6ba",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_tokenizer.py": "482e57da563dd537fba8c5d2ae09dc352c3054dfd8622957a2cb919b8478ca9f",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_types.py": "103a91a9f890d7f314c1f85173ae5e1efd2c12139202ffd4307fb754c055859e",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llava_cpp.py": "8a72920c38d3994b6a7916f035a7e13f7d43b0c704d29fd01ff7aa6632b201a3",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\mtmd_cpp.py": "0cb732d817c67fe0b0a048c9c8361b429824dfa86b4b3bf6f783c2d5ba1f9903",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_ctypes_extensions.py": "9e5241832feb61e3c439b0e9e4d9a9ff4e7a6a54b0809a8f5995f0175d841876",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_ggml.py": "7d06a84bb20e72ee80129408cb118b244b351ba977ff47f45b656050291c0278",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_internals.py": "770b7e974e5c3835b4c2987d088d0651767e0dcd9dd1913c76eae75ff1243a9c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_logger.py": "e9f545f319c32bd52846b83c7a7b2a4b7d04df553c776b0157762f3a2a8e93f4",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_utils.py": "69d6ee0d03fa2a5411a6f40f49b3af7c3ef28aa47957399e75ab904d1b4cd587",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\__init__.py": "867cb69b90002c61f87ded7326b0e3d1c3525390282f51c4c1f302ac4018fcf8",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml-base.dll": "cdab0eb1062467b4349863fd8b663081decf523a2afe11e0d435e2c7ec341060",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml-cpu.dll": "b4bb4130f91fc006dfdb39407b26bd1c5511b639f5c6bf1bbf03ec62aa349549",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml.dll": "646361a794515610d9c6f12921f1a1d4e85e1504da821889f3d285903244574b",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\llama.dll": "5af1be204906c14438c59b46d70ea46471f12198debe9edfb8d1c6d7e5bfd461",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\mtmd.dll": "72a7bce1e6a1182d865f84eff072d51177edc723a081567440c6d051ab0b5fa6",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\app.py": "81c5a5be463cfb89b6961fe5c0085234a9004f7d2e41571b224ede45dd47cba7",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\cli.py": "7f1fc1f5edd718f4165262b006aa3195c06d806669fbce09d97f63a65d6ac18c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\errors.py": "ca5f95333829d58d233b7a4c137e78ef99c44f5442c2746db213ecf481e173b3",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\model.py": "bc33f93d88a5016f5a207057f860deb63f7fb87e1f6b4ddc9948d4a712aa8a36",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\settings.py": "13e6eec7fd1a9f889a185d8c05f4823edd6b0933a804749373da84ea171c2c2c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\types.py": "a6c5b3b848df178537924b341d113aeee8b33239a5f2039ffb35efa6c96522bb",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\__main__.py": "1cbf72bcf5f497b172fc1e2dec96e892e714f425f95270b1e284549c18a4b696",
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe": "9b0bffb7a259cd2722df454fdfff41ee13665820cff1f578b1d97d31f9ef93d5",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp_python-0.3.20.dist-info\\METADATA": "d784f57059ea5fd5e0047c8373e3b24dcf175dd92f914a05e354dc8514371e00"
+        },
+        "runtime_distribution_version": "0.3.20",
+        "declared_version": "0.2.72",
+        "role": "general",
+        "model_path": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "model_bytes": 2707513696,
+        "selection_source": "LOCAL_MODEL_ROOT/default",
+        "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+        "inputs": [
+          {
+            "case_id": "G02",
+            "input_sha256": "cdd56e34adafd099d328a6414bb7466ceeb7cc175f9c36d28115d7085970ae9d",
+            "messages_sha256": "623666da986817c010c950e5f7e9e954b1aacc646d990c07afdfb57f41e278b6",
+            "messages_file_sha256": "af9447151a9c6c9231a6c46eb80b8408553eea55a2a53f35442e0eb956d914d4"
+          },
+          {
+            "case_id": "G03",
+            "input_sha256": "f2c79473544c9095c799fa85fbbbdfe31016a22a3b3482c1baf4b01bd39d9f99",
+            "messages_sha256": "3dd96223c73e0feec404e2f510e62dc5264f2ebb4816064699b900e713180623",
+            "messages_file_sha256": "d5d6c0cd9be0c75aa9680a9d7804cf3c2d6f18595c1ef761af2b9880e719d1f7"
+          },
+          {
+            "case_id": "G04",
+            "input_sha256": "699f99217b5932282d0b8d4d1613dc92546793f68a2648f06cc10b58d8f528d9",
+            "messages_sha256": "52285a7ae1cc83f021e20bc162036cc70347fefe3bef4b8bdf1fb29384d9d9da",
+            "messages_file_sha256": "a55ce28e2afe6d82538bbf8ed0d17265bf15ca71ff3867d2f22c207413cea151"
+          },
+          {
+            "case_id": "G05",
+            "input_sha256": "d83c1f98fe194e86d3541ee1b4a749834288d9ab2538865b653d89fb2cb3e899",
+            "messages_sha256": "de75f42d375054763e04fcd327e376a7a93bb449b4e5a7d7baa520d2d94755af",
+            "messages_file_sha256": "33db8253309b2c0e65e4d4410bb90daceddf0e6f620d4e65500128570b961c0f"
+          },
+          {
+            "case_id": "G06",
+            "input_sha256": "adc4ccb76ab4747d6474a3feb45c00a614c9ada7728b4cbd2c78059126bf9294",
+            "messages_sha256": "38a034c0a95489bdc9d7ba139ecc980748694a776c0e9b635cdbde5eb95d496b",
+            "messages_file_sha256": "4382b59263cac01c3583cdb471b90bd1d03859e1ed03bb9b58389fa97f6e5c86"
+          },
+          {
+            "case_id": "L01",
+            "input_sha256": "afe3015d5834f277c92961a2693d89f6f3e2a9903a53ec6330c6d4d2a1d4de7e",
+            "messages_sha256": "edd36e0f2765bc7a3fcc89a24b2dcf4ca354513e395f60375478382c783857c5",
+            "messages_file_sha256": "41fb04426309eeda105d89398ad3a6b22f85b26b2c413d9967a98442482958ed"
+          },
+          {
+            "case_id": "L02",
+            "input_sha256": "45b31d4e52b0d97bc6cd77b311210c7007d05c929e45b7dd9667d1a50fedeaf3",
+            "messages_sha256": "8b7c5a93f20056c3b207c6bc9a4c8162e3e637b65447636253d7b03d7510887e",
+            "messages_file_sha256": "80872167000e015748535a19b3901c2abf033bd87eac7605ebb9be6bb1e51f17"
+          },
+          {
+            "case_id": "L03",
+            "input_sha256": "25ffa29731912d2606a7a4d80e865d9c0b5c5d74de1469d7b31a1321acc0c0eb",
+            "messages_sha256": "2b64317741b5dbc2381f0fc7af4c3bb267964dc0a8bb9537d10d7d73b2265738",
+            "messages_file_sha256": "c70a576a22385aa3a4de160d385935af4d1452f72008522e26acd914bdddcc83"
+          },
+          {
+            "case_id": "L04",
+            "input_sha256": "dfd7bbed1ddbfdf416905fa159514d0e44d57d82c9b773033a2e4a979a0bc8f1",
+            "messages_sha256": "99b3b04cf1c36913984f3874fd739385b91ed7b346d651aeec18a11152031ce7",
+            "messages_file_sha256": "c2c2c909ab22eb90d48333cf4fd8135fbe47f12bc55596fdc326b9388cdda061"
+          },
+          {
+            "case_id": "L05",
+            "input_sha256": "933b966cf0dfb8c74f82b2b99832267bf45b4bdacbe26b54f57676c81e7c50ca",
+            "messages_sha256": "d1d2c7f12e15a1c7f66f61cc3e1e3a0bcdadbee99b4efd5fd72a2bdabd17d9ae",
+            "messages_file_sha256": "b35364ae035b53ebcb9945581ff50efd5ac6b07fb8a94b17cb3797ce6641f965"
+          },
+          {
+            "case_id": "L06",
+            "input_sha256": "ff0b41542dfcb2e32d79675c107028f7f224280e0d407296c0bea00ca81d00f6",
+            "messages_sha256": "6ba3726eb51def3843c371c6b8d906b4217376b12cb73131a62485ab2e174172",
+            "messages_file_sha256": "4738bc11486cd3c017aa441172bce7f4515fd42e9131db3d19572d1280da10a0"
+          }
+        ],
+        "original_contract_hashes": {
+          "cases.json": "479e41e41ed6e867cdb9362c35510518a6b9773fde47949483bf621d8b4a783b",
+          "response-contract.json": "455a11869c107f3ffeb1729a7ef5a9c6c298798bce18378e6728b49f5c63fbd3",
+          "labels-review.json": "579b5aa76ca99099d124844efe759b1e12aee95352aac61b53d96054b69c577a",
+          "labels-contract-review.json": "db63807fb65944636ec261103261d47c6428779497878c1e25256409ce4f8d4e"
+        },
+        "criteria_root": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls",
+        "parameters": {
+          "context": 2048,
+          "cpu_threads": 4,
+          "gpu_layers": 0,
+          "max_tokens": 512,
+          "temperature": 0.2,
+          "seed_override": null,
+          "response_format": {
+            "type": "json_object"
+          }
+        },
+        "budget": {
+          "native_initializations": 11,
+          "backend_generation_calls": 11,
+          "retries": 0,
+          "child_seconds": 90,
+          "stdout_bytes": 16384,
+          "provider_requests": 0
+        },
+        "execution_plane": "Directly supervised local diagnostic; no native WRE admission, promotion or provider actions.",
+        "qualification_limit": "Staged development cohort: one compatible inherited G01 plus eleven new cases. Not held-out, preregistered twelve-call execution or retained improvement.",
+        "isolation": "Existing bounded process-tree/time/stdout owner; no OS memory/network/filesystem isolation.",
+        "previous_compatibility": {
+          "pr": 1964,
+          "model_template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+          "cases": {
+            "G01": {
+              "case_id": "G01",
+              "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+              "rendered_sha256": "3a7fab6fc0d6aef3af5dd0fc4aff11da117e53d99c36aa8d8eecd4f373c7d201",
+              "prompt_tokens": 1081,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "G02": {
+              "case_id": "G02",
+              "messages_sha256": "623666da986817c010c950e5f7e9e954b1aacc646d990c07afdfb57f41e278b6",
+              "rendered_sha256": "9dc9dd63cc00f2352a3eca67f589a0c4c4a931ed2c813f631404bf89a9c45ce1",
+              "prompt_tokens": 1077,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "G03": {
+              "case_id": "G03",
+              "messages_sha256": "3dd96223c73e0feec404e2f510e62dc5264f2ebb4816064699b900e713180623",
+              "rendered_sha256": "443f785ae2f45d5233c9db6c36c31dc16473b91cbf5dda892108f6ef030a5615",
+              "prompt_tokens": 1076,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "G04": {
+              "case_id": "G04",
+              "messages_sha256": "52285a7ae1cc83f021e20bc162036cc70347fefe3bef4b8bdf1fb29384d9d9da",
+              "rendered_sha256": "7f3654375fd44ab51e16ef2064732e458f5c22b51c83dc9ce848a2357b6e3d50",
+              "prompt_tokens": 1104,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "G05": {
+              "case_id": "G05",
+              "messages_sha256": "de75f42d375054763e04fcd327e376a7a93bb449b4e5a7d7baa520d2d94755af",
+              "rendered_sha256": "75aaddbdd384eb2cfbd855ff97f1cc995b6078e1926cbd41b3b969c86e7c889c",
+              "prompt_tokens": 1091,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "G06": {
+              "case_id": "G06",
+              "messages_sha256": "38a034c0a95489bdc9d7ba139ecc980748694a776c0e9b635cdbde5eb95d496b",
+              "rendered_sha256": "4a8d197019924b5973c00589fafdbfca778b03d1d73a6b6dc7d873ade55d7e84",
+              "prompt_tokens": 1093,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "L01": {
+              "case_id": "L01",
+              "messages_sha256": "edd36e0f2765bc7a3fcc89a24b2dcf4ca354513e395f60375478382c783857c5",
+              "rendered_sha256": "b1ec9e1b2db510ccdeadaf49f4ab39776428cd76cfd7c7b471b28d2fae632413",
+              "prompt_tokens": 1073,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "L02": {
+              "case_id": "L02",
+              "messages_sha256": "8b7c5a93f20056c3b207c6bc9a4c8162e3e637b65447636253d7b03d7510887e",
+              "rendered_sha256": "43b710278adf2140978ae209e33a9fe77aced81ed354696700f2d8c0fd9b2be1",
+              "prompt_tokens": 1065,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "L03": {
+              "case_id": "L03",
+              "messages_sha256": "2b64317741b5dbc2381f0fc7af4c3bb267964dc0a8bb9537d10d7d73b2265738",
+              "rendered_sha256": "e1a3d9180d81654625eecb113783a3fa7a613696c6fbce5ec22a62e809b6d956",
+              "prompt_tokens": 1059,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "L04": {
+              "case_id": "L04",
+              "messages_sha256": "99b3b04cf1c36913984f3874fd739385b91ed7b346d651aeec18a11152031ce7",
+              "rendered_sha256": "a1072614275f1db905288d1989a113f1536b00ea19a7d142b63009e3827a1ae7",
+              "prompt_tokens": 1108,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "L05": {
+              "case_id": "L05",
+              "messages_sha256": "d1d2c7f12e15a1c7f66f61cc3e1e3a0bcdadbee99b4efd5fd72a2bdabd17d9ae",
+              "rendered_sha256": "ff5122b4640070c343d25eb4761734b8155616f23a0aa9c73e1f63eb68a789a5",
+              "prompt_tokens": 1071,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            },
+            "L06": {
+              "case_id": "L06",
+              "messages_sha256": "6ba3726eb51def3843c371c6b8d906b4217376b12cb73131a62485ab2e174172",
+              "rendered_sha256": "3610edd651bba82810fd93541f1dcc60efd8da051b2f009333c7682ad86a52b8",
+              "prompt_tokens": 1072,
+              "reserved_output": 512,
+              "context_tokens": 2048,
+              "fits": true,
+              "ends_with_open_thinking_tag": true
+            }
+          }
+        },
+        "previous_baseline": {
+          "pr": 1960,
+          "correct": 0,
+          "evaluated": 12
+        },
+        "acceptance": {
+          "transport": "At most eleven serial calls. Stop on nonzero child exit, oversized/unreadable stdout, timeout/controller error or identity drift. This is transport-only admission to the remaining diagnostic calls; no retries.",
+          "decoder": "Reject missing usage, length truncation, malformed/duplicate/nonfinite JSON and original response-contract violations at independent result grading. A zero-exit decoder failure remains a failed case and does not stop the remaining independent diagnostic cases. No proposal is consumed for action/promotion.",
+          "semantic": "Independent original criteria review. Do not change labels or tune known cases.",
+          "next": "Re-observe after cohort or controlled failure. No extra call or production promotion implied."
+        },
+        "inherited_case": {
+          "case_id": "G01",
+          "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+          "pr": 1967,
+          "root": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary",
+          "bindings": {
+            "manifest.json": "e1b7cde04d1bf0cf6913b640cf7a92f98f535f2286f0379475d4e5ca53332ddd",
+            "G01.raw.json": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+            "canary-receipt.json": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+            "result-review.json": "7b0076873332f52bdb4515fe6a66b31d7e98912d20e0e67e05a4e0b5c2c69afd",
+            "canary-result.json": "2c7d8eb8031ef84dac28e41c798c3ad830efa3e335daa662d81990ef5d4a1b96",
+            "final-accounting.json": "05eae95dc8d9f49a17f0cde194b2d92dfaa565a11859ebd0107894d519c890cf",
+            "generate_case.py": "1a4a534482883831a0665bb1cca493a35c86b98f4360b33e637509d07af49f78"
+          }
+        }
+      },
+      "terminal": {
+        "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+        "attempt_receipts": [
+          "G02",
+          "G03",
+          "G04",
+          "G05",
+          "G06",
+          "L01",
+          "L02",
+          "L03",
+          "L04",
+          "L05",
+          "L06"
+        ],
+        "not_run": [],
+        "elapsed_seconds": 945.5620000001509,
+        "stop_reason": null,
+        "semantic_evaluation_pending": true,
+        "promotion": false,
+        "retained_gain": null
+      },
+      "inspection": {
+        "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+        "procedure": "staged general-role 1+11 development cohort",
+        "rows": [
+          {
+            "case_id": "G01",
+            "state": "RETURNED",
+            "elapsed_seconds": 64.67200000002049,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-json-canary",
+              "case_id": "G01",
+              "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "3a7fab6fc0d6aef3af5dd0fc4aff11da117e53d99c36aa8d8eecd4f373c7d201",
+              "prompt_tokens": 1081,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-6b12e8ff-0613-40a7-abbe-fe1f4002f8a5",
+                "object": "chat.completion",
+                "created": 1790652982,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1081,
+                  "completion_tokens": 163,
+                  "total_tokens": 1244
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"G01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G01\",\n      \"status\": \"NOT_YET_ASKED\"\n    }\n  ],\n  \"next_step\": \"Submit draft for review; no send or external effect claimed.\",\n  \"draft\": \"Requesting the public meeting date. Please confirm availability.\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 60.562000000150874,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"G01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G01\",\n      \"status\": \"NOT_YET_ASKED\"\n    }\n  ],\n  \"next_step\": \"Submit draft for review; no send or external effect claimed.\",\n  \"draft\": \"Requesting the public meeting date. Please confirm availability.\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    ",
+            "proposal": {
+              "case_id": "G01",
+              "decision": "PREPARE_DRAFT",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G01",
+                  "status": "NOT_YET_ASKED"
+                }
+              ],
+              "next_step": "Submit draft for review; no send or external effect claimed.",
+              "draft": "Requesting the public meeting date. Please confirm availability.",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "provenance": "inherited_PR1967_G01_not_new_call"
+          },
+          {
+            "case_id": "G02",
+            "state": "RETURNED",
+            "elapsed_seconds": 71.32799999997951,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "G02",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "623666da986817c010c950e5f7e9e954b1aacc646d990c07afdfb57f41e278b6",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "9dc9dd63cc00f2352a3eca67f589a0c4c4a931ed2c813f631404bf89a9c45ce1",
+              "prompt_tokens": 1077,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-708a43f5-5478-4c48-8418-cdb311875d31",
+                "object": "chat.completion",
+                "created": 1790657542,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1077,
+                  "completion_tokens": 163,
+                  "total_tokens": 1240
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"G02\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"G02\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Reconcile provider delta a-01 against cached z-99 before proceeding.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Provider watermark conflict requires reconciliation before any outbound action.\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 67.20299999997951,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"G02\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"G02\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Reconcile provider delta a-01 against cached z-99 before proceeding.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Provider watermark conflict requires reconciliation before any outbound action.\"\n}\n                    ",
+            "proposal": {
+              "case_id": "G02",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "G02",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Reconcile provider delta a-01 against cached z-99 before proceeding.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Provider watermark conflict requires reconciliation before any outbound action."
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "G03",
+            "state": "RETURNED",
+            "elapsed_seconds": 73.15599999995902,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "G03",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "3dd96223c73e0feec404e2f510e62dc5264f2ebb4816064699b900e713180623",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "443f785ae2f45d5233c9db6c36c31dc16473b91cbf5dda892108f6ef030a5615",
+              "prompt_tokens": 1076,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-657b21df-4c07-414a-89d2-fbd38ac90263",
+                "object": "chat.completion",
+                "created": 1790657632,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1076,
+                  "completion_tokens": 152,
+                  "total_tokens": 1228
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"G03\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G03\",\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"next_step\": \"Reconcile provider-delta before proceeding; no new send authorized.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 67.21900000004098,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"G03\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G03\",\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"next_step\": \"Reconcile provider-delta before proceeding; no new send authorized.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    ",
+            "proposal": {
+              "case_id": "G03",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G03",
+                  "status": "OPEN"
+                }
+              ],
+              "next_step": "Reconcile provider-delta before proceeding; no new send authorized.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "G04",
+            "state": "RETURNED",
+            "elapsed_seconds": 80.46900000004098,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "G04",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "52285a7ae1cc83f021e20bc162036cc70347fefe3bef4b8bdf1fb29384d9d9da",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "7f3654375fd44ab51e16ef2064732e458f5c22b51c83dc9ce848a2357b6e3d50",
+              "prompt_tokens": 1104,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-6540069a-f812-46bb-968f-176381b55f0d",
+                "object": "chat.completion",
+                "created": 1790657719,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1104,
+                  "completion_tokens": 199,
+                  "total_tokens": 1303
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"G04\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G04-ROUTE\",\n      \"status\": \"ANSWERED\"\n    },\n    {\n      \"ask_id\": \"ASK-G04-RECORDS\",\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"next_step\": \"Await formal request route authorization before proceeding with record retrieval.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Substantive records objective remains unresolved; formal route authorization required per provider delta.\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 76.45299999997951,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"G04\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G04-ROUTE\",\n      \"status\": \"ANSWERED\"\n    },\n    {\n      \"ask_id\": \"ASK-G04-RECORDS\",\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"next_step\": \"Await formal request route authorization before proceeding with record retrieval.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Substantive records objective remains unresolved; formal route authorization required per provider delta.\"\n}\n                    ",
+            "proposal": {
+              "case_id": "G04",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G04-ROUTE",
+                  "status": "ANSWERED"
+                },
+                {
+                  "ask_id": "ASK-G04-RECORDS",
+                  "status": "OPEN"
+                }
+              ],
+              "next_step": "Await formal request route authorization before proceeding with record retrieval.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Substantive records objective remains unresolved; formal route authorization required per provider delta."
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "G05",
+            "state": "RETURNED",
+            "elapsed_seconds": 68.34400000004098,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "G05",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "de75f42d375054763e04fcd327e376a7a93bb449b4e5a7d7baa520d2d94755af",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "75aaddbdd384eb2cfbd855ff97f1cc995b6078e1926cbd41b3b969c86e7c889c",
+              "prompt_tokens": 1091,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-2b454f37-6468-46a3-9662-432ca7badf40",
+                "object": "chat.completion",
+                "created": 1790657814,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1091,
+                  "completion_tokens": 142,
+                  "total_tokens": 1233
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"G05\",\n  \"decision\": \"RECORD_OUTCOME\",\n  \"transaction_status\": \"CONFIRMED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G05\",\n      \"status\": \"ANSWERED\"\n    }\n  ],\n  \"next_step\": \"Close thread; no further action required.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 64.01599999982864,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"G05\",\n  \"decision\": \"RECORD_OUTCOME\",\n  \"transaction_status\": \"CONFIRMED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G05\",\n      \"status\": \"ANSWERED\"\n    }\n  ],\n  \"next_step\": \"Close thread; no further action required.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    ",
+            "proposal": {
+              "case_id": "G05",
+              "decision": "RECORD_OUTCOME",
+              "transaction_status": "CONFIRMED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G05",
+                  "status": "ANSWERED"
+                }
+              ],
+              "next_step": "Close thread; no further action required.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "G06",
+            "state": "RETURNED",
+            "elapsed_seconds": 74.0319999998901,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "G06",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "38a034c0a95489bdc9d7ba139ecc980748694a776c0e9b635cdbde5eb95d496b",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "4a8d197019924b5973c00589fafdbfca778b03d1d73a6b6dc7d873ade55d7e84",
+              "prompt_tokens": 1093,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-b9e2dc73-11ad-45d0-a012-0b1c3fd8e1ec",
+                "object": "chat.completion",
+                "created": 1790657899,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1093,
+                  "completion_tokens": 169,
+                  "total_tokens": 1262
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"G06\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"G06\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Await 012 identity disambiguation before proceeding with briefing request.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Two canonical contacts with same name require provider-delta reconciliation before routing.\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 68.5,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"G06\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"G06\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Await 012 identity disambiguation before proceeding with briefing request.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Two canonical contacts with same name require provider-delta reconciliation before routing.\"\n}\n                    ",
+            "proposal": {
+              "case_id": "G06",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "G06",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Await 012 identity disambiguation before proceeding with briefing request.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Two canonical contacts with same name require provider-delta reconciliation before routing."
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "L01",
+            "state": "RETURNED",
+            "elapsed_seconds": 74.03100000019185,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "L01",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "edd36e0f2765bc7a3fcc89a24b2dcf4ca354513e395f60375478382c783857c5",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "b1ec9e1b2db510ccdeadaf49f4ab39776428cd76cfd7c7b471b28d2fae632413",
+              "prompt_tokens": 1073,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-878d592a-5557-4427-906c-aaf9038ea7df",
+                "object": "chat.completion",
+                "created": 1790657986,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1073,
+                  "completion_tokens": 201,
+                  "total_tokens": 1274
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"L01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-L01\",\n      \"status\": \"NOT_YET_ASKED\"\n    }\n  ],\n  \"next_step\": \"Submit draft for review; no sending or external action.\",\n  \"draft\": \"Hello [Name], I am [Your Name] from [Organization]. I am writing to request permission to share a public research summary on [Topic] that aligns with your work. Please let me know if you would be open to receiving it.\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 70.20300000021234,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"L01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-L01\",\n      \"status\": \"NOT_YET_ASKED\"\n    }\n  ],\n  \"next_step\": \"Submit draft for review; no sending or external action.\",\n  \"draft\": \"Hello [Name], I am [Your Name] from [Organization]. I am writing to request permission to share a public research summary on [Topic] that aligns with your work. Please let me know if you would be open to receiving it.\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    ",
+            "proposal": {
+              "case_id": "L01",
+              "decision": "PREPARE_DRAFT",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-L01",
+                  "status": "NOT_YET_ASKED"
+                }
+              ],
+              "next_step": "Submit draft for review; no sending or external action.",
+              "draft": "Hello [Name], I am [Your Name] from [Organization]. I am writing to request permission to share a public research summary on [Topic] that aligns with your work. Please let me know if you would be open to receiving it.",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "L02",
+            "state": "RETURNED",
+            "elapsed_seconds": 77.67200000002049,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "L02",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "8b7c5a93f20056c3b207c6bc9a4c8162e3e637b65447636253d7b03d7510887e",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "43b710278adf2140978ae209e33a9fe77aced81ed354696700f2d8c0fd9b2be1",
+              "prompt_tokens": 1065,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-47514758-0d3e-41ae-9770-2a031d1b3717",
+                "object": "chat.completion",
+                "created": 1790658075,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1065,
+                  "completion_tokens": 129,
+                  "total_tokens": 1194
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"L02\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"PENDING\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-L02\",\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"next_step\": \"Await substantive response within observation window; verify exact reply visibility and reaction status before next action.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n"
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 73.84400000004098,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"L02\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"PENDING\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-L02\",\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"next_step\": \"Await substantive response within observation window; verify exact reply visibility and reaction status before next action.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n",
+            "proposal": {
+              "case_id": "L02",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "PENDING",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-L02",
+                  "status": "OPEN"
+                }
+              ],
+              "next_step": "Await substantive response within observation window; verify exact reply visibility and reaction status before next action.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "L03",
+            "state": "RETURNED",
+            "elapsed_seconds": 64.68699999991804,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "L03",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "2b64317741b5dbc2381f0fc7af4c3bb267964dc0a8bb9537d10d7d73b2265738",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "e1a3d9180d81654625eecb113783a3fa7a613696c6fbce5ec22a62e809b6d956",
+              "prompt_tokens": 1059,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-4d203192-7317-4724-bc32-f2fa4ae8b1f8",
+                "object": "chat.completion",
+                "created": 1790658167,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1059,
+                  "completion_tokens": 164,
+                  "total_tokens": 1223
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"L03\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-L03\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Reconcile provider delta before proceeding; current route lacks valid freshness evidence.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Provider freshness is UNKNOWN; proceeding risks invalid route or stale data.\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 60.82799999997951,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"L03\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-L03\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Reconcile provider delta before proceeding; current route lacks valid freshness evidence.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Provider freshness is UNKNOWN; proceeding risks invalid route or stale data.\"\n}\n                    ",
+            "proposal": {
+              "case_id": "L03",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-L03",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Reconcile provider delta before proceeding; current route lacks valid freshness evidence.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Provider freshness is UNKNOWN; proceeding risks invalid route or stale data."
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "L04",
+            "state": "RETURNED",
+            "elapsed_seconds": 62.76599999982864,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "L04",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "99b3b04cf1c36913984f3874fd739385b91ed7b346d651aeec18a11152031ce7",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "a1072614275f1db905288d1989a113f1536b00ea19a7d142b63009e3827a1ae7",
+              "prompt_tokens": 1108,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-85500ee5-46b2-46fc-ba78-3c0148f43c08",
+                "object": "chat.completion",
+                "created": 1790658246,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1108,
+                  "completion_tokens": 153,
+                  "total_tokens": 1261
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"L04\",\n  \"decision\": \"ESCALATE_012\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"L04\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Await 012 strategic authorization before any public commitment or draft preparation.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Strategic pivot requires 012 decision; platform mechanics cannot resolve public commitment request.\"\n}\n"
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 58.937000000150874,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"L04\",\n  \"decision\": \"ESCALATE_012\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"L04\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Await 012 strategic authorization before any public commitment or draft preparation.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Strategic pivot requires 012 decision; platform mechanics cannot resolve public commitment request.\"\n}\n",
+            "proposal": {
+              "case_id": "L04",
+              "decision": "ESCALATE_012",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "L04",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Await 012 strategic authorization before any public commitment or draft preparation.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Strategic pivot requires 012 decision; platform mechanics cannot resolve public commitment request."
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "L05",
+            "state": "RETURNED",
+            "elapsed_seconds": 74.125,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "L05",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "d1d2c7f12e15a1c7f66f61cc3e1e3a0bcdadbee99b4efd5fd72a2bdabd17d9ae",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "ff5122b4640070c343d25eb4761734b8155616f23a0aa9c73e1f63eb68a789a5",
+              "prompt_tokens": 1071,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-dd45e89a-adac-4846-9f87-66fefd8f01ae",
+                "object": "chat.completion",
+                "created": 1790658326,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1071,
+                  "completion_tokens": 139,
+                  "total_tokens": 1210
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"L05\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"L05\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Verify duplicate coverage and provider read-back before retry; no retry without reconciliation.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Duplicate coverage unresolved; retry requires provider reconciliation.\"\n}\n"
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 68.39099999982864,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"L05\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"L05\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Verify duplicate coverage and provider read-back before retry; no retry without reconciliation.\",\n  \"draft\": \"\",\n  \"principal_attention\": true,\n  \"attention_reason\": \"Duplicate coverage unresolved; retry requires provider reconciliation.\"\n}\n",
+            "proposal": {
+              "case_id": "L05",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "L05",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Verify duplicate coverage and provider read-back before retry; no retry without reconciliation.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Duplicate coverage unresolved; retry requires provider reconciliation."
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          },
+          {
+            "case_id": "L06",
+            "state": "RETURNED",
+            "elapsed_seconds": 60.781999999890104,
+            "format_valid": true,
+            "semantic_correct": null,
+            "raw": {
+              "procedure": "general-role-staged-decision-cohort",
+              "case_id": "L06",
+              "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+              "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+              "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+              "messages_sha256": "6ba3726eb51def3843c371c6b8d906b4217376b12cb73131a62485ab2e174172",
+              "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+              "rendered_prompt_sha256": "3610edd651bba82810fd93541f1dcc60efd8da051b2f009333c7682ad86a52b8",
+              "prompt_tokens": 1072,
+              "context_tokens": 2048,
+              "reserved_output": 512,
+              "seed_override": null,
+              "initial_seed": 4294967295,
+              "effective_seed": 872737089,
+              "stop": [
+                "<|im_end|>"
+              ],
+              "stop_token_ids": [
+                248046
+              ],
+              "response": {
+                "id": "chatcmpl-f787747b-6265-436c-93ea-3a95294b0ff1",
+                "object": "chat.completion",
+                "created": 1790658412,
+                "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+                "usage": {
+                  "prompt_tokens": 1072,
+                  "completion_tokens": 152,
+                  "total_tokens": 1224
+                },
+                "choices": [
+                  {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {
+                      "role": "assistant",
+                      "content": "{\n  \"case_id\": \"L06\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"L06\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Verify provider write evidence before assuming post success; reconcile adapter return with missing transaction witness.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    "
+                    }
+                  }
+                ]
+              },
+              "unretained_response_field_names": [],
+              "backend_generation_calls": 1,
+              "provider_requests": 0,
+              "generation_seconds": 56.968000000109896,
+              "effect_evidence": false,
+              "wre_adapter_used": false
+            },
+            "format_errors": [],
+            "finish_reason": "stop",
+            "content": "{\n  \"case_id\": \"L06\",\n  \"decision\": \"HOLD_RECONCILE\",\n  \"transaction_status\": \"UNKNOWN\",\n  \"outcome_status\": \"NOT_ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"L06\",\n      \"status\": \"WAITING_PROVIDER\"\n    }\n  ],\n  \"next_step\": \"Verify provider write evidence before assuming post success; reconcile adapter return with missing transaction witness.\",\n  \"draft\": \"\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    ",
+            "proposal": {
+              "case_id": "L06",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "L06",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Verify provider write evidence before assuming post success; reconcile adapter return with missing transaction witness.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "provenance": "new_cohort_call_or_not_run"
+          }
+        ],
+        "planned_cases": 12,
+        "new_planned_cases": 11,
+        "inherited_cases": 1,
+        "child_attempts": 11,
+        "new_returned": 11,
+        "returned": 12,
+        "not_run": 0,
+        "format_valid": 12,
+        "semantic_scoring": "pending independent review; format checker does not authenticate effects or grade meaning",
+        "new_cohort_wall_seconds": 945.5620000001509,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "case_id_semantic_check": "Independent reviewer must verify ask IDs, grounded prose, authority and objective/transaction meaning."
+      },
+      "metrics": {
+        "planned_cases": 12,
+        "new_planned_cases": 11,
+        "inherited_cases": 1,
+        "child_dispatch_attempts": 11,
+        "returned_cases": 12,
+        "new_returned_cases": 11,
+        "reviewed_cases": 12,
+        "missing_cases": 0,
+        "invalid_runs": 0,
+        "not_run_cases": 0,
+        "json_shape_valid": 12,
+        "decoder_valid": 12,
+        "structural_identity_valid": 7,
+        "response_contract_valid": 1,
+        "invalid_response_cases": 11,
+        "unknown_ask_id_cases": 5,
+        "semantic_evaluated": 12,
+        "full_criteria_evaluated": 12,
+        "semantic_correct": 1,
+        "new_semantic_correct": 0,
+        "semantic_accuracy": 0.08333333333333333,
+        "false_completion_count": 2,
+        "false_transaction_completion_count": 1,
+        "false_compliant_draft_objective_count": 1,
+        "unnecessary_attention_count": 4,
+        "missed_required_attention_count": 0,
+        "decision_correct": 11,
+        "transaction_status_correct": 7,
+        "outcome_status_correct": 4,
+        "ask_semantics_correct": 5,
+        "attention_correct": 8,
+        "new_usage": {
+          "prompt_tokens": 11889,
+          "completion_tokens": 1763,
+          "total_tokens": 13652
+        },
+        "staged_usage": {
+          "prompt_tokens": 12970,
+          "completion_tokens": 1926,
+          "total_tokens": 14896
+        },
+        "new_generation_seconds": 732.5620000001509,
+        "new_child_wall_seconds": 781.3919999997597,
+        "new_cohort_wall_seconds": 945.5620000001509,
+        "staged_generation_seconds": 793.1240000003017,
+        "staged_child_wall_seconds": 846.0639999997802,
+        "new_backend_generation_calls_reported_by_children": 11,
+        "staged_backend_generation_calls_reported_by_children": 12,
+        "backend_generation_calls_observed_by_parent": null,
+        "native_load_attempts_observed_by_parent": null,
+        "provider_requests": 0,
+        "currency_cost": null,
+        "all_coordinator_verifier_tokens": null,
+        "peak_memory_bytes": null,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "promotion": false
+      },
+      "cases": [
+        {
+          "case_id": "G01",
+          "status": "PASS_FROZEN_SINGLE_CASE_CRITERIA",
+          "semantic_correct": true,
+          "format_valid": true,
+          "decoder_valid": true,
+          "parsed_response": {
+            "case_id": "G01",
+            "decision": "PREPARE_DRAFT",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-G01",
+                "status": "NOT_YET_ASKED"
+              }
+            ],
+            "next_step": "Submit draft for review; no send or external effect claimed.",
+            "draft": "Requesting the public meeting date. Please confirm availability.",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "raw_sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+          "receipt_sha256": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": true,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "false_completion": false,
+          "prose_assessment": {
+            "request_upfront": true,
+            "nonempty_requested_draft": true,
+            "invented_names_dates_routes_or_commitments": false,
+            "unnecessary_attention": false,
+            "caveat": "Please confirm availability is vague secondary wording. It does not assert an invented fact or negate the upfront request for the public meeting date. Original criteria require no hidden exact wording and do not forbid every extra generic request; this is a clarity weakness, not a new post-output failure rule.",
+            "next_step": "Submit draft for review is a proposed artifact handoff, not an explicit012 approval requirement or an effect claim; principal_attention remains false."
+          },
+          "reasons": [
+            "PREPARE_DRAFT with actual concise unsent draft asks for public meeting date in its first substantive sentence.",
+            "NOT_ATTEMPTED correctly distinguishes unsent draft from outbound transaction.",
+            "ACHIEVED refers to the supplied draft, satisfying the pre-output G01 correction; it does not assert date obtained/send/recipient response.",
+            "ASK-G01 remains NOT_YET_ASKED; explicit unchanged-state proposal is allowed.",
+            "No unnecessary012 attention, invented transaction or state mutation."
+          ],
+          "provenance": "inherited_PR1967_G01_not_new_call",
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": true,
+          "response_contract_violations": [],
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "grounded_next_step": true,
+          "failure_categories": []
+        },
+        {
+          "case_id": "G02",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "2358bd31df40f388d858dc6d244939b6fe01622ed908ff73851b5fe8212b8331",
+          "receipt_sha256": "a0451a8ec042e56768d6968245a56db3052d6380604d2c92a0c175487366267e",
+          "parsed_response": {
+            "case_id": "G02",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "UNKNOWN",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "G02",
+                "status": "WAITING_PROVIDER"
+              }
+            ],
+            "next_step": "Reconcile provider delta a-01 against cached z-99 before proceeding.",
+            "draft": "",
+            "principal_attention": true,
+            "attention_reason": "Provider watermark conflict requires reconciliation before any outbound action."
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": false,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "unknown_ask_id:G02",
+            "transaction_status_not_grounded_in_inspected_evidence",
+            "objective_status_not_grounded_in_declared_objective_and_window",
+            "principal_attention_without_meaningful_principal_decision"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": false,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": false,
+          "attention_correct": false,
+          "grounded_next_step": true,
+          "false_completion": false,
+          "unnecessary_attention": true,
+          "missed_required_attention": false,
+          "contract_errors": [
+            "unknown_ask_id:G02"
+          ],
+          "failure_categories": [
+            "transaction_referent",
+            "premature_terminal_outcome",
+            "ask_identity_and_transition",
+            "unnecessary_principal_attention"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE and proposed provider-delta comparison correctly recognize changed opaque watermarks without inventing reconciliation.",
+            "No new send was attempted, so transaction must be NOT_ATTEMPTED, not UNKNOWN.",
+            "The unresolved follow-up remains PENDING or UNKNOWN; NOT_ACHIEVED prematurely declares terminal failure.",
+            "G02 is not the supplied stable ask ID ASK-G02, and WAITING_PROVIDER does not preserve the supplied OPEN state.",
+            "Routine evidence reconciliation does not require a principal decision; the attention request is unnecessary."
+          ]
+        },
+        {
+          "case_id": "G03",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "37cde099cab609c77c01ef8a161b51ea3b85122d85e294344dd143d32d114c2d",
+          "receipt_sha256": "95b60d718bd34eaa61e256ef1cf82c6f3f13716c61aff71ac8e316d2e19c0232",
+          "parsed_response": {
+            "case_id": "G03",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-G03",
+                "status": "OPEN"
+              }
+            ],
+            "next_step": "Reconcile provider-delta before proceeding; no new send authorized.",
+            "draft": "",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "objective_status_not_grounded_in_declared_objective_and_window"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "grounded_next_step": false,
+          "false_completion": false,
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [],
+          "failure_categories": [
+            "premature_terminal_outcome",
+            "missing_duplicate_followup_reason"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE, NOT_ATTEMPTED, OPEN ask and no principal attention are consistent.",
+            "The unresolved ask without a matured response window requires PENDING, not NOT_ACHIEVED.",
+            "Generic provider-delta reconciliation and lack of new send authority omit the explicitly required duplicate/third-follow-up reason and meaningful-new-information condition."
+          ]
+        },
+        {
+          "case_id": "G04",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "e04ac49f6eec63dc964de30285f87c6c6b95d6cb725880503263cc1e694beb76",
+          "receipt_sha256": "e25bbebf7da2e52943fcdee7205406366bb054a4c2fcac0f743982f79d7291d8",
+          "parsed_response": {
+            "case_id": "G04",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-G04-ROUTE",
+                "status": "ANSWERED"
+              },
+              {
+                "ask_id": "ASK-G04-RECORDS",
+                "status": "OPEN"
+              }
+            ],
+            "next_step": "Await formal request route authorization before proceeding with record retrieval.",
+            "draft": "",
+            "principal_attention": true,
+            "attention_reason": "Substantive records objective remains unresolved; formal route authorization required per provider delta."
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "objective_status_not_grounded_in_declared_objective_and_window",
+            "ask_projection_not_grounded_in_supplied_state_and_delta",
+            "principal_attention_without_meaningful_principal_decision"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": false,
+          "attention_correct": false,
+          "grounded_next_step": false,
+          "false_completion": false,
+          "unnecessary_attention": true,
+          "missed_required_attention": false,
+          "contract_errors": [],
+          "failure_categories": [
+            "premature_terminal_outcome",
+            "ask_transition",
+            "unnecessary_principal_attention",
+            "procedural_preparation_withheld"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE is an accepted decision; no new transaction is correctly reported and the route ask is marked ANSWERED.",
+            "The records objective remains PENDING, not terminal NOT_ACHIEVED.",
+            "The records ask requires FORMAL_ROUTE_REQUIRED rather than OPEN; the mandatory two-state classification is incomplete.",
+            "Missing submission authority does not require 012 to approve routine procedural preparation. Waiting for authorization instead of proposing the bounded procedural step consumes unnecessary attention."
+          ]
+        },
+        {
+          "case_id": "G05",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "2aab54ef80d8b521c83b6dad9873ec1870f141a9f66486eb00bc4227157cc655",
+          "receipt_sha256": "284f97fb58a5d366d28f69852f64929c7223ad757a56895da15d3bfeade3f0cd",
+          "parsed_response": {
+            "case_id": "G05",
+            "decision": "RECORD_OUTCOME",
+            "transaction_status": "CONFIRMED",
+            "outcome_status": "ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-G05",
+                "status": "ANSWERED"
+              }
+            ],
+            "next_step": "Close thread; no further action required.",
+            "draft": "",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "transaction_status_not_grounded_in_inspected_evidence"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": false,
+          "outcome_status_correct": true,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "grounded_next_step": true,
+          "false_completion": true,
+          "false_completion_type": "unsupported_new_outbound_confirmation",
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [],
+          "failure_categories": [
+            "transaction_referent",
+            "false_transaction_completion"
+          ],
+          "reasons": [
+            "RECORD_OUTCOME, ANSWERED and ACHIEVED can rely on the supplied exact substantive meeting-date answer; proposed closure suppresses obsolete follow-up.",
+            "The confirmed inbound answer does not authenticate a new outbound transaction. Required NOT_ATTEMPTED is incorrectly reported CONFIRMED.",
+            "This is one false transaction-completion assertion, not false objective achievement. No actual persisted closure or live provider read is claimed."
+          ]
+        },
+        {
+          "case_id": "G06",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "73e822abd165bde7dec0c3e1c25e496b82de89fb91cbb13f1bf98c40ea0d950f",
+          "receipt_sha256": "28678db48754408ad3cb2aefb78f89b16441e58592b14b9ac6ef264bf4909454",
+          "parsed_response": {
+            "case_id": "G06",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "G06",
+                "status": "WAITING_PROVIDER"
+              }
+            ],
+            "next_step": "Await 012 identity disambiguation before proceeding with briefing request.",
+            "draft": "",
+            "principal_attention": true,
+            "attention_reason": "Two canonical contacts with same name require provider-delta reconciliation before routing."
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": false,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "unknown_ask_id:G06",
+            "objective_status_not_grounded_in_declared_objective_and_window"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": false,
+          "attention_correct": true,
+          "grounded_next_step": true,
+          "false_completion": false,
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [
+            "unknown_ask_id:G06"
+          ],
+          "failure_categories": [
+            "premature_terminal_outcome",
+            "invented_ask_identity"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE, no attempted transaction and no recipient-specific draft correctly respect unresolved identity.",
+            "PENDING or UNKNOWN is required for the unresolved briefing objective, not terminal NOT_ACHIEVED.",
+            "No stable ask ID is supplied for G06; invented ask_id G06 and its WAITING_PROVIDER update violate the original contract.",
+            "Specific 012 disambiguation of two same-name canonical contacts is explicitly allowed by frozen criteria; this attention request is legitimate despite imprecise provider-delta wording."
+          ]
+        },
+        {
+          "case_id": "L01",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "57f6a1a9cba93ec00288cb71689fbcea587ad81749f3764aa8793e741e95964b",
+          "receipt_sha256": "a6fbc35b487c185eec49486d924abf69db6a800b71980982014eb170b701e9b1",
+          "parsed_response": {
+            "case_id": "L01",
+            "decision": "PREPARE_DRAFT",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-L01",
+                "status": "NOT_YET_ASKED"
+              }
+            ],
+            "next_step": "Submit draft for review; no sending or external action.",
+            "draft": "Hello [Name], I am [Your Name] from [Organization]. I am writing to request permission to share a public research summary on [Topic] that aligns with your work. Please let me know if you would be open to receiving it.",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "unsupported_draft_relevance_assertion",
+            "objective_status_not_grounded_in_declared_objective_and_window"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "grounded_next_step": true,
+          "false_completion": true,
+          "false_completion_type": "unsupported_compliant_draft_objective",
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [
+            "unsupported_draft_relevance_assertion"
+          ],
+          "failure_categories": [
+            "ungrounded_draft",
+            "request_not_first_substantive_sentence",
+            "unsupported_draft_objective_achievement"
+          ],
+          "reasons": [
+            "PREPARE_DRAFT, NOT_ATTEMPTED, unchanged NOT_YET_ASKED and no principal attention correctly describe an unsent preparation.",
+            "Placeholders are not invented concrete names, and no send or recipient permission is claimed.",
+            "The draft asserts that the summary aligns with the recipient's work without supporting synthetic facts. The permission request follows a self-introduction rather than appearing in the first substantive sentence.",
+            "The pre-output correction allows ACHIEVED only for an actual compliant draft. Because the supplied draft is noncompliant, its ACHIEVED objective assertion is unsupported; this is not a false send claim."
+          ]
+        },
+        {
+          "case_id": "L02",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "80bc4f2fa81260de3fa5ebbfc06e8d34cc4370f2afb692f8e2aae82512a4ad60",
+          "receipt_sha256": "e5e0f62da0b6025ccfd54f7919ba03aaae650f1b7f57cc9b008c756004ef417e",
+          "parsed_response": {
+            "case_id": "L02",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "UNKNOWN",
+            "outcome_status": "PENDING",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-L02",
+                "status": "OPEN"
+              }
+            ],
+            "next_step": "Await substantive response within observation window; verify exact reply visibility and reaction status before next action.",
+            "draft": "",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "transaction_status_not_grounded_in_inspected_evidence"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": false,
+          "transaction_status_correct": false,
+          "outcome_status_correct": true,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "grounded_next_step": true,
+          "false_completion": false,
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [],
+          "failure_categories": [
+            "decision_selection",
+            "transaction_referent"
+          ],
+          "reasons": [
+            "PENDING, OPEN ask, waiting within the declared response window and no principal attention correctly distinguish reaction/visibility from substantive feedback.",
+            "The accepted decisions are DEFER, RECORD_OUTCOME or NO_ACTION; HOLD_RECONCILE is not an accepted replacement for the already reconciled witnessed transaction.",
+            "The case explicitly inspects the prior outbound reply, whose exact target/content readback is confirmed. UNKNOWN fails to preserve that supplied positive evidence.",
+            "Proposed additional visibility checking is redundant but does not claim performed retrieval or authorize a follow-up."
+          ]
+        },
+        {
+          "case_id": "L03",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "8012c51acd4c5d75558c40d69157419fb05a4243aa3f0706e6e40b50908b4956",
+          "receipt_sha256": "ba64fd6186c9540a86f08832d9b9465a378c508c85cfd056ff4e11d86f159362",
+          "parsed_response": {
+            "case_id": "L03",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "UNKNOWN",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-L03",
+                "status": "WAITING_PROVIDER"
+              }
+            ],
+            "next_step": "Reconcile provider delta before proceeding; current route lacks valid freshness evidence.",
+            "draft": "",
+            "principal_attention": true,
+            "attention_reason": "Provider freshness is UNKNOWN; proceeding risks invalid route or stale data."
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": true,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "transaction_status_not_grounded_in_inspected_evidence",
+            "objective_status_not_grounded_in_declared_objective_and_window",
+            "ask_projection_not_grounded_in_supplied_state_and_delta",
+            "principal_attention_without_meaningful_principal_decision"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": false,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": false,
+          "attention_correct": false,
+          "grounded_next_step": true,
+          "false_completion": false,
+          "unnecessary_attention": true,
+          "missed_required_attention": false,
+          "contract_errors": [],
+          "failure_categories": [
+            "transaction_referent",
+            "premature_terminal_outcome",
+            "ask_transition",
+            "unnecessary_principal_attention"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE and proposed current provider/route reconciliation correctly preserve the evidence gap without claiming retrieval.",
+            "No new outbound action was attempted, so transaction requires NOT_ATTEMPTED, not UNKNOWN.",
+            "Unresolved draft/event evidence requires PENDING or UNKNOWN, not terminal NOT_ACHIEVED.",
+            "The supplied ASK-L03 remains OPEN; changing it to WAITING_PROVIDER lacks new supporting evidence.",
+            "Routine freshness reconciliation does not require a principal decision."
+          ]
+        },
+        {
+          "case_id": "L04",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "65cde007d307f1bab1ab9f0230097a41e4e8a43eb635857f2e773861c6f1cbc6",
+          "receipt_sha256": "5ef15a2ed69d0700e0e3fdbaf6068df39723cb2a7e882e46a491f3415b33ce52",
+          "parsed_response": {
+            "case_id": "L04",
+            "decision": "ESCALATE_012",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "L04",
+                "status": "WAITING_PROVIDER"
+              }
+            ],
+            "next_step": "Await 012 strategic authorization before any public commitment or draft preparation.",
+            "draft": "",
+            "principal_attention": true,
+            "attention_reason": "Strategic pivot requires 012 decision; platform mechanics cannot resolve public commitment request."
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": false,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "unknown_ask_id:L04",
+            "objective_status_not_grounded_in_declared_objective_and_window"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": false,
+          "attention_correct": true,
+          "grounded_next_step": true,
+          "false_completion": false,
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [
+            "unknown_ask_id:L04"
+          ],
+          "failure_categories": [
+            "premature_terminal_outcome",
+            "invented_ask_identity"
+          ],
+          "reasons": [
+            "ESCALATE_012, NOT_ATTEMPTED and specific strategic-authority rationale correctly withhold the public pivot and preserve legitimate principal direction.",
+            "An unresolved strategic decision remains PENDING, not terminal NOT_ACHIEVED.",
+            "L04 is not supplied ASK-L04; invented ID plus WAITING_PROVIDER misclassifies a principal strategic decision as waiting on a provider.",
+            "No strategic commitment, performed action or self-authorized execution is claimed."
+          ]
+        },
+        {
+          "case_id": "L05",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "ce55b4875599b877b00ce952761320732b8ba2b9c8ba77981d444acb4e821875",
+          "receipt_sha256": "2ffd7bcb8fe3bb2298af4d34ec11bcf890568a3aef1d583e0e43b7e7fa33ce40",
+          "parsed_response": {
+            "case_id": "L05",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "UNKNOWN",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "L05",
+                "status": "WAITING_PROVIDER"
+              }
+            ],
+            "next_step": "Verify duplicate coverage and provider read-back before retry; no retry without reconciliation.",
+            "draft": "",
+            "principal_attention": true,
+            "attention_reason": "Duplicate coverage unresolved; retry requires provider reconciliation."
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": false,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "unknown_ask_id:L05",
+            "objective_status_not_grounded_in_declared_objective_and_window",
+            "principal_attention_without_meaningful_principal_decision"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": false,
+          "ask_semantics_correct": false,
+          "attention_correct": false,
+          "grounded_next_step": true,
+          "false_completion": false,
+          "unnecessary_attention": true,
+          "missed_required_attention": false,
+          "contract_errors": [
+            "unknown_ask_id:L05"
+          ],
+          "failure_categories": [
+            "unjustified_negative_outcome",
+            "invented_ask_identity",
+            "unnecessary_principal_attention"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE and UNKNOWN transaction correctly preserve ambiguous submission; proposed readback/duplicate reconciliation with no immediate retry is appropriate.",
+            "The exactly-once objective remains UNKNOWN. NOT_ACHIEVED incorrectly treats an ambiguous timeout as certain non-achievement.",
+            "No ask ID is supplied; L05 and its WAITING_PROVIDER update are invented.",
+            "Routine separately authorized readback/reconciliation does not itself require a strategic principal decision; attention is unnecessary."
+          ]
+        },
+        {
+          "case_id": "L06",
+          "status": "FAIL_FROZEN_CASE_CRITERIA",
+          "provenance": "new_cohort_call",
+          "raw_sha256": "fad774006aa936680f1bb29c6f33a7f166bb1757ed5c2002c6520d6eaa960059",
+          "receipt_sha256": "6fe75f4031f251970bc7891694e9c63f92bbb9ce42a6f241f441bd7804911d4d",
+          "parsed_response": {
+            "case_id": "L06",
+            "decision": "HOLD_RECONCILE",
+            "transaction_status": "UNKNOWN",
+            "outcome_status": "NOT_ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "L06",
+                "status": "WAITING_PROVIDER"
+              }
+            ],
+            "next_step": "Verify provider write evidence before assuming post success; reconcile adapter return with missing transaction witness.",
+            "draft": "",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "json_shape_valid": true,
+          "structural_identity_valid": false,
+          "response_contract_valid": false,
+          "response_contract_violations": [
+            "unknown_ask_id:L06",
+            "transaction_status_not_grounded_in_inspected_evidence"
+          ],
+          "decoder_valid": true,
+          "semantic_correct": false,
+          "decision_correct": true,
+          "transaction_status_correct": false,
+          "outcome_status_correct": true,
+          "ask_semantics_correct": false,
+          "attention_correct": true,
+          "grounded_next_step": false,
+          "false_completion": false,
+          "unnecessary_attention": false,
+          "missed_required_attention": false,
+          "contract_errors": [
+            "unknown_ask_id:L06"
+          ],
+          "failure_categories": [
+            "proven_no_effect_erased",
+            "invented_ask_identity",
+            "missing_no_effect_owner_correction"
+          ],
+          "reasons": [
+            "HOLD_RECONCILE is accepted; NOT_ACHIEVED and no principal attention correctly avoid claiming a public post.",
+            "The supplied trace establishes no provider write; transaction must be NO_EFFECT, not UNKNOWN. Mere missing readback does not erase this explicit negative evidence.",
+            "No ask ID is supplied; L06 and its WAITING_PROVIDER update are invented.",
+            "The proposed next step asks for more evidence rather than reporting the established no-effect attempt and proposing correction of the unsupported executed flag. No actual correction or retry is claimed."
+          ]
+        }
+      ],
+      "independent_review": {
+        "schema": "independent_general_decision_cohort_result_review.v1",
+        "self": "0102",
+        "role": "verifier",
+        "origin": "internal_handoff",
+        "principal_ref": "012",
+        "reviewer": "measurement_seam_review",
+        "reviewed_at": "2026-09-29T05:12:48.228741+00:00",
+        "approved": true,
+        "reads_released": true,
+        "approval_meaning": "Transport accounting and independent frozen-criteria grading reviewed; affirmative review status is not candidate acceptance.",
+        "candidate_approved_for_promotion": false,
+        "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+        "status": "CONTROLLED_SEMANTIC_QUALIFICATION_FAILURE",
+        "evidence_hashes": {
+          "manifest.json": "f95db3f61d1e2ec2c7cee74bb0308f49a3ef8eb7073ecfa7cd65be6fa44c91a0",
+          "manifest.initial.json": "b8819664a049a2b5d1594543f42961551ae64c893833e428011b5ffa9cba5d33",
+          "pre-execution-reconciliation.json": "bb91b1522d84ff413f7feffd0dc8ed5f672757def831a0a286ea66c1de9c8363",
+          "entry.json": "7f94b346cb503d395030c266a2716bd9359642dcea9fe76885ca60d06b0e726d",
+          "source-review.json": "32c44eac8c3e880a969074e8190a07cec5addb85c5d29fa68993aa9c1ea9e610",
+          "execution-review.json": "3744c4a2c689034502a89a5624453f0115fdda57ce5fd9cc64a8f86a8927419c",
+          "partial-result-review.json": "6b445a5160286995498b691d71b174041fc319dfd56a003a598ae284427cb78a",
+          "matrix-started.json": "f15bd39f39648b2e6c6758bba6b1919c019900550a93a13df125618e8f6220ae",
+          "matrix-terminal.json": "772a06489b21a2af91f55c25c3117732e4b77f441362778a511ed6d016113829",
+          "output-inspection.json": "70309bc5c561283a56fb19a1fa9248c9ebb44932cdeca1184f964919aa689e5f",
+          "generate_case.py": "887221ff813413c7d13d106890d7051413f337850ed7a6af44fbd1fe868af16f",
+          "run_matrix.py": "6c686a2550e0f51a908d187f3d804c963dec5c00dad2045e0ebd9bfabf29f36a",
+          "inspect_outputs.py": "356ef7b537a37f6c9a8cb91f8335e3768a77fb3b290e3310253b3170bbb02744",
+          "G02.raw.json": "2358bd31df40f388d858dc6d244939b6fe01622ed908ff73851b5fe8212b8331",
+          "G02.receipt.json": "a0451a8ec042e56768d6968245a56db3052d6380604d2c92a0c175487366267e",
+          "G03.raw.json": "37cde099cab609c77c01ef8a161b51ea3b85122d85e294344dd143d32d114c2d",
+          "G03.receipt.json": "95b60d718bd34eaa61e256ef1cf82c6f3f13716c61aff71ac8e316d2e19c0232",
+          "G04.raw.json": "e04ac49f6eec63dc964de30285f87c6c6b95d6cb725880503263cc1e694beb76",
+          "G04.receipt.json": "e25bbebf7da2e52943fcdee7205406366bb054a4c2fcac0f743982f79d7291d8",
+          "G05.raw.json": "2aab54ef80d8b521c83b6dad9873ec1870f141a9f66486eb00bc4227157cc655",
+          "G05.receipt.json": "284f97fb58a5d366d28f69852f64929c7223ad757a56895da15d3bfeade3f0cd",
+          "G06.raw.json": "73e822abd165bde7dec0c3e1c25e496b82de89fb91cbb13f1bf98c40ea0d950f",
+          "G06.receipt.json": "28678db48754408ad3cb2aefb78f89b16441e58592b14b9ac6ef264bf4909454",
+          "L01.raw.json": "57f6a1a9cba93ec00288cb71689fbcea587ad81749f3764aa8793e741e95964b",
+          "L01.receipt.json": "a6fbc35b487c185eec49486d924abf69db6a800b71980982014eb170b701e9b1",
+          "L02.raw.json": "80bc4f2fa81260de3fa5ebbfc06e8d34cc4370f2afb692f8e2aae82512a4ad60",
+          "L02.receipt.json": "e5e0f62da0b6025ccfd54f7919ba03aaae650f1b7f57cc9b008c756004ef417e",
+          "L03.raw.json": "8012c51acd4c5d75558c40d69157419fb05a4243aa3f0706e6e40b50908b4956",
+          "L03.receipt.json": "ba64fd6186c9540a86f08832d9b9465a378c508c85cfd056ff4e11d86f159362",
+          "L04.raw.json": "65cde007d307f1bab1ab9f0230097a41e4e8a43eb635857f2e773861c6f1cbc6",
+          "L04.receipt.json": "5ef15a2ed69d0700e0e3fdbaf6068df39723cb2a7e882e46a491f3415b33ce52",
+          "L05.raw.json": "ce55b4875599b877b00ce952761320732b8ba2b9c8ba77981d444acb4e821875",
+          "L05.receipt.json": "2ffd7bcb8fe3bb2298af4d34ec11bcf890568a3aef1d583e0e43b7e7fa33ce40",
+          "L06.raw.json": "fad774006aa936680f1bb29c6f33a7f166bb1757ed5c2002c6520d6eaa960059",
+          "L06.receipt.json": "6fe75f4031f251970bc7891694e9c63f92bbb9ce42a6f241f441bd7804911d4d"
+        },
+        "frozen_criteria_bindings": {
+          "cases.json": "479e41e41ed6e867cdb9362c35510518a6b9773fde47949483bf621d8b4a783b",
+          "response-contract.json": "455a11869c107f3ffeb1729a7ef5a9c6c298798bce18378e6728b49f5c63fbd3",
+          "labels-review.json": "579b5aa76ca99099d124844efe759b1e12aee95352aac61b53d96054b69c577a",
+          "labels-contract-review.json": "db63807fb65944636ec261103261d47c6428779497878c1e25256409ce4f8d4e"
+        },
+        "inherited_case_bindings": {
+          "manifest.json": "e1b7cde04d1bf0cf6913b640cf7a92f98f535f2286f0379475d4e5ca53332ddd",
+          "G01.raw.json": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+          "canary-receipt.json": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+          "result-review.json": "7b0076873332f52bdb4515fe6a66b31d7e98912d20e0e67e05a4e0b5c2c69afd",
+          "canary-result.json": "2c7d8eb8031ef84dac28e41c798c3ad830efa3e335daa662d81990ef5d4a1b96",
+          "final-accounting.json": "05eae95dc8d9f49a17f0cde194b2d92dfaa565a11859ebd0107894d519c890cf",
+          "generate_case.py": "1a4a534482883831a0665bb1cca493a35c86b98f4360b33e637509d07af49f78"
+        },
+        "inherited_G01_review_case_unchanged": {
+          "case_id": "G01",
+          "status": "PASS_FROZEN_SINGLE_CASE_CRITERIA",
+          "semantic_correct": true,
+          "format_valid": true,
+          "decoder_valid": true,
+          "parsed_response": {
+            "case_id": "G01",
+            "decision": "PREPARE_DRAFT",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-G01",
+                "status": "NOT_YET_ASKED"
+              }
+            ],
+            "next_step": "Submit draft for review; no send or external effect claimed.",
+            "draft": "Requesting the public meeting date. Please confirm availability.",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "raw_sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+          "receipt_sha256": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": true,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "false_completion": false,
+          "prose_assessment": {
+            "request_upfront": true,
+            "nonempty_requested_draft": true,
+            "invented_names_dates_routes_or_commitments": false,
+            "unnecessary_attention": false,
+            "caveat": "Please confirm availability is vague secondary wording. It does not assert an invented fact or negate the upfront request for the public meeting date. Original criteria require no hidden exact wording and do not forbid every extra generic request; this is a clarity weakness, not a new post-output failure rule.",
+            "next_step": "Submit draft for review is a proposed artifact handoff, not an explicit012 approval requirement or an effect claim; principal_attention remains false."
+          },
+          "reasons": [
+            "PREPARE_DRAFT with actual concise unsent draft asks for public meeting date in its first substantive sentence.",
+            "NOT_ATTEMPTED correctly distinguishes unsent draft from outbound transaction.",
+            "ACHIEVED refers to the supplied draft, satisfying the pre-output G01 correction; it does not assert date obtained/send/recipient response.",
+            "ASK-G01 remains NOT_YET_ASKED; explicit unchanged-state proposal is allowed.",
+            "No unnecessary012 attention, invented transaction or state mutation."
+          ]
+        },
+        "metrics": {
+          "planned_cases": 12,
+          "new_planned_cases": 11,
+          "inherited_cases": 1,
+          "child_dispatch_attempts": 11,
+          "returned_cases": 12,
+          "new_returned_cases": 11,
+          "reviewed_cases": 12,
+          "missing_cases": 0,
+          "invalid_runs": 0,
+          "not_run_cases": 0,
+          "json_shape_valid": 12,
+          "decoder_valid": 12,
+          "structural_identity_valid": 7,
+          "response_contract_valid": 1,
+          "invalid_response_cases": 11,
+          "unknown_ask_id_cases": 5,
+          "semantic_evaluated": 12,
+          "full_criteria_evaluated": 12,
+          "semantic_correct": 1,
+          "new_semantic_correct": 0,
+          "semantic_accuracy": 0.08333333333333333,
+          "false_completion_count": 2,
+          "false_transaction_completion_count": 1,
+          "false_compliant_draft_objective_count": 1,
+          "unnecessary_attention_count": 4,
+          "missed_required_attention_count": 0,
+          "decision_correct": 11,
+          "transaction_status_correct": 7,
+          "outcome_status_correct": 4,
+          "ask_semantics_correct": 5,
+          "attention_correct": 8,
+          "new_usage": {
+            "prompt_tokens": 11889,
+            "completion_tokens": 1763,
+            "total_tokens": 13652
+          },
+          "staged_usage": {
+            "prompt_tokens": 12970,
+            "completion_tokens": 1926,
+            "total_tokens": 14896
+          },
+          "new_generation_seconds": 732.5620000001509,
+          "new_child_wall_seconds": 781.3919999997597,
+          "new_cohort_wall_seconds": 945.5620000001509,
+          "staged_generation_seconds": 793.1240000003017,
+          "staged_child_wall_seconds": 846.0639999997802,
+          "new_backend_generation_calls_reported_by_children": 11,
+          "staged_backend_generation_calls_reported_by_children": 12,
+          "backend_generation_calls_observed_by_parent": null,
+          "native_load_attempts_observed_by_parent": null,
+          "provider_requests": 0,
+          "currency_cost": null,
+          "all_coordinator_verifier_tokens": null,
+          "peak_memory_bytes": null,
+          "held_out_gain": null,
+          "retained_gain": null,
+          "promotion": false
+        },
+        "metric_definitions": {
+          "cohort": "One prior independently reviewed G01 plus eleven new calls. All twelve remain in overall correctness denominator, including invalid responses.",
+          "child_dispatch_attempts": "New calls in this budget only; inherited G01 is not counted again.",
+          "json_shape_valid": "Strict duplicate/nonfinite-rejecting JSON, exact fields/types/enums/lengths. Does not establish known ask identity or grounded meaning.",
+          "structural_identity_valid": "JSON shape plus ask IDs declared in supplied case facts; excludes five unknown-ID cases.",
+          "response_contract_valid": "Independent application of the existing response contract including supplied-evidence grounding for transaction/objective/ask projections, factual draft content and meaningful-principal-attention obligations. This is a manually judged descriptive metric, not a new runtime schema or new acceptance criterion.",
+          "full_criteria_evaluated": "All twelve staged responses diagnostically graded against original labels plus pre-output G01/L01 correction. Invalid cases stay failures in denominator; not an accuracy computed only over syntactically valid survivors.",
+          "false_completion": "Unsupported positive transaction or objective achievement assertions. One G05 new-outbound CONFIRMED and one L01 claim that a noncompliant draft met the declared draft objective; these are separately exposed and do not mean two actual sends.",
+          "timing": "New child wall and generation sums exclude inherited G01; staged sums add its original measured values. New cohort wall is actual new controller elapsed time and is not a twelve-call concurrent benchmark.",
+          "unknowns": "Parent native/backend counts, costs, peak memory, held-out and retained gain remain null; child counters are same-process claims, not independent native attestations."
+        },
+        "cases": [
+          {
+            "case_id": "G01",
+            "status": "PASS_FROZEN_SINGLE_CASE_CRITERIA",
+            "semantic_correct": true,
+            "format_valid": true,
+            "decoder_valid": true,
+            "parsed_response": {
+              "case_id": "G01",
+              "decision": "PREPARE_DRAFT",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G01",
+                  "status": "NOT_YET_ASKED"
+                }
+              ],
+              "next_step": "Submit draft for review; no send or external effect claimed.",
+              "draft": "Requesting the public meeting date. Please confirm availability.",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "raw_sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+            "receipt_sha256": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": true,
+            "ask_semantics_correct": true,
+            "attention_correct": true,
+            "false_completion": false,
+            "prose_assessment": {
+              "request_upfront": true,
+              "nonempty_requested_draft": true,
+              "invented_names_dates_routes_or_commitments": false,
+              "unnecessary_attention": false,
+              "caveat": "Please confirm availability is vague secondary wording. It does not assert an invented fact or negate the upfront request for the public meeting date. Original criteria require no hidden exact wording and do not forbid every extra generic request; this is a clarity weakness, not a new post-output failure rule.",
+              "next_step": "Submit draft for review is a proposed artifact handoff, not an explicit012 approval requirement or an effect claim; principal_attention remains false."
+            },
+            "reasons": [
+              "PREPARE_DRAFT with actual concise unsent draft asks for public meeting date in its first substantive sentence.",
+              "NOT_ATTEMPTED correctly distinguishes unsent draft from outbound transaction.",
+              "ACHIEVED refers to the supplied draft, satisfying the pre-output G01 correction; it does not assert date obtained/send/recipient response.",
+              "ASK-G01 remains NOT_YET_ASKED; explicit unchanged-state proposal is allowed.",
+              "No unnecessary012 attention, invented transaction or state mutation."
+            ],
+            "provenance": "inherited_PR1967_G01_not_new_call",
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": true,
+            "response_contract_violations": [],
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "grounded_next_step": true,
+            "failure_categories": []
+          },
+          {
+            "case_id": "G02",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "2358bd31df40f388d858dc6d244939b6fe01622ed908ff73851b5fe8212b8331",
+            "receipt_sha256": "a0451a8ec042e56768d6968245a56db3052d6380604d2c92a0c175487366267e",
+            "parsed_response": {
+              "case_id": "G02",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "G02",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Reconcile provider delta a-01 against cached z-99 before proceeding.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Provider watermark conflict requires reconciliation before any outbound action."
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": false,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "unknown_ask_id:G02",
+              "transaction_status_not_grounded_in_inspected_evidence",
+              "objective_status_not_grounded_in_declared_objective_and_window",
+              "principal_attention_without_meaningful_principal_decision"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": false,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": false,
+            "attention_correct": false,
+            "grounded_next_step": true,
+            "false_completion": false,
+            "unnecessary_attention": true,
+            "missed_required_attention": false,
+            "contract_errors": [
+              "unknown_ask_id:G02"
+            ],
+            "failure_categories": [
+              "transaction_referent",
+              "premature_terminal_outcome",
+              "ask_identity_and_transition",
+              "unnecessary_principal_attention"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE and proposed provider-delta comparison correctly recognize changed opaque watermarks without inventing reconciliation.",
+              "No new send was attempted, so transaction must be NOT_ATTEMPTED, not UNKNOWN.",
+              "The unresolved follow-up remains PENDING or UNKNOWN; NOT_ACHIEVED prematurely declares terminal failure.",
+              "G02 is not the supplied stable ask ID ASK-G02, and WAITING_PROVIDER does not preserve the supplied OPEN state.",
+              "Routine evidence reconciliation does not require a principal decision; the attention request is unnecessary."
+            ]
+          },
+          {
+            "case_id": "G03",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "37cde099cab609c77c01ef8a161b51ea3b85122d85e294344dd143d32d114c2d",
+            "receipt_sha256": "95b60d718bd34eaa61e256ef1cf82c6f3f13716c61aff71ac8e316d2e19c0232",
+            "parsed_response": {
+              "case_id": "G03",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G03",
+                  "status": "OPEN"
+                }
+              ],
+              "next_step": "Reconcile provider-delta before proceeding; no new send authorized.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "objective_status_not_grounded_in_declared_objective_and_window"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": true,
+            "attention_correct": true,
+            "grounded_next_step": false,
+            "false_completion": false,
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [],
+            "failure_categories": [
+              "premature_terminal_outcome",
+              "missing_duplicate_followup_reason"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE, NOT_ATTEMPTED, OPEN ask and no principal attention are consistent.",
+              "The unresolved ask without a matured response window requires PENDING, not NOT_ACHIEVED.",
+              "Generic provider-delta reconciliation and lack of new send authority omit the explicitly required duplicate/third-follow-up reason and meaningful-new-information condition."
+            ]
+          },
+          {
+            "case_id": "G04",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "e04ac49f6eec63dc964de30285f87c6c6b95d6cb725880503263cc1e694beb76",
+            "receipt_sha256": "e25bbebf7da2e52943fcdee7205406366bb054a4c2fcac0f743982f79d7291d8",
+            "parsed_response": {
+              "case_id": "G04",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G04-ROUTE",
+                  "status": "ANSWERED"
+                },
+                {
+                  "ask_id": "ASK-G04-RECORDS",
+                  "status": "OPEN"
+                }
+              ],
+              "next_step": "Await formal request route authorization before proceeding with record retrieval.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Substantive records objective remains unresolved; formal route authorization required per provider delta."
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "objective_status_not_grounded_in_declared_objective_and_window",
+              "ask_projection_not_grounded_in_supplied_state_and_delta",
+              "principal_attention_without_meaningful_principal_decision"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": false,
+            "attention_correct": false,
+            "grounded_next_step": false,
+            "false_completion": false,
+            "unnecessary_attention": true,
+            "missed_required_attention": false,
+            "contract_errors": [],
+            "failure_categories": [
+              "premature_terminal_outcome",
+              "ask_transition",
+              "unnecessary_principal_attention",
+              "procedural_preparation_withheld"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE is an accepted decision; no new transaction is correctly reported and the route ask is marked ANSWERED.",
+              "The records objective remains PENDING, not terminal NOT_ACHIEVED.",
+              "The records ask requires FORMAL_ROUTE_REQUIRED rather than OPEN; the mandatory two-state classification is incomplete.",
+              "Missing submission authority does not require 012 to approve routine procedural preparation. Waiting for authorization instead of proposing the bounded procedural step consumes unnecessary attention."
+            ]
+          },
+          {
+            "case_id": "G05",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "2aab54ef80d8b521c83b6dad9873ec1870f141a9f66486eb00bc4227157cc655",
+            "receipt_sha256": "284f97fb58a5d366d28f69852f64929c7223ad757a56895da15d3bfeade3f0cd",
+            "parsed_response": {
+              "case_id": "G05",
+              "decision": "RECORD_OUTCOME",
+              "transaction_status": "CONFIRMED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G05",
+                  "status": "ANSWERED"
+                }
+              ],
+              "next_step": "Close thread; no further action required.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "transaction_status_not_grounded_in_inspected_evidence"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": false,
+            "outcome_status_correct": true,
+            "ask_semantics_correct": true,
+            "attention_correct": true,
+            "grounded_next_step": true,
+            "false_completion": true,
+            "false_completion_type": "unsupported_new_outbound_confirmation",
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [],
+            "failure_categories": [
+              "transaction_referent",
+              "false_transaction_completion"
+            ],
+            "reasons": [
+              "RECORD_OUTCOME, ANSWERED and ACHIEVED can rely on the supplied exact substantive meeting-date answer; proposed closure suppresses obsolete follow-up.",
+              "The confirmed inbound answer does not authenticate a new outbound transaction. Required NOT_ATTEMPTED is incorrectly reported CONFIRMED.",
+              "This is one false transaction-completion assertion, not false objective achievement. No actual persisted closure or live provider read is claimed."
+            ]
+          },
+          {
+            "case_id": "G06",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "73e822abd165bde7dec0c3e1c25e496b82de89fb91cbb13f1bf98c40ea0d950f",
+            "receipt_sha256": "28678db48754408ad3cb2aefb78f89b16441e58592b14b9ac6ef264bf4909454",
+            "parsed_response": {
+              "case_id": "G06",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "G06",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Await 012 identity disambiguation before proceeding with briefing request.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Two canonical contacts with same name require provider-delta reconciliation before routing."
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": false,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "unknown_ask_id:G06",
+              "objective_status_not_grounded_in_declared_objective_and_window"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": false,
+            "attention_correct": true,
+            "grounded_next_step": true,
+            "false_completion": false,
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [
+              "unknown_ask_id:G06"
+            ],
+            "failure_categories": [
+              "premature_terminal_outcome",
+              "invented_ask_identity"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE, no attempted transaction and no recipient-specific draft correctly respect unresolved identity.",
+              "PENDING or UNKNOWN is required for the unresolved briefing objective, not terminal NOT_ACHIEVED.",
+              "No stable ask ID is supplied for G06; invented ask_id G06 and its WAITING_PROVIDER update violate the original contract.",
+              "Specific 012 disambiguation of two same-name canonical contacts is explicitly allowed by frozen criteria; this attention request is legitimate despite imprecise provider-delta wording."
+            ]
+          },
+          {
+            "case_id": "L01",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "57f6a1a9cba93ec00288cb71689fbcea587ad81749f3764aa8793e741e95964b",
+            "receipt_sha256": "a6fbc35b487c185eec49486d924abf69db6a800b71980982014eb170b701e9b1",
+            "parsed_response": {
+              "case_id": "L01",
+              "decision": "PREPARE_DRAFT",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-L01",
+                  "status": "NOT_YET_ASKED"
+                }
+              ],
+              "next_step": "Submit draft for review; no sending or external action.",
+              "draft": "Hello [Name], I am [Your Name] from [Organization]. I am writing to request permission to share a public research summary on [Topic] that aligns with your work. Please let me know if you would be open to receiving it.",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "unsupported_draft_relevance_assertion",
+              "objective_status_not_grounded_in_declared_objective_and_window"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": true,
+            "attention_correct": true,
+            "grounded_next_step": true,
+            "false_completion": true,
+            "false_completion_type": "unsupported_compliant_draft_objective",
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [
+              "unsupported_draft_relevance_assertion"
+            ],
+            "failure_categories": [
+              "ungrounded_draft",
+              "request_not_first_substantive_sentence",
+              "unsupported_draft_objective_achievement"
+            ],
+            "reasons": [
+              "PREPARE_DRAFT, NOT_ATTEMPTED, unchanged NOT_YET_ASKED and no principal attention correctly describe an unsent preparation.",
+              "Placeholders are not invented concrete names, and no send or recipient permission is claimed.",
+              "The draft asserts that the summary aligns with the recipient's work without supporting synthetic facts. The permission request follows a self-introduction rather than appearing in the first substantive sentence.",
+              "The pre-output correction allows ACHIEVED only for an actual compliant draft. Because the supplied draft is noncompliant, its ACHIEVED objective assertion is unsupported; this is not a false send claim."
+            ]
+          },
+          {
+            "case_id": "L02",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "80bc4f2fa81260de3fa5ebbfc06e8d34cc4370f2afb692f8e2aae82512a4ad60",
+            "receipt_sha256": "e5e0f62da0b6025ccfd54f7919ba03aaae650f1b7f57cc9b008c756004ef417e",
+            "parsed_response": {
+              "case_id": "L02",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "PENDING",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-L02",
+                  "status": "OPEN"
+                }
+              ],
+              "next_step": "Await substantive response within observation window; verify exact reply visibility and reaction status before next action.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "transaction_status_not_grounded_in_inspected_evidence"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": false,
+            "transaction_status_correct": false,
+            "outcome_status_correct": true,
+            "ask_semantics_correct": true,
+            "attention_correct": true,
+            "grounded_next_step": true,
+            "false_completion": false,
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [],
+            "failure_categories": [
+              "decision_selection",
+              "transaction_referent"
+            ],
+            "reasons": [
+              "PENDING, OPEN ask, waiting within the declared response window and no principal attention correctly distinguish reaction/visibility from substantive feedback.",
+              "The accepted decisions are DEFER, RECORD_OUTCOME or NO_ACTION; HOLD_RECONCILE is not an accepted replacement for the already reconciled witnessed transaction.",
+              "The case explicitly inspects the prior outbound reply, whose exact target/content readback is confirmed. UNKNOWN fails to preserve that supplied positive evidence.",
+              "Proposed additional visibility checking is redundant but does not claim performed retrieval or authorize a follow-up."
+            ]
+          },
+          {
+            "case_id": "L03",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "8012c51acd4c5d75558c40d69157419fb05a4243aa3f0706e6e40b50908b4956",
+            "receipt_sha256": "ba64fd6186c9540a86f08832d9b9465a378c508c85cfd056ff4e11d86f159362",
+            "parsed_response": {
+              "case_id": "L03",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-L03",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Reconcile provider delta before proceeding; current route lacks valid freshness evidence.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Provider freshness is UNKNOWN; proceeding risks invalid route or stale data."
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": true,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "transaction_status_not_grounded_in_inspected_evidence",
+              "objective_status_not_grounded_in_declared_objective_and_window",
+              "ask_projection_not_grounded_in_supplied_state_and_delta",
+              "principal_attention_without_meaningful_principal_decision"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": false,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": false,
+            "attention_correct": false,
+            "grounded_next_step": true,
+            "false_completion": false,
+            "unnecessary_attention": true,
+            "missed_required_attention": false,
+            "contract_errors": [],
+            "failure_categories": [
+              "transaction_referent",
+              "premature_terminal_outcome",
+              "ask_transition",
+              "unnecessary_principal_attention"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE and proposed current provider/route reconciliation correctly preserve the evidence gap without claiming retrieval.",
+              "No new outbound action was attempted, so transaction requires NOT_ATTEMPTED, not UNKNOWN.",
+              "Unresolved draft/event evidence requires PENDING or UNKNOWN, not terminal NOT_ACHIEVED.",
+              "The supplied ASK-L03 remains OPEN; changing it to WAITING_PROVIDER lacks new supporting evidence.",
+              "Routine freshness reconciliation does not require a principal decision."
+            ]
+          },
+          {
+            "case_id": "L04",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "65cde007d307f1bab1ab9f0230097a41e4e8a43eb635857f2e773861c6f1cbc6",
+            "receipt_sha256": "5ef15a2ed69d0700e0e3fdbaf6068df39723cb2a7e882e46a491f3415b33ce52",
+            "parsed_response": {
+              "case_id": "L04",
+              "decision": "ESCALATE_012",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "L04",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Await 012 strategic authorization before any public commitment or draft preparation.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Strategic pivot requires 012 decision; platform mechanics cannot resolve public commitment request."
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": false,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "unknown_ask_id:L04",
+              "objective_status_not_grounded_in_declared_objective_and_window"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": false,
+            "attention_correct": true,
+            "grounded_next_step": true,
+            "false_completion": false,
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [
+              "unknown_ask_id:L04"
+            ],
+            "failure_categories": [
+              "premature_terminal_outcome",
+              "invented_ask_identity"
+            ],
+            "reasons": [
+              "ESCALATE_012, NOT_ATTEMPTED and specific strategic-authority rationale correctly withhold the public pivot and preserve legitimate principal direction.",
+              "An unresolved strategic decision remains PENDING, not terminal NOT_ACHIEVED.",
+              "L04 is not supplied ASK-L04; invented ID plus WAITING_PROVIDER misclassifies a principal strategic decision as waiting on a provider.",
+              "No strategic commitment, performed action or self-authorized execution is claimed."
+            ]
+          },
+          {
+            "case_id": "L05",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "ce55b4875599b877b00ce952761320732b8ba2b9c8ba77981d444acb4e821875",
+            "receipt_sha256": "2ffd7bcb8fe3bb2298af4d34ec11bcf890568a3aef1d583e0e43b7e7fa33ce40",
+            "parsed_response": {
+              "case_id": "L05",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "L05",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Verify duplicate coverage and provider read-back before retry; no retry without reconciliation.",
+              "draft": "",
+              "principal_attention": true,
+              "attention_reason": "Duplicate coverage unresolved; retry requires provider reconciliation."
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": false,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "unknown_ask_id:L05",
+              "objective_status_not_grounded_in_declared_objective_and_window",
+              "principal_attention_without_meaningful_principal_decision"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": false,
+            "ask_semantics_correct": false,
+            "attention_correct": false,
+            "grounded_next_step": true,
+            "false_completion": false,
+            "unnecessary_attention": true,
+            "missed_required_attention": false,
+            "contract_errors": [
+              "unknown_ask_id:L05"
+            ],
+            "failure_categories": [
+              "unjustified_negative_outcome",
+              "invented_ask_identity",
+              "unnecessary_principal_attention"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE and UNKNOWN transaction correctly preserve ambiguous submission; proposed readback/duplicate reconciliation with no immediate retry is appropriate.",
+              "The exactly-once objective remains UNKNOWN. NOT_ACHIEVED incorrectly treats an ambiguous timeout as certain non-achievement.",
+              "No ask ID is supplied; L05 and its WAITING_PROVIDER update are invented.",
+              "Routine separately authorized readback/reconciliation does not itself require a strategic principal decision; attention is unnecessary."
+            ]
+          },
+          {
+            "case_id": "L06",
+            "status": "FAIL_FROZEN_CASE_CRITERIA",
+            "provenance": "new_cohort_call",
+            "raw_sha256": "fad774006aa936680f1bb29c6f33a7f166bb1757ed5c2002c6520d6eaa960059",
+            "receipt_sha256": "6fe75f4031f251970bc7891694e9c63f92bbb9ce42a6f241f441bd7804911d4d",
+            "parsed_response": {
+              "case_id": "L06",
+              "decision": "HOLD_RECONCILE",
+              "transaction_status": "UNKNOWN",
+              "outcome_status": "NOT_ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "L06",
+                  "status": "WAITING_PROVIDER"
+                }
+              ],
+              "next_step": "Verify provider write evidence before assuming post success; reconcile adapter return with missing transaction witness.",
+              "draft": "",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "json_shape_valid": true,
+            "structural_identity_valid": false,
+            "response_contract_valid": false,
+            "response_contract_violations": [
+              "unknown_ask_id:L06",
+              "transaction_status_not_grounded_in_inspected_evidence"
+            ],
+            "decoder_valid": true,
+            "semantic_correct": false,
+            "decision_correct": true,
+            "transaction_status_correct": false,
+            "outcome_status_correct": true,
+            "ask_semantics_correct": false,
+            "attention_correct": true,
+            "grounded_next_step": false,
+            "false_completion": false,
+            "unnecessary_attention": false,
+            "missed_required_attention": false,
+            "contract_errors": [
+              "unknown_ask_id:L06"
+            ],
+            "failure_categories": [
+              "proven_no_effect_erased",
+              "invented_ask_identity",
+              "missing_no_effect_owner_correction"
+            ],
+            "reasons": [
+              "HOLD_RECONCILE is accepted; NOT_ACHIEVED and no principal attention correctly avoid claiming a public post.",
+              "The supplied trace establishes no provider write; transaction must be NO_EFFECT, not UNKNOWN. Mere missing readback does not erase this explicit negative evidence.",
+              "No ask ID is supplied; L06 and its WAITING_PROVIDER update are invented.",
+              "The proposed next step asks for more evidence rather than reporting the established no-effect attempt and proposing correction of the unsupported executed flag. No actual correction or retry is claimed."
+            ]
+          }
+        ],
+        "findings": [
+          "All eleven new calls returned once within limits; exact raw/receipt/source/runtime/template/message and unchanged criteria bindings verified. No retry or incomplete case disappeared from accounting.",
+          "All twelve staged outputs have valid JSON shape; five invent ask IDs. The lightweight inspector reports shape only and is not represented as full contract verification.",
+          "Only inherited G01 meets every frozen criterion. Its original review and wording caveat are preserved verbatim. All eleven new cases fail at least one original requirement.",
+          "L01 placeholders alone are not fabricated names. Its unsupported claim that the summary aligns with the recipient work and request placement make the draft noncompliant under unchanged criteria; its ACHIEVED assertion is classified separately from false sending.",
+          "G05 substantive answer supports objective ACHIEVED but not a new outbound CONFIRMED transaction. L02 discards exact positive transaction evidence; L06 discards explicit no-write evidence.",
+          "Unresolved objectives repeatedly become terminal NOT_ACHIEVED. Specific G06 identity clarification and L04 strategic escalation are legitimate; no required strategic attention was missed.",
+          "No transport/grammar repair, model update or further prompt-tuning budget follows from this result. Valid JSON did not establish trusted decisions.",
+          "Comparison to prior coder0/12 is descriptive only: staged general1/12, one additional correct known development case. No held-out, retained or generalized benefit and no relative gain from a zero baseline are claimed."
+        ],
+        "development_comparison": {
+          "prior_coder_correct": 0,
+          "prior_coder_evaluated": 12,
+          "staged_general_correct": 1,
+          "staged_general_evaluated": 12,
+          "correct_case_delta": 1,
+          "relative_accuracy_gain": null,
+          "reason_relative_unknown": "Zero baseline; model/template change and staged known-case exposure prevent causal/generalized claims."
+        },
+        "next_action": {
+          "selected": "Qualify the existing correspondence/WRE proposal-consumption boundary, then extend the existing owner only for a demonstrated missing evidence-grounded ask-transition check.",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3,
+            "total": 14,
+            "priority": "P1"
+          },
+          "owner_bindings": {
+            "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py": "0c6ad4ec1027ac1a05b3b201fffcd9754fd19af82ce76f9c658cab8c1fa84cd7",
+            "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+            "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py": "1fe1db5bb477b07a411db161c64212a29f02fbc1fae4c33164772d25f06a0fdf"
+          },
+          "evidence": [
+            "reddog_correspondence_state.py defines AskRecord/CorrespondenceState, validates unique declared ask IDs and new_delta subsets, and requires matching valid provider watermarks. It does not currently expose a proposed ask-transition consumer in the inspected owner.",
+            "local_skill_inference.py and WRE master preserve the existing unverified-model-proposal/effect evidence guards; repeating their unconditional rejection alone would not advance proposal consumption."
+          ],
+          "minimum_next_slice": [
+            "Name the existing current-state plus proposed ask-update contract and source-backed evidence preconditions before editing. Reuse AskStatus, declared IDs, scope/freshness/watermark and provider-event references; never hardcode fixture IDs or expected answer lookups.",
+            "Replay the observed unknown-ID/unsupported-transition proposals as deterministic negative controls. Include legitimate positive updates, unchanged asks, route-versus-record distinctions, scoped substantive-answer evidence and true unknown/no-effect distinctions so a reject-everything gate cannot pass.",
+            "Keep transaction and objective assessment separate; do not infer outbound success from inbound answers or a model label. Do not silently correct this cohort output or count rejection as semantic task success.",
+            "Extend the smallest existing correspondence/WRE owner only if no existing consumer satisfies the contract; preserve unverified effect guard and avoid copying the evaluation-only response envelope into a universal runtime schema.",
+            "Independently review and validate the bounded reusable layer without new model calls. Re-observe after its result before authorizing further model, worker or FoundUp tests."
+          ],
+          "additional_model_calls_authorized": 0,
+          "native_blockers": "Seven inherited native admission blockers and null effect-use lease remain unrefuted; this diagnostic grants no worker promotion or autonomous effects.",
+          "wsp15_rationale": "Cross-owner tracing and qualification of a missing current-state/proposed-update consumption contract is moderately complex (3), critical (4), difficult to defer (4), with moderate impact (3):14/P1. This replaces the initial13/P1 preparation estimate; it grants no authority and does not change experimental grading."
+        },
+        "limitations": [
+          "Independent grading is learned-judge assessment against fixed facts, not formal verification. Original labels were exposed during development and are not held-out.",
+          "One inherited successful canary plus eleven later cases; not twelve newly preregistered trials and not proof of causal improvement from model choice.",
+          "No provider operations, account behavior, real relationship outcomes, WRE execution/retention or autonomous FoundUp launch demonstrated.",
+          "Trusted local libraries with process-tree/time/stdout controls, not an OS memory/network/filesystem sandbox or immutable execution.",
+          "Model digest integrity relies on reviewed parent pre/post observations; reviewer did not load the model or repeat generation."
+        ],
+        "review_reconciliation": {
+          "preserved_initial_review": "result-review-initial-score.json",
+          "initial_sha256": "22d2fecf96ff9de5bc01b56de8c0a586f02dfc761b98d0e48fecea737a882e5c",
+          "changed": "Next-slice complexity2 to3 and total13 to14 only, plus rationale; original case judgments, metrics and evidence bindings unchanged."
+        }
+      },
+      "signal_classification": {
+        "runtime_counts": "Execution feedback, child reports distinct from parent observation; sampled identity checks are not immutable execution.",
+        "semantic_grade": "Separate learned judge applying the unchanged pre-output criteria, not formal proof or an independent native rerun.",
+        "held_out_coverage": false,
+        "human_objective": "012 chooses the objective separately from measured candidate fitness.",
+        "authorization": "Supervised local diagnostic; no native WRE work order, external account action or promotion."
+      },
+      "next_action": "Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap",
+      "next_selection": {
+        "selected_action": "Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap",
+        "source_head": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "ranked_candidates": [
+          {
+            "task": "Native autonomous RSI admission",
+            "dimensions": [
+              4,
+              5,
+              4,
+              5
+            ],
+            "total": 18,
+            "priority": "P0",
+            "eligible": false,
+            "state": "blocked",
+            "wsp97": "Seven inherited authority blockers and null effect-use lease remain unrefuted. This local result creates no native work order or promotion authority."
+          },
+          {
+            "task": "Operational decision qualification",
+            "dimensions": [
+              3,
+              4,
+              3,
+              4
+            ],
+            "total": 14,
+            "priority": "P1",
+            "eligible": false,
+            "state": "parent_partially_complete",
+            "wsp97": "Original coder baseline and staged general-model cohort are measured. The broad candidate fails original criteria; execute a narrow rejection/consumption boundary child."
+          },
+          {
+            "task": "Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap",
+            "dimensions": [
+              3,
+              4,
+              4,
+              3
+            ],
+            "total": 14,
+            "priority": "P1",
+            "eligible": true,
+            "selected": true,
+            "state": "scoped_reproduction_and_repair_eligible",
+            "wsp97": "Reuse correspondence state/recipient and WRE proposal owners. Replay frozen failed outputs as negatives, add independent legitimate-update controls, trace the actual consumer and repair only reproduced missing rejection. No fixture-ID hardcoding, result rewriting or evaluation-envelope promotion."
+          },
+          {
+            "task": "WRE candidate integration",
+            "dimensions": [
+              3,
+              4,
+              3,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": false,
+            "state": "candidate_quality_rejected",
+            "wsp97": "Failed general-model proposals must not be promoted. Preserve the unverified-proposal guard; no production adapter or universal schema activation."
+          },
+          {
+            "task": "Held-out and later retained-use comparison",
+            "dimensions": [
+              3,
+              4,
+              3,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": false,
+            "state": "broader_candidate_quality_pending",
+            "wsp97": "Reserve independent criteria and later invocation evidence. More retries or a known-case pass do not establish retained benefit."
+          },
+          {
+            "task": "Native dependency pin reconciliation",
+            "dimensions": [
+              3,
+              3,
+              3,
+              3
+            ],
+            "total": 12,
+            "priority": "P2",
+            "eligible": false,
+            "state": "deployment_qualification_open",
+            "wsp97": "Installed 0.3.20 completed this native call, while declared 0.2.72 differs. A single local success does not justify a speculative shared-host dependency update."
+          },
+          {
+            "task": "Isolated AmIBot lifecycle test",
+            "dimensions": [
+              3,
+              4,
+              2,
+              3
+            ],
+            "total": 12,
+            "priority": "P2",
+            "eligible": false,
+            "state": "downstream_blocked",
+            "wsp97": "Requires qualified decisions and an admitted worker; active FoundUps and Remote-owned AutoPost remain protected."
+          }
+        ],
+        "rationale": "Completed execution separates valid output shape from unreliable decisions. Grounded identity/evidence validation is the highest-value executable layer before stronger models, integration or scaling. The native18/P0 parent remains blocked by inherited authority conditions; this local diagnostic supplies none.",
+        "resolved_item": "All eleven remaining original cases executed once; compatible G01 reused explicitly. This development cohort is closed without retries or promotion.",
+        "first_executable_step": "Trace one unsupported transaction claim and one invented ask ID through existing correspondence/WRE consumers, with a legitimate unchanged-ID update as positive control. Distinguish already-enforced rejection from a demonstrated gap before editing.",
+        "scope": [
+          "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py",
+          "modules/infrastructure/wre_core/src/local_skill_inference.py",
+          "existing owning tests/interfaces"
+        ],
+        "invariants": [
+          "Do not repair failed model outputs into accepted answers.",
+          "Do not hardcode case IDs or read answer labels in runtime logic.",
+          "Keep transaction evidence, objective evidence, ask state and principal attention separate.",
+          "The evaluation-only response envelope is not a new runtime schema.",
+          "Passing rejection tests do not prove authenticated effects, native admission, retained benefit or successful provider action."
+        ],
+        "effort_cost_verification": "Moderate source/consumer work with deterministic replay and independent positive/negative controls; no additional model/provider budget needed. Actual repair scope depends on a reproduced owner gap.",
+        "scoring_scope": "Incremental RSI critical path after observed cohort; four canonical WSP15 dimensions. Not a full historical backlog recertification.",
+        "next_gate": "One useful bounded rejection/consumption layer, then re-observe. Held-out evaluation, later retained use and admitted execution remain separate gates."
+      },
+      "retrieval": {
+        "source": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "semantic_query_repeated": false,
+        "noise": "Lexical duplicates/unrelated matches supplemented with exact existing owner/contract reads.",
+        "missing": [
+          "Tier-0: SPEC.md",
+          "Tier-0: PRD.md",
+          "Tier-0: PROMPTS.md",
+          "Tier-0: prompts/",
+          "Tier-0: RUNBOOK.md",
+          "Tier-1: ROADMAP.md",
+          "Tier-2: memory/README.md",
+          "Tier-2: HOLOINDEX.md",
+          "Tier-2: ADR.md",
+          "Tier-2: adr/",
+          "Tier-2: INCIDENTS.md",
+          "Tier-2: SEV.md"
+        ],
+        "required_artifacts_complete": true,
+        "improvement": "Reuse frozen original fixtures, source map, correspondence skill and current roadmap; no new document owner."
+      },
+      "limits": [
+        "Staged development cohort: one inherited G01 plus eleven newly budgeted cases; not twelve newly preregistered calls or held-out evidence.",
+        "JSON/shape validity, full response-contract validity and full-case correctness are separate; invalid answers remain in attempt accounting.",
+        "G01 preserves the original vague secondary-wording caveat and its original source identity.",
+        "No held-out gain, later retained use, production adapter change, native admission or FoundUp launch.",
+        "Process-tree/time/stdout limits are not OS memory/network/filesystem isolation; peak memory is unknown.",
+        "Five source and 31 runtime file hashes plus model hash are sampled partial closure, not immutable/full transitive runtime verification.",
+        "Installed llama-cpp-python 0.3.20 differs from declared 0.2.72; this diagnostic does not update dependencies.",
+        "Native token and wall-time counts exclude coordinator/verifier cost; currency remains unknown."
+      ],
+      "evidence": {
+        "entry.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\entry.json",
+          "sha256": "7f94b346cb503d395030c266a2716bd9359642dcea9fe76885ca60d06b0e726d"
+        },
+        "manifest.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\manifest.json",
+          "sha256": "f95db3f61d1e2ec2c7cee74bb0308f49a3ef8eb7073ecfa7cd65be6fa44c91a0"
+        },
+        "manifest.initial.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\manifest.initial.json",
+          "sha256": "b8819664a049a2b5d1594543f42961551ae64c893833e428011b5ffa9cba5d33"
+        },
+        "pre-execution-reconciliation.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\pre-execution-reconciliation.json",
+          "sha256": "bb91b1522d84ff413f7feffd0dc8ed5f672757def831a0a286ea66c1de9c8363"
+        },
+        "source-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\source-review.json",
+          "sha256": "32c44eac8c3e880a969074e8190a07cec5addb85c5d29fa68993aa9c1ea9e610"
+        },
+        "execution-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\execution-review.json",
+          "sha256": "3744c4a2c689034502a89a5624453f0115fdda57ce5fd9cc64a8f86a8927419c"
+        },
+        "matrix-started.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\matrix-started.json",
+          "sha256": "f15bd39f39648b2e6c6758bba6b1919c019900550a93a13df125618e8f6220ae"
+        },
+        "matrix-terminal.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\matrix-terminal.json",
+          "sha256": "772a06489b21a2af91f55c25c3117732e4b77f441362778a511ed6d016113829"
+        },
+        "output-inspection.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\output-inspection.json",
+          "sha256": "70309bc5c561283a56fb19a1fa9248c9ebb44932cdeca1184f964919aa689e5f"
+        },
+        "result-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\result-review.json",
+          "sha256": "73daf6b54fb4afa661445990414a946f67d45ef1217d1d78fa052858ba47cefc"
+        },
+        "next-action.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\next-action.json",
+          "sha256": "de65a3916579616a8d8dd4540b1e6fc49bc3c5caa19ee4040343ea0e213b594d"
+        },
+        "holo-lexical.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\holo-lexical.json",
+          "sha256": "281f1abd29e7424b6a678760599620006b2091872327488b4b817b8f09f865ee"
+        },
+        "next-owner-findings.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\next-owner-findings.json",
+          "sha256": "f7143d07737d87225af0c3383d881e3ba9c5a12709c373bb1fa3e24874bf8001"
+        },
+        "holo-next-owner.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\holo-next-owner.json",
+          "sha256": "7c30ebb9ea5db37d85d06fe097779e9abb25aa48ee947ac8771fa0286e2448f3"
+        },
+        "generate_case.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\generate_case.py",
+          "sha256": "887221ff813413c7d13d106890d7051413f337850ed7a6af44fbd1fe868af16f"
+        },
+        "run_matrix.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\run_matrix.py",
+          "sha256": "6c686a2550e0f51a908d187f3d804c963dec5c00dad2045e0ebd9bfabf29f36a"
+        },
+        "inspect_outputs.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\inspect_outputs.py",
+          "sha256": "356ef7b537a37f6c9a8cb91f8335e3768a77fb3b290e3310253b3170bbb02744"
+        },
+        "G02.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G02.receipt.json",
+          "sha256": "a0451a8ec042e56768d6968245a56db3052d6380604d2c92a0c175487366267e"
+        },
+        "G03.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G03.receipt.json",
+          "sha256": "95b60d718bd34eaa61e256ef1cf82c6f3f13716c61aff71ac8e316d2e19c0232"
+        },
+        "G04.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G04.receipt.json",
+          "sha256": "e25bbebf7da2e52943fcdee7205406366bb054a4c2fcac0f743982f79d7291d8"
+        },
+        "G05.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G05.receipt.json",
+          "sha256": "284f97fb58a5d366d28f69852f64929c7223ad757a56895da15d3bfeade3f0cd"
+        },
+        "G06.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G06.receipt.json",
+          "sha256": "28678db48754408ad3cb2aefb78f89b16441e58592b14b9ac6ef264bf4909454"
+        },
+        "L01.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L01.receipt.json",
+          "sha256": "a6fbc35b487c185eec49486d924abf69db6a800b71980982014eb170b701e9b1"
+        },
+        "L02.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L02.receipt.json",
+          "sha256": "e5e0f62da0b6025ccfd54f7919ba03aaae650f1b7f57cc9b008c756004ef417e"
+        },
+        "L03.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L03.receipt.json",
+          "sha256": "ba64fd6186c9540a86f08832d9b9465a378c508c85cfd056ff4e11d86f159362"
+        },
+        "L04.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L04.receipt.json",
+          "sha256": "5ef15a2ed69d0700e0e3fdbaf6068df39723cb2a7e882e46a491f3415b33ce52"
+        },
+        "L05.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L05.receipt.json",
+          "sha256": "2ffd7bcb8fe3bb2298af4d34ec11bcf890568a3aef1d583e0e43b7e7fa33ce40"
+        },
+        "L06.receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L06.receipt.json",
+          "sha256": "6fe75f4031f251970bc7891694e9c63f92bbb9ce42a6f241f441bd7804911d4d"
+        },
+        "G02.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G02.raw.json",
+          "sha256": "2358bd31df40f388d858dc6d244939b6fe01622ed908ff73851b5fe8212b8331"
+        },
+        "G03.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G03.raw.json",
+          "sha256": "37cde099cab609c77c01ef8a161b51ea3b85122d85e294344dd143d32d114c2d"
+        },
+        "G04.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G04.raw.json",
+          "sha256": "e04ac49f6eec63dc964de30285f87c6c6b95d6cb725880503263cc1e694beb76"
+        },
+        "G05.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G05.raw.json",
+          "sha256": "2aab54ef80d8b521c83b6dad9873ec1870f141a9f66486eb00bc4227157cc655"
+        },
+        "G06.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\G06.raw.json",
+          "sha256": "73e822abd165bde7dec0c3e1c25e496b82de89fb91cbb13f1bf98c40ea0d950f"
+        },
+        "L01.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L01.raw.json",
+          "sha256": "57f6a1a9cba93ec00288cb71689fbcea587ad81749f3764aa8793e741e95964b"
+        },
+        "L02.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L02.raw.json",
+          "sha256": "80bc4f2fa81260de3fa5ebbfc06e8d34cc4370f2afb692f8e2aae82512a4ad60"
+        },
+        "L03.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L03.raw.json",
+          "sha256": "8012c51acd4c5d75558c40d69157419fb05a4243aa3f0706e6e40b50908b4956"
+        },
+        "L04.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L04.raw.json",
+          "sha256": "65cde007d307f1bab1ab9f0230097a41e4e8a43eb635857f2e773861c6f1cbc6"
+        },
+        "L05.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L05.raw.json",
+          "sha256": "ce55b4875599b877b00ce952761320732b8ba2b9c8ba77981d444acb4e821875"
+        },
+        "L06.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\L06.raw.json",
+          "sha256": "fad774006aa936680f1bb29c6f33a7f166bb1757ed5c2002c6520d6eaa960059"
+        }
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\final-accounting.json"
     }
   }
 }
