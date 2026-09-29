@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.operational_general_preflight_20260929",
-    "base_commit": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
-    "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
-    "status": "compatibility_checkpoint_reobserve_before_decoder_canary",
+    "observation_path": "current_observation.operational_general_canary_20260929",
+    "base_commit": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+    "selected_action": "Complete original twelve-case general-model coverage with eleven remaining cases, reusing the compatible frozen G01 result",
+    "status": "single_case_checkpoint_reobserve_before_remaining_eleven",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,14 +1894,14 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
     "historical_inherited_checkpoint": {
       "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_path": "current_observation.operational_matrix_20260929",
-      "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
-      "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
-      "status": "diagnostic_checkpoint_reobserve_before_next_layer",
+      "observation_path": "current_observation.operational_general_preflight_20260929",
+      "base_commit": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+      "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
+      "status": "compatibility_checkpoint_reobserve_before_decoder_canary",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -1911,26 +1911,44 @@
         "priority": "P1"
       },
       "dispatchable": false,
-      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json",
       "requires_fresh_reobservation_after_closure": true,
       "historical_inherited_checkpoint": {
         "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-        "observation_path": "current_observation.operational_first_loop_20260929",
-        "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
-        "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
-        "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
-        "status": "bounded_development_experiment_complete_reobserve_before_wiring",
+        "observation_path": "current_observation.operational_matrix_20260929",
+        "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
+        "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
+        "status": "diagnostic_checkpoint_reobserve_before_next_layer",
         "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 4,
-          "deferability": 3,
-          "impact": 4,
-          "total": 14,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
           "priority": "P1"
         },
         "dispatchable": false,
-        "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
-        "requires_fresh_reobservation_after_closure": true
+        "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
+        "requires_fresh_reobservation_after_closure": true,
+        "historical_inherited_checkpoint": {
+          "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
+          "observation_path": "current_observation.operational_first_loop_20260929",
+          "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+          "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
+          "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
+          "status": "bounded_development_experiment_complete_reobserve_before_wiring",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 3,
+            "impact": 4,
+            "total": 14,
+            "priority": "P1"
+          },
+          "dispatchable": false,
+          "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
+          "requires_fresh_reobservation_after_closure": true
+        }
       }
     }
   },
@@ -9602,6 +9620,656 @@
         }
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json"
+    },
+    "operational_general_canary_20260929": {
+      "state": "single_general_role_canary_passed_no_promotion",
+      "base": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+      "manifest": {
+        "created_utc": "2026-09-29T03:31:26.168102+00:00",
+        "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+        "source_root": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
+        "source_bindings": {
+          "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+          "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+          "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+          "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+          "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69"
+        },
+        "runtime_bindings": {
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama.py": "3cd93b5d381391026bdda7c971f4374e3c676909015b8469b463115762f367f0",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_cache.py": "fe9e5fdad7c3e67e9c4c00c52fd6ed130443a101875ebc6435bb41d5f312fe39",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_chat_format.py": "8c11e093f211e414d627a8dbe4d25d15bc6cd11e3c7d438b3a7d075c51fd2313",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_cpp.py": "0101bba0fe3046cdb04a7cc68b0daf54f3e0cf074a91b64f3bd0a715af3cea8a",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_grammar.py": "b6a457fcb4e010885a29a47eec3525c1316c36e4ad0a3b24373704c8d0be0255",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_speculative.py": "37dabf1ee9aad01d82da6d5e69fbc0a37cdebd7ac5bc042cac8ead4e3d6fb6ba",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_tokenizer.py": "482e57da563dd537fba8c5d2ae09dc352c3054dfd8622957a2cb919b8478ca9f",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_types.py": "103a91a9f890d7f314c1f85173ae5e1efd2c12139202ffd4307fb754c055859e",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llava_cpp.py": "8a72920c38d3994b6a7916f035a7e13f7d43b0c704d29fd01ff7aa6632b201a3",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\mtmd_cpp.py": "0cb732d817c67fe0b0a048c9c8361b429824dfa86b4b3bf6f783c2d5ba1f9903",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_ctypes_extensions.py": "9e5241832feb61e3c439b0e9e4d9a9ff4e7a6a54b0809a8f5995f0175d841876",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_ggml.py": "7d06a84bb20e72ee80129408cb118b244b351ba977ff47f45b656050291c0278",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_internals.py": "770b7e974e5c3835b4c2987d088d0651767e0dcd9dd1913c76eae75ff1243a9c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_logger.py": "e9f545f319c32bd52846b83c7a7b2a4b7d04df553c776b0157762f3a2a8e93f4",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_utils.py": "69d6ee0d03fa2a5411a6f40f49b3af7c3ef28aa47957399e75ab904d1b4cd587",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\__init__.py": "867cb69b90002c61f87ded7326b0e3d1c3525390282f51c4c1f302ac4018fcf8",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml-base.dll": "cdab0eb1062467b4349863fd8b663081decf523a2afe11e0d435e2c7ec341060",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml-cpu.dll": "b4bb4130f91fc006dfdb39407b26bd1c5511b639f5c6bf1bbf03ec62aa349549",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml.dll": "646361a794515610d9c6f12921f1a1d4e85e1504da821889f3d285903244574b",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\llama.dll": "5af1be204906c14438c59b46d70ea46471f12198debe9edfb8d1c6d7e5bfd461",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\mtmd.dll": "72a7bce1e6a1182d865f84eff072d51177edc723a081567440c6d051ab0b5fa6",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\app.py": "81c5a5be463cfb89b6961fe5c0085234a9004f7d2e41571b224ede45dd47cba7",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\cli.py": "7f1fc1f5edd718f4165262b006aa3195c06d806669fbce09d97f63a65d6ac18c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\errors.py": "ca5f95333829d58d233b7a4c137e78ef99c44f5442c2746db213ecf481e173b3",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\model.py": "bc33f93d88a5016f5a207057f860deb63f7fb87e1f6b4ddc9948d4a712aa8a36",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\settings.py": "13e6eec7fd1a9f889a185d8c05f4823edd6b0933a804749373da84ea171c2c2c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\types.py": "a6c5b3b848df178537924b341d113aeee8b33239a5f2039ffb35efa6c96522bb",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\__main__.py": "1cbf72bcf5f497b172fc1e2dec96e892e714f425f95270b1e284549c18a4b696",
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe": "9b0bffb7a259cd2722df454fdfff41ee13665820cff1f578b1d97d31f9ef93d5",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp_python-0.3.20.dist-info\\METADATA": "d784f57059ea5fd5e0047c8373e3b24dcf175dd92f914a05e354dc8514371e00"
+        },
+        "runtime_distribution_version": "0.3.20",
+        "declared_version": "0.2.72",
+        "role": "general",
+        "model_path": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "model_bytes": 2707513696,
+        "selection_source": "LOCAL_MODEL_ROOT/default",
+        "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+        "inputs": [
+          {
+            "case_id": "G01",
+            "input_sha256": "337825da165bbbe162b7862779f5ec3be46b5a722011ef399c5875f4cc82958a",
+            "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+            "messages_file_sha256": "8aa3c511e3a8ebe4fbf97413b0cb79d546c585942f8c85f90a3cee40fd2b34e8"
+          }
+        ],
+        "original_contract_hashes": {
+          "cases.json": "479e41e41ed6e867cdb9362c35510518a6b9773fde47949483bf621d8b4a783b",
+          "response-contract.json": "455a11869c107f3ffeb1729a7ef5a9c6c298798bce18378e6728b49f5c63fbd3",
+          "labels-review.json": "579b5aa76ca99099d124844efe759b1e12aee95352aac61b53d96054b69c577a",
+          "labels-contract-review.json": "db63807fb65944636ec261103261d47c6428779497878c1e25256409ce4f8d4e"
+        },
+        "criteria_root": "O:\\Foundups-Agent-audits\\20260928-rsi-operational-decision-controls",
+        "parameters": {
+          "context": 2048,
+          "cpu_threads": 4,
+          "gpu_layers": 0,
+          "max_tokens": 512,
+          "temperature": 0.2,
+          "seed_override": null,
+          "response_format": {
+            "type": "json_object"
+          }
+        },
+        "budget": {
+          "native_initializations": 1,
+          "backend_generation_calls": 1,
+          "retries": 0,
+          "child_seconds": 90,
+          "stdout_bytes": 16384,
+          "provider_requests": 0
+        },
+        "execution_plane": "Directly supervised local diagnostic; no native WRE admission, promotion or provider actions.",
+        "qualification_limit": "One known development case cannot establish full semantic quality, held-out or retained improvement.",
+        "isolation": "Existing bounded process-tree/time/stdout owner; no OS memory/network/filesystem isolation.",
+        "previous_compatibility": {
+          "pr": 1964,
+          "merge": "b65870f897398eb0bc90376bb3c14481cd519c3d",
+          "model_template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+          "G01_prompt_tokens": 1081,
+          "G01_rendered_sha256": "3a7fab6fc0d6aef3af5dd0fc4aff11da117e53d99c36aa8d8eecd4f373c7d201"
+        },
+        "previous_baseline": {
+          "pr": 1960,
+          "correct": 0,
+          "evaluated": 12
+        },
+        "acceptance": {
+          "transport": "One completed bounded response, no identity drift, no oversized/unreadable output.",
+          "decoder": "Strict JSON object satisfying the unchanged response contract; no length-truncated output.",
+          "semantic": "Independent G01 criteria remain frozen; report separately from format and do not tune the labels.",
+          "next": "Re-observe after the result; no second call or implicit full-matrix budget."
+        }
+      },
+      "raw": {
+        "procedure": "general-role-json-canary",
+        "case_id": "G01",
+        "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+        "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+        "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+        "rendered_prompt_sha256": "3a7fab6fc0d6aef3af5dd0fc4aff11da117e53d99c36aa8d8eecd4f373c7d201",
+        "prompt_tokens": 1081,
+        "context_tokens": 2048,
+        "reserved_output": 512,
+        "seed_override": null,
+        "initial_seed": 4294967295,
+        "effective_seed": 872737089,
+        "stop": [
+          "<|im_end|>"
+        ],
+        "stop_token_ids": [
+          248046
+        ],
+        "response": {
+          "id": "chatcmpl-6b12e8ff-0613-40a7-abbe-fe1f4002f8a5",
+          "object": "chat.completion",
+          "created": 1790652982,
+          "model": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+          "usage": {
+            "prompt_tokens": 1081,
+            "completion_tokens": 163,
+            "total_tokens": 1244
+          },
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop",
+              "message": {
+                "role": "assistant",
+                "content": "{\n  \"case_id\": \"G01\",\n  \"decision\": \"PREPARE_DRAFT\",\n  \"transaction_status\": \"NOT_ATTEMPTED\",\n  \"outcome_status\": \"ACHIEVED\",\n  \"ask_updates\": [\n    {\n      \"ask_id\": \"ASK-G01\",\n      \"status\": \"NOT_YET_ASKED\"\n    }\n  ],\n  \"next_step\": \"Submit draft for review; no send or external effect claimed.\",\n  \"draft\": \"Requesting the public meeting date. Please confirm availability.\",\n  \"principal_attention\": false,\n  \"attention_reason\": \"\"\n}\n                    "
+              }
+            }
+          ]
+        },
+        "unretained_response_field_names": [],
+        "backend_generation_calls": 1,
+        "provider_requests": 0,
+        "generation_seconds": 60.562000000150874,
+        "effect_evidence": false,
+        "wre_adapter_used": false
+      },
+      "receipt": {
+        "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+        "case_id": "G01",
+        "child_dispatch_attempts": 1,
+        "native_load_attempts": null,
+        "backend_generation_calls_observed_by_parent": null,
+        "provider_requests": 0,
+        "timeout_seconds": 90,
+        "stdout_limit_bytes": 16384,
+        "sandbox": false,
+        "os_memory_limit": false,
+        "os_network_isolation": false,
+        "peak_memory_bytes": null,
+        "sampled_identity_checks": true,
+        "postcheck_passed": true,
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "controller_sha256": "24ea4c199ab74e55a3c40640bec0adb844668c4f9a0aefe5197dfc88a27b47e4",
+        "child_sha256": "1a4a534482883831a0665bb1cca493a35c86b98f4360b33e637509d07af49f78",
+        "returncode": 0,
+        "output_oversized": false,
+        "output_read_failed": false,
+        "raw_sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+        "state": "RETURNED",
+        "child_wall_seconds": 64.67200000002049
+      },
+      "metrics": {
+        "planned_cases": 1,
+        "child_dispatch_attempts": 1,
+        "returned_cases": 1,
+        "reviewed_cases": 1,
+        "missing_cases": 0,
+        "invalid_runs": 0,
+        "not_run_cases": 0,
+        "strict_format_valid": 1,
+        "decoder_qualified_cases": 1,
+        "semantic_evaluated": 1,
+        "semantic_correct": 1,
+        "semantic_accuracy": 1.0,
+        "semantic_denominator_scope": "One known development G01 canary only, not twelve cases or a population estimate.",
+        "false_completion_count": 0,
+        "unnecessary_attention_count": 0,
+        "missed_required_attention_count": 0,
+        "backend_generation_calls_reported_by_child": 1,
+        "backend_generation_calls_observed_by_parent": null,
+        "native_load_attempts_observed_by_parent": null,
+        "provider_requests": 0,
+        "usage": {
+          "prompt_tokens": 1081,
+          "completion_tokens": 163,
+          "total_tokens": 1244
+        },
+        "generation_seconds": 60.562000000150874,
+        "child_wall_seconds": 64.67200000002049,
+        "finish_reason": "stop",
+        "currency_cost": null,
+        "all_coordinator_verifier_tokens": null,
+        "peak_memory_bytes": null,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "promotion": false
+      },
+      "cases": [
+        {
+          "case_id": "G01",
+          "status": "PASS_FROZEN_SINGLE_CASE_CRITERIA",
+          "semantic_correct": true,
+          "format_valid": true,
+          "decoder_valid": true,
+          "parsed_response": {
+            "case_id": "G01",
+            "decision": "PREPARE_DRAFT",
+            "transaction_status": "NOT_ATTEMPTED",
+            "outcome_status": "ACHIEVED",
+            "ask_updates": [
+              {
+                "ask_id": "ASK-G01",
+                "status": "NOT_YET_ASKED"
+              }
+            ],
+            "next_step": "Submit draft for review; no send or external effect claimed.",
+            "draft": "Requesting the public meeting date. Please confirm availability.",
+            "principal_attention": false,
+            "attention_reason": ""
+          },
+          "raw_sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+          "receipt_sha256": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+          "decision_correct": true,
+          "transaction_status_correct": true,
+          "outcome_status_correct": true,
+          "ask_semantics_correct": true,
+          "attention_correct": true,
+          "false_completion": false,
+          "prose_assessment": {
+            "request_upfront": true,
+            "nonempty_requested_draft": true,
+            "invented_names_dates_routes_or_commitments": false,
+            "unnecessary_attention": false,
+            "caveat": "Please confirm availability is vague secondary wording. It does not assert an invented fact or negate the upfront request for the public meeting date. Original criteria require no hidden exact wording and do not forbid every extra generic request; this is a clarity weakness, not a new post-output failure rule.",
+            "next_step": "Submit draft for review is a proposed artifact handoff, not an explicit012 approval requirement or an effect claim; principal_attention remains false."
+          },
+          "reasons": [
+            "PREPARE_DRAFT with actual concise unsent draft asks for public meeting date in its first substantive sentence.",
+            "NOT_ATTEMPTED correctly distinguishes unsent draft from outbound transaction.",
+            "ACHIEVED refers to the supplied draft, satisfying the pre-output G01 correction; it does not assert date obtained/send/recipient response.",
+            "ASK-G01 remains NOT_YET_ASKED; explicit unchanged-state proposal is allowed.",
+            "No unnecessary012 attention, invented transaction or state mutation."
+          ]
+        }
+      ],
+      "independent_review": {
+        "schema": "independent_general_json_canary_result_review.v1",
+        "reviewer": "measurement_seam_review",
+        "role": "verifier",
+        "origin": "internal_handoff",
+        "principal_ref": "012",
+        "reviewed_at": "2026-09-29T03:40:50.929877+00:00",
+        "approved": true,
+        "reads_released": true,
+        "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+        "status": "DECODER_AND_FROZEN_G01_CANARY_PASSED",
+        "approval_meaning": "Recorded one-case evidence and frozen G01 acceptance reviewed; no model/worker promotion or additional call authority.",
+        "candidate_approved_for_promotion": false,
+        "evidence_hashes": {
+          "manifest.json": "e1b7cde04d1bf0cf6913b640cf7a92f98f535f2286f0379475d4e5ca53332ddd",
+          "source-review.json": "1807c898999cf7a17f87eca17c237dfe26d6f71a8a83447e23fad752acb2fdbb",
+          "execution-review.json": "9287bdb36c452e3f1964427fbba654c485e2307c9a37c090912bf51181c6ad12",
+          "generate_case.py": "1a4a534482883831a0665bb1cca493a35c86b98f4360b33e637509d07af49f78",
+          "run_canary.py": "24ea4c199ab74e55a3c40640bec0adb844668c4f9a0aefe5197dfc88a27b47e4",
+          "canary-started.json": "be73c2ccda46bef3506188b64cea86c52b660cbcb4a53a010116882df2acefe5",
+          "G01.raw.json": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+          "canary-receipt.json": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+          "output-inspection.json": "7a45a98827cc4f791a0d7d968bc758b537dcb81fa0f0d41d08a1e44078e04b73"
+        },
+        "frozen_criteria_bindings": {
+          "cases.json": "479e41e41ed6e867cdb9362c35510518a6b9773fde47949483bf621d8b4a783b",
+          "response-contract.json": "455a11869c107f3ffeb1729a7ef5a9c6c298798bce18378e6728b49f5c63fbd3",
+          "labels-review.json": "579b5aa76ca99099d124844efe759b1e12aee95352aac61b53d96054b69c577a",
+          "labels-contract-review.json": "db63807fb65944636ec261103261d47c6428779497878c1e25256409ce4f8d4e"
+        },
+        "metrics": {
+          "planned_cases": 1,
+          "child_dispatch_attempts": 1,
+          "returned_cases": 1,
+          "reviewed_cases": 1,
+          "missing_cases": 0,
+          "invalid_runs": 0,
+          "not_run_cases": 0,
+          "strict_format_valid": 1,
+          "decoder_qualified_cases": 1,
+          "semantic_evaluated": 1,
+          "semantic_correct": 1,
+          "semantic_accuracy": 1.0,
+          "semantic_denominator_scope": "One known development G01 canary only, not twelve cases or a population estimate.",
+          "false_completion_count": 0,
+          "unnecessary_attention_count": 0,
+          "missed_required_attention_count": 0,
+          "backend_generation_calls_reported_by_child": 1,
+          "backend_generation_calls_observed_by_parent": null,
+          "native_load_attempts_observed_by_parent": null,
+          "provider_requests": 0,
+          "usage": {
+            "prompt_tokens": 1081,
+            "completion_tokens": 163,
+            "total_tokens": 1244
+          },
+          "generation_seconds": 60.562000000150874,
+          "child_wall_seconds": 64.67200000002049,
+          "finish_reason": "stop",
+          "currency_cost": null,
+          "all_coordinator_verifier_tokens": null,
+          "peak_memory_bytes": null,
+          "held_out_gain": null,
+          "retained_gain": null,
+          "promotion": false
+        },
+        "cases": [
+          {
+            "case_id": "G01",
+            "status": "PASS_FROZEN_SINGLE_CASE_CRITERIA",
+            "semantic_correct": true,
+            "format_valid": true,
+            "decoder_valid": true,
+            "parsed_response": {
+              "case_id": "G01",
+              "decision": "PREPARE_DRAFT",
+              "transaction_status": "NOT_ATTEMPTED",
+              "outcome_status": "ACHIEVED",
+              "ask_updates": [
+                {
+                  "ask_id": "ASK-G01",
+                  "status": "NOT_YET_ASKED"
+                }
+              ],
+              "next_step": "Submit draft for review; no send or external effect claimed.",
+              "draft": "Requesting the public meeting date. Please confirm availability.",
+              "principal_attention": false,
+              "attention_reason": ""
+            },
+            "raw_sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4",
+            "receipt_sha256": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a",
+            "decision_correct": true,
+            "transaction_status_correct": true,
+            "outcome_status_correct": true,
+            "ask_semantics_correct": true,
+            "attention_correct": true,
+            "false_completion": false,
+            "prose_assessment": {
+              "request_upfront": true,
+              "nonempty_requested_draft": true,
+              "invented_names_dates_routes_or_commitments": false,
+              "unnecessary_attention": false,
+              "caveat": "Please confirm availability is vague secondary wording. It does not assert an invented fact or negate the upfront request for the public meeting date. Original criteria require no hidden exact wording and do not forbid every extra generic request; this is a clarity weakness, not a new post-output failure rule.",
+              "next_step": "Submit draft for review is a proposed artifact handoff, not an explicit012 approval requirement or an effect claim; principal_attention remains false."
+            },
+            "reasons": [
+              "PREPARE_DRAFT with actual concise unsent draft asks for public meeting date in its first substantive sentence.",
+              "NOT_ATTEMPTED correctly distinguishes unsent draft from outbound transaction.",
+              "ACHIEVED refers to the supplied draft, satisfying the pre-output G01 correction; it does not assert date obtained/send/recipient response.",
+              "ASK-G01 remains NOT_YET_ASKED; explicit unchanged-state proposal is allowed.",
+              "No unnecessary012 attention, invented transaction or state mutation."
+            ]
+          }
+        ],
+        "findings": [
+          "Exact source/model/template/rendered/message identities and reviewed scripts match; sampled source/runtime checks freshly verified.",
+          "Actual JSON grammar/decoder produced a complete strict object and stopped within its token/time limits; no transport/grammar defect is demonstrated by this canary.",
+          "Whitespace after closing brace is valid JSON whitespace and not a format failure. No nonpublic response fields were retained; no reasoning trace inferred from template prefix.",
+          "The response meets all original G01 criteria with the documented wording caveat. Do not conflate a one-case pass with a full general-model comparison.",
+          "Native stage/cleanup is not independently attested. Parent native/backend counters remain null; child call report is same-process evidence.",
+          "This fixes no production source and proves no live communication, retention or native WRE admission."
+        ],
+        "next_action": {
+          "selected": "Freeze the remaining eleven original development cases with the unchanged general-model procedure, then independently grade the complete staged twelve-case cohort.",
+          "wsp15": {
+            "complexity": 2,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3,
+            "total": 13,
+            "priority": "P1"
+          },
+          "rationale": "Decoder/format feasibility is now observed. Remaining-case coverage has greater value than anotherG01 tune, speculative grammar repair or dependency change. Reuse this immutable G01 result if all procedure/source/input identities remain compatible to avoid a redundant generation.",
+          "constraints": [
+            "Preparation only; no additional model calls authorized by this review.",
+            "Freeze exact remaining-case list,unchanged instruction/labels/runtime/template,per-case budgets and stop rules before dispatch.",
+            "If reusing this canary, report one prior canary plus eleven later calls as a staged known-development cohort, never twelve newly preregistered calls or held-out validation.",
+            "If provenance-relevant code/runtime/prompt changes, reconcile first; do not silently combine incompatible runs.",
+            "After results, reassess whether a shared semantic repair or candidate integration is warranted; no automatic promotion."
+          ],
+          "additional_generation_budget_granted": 0
+        },
+        "limitations": [
+          "One known case with previous adaptive exposure and unchanged criteria; no statistical/generalized/held-out/retained gain claim.",
+          "Model and template differ from coder baseline; one-case contrast cannot isolate the cause of improvement.",
+          "Model digest relies on reviewed controller pre/post evidence; reviewer did not reload/rehash2.7GB or regenerate.",
+          "Trusted local libraries and bounded process-tree/time/stdout, not OS memory/network/filesystem isolation or immutable execution.",
+          "Unknown peak memory,currency,total coordinator/verifier cost and independent native cleanup remain unknown."
+        ]
+      },
+      "signal_classification": {
+        "runtime_counts": "Execution feedback from trusted local libraries; child reports remain distinct from parent observations.",
+        "semantic_grade": "Separate learned judge applying unchanged pre-output criteria; no formal proof or independent native rerun.",
+        "held_out_coverage": false,
+        "human_objective": "012 defines the goal separately from measured candidate fitness.",
+        "authorization": "Supervised local diagnostic only; zero native WRE work orders and no promotion authority."
+      },
+      "next_action": "Complete original twelve-case general-model coverage with eleven remaining cases, reusing the compatible frozen G01 result",
+      "next_selection": {
+        "selected_action": "Complete original twelve-case general-model coverage with eleven remaining cases, reusing the compatible frozen G01 result",
+        "source_head": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "rationale": "The existing general model passed the actual JSON decoder path and original G01 criteria within its bound. A single known development case cannot qualify broader behavior. Execute the eleven remaining unchanged cases after freezing a new budget; reuse G01 only when source/runtime/model/template/procedure remain compatible. Report the result as a staged 1+11 development cohort, not twelve freshly preregistered calls or held-out evidence. Preserve the wording caveat; no G01 tuning or label changes.",
+        "ranked_candidates": [
+          {
+            "task": "Native autonomous RSI admission",
+            "dimensions": [
+              4,
+              5,
+              4,
+              5
+            ],
+            "total": 18,
+            "priority": "P0",
+            "eligible": false,
+            "state": "blocked",
+            "wsp97": "Seven inherited authority blockers and null effect-use lease remain unrefuted. This local result creates no native work order or promotion authority."
+          },
+          {
+            "task": "Operational decision qualification",
+            "dimensions": [
+              3,
+              4,
+              3,
+              4
+            ],
+            "total": 14,
+            "priority": "P1",
+            "eligible": false,
+            "state": "parent_partially_complete",
+            "wsp97": "Prior coder baseline, general-model compatibility and single decoder canary are now distinct completed observations; advance the selected comparison child."
+          },
+          {
+            "task": "Remaining eleven general-model decision cases",
+            "dimensions": [
+              2,
+              4,
+              4,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": true,
+            "selected": true,
+            "state": "preparation_eligible",
+            "wsp97": "Reuse the immutable G01 result and original remaining eleven cases/criteria through the existing backend and child owner. Confirm compatibility before reuse, freeze a new budget, preserve all failures and label staged 1+11 provenance. If compatibility changed, reconcile that change before counting G01 in the new cohort."
+          },
+          {
+            "task": "WRE candidate integration",
+            "dimensions": [
+              3,
+              4,
+              3,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": false,
+            "state": "quality_gate_pending",
+            "wsp97": "One known successful decision is insufficient for production adapter integration. Preserve the existing unverified-proposal guard."
+          },
+          {
+            "task": "Held-out and later retained-use comparison",
+            "dimensions": [
+              3,
+              4,
+              3,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": false,
+            "state": "broader_candidate_quality_pending",
+            "wsp97": "Reserve independent criteria and later invocation evidence. More retries or a known-case pass do not establish retained benefit."
+          },
+          {
+            "task": "Native dependency pin reconciliation",
+            "dimensions": [
+              3,
+              3,
+              3,
+              3
+            ],
+            "total": 12,
+            "priority": "P2",
+            "eligible": false,
+            "state": "deployment_qualification_open",
+            "wsp97": "Installed 0.3.20 completed this native call, while declared 0.2.72 differs. A single local success does not justify a speculative shared-host dependency update."
+          },
+          {
+            "task": "Isolated AmIBot lifecycle test",
+            "dimensions": [
+              3,
+              4,
+              2,
+              3
+            ],
+            "total": 12,
+            "priority": "P2",
+            "eligible": false,
+            "state": "downstream_blocked",
+            "wsp97": "Requires qualified decisions and an admitted worker; active FoundUps and Remote-owned AutoPost remain protected."
+          }
+        ],
+        "resolved_item": "General-role G01 decoder canary: one completed call, strict JSON and original semantic criteria accepted. No extra call is part of this closed budget.",
+        "effort_cost_verification": "The observed G01 child took 64.672 seconds and used 1081 input plus 163 output tokens. Reusing compatible evidence avoids one duplicate call; the remaining eleven-call budget must be fixed separately. Currency, peak memory and total coordinator/verifier cost remain unknown. Independent original-criteria grading is required.",
+        "scoring_scope": "Incremental current RSI critical path after new execution evidence; canonical four-dimension WSP15 sum. Not a full historical backlog recertification.",
+        "next_gate": "Staged original twelve-case development coverage (one frozen G01 plus eleven new cases), then re-observe. No held-out gain, retention, native admission or production promotion follows automatically."
+      },
+      "limits": [
+        "One known development case. Other eleven general-model decisions remain unevaluated; not a population accuracy estimate.",
+        "JSON and original G01 semantics passed; vague secondary availability wording remains a documented clarity caveat.",
+        "No held-out gain, retained use, production adapter change, native WRE admission or FoundUp launch.",
+        "Process-tree/time/stdout bounds are not OS memory/network/filesystem isolation; peak memory is unknown.",
+        "Sampled source/runtime/model hashes before and after execution are not immutable execution or full runtime closure.",
+        "Installed llama-cpp-python 0.3.20 differs from declared 0.2.72; no dependency update.",
+        "Recorded native token usage and child duration exclude coordinator/verifier cost; currency cost remains unknown."
+      ],
+      "retrieval": {
+        "source": "d8263ecf8b6cd3d72244177bde86d292875d106f",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "semantic_query_repeated": false,
+        "request_correction": "First request used mode instead of retrieval_mode; preserved request_field_invalid, then corrected schema.",
+        "noise": "Lexical bundle supplemented by exact resolver/backend/contract reads; lexical ranking is not semantic proof.",
+        "missing": [
+          "Tier-0: SPEC.md",
+          "Tier-0: PRD.md",
+          "Tier-0: PROMPTS.md",
+          "Tier-0: prompts/",
+          "Tier-0: RUNBOOK.md",
+          "Tier-1: ROADMAP.md",
+          "Tier-2: memory/README.md",
+          "Tier-2: HOLOINDEX.md",
+          "Tier-2: ADR.md",
+          "Tier-2: adr/",
+          "Tier-2: INCIDENTS.md",
+          "Tier-2: SEV.md"
+        ],
+        "required_artifacts_complete": true,
+        "improvement": "Reuse existing source map, skill contract and original frozen messages; no new index or document family."
+      },
+      "evidence": {
+        "entry.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\entry.json",
+          "sha256": "ada3852d5cdf33d1cea01c3fc47e1925669748045779a8de507fcd6297fbd927"
+        },
+        "manifest.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\manifest.json",
+          "sha256": "e1b7cde04d1bf0cf6913b640cf7a92f98f535f2286f0379475d4e5ca53332ddd"
+        },
+        "source-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\source-review.json",
+          "sha256": "1807c898999cf7a17f87eca17c237dfe26d6f71a8a83447e23fad752acb2fdbb"
+        },
+        "execution-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\execution-review.json",
+          "sha256": "9287bdb36c452e3f1964427fbba654c485e2307c9a37c090912bf51181c6ad12"
+        },
+        "canary-started.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\canary-started.json",
+          "sha256": "be73c2ccda46bef3506188b64cea86c52b660cbcb4a53a010116882df2acefe5"
+        },
+        "canary-receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\canary-receipt.json",
+          "sha256": "9284871936a2f894e4b507f750c14b7ae2af114b72965b7e3ff79038d234167a"
+        },
+        "G01.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\G01.raw.json",
+          "sha256": "e719978b37095bd712eafe64ef3bfb13cfafa3f87a9753afe54553987d39ffa4"
+        },
+        "output-inspection.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\output-inspection.json",
+          "sha256": "7a45a98827cc4f791a0d7d968bc758b537dcb81fa0f0d41d08a1e44078e04b73"
+        },
+        "result-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\result-review.json",
+          "sha256": "7b0076873332f52bdb4515fe6a66b31d7e98912d20e0e67e05a4e0b5c2c69afd"
+        },
+        "next-action.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\next-action.json",
+          "sha256": "8ecd466322e3d07900898ba5b9f93f80ab06008ea0f9ce05779aff10abaa1815"
+        },
+        "holo-request-invalid.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\holo-request-invalid.json",
+          "sha256": "cebeac37c666b28a1ddc6856edadb77773f1d4f6c2eed0a0e421b929071f530e"
+        },
+        "holo-lexical.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\holo-lexical.json",
+          "sha256": "e1c44d8b7c1609e5f6fa3afecb394228d537712e9c6ffea0a703784612279d1c"
+        },
+        "preparation-reconciliation.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\preparation-reconciliation.json",
+          "sha256": "762c23669438d9dd595b8437da19d0124642366ad6ac17d8cc5bf3e42784dec2"
+        },
+        "peer-1935.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\peer-1935.json",
+          "sha256": "da26cf2c73d6130db1667010748bcc1e4d8d5c502e6e3bbbc9433ae7d52ee8c7"
+        },
+        "generate_case.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\generate_case.py",
+          "sha256": "1a4a534482883831a0665bb1cca493a35c86b98f4360b33e637509d07af49f78"
+        },
+        "run_canary.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\run_canary.py",
+          "sha256": "24ea4c199ab74e55a3c40640bec0adb844668c4f9a0aefe5197dfc88a27b47e4"
+        },
+        "inspect_output.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\inspect_output.py",
+          "sha256": "a49267875449b308ee4a5d6495eec31462edaf7cef4ff8cb03574566ffb240bb"
+        }
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\final-accounting.json"
     }
   }
 }
