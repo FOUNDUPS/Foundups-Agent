@@ -59,13 +59,13 @@ export default function Home() {
         <section className="three-sites" aria-labelledby="three-sites-title">
           <div className="three-sites-intro">
             <p className="eyebrow"><span /> 福井の三地点構想 · 候補地</p>
-            <h2 id="three-sites-title">温泉を中心に、二つの学校跡地も検証する。</h2>
-            <p>旧すかっとランド九頭竜は人が集まる地域拠点。旧羽生小学校と旧下宇坂小学校は、需要・電力・通信・建物条件を調べる計算拠点の候補です。いずれも採用や整備が決まった施設ではありません。</p>
+            <h2 id="three-sites-title">二つの学校跡地から、三地点の可能性を検証する。</h2>
+            <p>旧羽生小学校を初期優先の計算拠点候補、旧下宇坂小学校を将来拡張候補、旧すかっとランド九頭竜を人が集まる地域拠点として検討します。順位は実際の需要と電力・通信・建物条件で見直します。採用や整備は未決定です。</p>
           </div>
           <div className="three-sites-grid" role="list" aria-label="三地点の提案上の役割">
-            <article role="listitem"><span>01 · 地域拠点</span><h3>旧すかっとランド九頭竜</h3><p>温泉、交流、教育とイノベーションを結ぶ再利用案。解体案とのPPP/PFI比較を市に求めています。</p></article>
-            <article role="listitem"><span>02 · 初期優先候補</span><h3>旧羽生小学校</h3><p>近隣の送変電設備を現地で確認。利用できる電力容量や光回線は未確認で、正式な照会が必要です。</p></article>
-            <article role="listitem"><span>03 · 将来拡張候補</span><h3>旧下宇坂小学校</h3><p>広い敷地を生かす可能性を検討。需要と電力・通信・建物条件がそろうまで整備は前提としません。</p></article>
+            <article role="listitem"><span>初期優先候補</span><h3>旧羽生小学校</h3><p>近隣の送変電設備を現地で確認。利用できる電力容量や光回線は未確認で、正式な照会が必要です。</p></article>
+            <article role="listitem"><span>将来拡張候補</span><h3>旧下宇坂小学校</h3><p>広い敷地を生かす可能性を検討。需要と電力・通信・建物条件がそろうまで整備は前提としません。</p></article>
+            <article role="listitem"><span>地域拠点・別経路</span><h3>旧すかっとランド九頭竜</h3><p>温泉、交流、教育とイノベーションを結ぶ再利用案。解体案とのPPP/PFI比較を市に求めています。</p></article>
           </div>
           <p className="three-sites-note">福井市の令和8年度民間提案募集の対象は二つの学校跡地です。旧すかっとランド九頭竜は別のPPP/PFI経路で比較を求めます。 <a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html" target="_blank" rel="noreferrer">市の募集資料 ↗</a> <a href="/reports/jhr">三地点の技術評価 ↗</a></p>
         </section>
