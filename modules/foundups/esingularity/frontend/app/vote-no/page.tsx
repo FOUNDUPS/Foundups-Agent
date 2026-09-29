@@ -42,7 +42,7 @@ export default function VoteNoPage() {
       <section className="civic-contact" id="contact">
         <p className="civic-kicker">ACTION / 声を届ける</p><h2>温泉を守る意思を、届ける。</h2>
         <div className="civic-contact-grid">
-          <a href="mailto:gikai@city.fukui.lg.jp?subject=%E6%97%A7%E3%81%99%E3%81%8B%E3%81%A3%E3%81%A8%E3%83%A9%E3%83%B3%E3%83%89%E4%B9%9D%E9%A0%AD%E7%AB%9C%E3%81%AE%E8%A7%A3%E4%BD%93%E6%BA%96%E5%82%99%E4%BA%88%E7%AE%97%E3%81%AB%E5%8F%8D%E5%AF%BE%E3%81%97%E3%81%BE%E3%81%99">福井市議会へメールする<small>議会事務局：gikai@city.fukui.lg.jp</small></a>
+          <a href="mailto:gikai@city.fukui.lg.jp?subject=%E6%97%A7%E3%81%99%E3%81%8B%E3%81%A3%E3%81%A8%E3%83%A9%E3%83%B3%E3%83%89%E4%B9%9D%E9%A0%AD%E7%AB%9C%E3%81%AEPPP%2FPFI%E6%AF%94%E8%BC%83%E6%A4%9C%E8%A8%BC%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">福井市議会へメールする<small>議会事務局：gikai@city.fukui.lg.jp</small></a>
           <a href="https://www.city.fukui.lg.jp/sisei/kotyou/request/i-asking.html" target="_blank" rel="noreferrer">福井市へ意見を送る<small>福井市公式「ご意見・ご提案」ページ ↗</small></a>
         </div>
       </section>
