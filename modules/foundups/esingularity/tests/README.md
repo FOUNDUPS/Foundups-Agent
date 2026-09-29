@@ -67,3 +67,19 @@ exclude non-AWARDED grants, survive Sukatto removal, conserve investor/retained 
 and hold later-site deployment until its own evidence gates pass.
 
 Costed planning tests additionally protect MODEL ONLY labels, independent site budgets, physical sales limits, idle energy, debt/investor separation, renewal costs and preservation of existing FIN/grant structures.
+
+## Regional impact regression — 2026-09-29
+
+The same `test_yumori_economic_model.py` now qualifies the separate
+`src/yumori_regional_impact.py` calculation owner. See the
+[model and native reconciliation receipt](../docs/YUMORI_REGIONAL_IMPACT.md).
+
+Coverage includes source-derived historical uses versus an unverified lifetime
+claim, retained FY2019 source-recheck status, recorded user fees, 41 native-sheet
+numerical projection values, zero discount rates, zero attendance, demolition
+escalation sensitivity, invalid/non-finite inputs, tourism category overlap and
+unchanged commercial portfolio results before/after regional calculation.
+
+No new test file or second financial workbook is introduced. Existing portfolio,
+legacy-parity, demand and heat tests are preserved. Native FIN receipt: 41 outputs
+matched the dated Python expected values; this does not certify commercial inputs.
