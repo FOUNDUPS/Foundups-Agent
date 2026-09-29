@@ -56,6 +56,20 @@ export default function Home() {
           <FukuiComparisonMap />
         </section>
 
+        <section className="three-sites" aria-labelledby="three-sites-title">
+          <div className="three-sites-intro">
+            <p className="eyebrow"><span /> 福井の三地点構想 · 候補地</p>
+            <h2 id="three-sites-title">温泉を中心に、二つの学校跡地も検証する。</h2>
+            <p>旧すかっとランド九頭竜は人が集まる地域拠点。旧羽生小学校と旧下宇坂小学校は、需要・電力・通信・建物条件を調べる計算拠点の候補です。いずれも採用や整備が決まった施設ではありません。</p>
+          </div>
+          <div className="three-sites-grid" role="list" aria-label="三地点の提案上の役割">
+            <article role="listitem"><span>01 · 地域拠点</span><h3>旧すかっとランド九頭竜</h3><p>温泉、交流、教育とイノベーションを結ぶ再利用案。解体案とのPPP/PFI比較を市に求めています。</p></article>
+            <article role="listitem"><span>02 · 初期優先候補</span><h3>旧羽生小学校</h3><p>近隣の送変電設備を現地で確認。利用できる電力容量や光回線は未確認で、正式な照会が必要です。</p></article>
+            <article role="listitem"><span>03 · 将来拡張候補</span><h3>旧下宇坂小学校</h3><p>広い敷地を生かす可能性を検討。需要と電力・通信・建物条件がそろうまで整備は前提としません。</p></article>
+          </div>
+          <p className="three-sites-note">福井市の令和8年度民間提案募集の対象は二つの学校跡地です。旧すかっとランド九頭竜は別のPPP/PFI経路で比較を求めます。 <a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html" target="_blank" rel="noreferrer">市の募集資料 ↗</a> <a href="/reports/jhr">三地点の技術評価 ↗</a></p>
+        </section>
+
         <section className="story section current-position" id="current-position" aria-labelledby="current-position-title">
           <div className="section-index">現在の委員会要請 <span>/ 2026年9月28日更新</span></div>
           <div className="story-heading">
@@ -150,6 +164,11 @@ export default function Home() {
             <article role="listitem"><span>8,099.56㎡</span><strong>財産資料の延床面積</strong><p>福井市の財産資料の数値。2026年9月の解体準備事業資料は8,923.56㎡と記載しており、体育館等を含む範囲差の可能性がありますが、内訳は市へ確認中です。</p></article>
             <article role="listitem"><span>約15.8億円</span><strong>将来の解体見込み</strong><p>2026年6月の市議会質問資料に示された見込みで、確定契約額ではありません。</p></article>
             <article role="listitem"><span>129,649人</span><strong>2018年度利用</strong><p>入館者と宿泊者を合わせた、閉館前の利用実績。</p></article>
+          </div>
+          <div className="attendance-history">
+            <strong>開館以来の利用を、確認できる期間から見る。</strong>
+            <p>1994年開館。福井市の公表値を合算すると、2005〜2018年度の延べ利用は1,957,341人です（2006〜2010年度、2011〜2015年度は公表された年平均を各5倍）。「開館以来300万人超」は初期11年間の年度別記録が未確認のため推定であり、確定した累計としては扱いません。2020年度も通年営業の実績として外挿しません。</p>
+            <a href="https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf" target="_blank" rel="noreferrer">福井市の利用実績報告を見る ↗</a>
           </div>
           <div className="evidence-boundary">
             <strong>再利用の事業性、資金調達、工事費は検証中です。</strong>
