@@ -325,3 +325,9 @@
 - Registered `esingularity_001` with the Foundups catalog using `/f/esingularity_001` and `idb_esingularity_001`.
 - Kept token status deferred and made no fundraising, investment, CABR, payout, or DAO activation claim.
 - Performed the migration on the isolated `feat/esingularity-foundup-migration` branch to avoid unrelated RedDog work.
+## 2026-09-29 — Three-site panel and bounded attendance history
+
+- Followed WSP 97 and the website-update skill; recorded the pre-edit audit and Prometheus M-to-M prompt in `frontend/audit/WSP97_THREE_SITES_ATTENDANCE_20260929.md`. Compared the project page, separate YUMORI homepage, shared ticker, Documents 03/05/07, candidate registry, Fukui City monitoring report and school-property call.
+- Added a compact project-only panel beneath the existing eSingularity hero: Sukatto as the human-facing PPP/PFI reuse proposal, former Hanyu as the conditional initial-priority school candidate, and former Shimousaka as the future expansion candidate. City school property call and Sukatto PPP/PFI route are distinguished; no capacity or approval is implied.
+- Added the FY2005–FY2018 calculated 1,957,341 extended uses next to the existing FY2018 statistic, with calculation and source. The three-million lifetime number remains explicitly estimated because FY1994–FY2004 annual records are missing; no FY2020 full-year extrapolation is used. Updated the public claim gate and Japanese, English and Brazilian Portuguese copy.
+- Validation: domain routing 18/18; selected pytest 29 passed, 2 unrelated tests fail because this checkout lacks `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`; ESLint 0 errors/7 existing `img` warnings; vinext production build passed. Local browser preview was blocked by its client; live visual QA and publication receipt remain to be recorded after deployment.
