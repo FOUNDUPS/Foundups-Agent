@@ -1,3 +1,40 @@
+## General-role compatibility layer — 2026-09-29
+
+The existing general-role Qwen3.5-4B model loaded through `LlamaCppBackend` at
+source `4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7`. All 12 unchanged synthetic
+Gmail/LinkedIn prompts fit the actual template and 2048-token context with
+512 output tokens reserved. Independent artifact review accepted this narrow
+compatibility result; no generation or semantic qualification occurred.
+
+| Measure | Observed |
+|---|---|
+| Child dispatches / successful backend initializations reported by child | 1 / 1 |
+| Prompts fitting / tokenized | 12 / 12 |
+| Prompt tokens / minimum remaining headroom after output reservation | 1059–1108 / 428 |
+| Native load / bounded child wall seconds | 3.062 / 3.875 |
+| Generations / provider requests | 0 / 0 |
+| Semantic correctness / retained gain | unknown / unknown |
+
+The parent's native-load count remains unknown; the child reports one successful
+load. Counts from tokenization are capacity evidence, not inference usage.
+All rendered prompts end in an open thinking tag, which alone is not a defect.
+The existing JSON grammar path still needs an actual bounded decoder check.
+
+WSP 15 / WSP 97 next layer: **one frozen general-model JSON canary** (13/P1),
+then re-observe before a full unchanged 12-case comparison. This completed
+budget permits no further model calls. Preserve the previous coder baseline
+of 0/12 semantically correct and the original acceptance criteria.
+
+Use the existing backend and process owner; no new router or application module.
+Native WRE admission, held-out evaluation, retained use, one OpenClaw/Hermes
+ticket and isolated AmIBot remain later gates. The installed/declaration version
+mismatch and absence of OS memory/network isolation remain explicit limits.
+
+Canonical evidence and ranked next queue: `docs/roadmaps/rsi_swarm_backlog.json`
+→ `current_observation.operational_general_preflight_20260929`. Publication and
+main/owned-lane closure require separate receipts. Earlier sections are historical
+checkpoints; active YUMORI/eSingularity and Remote-owned AutoPost remain protected.
+
 ## Frozen operational decision matrix — 2026-09-29
 
 The frozen diagnostic run uses the unchanged C3 procedure and original

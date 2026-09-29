@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.operational_matrix_20260929",
-    "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
-    "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
-    "status": "diagnostic_checkpoint_reobserve_before_next_layer",
+    "observation_path": "current_observation.operational_general_preflight_20260929",
+    "base_commit": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+    "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
+    "status": "compatibility_checkpoint_reobserve_before_decoder_canary",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,26 +1894,44 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
     "historical_inherited_checkpoint": {
       "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_path": "current_observation.operational_first_loop_20260929",
-      "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
-      "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
-      "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
-      "status": "bounded_development_experiment_complete_reobserve_before_wiring",
+      "observation_path": "current_observation.operational_matrix_20260929",
+      "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
+      "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
+      "status": "diagnostic_checkpoint_reobserve_before_next_layer",
       "wsp15": {
-        "complexity": 3,
+        "complexity": 2,
         "importance": 4,
-        "deferability": 3,
-        "impact": 4,
-        "total": 14,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
         "priority": "P1"
       },
       "dispatchable": false,
-      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
-      "requires_fresh_reobservation_after_closure": true
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
+      "requires_fresh_reobservation_after_closure": true,
+      "historical_inherited_checkpoint": {
+        "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
+        "observation_path": "current_observation.operational_first_loop_20260929",
+        "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+        "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
+        "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
+        "status": "bounded_development_experiment_complete_reobserve_before_wiring",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 3,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "dispatchable": false,
+        "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
+        "requires_fresh_reobservation_after_closure": true
+      }
     }
   },
   "current_observation": {
@@ -8813,6 +8831,777 @@
         }
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json"
+    },
+    "operational_general_preflight_20260929": {
+      "state": "general_role_load_and_prompt_fit_qualified_no_generation",
+      "base": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+      "manifest": {
+        "created_utc": "2026-09-29T02:17:26.295580+00:00",
+        "source_head": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "source_root": "O:\\Foundups-Agent-worktrees\\agent-rsi-observation",
+        "source_bindings": {
+          "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+          "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+          "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+          "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+          "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69"
+        },
+        "runtime_bindings": {
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama.py": "3cd93b5d381391026bdda7c971f4374e3c676909015b8469b463115762f367f0",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_cache.py": "fe9e5fdad7c3e67e9c4c00c52fd6ed130443a101875ebc6435bb41d5f312fe39",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_chat_format.py": "8c11e093f211e414d627a8dbe4d25d15bc6cd11e3c7d438b3a7d075c51fd2313",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_cpp.py": "0101bba0fe3046cdb04a7cc68b0daf54f3e0cf074a91b64f3bd0a715af3cea8a",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_grammar.py": "b6a457fcb4e010885a29a47eec3525c1316c36e4ad0a3b24373704c8d0be0255",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_speculative.py": "37dabf1ee9aad01d82da6d5e69fbc0a37cdebd7ac5bc042cac8ead4e3d6fb6ba",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_tokenizer.py": "482e57da563dd537fba8c5d2ae09dc352c3054dfd8622957a2cb919b8478ca9f",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llama_types.py": "103a91a9f890d7f314c1f85173ae5e1efd2c12139202ffd4307fb754c055859e",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\llava_cpp.py": "8a72920c38d3994b6a7916f035a7e13f7d43b0c704d29fd01ff7aa6632b201a3",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\mtmd_cpp.py": "0cb732d817c67fe0b0a048c9c8361b429824dfa86b4b3bf6f783c2d5ba1f9903",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_ctypes_extensions.py": "9e5241832feb61e3c439b0e9e4d9a9ff4e7a6a54b0809a8f5995f0175d841876",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_ggml.py": "7d06a84bb20e72ee80129408cb118b244b351ba977ff47f45b656050291c0278",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_internals.py": "770b7e974e5c3835b4c2987d088d0651767e0dcd9dd1913c76eae75ff1243a9c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_logger.py": "e9f545f319c32bd52846b83c7a7b2a4b7d04df553c776b0157762f3a2a8e93f4",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\_utils.py": "69d6ee0d03fa2a5411a6f40f49b3af7c3ef28aa47957399e75ab904d1b4cd587",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\__init__.py": "867cb69b90002c61f87ded7326b0e3d1c3525390282f51c4c1f302ac4018fcf8",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml-base.dll": "cdab0eb1062467b4349863fd8b663081decf523a2afe11e0d435e2c7ec341060",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml-cpu.dll": "b4bb4130f91fc006dfdb39407b26bd1c5511b639f5c6bf1bbf03ec62aa349549",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\ggml.dll": "646361a794515610d9c6f12921f1a1d4e85e1504da821889f3d285903244574b",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\llama.dll": "5af1be204906c14438c59b46d70ea46471f12198debe9edfb8d1c6d7e5bfd461",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\lib\\mtmd.dll": "72a7bce1e6a1182d865f84eff072d51177edc723a081567440c6d051ab0b5fa6",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\app.py": "81c5a5be463cfb89b6961fe5c0085234a9004f7d2e41571b224ede45dd47cba7",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\cli.py": "7f1fc1f5edd718f4165262b006aa3195c06d806669fbce09d97f63a65d6ac18c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\errors.py": "ca5f95333829d58d233b7a4c137e78ef99c44f5442c2746db213ecf481e173b3",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\model.py": "bc33f93d88a5016f5a207057f860deb63f7fb87e1f6b4ddc9948d4a712aa8a36",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\settings.py": "13e6eec7fd1a9f889a185d8c05f4823edd6b0933a804749373da84ea171c2c2c",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\types.py": "a6c5b3b848df178537924b341d113aeee8b33239a5f2039ffb35efa6c96522bb",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp\\server\\__main__.py": "1cbf72bcf5f497b172fc1e2dec96e892e714f425f95270b1e284549c18a4b696",
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe": "9b0bffb7a259cd2722df454fdfff41ee13665820cff1f578b1d97d31f9ef93d5",
+          "O:\\Foundups-Agent\\.venv\\Lib\\site-packages\\llama_cpp_python-0.3.20.dist-info\\METADATA": "d784f57059ea5fd5e0047c8373e3b24dcf175dd92f914a05e354dc8514371e00"
+        },
+        "runtime_distribution_version": "0.3.20",
+        "declared_version": "0.2.72",
+        "role": "general",
+        "model_path": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "model_bytes": 2707513696,
+        "selection_source": "LOCAL_MODEL_ROOT/default",
+        "previous_closed_baseline": {
+          "pr": 1960,
+          "merge": "b5175561123edfa8f6bc3581190f808ffa1a7da1",
+          "semantic_correct": 0,
+          "cases": 12
+        },
+        "parameters": {
+          "context": 2048,
+          "cpu_threads": 4,
+          "gpu_layers": 0
+        },
+        "proposed_budget": {
+          "native_initializations": 1,
+          "generation_calls": 0,
+          "retries": 0,
+          "child_seconds": 90,
+          "stdout_bytes": 16384,
+          "provider_requests": 0
+        },
+        "execution_plane": "Directly supervised read-only local compatibility qualification; no native WRE admission.",
+        "qualification_limit": "Successful model load and tokenizer fit do not qualify decision quality. No promotion, live effects or retained improvement.",
+        "isolation": "Existing bounded child with process-tree/time/stdout bounds; trusted installed libraries, no OS memory/network/filesystem isolation.",
+        "previous_prompt_bindings": {
+          "instruction_sha256": "7290da530dc3a7a80e886c67f71bdbfa7b15e9fbb9452f3741936c2214eb3ba0",
+          "inputs": [
+            {
+              "case_id": "G01",
+              "input_sha256": "337825da165bbbe162b7862779f5ec3be46b5a722011ef399c5875f4cc82958a",
+              "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+              "messages_file_sha256": "8aa3c511e3a8ebe4fbf97413b0cb79d546c585942f8c85f90a3cee40fd2b34e8"
+            },
+            {
+              "case_id": "G02",
+              "input_sha256": "cdd56e34adafd099d328a6414bb7466ceeb7cc175f9c36d28115d7085970ae9d",
+              "messages_sha256": "623666da986817c010c950e5f7e9e954b1aacc646d990c07afdfb57f41e278b6",
+              "messages_file_sha256": "af9447151a9c6c9231a6c46eb80b8408553eea55a2a53f35442e0eb956d914d4"
+            },
+            {
+              "case_id": "G03",
+              "input_sha256": "f2c79473544c9095c799fa85fbbbdfe31016a22a3b3482c1baf4b01bd39d9f99",
+              "messages_sha256": "3dd96223c73e0feec404e2f510e62dc5264f2ebb4816064699b900e713180623",
+              "messages_file_sha256": "d5d6c0cd9be0c75aa9680a9d7804cf3c2d6f18595c1ef761af2b9880e719d1f7"
+            },
+            {
+              "case_id": "G04",
+              "input_sha256": "699f99217b5932282d0b8d4d1613dc92546793f68a2648f06cc10b58d8f528d9",
+              "messages_sha256": "52285a7ae1cc83f021e20bc162036cc70347fefe3bef4b8bdf1fb29384d9d9da",
+              "messages_file_sha256": "a55ce28e2afe6d82538bbf8ed0d17265bf15ca71ff3867d2f22c207413cea151"
+            },
+            {
+              "case_id": "G05",
+              "input_sha256": "d83c1f98fe194e86d3541ee1b4a749834288d9ab2538865b653d89fb2cb3e899",
+              "messages_sha256": "de75f42d375054763e04fcd327e376a7a93bb449b4e5a7d7baa520d2d94755af",
+              "messages_file_sha256": "33db8253309b2c0e65e4d4410bb90daceddf0e6f620d4e65500128570b961c0f"
+            },
+            {
+              "case_id": "G06",
+              "input_sha256": "adc4ccb76ab4747d6474a3feb45c00a614c9ada7728b4cbd2c78059126bf9294",
+              "messages_sha256": "38a034c0a95489bdc9d7ba139ecc980748694a776c0e9b635cdbde5eb95d496b",
+              "messages_file_sha256": "4382b59263cac01c3583cdb471b90bd1d03859e1ed03bb9b58389fa97f6e5c86"
+            },
+            {
+              "case_id": "L01",
+              "input_sha256": "afe3015d5834f277c92961a2693d89f6f3e2a9903a53ec6330c6d4d2a1d4de7e",
+              "messages_sha256": "edd36e0f2765bc7a3fcc89a24b2dcf4ca354513e395f60375478382c783857c5",
+              "messages_file_sha256": "41fb04426309eeda105d89398ad3a6b22f85b26b2c413d9967a98442482958ed"
+            },
+            {
+              "case_id": "L02",
+              "input_sha256": "45b31d4e52b0d97bc6cd77b311210c7007d05c929e45b7dd9667d1a50fedeaf3",
+              "messages_sha256": "8b7c5a93f20056c3b207c6bc9a4c8162e3e637b65447636253d7b03d7510887e",
+              "messages_file_sha256": "80872167000e015748535a19b3901c2abf033bd87eac7605ebb9be6bb1e51f17"
+            },
+            {
+              "case_id": "L03",
+              "input_sha256": "25ffa29731912d2606a7a4d80e865d9c0b5c5d74de1469d7b31a1321acc0c0eb",
+              "messages_sha256": "2b64317741b5dbc2381f0fc7af4c3bb267964dc0a8bb9537d10d7d73b2265738",
+              "messages_file_sha256": "c70a576a22385aa3a4de160d385935af4d1452f72008522e26acd914bdddcc83"
+            },
+            {
+              "case_id": "L04",
+              "input_sha256": "dfd7bbed1ddbfdf416905fa159514d0e44d57d82c9b773033a2e4a979a0bc8f1",
+              "messages_sha256": "99b3b04cf1c36913984f3874fd739385b91ed7b346d651aeec18a11152031ce7",
+              "messages_file_sha256": "c2c2c909ab22eb90d48333cf4fd8135fbe47f12bc55596fdc326b9388cdda061"
+            },
+            {
+              "case_id": "L05",
+              "input_sha256": "933b966cf0dfb8c74f82b2b99832267bf45b4bdacbe26b54f57676c81e7c50ca",
+              "messages_sha256": "d1d2c7f12e15a1c7f66f61cc3e1e3a0bcdadbee99b4efd5fd72a2bdabd17d9ae",
+              "messages_file_sha256": "b35364ae035b53ebcb9945581ff50efd5ac6b07fb8a94b17cb3797ce6641f965"
+            },
+            {
+              "case_id": "L06",
+              "input_sha256": "ff0b41542dfcb2e32d79675c107028f7f224280e0d407296c0bea00ca81d00f6",
+              "messages_sha256": "6ba3726eb51def3843c371c6b8d906b4217376b12cb73131a62485ab2e174172",
+              "messages_file_sha256": "4738bc11486cd3c017aa441172bce7f4515fd42e9131db3d19572d1280da10a0"
+            }
+          ]
+        },
+        "previous_matrix_audit": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix",
+        "previous_criteria_hashes": {
+          "cases.json": "479e41e41ed6e867cdb9362c35510518a6b9773fde47949483bf621d8b4a783b",
+          "response-contract.json": "455a11869c107f3ffeb1729a7ef5a9c6c298798bce18378e6728b49f5c63fbd3",
+          "labels-review.json": "579b5aa76ca99099d124844efe759b1e12aee95352aac61b53d96054b69c577a",
+          "labels-contract-review.json": "db63807fb65944636ec261103261d47c6428779497878c1e25256409ce4f8d4e"
+        }
+      },
+      "raw": {
+        "source_head": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "owner": "LlamaCppBackend.initialize",
+        "backend_initializations": 1,
+        "native_load_attempts": 1,
+        "initialized": true,
+        "load_seconds": 3.0619999999180436,
+        "generation_calls": 0,
+        "provider_requests": 0,
+        "effect_evidence": false,
+        "promotion": false,
+        "semantic_quality": null,
+        "case_fits": [
+          {
+            "case_id": "G01",
+            "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+            "rendered_sha256": "3a7fab6fc0d6aef3af5dd0fc4aff11da117e53d99c36aa8d8eecd4f373c7d201",
+            "prompt_tokens": 1081,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G02",
+            "messages_sha256": "623666da986817c010c950e5f7e9e954b1aacc646d990c07afdfb57f41e278b6",
+            "rendered_sha256": "9dc9dd63cc00f2352a3eca67f589a0c4c4a931ed2c813f631404bf89a9c45ce1",
+            "prompt_tokens": 1077,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G03",
+            "messages_sha256": "3dd96223c73e0feec404e2f510e62dc5264f2ebb4816064699b900e713180623",
+            "rendered_sha256": "443f785ae2f45d5233c9db6c36c31dc16473b91cbf5dda892108f6ef030a5615",
+            "prompt_tokens": 1076,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G04",
+            "messages_sha256": "52285a7ae1cc83f021e20bc162036cc70347fefe3bef4b8bdf1fb29384d9d9da",
+            "rendered_sha256": "7f3654375fd44ab51e16ef2064732e458f5c22b51c83dc9ce848a2357b6e3d50",
+            "prompt_tokens": 1104,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G05",
+            "messages_sha256": "de75f42d375054763e04fcd327e376a7a93bb449b4e5a7d7baa520d2d94755af",
+            "rendered_sha256": "75aaddbdd384eb2cfbd855ff97f1cc995b6078e1926cbd41b3b969c86e7c889c",
+            "prompt_tokens": 1091,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G06",
+            "messages_sha256": "38a034c0a95489bdc9d7ba139ecc980748694a776c0e9b635cdbde5eb95d496b",
+            "rendered_sha256": "4a8d197019924b5973c00589fafdbfca778b03d1d73a6b6dc7d873ade55d7e84",
+            "prompt_tokens": 1093,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L01",
+            "messages_sha256": "edd36e0f2765bc7a3fcc89a24b2dcf4ca354513e395f60375478382c783857c5",
+            "rendered_sha256": "b1ec9e1b2db510ccdeadaf49f4ab39776428cd76cfd7c7b471b28d2fae632413",
+            "prompt_tokens": 1073,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L02",
+            "messages_sha256": "8b7c5a93f20056c3b207c6bc9a4c8162e3e637b65447636253d7b03d7510887e",
+            "rendered_sha256": "43b710278adf2140978ae209e33a9fe77aced81ed354696700f2d8c0fd9b2be1",
+            "prompt_tokens": 1065,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L03",
+            "messages_sha256": "2b64317741b5dbc2381f0fc7af4c3bb267964dc0a8bb9537d10d7d73b2265738",
+            "rendered_sha256": "e1a3d9180d81654625eecb113783a3fa7a613696c6fbce5ec22a62e809b6d956",
+            "prompt_tokens": 1059,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L04",
+            "messages_sha256": "99b3b04cf1c36913984f3874fd739385b91ed7b346d651aeec18a11152031ce7",
+            "rendered_sha256": "a1072614275f1db905288d1989a113f1536b00ea19a7d142b63009e3827a1ae7",
+            "prompt_tokens": 1108,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L05",
+            "messages_sha256": "d1d2c7f12e15a1c7f66f61cc3e1e3a0bcdadbee99b4efd5fd72a2bdabd17d9ae",
+            "rendered_sha256": "ff5122b4640070c343d25eb4761734b8155616f23a0aa9c73e1f63eb68a789a5",
+            "prompt_tokens": 1071,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L06",
+            "messages_sha256": "6ba3726eb51def3843c371c6b8d906b4217376b12cb73131a62485ab2e174172",
+            "rendered_sha256": "3610edd651bba82810fd93541f1dcc60efd8da051b2f009333c7682ad86a52b8",
+            "prompt_tokens": 1072,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          }
+        ],
+        "architecture": "qwen35",
+        "chat_format": "chat_template.default",
+        "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+        "state": "INITIALIZED_AND_ALL_PROMPTS_FIT",
+        "generation_quality_qualified": false,
+        "limitation": "Load/tokenization only; decoder correctness and semantic comparison untested."
+      },
+      "receipt": {
+        "source_head": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "child_dispatch_attempts": 1,
+        "native_load_attempts": null,
+        "generation_calls": 0,
+        "provider_requests": 0,
+        "sandbox": false,
+        "os_memory_limit": false,
+        "os_network_isolation": false,
+        "peak_memory_bytes": null,
+        "sampled_identity_checks": true,
+        "postcheck_passed": true,
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "returncode": 0,
+        "output_oversized": false,
+        "output_read_failed": false,
+        "raw_sha256": "d1a294627bffe742223d83eeaaccbc571b2f927e0a4f653dbaa39e762e9be310",
+        "state": "RETURNED",
+        "child_wall_seconds": 3.875
+      },
+      "metrics": {
+        "child_dispatch_attempts": 1,
+        "backend_initializations_reported_by_child": 1,
+        "native_load_attempts_reported_by_child": 1,
+        "native_load_attempts_observed_by_parent": null,
+        "initialized": true,
+        "architecture": "qwen35",
+        "chat_format": "chat_template.default",
+        "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+        "planned_prompts": 12,
+        "tokenized_prompts": 12,
+        "fit_prompts": 12,
+        "prompt_tokens_min": 1059,
+        "prompt_tokens_max": 1108,
+        "reserved_output_tokens": 512,
+        "context_tokens": 2048,
+        "minimum_context_headroom_after_reservation": 428,
+        "open_thinking_tag_prompts": 12,
+        "generation_calls": 0,
+        "provider_requests": 0,
+        "load_seconds": 3.0619999999180436,
+        "child_wall_seconds": 3.875,
+        "postcheck_passed": true,
+        "semantic_quality": null,
+        "retained_gain": null,
+        "peak_memory_bytes": null,
+        "promotion": false,
+        "semantic_evaluated": 0,
+        "semantic_correct": null,
+        "held_out_gain": null,
+        "currency_cost": null,
+        "all_coordinator_verifier_tokens": null
+      },
+      "independent_review": {
+        "schema": "independent_general_role_preflight_result_review.v1",
+        "reviewer": "measurement_seam_review",
+        "role": "verifier",
+        "origin": "internal_handoff",
+        "principal_ref": "012",
+        "reviewed_at": "2026-09-29T02:26:41.994307+00:00",
+        "approved": true,
+        "reads_released": true,
+        "source_head": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "status": "COMPATIBILITY_LOAD_AND_FIT_ACCEPTED",
+        "approval_meaning": "Observed load and tokenizer/template capacity accepted only; no generation or semantic qualification and no new execution budget.",
+        "evidence_hashes": {
+          "manifest.json": "93bbeb5b8b2a575a1fbc32b2f685c4bd60303d11d0012f9499fc89c37853da26",
+          "probe_general.py": "82e5caeacc6cce5f1388990c57a4a7a2a7cfd08a967493e5149f3ac4562bf4a0",
+          "run_preflight.py": "cc83d5bd14a74db371e9d573e667dd2661eef6c72a365f6bd6338b4810c87b08",
+          "execution-review.json": "4297872f6ef614d9364f14310514ec08392b5f96ebff3c678c12fbce4a211266",
+          "source-review.json": "36ab40120eaf7a18a5b2e626c02e445d0cf26e935b37d37941e089bc98624980",
+          "preflight-started.json": "71a778e94175dd44649d0c11268464cdbff70f264c3e8e8e8207dff6782f1e8b",
+          "preflight.raw.json": "d1a294627bffe742223d83eeaaccbc571b2f927e0a4f653dbaa39e762e9be310",
+          "preflight-receipt.json": "d779b8f2c7185ce7f42a498fb4274359b364c1b4448bda084f483e005c5b687f"
+        },
+        "metrics": {
+          "child_dispatch_attempts": 1,
+          "backend_initializations_reported_by_child": 1,
+          "native_load_attempts_reported_by_child": 1,
+          "native_load_attempts_observed_by_parent": null,
+          "initialized": true,
+          "architecture": "qwen35",
+          "chat_format": "chat_template.default",
+          "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+          "planned_prompts": 12,
+          "tokenized_prompts": 12,
+          "fit_prompts": 12,
+          "prompt_tokens_min": 1059,
+          "prompt_tokens_max": 1108,
+          "reserved_output_tokens": 512,
+          "context_tokens": 2048,
+          "minimum_context_headroom_after_reservation": 428,
+          "open_thinking_tag_prompts": 12,
+          "generation_calls": 0,
+          "provider_requests": 0,
+          "load_seconds": 3.0619999999180436,
+          "child_wall_seconds": 3.875,
+          "postcheck_passed": true,
+          "semantic_quality": null,
+          "retained_gain": null,
+          "peak_memory_bytes": null,
+          "promotion": false
+        },
+        "case_fits": [
+          {
+            "case_id": "G01",
+            "messages_sha256": "c845a7f4d62d26e29494bdb32217d3ef31374195ac8616a959a8b943f08d7bf0",
+            "rendered_sha256": "3a7fab6fc0d6aef3af5dd0fc4aff11da117e53d99c36aa8d8eecd4f373c7d201",
+            "prompt_tokens": 1081,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G02",
+            "messages_sha256": "623666da986817c010c950e5f7e9e954b1aacc646d990c07afdfb57f41e278b6",
+            "rendered_sha256": "9dc9dd63cc00f2352a3eca67f589a0c4c4a931ed2c813f631404bf89a9c45ce1",
+            "prompt_tokens": 1077,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G03",
+            "messages_sha256": "3dd96223c73e0feec404e2f510e62dc5264f2ebb4816064699b900e713180623",
+            "rendered_sha256": "443f785ae2f45d5233c9db6c36c31dc16473b91cbf5dda892108f6ef030a5615",
+            "prompt_tokens": 1076,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G04",
+            "messages_sha256": "52285a7ae1cc83f021e20bc162036cc70347fefe3bef4b8bdf1fb29384d9d9da",
+            "rendered_sha256": "7f3654375fd44ab51e16ef2064732e458f5c22b51c83dc9ce848a2357b6e3d50",
+            "prompt_tokens": 1104,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G05",
+            "messages_sha256": "de75f42d375054763e04fcd327e376a7a93bb449b4e5a7d7baa520d2d94755af",
+            "rendered_sha256": "75aaddbdd384eb2cfbd855ff97f1cc995b6078e1926cbd41b3b969c86e7c889c",
+            "prompt_tokens": 1091,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "G06",
+            "messages_sha256": "38a034c0a95489bdc9d7ba139ecc980748694a776c0e9b635cdbde5eb95d496b",
+            "rendered_sha256": "4a8d197019924b5973c00589fafdbfca778b03d1d73a6b6dc7d873ade55d7e84",
+            "prompt_tokens": 1093,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L01",
+            "messages_sha256": "edd36e0f2765bc7a3fcc89a24b2dcf4ca354513e395f60375478382c783857c5",
+            "rendered_sha256": "b1ec9e1b2db510ccdeadaf49f4ab39776428cd76cfd7c7b471b28d2fae632413",
+            "prompt_tokens": 1073,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L02",
+            "messages_sha256": "8b7c5a93f20056c3b207c6bc9a4c8162e3e637b65447636253d7b03d7510887e",
+            "rendered_sha256": "43b710278adf2140978ae209e33a9fe77aced81ed354696700f2d8c0fd9b2be1",
+            "prompt_tokens": 1065,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L03",
+            "messages_sha256": "2b64317741b5dbc2381f0fc7af4c3bb267964dc0a8bb9537d10d7d73b2265738",
+            "rendered_sha256": "e1a3d9180d81654625eecb113783a3fa7a613696c6fbce5ec22a62e809b6d956",
+            "prompt_tokens": 1059,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L04",
+            "messages_sha256": "99b3b04cf1c36913984f3874fd739385b91ed7b346d651aeec18a11152031ce7",
+            "rendered_sha256": "a1072614275f1db905288d1989a113f1536b00ea19a7d142b63009e3827a1ae7",
+            "prompt_tokens": 1108,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L05",
+            "messages_sha256": "d1d2c7f12e15a1c7f66f61cc3e1e3a0bcdadbee99b4efd5fd72a2bdabd17d9ae",
+            "rendered_sha256": "ff5122b4640070c343d25eb4761734b8155616f23a0aa9c73e1f63eb68a789a5",
+            "prompt_tokens": 1071,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          },
+          {
+            "case_id": "L06",
+            "messages_sha256": "6ba3726eb51def3843c371c6b8d906b4217376b12cb73131a62485ab2e174172",
+            "rendered_sha256": "3610edd651bba82810fd93541f1dcc60efd8da051b2f009333c7682ad86a52b8",
+            "prompt_tokens": 1072,
+            "reserved_output": 512,
+            "context_tokens": 2048,
+            "fits": true,
+            "ends_with_open_thinking_tag": true
+          }
+        ],
+        "findings": [
+          "Exact reviewed scripts/manifest, source/runtime bindings and twelve original message hashes remain unchanged; one observed child returned normally within its bound.",
+          "Existing LlamaCppBackend initialized qwen35 with2048 context and all twelve actual-template tokenizations fit with512 tokens reserved. Count and arithmetic checked without repeating tokenization.",
+          "Parent native count remains unknown; child reports successful owner/native initialization. Neither serialization nor this review turns that report into independent native attestation.",
+          "All open-thinking flags describe rendered template prefixes. No generated reasoning trace exists and this alone does not demonstrate a defect.",
+          "Existing installed llama_chat_format.py:615-641 tokenizes the formatter output then converts response_format=json_object to grammar; lines689-716 pass that grammar to create_completion. Grammar constrains generated syntax; it does not prove field semantics, correct stop behavior or acceptable decoder time.",
+          "The declared version mismatch did not block the observed load. This does not reconcile deployment dependencies or justify changing the runtime pin."
+        ],
+        "next_gate": {
+          "recommendation": "One separately frozen decoder/JSON canary through the same existing backend before spending a twelve-case comparison budget.",
+          "requirements": [
+            "Freeze one unchanged diagnostic case, instruction, model/template identity, context2048/output512,temperature and exact existing json_object control before invocation.",
+            "Record raw content, finish reason, usage, wall time and source bindings; require a complete strict JSON object and unchanged structural contract. Count timeout/truncation/empty output separately.",
+            "Do not infer or repair a defect solely from the thinking prefix; do not change criteria or tune after seeing this canary.",
+            "Canary success is decoder/format feasibility only. Semantic comparison requires a separately bounded fixed matrix and the existing independent criteria."
+          ],
+          "authorized_generation_calls_by_this_review": 0
+        },
+        "limitations": [
+          "Trusted local-library/process-tree boundary; no OS memory/network/filesystem isolation or measured peak memory.",
+          "Pre/post hashes are sampled, not immutable execution. Full model digest relies on the reviewed controller receipt; reviewer did not rehash2.7GB or reload.",
+          "No tests repeated, native invocations, providers, repository edits, held-out semantic evaluation, retained benefit or WRE admission."
+        ]
+      },
+      "signal_classification": {
+        "runtime_counts": "Execution feedback from trusted local libraries; parent process observations and child native assertions remain separate.",
+        "independent_review": "Separate source/artifact review; not an independent rerun or formal verifier.",
+        "semantic_grade": null,
+        "held_out_coverage": false,
+        "human_objective": "012 selects objectives; compatibility is not a numerical research-direction score.",
+        "authorization": "Supervised local qualification only; no native WRE admission, promotion or live action."
+      },
+      "next_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
+      "next_selection": {
+        "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "source_head": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "finding_summary": "The existing general-role Qwen3.5-4B model loads through LlamaCppBackend and all 12 unchanged messages fit the 2048-token context with 512 output tokens reserved. All rendered prompts end with an open thinking tag. No generation was performed, so decoder behavior, JSON completion and decision quality remain unknown.",
+        "rationale": "The compatibility blocker is now narrowed by execution evidence. An open thinking prefix is not itself a defect, but the previous coder candidate's JSON procedure has not been exercised through this model's template and decoder. One fixed canary is a smaller informative next step than a full matrix or speculative backend/dependency changes. Keep the original semantic criteria and stop on a failed or uncertain boundary; do not tune labels to obtain a pass.",
+        "ranked_candidates": [
+          {
+            "task": "Native autonomous RSI admission",
+            "dimensions": [
+              4,
+              5,
+              4,
+              5
+            ],
+            "total": 18,
+            "priority": "P0",
+            "eligible": false,
+            "state": "blocked",
+            "wsp97": "Seven inherited authority blockers and null lease remain unrefuted. Successful local model loading grants no native admission."
+          },
+          {
+            "task": "Operational decision qualification",
+            "dimensions": [
+              3,
+              4,
+              3,
+              4
+            ],
+            "total": 14,
+            "priority": "P1",
+            "eligible": false,
+            "state": "parent_partially_complete",
+            "wsp97": "Closed frozen coder baseline and now completed general-model load/context probe; advance the selected child."
+          },
+          {
+            "task": "General-model decoder and JSON canary",
+            "dimensions": [
+              2,
+              4,
+              4,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": true,
+            "selected": true,
+            "state": "preparation_eligible",
+            "wsp97": "Reuse existing backend, formatter, bounded child and unchanged development case. Freeze one generation budget and independent criteria before execution."
+          },
+          {
+            "task": "Full general-model decision matrix",
+            "dimensions": [
+              2,
+              4,
+              4,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": false,
+            "state": "decoder_gate_pending",
+            "wsp97": "Do not spend a full matrix budget before observing actual decoder/JSON behavior. Prior 0/12 coder result remains the development baseline."
+          },
+          {
+            "task": "WRE candidate integration",
+            "dimensions": [
+              3,
+              4,
+              3,
+              3
+            ],
+            "total": 13,
+            "priority": "P1",
+            "eligible": false,
+            "state": "quality_gate_pending",
+            "wsp97": "Load/context compatibility is not semantic acceptance; preserve unverified-proposal boundary."
+          },
+          {
+            "task": "Native dependency pin reconciliation",
+            "dimensions": [
+              3,
+              3,
+              3,
+              3
+            ],
+            "total": 12,
+            "priority": "P2",
+            "eligible": false,
+            "state": "deployment_qualification_open",
+            "wsp97": "Installed0.3.20 supports this observed load; declared0.2.72 remains different. No evidence justifies a shared-host update in this slice."
+          },
+          {
+            "task": "Isolated AmIBot lifecycle test",
+            "dimensions": [
+              3,
+              4,
+              2,
+              3
+            ],
+            "total": 12,
+            "priority": "P2",
+            "eligible": false,
+            "state": "downstream_blocked",
+            "wsp97": "Requires qualified decisions and an admitted worker. Protect active FoundUps and separately owned AutoPost."
+          }
+        ],
+        "resolved_item": "General-role model load and fixed prompt-fit preflight; no repeat of this unchanged successful load merely to restate status.",
+        "cost_and_verification": "This completed budget allowed one initialization and zero generations. Next generation needs a new fixed budget, unchanged controls, bounded process and independent result review; currency and total coordinator/reviewer cost remain unknown.",
+        "scoring_scope": "Incremental current RSI critical path; canonical WSP15 four-dimension sum, eligibility and cost tracked separately. Not a full59-task recertification.",
+        "next_gate": "One source/runtime-bound canary, then re-observe before a full unchanged 12-case comparison. Held-out and later retained-use evidence remain necessary before claiming RSI gain."
+      },
+      "prior_semantic_baseline": {
+        "pr": 1960,
+        "merge": "b5175561123edfa8f6bc3581190f808ffa1a7da1",
+        "semantic_correct": 0,
+        "cases": 12
+      },
+      "limits": [
+        "Load and tokenization only; decoder behavior and semantic quality remain untested for this model.",
+        "Open thinking prefix alone is not a defect. No reasoning text was generated.",
+        "Tokenized prompt counts are capacity measurements, not inference usage; child duration is not total sprint cost.",
+        "Process-tree/time/stdout bounds are not OS memory/network/filesystem isolation; peak memory remains unknown.",
+        "Source/runtime/model identities were sampled before/after, not immutable execution or full transitive runtime closure.",
+        "Installed llama-cpp-python 0.3.20 differs from declared 0.2.72; no dependency update.",
+        "Development fixtures only; no held-out or retained gain, worker promotion or production adapter change."
+      ],
+      "retrieval": {
+        "source": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
+        "freshness": "UNKNOWN",
+        "semantic_query_repeated": false,
+        "reason": "Prior authority/query-host mismatch remains unchanged; governed lexical path used directly.",
+        "noise": "Duplicate code hits and unrelated simulator/comment-drafter hits; exact resolver/tests prioritized.",
+        "missing": [
+          "Tier-0: SPEC.md",
+          "Tier-0: PRD.md",
+          "Tier-0: PROMPTS.md",
+          "Tier-0: prompts/",
+          "Tier-0: RUNBOOK.md",
+          "Tier-1: ROADMAP.md",
+          "Tier-2: memory/README.md",
+          "Tier-2: HOLOINDEX.md",
+          "Tier-2: ADR.md",
+          "Tier-2: adr/",
+          "Tier-2: INCIDENTS.md",
+          "Tier-2: SEV.md"
+        ],
+        "required_artifacts_complete": true,
+        "skill_hits": 0,
+        "improvement": "Use module hint plus exact backend/installed-source reads; no new index/store/module."
+      },
+      "evidence": {
+        "entry.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\entry.json",
+          "sha256": "245514450514ee01f0a5489e97939a63877b181fd6019a3c24f9b36f51e5c6a6"
+        },
+        "manifest.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\manifest.json",
+          "sha256": "93bbeb5b8b2a575a1fbc32b2f685c4bd60303d11d0012f9499fc89c37853da26"
+        },
+        "source-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\source-review.json",
+          "sha256": "36ab40120eaf7a18a5b2e626c02e445d0cf26e935b37d37941e089bc98624980"
+        },
+        "execution-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\execution-review.json",
+          "sha256": "4297872f6ef614d9364f14310514ec08392b5f96ebff3c678c12fbce4a211266"
+        },
+        "preflight-started.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\preflight-started.json",
+          "sha256": "71a778e94175dd44649d0c11268464cdbff70f264c3e8e8e8207dff6782f1e8b"
+        },
+        "preflight.raw.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\preflight.raw.json",
+          "sha256": "d1a294627bffe742223d83eeaaccbc571b2f927e0a4f653dbaa39e762e9be310"
+        },
+        "preflight-receipt.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\preflight-receipt.json",
+          "sha256": "d779b8f2c7185ce7f42a498fb4274359b364c1b4448bda084f483e005c5b687f"
+        },
+        "result-review.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\result-review.json",
+          "sha256": "1258520ad6b0451ecef235a93ec14ab11424e4d82f44cff4145376576ecea2fd"
+        },
+        "next-action.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\next-action.json",
+          "sha256": "d51e3df05d18bd17f6bdfae2165ca313a5f3ccdcd96b52f0c3e29bc5b625b99f"
+        },
+        "holo-lexical.json": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\holo-lexical.json",
+          "sha256": "ca0b1b7b88719f95c5d429a4a367abc9b9dd3c1961ed7cca48e585944274d11c"
+        },
+        "probe_general.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\probe_general.py",
+          "sha256": "82e5caeacc6cce5f1388990c57a4a7a2a7cfd08a967493e5149f3ac4562bf4a0"
+        },
+        "run_preflight.py": {
+          "path": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\run_preflight.py",
+          "sha256": "cc83d5bd14a74db371e9d573e667dd2661eef6c72a365f6bd6338b4810c87b08"
+        }
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json"
     }
   }
 }
