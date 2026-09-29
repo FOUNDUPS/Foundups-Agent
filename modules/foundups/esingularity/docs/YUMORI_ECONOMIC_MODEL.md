@@ -320,6 +320,10 @@ Source of inputs: `data/yumori_planning_assumptions.json`. Calculation: `run_pla
 
 - Reused existing site tabs, all 18 workbook tabs and the grant/commitment ledger. No new workbook or grant registry. No City procedure or grant-status changes in this slice.
 - 70 module tests and 18 routing tests pass. Native FIN readback matched all 165 annual cash input cells, 9 headline numerical outputs, three scenario verdicts and ten later-site cash years against Python, with no errors in the changed ranges.
-- Independent LibreOffice recalculation reproduced the portfolio results. The unchanged legacy Dashboard E85 Google array-IRR formula is a LibreOffice compatibility exception; its native cached result remains intact. It is not used by the portfolio model.
+- Independent LibreOffice forced full recalculation (OOXMLRecalcMode=0) reproduced the portfolio results and a disposable changed-input fixture: Hanyu fit-out area 400→600 m², base Year-1 demand 160,000→100,000 GPUh, and Sukatto excluded. Ordinary conversion can retain stale dependency caches; those caches were rejected. The unchanged legacy Dashboard E85 Google array-IRR formula is a LibreOffice compatibility exception; its native cached result remains intact. It is not used by the portfolio model.
 - Native addTable metadata creation returned a connector internal error on the bounded call and minimal retry. The populated, formatted native cell tables and formulas are preserved; no unsupported table-object claim is made.
 - Cost quotes and actual feasibility remain outstanding. WSP 97 PR/merge and operational receipts are recorded in the dedicated follow-up PR and canonical Moshpit event.
+
+The costed cash schedule uses the existing `unlevered_cash_jpy` API field as **CFADS / cash before debt service**. Its cash-tax proxy deducts modeled interest, so this is not a financing-independent unlevered valuation. Site cost recovery uses this disclosed tax scenario; investor recovery uses actual modeled distributions. No unlevered IRR or enterprise valuation is claimed.
+
+Follow-up delivery: [PR #1962](https://github.com/FOUNDUPS/Foundups-Agent/pull/1962). Final merge/main and native receipts are recorded in the PR and canonical Moshpit.

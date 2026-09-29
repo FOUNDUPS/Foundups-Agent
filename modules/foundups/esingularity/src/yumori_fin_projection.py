@@ -31,7 +31,7 @@ def build_projection():
     keys=['price_jpy_gpu_hour','price_escalation','energy_jpy_kwh','demand_charge_jpy_kw_month','energy_escalation','operations_y1_jpy','operations_escalation','variable_opex_share','maintenance_share_capex','tax_rate','working_capital_share','renewal_fraction_year5','debt_share','debt_rate','debt_term_years','reserve_share_capex','investor_return_rate','investor_repayment_years','community_y1_jpy','compute_life_years','infrastructure_life_years']
     put('Assumptions',90,[['Independent scenario inputs','Downside','Base','Upside','Basis']])
     for row,key in enumerate(keys,91):
-        put('Assumptions',row,[[key]+[data['scenarios'][n][key] for n in ('downside','base','upside')]+['MODEL ONLY; changeable, no financing offer or tax opinion']])
+        put('Assumptions',row,[[key.replace('_',' ')]+[data['scenarios'][n][key] for n in ('downside','base','upside')]+['MODEL ONLY']])
     put('Assumptions',114,[['Basis / source','Verified comparator only; ALL site construction costs remain MODEL ONLY']])
     for row,source in enumerate(data['sources'],115):put('Assumptions',row,[[source['id'],source['url'],source['fact']]])
     put('Assumptions',119,[['Tax / currency',data['tax_basis']],['Scope','No demolition saving, building valuation, heat sale or unawarded grant counted as project cash.'],['Financing','Debt/equity below are hypothetical financing obligations; committed-source ledger stays zero.'],['Evidence','INSUFFICIENT EVIDENCE — assumptions complete does not mean utility/demand/quotes verified.']])
@@ -77,7 +77,7 @@ def build_projection():
                 formulas.append('='+forms[off])
             put('Revenue',rr+off,[[label]+formulas])
         put('Revenue',rr+8,[['Evidence','MODEL ONLY hypothetical customer-hours. No order, realized price or available utility capacity is established.']])
-        labels=['Annual facility energy kWh','Energy charge','Demand charge','Electricity total','Operations / carrier / rent / insurance','Maintenance expense','Community cash','EBITDA','Opening scenario debt','Interest','Principal repayment','Closing debt','Depreciation proxy','Cash tax proxy','Working capital target','Peak working capital','Working capital cash increase','Equipment renewal CapEx','Reserve contribution','Investor due: return + capital','Debt service','Unlevered cash / CFADS']
+        labels=['Annual facility energy kWh','Energy charge','Demand charge','Electricity total','Operations / carrier / rent / insurance','Maintenance expense','Community cash','EBITDA','Opening scenario debt','Interest','Principal repayment','Closing debt','Depreciation proxy','Cash tax proxy','Working capital target','Peak working capital','Working capital cash increase','Equipment renewal CapEx','Reserve contribution','Investor due: return + capital','Debt service','Cash before debt / CFADS']
         put('Opex',op,[[name+' — full cash drivers','Year 1','Year 2','Year 3','Year 4','Year 5']])
         for off,label in enumerate(labels,1):
             fs=[]
@@ -89,6 +89,7 @@ def build_projection():
         put('Opex',op+24,[['Scope','MODEL ONLY terms; no debt/equity commitment. Tax proxy excludes loss carryforwards; renewal charged in Year 5; no terminal value.']])
         cash_sources=[('Revenue',rr+5),('Opex',op+4),('Opex',op+5),('Opex',op+6),('Opex',op+14),('Opex',op+17),('Opex',op+18),('Opex',op+21),('Opex',op+19),('Opex',op+20),('Opex',op+7)]
         for off,(source,r) in enumerate(cash_sources,1):put('5Y Model',start+off,[['='+source+'!'+col+str(r) for col in 'BCDEF']],1)
+        put('5Y Model',start+15,[['CFADS — cash before debt service']])
         put('5Y Model',start+36,[[f'={cap}*(1-{a(103)})']],1)
         put('5Y Model',start+37,[[f'MODEL ONLY — {terms["cost_case"]} costs; Assumptions 68:122, Revenue and Opex schedules.']],1)
         verdict=f'=IF(OR(NOT(\'Site 3 — Hanyu\'!B12),COUNTIF(Revenue!B{rr+6}:F{rr+6},"FAIL*")>0,CapEx!E26>0,COUNT(B{start+1}:F{start+11})<>55,COUNTIF(B{start+1}:F{start+11},"<0")>0,Financing!B64>0),"INSUFFICIENT EVIDENCE",IF(OR(G{start+28}>0,G{start+29}>0),"NO — ADDITIONAL CAPITAL REQUIRED",IF(G{start+27}>=CapEx!{cc}37-{cap},"YES UNDER CURRENT MODEL ASSUMPTIONS",IF(G{start+27}>0,"PARTIAL SELF-FUNDING","NO — ADDITIONAL CAPITAL REQUIRED"))))'
@@ -104,7 +105,7 @@ def build_projection():
         tab=site['site_id']+' — '+site['name'];terms=data['later_site_cash'][site['site_id']]
         put(tab,61,[['Independent phase cash — BASE MODEL ONLY','Year 1','Year 2','Year 3','Year 4','Year 5']])
         put(tab,62,[['Assumed GPU-hours' if site['site_id']=='Site 2' else 'Assumed visits']+terms.get('gpu_hours',terms.get('visits'))])
-        for off,label in [(2,'Price / GPUh or spend / visit'),(3,'Revenue'),(4,'Electricity / combined variable Opex'),(5,'Fixed + remaining operating cost'),(6,'Maintenance'),(7,'Depreciation proxy'),(8,'Tax proxy'),(9,'Working capital target'),(10,'Working capital cash increase'),(11,'Equipment renewal'),(12,'Unlevered cash / CFADS')]:
+        for off,label in [(2,'Price / GPUh or spend / visit'),(3,'Revenue'),(4,'Electricity / combined variable Opex'),(5,'Fixed + remaining operating cost'),(6,'Maintenance'),(7,'Depreciation proxy'),(8,'Tax proxy'),(9,'Working capital target'),(10,'Working capital cash increase'),(11,'Equipment renewal'),(12,'Cash before debt / CFADS')]:
             vals=[]
             for y,col in enumerate('BCDEF'):
                 prev=chr(ord(col)-1)
@@ -140,9 +141,21 @@ def build_projection():
     for tab,row,endcol in headers:
         req.append({'repeatCell':{'range':{'sheetId':IDS[tab],'startRowIndex':row-1,'endRowIndex':row,'startColumnIndex':0,'endColumnIndex':endcol},'cell':{'userEnteredFormat':{'backgroundColor':{'red':.08,'green':.22,'blue':.33},'textFormat':{'bold':True,'foregroundColor':{'red':1,'green':1,'blue':1}}}},'fields':'userEnteredFormat.backgroundColor,userEnteredFormat.textFormat.bold,userEnteredFormat.textFormat.foregroundColor'}})
     for tab,r1,r2,c1,c2 in [('CapEx',33,37,1,4),('Opex',31,54,1,6),('Opex',66,89,1,6),('Opex',101,124,1,6)]+[(site['site_id']+' — '+site['name'],15,14+len(cost_site(site,data,'base')),5,8) for site in data['sites']]:
-        req.append({'repeatCell':{'range':{'sheetId':IDS[tab],'startRowIndex':r1-1,'endRowIndex':r2,'startColumnIndex':c1,'endColumnIndex':c2},'cell':{'userEnteredFormat':{'numberFormat':{'type':'NUMBER','pattern':'#,##0.##'}}},'fields':'userEnteredFormat.numberFormat'}})
+        req.append({'repeatCell':{'range':{'sheetId':IDS[tab],'startRowIndex':r1-1,'endRowIndex':r2,'startColumnIndex':c1,'endColumnIndex':c2},'cell':{'userEnteredFormat':{'numberFormat':{'type':'NUMBER','pattern':'#,##0'}}},'fields':'userEnteredFormat.numberFormat'}})
     style('Dashboard',4,4,3,5)
     req.append({'repeatCell':{'range':{'sheetId':2001,'startRowIndex':3,'endRowIndex':4,'startColumnIndex':3,'endColumnIndex':5},'cell':{'userEnteredFormat':{'backgroundColor':{'red':.93,'green':.93,'blue':.93}}},'fields':'userEnteredFormat.backgroundColor'}})
+    for tab in ('Assumptions','Revenue','Opex'):
+        for first,last,width in [(0,1,280),(1,6 if tab!='Assumptions' else 4,155)]:
+            req.append({'updateDimensionProperties':{'range':{'sheetId':IDS[tab],'dimension':'COLUMNS','startIndex':first,'endIndex':last},'properties':{'pixelSize':width},'fields':'pixelSize'}})
+    req.append({'updateDimensionProperties':{'range':{'sheetId':2002,'dimension':'COLUMNS','startIndex':4,'endIndex':5},'properties':{'pixelSize':240},'fields':'pixelSize'}})
+    formats=[('Assumptions',91,111,1,4,'#,##0.00'),('Revenue',31,35,1,6,'#,##0'),('Revenue',46,50,1,6,'#,##0'),('Revenue',61,65,1,6,'#,##0')]+[(site['site_id']+' — '+site['name'],62,73,1,6,'#,##0') for site in data['sites'][1:]]
+    formats += [('Assumptions',r,r,1,4,'0.0%') for r in (92,95,97,98,99,100,101,102,103,104,106,107)]
+    formats += [('Revenue',r,r,1,6,'0.0%') for r in (34,49,64)]
+    formats += [('Revenue',r,r,1,6,'#,##0.00') for r in (32,47,62)]
+    for tab,r1,r2,c1,c2,pattern in formats:
+        req.append({'repeatCell':{'range':{'sheetId':IDS[tab],'startRowIndex':r1-1,'endRowIndex':r2,'startColumnIndex':c1,'endColumnIndex':c2},'cell':{'userEnteredFormat':{'numberFormat':{'type':'NUMBER','pattern':pattern}}},'fields':'userEnteredFormat.numberFormat'}})
+    for tab,r1,r2 in [('Assumptions',68,122),('Revenue',30,68),('Opex',30,124)]:
+        req.append({'autoResizeDimensions':{'dimensions':{'sheetId':IDS[tab],'dimension':'ROWS','startIndex':r1-1,'endIndex':r2}}})
     finish('04_outputs')
     return batches
 
