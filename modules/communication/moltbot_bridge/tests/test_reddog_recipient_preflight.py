@@ -476,3 +476,48 @@ def test_correspondence_persisted_read_validation(
     assert events_after == events_before == []
     assert restored is None
     assert error == expected_error
+
+
+@pytest.mark.parametrize("cached,observed,freshness,refresh", [
+    pytest.param("None", None, Freshness.VALID, True, id="missing-observation"),
+    pytest.param("True", True, Freshness.VALID, True, id="boolean-observation"),
+    pytest.param("0", 0, Freshness.VALID, True, id="integer-observation"),
+    pytest.param("1.5", 1.5, Freshness.VALID, True, id="float-observation"),
+    pytest.param("[]", [], Freshness.VALID, True, id="list-observation"),
+    pytest.param("{}", {}, Freshness.VALID, True, id="mapping-observation"),
+    pytest.param("b'token'", b"token", Freshness.VALID, True, id="bytes-observation"),
+    pytest.param("", "", Freshness.VALID, True, id="empty-evidence"),
+    pytest.param("None", "None", Freshness.VALID, False, id="literal-none"),
+    pytest.param("True", "True", Freshness.VALID, False, id="literal-true"),
+    pytest.param("0", "0", Freshness.VALID, False, id="literal-zero"),
+    pytest.param(" opaque ", " opaque ", Freshness.VALID, False, id="opaque-spaces"),
+    pytest.param(" ", " ", Freshness.VALID, False, id="opaque-whitespace"),
+    pytest.param("001", "1", Freshness.VALID, True, id="no-numeric-normalization"),
+    pytest.param(" opaque ", "opaque", Freshness.VALID, True, id="no-trimming"),
+    pytest.param("", "opaque", Freshness.VALID, True, id="missing-cached-token"),
+    pytest.param("opaque", "opaque", Freshness.STALE, True, id="stale-equality"),
+    pytest.param("opaque", "opaque", Freshness.UNKNOWN, True, id="unknown-equality"),
+])
+def test_correspondence_refresh_requires_nonempty_string_evidence(
+    isolated_correspondence_db, cached, observed, freshness, refresh,
+):
+    store = RedDogCorrespondenceStateStore()
+    store.upsert_state(CorrespondenceState(
+        scope_key="ORG::TOPIC", provider_watermark=cached, freshness=freshness,
+    ))
+    before = store.select("state")
+    assert store.provider_refresh_required("ORG::TOPIC", observed) is refresh
+    assert store.select("state") == before
+    assert store.list_events("ORG::TOPIC") == []
+
+
+def test_correspondence_invalid_observation_preserves_cache_integrity_error(
+    isolated_correspondence_db,
+):
+    store = RedDogCorrespondenceStateStore()
+    _persist_read_case(store, "digest_mismatch")
+    before = store.select("state")
+    with pytest.raises(ValueError, match="correspondence state digest mismatch"):
+        store.provider_refresh_required("ORG::TOPIC", None)
+    assert store.select("state") == before
+    assert store.list_events("ORG::TOPIC") == []

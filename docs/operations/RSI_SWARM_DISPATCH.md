@@ -1,3 +1,19 @@
+## Current bounded layer — 2026-09-29
+
+The prior 14/P1 proposal-consumer hypothesis is reconciled: WRE already quarantines
+local proposals and no production correspondence consumer was located. The
+concrete 13/P1 watermark defect is repaired locally (fixed 48cases:40/8 baseline,
+48/0 candidate). Preserve all original model failures.
+
+Next 15/P1: qualify one technical RSI canary through existing proposal-only workers
+and coordinator validation, with an independently frozen oracle, rollback and
+later-use acceptance. Broad platform decision mastery is not a dependency of a
+separately scoped technical task. No inference/native work order is admitted here.
+See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
+and canonical backlog `current_observation.correspondence_watermark_20260929`.
+Reconcile publication and fresh ownership before executing; earlier entries below
+are historical budgets and selections.
+
 ## Staged general-role cohort dispatch closure — 2026-09-29
 
 The eleven-call local budget is exhausted: all eleven returned; no retries or

@@ -1,3 +1,20 @@
+## Watermark evidence regression — 2026-09-29
+
+The existing `test_reddog_recipient_preflight.py` now has 48 cases: all 29 prior cases
+plus 19 fixed controls. Seven non-string observations and empty/empty evidence
+must refresh. Exact literal strings and opaque whitespace remain positive controls;
+numeric/whitespace normalization is forbidden. Stale/unknown freshness still
+refreshes, and invalid observation does not suppress a cached digest error.
+Successful reads leave stored rows/events unchanged.
+
+Same test bytes/IDs: baseline 40 passed/8 failed, candidate 48 passed; zero errors/skips.
+Local runner uses real state/recipient/database leaves and disposable SQLite,
+isolating eager package initializers and denying network/process/provider actions.
+It is a reviewed-test guard, not an OS sandbox. Existing CI selects the complete
+file. Independent replay, exact source bindings and hosted/publication status are
+in the canonical RSI backlog `correspondence_watermark_20260929` and its receipts.
+No provider delivery, PostgreSQL, concurrency or retained RSI benefit is claimed.
+
 ## 2026-09-28: Qualify persisted correspondence reads
 
 - WSP00/6/15/22/50/78/84/97; C2/I3/D3/Impact3=11/P2. Extend the existing recipient-preflight owner with nine fixed persisted-read cases; preserve all20 original tests and their SQLite isolation fixture.

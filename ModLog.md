@@ -1,3 +1,9 @@
+## 2026-09-29: Reject missing provider freshness evidence
+
+- WSP00/15/22/50/78/84/97; C2/I4/D4/Impact3=13/P1. Source trace reconciles the prior proposal-consumer hypothesis: WRE already quarantines local text; no production correspondence proposal consumer found.
+- Repair the existing watermark comparison without coercion or empty-token acceptance. Preserve opaque equality, state-integrity errors and all 29 prior tests. Frozen baseline 40pass/8fail; same 48candidate cases pass on disposable SQLite with actual leaf imports and isolated package initializers.
+- Next 15/P1: qualify one technical RSI canary under coordinator supervision before broader FoundUp rollout. No model/provider actions, production promotion or retained-gain claim. Canonical backlog holds exact source/tests, independent review and separate publication/closure receipts.
+
 ## 2026-09-29: Complete staged general-role decision measurement
 
 - WSP00/15/22/48/50/73/95/97: verify main `5b830f1ca`, unchanged source/runtime/model/criteria and peer ownership; reuse the existing backend and bounded child runner.
