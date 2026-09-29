@@ -12,13 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-29 first-layer experiment:** actual local model testing has begun on
-synthetic correspondence. None of the original 12 prompts fit; all 12 compact
-prompts fit. Three adaptive attempts cover only one decision case, with preserved
-failures and independent evaluation. Start from the [current experiment and
-layer gates](modules/infrastructure/wre_core/ROADMAP.md#first-local-operational-rsi-experiment--2026-09-29),
-not another product build. Full decision coverage, retained improvement and
-admitted OpenClaw/Hermes execution remain open.
+**2026-09-29 diagnostic matrix:** the unchanged local procedure completed 12/12 attempted responses; 0/12 met the independently frozen semantic criteria. See the [current matrix and next layer](modules/infrastructure/wre_core/ROADMAP.md#frozen-operational-decision-matrix--2026-09-29). Valid JSON alone is insufficient. This remains supervised qualification, with no held-out/retained gain or admitted OpenClaw/Hermes execution.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

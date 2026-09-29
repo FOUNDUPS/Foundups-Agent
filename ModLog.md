@@ -1,3 +1,9 @@
+## 2026-09-29: Measure the frozen operational decision matrix
+
+- WSP00/15/22/48/50/73/95/97/99: re-observe main08eb and preserve prior PR1953 closure; reuse unchanged C3 instructions, original12 controls, local model/backend and bounded child.
+- 12 child attempts; 12 format-valid; 0/12 semantically correct. Preserve raw responses, invalid/unrun distinctions, known native usage/latency and independent judgments. No criteria tuning, retries or promotion.
+- Update the existing backlog/roadmaps with the measured failure pattern and freshly ranked next layer. No application module, dependency update, live provider action or production RSI claim.
+
 ## 2026-09-29: Run the first local operational RSI development experiment
 
 - WSP00/15/22/50/73/95/97/99: reuse12 prepared synthetic correspondence controls, existing model resolver, M2M codec, bounded child and local inference owners. No new application module, skill or orchestrator.

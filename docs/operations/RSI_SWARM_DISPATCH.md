@@ -1,3 +1,38 @@
+## Frozen operational decision matrix — 2026-09-29
+
+The frozen diagnostic run uses the unchanged C3 procedure and original
+twelve synthetic Gmail/LinkedIn cases. It is supervised local qualification under
+WSP 97, using existing model/backend/child owners; no production adapter was changed.
+
+| Measure | Observed |
+|---|---|
+| Planned / attempted / returned / not run | 12 / 12 / 12 / 0 |
+| Format valid | 12 |
+| Semantically correct / evaluated | 0 / 12 |
+| Known input / output tokens | 12746 / 1195 |
+| Measured model-child / total wall seconds | 846.253 / 1145.968 |
+
+All 12 responses were structurally valid, but 0/12 met every frozen semantic criterion. The independent review found one unsupported transaction completion claim (G05) and four unnecessary requests for principal attention (G04, L03, L05, L06). Missing ask-state updates, incorrect objective/transaction distinctions and incorrect action selection prevent promotion.
+
+JSON validity does not establish decision correctness. Independent semantic grading
+uses the original frozen criteria, including transaction-versus-objective distinctions.
+This is a development baseline; held-out gain, retained use and native admission
+remain unproven. No live account actions, candidate promotion or FoundUp launch.
+
+WSP 15 re-observation selects: **Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter**
+(13/P1). The existing WRE adapter resolves the code model, whereas the existing resolver already has a general role for non-code reasoning. The matrix establishes a broad semantic failure baseline; testing role fit is smaller than changing production logic or creating another router. Model availability is not runtime compatibility or decision qualification. First verify the existing general-role runtime and bounded procedure; if compatible, freeze one comparison budget and unchanged criteria before any generation. No additional calls are part of this completed 12-call matrix.
+
+Use the existing model roles, correspondence/recipient guards and unverified-proposal
+boundary. Do not add another orchestrator or repair a model claim by relabelling it
+as verified success. The installed/declaration version mismatch and lack of OS
+memory/network isolation remain explicit qualification limits.
+
+Canonical case outputs, independent judgments, budget, source/runtime bindings and
+next ranked queue: `docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.operational_matrix_20260929`. Publication/main/cleanup receipts
+are separate from local model execution. Earlier experiment sections below are
+historical checkpoints. Protect active YUMORI/eSingularity and Remote-owned AutoPost.
+
 ## First local operational RSI experiment — 2026-09-29
 
 Use the existing synthetic correspondence fixture before building another FoundUp.
