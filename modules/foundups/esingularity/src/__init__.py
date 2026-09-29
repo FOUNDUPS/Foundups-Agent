@@ -14,8 +14,18 @@ from .yumori_economic_model import (
     load_japan_infrastructure_flows,
     run_yumori_economic_model,
 )
+from .yumori_regional_impact import (
+    AssetScenario,
+    VisitorScenario,
+    calculate_regional_impact,
+    regional_projection_values,
+)
 
 __all__ = [
+    "AssetScenario",
+    "VisitorScenario",
+    "calculate_regional_impact",
+    "regional_projection_values",
     "DEFAULT_SERVICE_CATALOG",
     "DemandLine",
     "DemandSizingInputs",
