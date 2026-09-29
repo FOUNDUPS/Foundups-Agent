@@ -1,3 +1,8 @@
+## 2026-09-29 — Costed planning scenarios
+
+- Extended the existing model test file: cost totals/ranges, scenario-versus-evidence boundary, demand capacity/idle energy, debt repayment, cash conservation, renewal timing, Sukatto exclusion, and native projection preservation.
+- Focused 34 tests and all 70 module tests passed; 18 routing tests passed. Native FIN numerical parity and forced-full LibreOffice recalculation verified, including cost/demand/Sukatto-inclusion changes in a disposable fixture; see canonical economic document receipt.
+
 ## 2026-09-29 — Three-site portfolio regression slice
 
 - Extended the existing test_yumori_economic_model.py; no new test file.

@@ -65,3 +65,5 @@ Portfolio fixtures are synthetic unit tests, not site cost estimates. Defaults m
 return INSUFFICIENT EVIDENCE, preserve Site 3/2/1 identities versus Priority 1/2/3,
 exclude non-AWARDED grants, survive Sukatto removal, conserve investor/retained cash
 and hold later-site deployment until its own evidence gates pass.
+
+Costed planning tests additionally protect MODEL ONLY labels, independent site budgets, physical sales limits, idle energy, debt/investor separation, renewal costs and preservation of existing FIN/grant structures.

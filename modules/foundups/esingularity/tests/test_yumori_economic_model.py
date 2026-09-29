@@ -1,4 +1,5 @@
 from dataclasses import replace
+from copy import deepcopy
 import pytest
 
 from modules.foundups.esingularity.src.yumori_economic_model import (
@@ -14,6 +15,7 @@ from modules.foundups.esingularity.src.yumori_economic_model import (
     calculate_heat_recovery,
     load_japan_infrastructure_flows,
     run_yumori_economic_model,
+    load_planning_assumptions, run_planning_scenario,
 )
 
 
@@ -279,3 +281,79 @@ def test_portfolio_schema_rejects_ambiguous_identity_costs_and_evidence():
     for costs in [(SiteCost("x", 1),), (SiteCost("x", 1, "SOURCED"),), (SiteCost("x"), SiteCost("x"))]:
         with pytest.raises(ValueError):
             run_portfolio_model(replace(model, sites=(replace(model.sites[0], costs=costs),)))
+
+
+def test_costed_planning_totals_and_truth_boundary():
+    p = run_planning_scenario()
+    r = p['result']
+    assert r['site_capex_jpy'] == {'Site 3': 567_500_000, 'Site 2': 699_687_500, 'Site 1': 1_449_500_000}
+    assert r['total_portfolio_capex_jpy'] == 2_716_687_500
+    assert p['design']['nodes'] == 7
+    assert p['design']['gpus'] == 56
+    assert p['design']['facility_kw'] == pytest.approx(104.49)
+    assert p['design']['confirmed_utility_kw'] is None
+    assert p['design']['contracted_gpu_hours'] == 0
+    assert p['evidence_result'] == 'INSUFFICIENT EVIDENCE'
+    assert set(r['deployment_gates'].values()) == {False}
+    assert r['committed_sources_jpy'] == 0
+    assert all(c['evidence'] == 'MODEL ONLY' for costs in p['costs'].values() for c in costs)
+
+
+def test_costed_scenarios_carry_deficits_and_separate_investors():
+    for name in ('downside', 'base', 'upside'):
+        p = run_planning_scenario(name)
+        r = p['result']
+        cash = [x['cash'] for x in p['annual']]
+        paid = sum(y['investor_distribution_jpy'] for y in r['years'])
+        retained = r['years'][-1]['retained_cash_balance_jpy']
+        assert sum(y['free_cash_after_debt_jpy'] for y in r['years']) == pytest.approx(paid + retained + sum(c['reserve_contribution_jpy'] for c in cash))
+        assert sum(y['principal_jpy'] for y in p['annual']) == pytest.approx(p['scenario_debt_jpy'])
+        assert cash[-1]['renewal_capex_jpy'] > 0
+        assert all(c['renewal_capex_jpy'] == 0 for c in cash[:-1])
+    assert run_planning_scenario('base')['result']['self_funding_result'] == 'NO — ADDITIONAL CAPITAL REQUIRED'
+    assert run_planning_scenario('upside')['result']['self_funding_result'] == 'PARTIAL SELF-FUNDING'
+
+
+def test_costed_demand_capacity_is_not_infinite():
+    data = deepcopy(load_planning_assumptions())
+    data['scenarios']['base']['gpu_hours'][0] = 1_000_000
+    with pytest.raises(ValueError, match='physical capacity'):
+        run_planning_scenario(data=data)
+    data = deepcopy(load_planning_assumptions())
+    data['scenarios']['base']['gpu_hours'][0] = 0
+    p = run_planning_scenario(data=data)
+    assert p['annual'][0]['cash']['revenue_jpy'] == 0
+    assert p['annual'][0]['cash']['electricity_jpy'] > 0  # idle power and demand charge
+
+
+def test_costed_sukatto_exclusion_does_not_change_hanyu_cash():
+    data = deepcopy(load_planning_assumptions())
+    data['sites'] = [s for s in data['sites'] if s['site_id'] != 'Site 1']
+    p = run_planning_scenario('upside', data)
+    original = run_planning_scenario('upside')
+    assert p['annual'] == original['annual']
+    assert p['result']['total_portfolio_capex_jpy'] == original['result']['total_portfolio_capex_jpy'] - original['result']['site_capex_jpy']['Site 1']
+
+
+def test_costed_tables_have_ordered_ranges_and_no_duplicate_scope():
+    from modules.foundups.esingularity.src.yumori_planning_scenarios import cost_site
+    data = load_planning_assumptions()
+    for site in data['sites']:
+        totals = [sum(c['amount_jpy'] for c in cost_site(site, data, k)) for k in ('low', 'base', 'high')]
+        assert totals == sorted(totals)
+    bad = deepcopy(data)
+    bad['sites'][0]['costs'].append(bad['sites'][0]['costs'][0])
+    with pytest.raises(ValueError, match='Duplicate'):
+        run_planning_scenario(data=bad)
+
+
+def test_native_projection_preserves_ledger_and_existing_workbook():
+    from modules.foundups.esingularity.src.yumori_fin_projection import build_projection
+    batches = build_projection()
+    assert len(batches) == 4
+    for batch in batches.values():
+        assert batch['spreadsheet_id'] == '1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0'
+        for request in batch['requests']:
+            assert not {'addSheet', 'deleteSheet', 'deleteDimension'} & request.keys()
+            if 'updateCells' in request:
+                assert request['updateCells']['start']['sheetId'] not in (2006, 1199086852)

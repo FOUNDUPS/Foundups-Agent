@@ -141,3 +141,7 @@ allocation IDs fail. Excluded-site funding cannot silently transfer to another
 site. Hanyu cash is computed without depending on Sukatto inclusion or gate status.
 Economic affordability and gated deployment are separate outputs. All 24 services
 and legacy five-year parity outputs remain unchanged.
+
+## Costed planning API
+
+`load_planning_assumptions()` reads the versioned planning data; `run_planning_scenario(name="base", data=None)` returns demand-derived design, independent cost lines, debt/cash driver schedules, later-site standalone cash and the canonical portfolio result. Evidence readiness remains separate from numeric scenario results. `yumori_fin_projection.build_projection()` emits bounded native FIN batches and performs no network mutation.

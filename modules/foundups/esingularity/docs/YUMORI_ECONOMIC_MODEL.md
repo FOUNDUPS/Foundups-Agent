@@ -1,6 +1,6 @@
 # YUMORI economic model — repository authority
 
-Last audited: 2026-09-28 JST
+Last audited: 2026-09-29 JST
 
 ## Rule
 
@@ -130,7 +130,7 @@ thermal loop, community, education, optional compute, design, contingency and su
 Turnkey quotes and their components must not overlap. Excluded work needs explicit
 zero and a scope basis; missing is `None` / `TBD`, not zero.
 
-Hanyu expansion is a separate additional budget. Thus there are **51 missing capital
+At the initial rebaseline, before the costed planning pass below, Hanyu expansion was a separate additional budget. There were **51 missing capital
 inputs** at this audit: 50 site cost lines plus expansion. Each five-year cash
 scenario has **55 missing annual inputs**: revenue, electricity, operations,
 maintenance, cash tax, working-capital increase, renewal CapEx, debt service,
@@ -139,8 +139,8 @@ upside have independent inputs; no unsupported percentage or lending terms are s
 Optional scenario equity is additionally needed for investor recovery. Later-site
 cash forecasts are separately missing for their payback calculations.
 
-Current result is **INSUFFICIENT EVIDENCE** in code and all three FIN scenarios.
-Hanyu, Shimousaka, Sukatto and total portfolio CapEx are **TBD**. Entered subtotal
+Initial empty-input result was **INSUFFICIENT EVIDENCE** in code and all three FIN scenarios. The later costed pass below supplies MODEL ONLY assumptions without promoting evidence readiness.
+At that initial checkpoint, Hanyu, Shimousaka, Sukatto and total portfolio CapEx were **TBD**. Entered subtotal
 is zero solely because no site amounts have been entered; it is not a cost estimate.
 Funding gap, cash available for reinvestment and paybacks remain indeterminate.
 No grant or financing commitment is recorded in the new portfolio sources.
@@ -212,3 +212,118 @@ remains an audit reference only, never a site quote or portfolio cost.
 
 See [WSP 97 rebaseline receipt](YUMORI_PORTFOLIO_REBASELINE_20260929.md) for native
 readbacks, tests and PR/main disposition.
+
+## Costed planning cases — 2026-09-29
+
+**MODEL ONLY — not quotes, confirmed demand, available utility capacity or secured financing.**
+All amounts below are nominal JPY millions, excluding consumption tax. The high case is not a guaranteed upper bound. Selected fit-out areas are hypothetical phase scope, not measured building areas. Additional Hanyu expansion is explicitly excluded (zero) pending a separate costed tranche.
+
+### Priority 1 — Hanyu (Site 3)
+
+| Component | Quantity / unit | Low ¥m | Base ¥m | High ¥m | Scope / status |
+| --- | --- | ---: | ---: | ---: | --- |
+| survey_engineering | 1 allowance | 3.000 | 5.000 | 8.000 | MODEL ONLY; Initial surveys only; detailed design is separate |
+| building_retrofit | 400 m2 selected fit-out | 20.000 | 32.000 | 52.000 | MODEL ONLY; Assumed limited phase area; not measured school area; exclude structural, MEP and container |
+| electrical_receiving | 1 allowance | 8.000 | 12.000 | 20.000 | MODEL ONLY; Internal incoming cables, metering and installation; exclude switchgear and utility work |
+| transformer_switchgear | 1 allowance | 12.000 | 20.000 | 35.000 | MODEL ONLY; Receiving transformer/switchgear equipment only |
+| utility_contribution | 1 allowance | 10.000 | 30.000 | 80.000 | MODEL ONLY; Unquoted utility allowance; actual scope and upper exposure unresolved |
+| modular_dc | 1 allowance | 10.000 | 18.000 | 30.000 | MODEL ONLY; Shell, racks and fit-out only; exclude compute/cooling/UPS |
+| compute_hardware | 7 8-GPU server | 245.000 | 315.000 | 420.000 | MODEL ONLY; Procurement allowance; CPU/RAM/local storage included, fabric in fiber_network; NVIDIA source supports specs only |
+| cooling_cdu_heat_rejection | 1 allowance | 10.000 | 18.000 | 30.000 | MODEL ONLY; Complete cooling scope; no additional turnkey cooling counted |
+| ups | 1 allowance | 5.000 | 8.000 | 14.000 | MODEL ONLY; Short ride-through UPS, not multi-hour autonomy |
+| bess | 100 kWh allowance | 4.000 | 6.000 | 9.000 | MODEL ONLY; Independent battery allowance, no confirmed gym siting or grid revenue |
+| fiber_network | 1 allowance | 5.000 | 10.000 | 25.000 | MODEL ONLY; Carrier installation and network/storage fabric; recurring charges in Opex |
+| fire_suppression | 1 allowance | 3.000 | 5.000 | 9.000 | MODEL ONLY; Dedicated compute-phase fire detection/suppression |
+| security | 1 allowance | 2.000 | 3.000 | 5.000 | MODEL ONLY; Access/CCTV fit-out, recurring service in Opex |
+| seismic_building | 1 allowance | 5.000 | 15.000 | 40.000 | MODEL ONLY; Unsurveyed strengthening allowance; failure may invalidate phase |
+| mechanical | 1 allowance | 3.000 | 5.000 | 10.000 | MODEL ONLY; Non-DC plumbing/ventilation only, excludes cooling |
+| contingency | non-compute direct subtotal | 16.200 | 50.500 | 159.200 | MODEL ONLY; Percentage of all non-compute direct lines, including fees; no contingency on contingency |
+| design_permitting | 1 allowance | 6.000 | 10.000 | 16.000 | MODEL ONLY; Detailed design and permits, excludes initial surveys |
+| education_community | 1 allowance | 0.000 | 0.000 | 0.000 | MODEL ONLY; Excluded from minimum compute phase; future scope needs separate budget |
+| site_use_rights | 1 allowance | 2.000 | 5.000 | 15.000 | MODEL ONLY; Lease/deposit/legal mobilization assumption, not a City price; annual rent in Opex |
+| **Total** | | **369.200** | **567.500** | **977.200** | Planning subtotal |
+
+### Priority 2 — Shimousaka (Site 2)
+
+| Component | Quantity / unit | Low ¥m | Base ¥m | High ¥m | Scope / status |
+| --- | --- | ---: | ---: | ---: | --- |
+| survey_engineering | 1 allowance | 4.000 | 7.000 | 12.000 | MODEL ONLY; Independent Shimousaka survey |
+| building_retrofit | 800 m2 selected fit-out | 48.000 | 80.000 | 128.000 | MODEL ONLY; Assumed phase area, not measured campus area; excludes structural/MEP/container |
+| electrical_receiving | 1 allowance | 10.000 | 18.000 | 30.000 | MODEL ONLY; Independent site cabling/install allowance |
+| transformer_switchgear | 1 allowance | 15.000 | 25.000 | 45.000 | MODEL ONLY; Independent receiving equipment; no Hanyu grid inference |
+| utility_contribution | 1 allowance | 15.000 | 45.000 | 120.000 | MODEL ONLY; Independent unquoted utility allowance; no known upper bound |
+| modular_dc | 1 allowance | 12.000 | 22.000 | 38.000 | MODEL ONLY; Shell/racks only |
+| compute_hardware | 5 8-GPU server | 190.000 | 240.000 | 325.000 | MODEL ONLY; Independent later procurement allowance, excludes fabric/cooling |
+| cooling_cdu_heat_rejection | 1 allowance | 12.000 | 22.000 | 38.000 | MODEL ONLY; Dedicated cooling scope |
+| ups | 1 allowance | 6.000 | 10.000 | 17.000 | MODEL ONLY; Short ride-through only |
+| bess | 150 kWh allowance | 6.750 | 9.750 | 15.000 | MODEL ONLY; Independent storage scope; no grid-service revenue |
+| fiber_network | 1 allowance | 8.000 | 18.000 | 40.000 | MODEL ONLY; Installation/fabric; no known carrier route |
+| fire_suppression | 1 allowance | 4.000 | 8.000 | 14.000 | MODEL ONLY; Independent compute/campus scope |
+| security | 1 allowance | 3.000 | 5.000 | 8.000 | MODEL ONLY; Access/CCTV |
+| seismic_building | 1 allowance | 10.000 | 30.000 | 80.000 | MODEL ONLY; Unsurveyed independent strengthening allowance |
+| mechanical | 1 allowance | 6.000 | 12.000 | 24.000 | MODEL ONLY; Non-DC building services; excludes cooling |
+| contingency | non-compute direct subtotal | 28.613 | 91.938 | 282.800 | MODEL ONLY; Percentage of all non-compute direct lines, including fees; no contingency on contingency |
+| design_permitting | 1 allowance | 10.000 | 18.000 | 30.000 | MODEL ONLY; Independent detailed design and permits |
+| education_community | 300 m2 limited fit-out | 18.000 | 30.000 | 48.000 | MODEL ONLY; Optional assumed education/incubation tranche; no full-campus renovation |
+| site_use_rights | 1 allowance | 3.000 | 8.000 | 20.000 | MODEL ONLY; Lease/deposit/legal mobilization; annual rent separate |
+| **Total** | | **409.363** | **699.688** | **1,314.800** | Planning subtotal |
+
+### Priority 3 — Sukatto (Site 1)
+
+| Component | Quantity / unit | Low ¥m | Base ¥m | High ¥m | Scope / status |
+| --- | --- | ---: | ---: | ---: | --- |
+| lawful_acquisition_lease_use | 1 allowance | 10.000 | 30.000 | 100.000 | MODEL ONLY; Lease/deposit/legal mobilization scenario, not property valuation or City offer |
+| building_rehabilitation | 3000 m2 phased rehabilitation | 180.000 | 300.000 | 540.000 | MODEL ONLY; Selected-area scenario; envelope/structure/interiors only; not whole-building quote |
+| asbestos | 1 allowance | 15.000 | 60.000 | 180.000 | MODEL ONLY; Unsurveyed treatment allowance; actual scope may exceed high case |
+| mep_renewal | 3000 m2 services renewal | 150.000 | 270.000 | 450.000 | MODEL ONLY; Electrical/plumbing/general HVAC only; bath plant and thermal pilot separate |
+| onsen_restoration | 1 allowance | 150.000 | 250.000 | 450.000 | MODEL ONLY; Bath plant, pools and onsen-specific works; water/access rights unverified |
+| thermal_loop_heat_reuse | 1 allowance | 20.000 | 40.000 | 80.000 | MODEL ONLY; Local heat-exchange/heat-pump pilot allowance; no intersite pipe, no heat revenue |
+| public_community | 1 allowance | 20.000 | 50.000 | 100.000 | MODEL ONLY; Furniture/community fit-out, excludes building and MEP works |
+| education_innovation | 1 allowance | 15.000 | 40.000 | 90.000 | MODEL ONLY; Equipment and specialist fit-out only |
+| optional_compute | 1 allowance | 0.000 | 0.000 | 0.000 | MODEL ONLY; Compute excluded until independent demand/power economics justify it |
+| design_permitting | 1 allowance | 30.000 | 60.000 | 100.000 | MODEL ONLY; Detailed design/permits, separate from initial surveys |
+| contingency | non-compute direct subtotal | 119.600 | 334.500 | 1,060.000 | MODEL ONLY; Percentage of all non-compute direct lines, including fees; no contingency on contingency |
+| survey_engineering | 1 allowance | 8.000 | 15.000 | 30.000 | MODEL ONLY; Initial structure/asbestos/MEP/thermal investigations |
+| **Total** | | **717.600** | **1,449.500** | **3,180.000** | Planning subtotal |
+
+### Hanyu cash and portfolio funding screen
+
+| Case | Portfolio CapEx ¥m | Hanyu CapEx ¥m | Y1 revenue ¥m | Y1 EBITDA ¥m | 5y investor paid ¥m | Retained ¥m | Capital + liquidity screen ¥m | Result |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| downside | 5,472.000 | 977.200 | 13.600 | -66.702 | 0.000 | 0.000 | 7,323.888 | NO — ADDITIONAL CAPITAL REQUIRED |
+| base | 2,716.688 | 567.500 | 88.000 | 19.013 | 0.000 | 0.000 | 3,309.877 | NO — ADDITIONAL CAPITAL REQUIRED |
+| upside | 1,496.162 | 369.200 | 200.000 | 129.959 | 230.750 | 250.206 | 1,245.956 | PARTIAL SELF-FUNDING |
+
+The screen includes initial uncommitted Hanyu capital, the remaining later-site capital after retained cash, peak liquidity and unpaid investor obligations. It is not an accounting cost total or a dated financing drawdown. Scenario debt/equity are hypothetical obligations and do not reduce the committed financing gap. Initial Hanyu capital is still required even in a successful later-site self-funding case.
+
+### Formula and scope audit
+
+- Demand scenario → discrete 8-GPU servers → IT power → PUE → required facility power. Hanyu: assumed peak 360,000 GPUh at 75% design utilization gives 7 servers / 56 GPUs / 104.49 kW required facility load. Shimousaka: independent 200,000 GPUh at 70% gives 5 servers / 40 GPUs / 85.55 kW. These are calculated planning loads, never utility-confirmed capacity or build decisions.
+- Hanyu downside/base/upside prices are ¥340/550/800 per GPU-hour ex tax, with annual changes −5%/−3%/0%. Quantities, prices, electricity and funding terms remain editable MODEL ONLY inputs. Price × sold hours is the only compute revenue; no duplicate managed-service revenue is added.
+- Electricity includes idle consumption, PUE, energy-price escalation and peak demand charges. Staffing/carrier/rent/insurance/admin are in fixed Opex; variable platform costs, maintenance and community cash are separate.
+- Straight-line debt principal plus declining interest, positive-income tax proxy after depreciation/interest, incremental working capital, Year-5 hardware renewal, reserves, investor preferred return and capital repayment are explicit. Negative operating cash and investor arrears carry forward. No loss-carryforward tax benefit, terminal resale proceeds or released working capital is credited.
+- Investor dues assume repayment over five years plus the scenario annual preferred return on initial equity; this is a stress-test obligation, not an agreed term sheet. Paid distributions and retained cash cannot be counted twice.
+- Contingency applies once to all non-compute direct costs, including fees. Container shell, receiving cables, transformer, utility works, cooling and compute have mutually exclusive scopes. No legacy Sukatto CapEx is copied into the schools.
+- Later-site cash is independently modeled for standalone phase payback. Sukatto visits/spend are hypothetical, not historical demand transferred into a forecast. Its combined variable Opex includes energy; no intersite heat sales, BESS sales or demolition savings are booked.
+- Paybacks use supplied operating-year cash only; no recovery within five years is reported as not recovered, not extrapolated. A simultaneous operating-year portfolio comparison is not a construction schedule. Hanyu self-funding never uses later-site cash.
+- Confirmed demand, utility/fiber, survey quantities, legal/use terms, tax/VAT treatment, construction timing, lending and offtake remain unresolved. Deployment gates stay HOLD; evidence result stays INSUFFICIENT EVIDENCE despite complete numeric assumptions.
+
+### Primary comparator sources (checked 2026-09-29)
+
+- [S1](https://ai.sakura.ad.jp/gpu/koukaryoku-dok/): Published H100 1008 JPY/GPU-hour and 8-GPU 2988 JPY/node-hour, tax inclusive; ex-tax equivalents 916.36 and 339.55 per GPU-hour. Different beta/SLA offerings; not project demand or realized price.
+- [S2](https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html): 8-GPU DGX H100/H200: maximum system input 10.2 kW; specification comparator only, not selected hardware or procurement cost.
+- [S3](https://www.rikuden.co.jp/jiyuka/ryokin2.html): High-voltage A published 1876 JPY/kW-month and 27.53 JPY/kWh including tax, excluding renewable levy; actual classification, fuel adjustments and connection unverified.
+
+Source of inputs: `data/yumori_planning_assumptions.json`. Calculation: `run_planning_scenario()` exposed by the canonical economic module. Native FIN projection: `python -m modules.foundups.esingularity.src.yumori_fin_projection <output-directory>`. Generated native requests require current metadata/range verification before authorized connector writes. No new workbook or alternate model is created.
+
+### Verification and execution receipt
+
+- Reused existing site tabs, all 18 workbook tabs and the grant/commitment ledger. No new workbook or grant registry. No City procedure or grant-status changes in this slice.
+- 70 module tests and 18 routing tests pass. Native FIN readback matched all 165 annual cash input cells, 9 headline numerical outputs, three scenario verdicts and ten later-site cash years against Python, with no errors in the changed ranges.
+- Independent LibreOffice forced full recalculation (OOXMLRecalcMode=0) reproduced the portfolio results and a disposable changed-input fixture: Hanyu fit-out area 400→600 m², base Year-1 demand 160,000→100,000 GPUh, and Sukatto excluded. Ordinary conversion can retain stale dependency caches; those caches were rejected. The unchanged legacy Dashboard E85 Google array-IRR formula is a LibreOffice compatibility exception; its native cached result remains intact. It is not used by the portfolio model.
+- Native addTable metadata creation returned a connector internal error on the bounded call and minimal retry. The populated, formatted native cell tables and formulas are preserved; no unsupported table-object claim is made.
+- Cost quotes and actual feasibility remain outstanding. WSP 97 PR/merge and operational receipts are recorded in the dedicated follow-up PR and canonical Moshpit event.
+
+The costed cash schedule uses the existing `unlevered_cash_jpy` API field as **CFADS / cash before debt service**. Its cash-tax proxy deducts modeled interest, so this is not a financing-independent unlevered valuation. Site cost recovery uses this disclosed tax scenario; investor recovery uses actual modeled distributions. No unlevered IRR or enterprise valuation is claimed.
+
+Follow-up delivery: [PR #1962](https://github.com/FOUNDUPS/Foundups-Agent/pull/1962). Final merge/main and native receipts are recorded in the PR and canonical Moshpit.

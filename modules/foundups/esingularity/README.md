@@ -196,3 +196,7 @@ economic module. Current self-funding output is **INSUFFICIENT EVIDENCE**; no si
 cost, grid capacity, financing terms or grant award is invented. Document 05 is the
 umbrella PPP/PFI/asset-procedure master; 07 retains technical evidence and photos.
 This rebaseline does not publish website changes or rewrite campaign history.
+
+## Costed planning scenarios (2026-09-29)
+
+The canonical [economic document](docs/YUMORI_ECONOMIC_MODEL.md#costed-planning-cases--2026-09-29) now contains independent low/base/high site CapEx tables and calculated downside/base/upside cash scenarios. `run_planning_scenario()` reads `data/yumori_planning_assumptions.json`; all project estimates are MODEL ONLY and all deployment gates remain unverified. The existing FIN workbook is the native formula projection.
