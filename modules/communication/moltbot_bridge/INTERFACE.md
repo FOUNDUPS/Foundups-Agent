@@ -1931,3 +1931,12 @@ stored digest. Rejection by these schema, scope, ask, count or digest checks rai
 truth. Arbitrary malformed payload shapes and coercions are not covered by this
 exception guarantee. `provider_refresh_required` uses the same read boundary and
 propagates invalid-state rejection.
+
+`provider_refresh_required(scope_key, observed_watermark)` requests reconciliation
+for a missing, non-string or empty observed token, an empty cached token, absent
+state, or non-VALID freshness. Only exact nonempty string equality can avoid a
+refresh. Tokens are opaque: no string conversion, trimming or ordering. Literal
+`"None"`, `"True"` and `"0"` remain valid string values. The stored digest/read
+boundary is evaluated first, so invalid cached state still raises its existing
+error even when the observation is invalid. This check does not authenticate a
+provider or grant send authority.

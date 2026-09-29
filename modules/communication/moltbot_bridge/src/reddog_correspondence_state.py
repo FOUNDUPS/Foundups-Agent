@@ -340,13 +340,17 @@ class RedDogCorrespondenceStateStore(ModuleDB):
         return state
 
     def provider_refresh_required(self, scope_key: str, observed_watermark: str) -> bool:
-        """Return True unless the cached provider watermark exactly matches."""
+        """Require VALID state and exact, nonempty string watermark evidence."""
         state = self.load_state(scope_key)
         if state is None:
             return True
         if state.freshness is not Freshness.VALID:
             return True
-        return state.provider_watermark != str(observed_watermark)
+        if not isinstance(observed_watermark, str) or not observed_watermark:
+            return True
+        if not state.provider_watermark:
+            return True
+        return state.provider_watermark != observed_watermark
 
 
 def summarize_ask_state(

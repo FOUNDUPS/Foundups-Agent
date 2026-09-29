@@ -1,3 +1,11 @@
+## Correspondence freshness boundary — 2026-09-29
+
+The existing refresh check now requires nonempty string evidence and exact opaque
+equality after persisted-state validation. Baseline40/48; candidate 48/48 on the
+same frozen SQLite cases. No provider action or new proposal consumer. The prior
+read-validation checkpoint below remains historical. See current evidence and
+publication/closure in the root RSI backlog `correspondence_watermark_20260929`.
+
 ## Correspondence read-validation checkpoint — 2026-09-28
 
 Reads now require an explicit supported payload schema, reuse the writer's state validation and bind the returned scope to the requested scope. Existing digest rejection and valid roundtrip remain. Cached state never authorizes a send; rejected cache state requires provider reconciliation.

@@ -1,3 +1,39 @@
+## Basic RSI layer and correspondence freshness — 2026-09-29
+
+WSP97 source reconciliation found that `local_skill_inference` already marks model
+text unverified and WRE excludes it from successful outcomes. No production
+consumer of the correspondence evaluation envelope was found. Preserve those
+boundaries; do not add a universal schema to make the failed cohort acceptable.
+
+The existing correspondence refresh check did have a concrete defect: converting
+observations to strings could equate `None`, booleans, numbers or containers with
+opaque cached tokens; two empty tokens also appeared fresh. C2/I4/D4/Impact3=13/P1
+selected the repair. It now requires nonempty string evidence and exact equality
+after the existing state/integrity/freshness checks. Literal strings such as
+`"None"` and whitespace-containing opaque tokens retain their exact semantics.
+
+Frozen actual-leaf/SQLite regression: **baseline 40 passed/8 failed; candidate 48/48
+passed**, with identical case IDs/test bytes and zero errors/skips. All29 prior
+cases remain. Local package initializers are isolated; this does not test full
+startup or provider delivery. Independent replay, hosted checks, publication and
+owned-lane closure are separate receipts in the canonical backlog entry
+`current_observation.correspondence_watermark_20260929`.
+
+**Next eligible layer: one technical RSI canary qualification (15/P1;
+C3/I4/D4/Impact4).** Reuse the existing proposal-only worker, coordinator and
+evaluation owners. Select one real reversible technical task, freeze independent
+baseline/candidate checks and scope, then qualify its bounded call and rollback.
+After acceptance, verify that a later invocation actually uses the retained
+candidate under unchanged criteria. No model call or native execution authority
+is granted by this plan. `WREAutoResearcher` remains dry-run-only.
+
+Broad Gmail/LinkedIn decision mastery is not a universal prerequisite for this
+separately scoped technical canary. Their existing failed decisions remain
+rejected. Native OpenClaw/Hermes admission, independent held-out benefit and
+multi-generation retention are still unproven. An isolated AmIBot ticket follows
+those gates; active eSingularity/YUMORI and Remote-owned AutoPost remain protected.
+Re-observe current main and ownership after closure before selecting execution.
+
 ## Staged general-role decision cohort — 2026-09-29
 
 At source `5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f`, the existing general-role Qwen3.5-4B

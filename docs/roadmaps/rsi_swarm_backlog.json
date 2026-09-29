@@ -1881,20 +1881,20 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.operational_general_cohort_20260929",
-    "base_commit": "5b830f1ca6041a2cd9334b88a5b4d4fb1e084e3f",
-    "selected_action": "Qualify grounded ask and evidence-transition rejection at the existing correspondence/WRE proposal boundary; extend only a demonstrated gap",
-    "status": "cohort_measured_reobserve_before_next_layer",
+    "observation_path": "current_observation.correspondence_watermark_20260929",
+    "base_commit": "6103615e26dc1c4a0309b32139b27b83fe42f411",
+    "selected_action": "Qualify one bounded technical RSI canary through existing proposal-only worker and coordinator-owned validation; freeze task-specific success, rollback and later-use checks before any model call",
+    "status": "watermark_repaired_reobserve_after_publication",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 14,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
     "historical_inherited_checkpoint": {
       "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
@@ -13503,6 +13503,200 @@
         }
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-decision-cohort\\final-accounting.json"
+    },
+    "correspondence_watermark_20260929": {
+      "state": "watermark_boundary_locally_repaired_pending_publication",
+      "base": "6103615e26dc1c4a0309b32139b27b83fe42f411",
+      "scope": "One existing correspondence refresh method plus regression and canonical documentation; no model/provider/external actions.",
+      "source_findings": {
+        "path": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\source-findings.json",
+        "sha256": "8b4587d025d974cb66cd4fa63fb9e052698d9f1415c57e8d0c82cdb9e3b1a2ea",
+        "result": "Existing WRE proposal quarantine remains intact; no production StateStore proposal consumer found."
+      },
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "wsp97": "Parent consumer search reconciled: WRE already quarantines proposals; correspondence evaluation envelope has no production consumer. Repair only concrete refresh boundary after reproduction.",
+      "validation": {
+        "baseline": {
+          "tests": 48,
+          "failures": 8,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 40
+        },
+        "candidate": {
+          "tests": 48,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 48
+        },
+        "same_case_ids": true,
+        "same_test_source": true,
+        "baseline_source_sha256": "0c6ad4ec1027ac1a05b3b201fffcd9754fd19af82ce76f9c658cab8c1fa84cd7",
+        "candidate_source_sha256": "0ee5a5ced26890f903d9112f6ea8136c1bf7bd2cc46d56cad6301ce5de49f37c",
+        "test_sha256": "41e27bcfedb24d446e9c7f759703a22d85cf7cae2e1ae0546e5361677ea7290c",
+        "runner": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\run_correspondence.py",
+        "command": "O:/Foundups-Agent/.venv/Scripts/python.exe -I -B run_correspondence.py baseline|candidate|independent",
+        "baseline_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\baseline\\receipt.json",
+        "candidate_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\candidate\\receipt.json",
+        "independent_review_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\result-review.json",
+        "hosted_selection": "Existing Run RedDog correspondence and recipient contracts step selects the complete test file; no CI selection change.",
+        "limits": [
+          "Actual leaf and SQLite execution with namespace package isolation; full startup/import graph excluded.",
+          "Python audit constraints for reviewed tests, not an OS sandbox or untrusted-native containment.",
+          "No provider, model, send, retention or autonomous runtime evaluation."
+        ],
+        "independent": {
+          "tests": 48,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 48
+        },
+        "independent_replay_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\independent\\receipt.json",
+        "independent_result_reviewed": true
+      },
+      "retrieval": {
+        "mode": "lexical",
+        "workspace_head": "6103615e26dc1c4a0309b32139b27b83fe42f411",
+        "semantic_freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "assessment": "Lexical first result names exact existing state owner; four generic queue hits are noise. Tier0 complete. Exact source reads and tracked-Python consumer search supplement missing test/skill hits. Semantic coverage not certified; no query reindex.",
+        "optional_gaps": [
+          "memory/README.md",
+          "requirements.txt"
+        ]
+      },
+      "next_action": "Qualify one bounded technical RSI canary through existing proposal-only worker and coordinator-owned validation; freeze task-specific success, rollback and later-use checks before any model call",
+      "next_wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            4,
+            5
+          ],
+          "total": 18,
+          "priority": "P0",
+          "eligible": false,
+          "state": "blocked",
+          "wsp97": "Inherited native authority blockers/effect-use lease remain unresolved; this maintenance slice grants none."
+        },
+        {
+          "task": "Qualify one bounded technical RSI canary through existing proposal-only worker and coordinator-owned validation; freeze task-specific success, rollback and later-use checks before any model call",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "eligible": true,
+          "state": "source_and_fixture_qualification_only",
+          "wsp97": "Reuse local_skill_inference, WRE proposal quarantine and existing evaluation/receipt owners. One real, reversible technical task with an independently fixed oracle; no new orchestrator, universal schema or model call admitted by this plan."
+        },
+        {
+          "task": "Broad operational decision qualification",
+          "dimensions": [
+            3,
+            4,
+            3,
+            4
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "candidate_rejected",
+          "wsp97": "Preserve original1/12 general-role and0/12 coder development results. Broad Gmail/LinkedIn capability is not a dependency of an independently scoped technical canary; consequential correspondence actions remain gated."
+        },
+        {
+          "task": "Existing correspondence/WRE proposal acceptance investigation",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "source_trace_reconciled",
+          "wsp97": "WRE already quarantines local text; StateStore production proposal consumer not found. Do not create a new consumer merely to accept the evaluation-only envelope."
+        },
+        {
+          "task": "Provider watermark evidence boundary",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "repaired_local_validation_complete_publication_pending",
+          "wsp97": "Eight reproduced false-fresh cases repaired in existing owner. Same48caseIDs now pass; no provider or model effects."
+        },
+        {
+          "task": "Independent held-out and later-invocation retained benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Requires a qualified task-specific candidate and actual retained use; synthetic fitness or repeated tests are insufficient."
+        },
+        {
+          "task": "Isolated AmIBot build ticket",
+          "dimensions": [
+            3,
+            4,
+            2,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Require a qualified worker and admitted execution path first. Protect active FoundUps and separately owned AutoPost."
+        }
+      ],
+      "basic_rsi_gate": [
+        "One bounded proposal from an existing worker on a source-pinned disposable technical task.",
+        "Independent task-specific checks distinguish baseline, candidate, regressions and scope violations; coordinator alone may accept.",
+        "Verify rejection/rollback and later invocation of the retained candidate under unchanged criteria; report actual cost and unknowns.",
+        "Native OpenClaw/Hermes admission is separate. Only then select an isolated FoundUp and later worker scaling."
+      ],
+      "metrics": {
+        "new_model_calls": 0,
+        "provider_actions": 0,
+        "production_promotions": 0,
+        "retained_gain": null,
+        "held_out_gain": null
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\final-accounting.json"
     }
   }
 }

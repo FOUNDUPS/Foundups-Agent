@@ -1123,3 +1123,7 @@ LinkedIn remain transaction truth. Google Sheets/Docs are optional human-facing
 projections and must be rebuildable. Raw mailbox bodies and complete recipient
 address dumps are not persisted in this state layer. A cached state never grants
 send authority; current routing and recipient preflight remain mandatory.
+
+Freshness comparison requires nonempty string watermarks and exact opaque equality.
+Missing, mistyped or empty observations require reconciliation; values are never
+coerced or trimmed. Existing invalid-cache errors still propagate first.
