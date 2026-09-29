@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'YUMORI.meは、ハイパースケール時代に地域の建物・電力・知識・文化を守り、既存資産を地域向けCOG DCへ再生する市民運動です。目標1,000人。',
   keywords: ['YUMORI.me','湯守','Japan Hyperscaler Report','JHR','COG DC','地域コンピュート','ハイパースケーラー','印西','福井','eSingularity'],
   alternates: { canonical: 'https://yumori.me/' },
-  openGraph: { title: 'YUMORI.me — I am a guardian.', description: '知る。守る。つくる。湯守になる。', type: 'website', url: 'https://yumori.me/' },
+  openGraph: { title: 'YUMORI.me — 湯守になる', description: '知る。守る。つくる。湯守になる。', type: 'website', url: 'https://yumori.me/' },
 };
 
 const join = { display:'inline-block', padding:'14px 22px', borderRadius:999, background:'#f4f1e8', color:'#0b0d0c', textDecoration:'none', fontWeight:850 } as const;
@@ -31,9 +31,10 @@ export default function YumoriPage() {
     <section className="yumori-hero" style={panel}>
       <p style={{ letterSpacing:'.18em', fontWeight:850 }}>YUMORI.me / 湯守</p>
       <h1 className="yumori-wordmark">YUMORI<span style={{opacity:.5}}>.me</span></h1>
-      <p style={{ fontSize:'clamp(1.6rem,4vw,3.5rem)', lineHeight:1.15, fontWeight:800, maxWidth:1000 }}>I am a guardian.<br/>日本の地域を守り、地域のAIをつくる。</p>
+      <p style={{ fontSize:'clamp(1.6rem,4vw,3.5rem)', lineHeight:1.15, fontWeight:800, maxWidth:1000 }}>私は湯守！ / me GUARDIAN! = YUMORI.me<br/>日本の地域を守り、地域のAIをつくる。</p>
       <figure className="yumori-hero-image"><img src="/yumori-compute-field.png" width="1672" height="941" alt="田園と地域の小規模AI計算基盤を組み合わせた再生構想" fetchPriority="high" /><figcaption>地域の未来を、地域でつくる。<span>再生構想のイメージ・実在の完成施設ではありません</span></figcaption></figure>
       <p style={body}>湯守は、本来、湯と場所を守る人。YUMORI.meは、その考えを地域へ広げます。AIインフラは必要です。しかし、土地・電力・知識・文化の未来を、地域の外だけで決めさせない。知る。守る。そして別の形をつくる。</p>
+      <p style={body}>9月25日の採決は終了しました。旧すかっとランド九頭竜について、設立準備委員会は解体工事に進む前のPPP/PFIによる解体案と再利用案の比較検証を求めています。<a href="/vote-no" style={link}>現在の要請と公開記録を見る →</a></p>
       <div style={{marginTop:30}}><Join /></div>
       <p style={{marginTop:18, opacity:.65}}>準備委員会の最初の目標：1,000人。1,000人に達した段階で、全国運動を支える正式な組織化を検討します。</p>
     </section>
@@ -44,7 +45,7 @@ export default function YumoriPage() {
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,280px),1fr))',gap:32,alignItems:'start'}}>
         <div><p style={body}>千葉・印西では巨大データセンターの集積が、電力、土地、景観、騒音、都市計画、地域との共存の問題になっています。米国ではさらに先の巨大集積をすでに経験しています。日本は、その結果を見てから動く必要はありません。</p>
           <p style={body}>YUMORIはデータセンターそのものに反対する運動ではありません。地域が、巨大投資の後ではなく<strong>前に</strong>選択できるようにする運動です。</p>
-          <p><a href={JHR_URL} style={link}>JAPAN HYPERSCALER REPORTを読む →</a></p><Join dark /></div>
+          <p><a href={JHR_URL} style={link}>ジャパン・ハイパースケーラー・レポート（JHR）を読む →</a></p><Join dark /></div>
         <figure style={{margin:0}}><img src={INZAI_IMAGE} alt="印西の大規模データセンター開発地" style={{width:'100%',borderRadius:18}}/><figcaption style={{fontSize:12,opacity:.6,marginTop:8}}>DPDC印西パーク開発地。画像出典: R.E.port。</figcaption></figure>
       </div>
     </section>
