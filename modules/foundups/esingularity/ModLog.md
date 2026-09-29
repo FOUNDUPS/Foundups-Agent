@@ -48,6 +48,7 @@
 - On YUMORI.me, added a concise current PPP/PFI comparison request and public-record link beneath the Japanese movement introduction, with English and Brazilian Portuguese derived from that text. Applied the existing guardian lockup and Japanese JHR name; kept the join form and WHY / WHAT / HOW sequence.
 - Changed only the active `/vote-no` council email subject to the present PPP/PFI comparison topic. The dated September 7 and 10 messages remain historical records.
 - Verified the movement language contracts, JHR public contracts, focused post-vote contract, and 18 routing checks; source publication status is recorded separately from these checks.
+- Squash-merged PR #1954 as `8d2687e917eb0ade554b2ddcc15efd2ee7f0dccd` after CI and Validate eSingularity passed. Reconciled the older Sites v53 source with current GitHub frontend, built successfully, and published Sites v54 from source `27ca3eb8dd2b258c6c12b8831dff770e8bc0c2b9`; deployment `appgdep_6abb049455008191a700d3f307efb92a` succeeded. Sites reports both custom domains active with SSL. Direct HTTP checks of `esingularity.ai` and `yumori.me` returned 403 in this execution environment, so fresh rendered custom-domain content is unverified; deployment success and source parity are distinct evidence.
 
 ## 2026-09-23 — eSingularity.ai current council-position packet concatenation
 
