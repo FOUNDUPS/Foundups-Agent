@@ -91,10 +91,30 @@ they occur. Legacy ¥2.085 billion CapEx is not a Hanyu or portfolio estimate.
   cash inputs per scenario remain missing; complete costs and financing gaps stay TBD.
 - Exported-copy visual review identified narrow columns and residual Hanyu row-11
   text; targeted dimension/adjacent-cell repairs were applied, not a workbook rebuild.
-- Focused model tests: 28 passed, portfolio module coverage 94% including branches.
+- Focused model tests: 28 passed, portfolio module coverage 93% including branches after the final fail-closed guards.
 - Full module Python suite: 64 passed. Domain-routing regression: 18 passed.
 - Two existing pytest configuration warnings concern an absent optional asyncio
   plugin; no tests failed. Sparse dependency materialization resolved collection
   imports without code changes outside this module.
 - Main moved to `4db607120d373666841626c0aa65eed5d9f5b1bb` during work (#1955/#1956).
   Those website/publication changes are independently owned and preserved.
+
+### PR and calculation-engine receipt
+
+Dedicated PR: https://github.com/FOUNDUPS/Foundups-Agent/pull/1958. The reviewed
+15-file patch was published through the connected GitHub app because shell Git
+had no push credentials. Remote tree `a33699af372a065596252115ca55b149f6f202bf`
+matched the local reviewed tree exactly. No unrelated main files were replaced.
+
+Native baseline and exported-copy verification are distinct. Google Sheets
+readback returns INSUFFICIENT EVIDENCE with 51 capital and 55 annual cash gaps.
+The export-preview engine retained inconsistent dependent caches after synthetic
+input changes, so those cached results were rejected. Independent LibreOffice
+recalculation of a disposable exported fixture produced the same downside/base/
+upside verdicts, gross cost, retained cash, external-gap screen, cash conservation
+and interpolated Hanyu payback as Python. Synthetic values were never written to
+the live FIN workbook. The old MW instruction now has a native zero-hit/PASS check.
+
+Final exact-head workflow/review disposition, squash commit and main readback belong
+in the PR closure and the canonical YUMORI Moshpit completion receipt. This file is
+an implementation audit, not a parallel operational timeline.
