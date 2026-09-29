@@ -127,3 +127,17 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 - COG DC capacity, heat recovery, demand, economics, 24-hour onsen operations, bath scale, 60-FoundUp occupancy, basement program and national reuse remain proposals pending validation.
 - Akira Hasegawa is not represented as committed to the project.
 - Public academic profiles are labeled as outreach candidates only; no membership or support is implied.
+
+## Three-site portfolio allocation interface
+
+`src/yumori_economic_model.py` exposes `SiteCost`, `GrantAllocation`,
+`SiteFinancialInputs`, `AnnualCashInputs`, `PortfolioInputs`, `PortfolioResult`,
+`default_portfolio_sites()` and `run_portfolio_model()`. The implementation resides
+in `src/yumori_portfolio_model.py` to keep legacy and demand-sizing logic bounded.
+
+`None` is missing, never zero. Independent costs retain evidence classes and
+sources. Grants require exact AWARDED status and award evidence; duplicate
+allocation IDs fail. Excluded-site funding cannot silently transfer to another
+site. Hanyu cash is computed without depending on Sukatto inclusion or gate status.
+Economic affordability and gated deployment are separate outputs. All 24 services
+and legacy five-year parity outputs remain unchanged.

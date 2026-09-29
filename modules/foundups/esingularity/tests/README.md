@@ -51,3 +51,17 @@ python -m pytest modules/foundups/esingularity/tests/test_yumori_economic_model.
 ```
 
 The test protects the 24-offer service catalog, functional-FIN parity, demand-to-kW translation, the financial-floor distinction, and the utility-capacity gate. It must never turn an unverified site MW value into a build target.
+
+## Portfolio regression coverage
+
+`test_yumori_economic_model.py` also covers the bounded three-site portfolio engine.
+Run the same focused file for legacy parity, demand-led sizing and portfolio tests:
+
+```bash
+python -m pytest -q modules/foundups/esingularity/tests/test_yumori_economic_model.py
+```
+
+Portfolio fixtures are synthetic unit tests, not site cost estimates. Defaults must
+return INSUFFICIENT EVIDENCE, preserve Site 3/2/1 identities versus Priority 1/2/3,
+exclude non-AWARDED grants, survive Sukatto removal, conserve investor/retained cash
+and hold later-site deployment until its own evidence gates pass.
