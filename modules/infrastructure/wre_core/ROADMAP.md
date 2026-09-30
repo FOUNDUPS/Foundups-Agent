@@ -1,59 +1,60 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `0d90f6eac`.** Build and test
-one supervised worker loop before adding platform breadth or worker count.
-One bounded no-generation preflight reused the existing Qwen engine and process
-owner, the unchanged historical repair prompt, model and runtime bindings.
+**Current qualification: 2026-09-30, source `9addd5751`.** One independently
+reviewed, phase-observed call through the existing WRE local proposal adapter
+reached a controlled timeout. The prompt, model, generation arguments, original
+48-case acceptance and 90-second/512-token limits were unchanged.
 
-| Current preflight measurement | Result |
+| Current generation experiment | Observed result |
 |---|---|
-| Initialization / whole child wall time | 5.485 / 6.563 seconds |
-| Completion prompt / reserved output / context | 414 / 512 / 2,048 tokens |
-| Full reserved output fits | Yes; installed completion special-token rules checked |
-| Text generation calls / retries / provider requests | 0 / 0 / 0 |
-| Close phase / parent postchecks | Completed / passed |
-| Generation speed, repair quality, held-out and retained gain | Unknown |
+| Actual adapter dispatches / returned proposals / timeouts / retries | 1 / 0 / 1 / 0 |
+| First initialization completed | 5.359 seconds, returned true |
+| Second initialization invocation | Cached, returned true; not a second native load |
+| Prompt / maximum output / context | 414 / 512 / 2,048 tokens |
+| Generation wrapper | Entered; no return before timeout |
+| Parent child wall time | 90.094 seconds |
+| Prompt evaluation, sampling/first token, generated-token count | Unknown |
+| Candidate tests / rollback / later artifact reuse | Not reached |
 
-Durations and phases are child instrumentation, checked against the returned
-JSON by an independent reviewer. Parent process/wall-time and exact source,
-runtime and model checks are separate evidence; no independent native-call
-attestation is claimed. Tokenization elapsed time fell below the observed timer
-resolution. This successful load does not explain the earlier timeout.
+Seven diagnostic child phases and the parent TimeoutExpired narrow **this**
+attempt to a non-returning generation call after successful initialization.
+They do not identify the native subphase, authenticate token counts, or explain
+the earlier uninstrumented timeout. No proposal was returned; quality is unknown,
+not zero. No graceful-close phase was recorded. The existing process-tree
+timeout owner handled termination, and source/runtime/model/acceptance postchecks
+passed. Independent review accepted the diagnostic result, not a candidate.
 
-**Prior rehearsal remains a controlled failure:** the historical PR1969 method
-controls produced 40 passed / 8 failed versus 48 passed on the current reference,
-with 48 unique unchanged development cases and 96 control observations. Its one
-worker call timed out at 90.109 seconds with no proposal or native-phase evidence.
-Those controls were not rerun here. No candidate was applied or retained.
-PR1973 recorded that result and is merged/main-verified at `7258f43cd` (main
-CI36669842363 and CodeQL36669842192 passed; owned lane closed).
+The prior no-generation preflight remains valid: 5.485-second initialization,
+6.563-second child wall time, and full 512-token output allowance fits. PR1974 is
+merged/main-verified at `9addd5751` (CI36675166744 and CodeQL36675165963 passed;
+owned lane closed). Historical PR1969 repair controls remain 40 passed / 8 failed
+versus 48 passed, on 48 unique unchanged development cases. They were not rerun
+here. The first uninstrumented 90.109-second timeout remains a separate result.
 
-**Next eligible layer: bounded generation-phase qualification (13/P1;
-C2/I4/D4/Impact3).** Use the same task and existing worker owner, with explicit
-phase evidence and a separately frozen time/token budget. Load time alone does
-not justify a larger generation budget or a model switch. Preserve the original
-timeout and 48-case criteria. This planning entry grants no further model call.
+**Next eligible layer: bounded generation subphase diagnostics (13/P1;
+C2/I4/D4/Impact3).** Inspect/reuse the installed engine's evaluation and sampling
+boundaries to observe prompt processing and first-token progress. Freeze any
+new diagnostic script and time/token budget before execution. Do not rerun this
+unchanged failed probe, infer token speed from the outer timeout, or increase the
+budget/switch models automatically. The completed one-call budget is closed.
 
-The minimum path to basic RSI is:
+The minimum path to basic RSI remains:
 
 1. Return one scoped worker proposal and independently review it.
-2. Test it against the unchanged repair controls; exercise rejection/rollback.
-3. Reuse the verified artifact in a later invocation and measure held-out benefit.
+2. Test against the unchanged repair controls; exercise rejection/rollback.
+3. Reuse the verified artifact later and measure independent held-out benefit.
 4. Run one admitted, isolated AmIBot ticket; then increase workers from 1 to 2.
 
-Historical repair reuse alone is not generalized improvement or production
-retention. Native WRE/OpenClaw/Hermes admission remains unresolved. The current
-trial is directly supervised; Python guards and a process-tree guard do not
-provide OS memory/network isolation. Installed llama-cpp0.3.20 still differs from
-declared0.2.72; this sprint updates no runtime. Broad Gmail/LinkedIn quality is
-not a prerequisite for this separate technical trial. Their rejected 1/12 general
-and 0/12 coder results remain unchanged. Active eSingularity/YUMORI and separately
-owned AutoPost remain protected.
+This is direct supervised qualification, not native WRE/OpenClaw/Hermes
+admission. No production source or runtime was changed. Installed llama-cpp0.3.20
+still differs from declared0.2.72. Process/Python guards are not OS memory/network
+isolation. Broader Gmail/LinkedIn quality remains separate; prior rejected 1/12
+general and 0/12 coder results are unchanged. Active eSingularity/YUMORI and
+separately owned AutoPost remain protected.
 
-Exact receipts and the re-scored queue: `docs/roadmaps/rsi_swarm_backlog.json` →
-`current_observation.worker_preflight_20260930`. Historical evidence remains at
-`current_observation.technical_canary_20260930`. Publication/CI/cleanup are
-separate receipts; re-observe after closure before dispatch.
+Exact evidence/queue: `docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.generation_phase_20260930`. Prior observations remain intact.
+Publication/CI/owned cleanup have separate receipts. Re-observe after closure.
 
 ## Staged general-role decision cohort — 2026-09-29
 

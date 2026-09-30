@@ -1,25 +1,24 @@
 ## Current bounded layer — 2026-09-30
 
-One no-generation preflight passed: existing code-role Qwen initialization took
-5.485 seconds; the child returned and closed in 6.563 seconds. The exact completion
-prompt uses 414 tokens, and its 512-token reserve fits the 2,048-token context.
-Zero completion calls, retries or provider requests. Independent artifact review
-checked child diagnostics, returned JSON and source/runtime/model bindings.
+The phase-observed generation trial ended in a **controlled timeout**: one
+existing local proposal-adapter dispatch, 90.094 seconds, no returned proposal,
+no retry or candidate execution. Initialization completed in 5.359 seconds; the
+generation wrapper entered and its cached initialization returned, but generation
+did not return. Native prompt evaluation, first-token progress and quality remain
+unknown. No graceful-close event was recorded. Parent postchecks passed.
 
-This does not explain the prior 90.109-second timeout or demonstrate generation,
-repair quality, retained gain or native dispatch. The earlier 40/8 baseline and
-48/0 reference controls were not rerun. PR1973 is merged/main-verified and closed.
-
-Next 13/P1: freeze a bounded generation-phase experiment on the existing worker
-and unchanged repair task, then review any returned proposal before application.
-No larger budget or model switch follows automatically from successful loading.
-Each model call needs its own bounded execution plan; this entry is planning only.
+Next 13/P1: qualify bounded evaluation/first-token diagnostics at existing engine
+boundaries. Preserve the unchanged task and acceptance; no unchanged failed
+rerun, automatic budget increase, model switch or new orchestrator. Any next
+experiment requires its own frozen script/budget. Current budget is closed.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.worker_preflight_20260930`. The sequence stays
-one worker → independent test/rollback → later use/held-out benefit → admitted
-isolated AmIBot → two workers. Broader platform work remains separate. Active
-FoundUps and Remote AutoPost are protected. Earlier sections are historical.
+and backlog `current_observation.generation_phase_20260930`. Prior preflight,
+historical controls and timeout remain separate observations; PR1974 is merged,
+main-verified and closed. Basic progression stays proposal → independent tests/
+rollback → later reuse/held-out benefit → admitted isolated AmIBot → two workers.
+Native admission remains unresolved; active FoundUps/Remote AutoPost protected.
+Earlier sections below are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 
