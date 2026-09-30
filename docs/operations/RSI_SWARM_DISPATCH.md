@@ -1,25 +1,24 @@
 ## Current bounded layer — 2026-09-30
 
-One verifier-informed repair through existing input_context returned in 44.906 s
-(636 input / 83 output tokens). Original instruction/model/chat/stops/criteria
-were unchanged. The original parser rejected Markdown fences; independent
-review also found missing token checks. No candidate application, tests,
-retention or native dispatch. The single-call budget is closed.
+All23 deterministic adapter/isolated-forwarding checks passed. Instruction/context
+loss was not reproduced in the tested scope; untrusted output remains a proposal.
+No production patch or native model/provider call. This is not full WRE dispatch
+or a successful repair. Independent review accepted the limited evidence.
 
-Next 14/P1 (C2/I4/D5/Impact3): qualify task-specific output-contract delivery at
-the existing local adapter before another model attempt. Begin with deterministic
-prompt/consumer checks and existing backend capability. Generic wrapper causality
-is unproven; no blind retry, fence stripping or relaxed criteria. Exact semantic
-Holo retrieval is separately blocked by authority-root/head mismatch (15/P1);
-route via existing governed R03 maintenance, never query-side reindex.
+Next13/P1 (C2/I4/D4/Impact3): separately freeze one material task-framing hypothesis
+through the existing worker. Preserve skill/context facts and original criteria,
+model/runtime/chat/stops/caps; no answer injection, fence stripping or blind retry.
+Require exact script review, prompt fit and separate one-call budget. Current
+observation grants no model call or native admission. A known-case pass alone
+would not prove held-out or retained benefit. Holo15/P1 authority maintenance and
+native18/P0 admission remain blocked; do not repair the index from query paths.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.verifier_feedback_20260930`. Original 48-case
-controls were not rerun; no held-out or retained gain. Basic progression remains
-accepted proposal → independent controls/rollback → later reuse/held-out benefit
-→ admitted isolated AmIBot → two workers. PR #1980 is closed and main-verified.
-Native admission remains unresolved; active FoundUps and Remote AutoPost remain
-protected. Earlier sections below are historical.
+and backlog `current_observation.output_contract_20260930`. Both earlier chat
+attempts remain rejected. Progression: accepted proposal → independent controls/
+rollback → later reuse/held-out benefit → admitted isolated AmIBot → two workers.
+PR #1981 is closed/main-verified. Protect active FoundUps and Remote AutoPost.
+Earlier sections below are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 
