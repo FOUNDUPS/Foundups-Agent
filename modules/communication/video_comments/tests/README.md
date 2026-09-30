@@ -14,6 +14,8 @@
 | `test_poc_dialogue.py` | PoC dialogue flow test | ✅ Available |
 | `test_post_comment.py` | Comment posting test | ✅ Available |
 | `test_move2japan_access.py` | Move2Japan channel access test | ✅ Available |
+| `test_reply_context_pipeline.py` | Per-row video context, full-prompt Qwen routing, and source-gate regressions | ✅ 7 passing |
+| `test_ytr1_runtime_hardening.py` | Text-model selection and reply runtime hardening | ✅ 11 passing |
 
 ## [TEST] Test Categories
 
@@ -42,6 +44,12 @@ python -m pytest tests/
 ```bash
 cd modules/communication/video_comments
 python -m pytest tests/test_[module_name].py
+```
+
+### Context Pipeline Regression
+```bash
+python -m pytest modules/communication/video_comments/tests/test_reply_context_pipeline.py -q
+python -m pytest modules/communication/video_comments/tests/test_ytr1_runtime_hardening.py -q
 ```
 
 ### With Coverage

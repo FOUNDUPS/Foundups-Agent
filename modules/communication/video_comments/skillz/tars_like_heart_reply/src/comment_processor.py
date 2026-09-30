@@ -117,6 +117,20 @@ class CommentProcessor:
         "unknown": "❓",
     }
 
+    CONTEXTUAL_REPLY_SOURCE_MARKERS = (
+        "lm_studio",
+        "qwen",
+        "grok",
+        "gemma_emoji",
+        "skill_0:",
+    )
+
+    @classmethod
+    def is_contextual_reply_source(cls, source: Optional[str]) -> bool:
+        """Return whether a source receipt proves the reply used comment context."""
+        normalized = (source or "unknown").lower()
+        return any(marker in normalized for marker in cls.CONTEXTUAL_REPLY_SOURCE_MARKERS)
+
     def __init__(
         self,
         driver,
@@ -132,6 +146,7 @@ class CommentProcessor:
         mod_lookup=None,
         reply_debug_tags=False,
         video_title=None,
+        target_channel_id=None,
         session_id: Optional[str] = None,
     ):
         """
@@ -149,6 +164,7 @@ class CommentProcessor:
             mod_lookup: ModeratorLookup instance (optional)
             reply_debug_tags: Append debug tags to replies (default False)
             video_title: Video title for context-aware replies (optional)
+            target_channel_id: Channel receiving the comment (personality routing)
         """
         self.driver = driver
         self.human = human
@@ -163,6 +179,7 @@ class CommentProcessor:
         self.mod_lookup = mod_lookup
         self.reply_debug_tags = reply_debug_tags
         self.video_title = video_title  # NEW (2025-12-30): Video context for alignment detection
+        self.target_channel_id = target_channel_id
         self.session_id = session_id or time.strftime("%Y%m%d_%H%M%S")
 
         # UI-derived action switches (requested: Like/Heart should not fire when UI looks disabled/greyed-out)
@@ -835,6 +852,54 @@ class CommentProcessor:
                     }
                 }
 
+                // Extract the exact video context for this inbox row. Studio inbox
+                // can mix comments from many videos, so a DAE-wide title is unsafe.
+                let videoTitle = null;
+                let videoId = null;
+                let videoUrl = null;
+                const videoTitleSelectors = [
+                    'ytcp-video-thumbnail-with-info #video-title',
+                    'ytcp-video-thumbnail-with-info [title]',
+                    'a#video-title',
+                    '#video-title',
+                    '[data-video-title]',
+                    '[class*="video-title"]'
+                ];
+                for (const selector of videoTitleSelectors) {
+                    const el = thread.querySelector(selector);
+                    if (!el) continue;
+                    const candidate = (
+                        el.getAttribute('title') ||
+                        el.getAttribute('aria-label') ||
+                        el.getAttribute('data-video-title') ||
+                        el.textContent || ''
+                    ).trim().replace(/\s+/g, ' ');
+                    if (candidate) {
+                        videoTitle = candidate.substring(0, 300);
+                        break;
+                    }
+                }
+
+                const links = thread.querySelectorAll('a[href]');
+                for (const link of links) {
+                    const href = link.href || link.getAttribute('href') || '';
+                    let match = href.match(/\/video\/([^\/?#]+)/);
+                    if (!match) match = href.match(/[?&]v=([^&#]+)/);
+                    if (!match) match = href.match(/\/shorts\/([^\/?#]+)/);
+                    if (!match) continue;
+                    videoId = match[1];
+                    videoUrl = href;
+                    if (!videoTitle) {
+                        const candidate = (
+                            link.getAttribute('title') ||
+                            link.getAttribute('aria-label') ||
+                            link.textContent || ''
+                        ).trim().replace(/\s+/g, ' ');
+                        if (candidate) videoTitle = candidate.substring(0, 300);
+                    }
+                    break;
+                }
+
                 return {
                     text: text.substring(0, 500),
                     author_name: authorName,
@@ -842,7 +907,10 @@ class CommentProcessor:
                     channel_id: channelId,
                     is_mod: isMod,
                     is_subscriber: isSubscriber,
-                    published_time: publishedTime
+                    published_time: publishedTime,
+                    video_title: videoTitle,
+                    video_id: videoId,
+                    video_url: videoUrl
                 };
             """, comment_idx - 1)
             
@@ -859,6 +927,14 @@ class CommentProcessor:
                     logger.info(f"[DAE] 📅 Comment age: '{published_time}'")
                 else:
                     logger.warning("[DAE] ⚠️ Could not extract published_time from DOM")
+                if data.get("video_title") or data.get("video_id"):
+                    logger.info(
+                        "[DAE] Video context: title=%r id=%s",
+                        data.get("video_title"),
+                        data.get("video_id") or "unknown",
+                    )
+                else:
+                    logger.warning("[DAE] No per-comment video context found in Studio DOM")
                 return data
             else:
                 # OCCAM'S RAZOR: No DOM thread at index = no comment exists
@@ -868,7 +944,17 @@ class CommentProcessor:
 
         except Exception as e:
             logger.warning(f"[DAE] Failed to extract comment data: {e}")
-            return {'text': '', 'author_name': 'Unknown', 'channel_id': None, 'is_mod': False, 'is_subscriber': False, 'published_time': None}
+            return {
+                'text': '',
+                'author_name': 'Unknown',
+                'channel_id': None,
+                'is_mod': False,
+                'is_subscriber': False,
+                'published_time': None,
+                'video_title': None,
+                'video_id': None,
+                'video_url': None,
+            }
 
     @staticmethod
     def parse_comment_age_days(published_time: str) -> Optional[int]:
@@ -984,6 +1070,9 @@ class CommentProcessor:
         results["commenter_channel_id"] = comment_data.get("channel_id")
         # Training Mode: Capture comment text for transcript (Task 3)
         results["comment_text"] = comment_data.get('text', '')[:500]  # Truncate for storage
+        results["video_title"] = comment_data.get("video_title") or self.video_title
+        results["video_id"] = comment_data.get("video_id")
+        results["video_url"] = comment_data.get("video_url")
         try:
             context_flags = self._get_context_flags(comment_data)
         except Exception as e:
@@ -1360,8 +1449,7 @@ class CommentProcessor:
                 hb_task = asyncio.create_task(self._thinking_heartbeat("Layer 2 (Intelligence)", hb_stop))
                 
                 try:
-                    # LLM TIMEOUT: 10 seconds for AI generation
-                    # 2026-02-04: Reduced from 15s→10s (Grok timeout is now 8s)
+                    # Bound the complete local-service + embedded-Qwen route.
                     actual_reply_text = await asyncio.wait_for(
                         asyncio.to_thread(self._generate_intelligent_reply, comment_data),
                         timeout=10.0
@@ -1371,6 +1459,21 @@ class CommentProcessor:
                     # Log result length for debugging
                     reply_len = len(actual_reply_text) if actual_reply_text else 0
                     logger.info(f"[HARD-THINK] Layer 2 Result: '{actual_reply_text[:50] if actual_reply_text else ''}...' (len={reply_len})")
+
+                    # Generic templates claim engagement without reading the
+                    # comment. Fail closed unless the legacy behavior is opted in.
+                    allow_generic = os.getenv(
+                        "YT_ALLOW_GENERIC_REPLY_FALLBACK", "false"
+                    ).strip().lower() in {"1", "true", "yes", "on"}
+                    if actual_reply_text and not allow_generic:
+                        generator = get_reply_generator()
+                        reply_source = generator.get_last_llm_source().lower()
+                        if not self.is_contextual_reply_source(reply_source):
+                            logger.warning(
+                                "[CONTEXT-GATE] Skipping non-contextual reply from source=%s",
+                                reply_source,
+                            )
+                            actual_reply_text = ""
 
                 except asyncio.TimeoutError:
                     hb_stop.set()
@@ -1400,23 +1503,31 @@ class CommentProcessor:
                     # actual_reply_text remains "" - caller will handle this as "skip reply"
 
                 elif not actual_reply_text or not actual_reply_text.strip():
-                    # Failure case (None, whitespace-only) - apply fallback
+                    # Failure case: fail closed unless legacy templates are opted in.
                     if actual_reply_text is not None:
                         logger.warning(f"[HARD-THINK] ⚠️ AI returned WHITESPACE reply! Triggering fallback.")
                     else:
                         logger.warning(f"[HARD-THINK] ⚠️ AI returned None! Triggering fallback.")
 
-                    logger.info("[HARD-THINK] Activiting Fallback Reply (Safe Template)")
-                    # Simple, safe, engagement-oriented fallbacks
-                    fallback_opts = [
-                        "Thanks for watching! 🚀",
-                        "Appreciate the comment! 🙏",
-                        "Great point! 👍",
-                        "FoundUps is the way! 💎",
-                        "0102 logic engaged! ✊"
-                    ]
-                    actual_reply_text = random.choice(fallback_opts)
-                    used_intelligent = False
+                    allow_generic = os.getenv(
+                        "YT_ALLOW_GENERIC_REPLY_FALLBACK", "false"
+                    ).strip().lower() in {"1", "true", "yes", "on"}
+                    if allow_generic:
+                        logger.info("[HARD-THINK] Activating legacy fallback reply")
+                        fallback_opts = [
+                            "Thanks for watching! 🚀",
+                            "Appreciate the comment! 🙏",
+                            "Great point! 👍",
+                            "FoundUps is the way! 💎",
+                            "0102 logic engaged! ✊",
+                        ]
+                        actual_reply_text = random.choice(fallback_opts)
+                        used_intelligent = False
+                    else:
+                        logger.warning(
+                            "[CONTEXT-GATE] No grounded reply available; skipping post"
+                        )
+                        actual_reply_text = ""
                 else:
                     used_intelligent = True
 
@@ -1558,7 +1669,8 @@ class CommentProcessor:
             is_mod=comment_data.get('is_mod', False),
             is_subscriber=comment_data.get('is_subscriber', False),
             published_time=comment_data.get('published_time'),
-            video_title=self.video_title  # NEW (2025-12-30): Pass video context for alignment detection
+            video_title=comment_data.get('video_title') or self.video_title,
+            target_channel_id=self.target_channel_id,
         )
 
     def _get_context_flags(self, comment_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -1568,6 +1680,7 @@ class CommentProcessor:
             'is_question': '?' in text or any(w in text for w in ['how', 'why', 'what', 'when', 'where']),
             'is_positive': any(w in text for w in ['great', 'awesome', 'love', 'thanks', 'good', 'best']),
             'is_negative': any(w in text for w in ['bad', 'hate', 'worst', 'stop', 'why']),
+            'has_video_context': bool(comment_data.get('video_title') or self.video_title),
         }
 
     async def _verify_action_with_vision(self, action_name: str, verify_description: str, timeout: float = 30.0) -> bool:

@@ -10,6 +10,20 @@ This module provides autonomous YouTube Studio comment engagement through the `C
 
 It also provides a lightweight **012 → Comment DAE control plane** for “broadcast” updates (e.g., promote a new channel) stored in module memory and injected into replies probabilistically to avoid spam signatures.
 
+## Contextual Reply Contract
+
+For autonomous replies, the Studio row is the authority for context. The DOM extractor returns `text`, `author_name`, `channel_id`, `video_title`, `video_id`, and `video_url`. `CommentProcessor` forwards the per-row video title and the receiving channel ID to `IntelligentReplyGenerator`.
+
+The default provider order is:
+
+1. LM Studio local model service (normally the general Qwen model; 3-second request bound)
+2. Embedded general Qwen resolved by `resolve_general_model_path()`
+3. Grok only when `YT_ENABLE_GROK_REPLIES=true` and credentials are configured
+
+RedDog/OpenRouter is not called from this module yet. RedDog's production Fusion calls are autonomous: policy, signed runtime/model bindings, and durable provider-call evidence replace any per-call 012 approval. The currently exposed production runners are typed for repository audits, backend-architect decisions, and bounded artifact generation rather than short-form YouTube replies. Integration should therefore add a provider-neutral reply runner that consumes the daemon's preconfigured policy and emits a content-free call receipt; it must not import the private script bridge.
+
+Every generated reply carries a source receipt. Template, BanterEngine, unknown, or stale sources are not posted by default. Set `YT_ALLOW_GENERIC_REPLY_FALLBACK=true` only to restore the legacy generic-template behavior.
+
 ## Primary Interface: execute_skill()
 
 ### Function Signature
