@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_proposal_caller_20260930",
-    "base_commit": "ca7117b6a64bc66a4d4885d742cd06379ab582f1",
-    "selected_action": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
-    "status": "caller_contract_verified_reobserve_after_closure",
+    "observation_path": "current_observation.native_caller_trial_20261001",
+    "base_commit": "4c37297f47e0774d5b380bd06a6b936bfa201550",
+    "selected_action": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+    "status": "actual_caller_verified_proposal_rejected_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-contract\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.contract_transfer_20260930"
+    "previous_observation_path": "current_observation.native_proposal_caller_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -17083,6 +17083,210 @@
         "backend_compatibility_passed": true,
         "initial_manifest_check": "stale; repaired using existing generator and both digest pins"
       }
+    },
+    "native_caller_trial_20261001": {
+      "source": "eb39c4b07836a418f6da0e0ad0dd02df25b76933",
+      "publication_base": "4c37297f47e0774d5b380bd06a6b936bfa201550",
+      "outcome": "NATIVE_CALLER_RETURNED_PROPOSAL_REJECTED",
+      "execution_plane": "directly_supervised_local_qualification",
+      "signal_class": "execution_feedback",
+      "measurements": {
+        "setup_attempts": 2,
+        "setup_failed": 1,
+        "setup_passed": 1,
+        "generation_attempts": 1,
+        "generation_returned": 1,
+        "generation_retries": 0,
+        "scope_accepted_proposals": 0,
+        "scope_rejected_proposals": 1,
+        "candidate_executions": 0,
+        "candidate_test_cases": 0,
+        "provider_requests": 0,
+        "prompt_tokens": 658,
+        "completion_tokens": 122,
+        "native_generation_seconds": 31.04700000002049,
+        "bounded_child_seconds": 36.125,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "paid_cost": null
+      },
+      "model": {
+        "role_override": "child-only code role",
+        "runtime": "llama-cpp-python 0.3.20",
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+        "context_tokens": 2048,
+        "max_output_tokens": 512,
+        "cpu_threads": 4,
+        "gpu_layers": 0
+      },
+      "route": "actual WRE master helper -> local_skill_inference -> QwenInferenceEngine.generate_chat_response; unrelated constructor collaborators inert",
+      "counters": {
+        "master_constructors": 1,
+        "helper_calls": 1,
+        "chat_calls": 1,
+        "engine_initialize_calls": 1,
+        "native_initialization_attempts": 1,
+        "native_initializations_returned": 1,
+        "completion_calls": 1,
+        "completion_returns": 1,
+        "formatter_calls": 1,
+        "full_prompt_tokenizations": 2,
+        "close_attempts": 1,
+        "close_returns": 1
+      },
+      "proposal": "def provider_refresh_required(self, scope_key: str, observed_watermark: str) -> bool:\n    \"\"\"Return True unless the cached provider watermark exactly matches.\"\"\"\n    state = self.load_state(scope_key)\n    if state is None:\n        return True\n    if state.freshness is not Freshness.VALID:\n        return True\n    if not isinstance(observed_watermark, str) or observed_watermark.strip() == \"\":\n        return True\n    if state.provider_watermark == \"\":\n        return True\n    return state.provider_watermark != observed_watermark",
+      "proposal_sha256": "6cc6690ef0aca1e964af105fa3ad92e83102651aaab7cc4ee830bdc4183fe09c",
+      "rejection": "Frozen AST call allowlist rejects observed_watermark.strip(); no fences removed, no criterion changed, no candidate execution/application. Static whitespace-token concern is not a test result.",
+      "setup_repair": "Initial RuntimeError was over-redacted. Independently confirmed raw CRLF instruction built2614 bytes while preregistered normalized prompt built2601. Corrected same worker normalizes after raw hash validation and records bounded static failure diagnostics. Original first-failure line remains unknown.",
+      "verification": "Separate author and independent execution/result reviewer. Pre/post source/runtime/model hashes and same-process witnesses are observations, not immutable execution or authenticated effect evidence.",
+      "artifact_hashes": {
+        "entry.json": "6352e3e7254639bc76041fe553a3a651ca83819f050b179c3e28370eaf331927",
+        "manifest.json": "5bb309183668cece4b993d4efb5d0240a41cce2aaf5163afdf425279c38cd1dd",
+        "runtime-preflight.json": "ca6a02b25188a4097efbfddae722f5c0e7dca57c7c2d2f57f4be438b6df83128",
+        "preflight-execution-review.json": "a0a2fbda2e7bb83a38be1983cd2cec44bfe5f8630205a6e27afb79c5ec381e0f",
+        "preflight-receipt.json": "51a67f5b702f74b43a48e427107b5d892c0a6372d2d1de17401b2c10d808f87e",
+        "preflight-child-evidence.json": "11dbc14e241679e984eae5a26c12a6e441a8d9c59fad263624bdc130428f2416",
+        "preflight-result-review.json": "05796a521ad3150fed14c9407eb0f695ec0e2b3281e2e05bf3816308fbd169ef",
+        "next-action-review.json": "70380f50fa58fca255bd64eb35a109029ca803e22416386d18ddf2206a2ea197",
+        "attempt2/manifest.json": "5bb309183668cece4b993d4efb5d0240a41cce2aaf5163afdf425279c38cd1dd",
+        "attempt2/generate_worker.py": "37411a0c15d34e0bac67882ce57bcb068c765a7565df60c38f3b5469221ff721",
+        "attempt2/worker-design.json": "45d2ca01be543f8d2ce5fb72643cb153d97045773ff74f51035845f02ac7bc59",
+        "attempt2/run_trial.py": "0e147c194ecce5116636d01e75c2eb60ab2f5ba2a049cb1970af712e144d2197",
+        "attempt2/acceptance.json": "ad6a132479507d258af3d72ada1351a2182b4e03b298fd59743163d17d00262d",
+        "attempt2/preflight-execution-review.json": "bc6ba1637050540b44b11f1e32ed55d3c3185b63f24f6c55bb740b07a2ab4c08",
+        "attempt2/preflight-receipt.json": "248764b11ec120fa0847ad2a6ffe19ec89a54e46c52e10f341c3d1fcee5afe77",
+        "attempt2/preflight-result-review.json": "4510609ebfd02cb386c1f05a53a97afadc81dc45bcf1ad38e5bc1123b03bf393",
+        "attempt2/generate-execution-review.json": "47e0ab0e995c0e14295473d3c739ef1e1248b765169cf397175e3158e83d8f62",
+        "attempt2/generate-receipt.json": "00ba44f83b675c70fdc5aa2dd21a69cd06f6075d07c02835ee27407cfaecfe88",
+        "attempt2/generate-child-evidence.json": "39ad3d06ae0a571a0c70b484f23c6aadfba6999e075a155ead6b2b450f87f8de",
+        "attempt2/generate-phases.jsonl": "67b9e19688d19517447f90c8591cee0592d722f9eb8ecd01b8befdcc14894860",
+        "attempt2/proposal-inspector-review.json": "be92f49407019b77d5b7460d342d52a2b8f9bb804239bd8756debad264fc8301",
+        "attempt2/inspect_proposal.py": "a6d3d33909f198ea30a7d20cd39496b5cd8dda65dd74f37499a606041a7a1d95",
+        "attempt2/parser-result.json": "67366a65631436264e643f091d0cbc313c213c09c31d78a582a2a85c9fec6bd7",
+        "attempt2/parser.stderr.log": "1a5eb9b4e54675102f94742468677335a50043e86b7629e9dc7d05354c6b6d6f",
+        "attempt2/proposal.py.txt": "6cc6690ef0aca1e964af105fa3ad92e83102651aaab7cc4ee830bdc4183fe09c",
+        "attempt2/result-review.json": "a564e54bd993e3c5172bed7c096fe9f1168ab5abdf4e91a297bcb2d06d19c0e6"
+      },
+      "audit_directory": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial",
+      "limits": [
+        "One known-case caller trial; not held-out competence or full execute_skill admission.",
+        "Explicit native close performed by experiment wrapper, not production adapter. Llama destructor exists; no persistent leak established.",
+        "Python audit guards and Windows process-tree owner are not OS network/memory isolation.",
+        "No provider/service/DB effects, PatternMemory promotion, retained benefit or production implementation changes.",
+        "Holo freshness remains UNKNOWN; prior authority root/head mismatch reused without query-side reindex.",
+        "Generation budget consumed and closed; no automatic retry or candidate application."
+      ],
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "Actual route returned, but experiment wrapper supplied explicit cleanup. Existing adapter has no explicit close and engine no lifetime API. Native destructor exists; no persistent leak demonstrated. Reuse existing owners and deterministic tests before repeated use."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "native_wre_admission": false,
+      "prior_closure": {
+        "pr": 1990,
+        "merge": "540effae837b20e339dbec6938fdcb2b96da14ff",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\final-accounting.json",
+      "publication_status": "Local experiment reviewed; PR/CI/merge/main closure separately recorded."
     }
   }
 }

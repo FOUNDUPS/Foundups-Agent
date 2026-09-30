@@ -1,4 +1,51 @@
-## Current bounded layer — 2026-09-30
+## Current bounded layer — 2026-10-01
+
+One real local-model call through the implemented WRE helper, adapter and Qwen native-chat engine returned in 36.125 seconds (658 input/122 output tokens). Independent review accepted the bounded route evidence; the unchanged strict inspector rejected the proposal for an unapproved `.strip()` call. No candidate was executed or applied. Two zero-init setup attempts are recorded: one failed, one passed after a CRLF normalization repair. Native admission and retained improvement remain unproven.
+
+| Measurement | Observed |
+|---|---|
+| Setup attempts / failed / passed | 2 / 1 / 1 |
+| Model calls / returned / retries | 1 / 1 / 0 |
+| Scope-accepted / scope-rejected proposals | 0 / 1 |
+| Candidate executions / test cases | 0 / 0 |
+| Input / output tokens | 658 / 122 |
+| Native generation / bounded child seconds | 31.047 / 36.125 |
+| Provider requests | 0 |
+| Held-out / retained gain | unknown / unknown |
+
+The trial ran pinned source `eb39c4b07836a418f6da0e0ad0dd02df25b76933` with 19 repository and 516
+runtime-file bindings. Publication starts at `4c37297f47e0774d5b380bd06a6b936bfa201550`; the caller leaves
+are unchanged and PR #1996 terminology is preserved. Real formatter/tokenizer
+and model initialization ran with CPU 4/GPU 0, 2048 context and 512 output cap.
+The same 658-token vector was checked twice; output stopped after 122 tokens.
+Proposal quarantine, pre/post source/runtime/model hashes, explicit test-owned
+close and bounded process cleanup passed independent result review.
+
+Initial setup failed before construction/model use, with only RuntimeError
+recorded. Static review established a raw-CRLF versus preregistered-LF prompt
+mismatch; its exact first failure was not recoverable. A reviewed correction
+retained raw input hashes and added bounded diagnostics. Original evidence is
+preserved. Neither setup attempt loaded a model.
+
+The frozen parser rejected `.strip()`; no grammar relaxation, model retry or
+candidate application followed. Route success does not imply task success.
+These are same-process witnesses plus independent receipt review, not formal
+verification, pristine held-out evaluation or authenticated runtime authority.
+Inert unrelated constructor collaborators and externally owned model cleanup
+mean this is not a full admitted WRE/OpenClaw/Hermes execution.
+
+**Next 13/P1: Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter.**
+The adapter creates a per-call engine but has no explicit cleanup. Installed
+Llama has a destructor, so this finding is not a demonstrated persistent leak.
+Extend the existing engine/adapter and existing portable tests; preserve direct
+engine reuse and stable failure reporting. No new model call is needed to
+qualify that contract. Native 18/P0 and Holo 15/P1 remain separately blocked;
+AmIBot stays downstream. Preserve active FoundUps and Remote AutoPost.
+
+Evidence: backlog `current_observation.native_caller_trial_20261001` and `O:/Foundups-Agent-audits/20260930-rsi-native-caller-trial/`.
+The one-call budget is closed; no retained improvement or autonomous RSI claim.
+
+## Historical native caller contract layer — 2026-09-30
 
 The existing master helper, local adapter and Qwen engine now support an explicit native-chat proposal mode. Raw completion remains the default. Local35-case portable contracts and4 installed-source formatter/handler controls passed independently reviewed checks; neither loaded a model. The original collection-only runner failure is preserved. Full native admission and retained improvement remain unproven.
 
