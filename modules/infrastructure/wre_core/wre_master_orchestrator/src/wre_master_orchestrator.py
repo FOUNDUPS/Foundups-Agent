@@ -39,13 +39,15 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+from modules.infrastructure.wre_core.src.local_skill_inference import (
+    execute_local_skill_inference,
+    validate_local_proposal_config,
+)
+
 # WSP 96 v1.3: Libido Monitor and Pattern Memory integration
 try:
     from modules.infrastructure.wre_core.src.libido_monitor import GemmaLibidoMonitor, LibidoSignal
     from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory as SQLitePatternMemory, SkillOutcome
-    from modules.infrastructure.wre_core.src.local_skill_inference import (
-        execute_local_skill_inference,
-    )
     from modules.infrastructure.wre_core.src.registered_skill_executor import (
         dispatch_registered_skill_executor,
         resolve_registered_skill_executor,
@@ -108,10 +110,15 @@ class WREMasterOrchestrator:
     efficiency gains.
     """
 
-    def __init__(self):
+    def __init__(self, *, local_proposal_mode="raw", local_native_chat_profile=None):
         """
         Initialize per WSP 1 (Foundation) and WSP 13 (Agentic System)
         """
+        # Trusted construction only; skill content/input_context cannot select a mode.
+        self.local_native_chat_profile = validate_local_proposal_config(
+            local_proposal_mode, local_native_chat_profile
+        )
+        self.local_proposal_mode = local_proposal_mode
         self.repo_root = Path(__file__).resolve().parents[5]
         # Core components per WSP architecture
         self.pattern_memory = PatternMemory()  # WSP 60 (original in-memory patterns)
@@ -483,10 +490,16 @@ class WREMasterOrchestrator:
         Returns:
             Dict with execution results
         """
+        options = {}
+        mode = getattr(self, "local_proposal_mode", "raw")
+        profile = getattr(self, "local_native_chat_profile", None)
+        if mode != "raw" or profile is not None:
+            options = {"proposal_mode": mode, "native_chat_profile": profile}
         return execute_local_skill_inference(
             skill_content=skill_content,
             input_context=input_context,
             agent=agent,
+            **options,
         )
     
     def execute_skill(

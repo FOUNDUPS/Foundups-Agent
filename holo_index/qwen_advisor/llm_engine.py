@@ -180,6 +180,76 @@ class QwenInferenceEngine:
             _log_error_type("Qwen response generation failed", exc)
             return "Error: Qwen response generation failed"
 
+    def generate_chat_response(
+        self, prompt: str, system_prompt: Optional[str] = None, *,
+        runtime_version: str, template_sha256: str,
+    ) -> str:
+        """Opt-in, qualified native text proposal; leave raw callers unchanged."""
+        try:
+            import re
+            import llama_cpp
+            from llama_cpp.llama_chat_format import (
+                Jinja2ChatFormatter, chat_formatter_to_chat_completion_handler,
+            )
+            if (type(runtime_version) is not str or runtime_version != "0.3.20"
+                    or getattr(llama_cpp, "__version__", None) != runtime_version
+                    or type(template_sha256) is not str
+                    or re.fullmatch(r"[0-9a-f]{64}", template_sha256) is None
+                    or not callable(Jinja2ChatFormatter)
+                    or not callable(chat_formatter_to_chat_completion_handler)):
+                raise ValueError("Unqualified native chat profile")
+            if not self.initialize():
+                raise ValueError("Native model unavailable")
+            response = self._native_chat_completion(
+                prompt, system_prompt, template_sha256,
+                Jinja2ChatFormatter, chat_formatter_to_chat_completion_handler,
+            )
+            content = response["choices"][0]["message"]["content"]
+            if not isinstance(content, str):
+                raise ValueError("Invalid native chat content")
+            return content.strip()
+        except Exception as exc:
+            _log_error_type("Qwen chat response generation failed", exc)
+            return "Error: Qwen chat response generation failed"
+
+    def _native_chat_completion(self, prompt, system_prompt, template_sha256, formatter_type, handler_factory):
+        """Keep rendering, capacity checking and the handler within one call."""
+        import hashlib
+        import math
+        template = self.llm.metadata.get("tokenizer.chat_template")
+        if (not isinstance(template, str) or not template
+                or hashlib.sha256(template.encode("utf-8")).hexdigest() != template_sha256):
+            raise ValueError("Unqualified native chat template")
+        context = self.llm.n_ctx()
+        if any(type(v) is not int or v <= 0 for v in (context, self.context_length, self.max_tokens)):
+            raise ValueError("Invalid native chat limits")
+        if (type(self.temperature) not in (int, float)
+                or not math.isfinite(self.temperature) or not 0 <= self.temperature <= 2):
+            raise ValueError("Invalid native chat temperature")
+        eos, bos = self.llm.token_eos(), self.llm.token_bos()
+        if type(eos) is not int or eos < 0 or type(bos) is not int:
+            raise ValueError("Invalid native chat token identifiers")
+        eos_text = self.llm.detokenize([eos], special=True).decode("utf-8")
+        bos_text = self.llm.detokenize([bos], special=True).decode("utf-8") if bos >= 0 else ""
+        if not eos_text:
+            raise ValueError("Missing native chat EOS")
+        messages = []
+        if system_prompt is not None:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+        formatter = formatter_type(template=template, eos_token=eos_text, bos_token=bos_text,
+                                   add_generation_prompt=True, stop_token_ids=[eos])
+        rendered = formatter(messages=messages, enable_thinking=False)
+        tokens = self.llm.tokenize(rendered.prompt.encode("utf-8"), add_bos=False, special=True)
+        if (rendered.added_special is not True or not isinstance(tokens, list) or not tokens
+                or any(type(t) is not int or t < 0 for t in tokens)
+                or len(tokens) + self.max_tokens > min(context, self.context_length)):
+            raise ValueError("Native chat prompt does not fit")
+        # A second Jinja render could differ (e.g. strftime_now); freeze this response.
+        handler = handler_factory(lambda **_kwargs: rendered)
+        return handler(llama=self.llm, messages=messages, max_tokens=self.max_tokens,
+                       temperature=self.temperature, stream=False, stop=["###"])
+
     def analyze_code_context(
         self,
         query: str,

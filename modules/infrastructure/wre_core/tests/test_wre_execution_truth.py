@@ -572,3 +572,293 @@ def test_react_clamps_untrusted_iteration_and_fidelity_inputs(monkeypatch):
     assert len(attempts) == 10
     assert result["success"] is False
     assert result["_react_metadata"]["max_iterations"] == 10
+
+
+# Portable caller wiring only: this fake factory is not a native formatter proof.
+_NATIVE_PROFILE_TEMPLATE = "synthetic qualified chat template"
+_NATIVE_SKILL = "# Skill\nReturn a proposal."
+_NATIVE_CONTEXT = {"x": 1, "proposal_mode": "native_chat"}
+_NATIVE_SYSTEM = "You are drafting a WRE proposal. Do not claim effects."
+_NATIVE_PROMPT = (
+    "Execute this skill step-by-step:\n\n# Skill\nReturn a proposal.\n\n"
+    'Input Context:\n{\n  "x": 1,\n  "proposal_mode": "native_chat"\n}\n\n'
+    "Draft a structured proposal. Do not claim that repository, shell, Git, "
+    "network, or external effects occurred."
+)
+
+
+def _native_profile():
+    import hashlib
+    return {"runtime_version": "0.3.20", "template_sha256": hashlib.sha256(
+        _NATIVE_PROFILE_TEMPLATE.encode("utf-8")).hexdigest()}
+
+
+@pytest.fixture
+def native_contract_collaborators(monkeypatch):
+    import sys
+    module = sys.modules[WREMasterOrchestrator.__module__]
+    calls = []
+    def collaborator(name):
+        def construct(*args, **kwargs):
+            calls.append(name)
+            return SimpleNamespace(set_thresholds=lambda *a, **k: calls.append("thresholds"))
+        return construct
+    for name in ("PatternMemory", "WSPValidator", "GemmaLibidoMonitor",
+                 "SQLitePatternMemory", "WRESkillsLoader", "SkillSelector"):
+        monkeypatch.setattr(module, name, collaborator(name), raising=False)
+    monkeypatch.setattr(module, "WRE_SKILLS_AVAILABLE", True)
+    monkeypatch.setattr(module, "SPRINT3_AVAILABLE", True)
+    monkeypatch.setattr(WREMasterOrchestrator, "_register_optional_workers",
+                        lambda self: calls.append("workers"))
+    for key, value in {"WRE_REACT_MODE": "0", "WRE_REACT_MAX_ITER": "3",
+                       "WRE_REACT_FIDELITY": "0.9", "WRE_TOT_SELECTION": "1",
+                       "WRE_TOT_MAX_BRANCHES": "5", "WRE_SKILL_SCAN_REQUIRED": "1",
+                       "WRE_SKILL_SCAN_ENFORCED": "1", "WRE_SKILL_SCAN_ALWAYS": "0",
+                       "WRE_SKILL_SCAN_TTL_SEC": "900", "WRE_SKILL_SCAN_MAX_SEVERITY": "medium",
+                       "WRE_PATTERN_MEMORY_DB": "must-not-open-synthetic.db"}.items():
+        monkeypatch.setenv(key, value)
+    return calls
+
+
+class _NativeContractModel:
+    def __init__(self):
+        self.metadata = {"tokenizer.chat_template": _NATIVE_PROFILE_TEMPLATE}
+        self.chat_handler, self.chat_format = object(), "unchanged-format"
+        self.raw, self.tokens, self.completions, self.selection_seen = [], [], [], []
+        self.count, self.capacity, self.outcome = 1536, 2048, "text"
+    def __call__(self, prompt, **kwargs):
+        self.raw.append((prompt, kwargs))
+        return {"choices": [{"text": "  raw proposal  "}]}
+    def n_ctx(self):
+        return self.capacity
+    def token_bos(self):
+        return 1
+    def token_eos(self):
+        return 2
+    def detokenize(self, tokens, special=False):
+        assert special is True
+        return b"<eos>" if tokens == [2] else b"<bos>"
+    def tokenize(self, text, add_bos=True, special=False):
+        self.tokens.append((text, add_bos, special))
+        return list(range(self.count))
+    def create_completion(self, **kwargs):
+        self.completions.append(kwargs)
+        self.selection_seen.append((self.chat_handler, self.chat_format,
+                                    "create_completion" in self.__dict__))
+        if self.outcome == "raises":
+            raise RuntimeError("SYNTHETIC_NATIVE_SECRET")
+        if self.outcome == "malformed":
+            return {}
+        return {"choices": [{"text": "" if self.outcome == "empty" else "  chat proposal  "}]}
+
+
+def _install_native_contract_factory(monkeypatch, state):
+    import sys
+    from types import ModuleType
+    native = ModuleType("llama_cpp")
+    native.__path__, native.__version__ = [], "0.3.20"
+    def forbidden(*args, **kwargs):
+        state.forbidden.append("native-constructor")
+        raise AssertionError("native constructor forbidden")
+    native.Llama = forbidden
+    formats = ModuleType("llama_cpp.llama_chat_format")
+    class Formatter:
+        def __init__(self, **kwargs):
+            state.formatter_init.append(kwargs)
+        def __call__(self, **kwargs):
+            state.renders.append(kwargs)
+            return SimpleNamespace(prompt="fixed synthetic rendered prompt", added_special=True,
+                                   stop="<eos>", stopping_criteria=None)
+    def factory(formatter):
+        state.factories.append(formatter)
+        def handler(*, llama, messages, **kwargs):
+            state.handlers.append((messages, dict(kwargs)))
+            rendered = formatter(messages=messages)
+            tokens = llama.tokenize(rendered.prompt.encode(), add_bos=not rendered.added_special,
+                                    special=True)
+            completion = llama.create_completion(prompt=tokens, **{
+                **kwargs, "stop": list(kwargs["stop"]) + [rendered.stop]})
+            return {"choices": [{"message": {"content": completion["choices"][0]["text"]}}]}
+        return handler
+    formats.Jinja2ChatFormatter = Formatter
+    formats.chat_formatter_to_chat_completion_handler = factory
+    monkeypatch.setitem(sys.modules, "llama_cpp", native)
+    monkeypatch.setitem(sys.modules, "llama_cpp.llama_chat_format", formats)
+    return native, formats
+
+
+@pytest.fixture
+def native_contract_boundary(monkeypatch, native_contract_collaborators):
+    from holo_index.qwen_advisor import llm_engine
+    from modules.infrastructure.shared_utilities import local_model_selection
+    state = SimpleNamespace(model=_NativeContractModel(), init=[], resolved=[], forbidden=[],
+                            formatter_init=[], renders=[], factories=[], handlers=[], init_ok=True)
+    def initialize(engine):
+        state.init.append(engine)
+        engine.llm, engine._initialized = state.model, state.init_ok
+        return state.init_ok
+    def resolve():
+        state.resolved.append(True)
+        return Path("synthetic-code.gguf")
+    monkeypatch.setattr(llm_engine.QwenInferenceEngine, "initialize", initialize)
+    monkeypatch.setattr(local_model_selection, "resolve_code_model_path", resolve)
+    state.native, state.formats = _install_native_contract_factory(monkeypatch, state)
+    yield state
+    assert state.forbidden == []
+
+
+def _native_contract_call(master):
+    return master._execute_skill_with_qwen(_NATIVE_SKILL, dict(_NATIVE_CONTEXT), "qwen")
+
+
+@pytest.mark.parametrize("selection", ["omitted", "explicit", "legacy"])
+def test_native_contract_raw_recording(selection, native_contract_boundary):
+    state = native_contract_boundary
+    if selection == "legacy":
+        master = object.__new__(WREMasterOrchestrator)
+    else:
+        master = WREMasterOrchestrator(**({} if selection == "omitted" else
+                                         {"local_proposal_mode": "raw"}))
+    result = _native_contract_call(master)
+    assert state.model.raw == [(_NATIVE_SYSTEM + "\n\n" + _NATIVE_PROMPT,
+                               {"max_tokens": 512, "temperature": 0.2,
+                                "stop": ["\n\n", "###"], "echo": False})]
+    assert len(state.init) == 2 and len(state.resolved) == 1
+    assert state.handlers == [] and state.model.completions == []
+    assert result["proposal"] == "raw proposal"
+    assert result["success"] is False and result["_effect_evidence"] is False
+
+
+_NATIVE_INVALID_CONFIGS = [
+    ("mode-unknown", "unknown", None), ("mode-bool", True, None),
+    ("mode-list", [], None), ("raw-profile", "raw", {}),
+    ("profile-missing", "native_chat", None), ("profile-list", "native_chat", []),
+    ("runtime-missing", "native_chat", {"template_sha256": "a" * 64}),
+    ("digest-missing", "native_chat", {"runtime_version": "0.3.20"}),
+    ("extra-field", "native_chat", {"runtime_version": "0.3.20", "template_sha256": "a" * 64, "x": 1}),
+    ("runtime-type", "native_chat", {"runtime_version": 3, "template_sha256": "a" * 64}),
+    ("runtime-unqualified", "native_chat", {"runtime_version": "0.2.72", "template_sha256": "a" * 64}),
+    ("digest-type", "native_chat", {"runtime_version": "0.3.20", "template_sha256": 1}),
+    ("digest-short", "native_chat", {"runtime_version": "0.3.20", "template_sha256": "a" * 63}),
+    ("digest-uppercase", "native_chat", {"runtime_version": "0.3.20", "template_sha256": "A" * 64}),
+    ("digest-nonhex", "native_chat", {"runtime_version": "0.3.20", "template_sha256": "g" * 64}),
+]
+
+
+@pytest.mark.parametrize("case,mode,profile", _NATIVE_INVALID_CONFIGS,
+                         ids=[row[0] for row in _NATIVE_INVALID_CONFIGS])
+def test_native_contract_invalid_config_before_effects(
+        case, mode, profile, native_contract_boundary, native_contract_collaborators):
+    from modules.infrastructure.wre_core.src import local_skill_inference as adapter
+    state = native_contract_boundary
+    with pytest.raises(ValueError):
+        adapter.validate_local_proposal_config(mode, profile)
+    with pytest.raises(ValueError):
+        WREMasterOrchestrator(local_proposal_mode=mode, local_native_chat_profile=profile)
+    result = adapter.execute_local_skill_inference(
+        skill_content=_NATIVE_SKILL, input_context={}, agent="qwen",
+        proposal_mode=mode, native_chat_profile=profile)
+    assert result["error_code"] == "local_model_unavailable" and result["proposal"] == ""
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert native_contract_collaborators == []
+    assert state.resolved == [] and state.init == [] and state.model.completions == []
+
+
+def test_native_contract_profile_copy_and_trusted_forwarding(native_contract_boundary):
+    from modules.infrastructure.wre_core.src import local_skill_inference as adapter
+    profile = _native_profile()
+    copied = adapter.validate_local_proposal_config("native_chat", profile)
+    assert copied == profile and copied is not profile
+    assert adapter.validate_local_proposal_config("raw", None) is None
+    master = WREMasterOrchestrator(local_proposal_mode="native_chat", local_native_chat_profile=profile)
+    profile["template_sha256"] = "0" * 64
+    context = {**_NATIVE_CONTEXT, "native_chat_profile": profile}
+    result = master._execute_skill_with_qwen(_NATIVE_SKILL, context, "qwen")
+    assert result["proposal"] == "chat proposal"
+    assert len(native_contract_boundary.handlers) == 1
+    assert native_contract_boundary.model.raw == []
+
+
+_NATIVE_BRANCHES = [
+    ("fit", 1, 1), ("overflow", 1, 0), ("actual-context-smaller", 1, 0),
+    ("runtime-old", 0, 0), ("runtime-missing", 0, 0), ("capability-missing", 0, 0),
+    ("template-missing", 1, 0), ("template-mismatch", 1, 0), ("init-false", 1, 0),
+    ("completion-raises", 1, 1), ("response-empty", 1, 1), ("response-malformed", 1, 1),
+]
+
+
+def _configure_native_contract_branch(case, state, monkeypatch):
+    if case == "overflow": state.model.count = 1537
+    if case == "actual-context-smaller": state.model.capacity = 2047
+    if case == "runtime-old": state.native.__version__ = "0.2.72"
+    if case == "runtime-missing": monkeypatch.delattr(state.native, "__version__")
+    if case == "capability-missing":
+        monkeypatch.delattr(state.formats, "chat_formatter_to_chat_completion_handler")
+    if case == "template-missing": state.model.metadata = {}
+    if case == "template-mismatch": state.model.metadata["tokenizer.chat_template"] = "different"
+    if case == "init-false": state.init_ok = False
+    if case == "completion-raises": state.model.outcome = "raises"
+    if case == "response-empty": state.model.outcome = "empty"
+    if case == "response-malformed": state.model.outcome = "malformed"
+
+
+@pytest.mark.parametrize("case,init_count,completion_count", _NATIVE_BRANCHES,
+                         ids=[row[0] for row in _NATIVE_BRANCHES])
+def test_native_contract_branch_wiring(
+        case, init_count, completion_count, native_contract_boundary, monkeypatch, caplog):
+    state = native_contract_boundary
+    _configure_native_contract_branch(case, state, monkeypatch)
+    master = WREMasterOrchestrator(local_proposal_mode="native_chat",
+                                   local_native_chat_profile=_native_profile())
+    before = (state.model.chat_handler, state.model.chat_format,
+              state.model.create_completion.__func__, set(state.model.__dict__))
+    result = _native_contract_call(master)
+    assert len(state.init) == init_count and len(state.model.completions) == completion_count
+    assert state.model.raw == [] and len(state.resolved) == 1
+    assert state.model.selection_seen == [(before[0], before[1], False)] * completion_count
+    assert before == (state.model.chat_handler, state.model.chat_format,
+                      state.model.create_completion.__func__, set(state.model.__dict__))
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert "SYNTHETIC_NATIVE_SECRET" not in str(result) + caplog.text
+    if case != "fit":
+        assert result["error_code"] == "local_model_unavailable" and result["proposal"] == ""
+    else:
+        assert result["proposal"] == "chat proposal" and result["steps_completed"] == 0
+        assert result["error_code"] == "unverified_model_proposal"
+        assert state.renders == [{"messages": [{"role": "system", "content": _NATIVE_SYSTEM},
+                                {"role": "user", "content": _NATIVE_PROMPT}], "enable_thinking": False}]
+        assert state.model.tokens == [(b"fixed synthetic rendered prompt", False, True)] * 2
+        assert state.model.completions[0]["prompt"] == list(range(1536))
+        assert state.model.completions[0]["stop"] == ["###", "<eos>"]
+        assert state.handlers[0][1] == {"max_tokens": 512, "temperature": 0.2,
+                                         "stream": False, "stop": ["###"]}
+        assert state.formatter_init == [{"template": _NATIVE_PROFILE_TEMPLATE,
+                                        "eos_token": "<eos>", "bos_token": "<bos>",
+                                        "stop_token_ids": [2], "add_generation_prompt": True}]
+
+
+def test_native_contract_sequential_state_is_unchanged(native_contract_boundary):
+    state = native_contract_boundary
+    master = WREMasterOrchestrator(local_proposal_mode="native_chat",
+                                   local_native_chat_profile=_native_profile())
+    before = (state.model.chat_handler, state.model.chat_format,
+              state.model.create_completion.__func__, set(state.model.__dict__))
+    first, second = _native_contract_call(master), _native_contract_call(master)
+    assert first == second and first["proposal"] == "chat proposal"
+    assert len(state.model.completions) == 2 and len(state.init) == 2
+    assert state.model.selection_seen == [(before[0], before[1], False)] * 2
+    assert state.handlers[0] == state.handlers[1] and state.renders[0] == state.renders[1]
+    assert before == (state.model.chat_handler, state.model.chat_format,
+                      state.model.create_completion.__func__, set(state.model.__dict__))
+
+
+def test_native_contract_engine_failure_is_redacted(native_contract_boundary, caplog):
+    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
+    state = native_contract_boundary
+    state.model.outcome = "raises"
+    engine = QwenInferenceEngine(Path("synthetic-code.gguf"))
+    response = engine.generate_chat_response(_NATIVE_PROMPT, _NATIVE_SYSTEM, **_native_profile())
+    assert isinstance(response, str) and response.startswith("Error:")
+    assert "SYNTHETIC_NATIVE_SECRET" not in response + caplog.text
+    assert len(state.init) == 1 and len(state.model.completions) == 1
+    assert state.model.raw == []
