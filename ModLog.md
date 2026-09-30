@@ -1,3 +1,13 @@
+## 2026-09-30 — Frozen correspondence contract comparison
+
+- Separate evaluator authored26 new cases; separate verifier checked oracle and
+  results. Same74 suite: defective62pass/12fail, generated/reference74pass each;
+  exact frozen failure IDs, zero errors/skips, zero model/provider calls.
+- Preserve original48; append evaluated26 to existing CI test owner. No production
+  method change. Post-development validation, not pristine held-out/retained RSI.
+- WSP00/5/6/15/22/48/50/84/97: next 13/P1 = Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners.
+  Evidence `O:/Foundups-Agent-audits/20260930-rsi-contract-transfer/`; previous #1988 closed/main-verified.
+
 ## 2026-09-30 — Accepted artifact passed fresh-process replay
 
 - Exact accepted five-file artifact, existing runner and original48 case IDs

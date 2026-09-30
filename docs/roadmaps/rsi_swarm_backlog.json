@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.artifact_replay_20260930",
-    "base_commit": "6020b6e05105a646867da22fab285b3ed4dc63e8",
-    "selected_action": "Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner",
-    "status": "historical_development_reuse_verified_reobserve_after_closure",
+    "observation_path": "current_observation.contract_transfer_20260930",
+    "base_commit": "0c4d0e696e2ef4f6c06d3f84861961d407095f55",
+    "selected_action": "Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners",
+    "status": "contract_comparison_verified_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-contract-transfer\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.nonthinking_trial_20260930"
+    "previous_observation_path": "current_observation.artifact_replay_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16530,6 +16530,322 @@
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\final-accounting.json",
       "publication_status": "Separate exact-head/main and cleanup receipt required."
+    },
+    "contract_transfer_20260930": {
+      "source": "0c4d0e696e2ef4f6c06d3f84861961d407095f55",
+      "outcome": "FROZEN_POST_DEVELOPMENT_CONTRACT_COMPARISON_PASSED",
+      "execution_plane": "directly_supervised_local_qualification",
+      "measurements": {
+        "results": {
+          "baseline": {
+            "original": {
+              "total": 48,
+              "passed": 40,
+              "failed": 8
+            },
+            "new": {
+              "total": 26,
+              "passed": 22,
+              "failed": 4
+            },
+            "all": {
+              "tests": 74,
+              "failures": 12,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 62
+            },
+            "failed_case_names": [
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[missing-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[boolean-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[integer-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[float-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[list-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[mapping-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[bytes-observation]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[empty-evidence]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_transfer_opaque_watermark_domain[collision-tuple]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_transfer_opaque_watermark_domain[collision-complex]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_transfer_opaque_watermark_domain[collision-nan]",
+              "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_transfer_opaque_watermark_domain[collision-infinity]"
+            ],
+            "wall_seconds": 3.1870000001508743,
+            "source_stable": true,
+            "unexpected_denials": 0,
+            "sqlite_open_count": 544,
+            "sqlite_path_count": 58
+          },
+          "reference": {
+            "original": {
+              "total": 48,
+              "passed": 48,
+              "failed": 0
+            },
+            "new": {
+              "total": 26,
+              "passed": 26,
+              "failed": 0
+            },
+            "all": {
+              "tests": 74,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 74
+            },
+            "failed_case_names": [],
+            "wall_seconds": 2.547000000020489,
+            "source_stable": true,
+            "unexpected_denials": 0,
+            "sqlite_open_count": 568,
+            "sqlite_path_count": 58
+          },
+          "candidate": {
+            "original": {
+              "total": 48,
+              "passed": 48,
+              "failed": 0
+            },
+            "new": {
+              "total": 26,
+              "passed": 26,
+              "failed": 0
+            },
+            "all": {
+              "tests": 74,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "passed": 74
+            },
+            "failed_case_names": [],
+            "wall_seconds": 2.406999999890104,
+            "source_stable": true,
+            "unexpected_denials": 0,
+            "sqlite_open_count": 568,
+            "sqlite_path_count": 58
+          }
+        },
+        "distinct_cases": 74,
+        "new_distinct_cases": 26,
+        "test_processes": 3,
+        "model_calls": 0,
+        "provider_calls": 0,
+        "frozen_predictions_matched": true,
+        "classification": "post-development contract validation; candidate was visible",
+        "held_out_gain": null,
+        "retained_gain": null,
+        "production_implementation_changed": false
+      },
+      "fixture_bindings": {
+        "baseline": {
+          "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py": "0c6ad4ec1027ac1a05b3b201fffcd9754fd19af82ce76f9c658cab8c1fa84cd7",
+          "modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py": "981bc425d0825fb8b847d3b6b60e4676cd1586212c765eab77cb12d75b9459c1",
+          "modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py": "7f2d1b7dd19ddfbfff1a01614c5464973cb0c361c490d6d720c886c09504f0f0",
+          "modules/infrastructure/database/src/db_manager.py": "d6234f217af412106be88be4efadb1f56f181d1ae54144ad5e8044cfc377d61f",
+          "modules/infrastructure/database/src/module_db.py": "78a96f1b11f42c1bef9ad4598db61e4abc47b883a98fe2aedc4afd892bbd8241"
+        },
+        "candidate": {
+          "modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py": "981bc425d0825fb8b847d3b6b60e4676cd1586212c765eab77cb12d75b9459c1",
+          "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py": "3debd4e00d214074718560e4396104129a7dba1dfe102540fae61ce009dfbb4e",
+          "modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py": "7f2d1b7dd19ddfbfff1a01614c5464973cb0c361c490d6d720c886c09504f0f0",
+          "modules/infrastructure/database/src/db_manager.py": "d6234f217af412106be88be4efadb1f56f181d1ae54144ad5e8044cfc377d61f",
+          "modules/infrastructure/database/src/module_db.py": "78a96f1b11f42c1bef9ad4598db61e4abc47b883a98fe2aedc4afd892bbd8241"
+        },
+        "reference": {
+          "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py": "8f369f4e986cb7eea866868e80257af9da29d97659fa9f71dcb6a6fee5d8697c",
+          "modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py": "981bc425d0825fb8b847d3b6b60e4676cd1586212c765eab77cb12d75b9459c1",
+          "modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py": "7f2d1b7dd19ddfbfff1a01614c5464973cb0c361c490d6d720c886c09504f0f0",
+          "modules/infrastructure/database/src/db_manager.py": "d6234f217af412106be88be4efadb1f56f181d1ae54144ad5e8044cfc377d61f",
+          "modules/infrastructure/database/src/module_db.py": "78a96f1b11f42c1bef9ad4598db61e4abc47b883a98fe2aedc4afd892bbd8241"
+        }
+      },
+      "plan_sha256": "52153943f30d140926271a675204ed5f98c9c4d5bd19a19ff8a87f09d73abbe1",
+      "artifact_hashes": {
+        "entry.json": "f0d7ed20a95e0fb9740e7b986a96edce15b389d8a41ce211423fa92ff7c461be",
+        "manifest.json": "0e3c94bf84b2acd0ab74f5e836c75ea176ef0f1aa339d6524f001158b50b73c9",
+        "transfer-plan.json": "52153943f30d140926271a675204ed5f98c9c4d5bd19a19ff8a87f09d73abbe1",
+        "transfer_cases.py.txt": "78b6efcd06a87ae597dc5ca0297f793e709eeb98b88f69056f03c1994c5e1763",
+        "prepare_fixtures.py": "cfd56310c04dca8a697ed97aad7a8ec1334f61b368f43887c57952d6cce08832",
+        "execute_comparison.py": "521b7007b68381493870c778f21644fd0c01908fef333526d905ec1ecb93fec4",
+        "run_correspondence.py": "a052ee1fb47977f1a8d3f52db5546921d3dd2c84bb3568a3323761eadf1a2d04",
+        "execution-review.json": "13cf8a96009441dea856ef8d701bafa44cda80b45a09e37094ef33349d0c72d7",
+        "execution-started.json": "f30df0e725d5ec4874b0cfdfab455b7e753dfe318c3ebcbc3977ec2e6d0c0f2f",
+        "execution.json": "f4d6f13b95f421558c0b8676de86082c4e3e04ee06a4280a29306a5e688a6f43",
+        "comparison-summary.json": "fdce8d5b52f3c2e233e7a5a63e9d429d8216833253b20dad95e669ae655a024c",
+        "summarize_comparison.py": "1aca6b63384d1b18183fd8f599d187318487a4fc1d754b1c0976d8e26e9e8ebe",
+        "result-review.json": "6694fe7ee6881ef5161afa8971da8444817120122604a8fe33e0631558c780ae",
+        "next-action-source-review.json": "05cd58facad600830b5f86e77310e89107be6c4a328ac0701b121d254c74a6d7",
+        "test-retention.json": "5cedbe659b07c03bddf4a02667ad50269a28ba9bd47e754ef4a6270def20070c",
+        "registry-check.json": "1b4c677614dfd202e30d243f21fa16c088aa611073ff11603a2b0351e8cd8b93",
+        "holo-query.json": "547ddf50c598ffb04d2fafaf50fcca0b761ac9e6f816f9853bc9485f3761f35c",
+        "wsp00-gate.json": "071a66eebcf33efd8f142d2864659746beca15d686228c475025383d1f6c1bef",
+        "baseline/receipt.json": "3abdee9d7f655f49a6c83721a39ebc1a6c4260132b8424271249b2c819dee267",
+        "baseline/results.xml": "b221a3356f09668e550f9a5af99aa1c142c0ce6ae803fed0c8f0dd030fa60281",
+        "baseline/output.log": "a47383636a4fbb1f056c6e5a5310019b8f2d9c11dfcaae3a42430f6aad265aef",
+        "reference/receipt.json": "a535f5123640e956442f515dbd34020732ea33fd72d8bd548507aa431216c079",
+        "reference/results.xml": "a359c38ca332949de1a0b6660da0dd4e02bd54b78536338b46bd1bda7488744e",
+        "reference/output.log": "b99536e4c65ba545fe5223817c2947bf7851ba983fe7b1f7f9d59b7c57b4007c",
+        "candidate/receipt.json": "adb79b18fe63d1bfb431f1b022436a2aba9544ae2ef1cffe5fcde96966077eba",
+        "candidate/results.xml": "db23d01db42851d375dfd5052695efda0e7e50665df893fd9d67eb28acc44190",
+        "candidate/output.log": "5290bfc07990ed0422cedba8e24d6cfe53cacaeb548289480043e581973b73af",
+        "next-action-source-review-v2.json": "6b4ee1ad6b43cef4c17a9cfca0cd81d75b350e4a8f77f5b9db413145f72e2a31"
+      },
+      "prior_evidence_bindings": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\manifest.json": "708204333fbf5b8aa23f3569d89671ae8e14f5bd370a1b3729bd721686014f61",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\result-review.json": "7f5f5a786abbfe401fa118ac153adb215d460571e78f33d47ec816724d6c3b8a",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\final-accounting.json": "2058e91acd4eaecbc19b997d47e4cca2ebfd107f86caded2d6bbfeff9f7937b4",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\publication-closure.json": "98ce8ee95b5c3e34add68d4cd1449021ec635f7f11cb43c040423d6a3909e3bf",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\next-action-source-review.json": "a39c9c8258859dcfbcdffd20baf24f835d95b3869d02c5d4c9a3c346a42295bd",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe"
+      },
+      "signal_class": "execution_feedback",
+      "verification_independence": "Separate evaluator authored/froze suite; separate verifier reviewed oracle/execution/results; coordinator executed three processes. All had prior candidate visibility; no authenticated native evaluator evidence.",
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No accepted semantic coverage; exact known owners reused.",
+        "ordering": "Canonical WSP/current queue, source/interface/tests, exact prior evidence.",
+        "missing": "Semantic coverage and native admission absent; memory/README owner still absent.",
+        "staleness": "One governed query on changed main; no retry/reindex.",
+        "duplication": "No new runtime module, parser, controller or test family.",
+        "maintenance_route": "Existing R03 authority owner.",
+        "quality": "Governed Holo returned no accepted semantic coverage. Exact-path public contract, test helpers and source-bound prior owners supplied this narrow scope. Entry-time transfer evidence gap is closed; native authority and broader independent benefit remain missing.",
+        "missing_artifacts": [
+          "modules/communication/moltbot_bridge/requirements.txt",
+          "modules/infrastructure/wre_core/memory/README.md"
+        ],
+        "navigation": "No direct retained/correspondence NAVIGATION mapping; existing test owner/interface located directly. No relevant TODO/FIXME markers in scoped source/test leaves."
+      },
+      "limits": [
+        "Post-development contract validation; evaluator has seen candidate. Not pristine held-out evidence.",
+        "Existing reviewed Python effect guards; not an OS sandbox.",
+        "No candidate edits, regeneration, production repair or PatternMemory admission.",
+        "74 distinct case IDs, not222 unique cases. Original48 and new26 denominators remain separate.",
+        "Four additional rejected baseline cases on the new26; no new production repair or general competence claim.",
+        "New tests retained for ordinary regression; this is not PatternMemory admission or retained model improvement."
+      ],
+      "test_only_changes": true,
+      "production_implementation_changed": false,
+      "candidate_applied": false,
+      "native_wre_admission": false,
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "The WRE adapter constructs QwenInferenceEngine directly and calls its raw-completion generate_response method. The successful trial replaced that method, borrowed its already initialized Llama into LlamaCppBackend, installed a scoped native formatter with enable_thinking=False, used chat messages and a different stop policy, and changed the prompt suffix. A backend-only thinking flag cannot reach the actual WRE caller. Qualify an explicit opt-in caller contract before any reusable implementation or further capability trial; reuse the already completed seven formatter/handler controls rather than repeat them."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "next_rationale": "The WRE adapter constructs QwenInferenceEngine directly and calls its raw-completion generate_response method. The successful trial replaced that method, borrowed its already initialized Llama into LlamaCppBackend, installed a scoped native formatter with enable_thinking=False, used chat messages and a different stop policy, and changed the prompt suffix. A backend-only thinking flag cannot reach the actual WRE caller. Qualify an explicit opt-in caller contract before any reusable implementation or further capability trial; reuse the already completed seven formatter/handler controls rather than repeat them.",
+      "next_planning": {
+        "effort": "Smallest reusable next prerequisite in existing owners.",
+        "cost": "No model budget allocated by this comparison.",
+        "verification_burden": "Independent scope/contract/effect checks; keep proposal, acceptance and authority separate.",
+        "dependencies": [
+          "Refresh exact main, owner/peer overlap and source/toolchain bindings after current publication. Expected retained-test and documentation changes must be rebound, not misreported as production drift.",
+          "Freeze a finite prospective no-init matrix in existing test_wre_execution_truth.py, with native backend tests only if a shared backend seam is selected. The independent reviewer must approve the oracle and effects before execution.",
+          "Pin the caller-to-engine opt-in configuration explicitly. Omitted mode must preserve current raw completion, system/prompt composition, stops, kwargs, redaction and fail-closed proposal envelope.",
+          "For explicit native-chat selection, freeze separate system/user messages, existing selected model identity, context/output/CPU/GPU caps and explicit stop list. Bind existing native formatter/factory support; do not pass unsupported enable_thinking through Llama.create_chat_completion.",
+          "Require supported-template handling and deterministic rejection for unsupported/invalid configuration before completion. No silent fallback to raw completion or LM Studio; no model alias/default change.",
+          "Use inert engine/native instances with constructor, provider, resolver-HTTP and database sentinels. Check zero init/generation/provider/DB operations; successful text still returns success=false and _effect_evidence=false.",
+          "If a scoped handler approach is selected, qualify restoration on return and exception and prevent cross-call state leakage. If direct existing handler invocation avoids mutation, independently review that alternative before selecting it.",
+          "A passing no-init contract permits planning a bounded source implementation in existing owners only. Any actual inference, new-task capability evaluation or application requires a separate exact-script/budget review."
+        ],
+        "ownership": "Existing RSI lane; shared checkout, active FoundUps and Remote AutoPost protected."
+      },
+      "prior_closure": {
+        "pr": 1988,
+        "merge": "0c4d0e696e2ef4f6c06d3f84861961d407095f55",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-contract-transfer\\final-accounting.json",
+      "publication_status": "Exact-head PR/main and owned closure recorded separately.",
+      "next_source_review": "next-action-source-review-v2.json",
+      "superseded_metadata_receipt": "next-action-source-review.json preserved; v2 corrects13 Git blob IDs, with raw source hashes and findings unchanged."
     }
   }
 }
