@@ -1,52 +1,52 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `e6bc0cb3c`.** The existing local
-selection, optional resolver and public catalog contracts passed 18 offline
-checks: 17 dynamic checks with synthetic files/fake backend collaborators and
-one static AST check of the actual WRE call path. No production contract defect
-was demonstrated; no routing implementation change is selected.
+**Current qualification: 2026-09-30, source `2712e27dd`.** One separately reviewed
+trial used the exact previously qualified Qwen3.5-4B artifact and its native
+template/tokenizer, retaining the final framing trial's complete instruction,
+feedback, chat transport, stops, caps and acceptance. It returned only the
+non-code heading `Thinking Process:`. The original parser raised SyntaxError;
+independent review rejected the proposal. Nothing was applied. Budget closed.
 
-| Observation | Verified scope |
+| Current attempt | Observed result |
 |---|---|
-| Selection precedence and missing-path fallback | 9 synthetic-file checks |
-| Optional LM Studio alias / GGUF fallback | 5 mocked resolver checks |
-| Public identity and unknown capability | 3 typed catalog checks |
-| Actual WRE adapter → Qwen engine → Llama | 1 static AST check; no native load |
-| Real model / provider / live resolver calls | 0 / 0 / 0 |
-| Alternative artifacts qualified / candidate applications | 0 / 0 |
-| Semantic / held-out / retained gain | Not measured / not measured / not measured |
+| Dispatch / returned / rejected / retries | 1 / 1 / 1 / 0 |
+| Parent child-wall time | 18.61 s |
+| Native response input / output / total tokens | 672 / 4 / 676 |
+| Syntax-valid / accepted proposals | 0/1 / 0/1 |
+| Candidate applications / test runs / retained uses | 0 / 0 / 0 |
+| Finish reason / exact terminating stop | `stop` / unknown |
+| Held-out / retained benefit | Not measured / not measured |
 
-Selection chooses the first existing candidate; a missing explicit path can
-fall through. The optional resolver prefers its fixed LM Studio alias, then
-the supplied fallback file. The actual WRE worker uses the selected file
-directly and does not use that resolver. Public `local/code` cards deliberately
-redact private paths: two distinct artifacts can yield identical cards.
-AVAILABLE/CANDIDATE records existence; it does not prove task competence,
-promotion or loaded artifact identity. Capability fields remain unmeasured.
+Explicit selected and engine file identity, pinned native template, actual
+forwarded prompt and full 512-token output reservation inside 2048 context passed.
+Parent pre/post bindings and child cleanup passed without journal failure.
+This is one unseeded adaptive known-case comparison of model plus native
+template/tokenizer; timing and output differences are not causal quality gains.
+Historical 48-case development controls (40/8 baseline, 48/0 reference) were
+rehashed, not rerun. No model text was extracted or executed.
 
-**Next eligible layer: revalidate the previously qualified Qwen3.5-4B artifact
-and prepare one exact-file technical trial (13/P1; C2/I4/D4/Impact3).** Reuse its
-historical artifact/load evidence only if fresh model/runtime/source hashes
-match. Do not repeat a load-only sprint if identity is unchanged. Keep exact
-file selection local to the experiment; check the actual rendered template
-and token fit in the same process before generation. Preserve the original
-strict Python parser and 48 historical development criteria. Any future call
-needs a separate finite budget and independent exact-harness review. No model
-call is granted by these deterministic results. A filename or public role card
-cannot substitute for the exact artifact. Prior rejected code trials remain
-rejected; no generic prompt retry or acceptance relaxation is selected.
+**Next eligible layer: exact stop forwarding, then one paragraph-stop
+comparison (13/P1; C2/I4/D4/Impact3).** Existing completion can report `stop`
+for multiple termination paths, so this receipt does not prove which fired.
+First use the existing backend/handler with a no-initialization recording
+collaborator to prove the exact stop list forwarded. If qualified, separately
+freeze one trial removing only the double-newline stop. Keep `###`, native EOS,
+the exact model/template, messages, context/output caps and strict parser/48
+criteria. No simultaneous thinking-mode change, code extraction, extra feedback,
+new router or production-wide stop change. A new call requires its own reviewed
+finite budget; current allocation is exhausted.
 
-Holo retrieval remains `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness
-and an index gap. R03 exact-source maintenance remains 15/P1 blocked; no query
-side reindex or fresh semantic coverage is claimed. Native admission remains
+Prior 18 offline route/identity checks remain valid at unchanged source scope;
+they establish selection contracts, not worker competence. Holo remains
+`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness and an index gap.
+R03 maintenance is 15/P1 blocked; no query-side reindex. Native admission is
 18/P0 blocked. Installed llama-cpp 0.3.20 versus declared 0.2.72 is unreconciled.
-This is supervised development qualification, not native autonomous RSI.
 
-Progression remains accepted proposal → independent controls and rollback →
-later reuse/held-out benefit → admitted isolated AmIBot → two workers. Active
-FoundUps and Remote AutoPost remain protected. PR #1983 is closed/main-verified.
-Evidence: backlog `current_observation.code_route_qualification_20260930` and
-`O:/Foundups-Agent-audits/20260930-rsi-code-route-qualification/`.
+Progression: accepted proposal → independent controls/rollback → later reuse
+and held-out benefit → admitted isolated AmIBot → two workers. Active FoundUps
+and Remote AutoPost remain protected. PR #1984 is closed/main-verified.
+Evidence: backlog `current_observation.alternative_technical_trial_20260930`
+and `O:/Foundups-Agent-audits/20260930-rsi-alternative-technical-trial/`.
 
 ## Staged general-role decision cohort — 2026-09-29
 
