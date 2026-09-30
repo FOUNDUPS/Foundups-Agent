@@ -157,9 +157,11 @@ A human-friendly internal disambiguation alias may exist in live/private state w
 
 ## Sent-first reconciliation
 
-Before claiming that a message is unanswered, an ask is unsent, or a draft is pending:
+**Assume-Sent invariant:** every proposed outbound must begin from the presumption that it may already have crossed the provider boundary. A Gmail draft, Drive manuscript, CRM row, queue label, Moshpit entry, or prior session statement is never proof that the message is unsent.
 
-1. Search relevant Sent with overlap.
+Before claiming that a message is unanswered, an ask is unsent, a draft is pending, or before any send-capable action:
+
+1. Search relevant Gmail Sent with overlap. Use the exact recipient route(s) plus thread/message identifiers when known, and corroborate with subject/body/attachment markers rather than a single broad keyword.
 2. Read exact candidates and their full threads.
 3. Compare newly authored text, attachments, and recipient coverage — not subjects alone.
 4. Distinguish:
@@ -168,9 +170,12 @@ Before claiming that a message is unanswered, an ask is unsent, or a draft is pe
    - `PARTIAL_RECIPIENT_COVERAGE`
    - `NO_SENT_MATCH_IN_CHECKED_SCOPE`
    - `UNKNOWN`
-5. A surviving newer draft is distinct from an earlier successful send.
-6. Missing Moshpit receipt after a verified send is a logging repair, not permission to resend.
-7. Incomplete pagination / ambiguous evidence means HOLD.
+5. Only a complete `NO_SENT_MATCH_IN_CHECKED_SCOPE` result permits progression toward a new provider send. `UNKNOWN`, incomplete pagination, ambiguous matches, or an unsearched exact recipient means HOLD / RECONCILE.
+6. Immediately before every send-capable action, repeat the Sent check even when it was already performed earlier in the same session. A newly provider-sent event invalidates the prior capsule/preflight.
+7. If any matching provider-Sent event already covers the ask or recipient scope, do not resend. Reconcile Gmail -> Email Log -> Contacts/Action Queue -> Moshpit instead.
+8. A surviving newer draft is distinct from an earlier successful send only when its unsent delta is proven after the Sent comparison.
+9. Missing Moshpit receipt after a verified send is a logging repair, not permission to resend.
+10. Provider-Sent integrity incidents still count as Sent for duplicate and follow-up suppression.
 
 ## Correspondence State Capsule — native continuity first, provider delta second
 
