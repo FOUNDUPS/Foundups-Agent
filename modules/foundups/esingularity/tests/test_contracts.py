@@ -140,6 +140,10 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "not another Moshpit or another contact database" in correspondence_text
     assert "reddog_correspondence_state/SKILLz.md" in correspondence_text
     assert "native correspondence store is the durable M2M continuity layer" in correspondence_text
+    assert "**Assume-Sent invariant:**" in correspondence_text
+    assert "Only a complete `NO_SENT_MATCH_IN_CHECKED_SCOPE` result permits progression" in correspondence_text
+    assert "repeat the Sent check even when it was already performed earlier in the same session" in correspondence_text
+    assert "Provider-Sent integrity incidents still count as Sent for duplicate and follow-up suppression." in correspondence_text
 
     reddog_text = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
     assert "Provider systems remain transaction truth." in reddog_text
