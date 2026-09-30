@@ -84,7 +84,7 @@ jobs:
           TMP: ${{ runner.temp }}
           TEMP: ${{ runner.temp }}
         run: |
-          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+          python -B -m pytest --tb=short -c /dev/null --noconftest \
             -o pythonpath=. -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/proposal-caller-pytest" -v \
             modules/infrastructure/wre_core/tests/test_wre_execution_truth.py
