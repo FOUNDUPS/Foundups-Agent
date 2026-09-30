@@ -31,6 +31,7 @@ Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizi
 - Sizing basis: add capacity only after customer demand and power/fiber/site conditions justify it.
 - BESS-in-gym, fiber, building reuse and interconnection remain concepts requiring engineering and operator confirmation.
 - Status: pre-feasibility.
+- Official asset evidence: Fukui City's current closed-school reuse page (updated 2026-09-15) lists 旧下宇坂小学校 and publishes the campus/site plan plus school/gym/pool-management floor plans. Treat these as feasibility basemaps, not final engineering/design drawings: https://www.city.fukui.lg.jp/kyoiku/school/school/haiko-rikatsuyou.html
 
 ## Site 3 — 旧羽生小学校 / Former Hanyu Elementary School
 
@@ -42,6 +43,7 @@ Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizi
 - Sizing basis: customer/service demand -> revenue/resource demand -> GPU/CPU/storage/network requirements -> IT kW -> facility kW -> compare with utility-confirmed capacity.
 - Required next evidence: Hokuriku Electric Power Transmission & Distribution connection response; two-route carrier/fiber study; building/MEP/structural, cooling/water, fire, seismic, flood/landslide, geotechnical, acoustic and access studies; bankable customer/offtake evidence.
 - Status: pre-feasibility. Priority is conditional and must be revised if the formal grid/fiber/site evidence does not support it.
+- Official asset evidence: the same current Fukui City reuse page lists 旧羽生小学校 and publishes the combined campus/floor-plan set for the school/gym/pool-management buildings. Treat it as feasibility evidence only; it does not establish grid, fiber, legal-use, retrofit or permitting suitability: https://www.city.fukui.lg.jp/kyoiku/school/school/haiko-rikatsuyou.html
 
 ## Demand-led financial-model contract
 
@@ -88,6 +90,16 @@ Sukatto needs a separately designated PPP/PFI receiving route; PFI Act Article 6
 is an option pending City determination. Source:
 https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html (checked 2026-09-29 JST).
 The minimum physical first phase still needs a lawful whole-property use plan.
+
+## FY2026 school asset-proposal procedure — verified 2026-10-01
+
+- Current official source: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html (last updated 2026-09-15).
+- Listed properties are **旧下宇坂小学校** and **旧羽生小学校**. Sukatto is not in this call.
+- Prior consultation is mandatory. The City states a **2026-11-30** cutoff for prior consultation/site survey and a **2026-12-15** proposal-document deadline.
+- The current official page links the City form bundle. The official Word artifact remains the submission master; do not recreate a look-alike.
+- The singular/property-specific filing structure still does **not** prove that one filing can cover both schools. Preserve the open gate: obtain written City confirmation of the required filing unit.
+- Utility/carrier inquiries are feasibility evidence and annex material, not separate City asset-proposal properties.
+- Keep this `ASSET_PROPOSAL` lane separate from Sukatto's `PPP_PFI` lane.
 
 The portfolio self-funding test in FIN and `run_portfolio_model()` is a hypothesis,
 not a guarantee that a first data center pays for all assets. Current output:
