@@ -1,38 +1,52 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-WSP97 source reconciliation found that `local_skill_inference` already marks model
-text unverified and WRE excludes it from successful outcomes. No production
-consumer of the correspondence evaluation envelope was found. Preserve those
-boundaries; do not add a universal schema to make the failed cohort acceptable.
+**Current qualification: 2026-09-30, source `3574efc4e`.** Build and test the
+smallest supervised loop before adding platform breadth or worker count.
+The existing code-role WRE proposal adapter was given one historical method
+repair. Main already contains that repair in PR1969; this is a development
+rehearsal, not newly outstanding work or a held-out benchmark.
 
-The existing correspondence refresh check did have a concrete defect: converting
-observations to strings could equate `None`, booleans, numbers or containers with
-opaque cached tokens; two empty tokens also appeared fresh. C2/I4/D4/Impact3=13/P1
-selected the repair. It now requires nonempty string evidence and exact equality
-after the existing state/integrity/freshness checks. Literal strings such as
-`"None"` and whitespace-containing opaque tokens retain their exact semantics.
+| Frozen observation | Result |
+|---|---|
+| Historical version / current reference | 40 passed,8 failed /48 passed |
+| Unique unchanged cases / total control observations | 48 /96 |
+| Worker dispatches / returned proposals / timeouts / retries | 1 /0 /1 /0 |
+| Bounded child wall time | 90.109seconds |
+| Candidate tests / rollback control / later artifact reuse | Not reached |
+| Native load/generation stage, tokens, quality and retained gain | Unknown |
 
-Frozen actual-leaf/SQLite regression: **baseline 40 passed/8 failed; candidate 48/48
-passed**, with identical case IDs/test bytes and zero errors/skips. All29 prior
-cases remain. Local package initializers are isolated; this does not test full
-startup or provider delivery. Independent replay, hosted checks, publication and
-owned-lane closure are separate receipts in the canonical backlog entry
-`current_observation.correspondence_watermark_20260929`.
+The existing bounded child owner raised TimeoutExpired; source, runtime and model
+postchecks passed. No proposal bytes were returned, so this is an execution-time
+failure, not a semantic score of zero. No candidate was applied, tested, promoted
+or retained. Frozen controls and independent artifact review remain valid.
+The local adapter preserves proposal quarantine; no new consumer or schema was
+created. This trial dispatched the real local inference path under direct
+supervision; its native phase is unknown. It was not native WRE/OpenClaw/Hermes
+dispatch. Python audit guards and a process-tree guard
+do not establish OS memory/network isolation. Installed llama-cpp0.3.20 differs
+from declared0.2.72; no runtime update was performed.
 
-**Next eligible layer: one technical RSI canary qualification (15/P1;
-C3/I4/D4/Impact4).** Reuse the existing proposal-only worker, coordinator and
-evaluation owners. Select one real reversible technical task, freeze independent
-baseline/candidate checks and scope, then qualify its bounded call and rollback.
-After acceptance, verify that a later invocation actually uses the retained
-candidate under unchanged criteria. No model call or native execution authority
-is granted by this plan. `WREAutoResearcher` remains dry-run-only.
+**Next eligible layer: phase-observable local worker qualification (13/P1;
+C2/I4/D4/Impact3).** First separate model loading from generation with a bounded
+no-generation preflight using existing owners. Then freeze any measured generation
+budget or smaller-worker comparison. Preserve the original timeout and48-case
+criteria; do not tune acceptance, retry the exhausted budget, or create another
+orchestrator. This plan itself admits no additional inference or native work.
 
-Broad Gmail/LinkedIn decision mastery is not a universal prerequisite for this
-separately scoped technical canary. Their existing failed decisions remain
-rejected. Native OpenClaw/Hermes admission, independent held-out benefit and
-multi-generation retention are still unproven. An isolated AmIBot ticket follows
-those gates; active eSingularity/YUMORI and Remote-owned AutoPost remain protected.
-Re-observe current main and ownership after closure before selecting execution.
+After a candidate returns: independent scope review → unchanged tests → explicit
+rejection/rollback control → fresh-process artifact reuse. Historical artifact
+reuse alone is not production retention or generalized improvement. Held-out
+benefit and an admitted worker still precede isolated AmIBot and scaling.
+Broad Gmail/LinkedIn mastery is not a prerequisite for this separate trial;
+their rejected1/12 general-role and0/12 coder results remain unchanged.
+Active eSingularity/YUMORI and separately owned AutoPost remain protected.
+
+PR1969's watermark fix is merged at `a5223d568`; exact main CI36532124589 and
+CodeQL36532123898 passed, and its owned lane is closed. Today's commands,
+identities, independent review, limits and next queue are in
+`docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.technical_canary_20260930`. Its publication and cleanup
+remain separate receipts. Re-observe after closure before the next selection.
 
 ## Staged general-role decision cohort — 2026-09-29
 

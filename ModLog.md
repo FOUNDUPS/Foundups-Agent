@@ -1,3 +1,18 @@
+## 2026-09-30 — Bounded technical RSI rehearsal: controlled timeout
+
+- Reused existing local_skill_inference/code-role Qwen and bounded child owner
+  against a historical PR1969 method; no production source or new module changed.
+- Frozen actual-leaf SQLite controls:40pass/8fail baseline,48pass reference,
+  same48 IDs/test bytes. Independent artifact review confirmed the controls.
+- One90second call timed out at90.109seconds with no proposal. Candidate testing,
+  rollback and reuse not reached; phase/tokens/quality/retained gain remain unknown.
+  No retry or promotion. Source/runtime/model postchecks passed.
+- WSP00/15/22/48/50/84/97/99: selected15/P1 rehearsal; re-scored next13/P1
+  phase-observable no-generation preflight. Existing canonical roadmap/dispatch/
+  backlog synchronized. Publication/CI/cleanup are separate exact-head receipts.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-technical-canary-qualification/`;
+  backlog `current_observation.technical_canary_20260930`.
+
 ## 2026-09-29: Reject missing provider freshness evidence
 
 - WSP00/15/22/50/78/84/97; C2/I4/D4/Impact3=13/P1. Source trace reconciles the prior proposal-consumer hypothesis: WRE already quarantines local text; no production correspondence proposal consumer found.

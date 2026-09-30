@@ -1881,94 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.correspondence_watermark_20260929",
-    "base_commit": "6103615e26dc1c4a0309b32139b27b83fe42f411",
-    "selected_action": "Qualify one bounded technical RSI canary through existing proposal-only worker and coordinator-owned validation; freeze task-specific success, rollback and later-use checks before any model call",
-    "status": "watermark_repaired_reobserve_after_publication",
+    "observation_path": "current_observation.technical_canary_20260930",
+    "base_commit": "3574efc4e80d0dd6c33abfa50975c6dcff0204ab",
+    "selected_action": "Qualify model-load and generation phase observations for the existing bounded local proposal path before selecting a measured timeout or smaller worker; one no-generation preflight first",
+    "status": "controlled_failure_no_candidate_reobserve_after_closure",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
-      "impact": 4,
-      "total": 15,
+      "impact": 3,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "historical_inherited_checkpoint": {
-      "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-      "observation_path": "current_observation.operational_general_canary_20260929",
-      "base_commit": "d8263ecf8b6cd3d72244177bde86d292875d106f",
-      "selected_action": "Complete original twelve-case general-model coverage with eleven remaining cases, reusing the compatible frozen G01 result",
-      "status": "single_case_checkpoint_reobserve_before_remaining_eleven",
-      "wsp15": {
-        "complexity": 2,
-        "importance": 4,
-        "deferability": 4,
-        "impact": 3,
-        "total": 13,
-        "priority": "P1"
-      },
-      "dispatchable": false,
-      "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-json-canary\\final-accounting.json",
-      "requires_fresh_reobservation_after_closure": true,
-      "historical_inherited_checkpoint": {
-        "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-        "observation_path": "current_observation.operational_general_preflight_20260929",
-        "base_commit": "4ba9ddd1a72b5ba055674e4ef462ef12e90fb1a7",
-        "selected_action": "Qualify the existing general-model chat template and JSON decoder with one frozen canary before another semantic matrix",
-        "status": "compatibility_checkpoint_reobserve_before_decoder_canary",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 4,
-          "deferability": 4,
-          "impact": 3,
-          "total": 13,
-          "priority": "P1"
-        },
-        "dispatchable": false,
-        "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-general-role-preflight\\final-accounting.json",
-        "requires_fresh_reobservation_after_closure": true,
-        "historical_inherited_checkpoint": {
-          "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-          "observation_path": "current_observation.operational_matrix_20260929",
-          "base_commit": "08ebfff05e500ba68bd10bfc53bb6b2308760628",
-          "selected_action": "Qualify the existing general-role local model for one fixed operational decision comparison before changing the WRE adapter",
-          "status": "diagnostic_checkpoint_reobserve_before_next_layer",
-          "wsp15": {
-            "complexity": 2,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 3,
-            "total": 13,
-            "priority": "P1"
-          },
-          "dispatchable": false,
-          "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-decision-matrix\\final-accounting.json",
-          "requires_fresh_reobservation_after_closure": true,
-          "historical_inherited_checkpoint": {
-            "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-            "observation_path": "current_observation.operational_first_loop_20260929",
-            "base_commit": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
-            "selected_action": "Qualify the operational decision contract with fixed synthetic controls",
-            "selected_component": "Frozen full-matrix decision baseline and semantic acceptance in existing owners",
-            "status": "bounded_development_experiment_complete_reobserve_before_wiring",
-            "wsp15": {
-              "complexity": 3,
-              "importance": 4,
-              "deferability": 3,
-              "impact": 4,
-              "total": 14,
-              "priority": "P1"
-            },
-            "dispatchable": false,
-            "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-first-loop\\final-accounting.json",
-            "requires_fresh_reobservation_after_closure": true
-          }
-        }
-      }
-    }
+    "previous_observation_path": "current_observation.correspondence_watermark_20260929"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -13697,6 +13625,181 @@
         "held_out_gain": null
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260929-rsi-correspondence-boundary\\final-accounting.json"
+    },
+    "technical_canary_20260930": {
+      "source_head": "3574efc4e80d0dd6c33abfa50975c6dcff0204ab",
+      "classification": "historical_development_repair_rehearsal",
+      "selection": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "historical_base": "6103615e26dc1c4a0309b32139b27b83fe42f411",
+      "historical_repair_pr": 1969,
+      "outcome": "CONTROLLED_FAILURE_TIMEOUT_NO_PROPOSAL",
+      "evidence_root": "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification",
+      "measurements": {
+        "child_dispatches": 1,
+        "returned_proposals": 0,
+        "timeouts": 1,
+        "retries": 0,
+        "native_loads": null,
+        "native_generations": null,
+        "prompt_tokens": null,
+        "output_tokens": null,
+        "worker_quality": null,
+        "candidate_tests": null,
+        "rollback_control": null,
+        "retained_replay": null,
+        "child_wall_seconds": 90.10900000017136,
+        "baseline": {
+          "tests": 48,
+          "failures": 8,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 40
+        },
+        "reference": {
+          "tests": 48,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 48
+        },
+        "unique_development_cases": 48,
+        "case_observations": 96,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "provider_dispatches": 0,
+        "total_compute_cost": null,
+        "coordinator_and_reviewer_usage": null
+      },
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334"
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "bytes": 4683073536
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "artifact_hashes": {
+        "manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe",
+        "acceptance-review.json": "b5b157fbfe5a5a20513d88428a2328d602042f5b974080a4948311de88f28b19",
+        "execution-review.json": "c65179ea4b3970c0469ec5f92afc45b05833fd24b714e70d69b7c4df7ed78409",
+        "candidate-review.json": "8c5e612c6f4c2aaeef400c9025931814e55d6c42b629a10bbb697d499e2b2e2d",
+        "canary.receipt.json": "79b4f59949b00ba227ba7206e1b456bc2abd78fc8032be8a2d0709737779ca08",
+        "baseline/receipt.json": "538d383d1b9b47cdeb809261a46c7d3db6385df33f0106c453e63e8c8b2c2e58",
+        "reference/receipt.json": "5618228cb772b57e7ca423dd6e2d5cd69c2704918f0f5e3e910ab3a68d43cc97"
+      },
+      "commands": [
+        "python.exe -I -B run_correspondence.py baseline baseline",
+        "python.exe -I -B run_correspondence.py reference reference",
+        "python.exe -I -B run_canary.py"
+      ],
+      "validation_scope": "Existing real leaves/SQLite with isolated package initializers; separate independent artifact review. Historical controls, no candidate evaluation; no OS sandbox.",
+      "code_changes": false,
+      "promotion": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "next_action": "Qualify model-load and generation phase observations for the existing bounded local proposal path before selecting a measured timeout or smaller worker; one no-generation preflight first",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            4,
+            5
+          ],
+          "total": 18,
+          "priority": "P0",
+          "eligible": false,
+          "state": "blocked",
+          "wsp97": "Inherited admission and effect-use lease unresolved; direct supervised trial does not supply authority."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            3,
+            4
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "candidate_rejected",
+          "wsp97": "Preserve1/12 general and0/12 coder development results; separate from technical canary."
+        },
+        {
+          "task": "Qualify model-load and generation phase observations for the existing bounded local proposal path before selecting a measured timeout or smaller worker; one no-generation preflight first",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": true,
+          "state": "qualification_only",
+          "wsp97": "New observed90s timeout has no phase evidence. Reuse existing process/model owners; do not enlarge budget blindly or add orchestrator."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "No returned candidate; rollback and retained replay not reached. Historical controls are not held-out improvement."
+        },
+        {
+          "task": "Isolated AmIBot build ticket",
+          "dimensions": [
+            3,
+            4,
+            2,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Require qualified worker and admitted execution path. Preserve activeFoundUps and Remote-owned AutoPost."
+        }
+      ],
+      "prior_closure": {
+        "pr": 1969,
+        "merge": "a5223d568ac5506f1caa989d4e95e27a4c11425b",
+        "main_ci": 36532124589,
+        "main_codeql": 36532123898,
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\final-accounting.json",
+      "publication_status": "pending_exact_head_checks_review_and_main_readback"
     }
   }
 }
