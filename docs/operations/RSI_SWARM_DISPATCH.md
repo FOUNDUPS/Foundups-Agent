@@ -1,25 +1,24 @@
 ## Current bounded layer — 2026-09-30
 
-The single chat qualification returned in 36.0 seconds with native usage of
-427 input / 57 output tokens. The original parser rejected a Markdown fence;
-independent review also rejected suppressed load errors and missing required
-logic. One dispatch, one rejected return, zero retries, zero candidate tests,
-zero applications and zero retained uses. Parent identity checks passed; child
-close was observed. Its model-call budget is closed.
+One verifier-informed repair through existing input_context returned in 44.906 s
+(636 input / 83 output tokens). Original instruction/model/chat/stops/criteria
+were unchanged. The original parser rejected Markdown fences; independent
+review also found missing token checks. No candidate application, tests,
+retention or native dispatch. The single-call budget is closed.
 
-Next 13/P1: prepare one verifier-informed repair ticket through existing
-`input_context`. Carry exact rejection evidence; inspect the existing stop
-policy and full token fit before any separately reviewed follow-up. Preserve
-the original criteria and effect-evidence quarantine. No new module, model
-switch, blind prompt sweep or relaxed parser is indicated by this result.
+Next 14/P1 (C2/I4/D5/Impact3): qualify task-specific output-contract delivery at
+the existing local adapter before another model attempt. Begin with deterministic
+prompt/consumer checks and existing backend capability. Generic wrapper causality
+is unproven; no blind retry, fence stripping or relaxed criteria. Exact semantic
+Holo retrieval is separately blocked by authority-root/head mismatch (15/P1);
+route via existing governed R03 maintenance, never query-side reindex.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.chat_qualification_20260930`. The response
-reported `stop`; its exact terminating stop is unknown. Prior experiments and
-controls are historical, not new gain. Basic progression remains scoped
-proposal → independent tests/rollback → later reuse/held-out benefit → admitted
-isolated AmIBot → two workers. Native admission remains unresolved. PR #1976
-is merged/main-verified and closed; active FoundUps and Remote AutoPost remain
+and backlog `current_observation.verifier_feedback_20260930`. Original 48-case
+controls were not rerun; no held-out or retained gain. Basic progression remains
+accepted proposal → independent controls/rollback → later reuse/held-out benefit
+→ admitted isolated AmIBot → two workers. PR #1980 is closed and main-verified.
+Native admission remains unresolved; active FoundUps and Remote AutoPost remain
 protected. Earlier sections below are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29

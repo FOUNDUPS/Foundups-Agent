@@ -1,3 +1,20 @@
+## 2026-09-30 — Verifier feedback delivered; repair still rejected
+
+- One existing-adapter feedback-only call returned in 44.906 s; native usage
+  636 input / 83 output / 719 total tokens. Same instruction/model/chat/stops/
+  criteria, with exact prior rejection in input_context. Parent pins and close
+  passed. Zero retries or provider requests; the one-call budget is closed.
+- Original parser rejected fences. Independent review found missing observed
+  token and cached-empty checks. No application, candidate tests or retained
+  benefit. Removing the visible catch did not produce an accepted repair.
+- Eight unchanged MethodProbe checks passed. Historical 48-case controls were
+  hash-checked, not rerun. Holo authority mismatch recorded without reindexing.
+- WSP 00/15/22/48/50/84/97 selects existing output-contract qualification:
+  C2/I4/D5/Impact3 = 14/P1; deterministic checks before more model attempts.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-verifier-feedback/` and
+  backlog `current_observation.verifier_feedback_20260930`. Prior #1980 closed;
+  this sprint's exact publication, CI and own-lane cleanup recorded separately.
+
 ## 2026-09-30 — RSI chat transport qualified; repair proposal rejected
 
 - One existing-adapter/shared-backend chat call returned in 36.0 s; native

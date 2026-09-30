@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-30 current layer:** the existing local worker returned a chat-formatted proposal in 36.0 seconds (427 input / 57 output tokens). Independent review rejected the Markdown fence, suppressed load errors and missing required logic; nothing was applied. Next 13/P1: one verifier-informed repair ticket through existing `input_context`, preserving the original acceptance contract. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1976 is merged/main-verified; native admission and retained improvement remain unresolved.
+**2026-09-30 current layer:** one verifier-informed local repair returned in 44.906 seconds (636 input / 83 output tokens), but still failed the unchanged code-only and watermark contract. No candidate was applied. Next 14/P1: qualify task-specific output-contract delivery at the existing adapter before another model attempt. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1980 is merged/main-verified. Native admission and demonstrated retained improvement remain open.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
