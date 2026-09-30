@@ -1,3 +1,11 @@
+## 2026-09-30 — YUMORI Work orchestration + capital-network expansion
+
+- Added `yumori_work_orchestrator` on current main as the YUMORI domain adapter from 012/Red Dog planning conversation to live-state-reconciled work items, canonical WSP 15 ordering, explicit 012 physical/decision actions, and bounded ChatGPT Work / RedDog handoff.
+- Added the governed capital-network workflow: classify real capital type, establish current public data-center/AI-infrastructure evidence, cross against verified first-degree LinkedIn/Gmail relationships, use Work/browser for mutual-connection and user-visible Contact Info inspection, reverify current roles, and require correspondence-state/recipient preflight before outreach.
+- The canonical capital database remains the existing CONTACTS workbook. The new workflow explicitly reuses `Capital Targets`, `Capital People`, `LinkedIn`, master Contacts and correspondence state instead of creating a second investor spreadsheet.
+- Capital precedents, mutual connections and visible contact data do not imply investor interest, support or authorization to send.
+- Added thin agent projections and WRE discovery metadata.
+
 ## 2026-09-30 — Fukui GX policy integration and JHR correction
 
 - Re-verified the national GX Strategic Region taxonomy and corrected a stale April-only status: METI's 2026-09-11 first tranche formally recognizes Fukui Prefecture (Fukui City / Obama City) under **decarbonized-power utilization**, while Fukui is not in the separate **data-center cluster** class.
