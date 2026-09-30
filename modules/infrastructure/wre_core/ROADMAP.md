@@ -1,52 +1,44 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `2712e27dd`.** One separately reviewed
-trial used the exact previously qualified Qwen3.5-4B artifact and its native
-template/tokenizer, retaining the final framing trial's complete instruction,
-feedback, chat transport, stops, caps and acceptance. It returned only the
-non-code heading `Thinking Process:`. The original parser raised SyntaxError;
-independent review rejected the proposal. Nothing was applied. Budget closed.
+**Current qualification: 2026-09-30, source `b43bc0234`.** One reviewed
+local trial removed only the caller double-newline stop through the existing
+WRE proposal adapter and disposable chat procedure. It retained the exact
+Qwen3.5-4B artifact, native template/tokenizer, messages, temperature and caps.
+The unchanged strict parser rejected its non-code output. Nothing was applied.
 
 | Current attempt | Observed result |
 |---|---|
 | Dispatch / returned / rejected / retries | 1 / 1 / 1 / 0 |
-| Parent child-wall time | 18.61 s |
-| Native response input / output / total tokens | 672 / 4 / 676 |
+| Parent child-wall time | 85.06 s |
+| Native input / output / total tokens | 672 / 512 / 1184 |
+| Finish reason | `length` — output cap reached |
 | Syntax-valid / accepted proposals | 0/1 / 0/1 |
 | Candidate applications / test runs / retained uses | 0 / 0 / 0 |
-| Finish reason / exact terminating stop | `stop` / unknown |
 | Held-out / retained benefit | Not measured / not measured |
 
-Explicit selected and engine file identity, pinned native template, actual
-forwarded prompt and full 512-token output reservation inside 2048 context passed.
-Parent pre/post bindings and child cleanup passed without journal failure.
-This is one unseeded adaptive known-case comparison of model plus native
-template/tokenizer; timing and output differences are not causal quality gains.
-Historical 48-case development controls (40/8 baseline, 48/0 reference) were
-rehashed, not rerun. No model text was extracted or executed.
+Actual forwarded stops were `###` and native EOS. Full 512 output reservation
+inside 2048 context, exact token forwarding and parent/cleanup checks passed.
+The prior two-case no-model forwarding proof was reused at unchanged source;
+historical 48 development controls were rehashed, not rerun. The previous
+four-token rejection remains recorded. Longer output is not improved correctness;
+this unseeded adaptive known-case comparison does not establish causal gain.
 
-**Next eligible layer: exact stop forwarding, then one paragraph-stop
-comparison (13/P1; C2/I4/D4/Impact3).** Existing completion can report `stop`
-for multiple termination paths, so this receipt does not prove which fired.
-First use the existing backend/handler with a no-initialization recording
-collaborator to prove the exact stop list forwarded. If qualified, separately
-freeze one trial removing only the double-newline stop. Keep `###`, native EOS,
-the exact model/template, messages, context/output caps and strict parser/48
-criteria. No simultaneous thinking-mode change, code extraction, extra feedback,
-new router or production-wide stop change. A new call requires its own reviewed
-finite budget; current allocation is exhausted.
+**Next eligible layer: Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization (13/P1).**
+The paragraph-stop-only trial returned capped non-code prose and remains rejected. Installed native top-level chat API cannot accept enable_thinking, while its existing Jinja formatter and handler factory can forward the exact false template variable. A finite no-initialization rendering/forwarding qualification is the smallest eligible action before any separate proposal trial; it tests transport capability, not output competence.
+Current one-call budget is closed. No retry, cap increase, output extraction,
+evaluation relaxation, production stop-policy change or new model call is
+authorized by this planning record. Use the exact independent next-action
+review in the existing audit before preparing another bounded experiment.
 
-Prior 18 offline route/identity checks remain valid at unchanged source scope;
-they establish selection contracts, not worker competence. Holo remains
-`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness and an index gap.
-R03 maintenance is 15/P1 blocked; no query-side reindex. Native admission is
-18/P0 blocked. Installed llama-cpp 0.3.20 versus declared 0.2.72 is unreconciled.
+Native admission 18/P0 and governed Holo authority 15/P1 remain blocked. Holo
+reports UNKNOWN/index gap; no query-side reindex. Installed llama-cpp 0.3.20
+versus declared 0.2.72 remains unreconciled. Preserve active FoundUps and
+Remote AutoPost. PR #1985 is closed/main-verified.
 
 Progression: accepted proposal → independent controls/rollback → later reuse
-and held-out benefit → admitted isolated AmIBot → two workers. Active FoundUps
-and Remote AutoPost remain protected. PR #1984 is closed/main-verified.
-Evidence: backlog `current_observation.alternative_technical_trial_20260930`
-and `O:/Foundups-Agent-audits/20260930-rsi-alternative-technical-trial/`.
+and held-out benefit → admitted isolated AmIBot → two workers.
+Evidence: backlog `current_observation.paragraph_stop_trial_20260930` and
+`O:/Foundups-Agent-audits/20260930-rsi-paragraph-stop-trial/`.
 
 ## Staged general-role decision cohort — 2026-09-29
 
