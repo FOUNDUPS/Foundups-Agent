@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-30 current layer:** the first bounded technical repair rehearsal reached a controlled failure: historical controls reproduced40/48 and current reference48/48, but the local worker returned no proposal within90seconds. Nothing was applied or retained. Next13/P1: measure model-load versus generation phases before choosing a budget or smaller worker. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR1969 is merged/main-verified; native OpenClaw/Hermes admission and retained improvement remain unproven.
+**2026-09-30 current layer:** one bounded no-generation preflight passed: the existing worker initialized in 5.485 seconds, and its 414-token prompt plus 512-token output allowance fits the 2,048-token context. Generation, repair quality and retained benefit remain unproven. The prior 90-second timeout remains unexplained. Next 13/P1: bounded generation-phase qualification, then independent candidate validation. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR1973 is merged/main-verified; native OpenClaw/Hermes admission remains unresolved.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

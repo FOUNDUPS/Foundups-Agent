@@ -1,52 +1,59 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `3574efc4e`.** Build and test the
-smallest supervised loop before adding platform breadth or worker count.
-The existing code-role WRE proposal adapter was given one historical method
-repair. Main already contains that repair in PR1969; this is a development
-rehearsal, not newly outstanding work or a held-out benchmark.
+**Current qualification: 2026-09-30, source `0d90f6eac`.** Build and test
+one supervised worker loop before adding platform breadth or worker count.
+One bounded no-generation preflight reused the existing Qwen engine and process
+owner, the unchanged historical repair prompt, model and runtime bindings.
 
-| Frozen observation | Result |
+| Current preflight measurement | Result |
 |---|---|
-| Historical version / current reference | 40 passed,8 failed /48 passed |
-| Unique unchanged cases / total control observations | 48 /96 |
-| Worker dispatches / returned proposals / timeouts / retries | 1 /0 /1 /0 |
-| Bounded child wall time | 90.109seconds |
-| Candidate tests / rollback control / later artifact reuse | Not reached |
-| Native load/generation stage, tokens, quality and retained gain | Unknown |
+| Initialization / whole child wall time | 5.485 / 6.563 seconds |
+| Completion prompt / reserved output / context | 414 / 512 / 2,048 tokens |
+| Full reserved output fits | Yes; installed completion special-token rules checked |
+| Text generation calls / retries / provider requests | 0 / 0 / 0 |
+| Close phase / parent postchecks | Completed / passed |
+| Generation speed, repair quality, held-out and retained gain | Unknown |
 
-The existing bounded child owner raised TimeoutExpired; source, runtime and model
-postchecks passed. No proposal bytes were returned, so this is an execution-time
-failure, not a semantic score of zero. No candidate was applied, tested, promoted
-or retained. Frozen controls and independent artifact review remain valid.
-The local adapter preserves proposal quarantine; no new consumer or schema was
-created. This trial dispatched the real local inference path under direct
-supervision; its native phase is unknown. It was not native WRE/OpenClaw/Hermes
-dispatch. Python audit guards and a process-tree guard
-do not establish OS memory/network isolation. Installed llama-cpp0.3.20 differs
-from declared0.2.72; no runtime update was performed.
+Durations and phases are child instrumentation, checked against the returned
+JSON by an independent reviewer. Parent process/wall-time and exact source,
+runtime and model checks are separate evidence; no independent native-call
+attestation is claimed. Tokenization elapsed time fell below the observed timer
+resolution. This successful load does not explain the earlier timeout.
 
-**Next eligible layer: phase-observable local worker qualification (13/P1;
-C2/I4/D4/Impact3).** First separate model loading from generation with a bounded
-no-generation preflight using existing owners. Then freeze any measured generation
-budget or smaller-worker comparison. Preserve the original timeout and48-case
-criteria; do not tune acceptance, retry the exhausted budget, or create another
-orchestrator. This plan itself admits no additional inference or native work.
+**Prior rehearsal remains a controlled failure:** the historical PR1969 method
+controls produced 40 passed / 8 failed versus 48 passed on the current reference,
+with 48 unique unchanged development cases and 96 control observations. Its one
+worker call timed out at 90.109 seconds with no proposal or native-phase evidence.
+Those controls were not rerun here. No candidate was applied or retained.
+PR1973 recorded that result and is merged/main-verified at `7258f43cd` (main
+CI36669842363 and CodeQL36669842192 passed; owned lane closed).
 
-After a candidate returns: independent scope review → unchanged tests → explicit
-rejection/rollback control → fresh-process artifact reuse. Historical artifact
-reuse alone is not production retention or generalized improvement. Held-out
-benefit and an admitted worker still precede isolated AmIBot and scaling.
-Broad Gmail/LinkedIn mastery is not a prerequisite for this separate trial;
-their rejected1/12 general-role and0/12 coder results remain unchanged.
-Active eSingularity/YUMORI and separately owned AutoPost remain protected.
+**Next eligible layer: bounded generation-phase qualification (13/P1;
+C2/I4/D4/Impact3).** Use the same task and existing worker owner, with explicit
+phase evidence and a separately frozen time/token budget. Load time alone does
+not justify a larger generation budget or a model switch. Preserve the original
+timeout and 48-case criteria. This planning entry grants no further model call.
 
-PR1969's watermark fix is merged at `a5223d568`; exact main CI36532124589 and
-CodeQL36532123898 passed, and its owned lane is closed. Today's commands,
-identities, independent review, limits and next queue are in
-`docs/roadmaps/rsi_swarm_backlog.json` →
-`current_observation.technical_canary_20260930`. Its publication and cleanup
-remain separate receipts. Re-observe after closure before the next selection.
+The minimum path to basic RSI is:
+
+1. Return one scoped worker proposal and independently review it.
+2. Test it against the unchanged repair controls; exercise rejection/rollback.
+3. Reuse the verified artifact in a later invocation and measure held-out benefit.
+4. Run one admitted, isolated AmIBot ticket; then increase workers from 1 to 2.
+
+Historical repair reuse alone is not generalized improvement or production
+retention. Native WRE/OpenClaw/Hermes admission remains unresolved. The current
+trial is directly supervised; Python guards and a process-tree guard do not
+provide OS memory/network isolation. Installed llama-cpp0.3.20 still differs from
+declared0.2.72; this sprint updates no runtime. Broad Gmail/LinkedIn quality is
+not a prerequisite for this separate technical trial. Their rejected 1/12 general
+and 0/12 coder results remain unchanged. Active eSingularity/YUMORI and separately
+owned AutoPost remain protected.
+
+Exact receipts and the re-scored queue: `docs/roadmaps/rsi_swarm_backlog.json` →
+`current_observation.worker_preflight_20260930`. Historical evidence remains at
+`current_observation.technical_canary_20260930`. Publication/CI/cleanup are
+separate receipts; re-observe after closure before dispatch.
 
 ## Staged general-role decision cohort — 2026-09-29
 
