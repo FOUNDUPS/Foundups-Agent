@@ -38,7 +38,7 @@ const sources = [
   },
   {
     label: "経済産業省：GX戦略地域（第1弾）認定（2026年9月11日）",
-    href: "https://www.meti.go.jp/press/2026/09/20260911006.html",
+    href: "https://www.meti.go.jp/press/2026/09/20260911006/20260911006.html",
   },
   {
     label: "内閣官房GX実行推進室：GX戦略地域制度に係る検討状況",
