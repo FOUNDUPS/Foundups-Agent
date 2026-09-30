@@ -1,60 +1,61 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `9addd5751`.** One independently
-reviewed, phase-observed call through the existing WRE local proposal adapter
-reached a controlled timeout. The prompt, model, generation arguments, original
-48-case acceptance and 90-second/512-token limits were unchanged.
+**Current qualification: 2026-09-30, source `8e04a39f4`.** The existing local
+worker returned one proposal under a separately reviewed 180-second deadline.
+It repeated the prompt's warnings instead of producing a function. The original
+AST parser rejected it before execution. Basic autonomous RSI is still incomplete.
 
-| Current generation experiment | Observed result |
+| Current qualification | Observed result |
 |---|---|
-| Actual adapter dispatches / returned proposals / timeouts / retries | 1 / 0 / 1 / 0 |
-| First initialization completed | 5.359 seconds, returned true |
-| Second initialization invocation | Cached, returned true; not a second native load |
-| Prompt / maximum output / context | 414 / 512 / 2,048 tokens |
-| Generation wrapper | Entered; no return before timeout |
-| Parent child wall time | 90.094 seconds |
-| Prompt evaluation, sampling/first token, generated-token count | Unknown |
-| Candidate tests / rollback / later artifact reuse | Not reached |
+| Dispatches / returned proposals / timeouts | 2 / 1 / 1 |
+| Automatic retries / deliberate budget follow-ups | 0 / 1 |
+| First packet, 90s nominal deadline | Timeout; parent wall 91.515s |
+| First prompt evaluation / sample-return progress | 15.734s / at least 256 method returns |
+| Separate 180s packet | Returned; parent wall 119.797s |
+| Second prompt evaluation / generation | 13.188s / 113.359s |
+| Completed eval / sample method returns | 512 / 512; not usage-token counts |
+| Syntax-valid / accepted proposals | 0/1 /0/1 returned proposal |
+| Candidate execution / later reuse | Not reached |
 
-Seven diagnostic child phases and the parent TimeoutExpired narrow **this**
-attempt to a non-returning generation call after successful initialization.
-They do not identify the native subphase, authenticate token counts, or explain
-the earlier uninstrumented timeout. No proposal was returned; quality is unknown,
-not zero. No graceful-close phase was recorded. The existing process-tree
-timeout owner handled termination, and source/runtime/model/acceptance postchecks
-passed. Independent review accepted the diagnostic result, not a candidate.
+The first trace demonstrated progressing generation. Its64→256 sample-return
+interval justified a separately frozen 180-second qualification; it did not prove
+output-token throughput or guarantee completion. The follow-up retained the
+same model, prompt, settings, 512 output cap and 48-case criteria. Its child
+reported complete close and no method/cleanup journal error; parent binding
+checks passed. No additional generation is admitted by this completed sprint.
 
-The prior no-generation preflight remains valid: 5.485-second initialization,
-6.563-second child wall time, and full 512-token output allowance fits. PR1974 is
-merged/main-verified at `9addd5751` (CI36675166744 and CodeQL36675165963 passed;
-owned lane closed). Historical PR1969 repair controls remain 40 passed / 8 failed
-versus 48 passed, on 48 unique unchanged development cases. They were not rerun
-here. The first uninstrumented 90.109-second timeout remains a separate result.
+Independent review accepts the diagnostic evidence and rejects the proposal.
+Usage tokens, finish reason, held-out gain and retained gain remain unknown.
+These observations do not explain earlier uninstrumented timeouts. Eight local
+pass-through checks passed; the rejected text was parsed only, never executed.
+Historical controls remain40 passed/8 failed versus 48 passed on 48 unchanged
+development cases. They were not rerun and are not new improvement evidence.
 
-**Next eligible layer: bounded generation subphase diagnostics (13/P1;
-C2/I4/D4/Impact3).** Inspect/reuse the installed engine's evaluation and sampling
-boundaries to observe prompt processing and first-token progress. Freeze any
-new diagnostic script and time/token budget before execution. Do not rerun this
-unchanged failed probe, infer token speed from the outer timeout, or increase the
-budget/switch models automatically. The completed one-call budget is closed.
+**Next eligible layer: qualify existing prompt/chat formatting (13/P1;
+C2/I4/D4/Impact3).** Inspect the raw-completion call in the current Qwen engine
+and existing `local_llm_backends.create_chat_completion` support against the
+selected model contract. A formatting mismatch is a hypothesis to verify, not a
+proven cause. Reuse before extending; preserve effect-evidence quarantine and
+the original code criteria. Do not add another backend, enlarge the budget again
+or relax the parser to accept prose. No production source/runtime changed here.
 
 The minimum path to basic RSI remains:
 
-1. Return one scoped worker proposal and independently review it.
-2. Test against the unchanged repair controls; exercise rejection/rollback.
+1. Produce one correctly scoped worker proposal and independently review it.
+2. Pass unchanged repair controls; exercise rejection/rollback.
 3. Reuse the verified artifact later and measure independent held-out benefit.
 4. Run one admitted, isolated AmIBot ticket; then increase workers from 1 to 2.
 
 This is direct supervised qualification, not native WRE/OpenClaw/Hermes
-admission. No production source or runtime was changed. Installed llama-cpp0.3.20
-still differs from declared0.2.72. Process/Python guards are not OS memory/network
-isolation. Broader Gmail/LinkedIn quality remains separate; prior rejected 1/12
-general and 0/12 coder results are unchanged. Active eSingularity/YUMORI and
-separately owned AutoPost remain protected.
+admission. Installed llama-cpp 0.3.20 still differs from declared 0.2.72. Process
+guards are not OS memory/network isolation. Broader Gmail/LinkedIn quality
+remains separate; prior rejected 1/12 general and 0/12 coder results are unchanged.
+Active eSingularity/YUMORI and separately owned AutoPost remain protected.
 
 Exact evidence/queue: `docs/roadmaps/rsi_swarm_backlog.json` →
-`current_observation.generation_phase_20260930`. Prior observations remain intact.
-Publication/CI/owned cleanup have separate receipts. Re-observe after closure.
+`current_observation.native_phase_20260930`. All prior observations remain intact.
+PR #1975 is merged/main-verified at `8e04a39f4` (CI 36680667946 and CodeQL 36680668121
+passed; owned lane closed). This sprint has separate publication/cleanup receipts.
 
 ## Staged general-role decision cohort — 2026-09-29
 
