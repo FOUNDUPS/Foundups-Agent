@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.nonthinking_trial_20260930",
-    "base_commit": "7de4eac2d50425567e0134e34667f3d93f79772d",
-    "selected_action": "Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner",
-    "status": "development_candidate_accepted_reobserve_after_closure",
+    "observation_path": "current_observation.artifact_replay_20260930",
+    "base_commit": "6020b6e05105a646867da22fab285b3ed4dc63e8",
+    "selected_action": "Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner",
+    "status": "historical_development_reuse_verified_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.paragraph_stop_trial_20260930"
+    "previous_observation_path": "current_observation.nonthinking_trial_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16267,6 +16267,269 @@
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "artifact_replay_20260930": {
+      "source": "6020b6e05105a646867da22fab285b3ed4dc63e8",
+      "outcome": "EXACT_ARTIFACT_FRESH_PROCESS_DEVELOPMENT_REPLAY_PASSED",
+      "execution_plane": "directly_supervised_local_qualification",
+      "measurements": {
+        "test_runs": 1,
+        "passed": 48,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "distinct_development_case_ids": 48,
+        "wall_seconds": 1.7659999998286366,
+        "model_calls": 0,
+        "provider_calls": 0,
+        "artifact_reuse_runs": 1,
+        "artifact_reuse_scope": "same historical development fixture and unchanged48 criteria",
+        "production_applications": 0,
+        "governed_retained_uses": 0,
+        "held_out_gain": null,
+        "retained_gain": null
+      },
+      "fixture_bindings": {
+        "modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py": "ea37eac86b3f861948765a225f1414ce1124964ea456be397bddb9a0c7773a48",
+        "modules/communication/moltbot_bridge/src/reddog_correspondence_state.py": "3debd4e00d214074718560e4396104129a7dba1dfe102540fae61ce009dfbb4e",
+        "modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py": "7f2d1b7dd19ddfbfff1a01614c5464973cb0c361c490d6d720c886c09504f0f0",
+        "modules/infrastructure/database/src/db_manager.py": "d6234f217af412106be88be4efadb1f56f181d1ae54144ad5e8044cfc377d61f",
+        "modules/infrastructure/database/src/module_db.py": "78a96f1b11f42c1bef9ad4598db61e4abc47b883a98fe2aedc4afd892bbd8241"
+      },
+      "case_names": [
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_newer_explicit_provider_route_overrides_stale_contacts",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_near_match_hyphen_difference_blocks",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_personal_route_closed_blocks_even_exact_address",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_bcc_only_policy_blocks_cc",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_newer_address_evidence_does_not_silently_reopen_closed_route",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_duplicate_sent_coverage_blocks_by_default",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_conflicting_top_precedence_routes_block",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_unknown_route_blocks",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_sent_only_or_unverified_contact_route_blocks",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_verified_public_directory_can_authorize_when_contact_history_is_unverified",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_display_name_and_case_normalize_without_character_rewrite",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_mixed_transaction_blocks_if_one_recipient_fails",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_sent_readback_matches_approved_transaction",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_sent_readback_detects_extra_or_missing_recipient",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_scope_key_is_deterministic_and_machine_safe",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_event_insert_is_idempotent_and_metadata_only",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_state_roundtrip_preserves_ask_accounting_and_digest",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_provider_watermark_is_change_detector_not_ordering_claim",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_invalid_delta_reference_fails_closed",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_serialized_state_contains_codes_not_raw_message_content",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[absent]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[digest_mismatch]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[unsupported_schema]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[missing_schema]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[empty_scope]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[scope_mismatch]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[duplicate_ask_ids]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[dangling_delta]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_persisted_read_validation[negative_outbound_count]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[missing-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[boolean-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[integer-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[float-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[list-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[mapping-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[bytes-observation]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[empty-evidence]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[literal-none]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[literal-true]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[literal-zero]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[opaque-spaces]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[opaque-whitespace]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[no-numeric-normalization]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[no-trimming]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[missing-cached-token]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[stale-equality]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_refresh_requires_nonempty_string_evidence[unknown-equality]",
+        "modules.communication.moltbot_bridge.tests.test_reddog_recipient_preflight::test_correspondence_invalid_observation_preserves_cache_integrity_error"
+      ],
+      "artifact_hashes": {
+        "entry.json": "e715132ada10c40fb7c5ab408ee144f007784954b3fc856a77e5de2c5114a70e",
+        "manifest.json": "708204333fbf5b8aa23f3569d89671ae8e14f5bd370a1b3729bd721686014f61",
+        "prepare_fixture.py": "89ccacb27129e65bf0e4223457b6a745a8beb8bf483d8a856e59e4440fafe26c",
+        "execute_replay.py": "0e2a3da8af1cef8597ebd18f77303cc75aede744df4dc8c15a275ca975e7a0e4",
+        "run_correspondence.py": "a052ee1fb47977f1a8d3f52db5546921d3dd2c84bb3568a3323761eadf1a2d04",
+        "execution-review.json": "3a6c6ea72ae218373073fff369504cd0289c1fa5c17dfb50a7c6078ae4453ff8",
+        "execution-started.json": "29d1ebd6881f8f5f71777499f7b72b789441f026e128240c62283e7a10c16fb2",
+        "execution.json": "dfe92a850e45ac3f471944cbff7e9af9ecccd053db021f2a84fe7cd8108e7b9d",
+        "retained/receipt.json": "7f5c46ea48795a56df37915512d651f2dff70a5e79b2b7404485b1cf7070313e",
+        "retained/results.xml": "cd9266aceb788abe3bca030964d81758a48826f6c17d733c32960cd340382d3b",
+        "retained/output.log": "205c7c4fc6bd9bcebc0987bb9871056c1670d5f2538a9a8011ce82911f06a8c4",
+        "result-review.json": "7f5f5a786abbfe401fa118ac153adb215d460571e78f33d47ec816724d6c3b8a",
+        "next-action-source-review.json": "a39c9c8258859dcfbcdffd20baf24f835d95b3869d02c5d4c9a3c346a42295bd",
+        "holo-query.json": "12345163f1b3af559a2fe033275f63258ff938f7e2ae6bc2a3aedc034f675922",
+        "wsp00-gate.json": "fc19908cfce83ad0ebe8577effd06840f8730827cb65bc953f4340e554e30368"
+      },
+      "prior_evidence_bindings": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\candidate-result-review.json": "a9010f0978803d857e6956e40a8a7160116c41cdc9225125d72173191c085bed",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\candidate-review.json": "a036750a963b298a4d4c141d47736c9645404b168500dd2495c25a2c92d5b105",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\candidate-execution-review.json": "0352a322f1f469aee1a9eb89fe4fc1507167df7fb79566c7fdb6d8046bddc79c",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\proposal-inspection.json": "35b748b7a5de806959d48543a87ede288de0977e1fe8c3975ddc3f36d6a705f1",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\application.json": "6baed37d47b3634d64182e08c04e6435003e781160f473474acfe3cf4da58a89",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\application-validation.json": "c677313444930c594d408bd8f6f48647bb7ef1882da42d40a2ba4c5d1401f93a",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\candidate\\receipt.json": "317eeda0933173aa92a808fb2a03a4bf2d6b454638b2c4424244324376c61d8a",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\candidate\\results.xml": "c7f90fec83f3b7543ea9af91fdb438bdfc9fd32c0435265454351914ca3d7a83",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\next-action-source-review.json": "dbe081bdd603fb5d4041f6c0086a74b5abc64d61a9c3c91d5d12d1a95af97e4e",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\final-accounting.json": "d582dbce5c865b16ae1167f678f19ec10eb611aadcc102340917e0350c76a37f",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\publication-closure.json": "b34c7d7d15d87ce098c59039135938d2b6042b3c59b46df9131b374ca23470f6"
+      },
+      "acceptance": {
+        "cases": 48,
+        "passed": 48,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "identical_case_order": true,
+        "identical_loaded_sources": true,
+        "unexpected_denials": 0,
+        "sqlite_paths": "fresh retained/temp/pytest/**/correspondence.db"
+      },
+      "controls_reused": "Prior historical baseline40pass/8fail, reference48pass and candidate48pass receipts retain exact bound artifacts. This fresh run repeats the same48case identities; counts are not additive unique coverage.",
+      "signal_class": "execution_feedback",
+      "verification_independence": "Independent source/execution/result review; coordinator ran the one fresh process. No authenticated native evaluator receipt.",
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No accepted semantic coverage; exact known owners reused.",
+        "ordering": "Canonical WSP/current queue, source/interface/tests, exact prior evidence.",
+        "missing": "Semantic coverage and native admission absent; memory/README owner still absent.",
+        "staleness": "One governed query on changed main; no retry/reindex.",
+        "duplication": "No new runtime module, parser, controller or test family.",
+        "maintenance_route": "Existing R03 authority owner.",
+        "quality": "No accepted semantic coverage on authority mismatch. Exact-path source/docs and prior bindings are used explicitly; no query-side reindex. Ordering/noise unavailable. Entry-time replay evidence gap is now closed by persisted result and independent review; post-development transfer and held-out results remain missing.",
+        "missing_artifacts": [
+          "modules/infrastructure/wre_core/memory/README.md"
+        ],
+        "navigation": "No direct retained/correspondence NAVIGATION hit; exact module interface, existing runner and independently checked source owners supplied coverage.",
+        "operational_markers": "No TODO/FIXME markers in inspected correspondence, verified-outcome and held-out gate leaves."
+      },
+      "limits": [
+        "Historical development artifact reuse; repeated criteria are not held-out evidence.",
+        "No PatternMemory write, runtime admission, promotion or production source change.",
+        "Existing Python effect guards, not an OS sandbox.",
+        "Production defect was already repaired in PR1969. No novel repair or general competence claim.",
+        "Source digests are sampled comparisons, not immutable execution or native attestation."
+      ],
+      "code_changes": false,
+      "candidate_applied": false,
+      "production_source_changed": false,
+      "native_wre_admission": false,
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior frozen decision cohort and code proposal did not meet acceptance; no unreviewed prompt retry."
+        },
+        {
+          "task": "Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "The original historical development proposal and fresh-process replay criteria are now satisfied, but both runs cover the same48 cases. The smallest useful next evidence is a separate, prospectively frozen input-domain/contract-composition comparison of the immutable accepted artifact against the historical defective control and fixed reference. Existing correspondence tests, corruption seeding and guarded runner already supply the owners. Native admission remains blocked by authentic authority prerequisites; neither another identical replay nor fabricated ratchet/memory receipts advances that gate."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical development artifact reuse passed; independent transfer and governed retention remain unproven. Selected next slice addresses the concrete pending prerequisite."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "next_rationale": "The original historical development proposal and fresh-process replay criteria are now satisfied, but both runs cover the same48 cases. The smallest useful next evidence is a separate, prospectively frozen input-domain/contract-composition comparison of the immutable accepted artifact against the historical defective control and fixed reference. Existing correspondence tests, corruption seeding and guarded runner already supply the owners. Native admission remains blocked by authentic authority prerequisites; neither another identical replay nor fabricated ratchet/memory receipts advances that gate.",
+      "next_planning": {
+        "effort": "One separately reviewed minimal next slice using existing owners.",
+        "cost": "No model budget allocated by replay; prefer deterministic validation.",
+        "verification_burden": "Keep fixed-candidate evaluation, authority and retained activation separate.",
+        "dependencies": [
+          "Close current replay sprint publication/main/owned lane, then freshly reobserve exact artifact, source, test/toolchain and owner identities.",
+          "A separate evaluator author should derive exact new inputs/expected outcomes from the existing public contract and source, independently freeze a small finite matrix before any evaluation, and disclose access to prior candidate/output/development failures. Candidate author/model receives no new evaluation feedback for edits.",
+          "Focus on meaningful uncovered compositions: propagate each existing cache-integrity/schema/scope validation error even with invalid observation; exact opaque Unicode equality/inequality without normalization; additional non-string values whose printable spelling matches cached text. Reuse existing helpers and avoid merely duplicating old48 IDs. Exact matrix/count and expected control discrimination require separate source/oracle review before execution.",
+          "Freeze identical new suite/loader/fixture environment for historical defective, immutable generated and fixed-reference artifacts; include predeclared rejection/positive controls to show the oracle detects at least the historical coercion defect and does not simply accept every method. Preserve all results, including unexpected failures.",
+          "Qualify any narrow runner selection adaptation and actual imported leaves/effects in advance; separate exact execution approval and finite process/DB/time budgets. This receipt authorizes preparation only, no new test/model/DB run.",
+          "Report only additional post-development contract evidence and explicit differential results. Since candidate/design are already visible, do not claim clean blinded holdout, general-purpose learning, new-task economic value, or causal/model improvement. A future genuinely independent held-out campaign and governed activation/rollback are separate."
+        ],
+        "ownership": "Existing RSI lane; shared and active FoundUps/Remote AutoPost protected."
+      },
+      "prior_closure": {
+        "pr": 1987,
+        "merge": "6020b6e05105a646867da22fab285b3ed4dc63e8",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-artifact-replay\\final-accounting.json",
+      "publication_status": "Separate exact-head/main and cleanup receipt required."
     }
   }
 }

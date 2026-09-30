@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-30 current layer:** one native non-thinking-prefix trial produced a code-only method in 50.44 s; after independent scope review it passed all 48 original development cases in a disposable historical fixture (baseline 40 pass / 8 fail). Production was already repaired; no retained or held-out benefit is claimed. Next 13/P1: Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1986 is closed/main-verified. Native admission remains open.
+**2026-09-30 current layer:** the accepted historical candidate passed the same 48 development tests again in a fresh process (1.77 s, zero model calls), with independent result review. Reproducible artifact reuse is demonstrated; held-out benefit and governed retention remain unproven. Next 13/P1: Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1987 is closed/main-verified. Native admission remains open.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
