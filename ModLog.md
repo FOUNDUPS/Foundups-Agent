@@ -1,3 +1,19 @@
+## 2026-09-30 — RSI generation boundary observed; controlled timeout
+
+- One existing WRE local proposal call with unchanged prompt/model/settings and
+  90-second/512-token cap. Load completed in 5.359 seconds; generation entered,
+  then parent timeout at 90.094 seconds. Cached initialization is counted separately.
+- No returned proposal, retry, application, candidate tests or retention. Native
+  prefill/first-token progress and quality unknown; no graceful-close evidence.
+  Exact source/runtime/model/acceptance postchecks passed; independent review
+  accepts diagnostics only. Previous controls/preflight/timeout preserved.
+- WSP00/15/22/48/50/84/97: next 13/P1 bounded evaluation/first-token diagnostics
+  through existing engine boundaries, before any budget/model change. No new
+  module or production code. Existing canonical owners synchronized.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-generation-phase/`;
+  backlog `current_observation.generation_phase_20260930`. PR1974 closure verified;
+  this sprint's publication and cleanup have separate exact-source receipts.
+
 ## 2026-09-30 — Existing RSI worker: initialization and prompt capacity verified
 
 - One supervised no-generation preflight: initialization 5.485 seconds, child
