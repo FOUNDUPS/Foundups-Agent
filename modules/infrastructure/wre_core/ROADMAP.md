@@ -1,42 +1,41 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `6020b6e05`.** The exact accepted
-five-file development artifact from PR #1987 was copied unchanged into a new
-disposable fixture, independently reviewed and loaded by the existing runner in
-one fresh process. All 48 original cases passed again.
+**Current qualification: 2026-09-30, source `0c4d0e696`.** A separate evaluator
+froze 26 new public-contract cases before execution; a separate verifier reviewed
+their oracle and run scope. The immutable generated artifact, historical defective
+control and fixed reference ran the identical 74-case suite in fresh processes.
 
-| Current replay | Observed result |
-|---|---|
-| New test runs / wall time | 1 / 1.77 s |
-| Pass / failure / error / skip | 48 / 0 / 0 / 0 |
-| New model / provider calls | 0 / 0 |
-| Changed artifact / test criteria | None / none |
-| Historical development artifact reuse | 1 fresh-process run |
-| Governed retained uses / held-out gain | 0 / not measured |
+| Variant | Original 48 | New 26 | Combined 74 |
+|---|---|---|---|
+| Historical defective | 40 pass / 8 fail | 22 pass / 4 fail | 62 pass / 12 fail |
+| Fixed reference | 48 pass | 26 pass | 74 pass |
+| Unchanged generated artifact | 48 pass | 26 pass | 74 pass |
 
-Five loaded source hashes and all 48 ordered case IDs match the accepted
-candidate. SQLite used fresh temporary paths, source hashes stayed stable and
-there were no unexpected denied effects. Independent review checked the persisted
-result; the coordinator ran the test. The Python guards are not an OS sandbox.
+The exact predeclared failure IDs matched. All runs had zero errors/skips,
+stable five-file source bindings and no unexpected denied effects. Three test
+processes used zero model/provider calls. These are 74 distinct cases, not222.
+The new matrix combines all eight cache-read errors with two invalid observation
+types, checks opaque Unicode equality/difference and tests four non-string
+spelling collisions plus literal positive controls. The original48 stay intact.
 
-The prior candidate run also passed these same 48 cases. These are repeated
-observations, not 96 unique tests. Historical baseline40/8 and reference48/0
-remain prior source-bound controls and were not rerun. This is execution feedback
-for a known-case historical rehearsal; production was fixed in PR #1969.
-Artifact reuse is not WRE-memory adoption, held-out benefit or production RSI.
-No PatternMemory write, model generation, production edit or activation occurred.
+The exact evaluated new tests extend the existing CI-selected correspondence
+test owner. No production implementation changes. This is post-development
+contract validation: author/verifier had candidate visibility, so it is not a
+pristine blinded holdout, general competence, native admission or retained RSI.
+The historical defect was already repaired in PR #1969. Prior fresh-process
+artifact reuse remains valid at its narrower48-case scope.
 
-**Next eligible layer: Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner (13/P1).**
-The original historical development proposal and fresh-process replay criteria are now satisfied, but both runs cover the same48 cases. The smallest useful next evidence is a separate, prospectively frozen input-domain/contract-composition comparison of the immutable accepted artifact against the historical defective control and fixed reference. Existing correspondence tests, corruption seeding and guarded runner already supply the owners. Native admission remains blocked by authentic authority prerequisites; neither another identical replay nor fabricated ratchet/memory receipts advances that gate.
-Use fresh source/ownership and independent scope review before execution.
+**Next eligible layer: Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners (13/P1).**
+The WRE adapter constructs QwenInferenceEngine directly and calls its raw-completion generate_response method. The successful trial replaced that method, borrowed its already initialized Llama into LlamaCppBackend, installed a scoped native formatter with enable_thinking=False, used chat messages and a different stop policy, and changed the prompt suffix. A backend-only thinking flag cannot reach the actual WRE caller. Qualify an explicit opt-in caller contract before any reusable implementation or further capability trial; reuse the already completed seven formatter/handler controls rather than repeat them.
+Fresh source/ownership and exact independent scope review remain required.
+Do not continue expanding this single repaired-method suite without a new
+demonstrated requirement. No model budget or native authority follows.
 
-Native18/P0 remains blocked by authority; Holo15/P1 still reports root/head
-mismatch, UNKNOWN freshness and index gap. No query-side reindex. The absent
-WRE memory README and missing direct NAVIGATION hit were recorded; existing
-interfaces and source-bound owners supplied this limited retrieval scope.
-PR #1987 is closed/main-verified. Preserve active FoundUps and Remote AutoPost.
-
-Evidence: backlog `current_observation.artifact_replay_20260930` and `O:/Foundups-Agent-audits/20260930-rsi-artifact-replay/`.
+Native18/P0 and Holo15/P1 remain blocked. Holo reports root/head mismatch,
+UNKNOWN freshness and an index gap; no query-side reindex. Existing public
+contracts/test helpers supplied exact-path retrieval. PR #1988 is closed/main-
+verified. Protect active FoundUps, shared checkout and Remote AutoPost.
+Evidence: backlog `current_observation.contract_transfer_20260930` and `O:/Foundups-Agent-audits/20260930-rsi-contract-transfer/`.
 
 ## Staged general-role decision cohort — 2026-09-29
 

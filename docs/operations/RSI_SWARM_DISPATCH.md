@@ -1,17 +1,17 @@
 ## Current bounded layer — 2026-09-30
 
-One fresh-process replay of the exact accepted historical development artifact
-passed all 48 original cases in 1.77 s with no model/provider calls. Independent
-source/execution/result review, five-file identity, case IDs and temporary SQLite
-checks passed. Original criteria stayed unchanged. This is reproducible reuse on
-the same development fixture, not held-out benefit or governed WRE retention.
-No production edit, PatternMemory write, activation or native admission occurred.
+Frozen post-development contract comparison completed: original48 +new26 cases.
+Historical defective control62pass/12fail; unchanged generated artifact and fixed
+reference74pass each. Separate evaluator and oracle/result verifier; zero model
+calls. Exact new tests extend the existing CI-selected owner, preserving all
+original tests. No production implementation change, pristine held-out claim,
+PatternMemory admission or retained model benefit. The prior48-case fresh-process
+reuse remains a separate historical observation; PR #1988 closed/main-verified.
 
-Next 13/P1: Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner.
-The original historical development proposal and fresh-process replay criteria are now satisfied, but both runs cover the same48 cases. The smallest useful next evidence is a separate, prospectively frozen input-domain/contract-composition comparison of the immutable accepted artifact against the historical defective control and fixed reference. Existing correspondence tests, corruption seeding and guarded runner already supply the owners. Native admission remains blocked by authentic authority prerequisites; neither another identical replay nor fabricated ratchet/memory receipts advances that gate.
+Next 13/P1: Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners.
+The WRE adapter constructs QwenInferenceEngine directly and calls its raw-completion generate_response method. The successful trial replaced that method, borrowed its already initialized Llama into LlamaCppBackend, installed a scoped native formatter with enable_thinking=False, used chat messages and a different stop policy, and changed the prompt suffix. A backend-only thinking flag cannot reach the actual WRE caller. Qualify an explicit opt-in caller contract before any reusable implementation or further capability trial; reuse the already completed seven formatter/handler controls rather than repeat them.
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.artifact_replay_20260930` for exact scope and prerequisites.
-PR #1987 is closed/main-verified. Earlier sections are historical.
+and backlog `current_observation.contract_transfer_20260930`. Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 

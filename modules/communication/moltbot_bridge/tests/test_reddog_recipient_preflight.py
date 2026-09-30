@@ -521,3 +521,66 @@ def test_correspondence_invalid_observation_preserves_cache_integrity_error(
         store.provider_refresh_required("ORG::TOPIC", None)
     assert store.select("state") == before
     assert store.list_events("ORG::TOPIC") == []
+
+
+
+
+# Post-development contract-transfer controls; candidate was already visible.
+# Separate evaluator review and frozen comparison precede any execution.
+@pytest.mark.parametrize("case,observed,expected_error", [
+    pytest.param('digest_mismatch', [], 'correspondence state digest mismatch', id='digest_mismatch-list'),
+    pytest.param('digest_mismatch', b"fixture-watermark", 'correspondence state digest mismatch', id='digest_mismatch-bytes'),
+    pytest.param('unsupported_schema', [], 'unsupported correspondence state schema', id='unsupported_schema-list'),
+    pytest.param('unsupported_schema', b"fixture-watermark", 'unsupported correspondence state schema', id='unsupported_schema-bytes'),
+    pytest.param('missing_schema', [], 'unsupported correspondence state schema', id='missing_schema-list'),
+    pytest.param('missing_schema', b"fixture-watermark", 'unsupported correspondence state schema', id='missing_schema-bytes'),
+    pytest.param('empty_scope', [], 'scope_key is required', id='empty_scope-list'),
+    pytest.param('empty_scope', b"fixture-watermark", 'scope_key is required', id='empty_scope-bytes'),
+    pytest.param('scope_mismatch', [], 'correspondence state scope mismatch', id='scope_mismatch-list'),
+    pytest.param('scope_mismatch', b"fixture-watermark", 'correspondence state scope mismatch', id='scope_mismatch-bytes'),
+    pytest.param('duplicate_ask_ids', [], 'ask_id values must be unique within a scope', id='duplicate_ask_ids-list'),
+    pytest.param('duplicate_ask_ids', b"fixture-watermark", 'ask_id values must be unique within a scope', id='duplicate_ask_ids-bytes'),
+    pytest.param('dangling_delta', [], 'new_delta_ask_ids must refer to declared asks', id='dangling_delta-list'),
+    pytest.param('dangling_delta', b"fixture-watermark", 'new_delta_ask_ids must refer to declared asks', id='dangling_delta-bytes'),
+    pytest.param('negative_outbound_count', [], 'outbound_since_latest_inbound must be >= 0', id='negative_outbound_count-list'),
+    pytest.param('negative_outbound_count', b"fixture-watermark", 'outbound_since_latest_inbound must be >= 0', id='negative_outbound_count-bytes'),
+])
+def test_correspondence_transfer_invalid_observation_preserves_all_read_errors(
+    isolated_correspondence_db, case, observed, expected_error,
+):
+    store = RedDogCorrespondenceStateStore()
+    _persist_read_case(store, case)
+    before = store.select("state")
+    events_before = store.select("events")
+    with pytest.raises(ValueError) as caught:
+        store.provider_refresh_required("ORG::TOPIC", observed)
+    assert str(caught.value) == expected_error
+    assert store.select("state") == before
+    assert store.select("events") == events_before == []
+
+
+@pytest.mark.parametrize("cached,observed,refresh", [
+    pytest.param("caf\u00e9", "caf\u00e9", False, id='unicode-nfc-equal'),
+    pytest.param("cafe\u0301", "cafe\u0301", False, id='unicode-nfd-equal'),
+    pytest.param("caf\u00e9", "cafe\u0301", True, id='unicode-normalization-distinct'),
+    pytest.param("\uff11", "1", True, id='unicode-fullwidth-distinct'),
+    pytest.param("(7,)", (7,), True, id='collision-tuple'),
+    pytest.param("(1+2j)", (1+2j), True, id='collision-complex'),
+    pytest.param("nan", float("nan"), True, id='collision-nan'),
+    pytest.param("inf", float("inf"), True, id='collision-infinity'),
+    pytest.param("nan", "nan", False, id='literal-nan'),
+    pytest.param("inf", "inf", False, id='literal-infinity'),
+])
+def test_correspondence_transfer_opaque_watermark_domain(
+    isolated_correspondence_db, cached, observed, refresh,
+):
+    store = RedDogCorrespondenceStateStore()
+    store.upsert_state(CorrespondenceState(
+        scope_key="ORG::TRANSFER", provider_watermark=cached,
+        freshness=Freshness.VALID,
+    ))
+    before = store.select("state")
+    events_before = store.select("events")
+    assert store.provider_refresh_required("ORG::TRANSFER", observed) is refresh
+    assert store.select("state") == before
+    assert store.select("events") == events_before == []

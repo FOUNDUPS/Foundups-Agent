@@ -1,3 +1,18 @@
+## 2026-09-30: Post-development correspondence contract coverage
+
+The existing recipient-preflight test owner now has74 cases: original48 unchanged
+plus26 frozen cases. Sixteen combine all eight cached-state validation errors
+with invalid list/bytes observations; ten cover opaque Unicode equality/difference,
+tuple/complex/nonfinite-number spelling collisions and literal positive controls.
+
+Same suite on isolated real-leaf SQLite: defective62pass/12fail (old40/8,new22/4),
+generated74pass and reference74pass. Exact predicted failure IDs matched; no
+errors/skips or unexpected denied effects. Separate author and verifier; candidate
+was visible, so this is post-development validation, not a blinded benchmark.
+No production method change or model call. Existing CI already runs this file;
+hosted/source closure is recorded in RSI backlog `current_observation.contract_transfer_20260930`.
+WSP00/5/6/15/22/48/50/97. Evidence `O:/Foundups-Agent-audits/20260930-rsi-contract-transfer/`.
+
 ## Watermark evidence regression — 2026-09-29
 
 The existing `test_reddog_recipient_preflight.py` now has 48 cases: all 29 prior cases
