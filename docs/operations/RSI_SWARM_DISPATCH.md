@@ -1,20 +1,23 @@
 ## Current bounded layer — 2026-09-30
 
-The paragraph-stop-only trial returned non-code output at its512-token cap
-in 85.06 s (672 input / 512 output). Original parser and independent review
-rejected it. No candidate applied or retained; one-call budget closed.
-The exact model/messages/template/caps/criteria remained unchanged; actual
-forwarded stops, prompt fit, parent bindings and cleanup passed. No cap increase,
-retry or output extraction. Two prior forwarding cases and 48 historical
-development controls retain their exact scope; they were not rerun.
+One native non-thinking-prefix trial returned a complete code-only method in
+50.44 s (674 input / 120 output tokens). Original parser and independent scope
+review passed; the method was applied only to a disposable historical fixture.
+All 48 original development cases passed, recovering the eight historical
+baseline failures. Source/test identities and bounded SQLite checks passed.
+Historical baseline/reference and seven prior no-model checks were rehashed,
+not rerun. Independent review accepted the persisted development result.
 
-Next 13/P1: Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization.
-The paragraph-stop-only trial returned capped non-code prose and remains rejected. Installed native top-level chat API cannot accept enable_thinking, while its existing Jinja formatter and handler factory can forward the exact false template variable. A finite no-initialization rendering/forwarding qualification is the smallest eligible action before any separate proposal trial; it tests transport capability, not output competence.
-Planning only; no next model allocation or native runtime admission.
-See [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.paragraph_stop_trial_20260930` for measurements, ranked dependencies,
-independent review and remaining gates. PR #1985 is closed/main-verified.
-Protect active FoundUps and Remote AutoPost. Earlier sections are historical.
+Production was already fixed in PR #1969. No production change, retained use,
+held-out benefit, native admission or promotion is claimed. Current model-call
+budget is closed. Earlier failed attempts and unchanged criteria remain intact.
+
+Next 13/P1: Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner.
+The generated method now passes all48 frozen development cases in the disposable historical fixture, whereas the exact historical baseline fails8. The original acceptance already requires a fresh-process retained replay and the same runner already supports that root/tag. Reusing the exact accepted five-file artifact is the smallest missing evidence layer; writing PatternMemory or adding orchestration would introduce unrelated state/authority without proving later benefit.
+See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
+and backlog `current_observation.nonthinking_trial_20260930` for evidence, gates and ownership.
+PR #1986 is closed/main-verified. Protect active FoundUps and Remote AutoPost.
+Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 

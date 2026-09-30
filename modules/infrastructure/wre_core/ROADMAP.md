@@ -1,44 +1,50 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `b43bc0234`.** One reviewed
-local trial removed only the caller double-newline stop through the existing
-WRE proposal adapter and disposable chat procedure. It retained the exact
-Qwen3.5-4B artifact, native template/tokenizer, messages, temperature and caps.
-The unchanged strict parser rejected its non-code output. Nothing was applied.
+**Current qualification: 2026-09-30, source `7de4eac2d`.** One separately
+reviewed trial bound the native template's non-thinking flag through its existing
+scoped handler. Exact model/runtime/template bytes, messages, stops, resource
+caps and original acceptance criteria were preserved. The complete code-only
+method passed the original parser, independent scope review and all 48 original
+development tests after application only to a disposable historical fixture.
 
 | Current attempt | Observed result |
 |---|---|
-| Dispatch / returned / rejected / retries | 1 / 1 / 1 / 0 |
-| Parent child-wall time | 85.06 s |
-| Native input / output / total tokens | 672 / 512 / 1184 |
-| Finish reason | `length` — output cap reached |
-| Syntax-valid / accepted proposals | 0/1 / 0/1 |
-| Candidate applications / test runs / retained uses | 0 / 0 / 0 |
-| Held-out / retained benefit | Not measured / not measured |
+| Calls / returned / retries | 1 / 1 / 0 |
+| Parent child-wall time | 50.44 s |
+| Native input / output / total tokens | 674 / 120 / 794 |
+| Syntax-valid / accepted development proposals | 1/1 / 1/1 |
+| Candidate tests | 48 pass; 0 failures, errors or skips |
+| Historical baseline / reference | 40 pass + 8 fail / 48 pass; rehashed, not rerun |
+| Disposable applications / production applications | 1 / 0 |
+| Retained uses / held-out or retained benefit | 0 / not measured |
 
-Actual forwarded stops were `###` and native EOS. Full 512 output reservation
-inside 2048 context, exact token forwarding and parent/cleanup checks passed.
-The prior two-case no-model forwarding proof was reused at unchanged source;
-historical 48 development controls were rehashed, not rerun. The previous
-four-token rejection remains recorded. Longer output is not improved correctness;
-this unseeded adaptive known-case comparison does not establish causal gain.
+Candidate owner hash, four untouched fixture files and all other AST definitions
+were checked before testing. Actual five-file source bindings stayed stable;
+SQLite stayed under the disposable test directory, with no unexpected denied
+effects. Independent review checked the exact candidate and persisted results;
+the coordinator executed this test run. This is execution feedback, not signed
+native evaluator evidence or formal verification.
 
-**Next eligible layer: Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization (13/P1).**
-The paragraph-stop-only trial returned capped non-code prose and remains rejected. Installed native top-level chat API cannot accept enable_thinking, while its existing Jinja formatter and handler factory can forward the exact false template variable. A finite no-initialization rendering/forwarding qualification is the smallest eligible action before any separate proposal trial; it tests transport capability, not output competence.
-Current one-call budget is closed. No retry, cap increase, output extraction,
-evaluation relaxation, production stop-policy change or new model call is
-authorized by this planning record. Use the exact independent next-action
-review in the existing audit before preparing another bounded experiment.
+The prior seven no-model handler checks were reused. The native false-render
+digest and actual token forwarding/full 512-token reserve were checked before
+generation. The current one-call budget is closed. Earlier rejected trials remain
+recorded. This is a known-case repair rehearsal after feedback; production had
+already been fixed in PR #1969. Recovering eight development failures does not
+establish novel repair, general competence, held-out transfer or retained RSI.
 
-Native admission 18/P0 and governed Holo authority 15/P1 remain blocked. Holo
-reports UNKNOWN/index gap; no query-side reindex. Installed llama-cpp 0.3.20
-versus declared 0.2.72 remains unreconciled. Preserve active FoundUps and
-Remote AutoPost. PR #1985 is closed/main-verified.
+**Next eligible layer: Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner (13/P1).**
+The generated method now passes all48 frozen development cases in the disposable historical fixture, whereas the exact historical baseline fails8. The original acceptance already requires a fresh-process retained replay and the same runner already supports that root/tag. Reusing the exact accepted five-file artifact is the smallest missing evidence layer; writing PatternMemory or adding orchestration would introduce unrelated state/authority without proving later benefit.
+Use the exact independent next-action review and fresh ownership/source before
+dispatch. No new model call, production activation or native admission is granted.
 
-Progression: accepted proposal → independent controls/rollback → later reuse
-and held-out benefit → admitted isolated AmIBot → two workers.
-Evidence: backlog `current_observation.paragraph_stop_trial_20260930` and
-`O:/Foundups-Agent-audits/20260930-rsi-paragraph-stop-trial/`.
+Native admission 18/P0 and Holo authority 15/P1 remain blocked; Holo freshness
+is UNKNOWN with an index gap. No query-side reindex. Installed llama-cpp 0.3.20
+versus declared 0.2.72 remains unreconciled. Preserve active FoundUps and Remote
+AutoPost. PR #1986 is closed/main-verified.
+
+Progression: accepted development candidate → governed later reuse and held-out
+benefit → native admitted isolated AmIBot → two workers.
+Evidence: backlog `current_observation.nonthinking_trial_20260930` and `O:/Foundups-Agent-audits/20260930-rsi-nonthinking-trial/`.
 
 ## Staged general-role decision cohort — 2026-09-29
 

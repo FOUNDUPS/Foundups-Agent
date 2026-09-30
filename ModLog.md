@@ -1,3 +1,16 @@
+## 2026-09-30 — Native non-thinking candidate passed development tests
+
+- One bounded native template-mode trial: 50.44 s, 674 input / 120 output
+  tokens. Original code-only parser and independent pure-method review passed.
+- Applied only to the disposable historical fixture; original 48 tests passed
+  without failures/errors/skips. Eight historical baseline failures recovered;
+  controls were rehashed, not rerun. Five-file source and effect guards passed.
+- Current production defect was already fixed in #1969. No production edit,
+  retained replay, held-out gain, native admission or promotion. Budget closed.
+- WSP 00/15/22/48/50/84/97: next 13/P1 = Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner.
+  Exact acceptance/result/next-action evidence: `O:/Foundups-Agent-audits/20260930-rsi-nonthinking-trial/`.
+- Six existing documentation owners; previous #1986 closed/main-verified.
+
 ## 2026-09-30 — Paragraph-stop worker trial rejected
 
 - One reviewed local call removed only double-newline stop; exact model,
