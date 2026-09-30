@@ -21,6 +21,7 @@ evals:
   - no_parallel_contact_database
   - moshpit_receipt_integrity
   - recursive_learning_promotion
+  - capital_network_graph_reconciliation
 ---
 
 # YUMORI.me correspondence / contact ledger
@@ -37,6 +38,9 @@ It does not create a second contact database. Live state remains in:
    - `Email Log`
    - `Action Queue`
    - `Correspondence Routing`
+   - `LinkedIn` — provider-visible relationship/contact evidence staging
+   - `Capital Targets` — organization-level capital/relevance pipeline
+   - `Capital People` — named decision-maker and warm-path graph
 3. Google Doc `LOG — YUMORI Moshpit Activity Ledger | 活動ログ`.
 4. Google Doc `0102 Moshpit — Agent Learning & Action Log` for operator learning.
 5. Existing contact-source images / business cards when identity needs verification.
@@ -157,9 +161,11 @@ A human-friendly internal disambiguation alias may exist in live/private state w
 
 ## Sent-first reconciliation
 
-Before claiming that a message is unanswered, an ask is unsent, or a draft is pending:
+**Assume-Sent invariant:** every proposed outbound must begin from the presumption that it may already have crossed the provider boundary. A Gmail draft, Drive manuscript, CRM row, queue label, Moshpit entry, or prior session statement is never proof that the message is unsent.
 
-1. Search relevant Sent with overlap.
+Before claiming that a message is unanswered, an ask is unsent, a draft is pending, or before any send-capable action:
+
+1. Search relevant Gmail Sent with overlap. Use the exact recipient route(s) plus thread/message identifiers when known, and corroborate with subject/body/attachment markers rather than a single broad keyword.
 2. Read exact candidates and their full threads.
 3. Compare newly authored text, attachments, and recipient coverage — not subjects alone.
 4. Distinguish:
@@ -168,9 +174,12 @@ Before claiming that a message is unanswered, an ask is unsent, or a draft is pe
    - `PARTIAL_RECIPIENT_COVERAGE`
    - `NO_SENT_MATCH_IN_CHECKED_SCOPE`
    - `UNKNOWN`
-5. A surviving newer draft is distinct from an earlier successful send.
-6. Missing Moshpit receipt after a verified send is a logging repair, not permission to resend.
-7. Incomplete pagination / ambiguous evidence means HOLD.
+5. Only a complete `NO_SENT_MATCH_IN_CHECKED_SCOPE` result permits progression toward a new provider send. `UNKNOWN`, incomplete pagination, ambiguous matches, or an unsearched exact recipient means HOLD / RECONCILE.
+6. Immediately before every send-capable action, repeat the Sent check even when it was already performed earlier in the same session. A newly provider-sent event invalidates the prior capsule/preflight.
+7. If any matching provider-Sent event already covers the ask or recipient scope, do not resend. Reconcile Gmail -> Email Log -> Contacts/Action Queue -> Moshpit instead.
+8. A surviving newer draft is distinct from an earlier successful send only when its unsent delta is proven after the Sent comparison.
+9. Missing Moshpit receipt after a verified send is a logging repair, not permission to resend.
+10. Provider-Sent integrity incidents still count as Sent for duplicate and follow-up suppression.
 
 ## Correspondence State Capsule — native continuity first, provider delta second
 
@@ -282,6 +291,89 @@ Use the established YUMORI labels and current live evidence.
 Do not turn automated acknowledgments, newsletters, GitHub/service notices, or resolved declines into stakeholder-response/action state.
 
 Preserve unread state unless the task explicitly authorizes changing it.
+
+## Capital network graph / warm-path expansion
+
+Capital discovery belongs in the existing CONTACTS workbook. Do **not** create a
+parallel investor spreadsheet, VC rolodex, or email-enrichment database.
+
+Canonical roles:
+
+- `Capital Targets` = organizations/funds/platforms. Classify capital type, geography,
+  direct data-center/AI-infrastructure evidence, Japan/APAC evidence, scale evidence,
+  fit lane, status, named leads, warm path, sources, and next action.
+- `Capital People` = people graph. Record current role evidence, LinkedIn/profile URL,
+  relationship state, connection date when provider-verified, target IDs, capital
+  relevance, and next action.
+- `LinkedIn` = provider-visible first-degree/contact-info evidence. A row here does
+  not itself authorize outreach.
+- `Contacts` / Email Log / Action Queue / Correspondence Routing remain the
+  correspondence authority once outreach is contemplated.
+
+### Relationship evidence classes
+
+Use exact relationship states:
+
+- `1ST_DEGREE_VERIFIED` — provider evidence or 012-supplied LinkedIn UI proves an
+  accepted first-degree connection.
+- `WARM_HISTORY` — prior investor/adviser relationship is evidenced, but current
+  LinkedIn degree/contact route is not yet verified.
+- `WARM_ADJACENT` — an active partner/counterparty can plausibly introduce a target;
+  no direct relationship is claimed.
+- `PUBLIC_TARGET` — named public professional only; no relationship is inferred.
+- `NEEDS_NETWORK_RECON` — 012 reports a network path but provider evidence has not
+  yet established it.
+
+Do not promote follows, profile views, recommendations, “people you may know,” group
+membership, or news-digest mentions into first-degree evidence.
+
+### Mutual-network crawl
+
+When browser-capable Work is available, prefer a bounded warm-path crawl over cold
+mass outreach:
+
+1. start from `1ST_DEGREE_VERIFIED` bridge nodes;
+2. inspect P0/P1 `Capital Targets` named decision-makers;
+3. record only mutual connections actually visible in the authenticated UI;
+4. reverify current company/title before using historical acceptance-mail titles;
+5. capture Contact info only when LinkedIn exposes it to 012's authenticated account;
+6. store exact visible email/website/profile URL with observation date and source;
+7. never guess email patterns or use enrichment that bypasses LinkedIn visibility;
+8. rank one-hop warm paths above cold targets when fit evidence is otherwise comparable.
+
+A contact-info email is a route fact, not permission to send. Before any message or
+email, run the normal correspondence-state capsule, Sent-first reconciliation,
+routing/preflight, and duplicate/follow-up gates.
+
+### Capital-fit classes
+
+Assign one primary class to each organization:
+
+`DIRECT_DC_EQUITY`, `INFRASTRUCTURE_PE`, `SOVEREIGN_PENSION`,
+`PROJECT_FINANCE_DEBT`, `STRATEGIC_CORPORATE`, `OPERATOR_JV`,
+`VC_GROWTH_PLATFORM`, `ANGEL_PREDEVELOPMENT`, or `INTRODUCTION_BRIDGE`.
+
+Also record Japan direct evidence as `YES / NO / ADJACENT` and Phase-1 fit as
+`HIGH / MEDIUM / LOW / UNKNOWN`. Fame, fund size, or a mutual connection does not
+by itself make a target HIGH fit.
+
+### Work / browser boundary
+
+The normal text/connector path may research organizations, verify named public
+profiles, inspect Gmail LinkedIn acceptance receipts, and update the CRM. If the
+task requires clicking LinkedIn mutual connections, connection controls, or
+Contact info panels that are not exposed through the connector, hand that bounded
+UI work to ChatGPT Work / Cloud Browser.
+
+Discovery does not authorize:
+- bulk connection requests;
+- bulk messages;
+- automatic email sends;
+- scraping hidden contact data.
+
+If connection requests are desired, Work must return a `CONNECT_CANDIDATE` list
+with target, current role, mutual path, rationale, proposed short note, and existing
+direct-route state. Sending remains a separately authorized effect.
 
 ## Structured-sheet integrity
 
