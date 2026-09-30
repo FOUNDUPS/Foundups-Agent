@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-09-28 JST
+Last verified: 2026-09-30 JST
 
 ## Purpose and truth boundary
 
@@ -165,6 +165,37 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 **Immediate YUMORI action:** prepare a two-scenario eligibility package for SII and Fukui City: (A) City retains ownership -> SII demonstration ineligible / MOE public-building route to evaluate; (B) eligible private/nonprofit building-owner structure -> SII demonstration route to evaluate. In parallel, ask a Phase-3 ZEB Planner whether it can lead a `ZEB化診断・計画策定支援事業` application with the current owner. A telephone inquiry to SII changes the registry only to `ELIGIBILITY INQUIRY`; do not promote to `ELIGIBLE` unless SII or the controlling rule establishes the actual applicant/property structure as eligible.
 
+## F-03 — GX地域共創補助金 / 脱炭素電源地域貢献型投資促進事業
+
+- Agency: 経済産業省／資源エネルギー庁／GX地域共創補助金事務局
+- Status: **VERIFIED PROGRAM / FY2026 FIRST CALL CLOSED / SECOND CALL PRE-ANNOUNCED**
+- Program structure: GX戦略地域の地域認定（①〜③）とは別の、事業者選定型「④脱炭素電源地域貢献型」
+- Data-center track: **データセンター設備投資型**
+- Policy conditions: use decarbonized electricity and contribute to the host region of the relevant decarbonized power source; support is for large equipment investment by an electricity-demand business.
+- Official program page: https://www.meti.go.jp/policy/energy_environment/global_warming/gx_strategy_area/subsidy/subsidy.html
+- Official program office: https://gx-area-hojo.jp/
+- The office published a second-call pre-announcement on 2026-08-20. Treat exact second-call dates, rates and thresholds as controlled by the current second-call guide when released; do not copy first-call economics into FIN as expected funding.
+
+**YUMORI fit:** potentially relevant to a future Hanyu-led or other independently qualifying building-scale compute investment if an eligible operating company/SPV has lawful site rights, a qualifying decarbonized-power procurement structure, demand/offtake, finance, and a credible operating plan. The preparatory committee and current Form 1 filing are not themselves an eligible DC investment application.
+
+**Required determination:** ask the GX program office whether a reuse/PPP data-center site in Fukui City can qualify under the DC investment track when it is outside the specific Inazu/Araki-Shinbo prefectural industrial-park parcel, provided the project satisfies the program's power-location, contribution, ownership, and investment requirements. Do not infer eligibility from Fukui City's GX Strategic Region status.
+
+## F-04 — 福井県成長産業立地促進補助金 / AI型データセンター
+
+- Agency: 福井県 産業労働部 成長産業立地課
+- Status: **VERIFIED PROGRAM / PROJECT ELIGIBILITY NOT ESTABLISHED**
+- Current official threshold: **投下固定資産額 100億円以上**
+- Eligible cost categories published for this class: land acquisition/site preparation, building construction, machinery/equipment acquisition.
+- Published subsidy rate: **20%**
+- Published limits: **新設 6億円 / 増設 3億円 / 企業グループ通算 30億円**, subject to the program notes and host-municipality ceiling.
+- Facility-form note: the AI data-center class is for **building-constructed data centers; container data centers are excluded**.
+- Official source: https://kigyoritti.pref.fukui.lg.jp/preferential/archives/1
+- Prefecture contact: 成長産業立地課, k-yuchi@pref.fukui.lg.jp
+
+**YUMORI fit:** the current Hanyu initial planning case is far below the ¥10B fixed-investment threshold and is not eligible on the present modeled scale. Do not aggregate unrelated Hanyu, Shimousaka and Sukatto budgets merely to manufacture the threshold. Re-evaluate only if verified demand, utility capacity, operator participation and finance justify a future buildingized investment at qualifying scale.
+
+**Municipal dependency:** the prefectural program notes tie the AI-DC cap to the host municipality's subsidy ceiling. Fukui City's 企業立地推進課 should therefore be included in any eligibility consultation before modeling a combined incentive stack. No prefectural or City amount is AWARDED to YUMORI.
+
 ## Other tracked programs
 
 - METI GX regional-co-creation / decarbonized-power-region investment programs: monitor for scale, regional and applicant fit; potentially relevant to later DC expansion, not assumed for Phase 1.
@@ -200,8 +231,8 @@ across sites merely to meet a threshold or reuse the same eligible cost twice.
 | --- | --- | --- | --- | --- |
 | F-01 | Eligible cooling, storage, thermal supply; GPU hardware not assumed eligible | Hanyu first; other nodes or Sukatto offtake only if independently eligible | Eligible corporation/equipment owner/operator; representative/joint structure per guide | Verify multi-site versus site/equipment applications, closed-property baseline, lawful rights, heat pairing and ownership |
 | F-02 | New/retrofit/modular DC decarbonization infrastructure under chosen track | Hanyu; later nodes separately screened | Qualifying private entity/SPC/owner-operator, fit unresolved | Verify site/application unit, renewable supply, rights, equipment, CO2, financing and timing; no automatic combined award |
-| F-03 | Future qualifying GX DC investment | Any future qualifying site; initial size unknown | Qualifying investing electricity-demand business | Current-round guide, scale, location, power conditions and multi-site treatment unresolved |
-| F-04 | Building-constructed AI DC investment under prefectural conditions | Future independently qualifying building project | Qualifying company | Container exclusion remains; do not combine site budgets to manufacture investment threshold; consult prefecture |
+| F-03 | GX地域共創補助金・DC設備投資型 | Future independently qualifying Hanyu-led or other site; not tied automatically to the named GX industrial-park parcel | Qualifying electricity-demand business / operator / SPV | Second call pre-announced; verify site-location/power-source rule, regional contribution, rights, operator, investment scale and current second-call terms before eligibility claim |
+| F-04 | 福井県AI型データセンター立地投資 | Future building-constructed DC at ≥¥10B verified fixed investment | Qualifying company | Current Hanyu phase is below threshold; container excluded; City ceiling applies; do not combine unrelated site budgets to manufacture threshold |
 | F-05 | PPP/PFI project-formation advice, not private CapEx | City-defined umbrella plus asset annexes | Fukui City / eligible public body | Which support menu can cover the proposed study scope? |
 | F-06 | Historical SME DX support, not core campus CapEx | Eligible tenants/local firms | Eligible Fukui SME/small business | Closed-round reference; future call and beneficiary fit unresolved |
 | F-07A | Existing-system CO2 retrofit / electrification / heat recovery | Sukatto if baseline qualifies; schools independently screened | Eligible corporate equipment owner and any required building-owner/user/ESCO joint parties | Site/system baseline, closed buildings, reduction threshold, ownership and combined-site treatment unresolved |
