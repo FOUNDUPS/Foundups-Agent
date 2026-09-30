@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.paragraph_stop_trial_20260930",
-    "base_commit": "b43bc0234de35f5274ed0231892d0c72e2191a33",
-    "selected_action": "Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization",
-    "status": "source_qualification_reobserve_after_closure",
+    "observation_path": "current_observation.nonthinking_trial_20260930",
+    "base_commit": "7de4eac2d50425567e0134e34667f3d93f79772d",
+    "selected_action": "Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner",
+    "status": "development_candidate_accepted_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.alternative_technical_trial_20260930"
+    "previous_observation_path": "current_observation.paragraph_stop_trial_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -15988,6 +15988,284 @@
         "status": "merged_main_verified_owned_lane_closed"
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "nonthinking_trial_20260930": {
+      "source": "7de4eac2d50425567e0134e34667f3d93f79772d",
+      "outcome": "NONTHINKING_PROPOSAL_PASSED_ORIGINAL_DEVELOPMENT_CRITERIA",
+      "execution_plane": "directly_supervised_local_qualification",
+      "measurements": {
+        "attempts": 1,
+        "returned": 1,
+        "rejected_invalid_output": 0,
+        "retries": 0,
+        "child_wall_seconds": 50.437999999849126,
+        "usage": {
+          "prompt_tokens": 674,
+          "completion_tokens": 120,
+          "total_tokens": 794
+        },
+        "syntax_valid_proposals": 1,
+        "accepted_development_proposals": 1,
+        "candidate_applications": 1,
+        "candidate_application_scope": "disposable historical fixture only",
+        "production_applications": 0,
+        "candidate_test_runs": 1,
+        "candidate_cases": {
+          "tests": 48,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 48
+        },
+        "historical_baseline_cases": {
+          "passed": 40,
+          "failed": 8,
+          "total": 48
+        },
+        "historical_reference_cases": {
+          "passed": 48,
+          "failed": 0,
+          "total": 48
+        },
+        "development_failures_recovered": 8,
+        "retained_uses": 0,
+        "finish_reason": "stop",
+        "exact_terminating_stop": null,
+        "held_out_gain": null,
+        "retained_gain": null
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+        "sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "bytes": 2707513696
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
+        "modules/infrastructure/shared_utilities/lm_studio_model_lifecycle.py": "c6ce1e7c70aba5d3dca1cdd3295a255924a506f87934a05749761606aed487fa",
+        "modules/infrastructure/shared_utilities/lm_studio_native_transport.py": "8b5d6f69de87194992c84827bac38111daca8b0d77f141165b4198e04bc44f95",
+        "modules/infrastructure/shared_utilities/lm_studio_lifecycle_intent.py": "30c7742b8a734bcea1c27812a3e55236ef6289c1076dbcd1d63d5c42e3776b7c",
+        "modules/infrastructure/shared_utilities/runtime_atomic_replace.py": "1b751c6e488f7d04c5ce5790b4674d1cc604b714f02e385ac9bc3c2bd02e2aa4",
+        "modules/infrastructure/shared_utilities/runtime_artifact_safety.py": "22bd3f18846f6f3bc7477093fb4a9435ffa990fbf4c825de1d9be522203dabac"
+      },
+      "frozen_acceptance_reference": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\acceptance-review.json": "b5b157fbfe5a5a20513d88428a2328d602042f5b974080a4948311de88f28b19",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\proposal-inspector-review.json": "a312d2b9013bc7663343bb59eeabaac69800a12b07bee938dacb6487f16f21a1",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\inspect_proposal.py": "e59f2538bb255ccc6770745aded8e575b1901a080aa70d001681b252c24b1168"
+      },
+      "artifact_hashes": {
+        "manifest.json": "e1eb7007cdd47d50d4e135a63d21120eb874a77795ae4c8c279224c5876d0ec5",
+        "generate_worker.py": "b57edb8dc366ad670d7d262872e215863c0c40dbe863d8108a7cac29f5461882",
+        "run_generation.py": "6bf77bdf0da35376fd947105be153d3164889d54238b171649c0c1e2d6e818ad",
+        "instruction.txt": "0b8bbedc0a70c78cccd4112bfb39f7ebcbc1119358f127e2b3184af8134b5720",
+        "input.json": "6dfff3191ed9ea6ac01b8cf4202a921d4cea5aab559b393812f45cbfd10a4266",
+        "input-check.json": "2da7b7c807a364df31bb3c8523c514da4e59c2169a41a70da8261b716c450223",
+        "control-reuse-check.json": "b091bdc92e7322fe287568334f2868f4118f14c6b0e8c6cf582a1e2d3dea79d7",
+        "execution-review.json": "e767c37f9a262786cfb15a4620d29ec86e4e50ce04044f599c15d0797345b140",
+        "generation.raw.json": "a3156db9a23dedd6d0ff535a026a9185b03ed90d259c13658f3e810a99833875",
+        "generation.receipt.json": "cfe048dcbd6af9bcf2ff58c94b3c80cdb7778a9e0dcf31008541c0ef8ba7d674",
+        "phases.jsonl": "f0a2e124a0a8ab5c576762a54fc68079d2ec36954e2ccc62ec42ab1d6899ce00",
+        "observed-template.txt": "a92e1dd97cb1cb175c9b70c0828e146bea4371c2643319b661b777e89811972e",
+        "inspect_proposal.py": "2e1daebaa974fc43f2148ee60f8a38127d69e7043773317b160a3dc6415b9ab3",
+        "proposal-inspector-review.json": "379597519837434db56bf54a14d0f845743ce868f061b7af1d19332d6f3c0a00",
+        "parser-execution.json": "132a7d924c7f0bcfd4edef02c75f1fbfeebb1738fec30eb7df1f8f38fde993fe",
+        "proposal-inspection.json": "35b748b7a5de806959d48543a87ede288de0977e1fe8c3975ddc3f36d6a705f1",
+        "proposal.py.txt": "bfbcd3badee53a40f9f0b20056315006d06117d3741008319fabb034ae627a96",
+        "result-review.json": "b61966bd289acdd6f1c3dde6d74af71fa2433feb00d14c39cd857da77b27e5f8",
+        "candidate-review.json": "a036750a963b298a4d4c141d47736c9645404b168500dd2495c25a2c92d5b105",
+        "candidate-execution-review.json": "0352a322f1f469aee1a9eb89fe4fc1507167df7fb79566c7fdb6d8046bddc79c",
+        "fixture-manifest.json": "2b502864bd4c0ff6991341ae5101c017a199c4d8f51b87b54d8347073c231af5",
+        "apply_reviewed_proposal.py": "626d048d865dda96ac4b3cc91662340d348c7543615c06358fb61d2f3a9b9648",
+        "run_correspondence.py": "a052ee1fb47977f1a8d3f52db5546921d3dd2c84bb3568a3323761eadf1a2d04",
+        "application.json": "6baed37d47b3634d64182e08c04e6435003e781160f473474acfe3cf4da58a89",
+        "application-validation.json": "c677313444930c594d408bd8f6f48647bb7ef1882da42d40a2ba4c5d1401f93a",
+        "candidate/receipt.json": "317eeda0933173aa92a808fb2a03a4bf2d6b454638b2c4424244324376c61d8a",
+        "candidate/results.xml": "c7f90fec83f3b7543ea9af91fdb438bdfc9fd32c0435265454351914ca3d7a83",
+        "candidate/output.log": "21651ffdb68b956896aaa9fc9b116ce1461ad653f15dd7bc3c99b94ec8cc8c01",
+        "candidate-result-review.json": "a9010f0978803d857e6956e40a8a7160116c41cdc9225125d72173191c085bed",
+        "next-action-source-review.json": "dbe081bdd603fb5d4041f6c0086a74b5abc64d61a9c3c91d5d12d1a95af97e4e",
+        "entry.json": "2f138ed445d9bc8a674a4a7d3213a60825157a1e7e087b0383cdd6985ae3095f",
+        "holo-query.json": "24a468db4a814c65e4a8ec3f186a7147dd825868fab6bf226f04974cade85cda",
+        "wsp00-gate.json": "b300ee5dd871479c3e0881ecafa0ed6d3e2f404a4a5e8f60a0562de454dce7a6"
+      },
+      "comparison": {
+        "previous_packet": "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial",
+        "preserved": [
+          "Exact model/runtime/template bytes, input/instruction/system/framing content",
+          "Current ### and native EOS/EOG,temperature0.2,CPU4/GPU0,512output/2048context/180seconds",
+          "Original strict parser and48 development criteria; no output extraction or extra feedback"
+        ],
+        "changed": [
+          "Native template enable_thinking=False via existing temporary scoped chat_handler; assistant prefix changes accordingly."
+        ],
+        "scope": "One unseeded adaptive known-task template-mode comparison, not held-out or retained gain."
+      },
+      "prerequisite_evidence": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\template-handler-review.json": "d15ebecd42d2d4c0b89097100bdda4c83ddd373b05638679b68be7e7508ec0cf",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\template-handler-result.json": "44893f05b50f2aac90eff9ad7b9b15e15d82c2ad7c0c469f51fa079fb2f5931a",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\template-handler-result-review.json": "2ae79e6edca33278acff09481d8943adcec323d138fa52e7cca5038966ae0f8e",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\next-trial-design.json": "a2e046be7f108ef5f83759d737966376f040a657dfe0b22f2e0b52a00afdb580",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\next-trial-design-review.json": "0fcd0fc37439be193c9fe3dec13e11bd5eb22137a4b7ca4bab426f3a9695a68f",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\final-accounting.json": "2cc4d001a2dc4bee0233696e535a7866983ca368c23790d2dbe8baf2eb8822b5"
+      },
+      "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "rendered_prompt_sha256": "0dc684d00de339ece365903aa0f89904d39f71ce9f74844371413ee9f96d813e",
+      "actual_prompt_verified": true,
+      "proposal_sha256": "094eab40b36ecc1ee68db8465094ef49f593f995f07552806db358c4ee6ab7b4",
+      "candidate_sha256": "3debd4e00d214074718560e4396104129a7dba1dfe102540fae61ce009dfbb4e",
+      "candidate_acceptance": "Original code-only parser passed; independent pure-method scope review preceded disposable application. All48 original cases passed with stable five-file source and no unexpected denied effects.",
+      "controls_reused": "Historical48-case baseline40/8 and reference48/0 retain exact source/fixture/criteria hashes; not rerun. Seven prior no-model formatter/handler cases reused at unchanged source.",
+      "signal_class": "execution_feedback",
+      "verification_independence": "Independent source, candidate scope and persisted-result review; coordinator executed the one48-case run. Not authenticated native evaluator evidence.",
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No accepted semantic coverage; exact known owners reused.",
+        "ordering": "Canonical WSP/current queue, source/interface/tests, exact prior evidence.",
+        "missing": "Semantic coverage and native admission absent; memory/README owner still absent.",
+        "staleness": "One governed query on changed main; no retry/reindex.",
+        "duplication": "No new runtime module, parser, controller or test family.",
+        "maintenance_route": "Existing R03 authority owner."
+      },
+      "limits": [
+        "Known-case historical rehearsal with explicit previous feedback; current production defect was already fixed in PR1969.",
+        "One unseeded adaptive template-mode comparison; no causal timing/general competence claim.",
+        "Candidate applied only to disposable fixture. No runtime route/configuration or production source change.",
+        "Tests use actual reviewed leaves/SQLite with isolated package initializers and Python effect guards; not an OS hostile-code sandbox.",
+        "No retained replay, held-out transfer, native WRE admission, promotion or production RSI demonstrated."
+      ],
+      "code_changes": false,
+      "candidate_applied": true,
+      "candidate_application_scope": "disposable historical fixture only",
+      "production_source_changed": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior frozen decision cohort and code proposal did not meet acceptance; no unreviewed prompt retry."
+        },
+        {
+          "task": "Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "The generated method now passes all48 frozen development cases in the disposable historical fixture, whereas the exact historical baseline fails8. The original acceptance already requires a fresh-process retained replay and the same runner already supports that root/tag. Reusing the exact accepted five-file artifact is the smallest missing evidence layer; writing PatternMemory or adding orchestration would introduce unrelated state/authority without proving later benefit."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "downstream",
+          "reason": "Development candidate accepted; fresh-process reuse, independent held-out evidence and any applicable governed activation/rollback remain pending."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "next_rationale": "The generated method now passes all48 frozen development cases in the disposable historical fixture, whereas the exact historical baseline fails8. The original acceptance already requires a fresh-process retained replay and the same runner already supports that root/tag. Reusing the exact accepted five-file artifact is the smallest missing evidence layer; writing PatternMemory or adding orchestration would introduce unrelated state/authority without proving later benefit.",
+      "next_planning": {
+        "effort": "Reuse the existing accepted artifact and retained-use/verification owners; one separately reviewed bounded layer.",
+        "cost": "Model-call budget closed; prefer deterministic reuse checks before any new generation or provider cost.",
+        "verification_burden": "Exact accepted artifact, unchanged original criteria, source/result identity and independent verification. No held-out claim for repeated development cases.",
+        "dependencies": [
+          "Complete this sprint publication/main/owned closure and freshly reobserve source/owners plus exact artifact/toolchain/runner identities before next execution.",
+          "Prepare existing retained fixture root from exact accepted candidate bytes under a new owned audit location; exclusive creation, no links/outside paths, bind allfive hashes and proposal/result/acceptance receipts. Do not modify or reuse prior candidate test output directory.",
+          "Independently review exact copy/manifest and unchanged runner commands before any replay; no execution grant in this planning receipt.",
+          "Use one fresh qualified isolated/no-bytecode process with existing run_correspondence.py retained retained, fresh external temp/profile/SQLite roots, no model/provider/defaultDB. Require same48case identities,48pass/0fail/error/skip, stablefive loaded-source pins, expected SQLite-only paths and no unexpected denials.",
+          "Retain independently reviewed result and exact accepted artifact identity after replay. Report this as historical development artifact reuse, not held-out benefit or governed WRE-memory adoption."
+        ],
+        "ownership": "Existing RSI lane; active FoundUps, shared checkout and RemoteAutoPost protected."
+      },
+      "prior_closure": {
+        "pr": 1986,
+        "merge": "7de4eac2d50425567e0134e34667f3d93f79772d",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-nonthinking-trial\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
     }
   }
