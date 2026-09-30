@@ -1,6 +1,7 @@
 import hashlib
 import inspect
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -29,6 +30,14 @@ from modules.communication.moltbot_bridge.src.reddog_recipient_preflight import 
     normalize_address,
     preflight_recipients,
     verify_sent_readback,
+)
+from modules.communication.moltbot_bridge.src.reddog_correspondence_sender_boundary import (
+    CorrespondenceTransaction,
+    ProviderSendResult,
+    SenderBoundaryDecision,
+    bind_preflight_receipt,
+    execute_sender_boundary,
+    transaction_digest,
 )
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -241,6 +250,218 @@ def test_sent_readback_detects_extra_or_missing_recipient():
     assert "SENT_READBACK_MISSING_RECIPIENT" in result.reasons
     assert "SENT_READBACK_EXTRA_RECIPIENT" in result.reasons
 
+
+
+def _boundary_transaction(
+    *,
+    address="route@example.org",
+    role=RecipientRole.TO,
+    content_digest="sha256:content-v1",
+    provider_object_id="draft-1",
+):
+    return CorrespondenceTransaction(
+        provider="gmail",
+        purpose_scope="YUMORI::UTILITY::PROCEDURE_INQUIRY",
+        recipients=(ProposedRecipient("org-1", role, address),),
+        content_digest=content_digest,
+        provider_object_id=provider_object_id,
+        thread_id="thread-1",
+    )
+
+
+def _boundary_send_receipt(transaction, *, issued_at=None, ttl_seconds=300):
+    receipt = preflight_recipients(
+        list(transaction.recipients),
+        [ev("org-1", "route@example.org", EvidenceLevel.PUBLIC_DIRECTORY)],
+    )
+    assert receipt.decision is PreflightDecision.SEND
+    return bind_preflight_receipt(
+        receipt,
+        transaction,
+        issued_at=issued_at or datetime(2026, 9, 30, 8, 0, tzinfo=timezone.utc),
+        ttl_seconds=ttl_seconds,
+    )
+
+
+def test_sender_boundary_transaction_digest_binds_recipient_role_and_content():
+    base = _boundary_transaction()
+    assert transaction_digest(base) == transaction_digest(_boundary_transaction())
+    assert transaction_digest(base) != transaction_digest(
+        _boundary_transaction(role=RecipientRole.CC)
+    )
+    assert transaction_digest(base) != transaction_digest(
+        _boundary_transaction(content_digest="sha256:content-v2")
+    )
+
+
+def test_sender_boundary_missing_receipt_never_invokes_provider():
+    calls = {"send": 0}
+
+    def provider_send(_transaction):
+        calls["send"] += 1
+        return ProviderSendResult("mid-1", "thread-1")
+
+    result = execute_sender_boundary(
+        authorization=None,
+        load_current_transaction=_boundary_transaction,
+        provider_send=provider_send,
+        provider_readback=lambda _result: {},
+        now=datetime(2026, 9, 30, 8, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.BLOCK
+    assert result.reasons == ("MISSING_PREFLIGHT_RECEIPT",)
+    assert result.provider_invoked is False
+    assert calls["send"] == 0
+
+
+def test_sender_boundary_block_receipt_never_invokes_provider():
+    tx = _boundary_transaction()
+    blocked = preflight_recipients(
+        list(tx.recipients),
+        [ev("org-1", "different@example.org", EvidenceLevel.PUBLIC_DIRECTORY)],
+    )
+    authorization = bind_preflight_receipt(
+        blocked,
+        tx,
+        issued_at=datetime(2026, 9, 30, 8, 0, tzinfo=timezone.utc),
+    )
+    calls = {"send": 0}
+
+    def provider_send(_transaction):
+        calls["send"] += 1
+        return ProviderSendResult("mid-1", "thread-1")
+
+    result = execute_sender_boundary(
+        authorization=authorization,
+        load_current_transaction=lambda: tx,
+        provider_send=provider_send,
+        provider_readback=lambda _result: {},
+        now=datetime(2026, 9, 30, 8, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.BLOCK
+    assert "PREFLIGHT_NOT_SEND" in result.reasons
+    assert calls["send"] == 0
+
+
+def test_sender_boundary_stale_receipt_never_invokes_provider():
+    tx = _boundary_transaction()
+    authorization = _boundary_send_receipt(tx, ttl_seconds=60)
+    calls = {"send": 0}
+
+    def provider_send(_transaction):
+        calls["send"] += 1
+        return ProviderSendResult("mid-1", "thread-1")
+
+    result = execute_sender_boundary(
+        authorization=authorization,
+        load_current_transaction=lambda: tx,
+        provider_send=provider_send,
+        provider_readback=lambda _result: {},
+        now=datetime(2026, 9, 30, 8, 2, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.BLOCK
+    assert "STALE_PREFLIGHT_RECEIPT" in result.reasons
+    assert calls["send"] == 0
+
+
+def test_sender_boundary_changed_draft_invalidates_receipt_before_provider():
+    authorized_tx = _boundary_transaction()
+    current_tx = _boundary_transaction(content_digest="sha256:changed-after-preflight")
+    authorization = _boundary_send_receipt(authorized_tx)
+    calls = {"send": 0}
+
+    def provider_send(_transaction):
+        calls["send"] += 1
+        return ProviderSendResult("mid-1", "thread-1")
+
+    result = execute_sender_boundary(
+        authorization=authorization,
+        load_current_transaction=lambda: current_tx,
+        provider_send=provider_send,
+        provider_readback=lambda _result: {},
+        now=datetime(2026, 9, 30, 8, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.BLOCK
+    assert "TRANSACTION_MISMATCH" in result.reasons
+    assert calls["send"] == 0
+
+
+def test_sender_boundary_valid_receipt_requires_exact_post_send_readback():
+    tx = _boundary_transaction()
+    authorization = _boundary_send_receipt(tx)
+    calls = {"send": 0, "readback": 0}
+
+    def provider_send(current):
+        calls["send"] += 1
+        assert current == tx
+        return ProviderSendResult("mid-1", "thread-1")
+
+    def provider_readback(result):
+        calls["readback"] += 1
+        assert result.provider_message_id == "mid-1"
+        return {
+            RecipientRole.TO: ["Route <route@example.org>"],
+            RecipientRole.CC: [],
+            RecipientRole.BCC: [],
+        }
+
+    result = execute_sender_boundary(
+        authorization=authorization,
+        load_current_transaction=lambda: tx,
+        provider_send=provider_send,
+        provider_readback=provider_readback,
+        now=datetime(2026, 9, 30, 8, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.VERIFIED_SENT
+    assert result.provider_invoked is True
+    assert result.reasons == ()
+    assert calls == {"send": 1, "readback": 1}
+
+
+def test_sender_boundary_readback_mismatch_is_integrity_incident_not_verified_sent():
+    tx = _boundary_transaction()
+    authorization = _boundary_send_receipt(tx)
+
+    result = execute_sender_boundary(
+        authorization=authorization,
+        load_current_transaction=lambda: tx,
+        provider_send=lambda _transaction: ProviderSendResult("mid-1", "thread-1"),
+        provider_readback=lambda _result: {
+            RecipientRole.TO: ["wrong@example.org"],
+            RecipientRole.CC: [],
+            RecipientRole.BCC: [],
+        },
+        now=datetime(2026, 9, 30, 8, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.PROVIDER_SENT_INTEGRITY_INCIDENT
+    assert "SENT_READBACK_MISSING_RECIPIENT" in result.reasons
+    assert "SENT_READBACK_EXTRA_RECIPIENT" in result.reasons
+
+
+def test_sender_boundary_provider_exception_requires_sent_reconciliation_before_retry():
+    tx = _boundary_transaction()
+    authorization = _boundary_send_receipt(tx)
+
+    def provider_send(_transaction):
+        raise RuntimeError("ambiguous transport failure")
+
+    result = execute_sender_boundary(
+        authorization=authorization,
+        load_current_transaction=lambda: tx,
+        provider_send=provider_send,
+        provider_readback=lambda _result: {},
+        now=datetime(2026, 9, 30, 8, 1, tzinfo=timezone.utc),
+    )
+
+    assert result.decision is SenderBoundaryDecision.PROVIDER_STATE_UNKNOWN
+    assert result.provider_invoked is True
+    assert result.reasons == ("PROVIDER_SEND_RAISED_RECONCILE_BEFORE_RETRY",)
 
 
 @pytest.fixture
