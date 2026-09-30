@@ -1,3 +1,20 @@
+## 2026-09-30 — One-factor framing trial returned identical rejected code
+
+- One reviewed local call changed only the final generic framing sentence;
+  instruction/context/model/chat/stops/criteria stayed fixed. Returned in
+  41.063 s; native usage 652 input / 83 output / 735 total tokens. No retries.
+- Exact proposal bytes matched the prior feedback trial. Original parser
+  rejected fences; independent review found missing watermark checks. No
+  candidate application, test execution, native admission or retained benefit.
+- Four pure framing checks passed. Prior eight probe checks and 48 development
+  controls were reused only at verified unchanged source scope, not rerun.
+- WSP 00/15/22/48/50/84/97 selects existing code-route/identity qualification:
+  C2/I4/D4/Impact3 = 13/P1. Availability does not prove competence; no further
+  blind prompt retry or new API/schema. Holo authority mismatch remains recorded.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-framing-qualification/` and
+  backlog `current_observation.framing_qualification_20260930`. Prior #1982 is
+  closed/main-verified; current publication/cleanup receipts remain separate.
+
 ## 2026-09-30 — Existing adapter delivery qualified; no patch justified
 
 - All23 deterministic checks passed:8 context/forwarding,4 output quarantine,
