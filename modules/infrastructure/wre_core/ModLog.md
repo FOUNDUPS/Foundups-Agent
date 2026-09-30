@@ -1,3 +1,20 @@
+## 2026-09-30 — Local worker route and identity contracts qualified
+
+- Eighteen offline checks passed: nine selection, five mocked backend routing,
+  three public catalog, one static actual-WRE-path check. Source hashes stayed
+  unchanged. No model/provider/live resolver call or production defect.
+- WRE directly loads its selected file; optional LM Studio alias preference
+  is a separate resolver. Public local/code identity and AVAILABLE/CANDIDATE
+  do not prove exact artifact identity, competence, promotion or RSI benefit.
+- WSP 00/15/22/48/50/84/97: next C2/I4/D4/Impact3 = 13/P1. Revalidate prior
+  Qwen3.5-4B artifact/runtime qualification before a separately reviewed finite
+  exact-file technical trial. Preserve parser/48 criteria; no blind retries,
+  new router or global environment switch. No current call budget granted.
+- Canonical six-owner planning/documentation update only. Independent source,
+  criteria, harness and result reviews are in the existing external audit lane:
+  `O:/Foundups-Agent-audits/20260930-rsi-code-route-qualification/`.
+- Native admission, independent held-out and retained benefit remain open.
+
 ## 2026-09-30 — One-factor framing trial returned identical rejected code
 
 - One reviewed local call changed only the final generic framing sentence;

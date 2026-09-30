@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-30 current layer:** one bounded task-framing trial returned byte-identical rejected code in 41.063 seconds (652 input / 83 output tokens). Nothing was applied. Next 13/P1: qualify existing local code-worker routing and model identity before another trial; no more blind prompt retries. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1982 is merged/main-verified. Native admission and demonstrated retained improvement remain open.
+**2026-09-30 current layer:** local worker routing/identity contracts passed 18 offline checks (17 synthetic/mock execution, one static WRE-path check); no production defect or model competence established. Next 13/P1: revalidate the previously qualified Qwen3.5-4B artifact and prepare one exact-file technical trial with unchanged acceptance. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1983 is merged/main-verified. Native admission and demonstrated retained improvement remain open.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

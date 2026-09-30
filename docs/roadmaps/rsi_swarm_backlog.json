@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.framing_qualification_20260930",
-    "base_commit": "edac7387799c405f1b138f27882fe0cc2ad448f8",
-    "selected_action": "Qualify existing local code-worker routing and model identity before selecting another worker trial",
-    "status": "code_route_identity_qualification_reobserve_after_closure",
+    "observation_path": "current_observation.code_route_qualification_20260930",
+    "base_commit": "e6bc0cb3c7804149bf96fba99462fb40e843df7c",
+    "selected_action": "Revalidate the previously qualified Qwen3.5-4B artifact and prepare one exact-file technical proposal trial under unchanged acceptance",
+    "status": "alternative_exact_file_trial_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-framing-qualification\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-code-route-qualification\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.output_contract_20260930"
+    "previous_observation_path": "current_observation.framing_qualification_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -15353,6 +15353,172 @@
         "status": "merged_main_verified_owned_lane_closed"
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-framing-qualification\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "code_route_qualification_20260930": {
+      "source": "e6bc0cb3c7804149bf96fba99462fb40e843df7c",
+      "outcome": "ROUTE_CONTRACTS_QUALIFIED_NO_PRODUCTION_DEFECT",
+      "execution_plane": "offline deterministic development characterization",
+      "measurements": {
+        "planned": 18,
+        "passed": 18,
+        "failed": 0,
+        "dynamic_mock_checks": 17,
+        "static_checks": 1,
+        "actual_model_calls": 0,
+        "actual_provider_calls": 0,
+        "live_resolver_calls": 0,
+        "alternative_artifacts_qualified": 0,
+        "semantic_quality_gain": null,
+        "held_out_gain": null,
+        "retained_gain": null
+      },
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/shared_utilities/local_llm_resolver.py": "468a586148f87ab883a6b9a7d52f064b67dd23a8c5e43810363d389384e888c8",
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/tests/test_local_model_selection.py": "977686e0e56421e430b4395f4171874bf2a8111a72db7033f584f236c97d5c80",
+        "modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py": "9f9355e34af33346cc42f7ff17db2ac3d40d5c487cda9bf653fc74d25c9a9247",
+        "modules/ai_intelligence/ai_gateway/src/model_intelligence_catalog.py": "33672e4f79ffdd746e8b3ef3022d033b77bb1bcffe34870f35e59581b9440e8a",
+        "modules/ai_intelligence/ai_gateway/tests/test_model_intelligence_catalog.py": "47b5d1e19f8534a4b6a72a4d8febeae32c6946992aac3910364e6041ce2986fc",
+        "modules/ai_intelligence/ai_gateway/INTERFACE.md": "bca9bd532af24a5b9707ac969895d242c7a89e4ee74da6fb2eb6277d23462f65",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/shared_utilities/INTERFACE.md": "06ad403a42eed552997feb4606b2cf48ff39dce99092df977e556614cd698e27",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md": "40b062090f23e56bfbd724f72a135b1f00bb780b9d122384ebb5352ebfd44d09",
+        "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md": "7b9a9de1c8ea2f322a5e363de64affe4a0e6ba1dd58848c7278c9d1c72eb8211",
+        "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md": "706239210fa0404f0f72d3b3c0f06fa3c371262d7d498546d63810d14d09b8d9",
+        "modules/ai_intelligence/ai_gateway/src/model_registry.py": "71072779852d60c87f0d205912b5a17b6b6e15c0fd1d27916e80af1cec0e905b"
+      },
+      "artifact_hashes": {
+        "qualify_routes.py": "bd593884793f53f07729e48692c3ebbe2485438a98c0585cbdf95b7331d927a7",
+        "acceptance-review.json": "69ea8ef8182ac3e3436950b4833cb10349a6329f0307a58d4af34f3e9336699c",
+        "source-review.json": "0a20a70163c0f10e4afea37c72552aa6c7b6488df347a3f9cf4ee6b1a1416d20",
+        "execution-review.json": "df40dc69aff1b6c625c0ab601fa539b85a558b1168d579485a7f0ec5ba6c30e7",
+        "generation-result.json": "2d364bb9e54ccb391e07f854547822ded3de1f3e7aa0790d961e832b2ec7df59",
+        "result-review.json": "6bda1b24051ffc6748101bbafb4c24a2e62b8fd4c7a124928ff0980a8d8ca976",
+        "entry.json": "4b9f5c050057502fd6c9d5b616e1418b9d4aa1a152c5b9da90e9789c4a85731b",
+        "holo-query.json": "5d0e11bf27036e03ce1f30cc30ad301cd647ff2715fa06a0323e80047bd2ed7b",
+        "wsp00-gate.json": "142ac6daca7bb43dd9a09599a9d82911d1cc67ecc09c5c6d392354b1ebc7c443"
+      },
+      "findings": [
+        "First existing configured file/directory/alias/default wins; missing explicit path may fall through by current contract.",
+        "Optional resolver prefers fixed LM Studio alias and separately falls back to supplied GGUF; all resolver collaborators were mocked.",
+        "Actual WRE path directly feeds selected code file into QwenInferenceEngine/Llama, not the optional resolver.",
+        "Public local/code cards intentionally redact private artifact identity. AVAILABLE/CANDIDATE is not verified competence or promotion."
+      ],
+      "candidate_applied": false,
+      "native_wre_admission": false,
+      "code_changes": false,
+      "budget_closed": true,
+      "retrieval": {
+        "noise": "Narrowed to exact selection/resolver/catalog and actual WRE call path.",
+        "ordering": "WSP00/97/15, current roadmap/dispatch, module contracts, exact source and tests.",
+        "missing": "No fresh semantic coverage, admitted worker or alternative competence evidence.",
+        "staleness": "Clean fresh main source pinned; prior checkpoint treated as historical.",
+        "duplication": "Existing owners reused; no new router, schema or worker."
+      },
+      "limits": [
+        "Synthetic GGUF-named files are not model artifacts.",
+        "Fake backend observations are not native load/probe evidence.",
+        "Python audit guard is not an OS sandbox.",
+        "Public role identity is intentionally not exact private model identity.",
+        "No admission, promotion, candidate application or retained improvement established."
+      ],
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior frozen decision cohort and code proposal did not meet acceptance; no unreviewed prompt retry."
+        },
+        {
+          "task": "Revalidate the previously qualified Qwen3.5-4B artifact and prepare one exact-file technical proposal trial under unchanged acceptance",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "Route contracts passed; reuse prior artifact/load evidence if exact hashes match. Check actual template/token fit before one separately reviewed finite trial; no redundant load-only sprint."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "downstream",
+          "reason": "Requires accepted candidate and governed activation/rollback; none accepted."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Revalidate the previously qualified Qwen3.5-4B artifact and prepare one exact-file technical proposal trial under unchanged acceptance",
+      "next_planning": {
+        "effort": "One narrow exact-file technical trial preparation after fresh identity/source checks; reuse historical qualification rather than another load-only campaign.",
+        "cost": "Current slice zero calls. Any future trial requires a finite reviewed call/token/wall budget; no downloads or paid provider calls selected.",
+        "verification_burden": "Bind exact artifact/runtime/source; observe actual rendered template and token fit in generation process; preserve original strict Python parser and48 historical development criteria. Quality, admission and retained benefit remain separate.",
+        "dependencies": "Fresh main/ownership, unchanged historical artifact/runtime evidence and independent exact harness review. Changed identity returns to qualification; no substitution by filename.",
+        "ownership": "Existing RSI/WRE local-worker lane; no global route/environment changes; protect active FoundUps and separate AutoPost."
+      },
+      "prior_closure": {
+        "pr": 1983,
+        "merge": "e6bc0cb3c7804149bf96fba99462fb40e843df7c",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-code-route-qualification\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
     }
   }

@@ -1,59 +1,52 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `edac73877`.** One local worker call
-changed only the final generic prompt sentence to require the skill's O-field
-artifact. The complete instruction and feedback context, model/runtime, chat
-transport, stops, caps and evaluator stayed fixed. It returned exactly the same
-proposal bytes as the prior feedback trial. The original parser rejected Markdown
-fences; independent review also found the missing watermark checks. Nothing was
-applied. The one-call budget is closed.
+**Current qualification: 2026-09-30, source `e6bc0cb3c`.** The existing local
+selection, optional resolver and public catalog contracts passed 18 offline
+checks: 17 dynamic checks with synthetic files/fake backend collaborators and
+one static AST check of the actual WRE call path. No production contract defect
+was demonstrated; no routing implementation change is selected.
 
-| Current attempt | Observed result |
+| Observation | Verified scope |
 |---|---|
-| Dispatch / returned / rejected / retries | 1 / 1 / 1 / 0 |
-| Parent wall | 41.063 s |
-| Native response input / output / total tokens | 652 / 83 / 735 |
-| Syntax-valid / accepted proposals | 0/1 / 0/1 |
-| Candidate applications / tests / retained uses | 0 / 0 / 0 |
-| Finish reason / exact terminating stop | `stop` / unknown |
-| Held-out / retained benefit | Not measured / not measured |
+| Selection precedence and missing-path fallback | 9 synthetic-file checks |
+| Optional LM Studio alias / GGUF fallback | 5 mocked resolver checks |
+| Public identity and unknown capability | 3 typed catalog checks |
+| Actual WRE adapter → Qwen engine → Llama | 1 static AST check; no native load |
+| Real model / provider / live resolver calls | 0 / 0 / 0 |
+| Alternative artifacts qualified / candidate applications | 0 / 0 |
+| Semantic / held-out / retained gain | Not measured / not measured / not measured |
 
-Four pure framing checks passed. The unchanged MethodProbe AST reuses eight
-prior checks; they were not rerun or counted as current inference validation.
-Actual forwarded prompt and full 512-token reserve fit the 2048 context. Parent
-pins and child close passed without journal failure. Native usage differs from
-method-return counts. Historical 48-case development controls retain their exact
-source/fixture hashes and were not rerun. This unseeded known-case observation
-does not establish causality or generalization. Prior 23 adapter checks remain
-transport/quarantine evidence; no production instruction-loss defect was found.
+Selection chooses the first existing candidate; a missing explicit path can
+fall through. The optional resolver prefers its fixed LM Studio alias, then
+the supplied fallback file. The actual WRE worker uses the selected file
+directly and does not use that resolver. Public `local/code` cards deliberately
+redact private paths: two distinct artifacts can yield identical cards.
+AVAILABLE/CANDIDATE records existence; it does not prove task competence,
+promotion or loaded artifact identity. Capability fields remain unmeasured.
 
-**Next eligible layer: existing code-worker routing/identity qualification
-(13/P1; C2/I4/D4/Impact3).** Stop generic prompt retries. Inspect existing local
-model selection, catalog normalization and capability routing; qualify explicit
-path precedence, missing-path fallback and alias identity with inert collaborators.
-File availability is not demonstrated competence; do not call an AVAILABLE flag
-a bug solely because a task failed. Live resolver probing/initialization is not
-a read-only inventory shortcut. Identify an exact existing alternative before
-any separately reviewed comparison. No new schema/backend or production patch
-without a reproduced contract failure; JSON response formatting would change
-the current raw-Python acceptance contract.
+**Next eligible layer: revalidate the previously qualified Qwen3.5-4B artifact
+and prepare one exact-file technical trial (13/P1; C2/I4/D4/Impact3).** Reuse its
+historical artifact/load evidence only if fresh model/runtime/source hashes
+match. Do not repeat a load-only sprint if identity is unchanged. Keep exact
+file selection local to the experiment; check the actual rendered template
+and token fit in the same process before generation. Preserve the original
+strict Python parser and 48 historical development criteria. Any future call
+needs a separate finite budget and independent exact-harness review. No model
+call is granted by these deterministic results. A filename or public role card
+cannot substitute for the exact artifact. Prior rejected code trials remain
+rejected; no generic prompt retry or acceptance relaxation is selected.
 
 Holo retrieval remains `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness
-and an index gap. Existing R03 exact-main authority maintenance remains 15/P1
-blocked; no query-side reindex or fresh semantic coverage is claimed. Native
-admission remains 18/P0 blocked. Installed llama-cpp 0.3.20 versus declared 0.2.72
-is unchanged and unreconciled. This is direct supervised local qualification,
-not native WRE/OpenClaw/Hermes dispatch or OS isolation.
+and an index gap. R03 exact-source maintenance remains 15/P1 blocked; no query
+side reindex or fresh semantic coverage is claimed. Native admission remains
+18/P0 blocked. Installed llama-cpp 0.3.20 versus declared 0.2.72 is unreconciled.
+This is supervised development qualification, not native autonomous RSI.
 
-Minimum progression: accepted scoped proposal → independent original controls
-and rollback → later verified reuse/held-out benefit → one admitted isolated
-AmIBot ticket → two workers. Basic autonomous RSI remains incomplete. Active
-FoundUps and Remote AutoPost are protected.
-
-Evidence/queue: backlog `current_observation.framing_qualification_20260930`;
-all prior observations remain. PR #1982 is merged/main-verified at `edac73877`,
-CI 36708558127 and CodeQL 36708558394 successful, owned lane closed. This sprint
-has separate publication and cleanup receipts.
+Progression remains accepted proposal → independent controls and rollback →
+later reuse/held-out benefit → admitted isolated AmIBot → two workers. Active
+FoundUps and Remote AutoPost remain protected. PR #1983 is closed/main-verified.
+Evidence: backlog `current_observation.code_route_qualification_20260930` and
+`O:/Foundups-Agent-audits/20260930-rsi-code-route-qualification/`.
 
 ## Staged general-role decision cohort — 2026-09-29
 
