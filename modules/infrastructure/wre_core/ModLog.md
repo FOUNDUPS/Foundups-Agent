@@ -1,3 +1,18 @@
+## 2026-09-30 — Alternative worker technical trial rejected
+
+- One exact Qwen3.5-4B/native-template procedure, unchanged instruction/feedback/
+  parser/48 criteria, returned only a four-token non-code heading. 18.61 s wall;
+  native usage 672 input / 4 output / 676 total. Original parser raised SyntaxError.
+- File/template/actual prompt-fit and cleanup checks passed. No candidate
+  application, tests, native admission, promotion or retained benefit. Budget
+  closed; no retry. Prior development controls rehashed, not rerun.
+- WSP 00/15/22/48/50/84/97 selects C2/I4/D4/Impact3 = 13/P1: verify existing stop
+  forwarding, then separately review one paragraph-stop comparison. Retain
+  model/template/messages/caps/criteria; no joint thinking-mode change or code
+  extraction. Exact terminating stop remains unknown.
+- Existing six RSI documentation owners only; audit and independent reviews:
+  `O:/Foundups-Agent-audits/20260930-rsi-alternative-technical-trial/`.
+
 ## 2026-09-30 — Local worker route and identity contracts qualified
 
 - Eighteen offline checks passed: nine selection, five mocked backend routing,

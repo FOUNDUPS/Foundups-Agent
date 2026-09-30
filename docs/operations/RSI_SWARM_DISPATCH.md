@@ -1,25 +1,22 @@
 ## Current bounded layer — 2026-09-30
 
-Existing local worker route/identity contracts passed 18 offline checks:
-17 synthetic/mock execution checks and one static actual-WRE-path check.
-No model/provider/live resolver call, production defect or new runtime module.
-The actual WRE worker directly loads its selected file; optional LM Studio
-resolver behavior is a separate path. Public `local/code` cards redact private
-artifact identity; AVAILABLE/CANDIDATE does not establish task competence.
+One exact Qwen3.5-4B/native-template technical trial returned only a non-code
+heading in 18.61 s (672 input / 4 output tokens). Original parser and independent
+review rejected it; nothing applied or retained. File/template/actual prompt-fit
+and cleanup checks passed. One-call budget closed; no retry or source change.
 
-Next 13/P1 (C2/I4/D4/Impact3): revalidate the previously qualified Qwen3.5-4B
-artifact and prepare one exact-file technical trial under unchanged acceptance.
-Reuse unchanged historical qualification; avoid another load-only sprint.
-Bind exact model/runtime/source, guard actual template/token fit before
-generation, preserve the strict parser and 48 development criteria, and obtain
-independent exact-harness review of a finite trial budget. No current model
-call allocation, global route switch or acceptance relaxation. Native 18/P0
-and Holo 15/P1 remain blocked.
+Next 13/P1 (C2/I4/D4/Impact3): qualify exact stop forwarding with a tiny existing
+backend/handler recording collaborator and no initialization. Then, if valid,
+prepare one separately reviewed comparison removing only the double-newline
+stop. Preserve ###, native EOS, model/template/messages/caps and original strict
+parser/48 development criteria. Do not infer the exact terminator from `stop`,
+change thinking mode jointly, extract code from reasoning or relax acceptance.
+No next call is allocated here. Native 18/P0 and Holo 15/P1 remain blocked.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.code_route_qualification_20260930`. Progression:
-accepted proposal → independent controls/rollback → later reuse/held-out benefit
-→ admitted isolated AmIBot → two workers. PR #1983 is closed/main-verified.
+and backlog `current_observation.alternative_technical_trial_20260930`.
+Progression: accepted proposal → independent controls/rollback → later reuse/
+held-out benefit → admitted isolated AmIBot → two workers. PR #1984 is closed.
 Protect active FoundUps and Remote AutoPost. Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29

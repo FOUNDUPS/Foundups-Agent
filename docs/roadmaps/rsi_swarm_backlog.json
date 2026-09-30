@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.code_route_qualification_20260930",
-    "base_commit": "e6bc0cb3c7804149bf96fba99462fb40e843df7c",
-    "selected_action": "Revalidate the previously qualified Qwen3.5-4B artifact and prepare one exact-file technical proposal trial under unchanged acceptance",
-    "status": "alternative_exact_file_trial_reobserve_after_closure",
+    "observation_path": "current_observation.alternative_technical_trial_20260930",
+    "base_commit": "2712e27dde54228d2a79ad5a2be5b987819c17e9",
+    "selected_action": "Qualify exact stop forwarding, then prepare one paragraph-stop comparison with the same worker and unchanged acceptance",
+    "status": "paragraph_stop_comparison_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-code-route-qualification\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.framing_qualification_20260930"
+    "previous_observation_path": "current_observation.code_route_qualification_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -15519,6 +15519,230 @@
         "status": "merged_main_verified_owned_lane_closed"
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-code-route-qualification\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "alternative_technical_trial_20260930": {
+      "source": "2712e27dde54228d2a79ad5a2be5b987819c17e9",
+      "outcome": "ALTERNATIVE_PROCEDURE_RETURNED_INVALID_CODE_PROPOSAL",
+      "execution_plane": "directly_supervised_local_qualification",
+      "measurements": {
+        "attempts": 1,
+        "returned": 1,
+        "rejected_invalid_output": 1,
+        "retries": 0,
+        "child_wall_seconds": 18.609999999869615,
+        "usage": {
+          "prompt_tokens": 672,
+          "completion_tokens": 4,
+          "total_tokens": 676
+        },
+        "syntax_valid_proposals": 0,
+        "accepted_proposals": 0,
+        "candidate_applications": 0,
+        "candidate_test_runs": 0,
+        "retained_uses": 0,
+        "finish_reason": "stop",
+        "exact_terminating_stop": null,
+        "held_out_gain": null,
+        "retained_gain": null
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+        "sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "bytes": 2707513696
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
+        "modules/infrastructure/shared_utilities/lm_studio_model_lifecycle.py": "c6ce1e7c70aba5d3dca1cdd3295a255924a506f87934a05749761606aed487fa",
+        "modules/infrastructure/shared_utilities/lm_studio_native_transport.py": "8b5d6f69de87194992c84827bac38111daca8b0d77f141165b4198e04bc44f95",
+        "modules/infrastructure/shared_utilities/lm_studio_lifecycle_intent.py": "30c7742b8a734bcea1c27812a3e55236ef6289c1076dbcd1d63d5c42e3776b7c",
+        "modules/infrastructure/shared_utilities/runtime_atomic_replace.py": "1b751c6e488f7d04c5ce5790b4674d1cc604b714f02e385ac9bc3c2bd02e2aa4",
+        "modules/infrastructure/shared_utilities/runtime_artifact_safety.py": "22bd3f18846f6f3bc7477093fb4a9435ffa990fbf4c825de1d9be522203dabac"
+      },
+      "frozen_acceptance_reference": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\acceptance-review.json": "b5b157fbfe5a5a20513d88428a2328d602042f5b974080a4948311de88f28b19",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\proposal-inspector-review.json": "a312d2b9013bc7663343bb59eeabaac69800a12b07bee938dacb6487f16f21a1",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\inspect_proposal.py": "e59f2538bb255ccc6770745aded8e575b1901a080aa70d001681b252c24b1168"
+      },
+      "artifact_hashes": {
+        "manifest.json": "c8f0307498b90d7cb14aa10367c1009151c80ca455445a70b153973c058ef60e",
+        "generate_worker.py": "eec3764c9651fe50afa6fe04d09b732f297a9d3f8e207aaefe63ef1fded0f1f8",
+        "run_generation.py": "6bf77bdf0da35376fd947105be153d3164889d54238b171649c0c1e2d6e818ad",
+        "instruction.txt": "0b8bbedc0a70c78cccd4112bfb39f7ebcbc1119358f127e2b3184af8134b5720",
+        "input.json": "6dfff3191ed9ea6ac01b8cf4202a921d4cea5aab559b393812f45cbfd10a4266",
+        "input-check.json": "7d18f40578e50723cece66d1d4fe8e43023eb02c27a2e0cf0138a807cf7c9d0a",
+        "control-reuse-check.json": "b091bdc92e7322fe287568334f2868f4118f14c6b0e8c6cf582a1e2d3dea79d7",
+        "source-review.json": "722a67343d2ec3d52c754ef9366e75c4c3049e29418925212c42a71e018dd91d",
+        "acceptance-review.json": "cd6702e0f90f5b1f5d1fbccaa26a1efdf4e487fa4d7f51b51a45681229490203",
+        "execution-review.json": "e79b8cd1ada2211c7fbb7441f04a9f2980072a28a0009dfbe2751fa5d2699357",
+        "generation.raw.json": "36c8ba52a02bb4771e08ea2139d5ebb83885b144a071de31a60e5d2a299039f5",
+        "generation.receipt.json": "3a62ae45667d3ed56d519c1bd7a2e811e0466f8038a5a4b3c7b5274fe5fd7d75",
+        "phases.jsonl": "f7f5ad819afd415828a3aae864daf491aae7941dcf648542b23172cc224221d3",
+        "observed-template.txt": "a92e1dd97cb1cb175c9b70c0828e146bea4371c2643319b661b777e89811972e",
+        "inspect_proposal.py": "2e1daebaa974fc43f2148ee60f8a38127d69e7043773317b160a3dc6415b9ab3",
+        "proposal-inspector-review.json": "50127944aad9563a819fcbcfda2b402496c1bb73f5f1f484d1896a6dfd29730e",
+        "parser-execution.json": "d611b44a3708301ec2e3edd81150e16b93b77cbba96f7f50e81375339a145689",
+        "proposal-inspection.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "proposal-inspection.stderr.log": "a3b724fa019bed209a988ef7ec5bbb6ca9989f64c459cd11a960d0c92e3f0f5b",
+        "proposal.py.txt": "25f2a4019adaf1379fdec7cd1b1b7098fa9084304491d5942058117dc5bd4966",
+        "result-review.json": "28122ee02c8878d59a59350fe0a96c9e32fe8e12470a96e9eb211c80c3b1c9a5",
+        "next-action-source-review.json": "527f1e5d66b3a8946a8b335441cadc50a648a2f0334a6fb095b5e4b318bf7ce7",
+        "entry.json": "3ecfc4a53493af551cb654e69b541bb079903f2688e730fa2647edcbc141386b",
+        "holo-query.json": "eaf9a4478f5658d6a3d8e4957d517fd4d75daff763b7ee4f3419f3d6b31c760c",
+        "wsp00-gate.json": "dcf3da4fad3861b619a7f54d46f41df326d6aaac4f8e6be26ef44c712ce75480"
+      },
+      "comparison": {
+        "previous_packet": "O:\\Foundups-Agent-audits\\20260930-rsi-framing-qualification",
+        "preserved": [
+          "instruction and complete feedback input bytes",
+          "framing/system messages/chat transport/stops/temperature/context/output cap",
+          "runtime source bindings",
+          "original strict parser and48 development controls",
+          "proposal quarantine and no effects"
+        ],
+        "changed": [
+          "exact selected model artifact and its native template/BOS/EOS/tokenizer"
+        ],
+        "scope": "One adaptive known-task alternative procedure; no weight-only causality, held-out or retained-gain claim."
+      },
+      "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "actual_prompt_verified": true,
+      "prompt_tokens": 672,
+      "proposal_sha256": "cc29d16b60195a51dca7b1ea1da0b05ee9bbc1fbdcb6c6f180fe8c9861bd0157",
+      "rejection": "Returned only Thinking Process:; original strict parser raised SyntaxError. No code extraction, reasoning stripping or acceptance edit.",
+      "controls_reused": "48 historical development cases, baseline40pass/8fail versus reference48pass; ten source and ten fixture files rehashed, not rerun. Instrumentation/framing AST and input/parser bytes unchanged.",
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No accepted semantic coverage; exact known owners used.",
+        "ordering": "Canonical WSP and current queue before source/contracts and prior exact evidence.",
+        "missing": "Semantic coverage unavailable; native admission absent.",
+        "staleness": "One governed query after main changed; no retry/reindex or freshness claim.",
+        "duplication": "Reuse existing child, WRE adapter, engine, backend, parser and controls.",
+        "maintenance_route": "Existing R03 authority maintenance owner."
+      },
+      "limits": [
+        "One unseeded adaptive known-task trial; model plus template/tokenizer changed together, not a pure weight-only comparison.",
+        "Sampled parent hashes and child assertions are not immutable execution or signed native admission.",
+        "Existing process-tree/time/output boundary only; no OS network or memory sandbox.",
+        "Finish reason stop does not identify the actual terminator.",
+        "No candidate application, independent held-out gain, later retained use or production RSI demonstrated."
+      ],
+      "code_changes": false,
+      "candidate_applied": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior frozen decision cohort and code proposal did not meet acceptance; no unreviewed prompt retry."
+        },
+        {
+          "task": "Qualify exact stop forwarding, then prepare one paragraph-stop comparison with the same worker and unchanged acceptance",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "Alternative procedure returned only non-code heading; exact terminating stop unknown. Existing stop override seam supports a narrow test; first deterministic forwarding evidence, then separate one-call review/budget."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "downstream",
+          "reason": "Requires accepted candidate and governed activation/rollback; none accepted."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Qualify exact stop forwarding, then prepare one paragraph-stop comparison with the same worker and unchanged acceptance",
+      "next_planning": {
+        "effort": "One tiny no-initialization backend/handler stop-forwarding check followed, only if qualified, by a separately frozen single paragraph-stop comparison.",
+        "cost": "Current one-call budget closed. Next call requires separate finite reviewed budget; no paid providers, downloads or broad model campaign.",
+        "verification_burden": "Change only removal of double-newline stop; retain ###, native EOS, exact model/template, all messages/caps and original strict parser/48 criteria. Preserve every failure and unknown exact stop identity.",
+        "dependencies": "Fresh source/ownership; exact forwarding evidence and independent script review. No native admission or promotion supplied.",
+        "ownership": "Existing RSI/WRE inference owners; no product-wide stop or thinking-mode change, global model switch or active FoundUp effects."
+      },
+      "prior_closure": {
+        "pr": 1984,
+        "merge": "2712e27dde54228d2a79ad5a2be5b987819c17e9",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
     }
   }
