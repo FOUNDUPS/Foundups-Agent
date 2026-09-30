@@ -24,7 +24,7 @@ not mean RedDog has 376 canonical specifications.
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
 | Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
-| Mosh Pit activity projection | `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
+| Moshpit activity projection | `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
 | Memex projection emitter | `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` | Product contract; specified, not implemented |
 | Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
 | FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |
