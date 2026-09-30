@@ -1,3 +1,10 @@
+## 2026-09-30 — Work orchestration and capital-network contracts
+
+- Reused `test_contracts.py`; no parallel test file or investor fixture was created.
+- Registered the YUMORI Work orchestrator and thin agent projections.
+- Regression requires canonical WSP 15 ordering, bounded `YUMORI WORK HANDOFF`, reuse of the existing CONTACTS `Capital Targets` / `Capital People` surfaces, first-degree relationship labeling, mutual-connection discovery language, and the rule that visible Contact Info is not send authorization.
+- The test protects the no-mass-blast / correspondence-preflight boundary rather than encoding private contact data.
+
 ## 2026-09-29 — Costed planning scenarios
 
 - Extended the existing model test file: cost totals/ranges, scenario-versus-evidence boundary, demand capacity/idle energy, debt repayment, cash conservation, renewal timing, Sukatto exclusion, and native projection preservation.
