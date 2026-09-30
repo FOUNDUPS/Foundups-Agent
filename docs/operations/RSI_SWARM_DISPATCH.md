@@ -1,18 +1,21 @@
-## Current bounded layer — 2026-09-29
+## Current bounded layer — 2026-09-30
 
-The prior 14/P1 proposal-consumer hypothesis is reconciled: WRE already quarantines
-local proposals and no production correspondence consumer was located. The
-concrete 13/P1 watermark defect is repaired locally (fixed 48cases:40/8 baseline,
-48/0 candidate). Preserve all original model failures.
+The historical technical repair canary is a **controlled failure**: one bounded
+local code-role dispatch timed out after90.109seconds without a returned proposal.
+No retries, application, candidate tests or retention occurred. Native load versus
+generation stage is unknown. Frozen controls reproduced40/8 baseline and48/0
+reference on the same48 development cases; this is not new product improvement.
 
-Next 15/P1: qualify one technical RSI canary through existing proposal-only workers
-and coordinator validation, with an independently frozen oracle, rollback and
-later-use acceptance. Broad platform decision mastery is not a dependency of a
-separately scoped technical task. No inference/native work order is admitted here.
+Next13/P1: qualify phase observations and one bounded no-generation local worker
+preflight before selecting a measured generation budget or smaller worker.
+Reuse the existing adapter/process owners and unchanged oracle. No additional
+call is admitted by this planning entry; the previous one-call budget is closed.
+
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and canonical backlog `current_observation.correspondence_watermark_20260929`.
-Reconcile publication and fresh ownership before executing; earlier entries below
-are historical budgets and selections.
+and backlog `current_observation.technical_canary_20260930` for exact receipts.
+PR1969 is merged/main-verified and its lane retired. Earlier sections below are
+historical observations. Native admission, held-out benefit and an isolated
+AmIBot ticket remain downstream; active FoundUps and Remote AutoPost are protected.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 

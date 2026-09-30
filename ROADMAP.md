@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-29 current layer:** a concrete correspondence freshness defect is repaired: frozen baseline40/48 passed; candidate48/48 passed. Existing WRE proposal quarantine remains; the general decision candidate is still rejected at1/12. Next15/P1: qualify **one supervised technical RSI canary**, using existing workers and independent task-specific checks before any bounded call. Broad Gmail/LinkedIn mastery is not a prerequisite for that separate task. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). Native OpenClaw/Hermes admission and retained improvement remain unproven.
+**2026-09-30 current layer:** the first bounded technical repair rehearsal reached a controlled failure: historical controls reproduced40/48 and current reference48/48, but the local worker returned no proposal within90seconds. Nothing was applied or retained. Next13/P1: measure model-load versus generation phases before choosing a budget or smaller worker. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR1969 is merged/main-verified; native OpenClaw/Hermes admission and retained improvement remain unproven.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
