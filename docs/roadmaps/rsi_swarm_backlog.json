@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_phase_20260930",
-    "base_commit": "8e04a39f44a652c4f9231888249b80f71d6d38f8",
-    "selected_action": "Qualify model-appropriate prompt/chat formatting at the existing local worker boundary against unchanged repair criteria; reuse existing chat support before extending",
-    "status": "returned_proposal_rejected_reobserve_after_closure",
+    "observation_path": "current_observation.chat_qualification_20260930",
+    "base_commit": "38c7f1fd0bd6ebd705baac347d7ecae93c541199",
+    "selected_action": "Prepare one verifier-informed repair ticket through existing input_context, retaining the original acceptance contract and qualified chat path",
+    "status": "rejected_proposal_repair_ticket_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-chat-qualification\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.generation_phase_20260930"
+    "previous_observation_path": "current_observation.native_phase_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -14397,6 +14397,235 @@
         "status": "merged_main_verified_owned_lane_closed"
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "chat_qualification_20260930": {
+      "source_head": "38c7f1fd0bd6ebd705baac347d7ecae93c541199",
+      "classification": "directly_supervised_existing_worker_qualification",
+      "outcome": "CHAT_RETURNED_PROPOSAL_REJECTED_FORMAT_AND_CONTRACT",
+      "evidence_root": "O:\\Foundups-Agent-audits\\20260930-rsi-chat-qualification",
+      "selection": {
+        "task": "Qualify model-appropriate prompt/chat formatting at the existing local worker boundary against unchanged repair criteria; reuse existing chat support before extending",
+        "dimensions": [
+          2,
+          4,
+          4,
+          3
+        ],
+        "total": 13,
+        "priority": "P1",
+        "eligible": true,
+        "state": "returned_proposal_rejected_prompt_contract_qualification",
+        "wsp97": "One proposal returned under separately frozen180s allowance but repeated instructions and failed original AST grammar. Inspect raw-completion versus existing chat formatting as a hypothesis; no additional deadline increase, new backend or relaxed criteria."
+      },
+      "measurements": {
+        "planned_attempts": 1,
+        "child_dispatch_attempts": 1,
+        "returned_attempts": 1,
+        "timeout_attempts": 0,
+        "retries": 0,
+        "nominal_child_timeout_seconds": 180,
+        "parent_child_wall_seconds": 36.0,
+        "child_reported_total_seconds": 35.765000000130385,
+        "child_reported_initialization_seconds": 5.280999999959022,
+        "child_reported_generation_seconds": 29.0,
+        "child_reported_first_eval_seconds": 15.125,
+        "recorded_phase_events": 16,
+        "prompt_tokens_native_response": 427,
+        "completion_tokens_native_response": 57,
+        "total_tokens_native_response": 484,
+        "usage_provenance": "Original public native chat-completion response captured by child, cross-checked against actual forwarded prompt list guard; not derived from method counts.",
+        "finish_reason": "stop",
+        "exact_terminating_stop": null,
+        "eval_method_returns": 57,
+        "sample_method_returns": 57,
+        "native_loads_observed_by_parent": null,
+        "generation_calls_observed_by_parent": null,
+        "returned_proposals": 1,
+        "syntax_valid_proposals": 0,
+        "rejected_proposals": 1,
+        "candidate_application_count": 0,
+        "candidate_test_runs": 0,
+        "retained_artifact_uses": 0,
+        "close_returned_in_child_journal": true,
+        "method_journal_failed": false,
+        "cleanup_journal_failed": false,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "currency_cost": null,
+        "peak_memory_bytes": null,
+        "promotion": false
+      },
+      "template_binding": {
+        "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "original_chat_format": "chat_template.default",
+        "selected_chat_format": "chat_template.default",
+        "template_text_utf8_sha256": "d5495a1e5db0611132a97e46a65dbb64a642a499421228b9c8b93229097fa9a4",
+        "template_file_raw_sha256": "e668f12b3282bd5b9647026c6db1d66aad79935f1a6799c458302ffef663537d",
+        "rendered_prompt_sha256": "9d0ed5d6625e2737cb4eed652006c2711fd4cfeee5a2e9024b4ff1e37b723214",
+        "unchanged_content_sha256": "13221879ffe40d2e6f8a3309880df1db77a6fa4902a07f1a6508cceb1851dd69",
+        "template_sha_preregistered": false,
+        "actual_token_list_verified_in_child": true,
+        "full_output_reserve_fits": true,
+        "scope": "Reviewed guard asserted exact handler token-list equality before generation. Reviewer did not rerun native tokenizer; public usage independently agrees with427 prompt tokens. Observed template text digest matches the saved text after filesystem newline normalization."
+      },
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
+        "modules/infrastructure/shared_utilities/lm_studio_model_lifecycle.py": "c6ce1e7c70aba5d3dca1cdd3295a255924a506f87934a05749761606aed487fa",
+        "modules/infrastructure/shared_utilities/lm_studio_native_transport.py": "8b5d6f69de87194992c84827bac38111daca8b0d77f141165b4198e04bc44f95",
+        "modules/infrastructure/shared_utilities/lm_studio_lifecycle_intent.py": "30c7742b8a734bcea1c27812a3e55236ef6289c1076dbcd1d63d5c42e3776b7c",
+        "modules/infrastructure/shared_utilities/runtime_atomic_replace.py": "1b751c6e488f7d04c5ce5790b4674d1cc604b714f02e385ac9bc3c2bd02e2aa4",
+        "modules/infrastructure/shared_utilities/runtime_artifact_safety.py": "22bd3f18846f6f3bc7477093fb4a9435ffa990fbf4c825de1d9be522203dabac"
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "bytes": 4683073536
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "artifact_hashes": {
+        "manifest.json": "316e24e38543e48708c28c975b9cf3fd87fdba92ee93d3c1d088eca4807401af",
+        "source-review.json": "2dc0a146a8041c088bb300a39ffe01da57fde2397cac0c3fe679c554b5f5911b",
+        "execution-review.json": "5f399a327a8493b715894904806bc2ad8b42411c8fb09def40c1e5d1ac71c780",
+        "result-review.json": "8e0aae4003f12feaf5a60b6f744d3897dfec30df976dd06b8976c9aeb6a3db9b",
+        "next-repair-source-review.json": "7645624fb4c9bd771b4559cce9a895440daae5bc05ce7ba6690a544b0ea73725",
+        "generation.receipt.json": "e0e892acf6a59490febb2db9aba440da3e833ec67d69a77dc5c065a8a907f169",
+        "generation.raw.json": "8b651eb2d1986b7cf024cbb60f21f791f79bc37e43901f1a0d524cb4cd4137c2",
+        "phases.jsonl": "1d89b68ee168b42b47a7df20a034b212d70972e8a6ba439f09b57b1d275253fe",
+        "probe-checks.json": "ebc2a36fd52f9e49252bf4b2ca4d4ae4695a2f0c8e6b4bff9a2a2bdf09ea8ab2",
+        "control-reuse-check.json": "12a2b9355fee3b574ce1af615998a040a98f4c54519cd23e91b291f4e3df8312",
+        "proposal-inspector-review.json": "2161319b927afa17d47bc066b041ac3993af57261a6dc267d0f32440bf4f9b94",
+        "parser-execution.json": "8c2ce720dedad55fb94605164e05e8b31fe4529ba9279f70fc103c9746315c8b",
+        "proposal-inspection.stderr.log": "18f6badf466106369a0ac2feafa2a639fb93edc689572fc9e44f4f9ecb8c2fa1",
+        "observed-template.txt": "e668f12b3282bd5b9647026c6db1d66aad79935f1a6799c458302ffef663537d"
+      },
+      "frozen_acceptance_reference": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\acceptance-review.json": "b5b157fbfe5a5a20513d88428a2328d602042f5b974080a4948311de88f28b19",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\proposal-inspector-review.json": "a312d2b9013bc7663343bb59eeabaac69800a12b07bee938dacb6487f16f21a1",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\inspect_proposal.py": "e59f2538bb255ccc6770745aded8e575b1901a080aa70d001681b252c24b1168"
+      },
+      "commands": [
+        "python.exe -I -S -B check_probe.py",
+        "python.exe -I -B run_generation.py",
+        "python.exe -I -S -B inspect_proposal.py"
+      ],
+      "local_checks": {
+        "instrumentation_passed": 8,
+        "instrumentation_failed": 0,
+        "scope": "Unchanged MethodProbe pass-through checks; not coverage of the new chat guard",
+        "parser_invocations": 1,
+        "unique_proposals_parsed": 1,
+        "proposal_syntax_failures": 1
+      },
+      "rejection": [
+        "Markdown fence violates the original code-only grammar",
+        "Visible exception handler suppresses load_state errors contrary to the fixed contract",
+        "Required freshness/watermark branches are absent"
+      ],
+      "provenance": "Native response supplies usage and finish_reason. Child verifies exact forwarded prompt tokens and close; parent verifies pinned inputs/source/runtime/model before and after. Independent reviewer accepts evidence, rejects candidate.",
+      "controls_reused": "Historical 48 development cases: baseline 40 passed/8 failed; reference 48 passed. Source/fixtures unchanged; not rerun, not new improvement evidence.",
+      "transport_changes": "Disposable override reuses existing LlamaCppBackend with the already-loaded engine; chat roles, model template, template EOS stop and response extraction differ from prior raw completion. No production source/runtime change.",
+      "limits": "One reviewed call, no retries or provider requests. Exact terminating stop is unknown. Template string identity was observed under pinned model bytes, not separately preregistered. Process-tree/stdout guards are not OS memory/network isolation. Shorter wall time for a different output is not validated speedup or RSI gain.",
+      "code_changes": false,
+      "candidate_applied": false,
+      "promotion": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "next_action": "Prepare one verifier-informed repair ticket through existing input_context, retaining the original acceptance contract and qualified chat path",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            4,
+            5
+          ],
+          "total": 18,
+          "priority": "P0",
+          "eligible": false,
+          "state": "blocked",
+          "wsp97": "Inherited admission and effect-use lease unresolved; direct supervised trial does not supply authority."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            3,
+            4
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "candidate_rejected",
+          "wsp97": "Preserve1/12 general and0/12 coder development results; separate from technical canary."
+        },
+        {
+          "task": "Prepare one verifier-informed repair ticket through existing input_context, retaining the original acceptance contract and qualified chat path",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": true,
+          "state": "chat_returned_proposal_rejected_format_and_contract",
+          "wsp97": "Reuse input_context to carry the exact rejected proposal and independent findings. Inspect the existing stop policy and freeze full token fit before any separately reviewed follow-up; no blind prompt sweep or relaxed parser."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "No accepted candidate; the returned proposal was rejected before application. Rollback and retained replay were not reached. Historical controls are not held-out improvement."
+        },
+        {
+          "task": "Isolated AmIBot build ticket",
+          "dimensions": [
+            3,
+            4,
+            2,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Require qualified worker and admitted execution path. Preserve activeFoundUps and Remote-owned AutoPost."
+        }
+      ],
+      "prior_closure": {
+        "pr": 1976,
+        "merge": "38c7f1fd0bd6ebd705baac347d7ecae93c541199",
+        "main_ci": 36688576814,
+        "main_codeql": 36688577207,
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-chat-qualification\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
     }
   }

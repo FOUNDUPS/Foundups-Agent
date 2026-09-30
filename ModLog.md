@@ -1,3 +1,20 @@
+## 2026-09-30 — RSI chat transport qualified; repair proposal rejected
+
+- One existing-adapter/shared-backend chat call returned in 36.0 s; native
+  usage 427 input / 57 output / 484 total tokens, generation 29.0 s. Parent
+  pins passed and child close was observed. No retries or provider requests.
+- Original code parser rejected the Markdown fence. Independent review also
+  found suppressed load errors and missing required logic. No application,
+  candidate tests, promotion or retained benefit. The call budget is closed.
+- Eight existing MethodProbe checks passed; they do not cover the new chat
+  guard. Historical 48-case controls were hash-checked, not rerun. Exact
+  terminating stop is unknown; faster output alone is not quality improvement.
+- WSP 00/15/22/48/50/84/97 selects 13/P1 verifier-informed repair through
+  existing input_context, preserving acceptance. No production code change.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-chat-qualification/` and
+  backlog `current_observation.chat_qualification_20260930`. PR #1976 closure
+  verified; this sprint's publication, CI and cleanup have separate receipts.
+
 ## 2026-09-30 — RSI worker returns; malformed proposal rejected
 
 - Qualified eval/sample observation on the existing local adapter: 90-second

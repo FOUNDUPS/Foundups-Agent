@@ -1,25 +1,26 @@
 ## Current bounded layer — 2026-09-30
 
-Two separately frozen qualification packets are closed. The 90-second packet
-timed out after recording real eval/sample progress. That evidence justified one
-180-second follow-up with unchanged task/model/criteria; it returned in 119.797s,
-closed cleanly according to the child journal and passed parent identity checks.
-The returned proposal repeated instructions and failed the unchanged AST parser.
-It was not applied or executed. Counts: 2 dispatches, 1 timeout, 1 returned/rejected
-proposal, 0 accepted candidates, 0 automatic retries, 1 deliberate budget follow-up.
+The single chat qualification returned in 36.0 seconds with native usage of
+427 input / 57 output tokens. The original parser rejected a Markdown fence;
+independent review also rejected suppressed load errors and missing required
+logic. One dispatch, one rejected return, zero retries, zero candidate tests,
+zero applications and zero retained uses. Parent identity checks passed; child
+close was observed. Its model-call budget is closed.
 
-Next 13/P1: verify model-appropriate prompt/chat formatting at the existing local
-worker boundary. Reuse existing chat support; formatting is a hypothesis, not a
-proven root cause. Preserve the original tests/parser and effect-evidence boundary.
-No more generation calls, deadline increases or model changes in this sprint.
+Next 13/P1: prepare one verifier-informed repair ticket through existing
+`input_context`. Carry exact rejection evidence; inspect the existing stop
+policy and full token fit before any separately reviewed follow-up. Preserve
+the original criteria and effect-evidence quarantine. No new module, model
+switch, blind prompt sweep or relaxed parser is indicated by this result.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.native_phase_20260930`. Method-return counts
-are not output tokens. No candidate tests or retained benefit were demonstrated.
-Basic progression remains scoped proposal → independent tests/rollback → later
-reuse/held-out benefit → admitted isolated AmIBot → two workers. Native admission
-remains unresolved. PR #1975 is merged/main-verified and closed; active FoundUps
-and Remote AutoPost remain protected. Earlier sections below are historical.
+and backlog `current_observation.chat_qualification_20260930`. The response
+reported `stop`; its exact terminating stop is unknown. Prior experiments and
+controls are historical, not new gain. Basic progression remains scoped
+proposal → independent tests/rollback → later reuse/held-out benefit → admitted
+isolated AmIBot → two workers. Native admission remains unresolved. PR #1976
+is merged/main-verified and closed; active FoundUps and Remote AutoPost remain
+protected. Earlier sections below are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 

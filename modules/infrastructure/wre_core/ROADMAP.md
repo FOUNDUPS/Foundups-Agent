@@ -1,61 +1,66 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `8e04a39f4`.** The existing local
-worker returned one proposal under a separately reviewed 180-second deadline.
-It repeated the prompt's warnings instead of producing a function. The original
-AST parser rejected it before execution. Basic autonomous RSI is still incomplete.
+**Current qualification: 2026-09-30, source `38c7f1fd0`.** One bounded call
+through the existing local adapter and shared chat backend returned a proposal.
+The original parser rejected its Markdown fence; independent review also found
+suppressed `load_state` errors and missing required logic. Nothing was applied.
+Basic autonomous RSI remains incomplete.
 
 | Current qualification | Observed result |
 |---|---|
-| Dispatches / returned proposals / timeouts | 2 / 1 / 1 |
-| Automatic retries / deliberate budget follow-ups | 0 / 1 |
-| First packet, 90s nominal deadline | Timeout; parent wall 91.515s |
-| First prompt evaluation / sample-return progress | 15.734s / at least 256 method returns |
-| Separate 180s packet | Returned; parent wall 119.797s |
-| Second prompt evaluation / generation | 13.188s / 113.359s |
-| Completed eval / sample method returns | 512 / 512; not usage-token counts |
-| Syntax-valid / accepted proposals | 0/1 /0/1 returned proposal |
-| Candidate execution / later reuse | Not reached |
+| Dispatches / returned proposals / timeouts / retries | 1 / 1 / 0 / 0 |
+| Parent wall / child generation | 36.0 s / 29.0 s |
+| Native response input / output / total tokens | 427 / 57 / 484 |
+| Output cap / context capacity | 512 / 2048 tokens |
+| Finish reason / exact terminating stop | `stop` / unknown |
+| Syntax-valid / accepted returned proposals | 0/1 / 0/1 |
+| Candidate application / candidate test runs / later reuse | 0 / 0 / 0 |
+| Held-out gain / retained gain | Not measured / not measured |
 
-The first trace demonstrated progressing generation. Its64→256 sample-return
-interval justified a separately frozen 180-second qualification; it did not prove
-output-token throughput or guarantee completion. The follow-up retained the
-same model, prompt, settings, 512 output cap and 48-case criteria. Its child
-reported complete close and no method/cleanup journal error; parent binding
-checks passed. No additional generation is admitted by this completed sprint.
+The disposable transport override reused the already-loaded model and existing
+`LlamaCppBackend`; no production source, dependency or model changed. It checked
+the actual forwarded prompt tokens against the rendered model template and full
+output reserve. Template identity was observed under pinned model bytes, not
+separately preregistered. Usage comes from the native response, not eval/sample
+method counts. Parent source/runtime/model checks passed; child close was
+observed without journal errors. The one-call budget is closed.
 
-Independent review accepts the diagnostic evidence and rejects the proposal.
-Usage tokens, finish reason, held-out gain and retained gain remain unknown.
-These observations do not explain earlier uninstrumented timeouts. Eight local
-pass-through checks passed; the rejected text was parsed only, never executed.
-Historical controls remain40 passed/8 failed versus 48 passed on 48 unchanged
-development cases. They were not rerun and are not new improvement evidence.
+Eight unchanged MethodProbe pass-through checks passed; these do not cover the
+new chat guard. Independent source, execution, parser and result reviews accept
+the transport evidence and reject the candidate. The rejected text was parsed,
+never executed. Historical controls remain 40 passed/8 failed versus 48 passed
+on 48 unchanged development cases; they were not rerun. Earlier raw-completion
+timeouts and rejected output remain historical observations. Shorter latency for
+a different output is not a demonstrated speedup, causal template-only effect,
+or RSI gain. The blank-line stop is a possible truncation factor; its actual
+involvement is unknown.
 
-**Next eligible layer: qualify existing prompt/chat formatting (13/P1;
-C2/I4/D4/Impact3).** Inspect the raw-completion call in the current Qwen engine
-and existing `local_llm_backends.create_chat_completion` support against the
-selected model contract. A formatting mismatch is a hypothesis to verify, not a
-proven cause. Reuse before extending; preserve effect-evidence quarantine and
-the original code criteria. Do not add another backend, enlarge the budget again
-or relax the parser to accept prose. No production source/runtime changed here.
+**Next eligible layer: verifier-informed repair ticket (13/P1;
+C2/I4/D4/Impact3).** Existing `local_skill_inference._build_prompt` serializes
+`input_context`, which can carry the exact rejected proposal and independent
+findings without a new schema or module. Inspect the existing stop policy and
+freeze full token fit for any separately reviewed follow-up. Preserve the
+code-only, no-catch method contract and parser. Do not invoke the broader WRE
+retry/evolution path or claim its routing is proven by this source inspection.
 
 The minimum path to basic RSI remains:
 
-1. Produce one correctly scoped worker proposal and independently review it.
+1. Produce one correctly scoped proposal and independently review it.
 2. Pass unchanged repair controls; exercise rejection/rollback.
 3. Reuse the verified artifact later and measure independent held-out benefit.
 4. Run one admitted, isolated AmIBot ticket; then increase workers from 1 to 2.
 
-This is direct supervised qualification, not native WRE/OpenClaw/Hermes
+This is directly supervised qualification, not native WRE/OpenClaw/Hermes
 admission. Installed llama-cpp 0.3.20 still differs from declared 0.2.72. Process
 guards are not OS memory/network isolation. Broader Gmail/LinkedIn quality
 remains separate; prior rejected 1/12 general and 0/12 coder results are unchanged.
 Active eSingularity/YUMORI and separately owned AutoPost remain protected.
 
 Exact evidence/queue: `docs/roadmaps/rsi_swarm_backlog.json` →
-`current_observation.native_phase_20260930`. All prior observations remain intact.
-PR #1975 is merged/main-verified at `8e04a39f4` (CI 36680667946 and CodeQL 36680668121
-passed; owned lane closed). This sprint has separate publication/cleanup receipts.
+`current_observation.chat_qualification_20260930`. All prior observations remain
+intact. PR #1976 is merged/main-verified at `38c7f1fd0` (CI 36688576814 and
+CodeQL 36688577207 passed; owned lane closed). This sprint has separate
+publication and cleanup receipts.
 
 ## Staged general-role decision cohort — 2026-09-29
 
