@@ -1,7 +1,7 @@
 import hashlib
 import inspect
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -292,6 +292,30 @@ def test_sender_boundary_transaction_digest_binds_recipient_role_and_content():
     assert transaction_digest(base) != transaction_digest(
         _boundary_transaction(content_digest="sha256:content-v2")
     )
+
+
+def test_sender_boundary_refuses_to_bind_receipt_for_different_recipients():
+    receipt = preflight_recipients(
+        [ProposedRecipient("org-1", RecipientRole.TO, "route@example.org")],
+        [ev("org-1", "route@example.org", EvidenceLevel.PUBLIC_DIRECTORY)],
+    )
+    mismatched = CorrespondenceTransaction(
+        provider="gmail",
+        purpose_scope="YUMORI::UTILITY::PROCEDURE_INQUIRY",
+        recipients=(ProposedRecipient("org-2", RecipientRole.TO, "other@example.org"),),
+        content_digest="sha256:content-v1",
+        provider_object_id="draft-1",
+        thread_id="thread-1",
+    )
+
+    with pytest.raises(
+        ValueError, match="preflight receipt recipients do not match transaction"
+    ):
+        bind_preflight_receipt(
+            receipt,
+            mismatched,
+            issued_at=datetime(2026, 9, 30, 8, 0, tzinfo=timezone.utc),
+        )
 
 
 def test_sender_boundary_missing_receipt_never_invokes_provider():
