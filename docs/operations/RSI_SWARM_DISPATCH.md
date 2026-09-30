@@ -1,24 +1,24 @@
 ## Current bounded layer — 2026-09-30
 
-All23 deterministic adapter/isolated-forwarding checks passed. Instruction/context
-loss was not reproduced in the tested scope; untrusted output remains a proposal.
-No production patch or native model/provider call. This is not full WRE dispatch
-or a successful repair. Independent review accepted the limited evidence.
+One final-sentence framing change returned in 41.063 s (652 input / 83 output
+tokens), with proposal bytes identical to the prior feedback trial. Unchanged
+parser and independent review rejected fences and missing watermark checks.
+No application, candidate tests, retention or native dispatch. One-call budget
+closed; four pure framing checks passed, historical controls were not rerun.
 
-Next13/P1 (C2/I4/D4/Impact3): separately freeze one material task-framing hypothesis
-through the existing worker. Preserve skill/context facts and original criteria,
-model/runtime/chat/stops/caps; no answer injection, fence stripping or blind retry.
-Require exact script review, prompt fit and separate one-call budget. Current
-observation grants no model call or native admission. A known-case pass alone
-would not prove held-out or retained benefit. Holo15/P1 authority maintenance and
-native18/P0 admission remain blocked; do not repair the index from query paths.
+Next 13/P1 (C2/I4/D4/Impact3): qualify existing local code-worker routing and
+model identity. Use inert collaborators for explicit path precedence, missing
+path fallback, catalog aliases and capability unknowns. File availability is
+not output competence; live resolver probing is not an inventory-only operation.
+No more blind prompt retries, new schema/backend, relaxed parser or model call
+without a separate exact experiment review and budget. A production patch needs
+a reproduced contract violation. Native 18/P0 and Holo 15/P1 remain blocked.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.output_contract_20260930`. Both earlier chat
-attempts remain rejected. Progression: accepted proposal → independent controls/
-rollback → later reuse/held-out benefit → admitted isolated AmIBot → two workers.
-PR #1981 is closed/main-verified. Protect active FoundUps and Remote AutoPost.
-Earlier sections below are historical.
+and backlog `current_observation.framing_qualification_20260930`. Progression:
+accepted proposal → independent controls/rollback → later reuse/held-out benefit
+→ admitted isolated AmIBot → two workers. PR #1982 is closed/main-verified.
+Protect active FoundUps and Remote AutoPost. Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 
