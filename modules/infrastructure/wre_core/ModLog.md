@@ -1,3 +1,15 @@
+## 2026-10-01 — Actual native caller qualification; proposal rejected
+
+- Actual helper/adapter/native-chat route returned once: 658 input/122 output
+  tokens, 36.125s bounded child, no retries/providers. Strict parser rejected
+  `.strip()`; zero candidate executions or test cases, no application.
+- Original failed zero-init setup retained; reviewed CRLF normalization and
+  diagnostics repair passed second setup. Independent result review; fixed
+  budgets and pre/post identities. Explicit cleanup belongs to test wrapper.
+- WSP00/5/15/22/48/50/84/97: next 13/P1 existing engine/adapter explicit cleanup
+  contract. No production code, admission, retention or protected FoundUp changes.
+- Evidence `O:/Foundups-Agent-audits/20260930-rsi-native-caller-trial/`; backlog `native_caller_trial_20261001`.
+
 ## 2026-09-30 — Opt-in native-chat proposal caller
 
 - Extend existing master/adapter/Qwen route; copied trusted runtime/template
