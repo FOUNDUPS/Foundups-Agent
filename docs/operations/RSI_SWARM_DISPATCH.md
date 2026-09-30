@@ -1,21 +1,25 @@
 ## Current bounded layer — 2026-09-30
 
-The historical technical repair canary is a **controlled failure**: one bounded
-local code-role dispatch timed out after90.109seconds without a returned proposal.
-No retries, application, candidate tests or retention occurred. Native load versus
-generation stage is unknown. Frozen controls reproduced40/8 baseline and48/0
-reference on the same48 development cases; this is not new product improvement.
+One no-generation preflight passed: existing code-role Qwen initialization took
+5.485 seconds; the child returned and closed in 6.563 seconds. The exact completion
+prompt uses 414 tokens, and its 512-token reserve fits the 2,048-token context.
+Zero completion calls, retries or provider requests. Independent artifact review
+checked child diagnostics, returned JSON and source/runtime/model bindings.
 
-Next13/P1: qualify phase observations and one bounded no-generation local worker
-preflight before selecting a measured generation budget or smaller worker.
-Reuse the existing adapter/process owners and unchanged oracle. No additional
-call is admitted by this planning entry; the previous one-call budget is closed.
+This does not explain the prior 90.109-second timeout or demonstrate generation,
+repair quality, retained gain or native dispatch. The earlier 40/8 baseline and
+48/0 reference controls were not rerun. PR1973 is merged/main-verified and closed.
+
+Next 13/P1: freeze a bounded generation-phase experiment on the existing worker
+and unchanged repair task, then review any returned proposal before application.
+No larger budget or model switch follows automatically from successful loading.
+Each model call needs its own bounded execution plan; this entry is planning only.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.technical_canary_20260930` for exact receipts.
-PR1969 is merged/main-verified and its lane retired. Earlier sections below are
-historical observations. Native admission, held-out benefit and an isolated
-AmIBot ticket remain downstream; active FoundUps and Remote AutoPost are protected.
+and backlog `current_observation.worker_preflight_20260930`. The sequence stays
+one worker → independent test/rollback → later use/held-out benefit → admitted
+isolated AmIBot → two workers. Broader platform work remains separate. Active
+FoundUps and Remote AutoPost are protected. Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 

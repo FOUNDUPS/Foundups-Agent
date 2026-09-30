@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.technical_canary_20260930",
-    "base_commit": "3574efc4e80d0dd6c33abfa50975c6dcff0204ab",
-    "selected_action": "Qualify model-load and generation phase observations for the existing bounded local proposal path before selecting a measured timeout or smaller worker; one no-generation preflight first",
-    "status": "controlled_failure_no_candidate_reobserve_after_closure",
+    "observation_path": "current_observation.worker_preflight_20260930",
+    "base_commit": "0d90f6eac365a7362a836a9abdafd1fca7a5f49c",
+    "selected_action": "Qualify one bounded generation-phase observation on the existing code-role worker and frozen repair task, then independently evaluate any returned proposal before application",
+    "status": "preflight_passed_generation_unmeasured_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-worker-phase-preflight\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.correspondence_watermark_20260929"
+    "previous_observation_path": "current_observation.technical_canary_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -13800,6 +13800,172 @@
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\final-accounting.json",
       "publication_status": "pending_exact_head_checks_review_and_main_readback"
+    },
+    "worker_preflight_20260930": {
+      "source_head": "0d90f6eac365a7362a836a9abdafd1fca7a5f49c",
+      "classification": "directly_supervised_no_generation_preflight",
+      "outcome": "INITIALIZATION_AND_PROMPT_CAPACITY_VERIFIED",
+      "evidence_root": "O:\\Foundups-Agent-audits\\20260930-rsi-worker-phase-preflight",
+      "selection": {
+        "task": "Qualify model-load and generation phase observations for the existing bounded local proposal path before selecting a measured timeout or smaller worker; one no-generation preflight first",
+        "dimensions": [
+          2,
+          4,
+          4,
+          3
+        ],
+        "total": 13,
+        "priority": "P1",
+        "eligible": true,
+        "state": "qualification_only",
+        "wsp97": "New observed90s timeout has no phase evidence. Reuse existing process/model owners; do not enlarge budget blindly or add orchestrator."
+      },
+      "measurements": {
+        "child_dispatches": 1,
+        "returned_results": 1,
+        "timeouts": 0,
+        "retries": 0,
+        "child_wall_seconds": 6.562999999849126,
+        "child_reported_initialization_seconds": 5.484999999869615,
+        "completion_prompt_tokens": 414,
+        "reserved_output_tokens": 512,
+        "context_tokens": 2048,
+        "full_reserved_output_fits": true,
+        "historical_token_policy_matches": true,
+        "generation_calls": 0,
+        "output_tokens": 0,
+        "provider_requests": 0,
+        "quality": null,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "tokenization_duration": "Below this timer observation resolution; not a zero-cost claim",
+        "total_compute_cost": null,
+        "coordinator_and_reviewer_usage": null
+      },
+      "provenance": "Child phase instrumentation and returned JSON, independently reviewed; parent wall-time, process result and source/runtime/model checks. No independent native-call attestation.",
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334"
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "bytes": 4683073536
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "artifact_hashes": {
+        "manifest.json": "9b16fa29f47fa90515e642033a3a8e951de9220fffd847e8235403a52810a0e1",
+        "source-review.json": "308207a6651c9fa2f5e11405632101363a572ad42fdebb4b33caf9ca95e10a4b",
+        "execution-review.json": "452e63b5f946e2979a7036b5b7644ee3419629eeeb530a112e1aab80eecff906",
+        "result-review.json": "c49381405be4a4e2f70f6abadac33a1de02ca0ed9ca9f912efe176249e156fef",
+        "preflight.receipt.json": "710a273adf3c47185cc224ef268e5f16e8ac963beff0bfdc54db34f9b6c20864",
+        "preflight.raw.json": "30c6feca37c260e29bfd72b32374e700a42325d3486d1bbafb93a0c761a8e119",
+        "phases.jsonl": "01670a78729c35571137d5e83342322813363383c4aff744a1c8b017013d1ab6"
+      },
+      "commands": [
+        "python.exe -I -B run_preflight.py"
+      ],
+      "limits": "One initialization, zero completion calls/retries/provider requests; 90-second child timeout and existing process-tree/stdout guard. No OS memory/network sandbox.",
+      "old_timeout_cause": null,
+      "old_canary_observation": "current_observation.technical_canary_20260930",
+      "code_changes": false,
+      "promotion": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "next_action": "Qualify one bounded generation-phase observation on the existing code-role worker and frozen repair task, then independently evaluate any returned proposal before application",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            4,
+            5
+          ],
+          "total": 18,
+          "priority": "P0",
+          "eligible": false,
+          "state": "blocked",
+          "wsp97": "Inherited admission and effect-use lease unresolved; direct supervised trial does not supply authority."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            3,
+            4
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "candidate_rejected",
+          "wsp97": "Preserve1/12 general and0/12 coder development results; separate from technical canary."
+        },
+        {
+          "task": "Qualify one bounded generation-phase observation on the existing code-role worker and frozen repair task, then independently evaluate any returned proposal before application",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": true,
+          "state": "generation_qualification",
+          "wsp97": "One initialization/tokenization trial passed; generation remains unmeasured. Freeze a separate bounded experiment with phase evidence; preserve the old timeout and original acceptance criteria."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "No returned candidate; rollback and retained replay not reached. Historical controls are not held-out improvement."
+        },
+        {
+          "task": "Isolated AmIBot build ticket",
+          "dimensions": [
+            3,
+            4,
+            2,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Require qualified worker and admitted execution path. Preserve activeFoundUps and Remote-owned AutoPost."
+        }
+      ],
+      "prior_closure": {
+        "pr": 1973,
+        "merge": "7258f43cdf903f4a302a325ea7719d9b38acde5e",
+        "main_ci": 36669842363,
+        "main_codeql": 36669842192,
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-worker-phase-preflight\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt; experiment result does not certify publication"
     }
   }
 }

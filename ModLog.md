@@ -1,3 +1,18 @@
+## 2026-09-30 — Existing RSI worker: initialization and prompt capacity verified
+
+- One supervised no-generation preflight: initialization 5.485 seconds, child
+  wall time 6.563 seconds, 414 prompt tokens + 512 output allowance within 2,048.
+- Reused existing Qwen/process owners and frozen repair prompt; zero completion
+  calls/retries/provider requests. Close completed; source/runtime/model postchecks
+  passed. Independent review corrected special-token counting before execution.
+- Prior timeout remains unexplained; generation quality and retained benefit are
+  unknown. No product code, runtime update, application or native admission.
+- WSP00/15/22/48/50/84/97: re-scored next 13/P1 bounded generation qualification.
+  Existing canonical roadmap, dispatch and backlog synchronized; no new module.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-worker-phase-preflight/`;
+  backlog `current_observation.worker_preflight_20260930`. Exact-head publication
+  and cleanup are separate receipts. Prior PR1973 closure reconciled.
+
 ## 2026-09-30 — Bounded technical RSI rehearsal: controlled timeout
 
 - Reused existing local_skill_inference/code-role Qwen and bounded child owner
