@@ -17,6 +17,7 @@ MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
 CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
+WORK_ORCHESTRATOR_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_work_orchestrator" / "SKILLz.md"
 REDDOG_CORRESPONDENCE_SKILL_PATH = REPOSITORY_ROOT / "modules" / "communication" / "moltbot_bridge" / "skillz" / "reddog_correspondence_state" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
@@ -107,6 +108,12 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert correspondence["intent_type"] == "MAINTENANCE"
     assert correspondence["version"] == "0.8.0"
 
+    work_orchestrator = registry["skills"]["yumori_work_orchestrator"]
+    assert work_orchestrator["location"] == "modules/foundups/esingularity/skillz/yumori_work_orchestrator"
+    assert work_orchestrator["primary_agent"] == "0102"
+    assert work_orchestrator["intent_type"] == "DECISION"
+    assert work_orchestrator["version"] == "0.2.0"
+
     reddog_state = registry["skills"]["reddog_correspondence_state"]
     assert reddog_state["location"] == "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state"
     assert reddog_state["primary_agent"] == "0102"
@@ -141,6 +148,16 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "reddog_correspondence_state/SKILLz.md" in correspondence_text
     assert "native correspondence store is the durable M2M continuity layer" in correspondence_text
 
+    work_text = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    assert "YUMORI WORK HANDOFF" in work_text
+    assert "MPS = Complexity + Importance + Deferability + Impact" in work_text
+    assert "Capital-network expansion protocol" in work_text
+    assert "Capital Targets" in work_text and "Capital People" in work_text
+    assert "1ST_DEGREE_VERIFIED" in work_text
+    assert "mutual connections" in work_text
+    assert "Visible Contact Info is a routable candidate, not send authorization." in work_text
+    assert "No mass blast." in work_text
+
     reddog_text = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
     assert "Provider systems remain transaction truth." in reddog_text
     assert "The state cache never grants permission to send." in reddog_text
@@ -152,6 +169,7 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
         ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),
         ("yumori-funding-ppp-intelligence", "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence/SKILLz.md"),
         ("yumori-contact-ledger", "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md"),
+        ("yumori-work-orchestrator", "modules/foundups/esingularity/skillz/yumori_work_orchestrator/SKILLz.md"),
     ):
         for root in (".agents", ".claude"):
             projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
