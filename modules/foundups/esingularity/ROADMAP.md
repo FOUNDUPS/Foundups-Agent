@@ -70,6 +70,10 @@ Historical Educational Singularity / eSingularity material (including 2007–201
 
 ## Three-site capital-allocation rebaseline — 2026-09-29
 
+- [x] Re-verify Fukui City's FY2026 asset-proposal call on 2026-10-01: only old Hanyu and old Shimousaka are listed; mandatory prior consultation/site survey runs through 2026-11-30 and proposal documents are due 2026-12-15.
+- [x] Preserve current official City site/floor-plan evidence for both schools as feasibility basemaps; do not treat them as final engineering drawings.
+- [ ] Preserve the exact current official Word form bundle as the submission master and obtain written City confirmation whether the two schools require separate property-specific filings or can share one prior-consultation filing. Do not infer the filing unit from the umbrella portfolio.
+
 - [x] Retain canonical Site 3/2/1 identities with Priority 1 Hanyu, Priority 2 Shimousaka, Priority 3 optional Sukatto.
 - [x] Extend the canonical model and existing 18-tab FIN workbook with independent costs, three Hanyu cash scenarios, investor/retained-cash separation and a self-funding test.
 - [x] Rebaseline native Doc 05's opening/decisions and align 07 while preserving six photos.
