@@ -4,7 +4,7 @@ Version: 0.4.141
 0.4.141 first binds the corrected fast-RedDog/deep-0102 identity boundary while preserving the 0.4.140 builder release: 1,398 backend files at `sha256:700d50f84e12...86e09ed` with one evidence-only held child. It changes no extension effect authority.
 
 Documentation entry points: the repository-wide [RedDog documentation map](../../docs/REDDOG_DOCUMENTATION_MAP.md) separates current product truth from audits and history; [RedDog architecture](ARCHITECTURE.md) defines the identity boundary.
-[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Mosh Pit](docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
+[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Moshpit](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
 They are not implemented authority and do not grant biometric, identity, wallet, work, or execution effects. `ARCHITECTURE.md` and `.gitignore` remain repository-only inputs outside the executable VSIX.
 
 The parent reproves the exact inert builder composition around a suspended Job-contained child using `-I -S -B -E -s`, a fixed six-entry `sys.path`, closed O:/E: roots, and bounded path-free JSON.
