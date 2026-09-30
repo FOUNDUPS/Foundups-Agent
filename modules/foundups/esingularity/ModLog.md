@@ -1,3 +1,11 @@
+## 2026-09-30 — Fukui GX policy integration and JHR correction
+
+- Re-verified the national GX Strategic Region taxonomy and corrected a stale April-only status: METI's 2026-09-11 first tranche formally recognizes Fukui Prefecture (Fukui City / Obama City) under **decarbonized-power utilization**, while Fukui is not in the separate **data-center cluster** class.
+- Added the 2026-09-02 Fukui governor / Energy Division policy signal that the Prefecture is accelerating large-data-center attraction and asked the national government to examine a dedicated-line supply model from nuclear generation, including whether regulation needs adjustment. This is policy exploration, not a supply commitment to a YUMORI site.
+- Integrated the policy connection into JHR #003 and corrected JHR #001's current-status callout without rewriting its April historical context.
+- Promoted F-03 and F-04 from shorthand rows into bounded funding-registry entries: the national GX Regional Co-Creation DC investment track is a future operator/SPV eligibility lane; Fukui's AI-data-center location subsidy requires ≥¥10B fixed investment and a building-constructed DC, so the current Hanyu phase does not qualify on its modeled scale.
+- Added concrete next actions for City Enterprise Location Promotion, Fukui Prefecture Growth Industry Location Division, the GX subsidy office, and the school prior-consultation agenda. No grant, utility capacity, City approval, operator participation, or fixed MW is promoted.
+
 ## 2026-09-29 — Investor finance path reconciliation
 
 - Corrected current FIN case-specific Hanyu funding gaps and labeled the separate legacy sizing diagnostic. Reconciled 03/05/06 references, the public finance entry, and the repository calculation note.
