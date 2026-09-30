@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.alternative_technical_trial_20260930",
-    "base_commit": "2712e27dde54228d2a79ad5a2be5b987819c17e9",
-    "selected_action": "Qualify exact stop forwarding, then prepare one paragraph-stop comparison with the same worker and unchanged acceptance",
-    "status": "paragraph_stop_comparison_reobserve_after_closure",
+    "observation_path": "current_observation.paragraph_stop_trial_20260930",
+    "base_commit": "b43bc0234de35f5274ed0231892d0c72e2191a33",
+    "selected_action": "Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization",
+    "status": "source_qualification_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.code_route_qualification_20260930"
+    "previous_observation_path": "current_observation.alternative_technical_trial_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -15743,6 +15743,251 @@
         "status": "merged_main_verified_owned_lane_closed"
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "paragraph_stop_trial_20260930": {
+      "source": "b43bc0234de35f5274ed0231892d0c72e2191a33",
+      "outcome": "PARAGRAPH_STOP_TRIAL_RETURNED_INVALID_CODE_AT_OUTPUT_CAP",
+      "execution_plane": "directly_supervised_local_qualification",
+      "measurements": {
+        "attempts": 1,
+        "returned": 1,
+        "rejected_invalid_output": 1,
+        "retries": 0,
+        "child_wall_seconds": 85.06300000008196,
+        "usage": {
+          "prompt_tokens": 672,
+          "completion_tokens": 512,
+          "total_tokens": 1184
+        },
+        "syntax_valid_proposals": 0,
+        "accepted_proposals": 0,
+        "candidate_applications": 0,
+        "candidate_test_runs": 0,
+        "retained_uses": 0,
+        "finish_reason": "length",
+        "exact_terminating_stop": null,
+        "held_out_gain": null,
+        "retained_gain": null
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen3.5-4b\\Qwen3.5-4B-Q4_K_M.gguf",
+        "sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "bytes": 2707513696
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334",
+        "modules/infrastructure/shared_utilities/lm_studio_model_lifecycle.py": "c6ce1e7c70aba5d3dca1cdd3295a255924a506f87934a05749761606aed487fa",
+        "modules/infrastructure/shared_utilities/lm_studio_native_transport.py": "8b5d6f69de87194992c84827bac38111daca8b0d77f141165b4198e04bc44f95",
+        "modules/infrastructure/shared_utilities/lm_studio_lifecycle_intent.py": "30c7742b8a734bcea1c27812a3e55236ef6289c1076dbcd1d63d5c42e3776b7c",
+        "modules/infrastructure/shared_utilities/runtime_atomic_replace.py": "1b751c6e488f7d04c5ce5790b4674d1cc604b714f02e385ac9bc3c2bd02e2aa4",
+        "modules/infrastructure/shared_utilities/runtime_artifact_safety.py": "22bd3f18846f6f3bc7477093fb4a9435ffa990fbf4c825de1d9be522203dabac"
+      },
+      "frozen_acceptance_reference": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\acceptance-review.json": "b5b157fbfe5a5a20513d88428a2328d602042f5b974080a4948311de88f28b19",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\proposal-inspector-review.json": "a312d2b9013bc7663343bb59eeabaac69800a12b07bee938dacb6487f16f21a1",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\inspect_proposal.py": "e59f2538bb255ccc6770745aded8e575b1901a080aa70d001681b252c24b1168"
+      },
+      "artifact_hashes": {
+        "manifest.json": "f5ab74af31945d5457a13220ff4accc633444f01a8f68aa6705684c95644ad2f",
+        "generate_worker.py": "6e68c7741aa75134d754e9fb17f27cd7ec1cc1f6d6456fcf0544d2ba7bfaaf89",
+        "run_generation.py": "6bf77bdf0da35376fd947105be153d3164889d54238b171649c0c1e2d6e818ad",
+        "instruction.txt": "0b8bbedc0a70c78cccd4112bfb39f7ebcbc1119358f127e2b3184af8134b5720",
+        "input.json": "6dfff3191ed9ea6ac01b8cf4202a921d4cea5aab559b393812f45cbfd10a4266",
+        "input-check.json": "843c95ec1681133a48c8d69c28e170a563f09b52314bd863eee2d21eb9370f29",
+        "control-reuse-check.json": "b091bdc92e7322fe287568334f2868f4118f14c6b0e8c6cf582a1e2d3dea79d7",
+        "execution-review.json": "31ad13a3bb7978c74d1a52b1c273c50002df8a4772702a01c3cb44abcc1d0b15",
+        "generation.raw.json": "27a5db04fd8574d6300a4c86903f8c5bb44a9f443611524339ede43a702ae896",
+        "generation.receipt.json": "ecc38e1071d1abac963fb1858bbc52a3f1f3659b5ab6e237ecf8ad631e103d23",
+        "phases.jsonl": "44d8036eacc9d9b2a4a2df5da00c73533963398248196dfdb888c058a77bdec5",
+        "observed-template.txt": "a92e1dd97cb1cb175c9b70c0828e146bea4371c2643319b661b777e89811972e",
+        "inspect_proposal.py": "2e1daebaa974fc43f2148ee60f8a38127d69e7043773317b160a3dc6415b9ab3",
+        "proposal-inspector-review.json": "f86b3c40a823e06df8bfed44253c939ac63dbf8606753949f79d1a8e911f5fb8",
+        "parser-execution.json": "c77e6af9c66d56a779fde718598888ea78297479281db48a7b24c7baea3e40fa",
+        "proposal-inspection.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "proposal-inspection.stderr.log": "8c0be22dc92a73255672497bee0a7791e0e4c6abaf021ec55061d0b6d7cd9b9a",
+        "proposal.py.txt": "c87524f21a0d873d0e470015c9ba59e3e904b11ec30594b38480da8202afd5c5",
+        "result-review.json": "e227a8535f2f6a9ed1e22332b513f31f77b1961a896db514f867b40243d14fb4",
+        "next-action-source-review.json": "c59c0572c1569134ed48ccb53719bee37b0d6d234c8dc0451d6a600869cc8980",
+        "entry.json": "eaebe22e00aaf455a49f46de22dad22ca6ed21c1f2264c9429151c7dde09142e",
+        "holo-query.json": "a6462be7836419eb160cece137d63c200a3e5e2353832fcf005147feac89f8d6",
+        "wsp00-gate.json": "a59f9998da5ab6a74edbf7c49b90849a91acf8566271259a7a68ff899aff5da7"
+      },
+      "comparison": {
+        "previous_packet": "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial",
+        "preserved": [
+          "Exact alternative artifact/runtime/template/BOS/EOS/tokenizer",
+          "Complete skill/input/final framing/system content",
+          "Temperature0.2, context2048, output512, CPU4/GPU0 and one180second attempt",
+          "Existing ### stop and native EOS/EOG behavior",
+          "Original strict raw-method parser, independent scope gate and48 development criteria",
+          "No reasoning/fence extraction, grammar, answer injection or enable_thinking change"
+        ],
+        "changed": [
+          "Remove only the caller double-newline paragraph stop; retain ### and formatter-appended native EOS."
+        ],
+        "scope": "One adaptive unseeded known-task stop-policy comparison. Actual previous terminating stop unknown; no causal, held-out or retained-gain claim."
+      },
+      "prerequisite_evidence": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\next-action-source-review.json": "527f1e5d66b3a8946a8b335441cadc50a648a2f0334a6fb095b5e4b318bf7ce7",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\stop-forwarding-result-review.json": "43248c9fa67b8539ed3c5059bf347d4a2177bc4ebaacab906623ec8ac0cde331",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\stop-forwarding-result.json": "8b1289ec96dd3d3d8e9c2e45e3a10dd8e9991e8979d35aa89d76bb05f806ac05",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\next-prerequisite-status.json": "bf344befb1a06001cbacb9c5bccd00501a5fc7e0210e158391da30ed0d3983b2",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-alternative-technical-trial\\final-accounting.json": "28991297d60863396f276097b44e1ab8006bfee970b6a13e366e5cbb041b2bbb"
+      },
+      "template_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "actual_prompt_verified": true,
+      "prompt_tokens": 672,
+      "proposal_sha256": "6e8682d40b0ea2202df57a4164032a356e4a76022bb62db1b21ae9a9d4468911",
+      "rejection": "Non-code output consumed the512-token cap; unchanged strict parser rejected it. No output extraction or acceptance change.",
+      "controls_reused": "Historical48-case baseline40pass/8fail and reference48pass;10source and10fixture hashes verified, not rerun. Deterministic two-case stop-forwarding prerequisite independently reviewed at unchanged source; no new calls for that check.",
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No accepted semantic coverage; exact known owners reused.",
+        "ordering": "Canonical WSP/current queue, source/interface/tests, exact prior evidence.",
+        "missing": "Semantic coverage and native admission absent; memory/README owner still absent.",
+        "staleness": "One governed query on changed main; no retry/reindex.",
+        "duplication": "No new runtime module, parser, controller or test family.",
+        "maintenance_route": "Existing R03 authority owner."
+      },
+      "limits": [
+        "One unseeded adaptive known-task stop-policy comparison, not a paired-seed causal study.",
+        "More output than the previous4tokens is not improved correctness; both proposals rejected.",
+        "Sampled source/runtime/model checks and child assertions are not immutable execution or native WRE admission.",
+        "Process-tree/time/output boundary only; no OS network or memory sandbox.",
+        "No candidate application, held-out benefit, retained use or production RSI demonstrated."
+      ],
+      "code_changes": false,
+      "candidate_applied": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior frozen decision cohort and code proposal did not meet acceptance; no unreviewed prompt retry."
+        },
+        {
+          "task": "Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "The paragraph-stop-only trial returned capped non-code prose and remains rejected. Installed native top-level chat API cannot accept enable_thinking, while its existing Jinja formatter and handler factory can forward the exact false template variable. A finite no-initialization rendering/forwarding qualification is the smallest eligible action before any separate proposal trial; it tests transport capability, not output competence."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "downstream",
+          "reason": "Requires accepted candidate and governed activation/rollback; none accepted."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "next_rationale": "The paragraph-stop-only trial returned capped non-code prose and remains rejected. Installed native top-level chat API cannot accept enable_thinking, while its existing Jinja formatter and handler factory can forward the exact false template variable. A finite no-initialization rendering/forwarding qualification is the smallest eligible action before any separate proposal trial; it tests transport capability, not output competence.",
+      "next_planning": {
+        "effort": "One narrow existing-owner source/procedure qualification before any separately reviewed call.",
+        "cost": "Current one-call budget closed; no retries, paid providers, downloads or cap increase.",
+        "verification_burden": "Retain original parser/48criteria and exact model/runtime/input. Qualify actual caller/template behavior before any new trial.",
+        "dependencies": [
+          "Freeze a small no-init check using exact installed callable bodies and observed template, inert tokenizer/completion recorder, source hashes and unchanged serialized messages/stops. Review exact script before execution.",
+          "Prove native Llama.create_chat_completion rejects enable_thinking before reaching a handler; do not mistake backend empty-error fallback for successful control.",
+          "Render unchanged native template with omitted/True and False using existing Jinja2ChatFormatter: omitted and True share open-think generation prefix; False yields native closed-think prefix. Bind full rendered strings and compare only expected template-variable effects.",
+          "Qualify a temporary explicit chat_handler built from existing chat_formatter_to_chat_completion_handler with formatter keyword bound enable_thinking=False. Retain normal backend/native entrypoint; use recording sink before actual completion; verify message preservation, expected rendered prompt/tokenization flags, ###/EOS forwarding, caps, no initialization/generation, and restoration on success/error.",
+          "Only after that check passes may a separate one-factor trial design and exact-script approval be considered; actual model identity/template/token-fit must be rechecked before generation. No new call budget in this source review."
+        ],
+        "ownership": "Existing RSI inference owners; protected active FoundUps and RemoteAutoPost unchanged."
+      },
+      "prior_closure": {
+        "pr": 1985,
+        "merge": "b43bc0234de35f5274ed0231892d0c72e2191a33",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-paragraph-stop-trial\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
     }
   }

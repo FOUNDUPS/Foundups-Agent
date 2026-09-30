@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-30 current layer:** one exact Qwen3.5-4B technical trial returned a four-token non-code heading in 18.61 seconds; the unchanged parser rejected it. Nothing was applied. Next 13/P1: qualify exact stop forwarding before one separately reviewed paragraph-stop comparison, preserving model/prompt/criteria. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1984 is merged/main-verified. Native admission and demonstrated retained improvement remain open.
+**2026-09-30 current layer:** the paragraph-stop-only local trial returned non-code output at the 512-token cap after 85.06 s; the unchanged parser rejected it. Nothing applied. Next 13/P1: Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1985 is merged/main-verified. Native admission and demonstrated retained improvement remain open.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

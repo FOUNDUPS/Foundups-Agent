@@ -1,3 +1,15 @@
+## 2026-09-30 — Paragraph-stop worker trial rejected
+
+- One reviewed local call removed only double-newline stop; exact model,
+  native template/input/caps/acceptance retained. Returned in 85.06 s with
+  672 input / 512 output tokens, finish `length`; unchanged parser rejected it.
+- Forwarded stops/prompt fit/source/runtime/cleanup passed. Nothing applied,
+  tested as candidate, promoted or retained. Current budget closed; no retry.
+- WSP 00/15/22/48/50/84/97: next 13/P1 = Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization.
+  Qualification only; no new call, cap increase, extraction or relaxed criteria.
+- Six existing RSI documentation owners; exact evidence and independent reviews:
+  `O:/Foundups-Agent-audits/20260930-rsi-paragraph-stop-trial/`. Previous #1985 merged/main-verified.
+
 ## 2026-09-30 — Alternative worker technical trial rejected
 
 - One exact Qwen3.5-4B/native-template procedure, unchanged instruction/feedback/

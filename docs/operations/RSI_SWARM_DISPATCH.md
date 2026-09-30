@@ -1,22 +1,19 @@
 ## Current bounded layer — 2026-09-30
 
-One exact Qwen3.5-4B/native-template technical trial returned only a non-code
-heading in 18.61 s (672 input / 4 output tokens). Original parser and independent
-review rejected it; nothing applied or retained. File/template/actual prompt-fit
-and cleanup checks passed. One-call budget closed; no retry or source change.
+The paragraph-stop-only trial returned non-code output at its512-token cap
+in 85.06 s (672 input / 512 output). Original parser and independent review
+rejected it. No candidate applied or retained; one-call budget closed.
+The exact model/messages/template/caps/criteria remained unchanged; actual
+forwarded stops, prompt fit, parent bindings and cleanup passed. No cap increase,
+retry or output extraction. Two prior forwarding cases and 48 historical
+development controls retain their exact scope; they were not rerun.
 
-Next 13/P1 (C2/I4/D4/Impact3): qualify exact stop forwarding with a tiny existing
-backend/handler recording collaborator and no initialization. Then, if valid,
-prepare one separately reviewed comparison removing only the double-newline
-stop. Preserve ###, native EOS, model/template/messages/caps and original strict
-parser/48 development criteria. Do not infer the exact terminator from `stop`,
-change thinking mode jointly, extract code from reasoning or relax acceptance.
-No next call is allocated here. Native 18/P0 and Holo 15/P1 remain blocked.
-
-See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.alternative_technical_trial_20260930`.
-Progression: accepted proposal → independent controls/rollback → later reuse/
-held-out benefit → admitted isolated AmIBot → two workers. PR #1984 is closed.
+Next 13/P1: Qualify the existing native non-thinking formatter and scoped chat-handler seam without initialization.
+The paragraph-stop-only trial returned capped non-code prose and remains rejected. Installed native top-level chat API cannot accept enable_thinking, while its existing Jinja formatter and handler factory can forward the exact false template variable. A finite no-initialization rendering/forwarding qualification is the smallest eligible action before any separate proposal trial; it tests transport capability, not output competence.
+Planning only; no next model allocation or native runtime admission.
+See [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
+and backlog `current_observation.paragraph_stop_trial_20260930` for measurements, ranked dependencies,
+independent review and remaining gates. PR #1985 is closed/main-verified.
 Protect active FoundUps and Remote AutoPost. Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
