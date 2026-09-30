@@ -1,50 +1,42 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `7de4eac2d`.** One separately
-reviewed trial bound the native template's non-thinking flag through its existing
-scoped handler. Exact model/runtime/template bytes, messages, stops, resource
-caps and original acceptance criteria were preserved. The complete code-only
-method passed the original parser, independent scope review and all 48 original
-development tests after application only to a disposable historical fixture.
+**Current qualification: 2026-09-30, source `6020b6e05`.** The exact accepted
+five-file development artifact from PR #1987 was copied unchanged into a new
+disposable fixture, independently reviewed and loaded by the existing runner in
+one fresh process. All 48 original cases passed again.
 
-| Current attempt | Observed result |
+| Current replay | Observed result |
 |---|---|
-| Calls / returned / retries | 1 / 1 / 0 |
-| Parent child-wall time | 50.44 s |
-| Native input / output / total tokens | 674 / 120 / 794 |
-| Syntax-valid / accepted development proposals | 1/1 / 1/1 |
-| Candidate tests | 48 pass; 0 failures, errors or skips |
-| Historical baseline / reference | 40 pass + 8 fail / 48 pass; rehashed, not rerun |
-| Disposable applications / production applications | 1 / 0 |
-| Retained uses / held-out or retained benefit | 0 / not measured |
+| New test runs / wall time | 1 / 1.77 s |
+| Pass / failure / error / skip | 48 / 0 / 0 / 0 |
+| New model / provider calls | 0 / 0 |
+| Changed artifact / test criteria | None / none |
+| Historical development artifact reuse | 1 fresh-process run |
+| Governed retained uses / held-out gain | 0 / not measured |
 
-Candidate owner hash, four untouched fixture files and all other AST definitions
-were checked before testing. Actual five-file source bindings stayed stable;
-SQLite stayed under the disposable test directory, with no unexpected denied
-effects. Independent review checked the exact candidate and persisted results;
-the coordinator executed this test run. This is execution feedback, not signed
-native evaluator evidence or formal verification.
+Five loaded source hashes and all 48 ordered case IDs match the accepted
+candidate. SQLite used fresh temporary paths, source hashes stayed stable and
+there were no unexpected denied effects. Independent review checked the persisted
+result; the coordinator ran the test. The Python guards are not an OS sandbox.
 
-The prior seven no-model handler checks were reused. The native false-render
-digest and actual token forwarding/full 512-token reserve were checked before
-generation. The current one-call budget is closed. Earlier rejected trials remain
-recorded. This is a known-case repair rehearsal after feedback; production had
-already been fixed in PR #1969. Recovering eight development failures does not
-establish novel repair, general competence, held-out transfer or retained RSI.
+The prior candidate run also passed these same 48 cases. These are repeated
+observations, not 96 unique tests. Historical baseline40/8 and reference48/0
+remain prior source-bound controls and were not rerun. This is execution feedback
+for a known-case historical rehearsal; production was fixed in PR #1969.
+Artifact reuse is not WRE-memory adoption, held-out benefit or production RSI.
+No PatternMemory write, model generation, production edit or activation occurred.
 
-**Next eligible layer: Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner (13/P1).**
-The generated method now passes all48 frozen development cases in the disposable historical fixture, whereas the exact historical baseline fails8. The original acceptance already requires a fresh-process retained replay and the same runner already supports that root/tag. Reusing the exact accepted five-file artifact is the smallest missing evidence layer; writing PatternMemory or adding orchestration would introduce unrelated state/authority without proving later benefit.
-Use the exact independent next-action review and fresh ownership/source before
-dispatch. No new model call, production activation or native admission is granted.
+**Next eligible layer: Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner (13/P1).**
+The original historical development proposal and fresh-process replay criteria are now satisfied, but both runs cover the same48 cases. The smallest useful next evidence is a separate, prospectively frozen input-domain/contract-composition comparison of the immutable accepted artifact against the historical defective control and fixed reference. Existing correspondence tests, corruption seeding and guarded runner already supply the owners. Native admission remains blocked by authentic authority prerequisites; neither another identical replay nor fabricated ratchet/memory receipts advances that gate.
+Use fresh source/ownership and independent scope review before execution.
 
-Native admission 18/P0 and Holo authority 15/P1 remain blocked; Holo freshness
-is UNKNOWN with an index gap. No query-side reindex. Installed llama-cpp 0.3.20
-versus declared 0.2.72 remains unreconciled. Preserve active FoundUps and Remote
-AutoPost. PR #1986 is closed/main-verified.
+Native18/P0 remains blocked by authority; Holo15/P1 still reports root/head
+mismatch, UNKNOWN freshness and index gap. No query-side reindex. The absent
+WRE memory README and missing direct NAVIGATION hit were recorded; existing
+interfaces and source-bound owners supplied this limited retrieval scope.
+PR #1987 is closed/main-verified. Preserve active FoundUps and Remote AutoPost.
 
-Progression: accepted development candidate → governed later reuse and held-out
-benefit → native admitted isolated AmIBot → two workers.
-Evidence: backlog `current_observation.nonthinking_trial_20260930` and `O:/Foundups-Agent-audits/20260930-rsi-nonthinking-trial/`.
+Evidence: backlog `current_observation.artifact_replay_20260930` and `O:/Foundups-Agent-audits/20260930-rsi-artifact-replay/`.
 
 ## Staged general-role decision cohort — 2026-09-29
 

@@ -1,3 +1,14 @@
+## 2026-09-30 — Accepted artifact passed fresh-process replay
+
+- Exact accepted five-file artifact, existing runner and original48 case IDs
+  reused in a new disposable fixture/process: 48 pass, no failures/errors/skips,
+  1.77 s, zero model/provider calls. Independent result review passed.
+- Same development criteria as prior candidate; no additive unique coverage,
+  held-out gain, governed retention, production repair or native admission claim.
+- WSP00/15/22/48/50/84/97: next 13/P1 = Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner.
+- Existing six documentation owners updated; PR #1987 closed/main-verified.
+  Evidence: `O:/Foundups-Agent-audits/20260930-rsi-artifact-replay/`; active FoundUps/Remote AutoPost preserved.
+
 ## 2026-09-30 — Native non-thinking candidate passed development tests
 
 - One bounded native template-mode trial: 50.44 s, 674 input / 120 output

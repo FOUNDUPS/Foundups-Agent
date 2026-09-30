@@ -1,23 +1,17 @@
 ## Current bounded layer — 2026-09-30
 
-One native non-thinking-prefix trial returned a complete code-only method in
-50.44 s (674 input / 120 output tokens). Original parser and independent scope
-review passed; the method was applied only to a disposable historical fixture.
-All 48 original development cases passed, recovering the eight historical
-baseline failures. Source/test identities and bounded SQLite checks passed.
-Historical baseline/reference and seven prior no-model checks were rehashed,
-not rerun. Independent review accepted the persisted development result.
+One fresh-process replay of the exact accepted historical development artifact
+passed all 48 original cases in 1.77 s with no model/provider calls. Independent
+source/execution/result review, five-file identity, case IDs and temporary SQLite
+checks passed. Original criteria stayed unchanged. This is reproducible reuse on
+the same development fixture, not held-out benefit or governed WRE retention.
+No production edit, PatternMemory write, activation or native admission occurred.
 
-Production was already fixed in PR #1969. No production change, retained use,
-held-out benefit, native admission or promotion is claimed. Current model-call
-budget is closed. Earlier failed attempts and unchanged criteria remain intact.
-
-Next 13/P1: Qualify fresh-process reuse of the exact accepted historical development artifact with the existing48-case runner.
-The generated method now passes all48 frozen development cases in the disposable historical fixture, whereas the exact historical baseline fails8. The original acceptance already requires a fresh-process retained replay and the same runner already supports that root/tag. Reusing the exact accepted five-file artifact is the smallest missing evidence layer; writing PatternMemory or adding orchestration would introduce unrelated state/authority without proving later benefit.
+Next 13/P1: Prepare an independently frozen post-development contract-transfer comparison in the existing correspondence test owner.
+The original historical development proposal and fresh-process replay criteria are now satisfied, but both runs cover the same48 cases. The smallest useful next evidence is a separate, prospectively frozen input-domain/contract-composition comparison of the immutable accepted artifact against the historical defective control and fixed reference. Existing correspondence tests, corruption seeding and guarded runner already supply the owners. Native admission remains blocked by authentic authority prerequisites; neither another identical replay nor fabricated ratchet/memory receipts advances that gate.
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.nonthinking_trial_20260930` for evidence, gates and ownership.
-PR #1986 is closed/main-verified. Protect active FoundUps and Remote AutoPost.
-Earlier sections are historical.
+and backlog `current_observation.artifact_replay_20260930` for exact scope and prerequisites.
+PR #1987 is closed/main-verified. Earlier sections are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 
