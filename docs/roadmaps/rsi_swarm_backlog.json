@@ -14601,7 +14601,7 @@
           "priority": "P1",
           "eligible": false,
           "state": "downstream",
-          "wsp97": "No returned candidate; rollback and retained replay not reached. Historical controls are not held-out improvement."
+          "wsp97": "No accepted candidate; the returned proposal was rejected before application. Rollback and retained replay were not reached. Historical controls are not held-out improvement."
         },
         {
           "task": "Isolated AmIBot build ticket",
