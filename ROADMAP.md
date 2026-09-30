@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-09-30 current layer:** the phase-observed worker call loaded in 5.359 seconds, entered generation, and timed out at 90.094 seconds without a returned proposal. Prompt capacity remains verified; generation subphase, token progress and quality are unknown. Next 13/P1: distinguish prompt evaluation from first-token/sampling progress before changing the budget or worker. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR1974 is merged/main-verified; native OpenClaw/Hermes admission and retained improvement remain unresolved.
+**2026-09-30 current layer:** the existing worker now has a completed local proposal call (119.797 seconds under a separately frozen 180-second deadline). The returned text repeated instructions and failed the unchanged code parser; no candidate was executed. The preceding 90-second diagnostic timeout remains recorded. Next 13/P1: qualify the existing prompt/chat-format path against the same repair criteria. See the [basic RSI layer and gates](modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29). PR #1975 is merged/main-verified; native OpenClaw/Hermes admission and retained improvement remain unresolved.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

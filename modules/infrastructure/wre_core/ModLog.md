@@ -1,3 +1,20 @@
+## 2026-09-30 — RSI worker returns; malformed proposal rejected
+
+- Qualified eval/sample observation on the existing local adapter: 90-second
+  packet timed out after at least 256 sample returns; no completion inferred.
+- Independent review supported one separate 180-second packet with unchanged
+  model/task/512-token cap/criteria. Returned in 119.797s, close observed, parent checks
+  passed; the proposed text repeated instructions and failed Python parsing.
+  No candidate execution, tests, retention or promotion. Both budgets closed.
+- Eight pass-through checks passed. Historical 48-case controls retained without
+  rerun. Method counts remain distinct from usage/output tokens. Two dispatches,
+  one timeout and one rejected return remain in the accounting denominator.
+- WSP00/15/22/48/50/84/97 selects 13/P1 existing prompt/chat-format qualification,
+  reuse before extension. No new module, backend or production source change.
+- Evidence: `O:/Foundups-Agent-audits/20260930-rsi-native-phase/` and canonical
+  backlog `current_observation.native_phase_20260930`. PR #1975 closure verified;
+  this sprint's exact-head publication, CI and owned cleanup recorded separately.
+
 ## 2026-09-30 — RSI generation boundary observed; controlled timeout
 
 - One existing WRE local proposal call with unchanged prompt/model/settings and

@@ -1,24 +1,25 @@
 ## Current bounded layer — 2026-09-30
 
-The phase-observed generation trial ended in a **controlled timeout**: one
-existing local proposal-adapter dispatch, 90.094 seconds, no returned proposal,
-no retry or candidate execution. Initialization completed in 5.359 seconds; the
-generation wrapper entered and its cached initialization returned, but generation
-did not return. Native prompt evaluation, first-token progress and quality remain
-unknown. No graceful-close event was recorded. Parent postchecks passed.
+Two separately frozen qualification packets are closed. The 90-second packet
+timed out after recording real eval/sample progress. That evidence justified one
+180-second follow-up with unchanged task/model/criteria; it returned in 119.797s,
+closed cleanly according to the child journal and passed parent identity checks.
+The returned proposal repeated instructions and failed the unchanged AST parser.
+It was not applied or executed. Counts: 2 dispatches, 1 timeout, 1 returned/rejected
+proposal, 0 accepted candidates, 0 automatic retries, 1 deliberate budget follow-up.
 
-Next 13/P1: qualify bounded evaluation/first-token diagnostics at existing engine
-boundaries. Preserve the unchanged task and acceptance; no unchanged failed
-rerun, automatic budget increase, model switch or new orchestrator. Any next
-experiment requires its own frozen script/budget. Current budget is closed.
+Next 13/P1: verify model-appropriate prompt/chat formatting at the existing local
+worker boundary. Reuse existing chat support; formatting is a hypothesis, not a
+proven root cause. Preserve the original tests/parser and effect-evidence boundary.
+No more generation calls, deadline increases or model changes in this sprint.
 
 See the [current WRE layer](../../modules/infrastructure/wre_core/ROADMAP.md#basic-rsi-layer-and-correspondence-freshness--2026-09-29)
-and backlog `current_observation.generation_phase_20260930`. Prior preflight,
-historical controls and timeout remain separate observations; PR1974 is merged,
-main-verified and closed. Basic progression stays proposal → independent tests/
-rollback → later reuse/held-out benefit → admitted isolated AmIBot → two workers.
-Native admission remains unresolved; active FoundUps/Remote AutoPost protected.
-Earlier sections below are historical.
+and backlog `current_observation.native_phase_20260930`. Method-return counts
+are not output tokens. No candidate tests or retained benefit were demonstrated.
+Basic progression remains scoped proposal → independent tests/rollback → later
+reuse/held-out benefit → admitted isolated AmIBot → two workers. Native admission
+remains unresolved. PR #1975 is merged/main-verified and closed; active FoundUps
+and Remote AutoPost remain protected. Earlier sections below are historical.
 
 ## Staged general-role cohort dispatch closure — 2026-09-29
 

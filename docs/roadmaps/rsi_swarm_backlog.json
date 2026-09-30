@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.generation_phase_20260930",
-    "base_commit": "9addd57517247aa5ebdb6b6d732b1aeee67140be",
-    "selected_action": "Qualify bounded prompt-evaluation and first-token/sampling diagnostics at the existing local engine boundary before choosing a generation budget or worker",
-    "status": "generation_timeout_subphase_unknown_reobserve_after_closure",
+    "observation_path": "current_observation.native_phase_20260930",
+    "base_commit": "8e04a39f44a652c4f9231888249b80f71d6d38f8",
+    "selected_action": "Qualify model-appropriate prompt/chat formatting at the existing local worker boundary against unchanged repair criteria; reuse existing chat support before extending",
+    "status": "returned_proposal_rejected_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-generation-phase\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.worker_preflight_20260930"
+    "previous_observation_path": "current_observation.generation_phase_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -14148,6 +14148,255 @@
         "status": "merged_main_verified_owned_lane_closed"
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-generation-phase\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
+    },
+    "native_phase_20260930": {
+      "source_head": "8e04a39f44a652c4f9231888249b80f71d6d38f8",
+      "classification": "directly_supervised_existing_worker_qualification",
+      "outcome": "TRANSPORT_RETURNED_PROPOSAL_REJECTED_BEFORE_EXECUTION",
+      "evidence_root": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase",
+      "selection": {
+        "task": "Qualify bounded prompt-evaluation and first-token/sampling diagnostics at the existing local engine boundary before choosing a generation budget or worker",
+        "dimensions": [
+          2,
+          4,
+          4,
+          3
+        ],
+        "total": 13,
+        "priority": "P1",
+        "eligible": true,
+        "state": "generation_subphase_qualification",
+        "wsp97": "This attempt loaded successfully but generation did not return. Distinguish prompt evaluation from sampling/token production using existing engine observations; no unchanged retry, automatic budget increase or model switch."
+      },
+      "measurements": {
+        "planned_child_attempts": 2,
+        "child_dispatches": 2,
+        "returned_proposals": 1,
+        "timeouts": 1,
+        "automatic_retries": 0,
+        "deliberate_budget_followups": 1,
+        "syntax_valid_proposals": 0,
+        "accepted_candidates": 0,
+        "candidate_tests": 0,
+        "candidate_applications": 0,
+        "retained_replays": 0,
+        "child_wall_seconds": [
+          91.51500000013039,
+          119.79699999978766
+        ],
+        "completion_prompt_tokens": 414,
+        "max_output_tokens": 512,
+        "context_tokens": 2048,
+        "completed_attempt_eval_method_returns": 512,
+        "completed_attempt_sample_method_returns": 512,
+        "output_tokens": null,
+        "usage_tokens": null,
+        "finish_reason": null,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "provider_requests": 0,
+        "total_compute_cost": null,
+        "coordinator_and_reviewer_usage": null
+      },
+      "attempts": [
+        {
+          "packet": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase",
+          "deadline_seconds": 90,
+          "state": "TIMEOUT",
+          "child_wall_seconds": 91.51500000013039,
+          "first_eval_seconds": 15.733999999938533,
+          "sample_method_returns_lower_bound": 256,
+          "sample_method_returns_total": null,
+          "proposal_returned": false,
+          "graceful_close_observed": false,
+          "result_review": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\result-review.json"
+        },
+        {
+          "packet": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\completion-budget",
+          "deadline_seconds": 180,
+          "state": "RETURNED_PROPOSAL_REJECTED",
+          "child_wall_seconds": 119.79699999978766,
+          "first_eval_seconds": 13.188000000081956,
+          "sample_method_returns_total": 512,
+          "proposal_returned": true,
+          "graceful_close_observed": true,
+          "syntax_result": "SyntaxError",
+          "result_review": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\completion-budget\\result-review.json"
+        }
+      ],
+      "provenance": "Parent completion/timeout receipts plus child method observations; independent review accepts diagnostic evidence and rejects proposal. Method counts are not authenticated usage tokens.",
+      "source_bindings": {
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/local_model_selection.py": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": "01335a689ab17147720842abd391edab1943ea66b7afd97447ef87850f0ae27b",
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": "541d9494c1b2f9191f783a0ff413f4e48bad005dcc08bec91079bb7bbfe85d69",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb",
+        "holo_index/__init__.py": "77bb87050ce92b7e02a8d60a7b19ff836eb0c326cdc527ccf49f8cfbc976d848",
+        "holo_index/qwen_advisor/__init__.py": "369e6ec065683ec0787f31e79417dc1e7ea1b4ef21389470ae30a3f0dea899ce",
+        "modules/infrastructure/wre_core/__init__.py": "50cf6817e480abd852f725cc96c1cdd97a77368bd0735c09d1ae4c8be415d256",
+        "modules/infrastructure/wre_core/src/__init__.py": "24978fcea7210fbcdb0bf7492405488d469c3683c91d98799a1e68b67ff49334"
+      },
+      "model": {
+        "path": "E:\\LM_studio\\models\\local\\qwen-coder-7b\\qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "bytes": 4683073536
+      },
+      "runtime": {
+        "installed": "0.3.20",
+        "declared": "0.2.72",
+        "reconciled": false
+      },
+      "artifact_hashes": {
+        "manifest.json": "9df2250fce924b0497bea61bb6e0a3997c9db17c0b40046359189e20e0a2da89",
+        "source-review.json": "7849d0ad5f759b16a134d45f8ba247ae30ad0732be6ac48211444d3edf1204a0",
+        "execution-review.json": "5c69f86eea7a214d6258f7933ff43a6a700c735b10a2636501c9490785235fb5",
+        "result-review.json": "ad8ca5b23ca3353357f8310351ab863b3ccc82c6a2e184be42ec2727bfc58ea3",
+        "generation.receipt.json": "9ff0eb66fbd054b5b4133d21dd753997e7322a59c6411bd63493346ef589f005",
+        "phases.jsonl": "a6a1806216c88a6d02e4442eb6d6bb846780a1c4be256f4cf7e0ee265492e3e7",
+        "probe-checks.json": "4c7b8911115348e4d72d703f5d06e861b9bed0703a34c8988cb23c52aa8a3ae3",
+        "control-reuse-check.json": "f621c31ef341362772f24e1c12f5eabb5b0cbf63b2a9410a953f03c7a4226e76",
+        "completion-budget/manifest.json": "a76508cfcf0eb66a6eac1d34dbed6ad3ad055b037db790d7058947ccd6bc620c",
+        "completion-budget/execution-review.json": "d1603bd00ae2d937291a32b05fc8c0fc2b3a91221ffdedde9d7e363ee9d014bb",
+        "completion-budget/result-review.json": "657a0c979302da1b54c1c120c469906ccf665f20f161b2da5f254201b9926648",
+        "completion-budget/generation.receipt.json": "b47df7fd78bb0839daf163cd9846a79d2e9b3bbcd43a6eb79afa86512dbac55c",
+        "completion-budget/generation.raw.json": "223c9635cdc807bb9d68fb1dbd36f809965063c531ded35dc35e05e67b00219f",
+        "completion-budget/phases.jsonl": "47785edaa6f5ad6f105ced50422c860e4918874548a8de61f28519864a0ebf34",
+        "completion-budget/proposal-inspector-review.json": "fd02aba5339ea4867a8878a18a8e19782696f783e168caa547f1e11e10fdb373",
+        "completion-budget/proposal-rejection.json": "18ba21f2c245c78fe047b24068fa38bc70d6b8d6cff8054c8ff7c8fb998acb28"
+      },
+      "frozen_acceptance_reference": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\acceptance-review.json": "b5b157fbfe5a5a20513d88428a2328d602042f5b974080a4948311de88f28b19",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\proposal-inspector-review.json": "a312d2b9013bc7663343bb59eeabaac69800a12b07bee938dacb6487f16f21a1",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\manifest.json": "89c66bcedb79892ac8d9d3ebf44fa4a6aafa0d6ffc1f8e69f0bc21a16220c0fe",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-technical-canary-qualification\\inspect_proposal.py": "e59f2538bb255ccc6770745aded8e575b1901a080aa70d001681b252c24b1168"
+      },
+      "commands": [
+        "python.exe -I -S -B check_probe.py",
+        "python.exe -I -B run_generation.py",
+        "python.exe -I -B completion-budget/run_generation.py",
+        "python.exe -I -S -B completion-budget/inspect_proposal.py"
+      ],
+      "local_checks": {
+        "instrumentation_passed": 8,
+        "instrumentation_failed": 0,
+        "unique_proposals_parsed": 1,
+        "proposal_syntax_failures": 1,
+        "parser_invocations": 2,
+        "parser_capture_note": "Second unchanged data-only parser invocation captured exact exit/log receipt; no extra proposal or model call."
+      },
+      "budget_decision": {
+        "prior_receipt_sha256": "9ff0eb66fbd054b5b4133d21dd753997e7322a59c6411bd63493346ef589f005",
+        "prior_one_call_budget_closed": true,
+        "new_calls": 1,
+        "new_retries": 0,
+        "child_seconds": 180,
+        "observed_sample_returns_at_last_milestone": 256,
+        "last_milestone_child_seconds": 80.59400000004098,
+        "seconds_per_method_return_64_to_256": 0.23429687499932092,
+        "meaning": "Progressing generation motivates one explicit larger deadline; method-return timing is not output-token throughput or a guaranteed completion estimate.",
+        "hard_stop": "After this one180s attempt, no additional calls, automatic extension, model/settings change or acceptance change in this sprint.",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "wsp97": "Extend only the directly supervised diagnostic deadline, reuse existing adapter and fixed criteria; native admission and promotion remain separate."
+      },
+      "limits": "Each separately reviewed packet ran once. The90s timeout remains a failed attempt; the180s result remains rejected. Process-tree/stdout guards are not OS memory/network isolation. No further model calls this sprint.",
+      "controls_reused": "Historical48-case baseline40pass/8fail and reference48pass retained at unchanged source/fixture bytes; no candidate or control tests rerun.",
+      "old_timeout_cause": null,
+      "prompt_format_root_cause": "unproven hypothesis",
+      "code_changes": false,
+      "candidate_applied": false,
+      "promotion": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "next_action": "Qualify model-appropriate prompt/chat formatting at the existing local worker boundary against unchanged repair criteria; reuse existing chat support before extending",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            4,
+            5
+          ],
+          "total": 18,
+          "priority": "P0",
+          "eligible": false,
+          "state": "blocked",
+          "wsp97": "Inherited admission and effect-use lease unresolved; direct supervised trial does not supply authority."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            3,
+            4
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "candidate_rejected",
+          "wsp97": "Preserve1/12 general and0/12 coder development results; separate from technical canary."
+        },
+        {
+          "task": "Qualify model-appropriate prompt/chat formatting at the existing local worker boundary against unchanged repair criteria; reuse existing chat support before extending",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": true,
+          "state": "returned_proposal_rejected_prompt_contract_qualification",
+          "wsp97": "One proposal returned under separately frozen180s allowance but repeated instructions and failed original AST grammar. Inspect raw-completion versus existing chat formatting as a hypothesis; no additional deadline increase, new backend or relaxed criteria."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "No returned candidate; rollback and retained replay not reached. Historical controls are not held-out improvement."
+        },
+        {
+          "task": "Isolated AmIBot build ticket",
+          "dimensions": [
+            3,
+            4,
+            2,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Require qualified worker and admitted execution path. Preserve activeFoundUps and Remote-owned AutoPost."
+        }
+      ],
+      "prior_closure": {
+        "pr": 1975,
+        "merge": "8e04a39f44a652c4f9231888249b80f71d6d38f8",
+        "main_ci": 36680667946,
+        "main_codeql": 36680668121,
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-phase\\final-accounting.json",
       "publication_status": "See separate exact-head publication and closure receipt"
     }
   }
