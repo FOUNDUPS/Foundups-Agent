@@ -1,3 +1,13 @@
+## Qualified native-chat proposal option
+
+The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
+configuration. Use a trusted `local_proposal_mode="native_chat"` plus an exact
+`local_native_chat_profile` only after qualifying the runtime/model/template.
+See [the interface](INTERFACE.md#opt-in-local-native-chat-proposals) for the
+profile and errors. The default raw route is unchanged; generated text is a
+proposal, never action success. Portable/installed-source checks have passed;
+an actual-model caller trial, native admission and retained benefit are separate.
+
 ## Measurement reader compatibility — 2026-09-29
 
 The existing explicitly selected research-report reader now rejects nested

@@ -72,6 +72,23 @@ jobs:
             --basetemp="$RUNNER_TEMP/correspondence-pytest" \
             modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py
 
+      - name: Run WRE local proposal caller contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          WRE_ENABLE_IRONCLAW_WORKER: '0'
+          FOUNDUPS_DB_ENGINE: sqlite
+          DATABASE_URL: ''
+          FOUNDUPS_DB_PATH: ${{ runner.temp }}/proposal-foundups.db
+          WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/proposal-pattern.db
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          python -B -m pytest --tb=short -c /dev/null --noconftest \
+            -o pythonpath=. -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/proposal-caller-pytest" -v \
+            modules/infrastructure/wre_core/tests/test_wre_execution_truth.py
+
       - name: Run WRE RSI measurement contract tests
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

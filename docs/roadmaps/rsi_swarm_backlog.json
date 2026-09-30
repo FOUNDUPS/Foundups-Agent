@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.contract_transfer_20260930",
-    "base_commit": "0c4d0e696e2ef4f6c06d3f84861961d407095f55",
-    "selected_action": "Qualify an opt-in full WRE-to-Qwen native-chat proposal configuration contract in the existing owners",
-    "status": "contract_comparison_verified_reobserve_after_closure",
+    "observation_path": "current_observation.native_proposal_caller_20260930",
+    "base_commit": "ca7117b6a64bc66a4d4885d742cd06379ab582f1",
+    "selected_action": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
+    "status": "caller_contract_verified_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-contract-transfer\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-contract\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.artifact_replay_20260930"
+    "previous_observation_path": "current_observation.contract_transfer_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16846,6 +16846,243 @@
       "publication_status": "Exact-head PR/main and owned closure recorded separately.",
       "next_source_review": "next-action-source-review-v2.json",
       "superseded_metadata_receipt": "next-action-source-review.json preserved; v2 corrects13 Git blob IDs, with raw source hashes and findings unchanged."
+    },
+    "native_proposal_caller_20260930": {
+      "source": "ca7117b6a64bc66a4d4885d742cd06379ab582f1",
+      "outcome": "OPT_IN_PROPOSAL_CALLER_CONTRACTS_PASSED",
+      "execution_plane": "directly_supervised_local_qualification",
+      "measurements": {
+        "portable": {
+          "selected": 35,
+          "passed": 35,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 2.0160000000614673
+        },
+        "installed_handler": {
+          "cases": 4,
+          "passed": 4,
+          "tokenizer": "synthetic",
+          "completion_sink": "synthetic",
+          "native_initializations": 0
+        },
+        "original_runner_attempt": {
+          "selected_cases_executed": 0,
+          "collection_errors": 1,
+          "reporter_failed": true,
+          "denied_source_identity": "unknown"
+        },
+        "new_parameterized_cases": 33,
+        "reused_control_cases": 2,
+        "model_calls": 0,
+        "provider_calls": 0,
+        "held_out_gain": null,
+        "retained_gain": null
+      },
+      "signal_class": "execution_feedback",
+      "verification_independence": "Separate test author and source/oracle/result verifier. Installed-handler result reviewed by agent other than its author. Candidate-visible portable checks are not held-out model evaluation.",
+      "artifact_hashes": {
+        "entry.json": "1817cb80cb8646e27aa911815fae67a5cdf94ac4efa39b783bd53ae6af69310d",
+        "manifest-v3.json": "f2a9cd7f6819acc44c75bbaf52e247eeeea2ab53e69a02a7099e7eb2d5825c61",
+        "test-plan-v2.json": "d730ea1d4b47eddc09754ff8e83b3c5ca4ac7244b0504deb1915c2180a2ac5b0",
+        "implementation-review.json": "97b9b286d03cd3a7a681341ed488dbe0e124efcba83365758d6aa97344e34ead",
+        "contract-review.json": "a9f4886649a87d2b9a31c9625777ca2917f0a32d5a8cd8ed4d816a73ee881f98",
+        "execution.json": "89812758a79c8f6703f960428dc86864ea32308cbe955672b0bd48774160dbf4",
+        "execution-v2.json": "c22c6a7711530895ea0550dcbf6fb41b8fa951b2fbf5317a895c6bc743fd7e59",
+        "execution-review-v2.json": "35d5987ea8d600219aadd4293c8b338710075b17ed4422c44c3077405a63c60d",
+        "portable-result-review.json": "5eb9a0b5be8c1e25be201e33ef07c88bb0516558b36086ed6d16c2e4be4fe21b",
+        "candidate/results.xml": "fea583dd1f824e38e0293fbdb72b9a16e5e3083dba2bfad6e59a2ba3714abce1",
+        "candidate/output.log": "9c297ce6c184a1d9d5311758aa3e1d96fb55c961e98d46aa6cd008de3a91e88a",
+        "candidate-v2/receipt.json": "a8e4015356284db9952de5749ccf71aa07c1c9ffa8c7f859e82c3ec7e99a6109",
+        "candidate-v2/results.xml": "8d885c08b56fb65d217c16e30687734bd0a3f798d6d4a5cd493a13702aad812a",
+        "candidate-v2/output.log": "8b7d631bb032aa9ff22fa3c9d548e2d36b6034ccb821e473caa457d6b7859744",
+        "handler-result.json": "aee2e082d1b703eab83860e47754992c9006ff242a9514623dd63065c4d8ffc2",
+        "handler-result-review.json": "d67de4744582d9af4eb3369051c7c6df0009750dab8296c385bf4a7936011a9f",
+        "handler-review.json": "969fec538cb1c8fb9f942417621ac12884385d5a36b5b62967299f0ee70004c4",
+        "check_native_handler.py": "e61a5652d74d560cf630c69ce41f7a6b704115e79890c8aef22bb6490c50d08a",
+        "next-action-review.json": "dbd0671e381fab577bb387f70cc60a2b65b19845125885e0d063239179481d45",
+        "registry-check.json": "cb0610740853d06c55b885d4fb50042ddacf6f2677ebaca890196318d493858e",
+        "holo-query.json": "e1ee2c08d8fe44c2b478aa76d52f6aeb47ea88f9a461d4749cfba240f0bb4808",
+        "wsp00-gate.json": "8ee4d2cbe3b59cb2d1ebb85cd6616af6b918a4081b6a0206335e175e7f20830d",
+        "binding-validation.json": "457e7e3205dc86a5ea7e3d34637dbc668bca8223b9371c75fba2dadeabc54ff6"
+      },
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "quality": "No semantic coverage accepted unless current/root-bound/gap-free. Exact source owners and v2 pins are fallback; evaluate missing docs explicitly. Do not reindex or repeat unchanged failed probe."
+      },
+      "limits": [
+        "35 portable cases and4 installed-source handler cases have distinct scopes; not39 native model tests.",
+        "First portable attempt failed collection and receipt reporting; corrected package aliases passed without widening the19-source closure.",
+        "Trusted constructor/helper -> adapter -> engine tested; full execute_skill admission and actual model generation not exercised.",
+        "Only explicit optional runtime0.3.20/template profile accepted. Declared0.2.72 not qualified; no dependency/model download.",
+        "Profile validation and copied configuration are not credentials, independent evidence or permission.",
+        "Raw mode remains default. No live FoundUp, PatternMemory promotion, provider effect or retained benefit."
+      ],
+      "production_implementation_changed": true,
+      "native_wre_admission": false,
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected",
+          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_planning": {
+        "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "prerequisites": [
+          "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
+          "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
+          "Perform a data-only preflight of the qualified interpreter and installed0.3.20 package/runtime leaves, prior known GGUF identity, template digest and exact frozen skill/context. Reuse still-current full-file identity evidence where valid; rehash changed/missing bindings rather than relying on a model alias or availability state.",
+          "In the single child, import and capability-check the actual native package before initialization. Any version/capability/import mismatch stops without generation or fallback. This qualifies only the explicitly restricted optional0.3.20 path, not declared0.2.72 portability.",
+          "Instantiate the real master with trusted native_chat/profile constructor inputs while replacing only unrelated constructor collaborators with the already qualified inert boundaries. Never open default PatternMemory/SQLite, activate services, invoke full execute_skill or derive mode/profile from skill/context.",
+          "Call the real _execute_skill_with_qwen once, preserving actual adapter prompt builder and real generate_chat_response, formatter/factory/conversion. Do not transplant the old worker generate_response/prompt replacements. Any observation wrapper must forward unchanged and be separately reviewed.",
+          "Capture the real engine/model through a transparent initialization witness and guarantee explicit close in worker finally plus controller timeout/process termination. The production adapter does not expose a lifecycle handle or prove close; external ownership must be concrete before execution.",
+          "Reuse the prior fixed skill/context and strict data-only parser only after checking their intended scope. The production generic prompt suffix differs from the prior successful experimental override; do not force the old rendered hash or claim this is a controlled model-quality comparison.",
+          "Freeze finite acceptance before execution. If output is valid code, a separate independent candidate/application review is still required; do not automatically rerun or expand historical correspondence tests."
+        ],
+        "proposed_budget_not_authorized": {
+          "max_initializations": 1,
+          "max_generation_calls": 1,
+          "retries": 0,
+          "child_seconds": 180,
+          "max_output_tokens": 512,
+          "context_tokens": 2048,
+          "cpu_threads": 4,
+          "gpu_layers": 0,
+          "temperature": 0.2,
+          "provider_requests": 0
+        },
+        "acceptance": {
+          "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
+          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
+          "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
+          "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",
+          "interpretation": "Route acceptance and proposal/parser acceptance are separate outcomes. A rejected or capped proposal can still establish bounded route execution; it does not satisfy task quality. Any hidden effect, binding drift, over-budget call or missing cleanup evidence rejects the integration qualification."
+        },
+        "limits": [
+          "Planning only, no model or execution budget granted.",
+          "No full execute_skill admission, scanner, authority lease, PatternMemory write, ratchet/promotion or rollback qualification.",
+          "No declared0.2.72 package/ABI claim; optional host0.3.20 only.",
+          "No new-task/held-out/model-general capability, autonomous learning or production engine-lifetime guarantee.",
+          "No new store, orchestrator, registry, backend, prompt rewrite or default model change."
+        ]
+      },
+      "prior_closure": {
+        "pr": 1989,
+        "merge": "ca7117b6a64bc66a4d4885d742cd06379ab582f1",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-contract\\final-accounting.json",
+      "publication_status": "Local qualifications verified; exact-head PR/main and owned closure require separate receipts.",
+      "integrity_bindings": {
+        "runtime_members": 1401,
+        "changed_members": [
+          "holo_index/qwen_advisor/llm_engine.py",
+          "modules/infrastructure/wre_core/src/local_skill_inference.py",
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py"
+        ],
+        "manifest_digest": "a85e312f623fe8e148a71f6a26bd622824281ae66f85974fee90e26c52770251",
+        "generator_tests_passed": 8,
+        "backend_compatibility_passed": true,
+        "initial_manifest_check": "stale; repaired using existing generator and both digest pins"
+      }
     }
   }
 }

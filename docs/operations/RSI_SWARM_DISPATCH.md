@@ -1,5 +1,36 @@
 ## Current bounded layer — 2026-09-30
 
+The existing master helper, local adapter and Qwen engine now support an explicit native-chat proposal mode. Raw completion remains the default. Local35-case portable contracts and4 installed-source formatter/handler controls passed independently reviewed checks; neither loaded a model. The original collection-only runner failure is preserved. Full native admission and retained improvement remain unproven.
+
+The extension stays within existing owners: trusted constructor configuration
+passes through `_execute_skill_with_qwen` and `execute_local_skill_inference`
+to `QwenInferenceEngine.generate_chat_response`. It validates the qualified
+runtime/template, renders once, reserves output capacity against the actual
+context, disables template thinking and preserves shared handler state.
+Generated text remains a proposal with `success=False` and no effect evidence.
+
+Validation: 33 new parameterized portable cases plus2 existing controls passed;
+the separately reviewed4 installed-handler cases use real installed formatter
+source but synthetic tokens/output. Initial runner attempt executed0/35 cases
+and failed collection plus receipt reporting. A reviewed alias/diagnostic repair
+passed35/35 with the same19 source pins; no source allowance was widened.
+Registry check:1661 tracked test files,269 quarantined, current. CI explicitly
+selects the full execution-truth file; hosted results require exact-head receipts.
+
+**Next eligible layer (13/P1): Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper.**
+The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.
+No model budget is issued by this record. Bind fresh source, runtime, model,
+template, prompt/caps, cleanup and fixed acceptance before any trial. Keep
+model capability, effect admission, retention and later-use benefit separate.
+Holo source authority and native18/P0 remain blocked; no query-side reindex.
+AmIBot remains downstream of an admitted worker. Preserve active FoundUps and
+Remote AutoPost. PR #1989 is closed/main-verified.
+
+Evidence: backlog `current_observation.native_proposal_caller_20260930`; `O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`.
+Earlier sections retain historical scope.
+
+## Historical correspondence contract layer — 2026-09-30
+
 Frozen post-development contract comparison completed: original48 +new26 cases.
 Historical defective control62pass/12fail; unchanged generated artifact and fixed
 reference74pass each. Separate evaluator and oracle/result verifier; zero model
