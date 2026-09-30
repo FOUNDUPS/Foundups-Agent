@@ -37,6 +37,10 @@ const sources = [
     href: "https://www.meti.go.jp/press/2026/04/20260424007/20260424007.html",
   },
   {
+    label: "経済産業省：GX戦略地域（第1弾）認定（2026年9月11日）",
+    href: "https://www.meti.go.jp/press/2026/09/20260911006.html",
+  },
+  {
     label: "内閣官房GX実行推進室：GX戦略地域制度に係る検討状況",
     href: "https://www.meti.go.jp/shingikai/enecho/denryoku_gas/jisedai_kiban/pdf/004_07_00.pdf",
   },
@@ -194,7 +198,7 @@ export default function JapanHyperscalerReportPage() {
 
       <section style={{ marginTop: 36 }}>
         <h2>6. Fukui Signal — 福井は先に選択肢をつくれる</h2>
-        <p><span style={tag}>OFFICIAL</span>福井県は現時点でデータセンター集積型9道県には入っていません。一方、福井市と小浜市は別類型の「脱炭素電源活用型」の有望地域です。</p>
+        <p><span style={tag}>OFFICIAL / 2026-09-11 UPDATE</span>福井県はデータセンター集積型の認定地域ではありません。一方、福井県（福井市・小浜市）はGX戦略地域第1弾の「脱炭素電源活用型」として正式認定されました。4月24日の有望地域（一次審査通過）から一段進んだ状態です。</p>
         <p><span style={tag}>ANALYSIS</span>これは「福井に巨大データセンターが来ることが決まった」という意味ではありません。しかし、AI需要、脱炭素電源、ワット・ビット連携、地方産業立地の方向を見ると、福井も先に土地・電力・地域利益のルールを持つべきです。</p>
         <p style={{ fontSize: "1.18rem", fontWeight: 800 }}>
           YUMORI.meの立場はデータセンター反対ではありません。田んぼ、山、集落の土地を何十haも集約する大型キャンパスだけを唯一の未来にしないことです。
