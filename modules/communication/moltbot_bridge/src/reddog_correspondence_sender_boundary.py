@@ -18,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from hashlib import sha256
 import json
-from typing import Callable, Mapping, Sequence, TypeVar
+from typing import Callable, Mapping, Sequence
 
 from .reddog_recipient_preflight import (
     PreflightDecision,
@@ -79,9 +79,6 @@ class SenderBoundaryResult:
     provider_result: ProviderSendResult | None = None
 
 
-T = TypeVar("T")
-
-
 def _aware_utc(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("timestamp must be timezone-aware")
@@ -132,6 +129,22 @@ def bind_preflight_receipt(
 
     if ttl_seconds <= 0:
         raise ValueError("ttl_seconds must be positive")
+
+    receipt_recipients = {
+        (check.identity_id, check.role, check.proposed_address)
+        for check in receipt.checks
+    }
+    transaction_recipients = {
+        (
+            recipient.identity_id,
+            recipient.role,
+            normalize_address(recipient.address),
+        )
+        for recipient in transaction.recipients
+    }
+    if receipt_recipients != transaction_recipients:
+        raise ValueError("preflight receipt recipients do not match transaction")
+
     issued = _aware_utc(issued_at)
     expires = issued + timedelta(seconds=ttl_seconds)
     return BoundPreflightReceipt(
