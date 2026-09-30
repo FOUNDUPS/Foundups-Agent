@@ -44,6 +44,11 @@ These are continuing acceptance gates, not completed features that may later be 
 - [x] Add a canonical candidate-site registry and separate FIN workbook tabs for Site 1 — Sukatto, Site 2 — Shimousaka, and Site 3 — Hanyu.
 - [x] Add the repository-owned demand-led YUMORI economic model, 24-offer service catalog, formula-driven Demand & Capacity / Node Sizing workbook projection, demand-capped heat calculation, and sourced JHR infrastructure-flow ledger.
 - [ ] Obtain utility and fiber responses for each candidate site; for Hanyu submit demand-derived initial and expansion load cases from the canonical economic model. Do not promote any fixed kW/MW into the functional model before demand, engineering and utility evidence support it.
+- [x] Correct the Fukui policy boundary after METI's 2026-09-11 first-tranche decision: Fukui Prefecture (Fukui City / Obama City) is now a formally designated **decarbonized-power-utilization GX Strategic Region**, not merely a first-stage candidate and not a data-center-cluster designation.
+- [ ] Add a GX-policy alignment agenda item to the Hanyu/Shimousaka prior consultation: ask Education Policy / Facilities Utilization to coordinate with Fukui City Enterprise Location Promotion on whether adaptive-reuse compute nodes can complement the City's designated GX industrial-location strategy.
+- [ ] Open a bounded eligibility consultation with Fukui Prefecture Growth Industry Location Division on the ¥10B building-constructed AI data-center incentive and with Fukui City Enterprise Location Promotion on the municipal cap/stacking rule. Current Hanyu phase is below the threshold; do not claim eligibility.
+- [ ] Open a bounded eligibility consultation with the GX Regional Co-Creation Subsidy office for the DC equipment-investment track before the second call: verify whether an eligible PPP/reuse site in Fukui City can qualify outside the named prefectural GX industrial-park parcel and what power-source / host-region contribution evidence is required.
+
 - [ ] Ask Fukui City to consider Cabinet Office PPP/PFI expert/one-stop support as part of an independent demolition-vs-reuse comparison.
 - [x] Provide Japanese, English, and Portuguese states for the ten-slide presentation.
 - [ ] Complete route-based Japanese, English, and Portuguese localization for every legacy page surface.
