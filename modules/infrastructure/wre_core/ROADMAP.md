@@ -1,61 +1,55 @@
 ## Basic RSI layer and correspondence freshness — 2026-09-29
 
-**Current qualification: 2026-09-30, source `c7d5e0fc8`.** One feedback-only
-development attempt carried the exact rejected proposal and independent findings
-through existing `input_context`. It returned another fenced method, without
-the required observed-token type/nonempty and cached-empty checks. The original
-parser and independent review rejected it. Nothing was applied.
+**Current qualification: 2026-09-30, source `1841414fe`.** All23 deterministic
+checks passed against the actual local adapter leaf and exact isolated master
+forwarding method, using synthetic model dependencies. Original instructions and
+context reached the engine without loss; fabricated success claims stayed
+quarantined. The suspected delivery defect was not reproduced in this scope.
+No production patch is justified by this result.
 
-| Current attempt | Observed result |
+| Deterministic group | Passed / planned |
 |---|---|
-| Dispatch / returned / rejected / retries | 1 / 1 / 1 / 0 |
-| Parent wall / generation | 44.906 s / 38.328 s |
-| Native response input / output / total tokens | 636 / 83 / 719 |
-| Syntax-valid / accepted returned proposals | 0/1 / 0/1 |
-| Candidate applications / tests / retained uses | 0 / 0 / 0 |
-| Finish reason / exact stop | `stop` / unknown |
+| Original/feedback/default/nested contexts, direct + master | 8 / 8 |
+| Untrusted text and fabricated success quarantine | 4 / 4 |
+| Invalid/sentinel responses | 8 / 8 |
+| Unsupported agent, init failure, redacted exception | 3 / 3 |
+| Total | 23 / 23 |
+| Native model calls / provider requests / candidate applications | 0 / 0 / 0 |
 | Held-out / retained benefit | Not measured / not measured |
 
-Original instructions, task, model, runtime, chat route, stops, temperature,
-512-token cap and 48-case acceptance stayed fixed. Only verifier feedback was
-added to the input; this is an adaptive known-case follow-up, not held-out
-evaluation. The visible exception catch disappeared, but overall acceptance
-did not improve. No retry or larger budget is authorized by this observation.
+These are transport/quarantine checks, not model-output quality, full WRE
+initialization/dispatch or native execution admission. Independent review
+inspected exact script/results/source bindings without reexecution. Exit0 is
+the coordinator's observed tool result, separately transcribed, not independent
+process evidence. Previous two chat proposals remain rejected; historical48
+development controls were not rerun. The interface promises a quarantined
+proposal or stable failure, not guaranteed raw or correct Python.
 
-Eight unchanged MethodProbe checks passed; they do not establish output-contract
-fidelity. The actual forwarded 636-token prompt plus full 512-token reserve fit
-the 2048 context. Parent pins passed and child close was observed without journal
-errors. Usage is from the native response, not method-return counts. Historical
-controls (40 passed/8 failed versus 48 passed on 48 development cases) remain
-hash-verified and were not rerun. Both chat attempts remain separate failures.
+**Next eligible layer: optional one-factor task-framing qualification (13/P1;
+C2/I4/D4/Impact3).** Reconcile the suspected source defect as not reproduced.
+Before any next call, freeze a material framing change, retaining full original
+skill/context facts and no reference solution. Keep model/runtime/chat/stops,
+temperature/caps and parser/48-case semantics unchanged. Verify complete prompt
+fit, exact script/source pins and a separate one-call budget. Stop on rejection;
+do not strip fences, relax criteria, blindly retry or add a new output API.
+Framing is a hypothesis, not a demonstrated cause. Even a known-case pass would
+not establish held-out or retained improvement.
 
-**Next eligible layer: existing output-contract qualification (14/P1;
-C2/I4/D5/Impact3).** Contract delivery now blocks any accepted candidate. Inspect
-`local_skill_inference._build_prompt`, existing backend controls and consumer
-checks; qualify prompt/contract preservation deterministically before another
-separately bounded model comparison. Generic structured-proposal wording is a
-hypothesis, not a proven cause. Existing tests cover proposal quarantine and
-errors, not full repair quality. Reuse the owners and original criteria; do not
-strip fences to manufacture acceptance or add a parallel orchestrator/schema.
+Holo retrieval remains `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness
+and an index gap. Existing R03 exact-main authority maintenance is15/P1 blocked;
+no fresh semantic coverage or query-side reindex is claimed. Exact source reads
+support this bounded existing-owner check. Native admission is18/P0 blocked.
 
-The governed Holo query returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`
-with zero owner attempts, UNKNOWN freshness and an index gap. This is not fresh
-semantic retrieval. Existing R03 exact-main publication/lease qualification is
-the 15/P1 blocked maintenance dependency; direct exact source reads support this
-bounded known-owner experiment. No query-side reindex was performed.
-
-Minimum progression remains: accepted scoped proposal → independent original
-controls and rollback → later verified reuse and held-out benefit → one admitted
-isolated AmIBot ticket → two workers. Basic autonomous RSI is not complete.
-Installed llama-cpp 0.3.20 versus declared 0.2.72 remains unreconciled. This is
-direct supervised qualification, not native WRE/OpenClaw/Hermes admission or
-OS memory/network isolation. Active FoundUps and Remote AutoPost stay protected.
+Minimum progression: accepted scoped proposal → independent original controls
+and rollback → later verified reuse/held-out benefit → one admitted isolated
+AmIBot ticket → two workers. Basic autonomous RSI is not complete. Installed
+llama-cpp0.3.20 versus declared0.2.72 remains unreconciled; no model runtime was
+loaded in this sprint. Active FoundUps and Remote AutoPost remain protected.
 
 Evidence/queue: `docs/roadmaps/rsi_swarm_backlog.json` →
-`current_observation.verifier_feedback_20260930`; all prior observations remain.
-PR #1980 is merged/main-verified at `c7d5e0fc8`, with CI 36694645719 and CodeQL
-36694645232 successful and its owned lane closed. This sprint has separate
-publication and cleanup receipts.
+`current_observation.output_contract_20260930`; all prior observations remain.
+PR #1981 is merged/main-verified at `1841414fe`, CI36701584056 and CodeQL36701583178
+successful, own lane closed. This sprint has separate publication/closure receipts.
 
 ## Staged general-role decision cohort — 2026-09-29
 

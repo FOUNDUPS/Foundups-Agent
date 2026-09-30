@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.verifier_feedback_20260930",
-    "base_commit": "c7d5e0fc853c6620ac45fe355e8e0a2708586062",
-    "selected_action": "Qualify task-specific output-contract delivery at the existing local_skill_inference boundary before another model attempt",
-    "status": "output_contract_qualification_reobserve_after_closure",
+    "observation_path": "current_observation.output_contract_20260930",
+    "base_commit": "1841414fe5c565fafc7e368472cf0a6ccdbc0484",
+    "selected_action": "Separately freeze one task-constrained prompt-framing qualification through existing local worker, if the proposed change is material and justified",
+    "status": "optional_framing_qualification_reobserve_after_closure",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
-      "deferability": 5,
+      "deferability": 4,
       "impact": 3,
-      "total": 14,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-verifier-feedback\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-output-contract\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.chat_qualification_20260930"
+    "previous_observation_path": "current_observation.verifier_feedback_20260930"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -14882,6 +14882,209 @@
         "dependencies": "Fresh source/ownership; existing acceptance and effect boundaries; separate review before changed runtime or model dispatch.",
         "ownership": "Existing RSI adapter lane; protect shared checkout and other FoundUps."
       }
+    },
+    "output_contract_20260930": {
+      "source_head": "1841414fe5c565fafc7e368472cf0a6ccdbc0484",
+      "classification": "deterministic_existing_adapter_contract_qualification",
+      "outcome": "INSTRUCTION_CONTEXT_LOSS_NOT_REPRODUCED_IN_QUALIFIED_SCOPE",
+      "evidence_root": "O:\\Foundups-Agent-audits\\20260930-rsi-output-contract",
+      "selection": {
+        "task": "Qualify task-specific output-contract delivery at the existing local_skill_inference boundary before another model attempt",
+        "dimensions": [
+          2,
+          4,
+          5,
+          3
+        ],
+        "total": 14,
+        "priority": "P1",
+        "eligible": true,
+        "state": "returned_feedback_proposal_rejected",
+        "wsp97": "Two chat proposals failed fixed output/semantic criteria. Inspect existing prompt construction, backend controls and consumer checks; qualify deterministically before a separate bounded comparison. Generic wrapper causality remains unproven. No new orchestrator, schema or relaxed parser."
+      },
+      "measurements": {
+        "planned_cases": 23,
+        "reported_cases": 23,
+        "reviewed_case_rows": 23,
+        "passed": 23,
+        "failed": 0,
+        "native_model_calls": 0,
+        "provider_requests": 0,
+        "product_mutations": 0,
+        "candidate_applications": 0,
+        "native_output_quality_trials": 0,
+        "held_out_gain": null,
+        "retained_gain": null,
+        "wall_seconds": null,
+        "currency_cost": null
+      },
+      "source_bindings": {
+        "modules/infrastructure/wre_core/src/local_skill_inference.py": "624bc5f76b6df3b1125b895f5007b90eb63e4ac669e6f1b9cd3179b68f2e26ca",
+        "modules/infrastructure/wre_core/INTERFACE.md": "3f47f67a160054b97d225c613b8baa827028eb85145c4c829cae34333c92b8f4",
+        "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py": "1fe1db5bb477b07a411db161c64212a29f02fbc1fae4c33164772d25f06a0fdf",
+        "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py": "0e4cc6d142a81093c333e63320e615443ff82964d8c239a269ec480b72186357",
+        "modules/infrastructure/shared_utilities/local_llm_backends.py": "df18dc69ec679e3e0643102dbaa097ad12f0c77faf5e75a6be91fd28253ae8cb",
+        "modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py": "9f9355e34af33346cc42f7ff17db2ac3d40d5c487cda9bf653fc74d25c9a9247",
+        "modules/infrastructure/wre_core/src/foundup_job_model_capability_projection.py": "da62a126336b3562c2869ad0de3f950f357589f7e88b07b36afc86d172990b61",
+        "holo_index/qwen_advisor/llm_engine.py": "0a1f6ea8d92b6cb58c88238d8bad1b2b0e74b8ea1c981f5fd1b3f5b18caa6fbb"
+      },
+      "input_bindings": {
+        "O:\\Foundups-Agent-audits\\20260930-rsi-verifier-feedback\\instruction.txt": "0b8bbedc0a70c78cccd4112bfb39f7ebcbc1119358f127e2b3184af8134b5720",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-verifier-feedback\\input.json": "6dfff3191ed9ea6ac01b8cf4202a921d4cea5aab559b393812f45cbfd10a4266",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-verifier-feedback\\generation.raw.json": "d3cfc964f76c947ffe131337c26b7c39714199820087e70593b0097fb33eb000",
+        "O:\\Foundups-Agent-audits\\20260930-rsi-chat-qualification\\input.json": "212c8492287a1231ef2e3423a396d4254d21189099700cd99e240aa80b36b6e7"
+      },
+      "artifact_hashes": {
+        "manifest.json": "119253ce6eaf69573b71d632b8251041fca09abeb970b2f88b29f95db610e628",
+        "execution-review.json": "e22a71cedcdf4a8dd529cb4486da7b451b0344ccd9ce8896447551a4b8def797",
+        "result-review.json": "6d39729dbdb498e30516b6a7eda0bf5340843f2565df5a4f324a146d2ab29085",
+        "source-review.json": "8de391c513be987151541fc1e4eca865ce2dd4d2020b10ca1f6d84f45b58b6f1",
+        "contract-results.json": "a51c797579609c5b2a5930da4341497cc6a1b57ef4ed057d4aed0ecf6c65301d",
+        "qualify_contract.py": "222144b2342392aaab083bceb5f5f4b87540d0a5902d0e89a90bc622891d6b65",
+        "execution-observation.json": "66bba484003b02f68faf65eb1fc5e78da14aed1967ca24447cbb5cca6160cbed",
+        "holo-query.json": "58562d1ea93c021e15d77ed1e266220fa0c5339e649cd0cf55846b88eb81b206"
+      },
+      "case_groups": {
+        "original_feedback_default_nested_transport_direct_and_isolated_master": 8,
+        "untrusted_proposal_and_false_success_quarantine": 4,
+        "invalid_output_rejection": 8,
+        "unsupported_init_and_generation_error": 3
+      },
+      "implementation": "Actual local_skill_inference leaf plus exact isolated master forwarding method, fake model dependency modules; production package initialization bypassed.",
+      "provenance": "Coordinator executed actual whole leaf and exact isolated master method with synthetic engine dependencies once; independent reviewer inspected exact script/results/source bindings, without reexecution. Exit0 is coordinator tool observation, transcribed separately, not signed or independent process evidence.",
+      "finding": "Full skill/context preserved in tested cases; untrusted returned assertions stay quarantined. A missing optional output API is not a demonstrated contract defect. No production patch justified.",
+      "limits": "Native inference, full WRE import/dispatch, code correctness and retained improvement are not exercised; no source patch is justified unless a concrete contract failure reproduces.",
+      "retrieval": {
+        "ok": false,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No usable semantic result.",
+        "ordering": "Read existing adapter/interface, sole caller, source tests and shared backend controls directly.",
+        "missing": "Semantic coverage remains unavailable.",
+        "staleness": "Authority mismatch; no freshness accepted. Prior owner source verified unchanged; this wake revalidated after main advanced.",
+        "duplication": "No alternate local inference adapter found; production patch not justified by missing model fidelity.",
+        "maintenance_route": "Existing governed R03 exact-source authority; no query reindex."
+      },
+      "code_changes": false,
+      "candidate_applied": false,
+      "native_wre_admission": false,
+      "budget_closed": true,
+      "next_action": "Separately freeze one task-constrained prompt-framing qualification through existing local worker, if the proposed change is material and justified",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            4,
+            5
+          ],
+          "total": 18,
+          "priority": "P0",
+          "eligible": false,
+          "state": "blocked",
+          "wsp97": "Inherited admission and effect-use lease unresolved; direct supervised trial does not supply authority."
+        },
+        {
+          "task": "Requalify current-source governed Holo semantic authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "eligible": false,
+          "state": "blocked_authority_generation",
+          "wsp97": "Known R03 owner contract, not new implementation: query rejected AUTHORITY_ROOT_HEAD_MISMATCH with zero owner attempts. Existing governed exact-main publication/leases must be qualified before semantic claims; no query reindex. Exact source reads support this separately bounded existing-worker test.",
+          "evidence": [
+            "holo_index/CLI_REFERENCE.md:125",
+            "holo_index/README.md:14",
+            "holo-query.json"
+          ]
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            3,
+            4
+          ],
+          "total": 14,
+          "priority": "P1",
+          "eligible": false,
+          "state": "candidate_rejected",
+          "wsp97": "Preserve1/12 general and0/12 coder development results; separate from technical canary."
+        },
+        {
+          "task": "Separately freeze one task-constrained prompt-framing qualification through existing local worker, if the proposed change is material and justified",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": true,
+          "state": "optional_framing_hypothesis_requires_freeze",
+          "wsp97": "Instruction/context loss not reproduced in23 deterministic checks. No production contract patch justified. Separately preregister one material framing change and one-call budget; preserve original criteria/model/chat/stops. No blind retry or solution injection."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "No accepted candidate; the returned proposal was rejected before application. Rollback and retained replay were not reached. Historical controls are not held-out improvement."
+        },
+        {
+          "task": "Isolated AmIBot build ticket",
+          "dimensions": [
+            3,
+            4,
+            2,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "eligible": false,
+          "state": "downstream",
+          "wsp97": "Require qualified worker and admitted execution path. Preserve activeFoundUps and Remote-owned AutoPost."
+        }
+      ],
+      "next_planning": {
+        "effort": "One bounded preregistered task-framing qualification, not new infrastructure.",
+        "cost": "No model call allocated by this observation; separate exact one-call review/budget before execution.",
+        "verification_burden": "Unchanged parser and48 development controls, complete prompt fit and exact source/runtime/model pins; known-case pass would not prove held-out or retained gain.",
+        "dependencies": "Fresh source/ownership, material one-factor hypothesis, unchanged skill/context facts without answer injection, no-effect boundary.",
+        "ownership": "Existing RSI adapter lane; protect shared checkout, activeFoundUps and RemoteAutoPost."
+      },
+      "preregistration": [
+        "Exact one-factor framing change versus the frozen feedback attempt, retaining full original skill/context facts and requested output contract. No reference solution or expected output in prompt/grammar.",
+        "Same model/runtime/chat/stops/temperature/caps and unchanged parser/48-case semantics; full prompt fit must be verified.",
+        "Existing adapter and backend owners with disposable override only until measured justification; preserve unverified proposal/effect boundary.",
+        "Separate exact script review and explicit one-call budget; zero model calls authorized by this deterministic result. Hard stop on rejection/failure, no blind repeats.",
+        "Material claim is known-case development response only. Even a pass does not prove general causality, held-out gain or retained use."
+      ],
+      "prior_closure": {
+        "pr": 1981,
+        "merge": "1841414fe5c565fafc7e368472cf0a6ccdbc0484",
+        "main_ci": 36701584056,
+        "main_codeql": 36701583178,
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-output-contract\\final-accounting.json",
+      "publication_status": "See separate exact-head publication and closure receipt"
     }
   }
 }
