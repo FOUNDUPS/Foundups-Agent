@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-01 current layer:** PR#2000 admission map is merged/main-verified and its owned lane is closed. The selected effect-lease/consensus qualification now passed11/11 local cases after a preserved zero-case collection failure. This confirms the current rejection boundary, not a repaired issuer/provider connection or admitted worker. Next13/P1: Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair. See [the measured qualification](modules/communication/moltbot_bridge/tests/README.md#effect-lease-consensus-qualification--2026-10-01).
+**2026-10-01 current layer:** PR#2000 and PR#2001 are merged/main-verified with owned lanes closed. The eleven effect-domain controls passed locally and on exact PR/main; CI and CodeQL passed. The [single-effect proof handoff design](modules/communication/moltbot_bridge/INTERFACE.md#single-effect-proof-handoff-design--2026-10-01) now selects a separate HIGH/worktree_create binding within existing owners, preserving delegated v1. This is planning, not approved runtime policy. Next13/P1: Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners. Authentic effect approval, signer integration and resident supervision remain subsequent gates; AmIBot stays at G0.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

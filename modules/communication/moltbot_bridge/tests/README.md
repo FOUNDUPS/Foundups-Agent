@@ -1,12 +1,21 @@
 ## Effect-lease consensus qualification — 2026-10-01
 
+PR#2001 closure is now verified: head `6ec636219f04cfd49af6280b2ad27b8e4daefe0f`,
+main `a555687186568e8b74fdfebe037081b077ec8581`; exact eleven cases passed in
+[PR CI36804752624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36804752624)
+and [main CI36805404497](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36805404497).
+All ten PR checks and main CodeQL passed. Original failed attempts below remain
+historical evidence. This documentation slice runs no application tests and
+claims no additional passing cases. The next pure binding contract is defined
+in [the existing interface](../INTERFACE.md#single-effect-proof-handoff-design--2026-10-01).
+
 Hosted attempt [CI36803912390](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36803912390)
 stopped at collection (two errors, zero selected case bodies) because `jsonschema`
 was absent before this new step. Setup now pins `jsonschema==4.26.0`, the locally
 qualified version within the existing `modules/foundups/requirements.txt` range.
 The dependency installs before the guarded test process. Test IDs, assertions
-and production sources are unchanged; the updated hosted run remains unverified
-until its actual result is recorded. Original failed log/XML/receipt are preserved.
+and production sources were unchanged; the successful hosted retry and main
+results are recorded above. Original failed log/XML/receipt are preserved.
 
 The finite existing-owner qualification passed **11/11 local cases**, with zero
 failures, errors or skips. HIGH/ULTRA effect requests are valid in their own

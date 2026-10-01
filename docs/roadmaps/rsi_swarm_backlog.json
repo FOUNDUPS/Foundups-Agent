@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_consensus_qualification_20261001",
-    "base_commit": "2c856eab05df6222bf740d0b678a20e44c193500",
-    "selected_action": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
-    "status": "local_qualification_complete_reobserve_after_publication",
+    "observation_path": "current_observation.effect_proof_design_20261001",
+    "base_commit": "a555687186568e8b74fdfebe037081b077ec8581",
+    "selected_action": "Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners",
+    "status": "source_design_prepared_review_and_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-consensus\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-proof-design\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.admission_prerequisites_20261001"
+    "previous_observation_path": "current_observation.effect_consensus_qualification_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -17887,6 +17887,244 @@
         "oracles_changed": false,
         "retry_status": "not_yet_observed"
       }
+    },
+    "effect_proof_design_20261001": {
+      "base_commit": "a555687186568e8b74fdfebe037081b077ec8581",
+      "scope": "Existing-owner source design and roadmap reconciliation only",
+      "identity": {
+        "self": "0102",
+        "role": "architect",
+        "origin": "external_principal",
+        "principal_ref": "012"
+      },
+      "prior_closure": {
+        "pr": 2001,
+        "head": "6ec636219f04cfd49af6280b2ad27b8e4daefe0f",
+        "merge": "a555687186568e8b74fdfebe037081b077ec8581",
+        "pr_checks": 10,
+        "local_cases": 11,
+        "pr_cases": 11,
+        "main_cases": 11,
+        "main_ci": 36805404497,
+        "main_codeql": 36805404123,
+        "owned_lane_closed": true,
+        "receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-consensus\\final-accounting.json",
+        "sha256": "840b157d7f797d27e5969fb926351693d17f7b2facfd57b444779a7b1c4b44bf"
+      },
+      "retrieval": {
+        "holo_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "authority_head": "83b0689705c7c95a64898d4e75342bd2fdf71bbd",
+        "query_host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "fallback": "Pinned source and module docs; no semantic completeness claim",
+        "noise": "Historical prepend-style checkpoints; use newest selection and exact source",
+        "ordering": "WSP then current roadmap then selected module owners",
+        "missing_artifacts": [
+          "modules/communication/moltbot_bridge/requirements.txt"
+        ],
+        "staleness_risk": "Holo mismatch and historical checkpoint language",
+        "duplication": "Reuse existing interface/backlog; no new module/schema runtime/skill/store"
+      },
+      "selected_design": {
+        "domain": "Separately versioned effect proof; preserve delegated v1",
+        "first_scope": [
+          "HIGH",
+          "worktree_create"
+        ],
+        "binding_fields": [
+          "schema_version",
+          "parent_authority_request_digest",
+          "target_signing_request_digest",
+          "effect_request_digest"
+        ],
+        "proposed_binding_schema": "reddog_effect_target_binding.v1",
+        "proof_carrier": "Out of target; independent grant signer re-verifies exact binding",
+        "provenance": "Authenticated effect-specific producer and authority mapping unqualified; no implied parent conversion",
+        "policy_activated": false,
+        "implemented": false,
+        "contract": "modules/communication/moltbot_bridge/INTERFACE.md#single-effect-proof-handoff-design--2026-10-01"
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "Exact PR/main checks and full85-case hosted caller suite verified; owned lane retired with recovery bundle. Native release/admission/retention not claimed."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it."
+        },
+        {
+          "task": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2000 source map merged/main verified and owned lane retired; preserved closure receipts."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        },
+        {
+          "task": "External supervisor transport and strict-decoder qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "No accepted new strict-decoder/backend evidence or authentic owner/requester handoff supplied; do not repeat unchanged rejected backend audit."
+        },
+        {
+          "task": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2001:11/11 local and exact PR/main cases;10 PR checks and main CI/CodeQL passed. Owned lane closed. No worker admission or retained gain."
+        },
+        {
+          "task": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "source_design_complete_publication_pending",
+          "reason": "Explicit effect-domain planning design selected; delegated v1 unchanged. Authenticated effect producer not established. Independent review and publication recorded in owned closure receipts."
+        },
+        {
+          "task": "Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "next_eligible_after_design_review_and_closure",
+          "reason": "Adds a pure target binding contract; no repeated PR2001 negatives, no capability/signing/owner/model/store effects. New independent structural cases required; trusted provenance remains a later prerequisite."
+        }
+      ],
+      "selected_next": {
+        "task": "Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "reason": "Highest eligible bounded prerequisite after closed qualification; higher-ranked native, Holo and supervisor items remain blocked."
+      },
+      "validation": {
+        "application_tests_run": 0,
+        "model_calls": 0,
+        "authority_calls": 0,
+        "runtime_admitted": false,
+        "retained_gain": null,
+        "independent_review": "See source-bound review and publication receipt; not a signature or runtime grant"
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-proof-design",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-proof-design\\final-accounting.json"
     }
   }
 }

@@ -1,3 +1,128 @@
+## Single-effect proof handoff design — 2026-10-01
+
+**Planning contract, not an implemented API or runtime grant.** Source baseline:
+`a555687186568e8b74fdfebe037081b077ec8581`. PR#2001 is merged; its eleven
+qualification controls passed locally and on exact PR/main. They establish the
+existing domain separation, not successful effect issuance. The next layer
+specifies a separately versioned single-effect binding inside the existing
+owners. The delegated v1 two-child path remains unchanged.
+
+### Decision and evidence
+
+Select explicit effect-domain authorization; reject implicit conversion of a
+delegated-work receipt into an effect permit. The initial proposed adaptation
+covers **HIGH / worktree_create only**. ULTRA and live_enqueue remain outside
+this adaptation; their existing request schemas are not removed or downgraded.
+
+`reddog_elevated_authority_consensus_evidence._sovereign_matches` binds sovereign
+evidence to a delegated request, work order and identities. Reviewer evidence
+signs its exact consensus context. Neither the scoped producer search nor the
+existing two-HIGH-child permit establishes authenticated approval of the later
+effect target. This is an evidence gap; installed runtime state is unknown.
+
+An authentic producer must explicitly authorize the precise effect binding.
+Its principal authority, policy membership, independent reviewer evidence,
+scope, expiry and revocation must be resolved through existing trusted owners.
+A matching work-order ID, signed parent receipt, self-asserted approval or a
+synthetic test fixture is insufficient. Producer admission remains blocked
+until that provenance is independently qualified.
+
+### Digest and carrier contract
+
+| Name | Meaning and existing owner | Planned consumer rule |
+|---|---|---|
+| E | `authoritative_use_effect_digest(kind, payload)` in `reddog_authoritative_use_lease_contract` | Exact worktree effect; retain queue/slice/work-order, plan and valve bindings. |
+| T | `signer_secret_access_request_digest(request.to_dict())` in `reddog_signer_secret_access_grant_contract` | Complete canonical effect SigningRequest, including requester, signer/key epoch, generation, session/replay identity, nonce and lifetime through its payload. No proof inserted into the target. |
+| P | `canonical_authority_request_digest(parent)` in `reddog_elevated_authority_consensus_contract` | Parent reference only. Its projection removes back-references; P alone grants no authority. |
+| B | Proposed domain-separated single-effect binding over P, T and E | New structural contract in existing contract/evidence owners; cannot reuse the delegated signing-input projection C, which hashes a different request domain. |
+| G | Existing `signer_secret_access_grant_id(grant)` | Grant continues to bind T, exact beneficiary, operation, tier and replay owner. Grant issuer/requester and effect beneficiary stay distinct. |
+
+The proposed B mapping has exactly `schema_version`,
+`parent_authority_request_digest`, `target_signing_request_digest`, and
+`effect_request_digest`. Proposed schema label: `reddog_effect_target_binding.v1`.
+Hash it with the existing strict canonical JSON digest. Recompute P/T/E from
+validated inputs; never accept supplied digests as independent evidence. T must
+be formed after the issuer's existing replay-store binding is final; later
+rebinding invalidates B and requires fresh authorization, not digest rewriting.
+
+The next pure layer requires the existing `DelegatedAuthorityRuntimeRequest`
+shape, parent `requested_operation == "worktree_create"`, and HIGH derived by
+`delegated_authority_tier(parent)`; there is no parent `authority_tier` field.
+Both effect `work_order_id` and `work_order_digest` must equal the parent.
+Check canonical HIGH/worktree_create target shape, its existing freshness
+rules, and caller-supplied exact target equality. Parent timestamps must be
+exact integers, with `issued_at <= now` and both declared identity/work-authority
+expiries greater than now; target expiry must not exceed either declared expiry.
+These are structural comparisons, not authenticated parent freshness or scope.
+Caller-supplied expected values remain untrusted test or planning inputs. Do
+not infer that the parent principal equals the actual effect requester:
+that mapping needs separately authenticated evidence.
+
+The future effect proof has a distinct explicit domain/version and travels
+**outside** the effect target. The current builder leaves both proof and consensus
+absent; `_request_matches` explicitly checks only consensus absence. The proposed
+pure binding requires typed `SigningRequest.elevated_consensus_proof is None`
+and canonical `to_dict()` omission of that key. This is a planned additional
+check, not an existing validator guarantee. The provider must obtain the outer
+grant's receipt digest from a
+verified effect proof, not copy the target's `None` or fill it from an arbitrary
+mapping. The grant signer must independently reverify the same B and exact T.
+The v1 delegated rehydrator and generic permit must not accept this by widening
+their roles. Final effect-proof fields and authenticated producer registration
+are a later gate; the B mapping is not a completed proof schema.
+
+### Existing ownership and lifecycle
+
+| Stage | Extend only after its preceding gate passes |
+|---|---|
+| Canonical binding | `reddog_authoritative_use_lease_contract`, `reddog_elevated_authority_consensus_contract` and `reddog_elevated_authority_consensus_evidence`: pure validation/correlation only. |
+| Authentic authorization | Existing sovereign/policy/reviewer resolver and verification owners: bind fresh authorized effect context to B; preserve independent review and revocation. No producer is admitted by this plan. |
+| Local handoff | Existing consensus capability and issuer/provider owners: separately typed single-target permit, exact provider/beneficiary binding; never repurpose the two-child delegated permit. |
+| Grant boundary | Existing grant issuance/admission and consensus signer verification owners: explicit proof-domain dispatch, re-verification and existing durable reservation. |
+| Effect consumption | Existing resolve-per-sign backend, lease rehydration and effect registries: retain grant consumption, generation fencing and one-use exact-effect consumption. |
+
+Proposed expiry is the earliest applicable bound: effect target (at most30s),
+effect approval, parent authorization, independent grant policy, current owner
+generation/selection and grant TTL. Check at each use; a later stage never
+extends an earlier expiry. Unknown bounds reject. Numeric/type and clock rules
+must remain explicit; no implicit Boolean-to-integer coercion.
+
+Local permit consumption and durable signer reservation are separate events.
+Use one target per effect permit and an explicit effect-domain durable nonce
+binding B plus receipt identity in the existing replay owner. Do not reuse the
+delegated two-child nonce domain. Successful grant signing consumes its own
+authorization; it is not proof the final effect ran. A downstream failure must
+not remint an equivalent permit or erase prior consumption. Ambiguous cleanup
+stops and records the attempt for reconciliation. Existing rollback attempts
+can suppress errors; they do not establish all-failure restoration. Detailed
+restart/recovery behavior must be qualified before issuer composition.
+
+### Layer gates and acceptance
+
+1. **Next executable layer, 13/P1 (C2/I4/D4/Impact3):** freeze and qualify the
+   pure B construction/correlation contract in the existing contract and test
+   owners. Cases: canonical match; target/work-order/operation/tier substitution;
+   requester/key/generation/replay/nonce/lifetime substitution; missing/extra or
+   malformed fields; expiry and wrong B schema/target kind. The later proof
+   schema is not parsed by this layer. Freeze exact cases before
+   implementation, with independently calculated expected canonical data.
+   Synthetic positives mean structural agreement only. No signing, permit
+   minting, owner admission, model calls or operational stores.
+2. Qualify authentic effect-specific authorization provenance and independent
+   signer re-verification; only then adapt the typed permit/provider handoff.
+3. Test disposable full issuer composition, one-use/restart/rollback outcomes,
+   then the remaining resident/supervision prerequisites. Re-observe before
+   admitting one worker. AmIBot remains downstream of that gate.
+4. Measure a held-out baseline/candidate outcome and retained use on a later
+   invocation before calling the result RSI improvement; worker count is not
+   an improvement metric.
+
+Do not repeat PR#2001's eleven negative controls as new progress. No new
+orchestrator, registry, storage family or skill is selected. This design does
+not clear the seven remaining resident trust reasons or the supervisor blocker.
+Canonical sequencing and closure evidence: `docs/roadmaps/rsi_swarm_backlog.json`,
+observation `effect_proof_design_20261001`.
+
 ## Effect-lease consensus qualification — 2026-10-01
 
 The finite existing-owner qualification passed **11/11 local cases**, with zero
