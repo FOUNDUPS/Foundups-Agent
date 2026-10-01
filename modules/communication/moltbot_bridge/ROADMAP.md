@@ -1,3 +1,13 @@
+## Reviewer-authority closure and next RSI test — 2026-10-02
+
+The connected reviewer-key layer is merged/main-verified in PR #2014 at `44d833c`.
+198 local cases and the PR/main 331 portable/eight Linux selections passed;
+connected regressions and CodeQL passed. Owned implementation lane closed.
+Runtime provenance, quorum and sovereign effect authority remain separate.
+Earlier pending/next-selection entries are historical. See the canonical
+[closure and test checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#reviewer-authority-closure-and-next-rsi-test--2026-10-02)
+and backlog observation `reviewer_authority_closure_20261002` for gates and receipts.
+
 ## Connected reviewer authority composition — 2026-10-01
 
 PR #2013 is merged/main-verified at `c9d1273572d25cf7fccfc98c9c13994e41b913ad`

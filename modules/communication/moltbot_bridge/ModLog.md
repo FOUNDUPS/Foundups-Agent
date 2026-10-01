@@ -1,3 +1,20 @@
+## 2026-10-02 — Reviewer authority closed; next RSI test narrowed
+
+- PR #2014 merged/main-verified at `44d833c`; owned lane recovered and removed.
+  Exact PR/main evidence: 331 authority,8 Linux,74 correspondence,308 measurement,
+  85 caller cases, no failures/errors/skips; CodeQL passed. Local 198 and integrity 8
+  plus Node contract are separate overlapping evidence, not an aggregate score.
+- Preserved three failed hosted attempts, the erroneous v1 Path-rejection oracle,
+  its corrected 20-case v2 qualification and the fail-closed log-parser correction.
+- Registry-audit preparation is objective-inconclusive. Frozen 13/P1 next preflight
+  targets the prior actual scope-rejected proposal through existing WRE owners.
+  No model calls, generated-code execution, production Skillz/PatternMemory
+  mutation, native admission or retained-benefit claim. Unseeded sampling and
+  method-specific AST validation limit what the next observation could prove.
+- WSP00/15/22/48/50/97: existing roadmap/backlog checkpoints reconciled; historical
+  observations retained. Evidence: backlog reviewer_authority_closure_20261002
+  and O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/.
+
 ## 2026-10-01 — Connect scoped reviewer authority through existing owners
 
 - Reconciled PR #2013 closed at `c9d1273`; implemented the selected 15/P1 connected
