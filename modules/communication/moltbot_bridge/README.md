@@ -2,9 +2,11 @@
 
 The [consensus interface](INTERFACE.md#conditional-effect-review-verification-api--2026-10-01)
 now checks one effect-specific review against the actual request and supplied
-policy/key/runtime evidence. 82 frozen local cases pass; exact hosted results
-pending. A conditional valid review is not quorum or runtime approval. Authentic
-production provenance, effect-scoped authority and worker admission remain open.
+policy/key/runtime evidence. PR #2010 is merged/main-verified: 82 frozen local
+cases and 222 selected consensus cases on both PR/main CI pass. A conditional
+valid review is not quorum or runtime approval. The [source-qualified owner map](INTERFACE.md#authenticated-effect-authority-qualification--2026-10-01)
+identifies the existing identity/runtime machinery and missing authenticated
+effect-authority contract. Production provenance and worker admission remain open.
 
 ## Cross-process observer qualification — 2026-09-27
 

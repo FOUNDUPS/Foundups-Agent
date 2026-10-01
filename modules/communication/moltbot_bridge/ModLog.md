@@ -1,3 +1,16 @@
+## 2026-10-01 — Qualify effect-authority owners and reconcile RSI closure
+
+- Reconciled PR #2010 at `f4978e12`, exact PR/main checks and clean owned-lane
+  closure. Historical publication-pending prose is explicitly superseded.
+- Read actual signed runtime and current-generation principal owners; documented
+  why their outputs cannot directly supply reviewer/effect authority. Existing
+  interface owns the missing field map and concrete next contract-design gate.
+- Documentation-only qualification; no runtime adapters, source/test/manifest
+  changes, operational calls or new modules. Local validation checks the packet
+  and source references; previous regression counts remain historical evidence.
+- Native RSI/AmIBot remain blocked; no retained gain claimed. WSP00/15/22/50/84/97.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-authority-qualification/`.
+
 ## 2026-10-01 — Verify conditional effect-specific reviewer decisions
 
 - Reconciled PR #2009 merged/main/owned-closure evidence at `f0224007`.

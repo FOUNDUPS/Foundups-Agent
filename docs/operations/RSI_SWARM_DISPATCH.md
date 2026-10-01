@@ -1,3 +1,34 @@
+## Effect-authority source qualification — 2026-10-01
+
+PR #2010 is merged/main-verified at `f4978e12`; its owned lane is closed.
+Exact PR/main CI each passed 222 selected consensus cases, 74 correspondence,
+308 measurement (two known configuration warnings) and 85 caller cases.
+All ten PR checks and both main workflows succeeded. The earlier pending
+reviewer checkpoint below is historical.
+
+Selected 14/P1 (C3/I4/D4/Impact3) source qualification is complete: real signed
+model-runtime and manifest-bound principal verification owners exist, but
+neither supplies effect-review authority as-is. Casting their outputs into
+consensus dataclasses would lose trust distinctions. No production adapter,
+new carrier or runtime execution was justified in this slice.
+
+The existing interface now records the owner/field gaps and acceptance gates.
+Next 14/P1 (C2/I4/D5/Impact3) freezes reviewer-key authority provenance and
+signed supply fields in the existing principal resolver/parser. Establish who
+may grant reviewer permission, epoch/expiry and role before adapter code.
+Runtime-to-reviewer and sovereign B/P/T/E/requester/beneficiary edges follow
+separately. No identical source audit is queued. Quorum, single-target permit/
+replay and one admitted worker follow only after independent validation.
+
+No runtime/config inventory, local product tests, signing, provider/model calls,
+service activation or retained-benefit measurement occurred. Holo freshness
+remains unverified at the unchanged authority/query-host mismatch; pinned source
+and canonical docs supplied fallback. Native RSI18/P0 remains blocked, AmIBot
+remains G0. See `current_observation.effect_authority_qualification_20261001`
+in the canonical backlog and the existing consensus interface for the field map.
+WSP00/15/22/50/84/97; exact audit and publication receipt directory:
+`O:/Foundups-Agent-audits/20261001-rsi-effect-authority-qualification/`.
+
 ## Effect-specific reviewer checkpoint — 2026-10-01
 
 PR #2009 is merged/main-verified at `f0224007`; its owned lane is closed.

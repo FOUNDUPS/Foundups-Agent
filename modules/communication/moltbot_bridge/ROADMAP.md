@@ -1,3 +1,14 @@
+## Effect-authority source qualification — 2026-10-01
+
+PR #2010 is merged/main-verified at `f4978e12`; its owned lane is closed.
+The [interface owner map](INTERFACE.md#authenticated-effect-authority-qualification--2026-10-01)
+records source qualification and missing authority fields. Next14/P1 freezes
+reviewer-key permission/epoch/expiry provenance in the existing signed-generation
+resolver/parser before adapter code. Runtime and sovereign edges remain separate.
+Exact validation/closure: [system dispatch checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#effect-authority-source-qualification--2026-10-01)
+and canonical backlog `effect_authority_qualification_20261001`.
+Earlier pending checkpoints below are historical; no native RSI/AmIBot admission.
+
 ## Effect-specific reviewer checkpoint — 2026-10-01
 
 PR #2009 is merged/main-verified at `f0224007`; its owned lane is closed.
