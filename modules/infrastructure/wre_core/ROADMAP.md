@@ -1,3 +1,42 @@
+## Explicit per-call cleanup — 2026-10-01
+
+Existing Qwen engine and WRE adapter now own explicit per-call cleanup. The independently frozen portable selection reproduced22 missing-contract failures (40pass) before repair and passed62/62 after repair, without model/provider/database calls. This closes a resource-ownership contract, not native memory-release proof or RSI admission.
+
+| Selection | Passed | Failed | Errors / skipped |
+|---|---:|---:|---:|
+| Before repair, same frozen62 IDs | 40 | 22 | 0 / 0 |
+| After repair, same frozen62 IDs | 62 | 0 | 0 / 0 |
+
+The selection retains35 prior portable caller controls and adds27 lifecycle
+cases. Real helper/adapter/engine methods use fake model handles and inert
+unrelated constructor collaborators. Nineteen source bindings remained equal
+before/after each execution. Independent author and reviewer roles are separate
+from implementation. Python audit guards are not OS/native isolation, and
+sampled hashes are not immutable execution evidence. The existing CI step runs
+the complete execution-truth file; hosted results belong to publication receipts.
+
+Cleanup failure rejects otherwise valid text. Direct-engine reuse, reentrant
+close, owned-but-uninitialized models and primary interruptions are covered.
+The installed native destructor already exists: no persistent leak or actual
+native memory release is claimed. No grant, provider call, candidate application,
+held-out benefit or retained improvement occurred.
+
+WSP62 review: adapter51→50lines; new result helper12 and close11. Engine class
+305→317 retains cohesive resource ownership above its inherited review threshold.
+Existing test owner864→1103lines is in the review window below1500; new functions
+remain bounded. Keep its portability/oracle cohesion now; a future decomposition
+must preserve all case identities and fixtures. No exemption or threshold change.
+
+**Next eligible assessment, 13/P1:** Map the existing external-signer issuer to resident admission prerequisites without consuming authority.
+Re-observe fresh main and ownership after closure. Read-only prerequisite tracing
+does not mint grants or activate native workers. Native18/P0, Holo15/P1 and
+independent retained benefit remain open; AmIBot stays downstream. Do not retry
+the previously rejected proposal, relax its acceptance grammar, or touch active
+FoundUps/Remote AutoPost as part of this slice.
+
+Evidence: backlog `current_observation.local_engine_lifecycle_20261001` and
+`O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/`.
+
 ## Actual native caller trial — 2026-10-01
 
 One real local-model call through the implemented WRE helper, adapter and Qwen native-chat engine returned in 36.125 seconds (658 input/122 output tokens). Independent review accepted the bounded route evidence; the unchanged strict inspector rejected the proposal for an unapproved `.strip()` call. No candidate was executed or applied. Two zero-init setup attempts are recorded: one failed, one passed after a CRLF normalization repair. Native admission and retained improvement remain unproven.

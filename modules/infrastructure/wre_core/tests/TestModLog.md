@@ -1,3 +1,16 @@
+## 2026-10-01 — Portable engine lifecycle regression
+
+Existing execution-truth owner adds27 cases; all35 previous portable caller IDs
+remain selected. Frozen baseline40pass/22fail matches exact predicted failures;
+same62 cases pass after repair with no errors/skips. Test bytes did not change
+after baseline. Existing fake engine/model fixtures gain explicit close support.
+Coverage includes raw/native success/error/empty/rejected runtime/template,
+cleanup error, owned uninitialized/falsey handles, reentrant/repeated close,
+primary interruption and direct reuse. No actual model/native allocation used.
+Full file85 cases is already selected by CI; local evidence is the62-case subset.
+See `O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/` and module roadmap
+for WSP62 cohesion review and evidence limits.
+
 ## Native proposal caller contracts — 2026-09-30
 
 The existing `test_wre_execution_truth.py` adds33 parameterized cases. The local

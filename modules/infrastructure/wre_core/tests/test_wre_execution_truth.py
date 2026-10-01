@@ -444,6 +444,9 @@ def test_local_inference_text_is_proposal_not_effect_success(monkeypatch):
         def __init__(self, **_kwargs):
             pass
 
+        def close(self):
+            pass
+
         def initialize(self):
             return True
 
@@ -469,6 +472,7 @@ def test_local_inference_rejects_engine_error_text(monkeypatch):
     engine = SimpleNamespace(
         initialize=lambda: True,
         generate_response=lambda **_kwargs: "Error: failed - SYNTHETIC_SECRET",
+        close=lambda: None,
     )
     monkeypatch.setattr(llm_engine, "QwenInferenceEngine", lambda **_kwargs: engine)
     monkeypatch.setattr(local_model_selection, "resolve_code_model_path", lambda: "model.gguf")
@@ -626,6 +630,9 @@ class _NativeContractModel:
         self.chat_handler, self.chat_format = object(), "unchanged-format"
         self.raw, self.tokens, self.completions, self.selection_seen = [], [], [], []
         self.count, self.capacity, self.outcome = 1536, 2048, "text"
+        self.close_calls = 0
+    def close(self):
+        self.close_calls += 1
     def __call__(self, prompt, **kwargs):
         self.raw.append((prompt, kwargs))
         return {"choices": [{"text": "  raw proposal  "}]}
@@ -862,3 +869,235 @@ def test_native_contract_engine_failure_is_redacted(native_contract_boundary, ca
     assert "SYNTHETIC_NATIVE_SECRET" not in response + caplog.text
     assert len(state.init) == 1 and len(state.model.completions) == 1
     assert state.model.raw == []
+
+
+# Portable lifecycle ownership: fake handles never allocate native resources.
+@pytest.mark.parametrize("initialized", [False, True], ids=["fresh", "flag-only"])
+def test_qwen_lifecycle_close_without_model(initialized):
+    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
+
+    engine = QwenInferenceEngine(Path("synthetic-code.gguf"))
+    engine._initialized = initialized
+    assert engine.close() is None
+    assert engine.close() is None
+    assert engine.llm is None and engine._initialized is False
+
+
+@pytest.mark.parametrize("initialized,falsey", [(True, False), (False, False), (True, True)],
+                         ids=["initialized", "owned-before-init", "falsey-owned"])
+def test_qwen_lifecycle_close_detaches_before_callback(initialized, falsey):
+    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
+
+    engine = QwenInferenceEngine(Path("synthetic-code.gguf"))
+    events = []
+
+    class OwnedHandle:
+        def __bool__(self):
+            return not falsey
+
+        def close(self):
+            events.append((engine.llm, engine._initialized))
+            # Reentrant cleanup must not hand the same handle out twice.
+            assert engine.close() is None
+
+    engine.llm, engine._initialized = OwnedHandle(), initialized
+    assert engine.close() is None
+    assert engine.close() is None
+    assert events == [(None, False)]
+    assert engine.llm is None and engine._initialized is False
+
+
+def test_qwen_lifecycle_close_error_is_redacted_and_not_retried(caplog):
+    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
+
+    engine = QwenInferenceEngine(Path("synthetic-code.gguf"))
+    events = []
+
+    class FailingHandle:
+        def close(self):
+            events.append((engine.llm, engine._initialized))
+            raise ValueError("SYNTHETIC_CLEANUP_SECRET")
+
+    engine.llm, engine._initialized = FailingHandle(), True
+    with caplog.at_level(logging.ERROR), pytest.raises(RuntimeError) as caught:
+        engine.close()
+    assert str(caught.value) == "Qwen model cleanup failed"
+    assert caught.value.__cause__ is None and caught.value.__suppress_context__ is True
+    assert "error_type=ValueError" in caplog.text
+    assert "SYNTHETIC_CLEANUP_SECRET" not in caplog.text + str(caught.value)
+    assert events == [(None, False)]
+    assert engine.llm is None and engine._initialized is False
+    assert engine.close() is None
+    assert events == [(None, False)]
+
+
+@pytest.fixture
+def lifecycle_boundary(native_contract_boundary, monkeypatch):
+    """Observe real engine ownership without replacing its candidate close body."""
+    from holo_index.qwen_advisor import llm_engine
+
+    state = native_contract_boundary
+    state.constructed, state.engine_closes, state.native_closes = [], [], []
+    state.cleanup_raises = False
+    engine_type = llm_engine.QwenInferenceEngine
+    original_init = engine_type.__init__
+    original_close = getattr(engine_type, "close", None)
+
+    def construct(engine, *args, **kwargs):
+        original_init(engine, *args, **kwargs)
+        state.constructed.append(engine)
+
+    def close(engine):
+        state.engine_closes.append(engine)
+        # Baseline has no close API, but also never calls this observer.  Missing
+        # adapter ownership is asserted after the call, not fabricated here.
+        assert callable(original_close)
+        return original_close(engine)
+
+    def close_native():
+        engine = state.engine_closes[-1]
+        state.native_closes.append((engine.llm, engine._initialized))
+        if state.cleanup_raises:
+            raise ValueError("SYNTHETIC_CLEANUP_SECRET")
+
+    monkeypatch.setattr(engine_type, "__init__", construct)
+    monkeypatch.setattr(engine_type, "close", close, raising=False)
+    monkeypatch.setattr(state.model, "close", close_native)
+    return state
+
+
+def _lifecycle_master(mode):
+    return WREMasterOrchestrator(
+        local_proposal_mode=mode,
+        local_native_chat_profile=_native_profile() if mode == "native_chat" else None,
+    )
+
+
+def _lifecycle_outcome(state, outcome, monkeypatch):
+    if outcome == "init-false":
+        state.init_ok = False
+    elif outcome == "runtime-old":
+        state.native.__version__ = "0.2.72"
+    elif outcome == "template-mismatch":
+        state.model.metadata["tokenizer.chat_template"] = "not the qualified template"
+    elif outcome in ("raises", "empty"):
+        state.model.outcome = outcome
+        original_raw = _NativeContractModel.__call__
+
+        def raw(model, *args, **kwargs):
+            response = original_raw(model, *args, **kwargs)
+            if outcome == "raises":
+                raise RuntimeError("SYNTHETIC_INFERENCE_SECRET")
+            response["choices"][0]["text"] = ""
+            return response
+
+        monkeypatch.setattr(_NativeContractModel, "__call__", raw)
+
+
+_LIFECYCLE_PATHS = [
+    ("raw", "text"), ("native_chat", "text"),
+    ("raw", "init-false"), ("native_chat", "init-false"),
+    ("raw", "raises"), ("native_chat", "raises"),
+    ("raw", "empty"), ("native_chat", "empty"),
+    ("native_chat", "runtime-old"), ("native_chat", "template-mismatch"),
+]
+
+
+@pytest.mark.parametrize("mode,outcome", _LIFECYCLE_PATHS,
+                         ids=[mode + "-" + outcome for mode, outcome in _LIFECYCLE_PATHS])
+def test_local_lifecycle_closes_before_return(mode, outcome, lifecycle_boundary, monkeypatch, caplog):
+    state = lifecycle_boundary
+    _lifecycle_outcome(state, outcome, monkeypatch)
+    result = _native_contract_call(_lifecycle_master(mode))
+
+    assert len(state.constructed) == 1
+    assert state.engine_closes == state.constructed
+    assert state.native_closes == ([] if outcome == "runtime-old" else [(None, False)])
+    assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert result["output"] == "" and result["steps_completed"] == 0
+    if outcome == "text":
+        assert result["error_code"] == "unverified_model_proposal"
+        assert result["proposal"] == ("raw proposal" if mode == "raw" else "chat proposal")
+    else:
+        assert result["error_code"] == "local_model_unavailable" and result["proposal"] == ""
+    assert "SYNTHETIC_INFERENCE_SECRET" not in str(result) + caplog.text
+    assert "SYNTHETIC_NATIVE_SECRET" not in str(result) + caplog.text
+
+
+@pytest.mark.parametrize("mode,outcome", [("raw", "text"), ("native_chat", "text"),
+                                         ("raw", "raises"), ("native_chat", "raises")],
+                         ids=["raw-proposal", "native-proposal", "raw-primary-error", "native-primary-error"])
+def test_local_lifecycle_cleanup_error_fails_closed(mode, outcome, lifecycle_boundary, monkeypatch, caplog):
+    state = lifecycle_boundary
+    state.cleanup_raises = True
+    _lifecycle_outcome(state, outcome, monkeypatch)
+    with caplog.at_level(logging.ERROR):
+        result = _native_contract_call(_lifecycle_master(mode))
+
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert state.native_closes == [(None, False)]
+    assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+    assert result["error_code"] == "local_model_unavailable" and result["proposal"] == ""
+    assert result["success"] is False and result["_effect_evidence"] is False and result["output"] == ""
+    assert "SYNTHETIC_CLEANUP_SECRET" not in str(result) + caplog.text
+    assert "SYNTHETIC_INFERENCE_SECRET" not in str(result) + caplog.text
+    assert "SYNTHETIC_NATIVE_SECRET" not in str(result) + caplog.text
+
+
+@pytest.mark.parametrize("case", ["unsupported-agent", "invalid-config", "resolver-error"])
+def test_local_lifecycle_preconstruction_failure_owns_nothing(case, lifecycle_boundary, monkeypatch):
+    from modules.infrastructure.shared_utilities import local_model_selection
+
+    state = lifecycle_boundary
+    options = {"skill_content": _NATIVE_SKILL, "input_context": dict(_NATIVE_CONTEXT), "agent": "qwen"}
+    if case == "unsupported-agent":
+        options["agent"] = "gemma"
+    elif case == "invalid-config":
+        options.update(proposal_mode="native_chat", native_chat_profile=None)
+    else:
+        def missing_model():
+            raise FileNotFoundError("SYNTHETIC_RESOLVER_SECRET")
+        monkeypatch.setattr(local_model_selection, "resolve_code_model_path", missing_model)
+    result = execute_local_skill_inference(**options)
+    assert state.constructed == state.engine_closes == state.native_closes == []
+    assert state.init == state.model.raw == state.model.completions == []
+    assert result["success"] is False and result["_effect_evidence"] is False and result["proposal"] == ""
+    assert result["error_code"] == ("unsupported_local_agent" if case == "unsupported-agent" else "local_model_unavailable")
+    assert "SYNTHETIC_RESOLVER_SECRET" not in str(result)
+
+
+@pytest.mark.parametrize("mode", ["raw", "native_chat"])
+def test_qwen_lifecycle_direct_generation_retains_owner(mode, native_contract_boundary):
+    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
+
+    state = native_contract_boundary
+    engine = QwenInferenceEngine(Path("synthetic-code.gguf"))
+    if mode == "raw":
+        responses = [engine.generate_response(_NATIVE_PROMPT, _NATIVE_SYSTEM) for _ in range(2)]
+        assert responses == ["raw proposal", "raw proposal"]
+        assert len(state.model.raw) == 2
+    else:
+        responses = [engine.generate_chat_response(_NATIVE_PROMPT, _NATIVE_SYSTEM, **_native_profile())
+                     for _ in range(2)]
+        assert responses == ["chat proposal", "chat proposal"]
+        assert len(state.model.completions) == 2
+    assert engine.llm is state.model and engine._initialized is True
+    assert state.model.close_calls == 0
+
+
+@pytest.mark.parametrize("mode", ["raw", "native_chat"])
+def test_local_lifecycle_interruption_preserves_primary(mode, lifecycle_boundary, monkeypatch):
+    from holo_index.qwen_advisor import llm_engine
+
+    state = lifecycle_boundary
+    def interrupted(engine, *args, **kwargs):
+        engine.llm, engine._initialized = state.model, True
+        raise KeyboardInterrupt("synthetic cancellation")
+    method = "generate_response" if mode == "raw" else "generate_chat_response"
+    monkeypatch.setattr(llm_engine.QwenInferenceEngine, method, interrupted)
+    with pytest.raises(KeyboardInterrupt, match="synthetic cancellation"):
+        _native_contract_call(_lifecycle_master(mode))
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert state.native_closes == [(None, False)]
+    assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
