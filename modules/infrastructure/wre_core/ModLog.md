@@ -1,3 +1,20 @@
+## 2026-10-02 — Qualify bounded worker metadata inspection
+
+- Reused existing Windows verified-file helpers in external audit tooling;
+  retained full same-API timestamps and unchanged bounded parser/caps.
+- Independent pre-execution review caught and repaired optimization-sensitive
+  launcher validation and cache-read attempts. One fixture run: 15 passed / 0
+  failed, 6 actual owner opens. One GPT-OSS metadata read: 5,195,563 bytes,
+  4.515s, descriptor closed; independently reviewed. Invocation budgets closed.
+- Source review found template/control and channel-contract questions; no model
+  initialization, generation, tokenizer/template execution or provider call.
+  Metadata is untrusted declaration, not runtime compatibility or RSI gain.
+- WSP00/15/22/48/50/97: next 14/P1 is separately reviewed Nemotron metadata
+  qualification through the same owners; GPT-OSS-specific work deferred 11/P2.
+  No new production module/skill, native admission or protected-lane change.
+- Evidence: backlog worker_metadata_qualification_20261002 and
+  O:/Foundups-Agent-audits/20261002-rsi-worker-metadata/.
+
 ## 2026-10-02 — Close unsuccessful guided worker comparison
 
 - Existing WRE route and disposable real loader delivered768-byte procedure;
