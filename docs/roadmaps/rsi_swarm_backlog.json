@@ -20451,7 +20451,15 @@
         "linux_real_root_cases": 5,
         "linux_transport_compatibility_cases": 3,
         "current_publication": "pending",
-        "final_delta": "Privileged Linux fixture collection guard; now operational/noncollectable. Same198 portable cases rerun; production unchanged."
+        "final_delta": "Privileged Linux fixture collection guard; now operational/noncollectable. Same198 portable cases rerun; production unchanged.",
+        "first_hosted_attempt": {
+          "run_id": 36888373071,
+          "passed": 330,
+          "failed": 1,
+          "linux_executed": false,
+          "cause": "Portable CI audit resolved a descriptor-relative lock as a repository path; reuse existing descriptor-aware observer without changing production/oracles",
+          "evidence_sha256": "c3478df792593638eecdefe393182cda75640f4bbf8611119462f08c440293b1"
+        }
       },
       "authority_limits": [
         "No production keys, owner configuration, service activation, paid calls or native worker admission.",

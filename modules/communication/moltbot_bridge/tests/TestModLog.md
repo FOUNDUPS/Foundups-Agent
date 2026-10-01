@@ -1,3 +1,14 @@
+## 2026-10-02 — Hosted descriptor-aware test guard correction
+
+First PR2014 CI passed330/331 portable cases; supplier positive rejected because
+Python's open audit event omits dir_fd. The unchanged supplier used its confined
+private temporary lock-root descriptor, but the guard resolved the lock relative to the
+checkout. Reused the existing Linux runner's descriptor observer for portable
+CI opens and descriptor-relative mutations; actual OS calls and confinement
+requirements remain unchanged. Production code, all331 oracles and Linux8 IDs
+are unchanged. Linux did not run in this failed attempt. Retry evidence remains
+separate; no passing hosted claim before observed success. WSP5/6/22/50/97.
+
 ## 2026-10-01 — Connect scoped reviewer authority through existing owners
 
 Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now
