@@ -77,7 +77,7 @@ jobs:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          python -m pip install "jsonschema==4.26.0"
+          python -m pip install "jsonschema==4.26.0" "cryptography==46.0.7"
           python -I -B - <<'PY'
           from pathlib import Path
           import hashlib,json,os,platform,subprocess,sys,tempfile,types
@@ -377,6 +377,15 @@ jobs:
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_reviewer_evidence.py::test_effect_review_requires_reviewer_independence_after_consistent_rebinding[author_runtime]',
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_reviewer_evidence.py::test_effect_review_rejects_revoked_reviewer_epoch',
           ]
+          # Real test-only Ed25519 compatibility; supplied resolver provenance remains unverified.
+          nodes += [
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[valid_effect_signature]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[signed_payload_tampered]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[signature_bit_tampered]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[foreign_key_consistently_rebound]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[delegated_prefix_signature]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[unrelated_message_signature]',
+          ]
           args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
               '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
               '--junitxml='+str(D/'results.xml')]
@@ -388,7 +397,7 @@ jobs:
           unexpected=[x for x in blocked if x['event']!='os.symlink']
           receipt={'returncode':status,'counts':counts,'exact_cases':exact,'hashes_stable':before==after,
               'blocked_events':blocked,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
-              'limits':['Python audit constraints, not OS isolation.','Domain, pure binding/context and structural controls; no issued effect lease or RSI benefit.']}
+              'limits':['Python audit constraints, not OS isolation.','Domain, binding/context, real test-only signatures and structural controls; no authenticated resolver provenance, issued effect lease or RSI benefit.']}
           (D/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({k:receipt[k] for k in ('counts','exact_cases','hashes_stable')}))
           raise SystemExit(status or (2 if unexpected or not exact or before!=after or counts['skipped'] else 0))

@@ -1,3 +1,18 @@
+## 2026-10-01 — Exercise real effect-review signatures
+
+- Reconciled PR #2012 merge/main/owned closure; selected the first runnable crypto
+  prerequisite of the 15/P1 connected key layer, preserving full implementation
+  as outstanding. Independent author froze 6 tests; separate reviewer qualified
+  their oracles/runner before execution.
+- Local 95 passes, 0 failures/errors/skips:6 real Ed25519 cases,82 prior conditional
+  cases,7 structural controls. No production source change or measured RSI gain.
+- CI 222→228; source inventory 14 unchanged, test inventory 19→20; canonical test
+  registry 1666/269 quarantined. Ephemeral test-only signing; no live authority.
+- Captured readiness/v2, signing-input size and trusted manifest-expiry
+  dependencies for the connected implementation. WSP00/5/6/15/22/49/50/62/84/95/97.
+- Publication pending; exact receipts and owned-lane closure belong to
+  `O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-implementation/`.
+
 ## 2026-10-01 — Specify explicit reviewer-key authority contract
 
 - Reconciled PR #2011 merged/main/clean owned closure at `1ff01a9`.

@@ -1,3 +1,20 @@
+## Real-signature review qualification — 2026-10-01
+
+PR #2012 is merged/main-verified at `8fe4ac6`; its owned lane is closed.
+The first executable prerequisite of the 15/P1 reviewer-key layer now exercises
+the unchanged effect-review API with real Ed25519 signatures. Six frozen cases
+cover acceptance, signed-payload/signature/key tampering and two wrong signing
+domains; all reach the actual public verifier. Local 95 cases pass: 6 new,82 prior
+conditional controls and 7 structural checks. CI retains 222 nodes and adds 6.
+
+This proves test-fixture cryptographic compatibility, not authenticated resolver
+provenance or RSI improvement. Full connected v5/v2 composition remains open,
+including readiness-version coverage, 65536-byte signing bounds and authenticated
+manifest expiry. Native RSI/AmIBot remain unadmitted; no retained gain is claimed.
+Current publication/closure: backlog `effect_review_crypto_qualification_20261001`
+and `O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-implementation/`.
+Hosted results are pending; prior pending prose below is historical.
+
 ## Reviewer-key authority contract — 2026-10-01
 
 PR #2011 is merged/main-verified at `1ff01a9`; the prior owned lane is closed.

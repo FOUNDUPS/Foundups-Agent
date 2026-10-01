@@ -64,6 +64,13 @@ checks and both main workflows succeeded; the owned lane is closed. These are
 regression counts, not independent proof of runtime authority or retained gain.
 Historical pending prose below is superseded by the canonical backlog closure.
 
+The real-signature prerequisite now has 6 frozen test-only Ed25519 cases through
+this unchanged API and the actual public verifier: valid signature accepts;
+payload/signature/key tampering and two wrong-domain signatures reject. Local 95
+cases pass including 82 prior and 7 structural controls; hosted 228 pending. Keys
+exist only in test memory. Supplied resolver provenance and inner-designation
+authentication remain unproven; no production caller or authority is added.
+
 ### Authenticated effect-authority qualification — 2026-10-01
 
 Source-qualified at `f4978e12e94e1b0d151b38b16c295d2bda374b23` after
@@ -168,6 +175,13 @@ requires separate authorized evidence; no new revocation store is selected.
 support. Existing `reddog_grant_authority_service_owner_binding.py` and
 `reddog_signer_independent_grant_authority_client_supply.py` accept v3/v4, while
 `reddog_grant_authority_source_policy_authority.py` load/revalidate requires v4.
+The principal readiness consumer also requires v1 today; qualify its v2 branch
+without widening permission snapshots. Bound the entire inner signing input,
+including prefix, to the public verifier's 65536-byte ceiling. Expose trusted
+manifest expiry through the current selection without changing legacy launch
+values; selection expiry is not a substitute. Reuse the selection already
+returned by `_manifest_selection_from_owner` rather than abandoning an extra one.
+
 Qualify all affected schema consumers and preserve v1–v4 rejection/acceptance
 behavior before allowing a v5 startup composition. Keep independent grant
 re-verification/nonce ownership in the existing signer path; no effect permit,

@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.reviewer_key_contract_20261001",
-    "base_commit": "1ff01a9f6575b675a8f68ee875813795a1087b86",
+    "observation_path": "current_observation.effect_review_crypto_qualification_20261001",
+    "base_commit": "8fe4ac6c7d18a7c5efc641d9b039ef45e87af1b8",
     "selected_action": "Implement connected scoped reviewer-key authority composition in existing owners",
-    "status": "reviewer_key_contract_designed_publication_pending",
+    "status": "crypto_prerequisite_locally_verified_publication_pending",
     "wsp15": {
       "complexity": 4,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_authority_qualification_20261001"
+    "previous_observation_path": "current_observation.reviewer_key_contract_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16975,7 +16975,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -17013,7 +17013,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -17024,7 +17024,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -17050,7 +17050,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper\u2192adapter\u2192engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",
@@ -20014,6 +20014,231 @@
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract\\final-accounting.json"
+    },
+    "effect_review_crypto_qualification_20261001": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "external_principal",
+      "principal_ref": "012",
+      "base": "8fe4ac6c7d18a7c5efc641d9b039ef45e87af1b8",
+      "selected": "Implement connected scoped reviewer-key authority composition in existing owners",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 15,
+        "priority": "P1"
+      },
+      "status": "crypto_prerequisite_locally_verified_publication_pending",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Implement connected scoped reviewer-key authority composition in existing owners",
+          "dimensions": [
+            4,
+            4,
+            4,
+            3
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "selected_first_crypto_prerequisite_complete_full_composition_open",
+          "dependency": "Freeze designation wire oracles and qualify coupled v5/v2, readiness, manifest expiry and Linux tests before connected implementation",
+          "ownership": "Existing root-owner loader, principal supply/parser/loader/current resolver and effect verification owners",
+          "effort_cost_verification": "One connected source slice with legacy and version-consumer tests; no paid models, operational configuration or native worker activation.",
+          "reason": "Source-design trust root now explicit. Implement the complete key edge rather than another inert parser; runtime/sovereign authority are separate."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        }
+      ],
+      "execution_scope": "First bounded runnable prerequisite: six independently authored real Ed25519 review tests against unchanged production source, plus82 existing conditional cases and 7 structural controls. Full connected key composition is not closed.",
+      "selection_reason": "Native 18/P0 and Holo 15/P1 remain blocked. Connected key layer 15/P1 wins among eligible RSI actions; qualify its real-crypto consumer before mutating coupled owner/artifact versions. This is a deliberate bounded split, not an infrastructure or permission blocker.",
+      "effort_cost_verification": "One94-line test sibling reusing existing fixture/API/backend; no model/provider spend. Independent oracles and review; local 95, hosted 228 selections pending.",
+      "source_reconciliation": "PR #2012 contract is merged/main-verified and owned lane closed; remove completed design from current queue, preserve historical observations. Existing82 recording tests did not exercise Ed25519; production sources remain unchanged.",
+      "retrieval": {
+        "last_known_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "query_host": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "repeated_probe": false,
+        "semantic_freshness": "unverified",
+        "fallback": "Exact main source/NAVIGATION/module docs. Historical pending prose reconciled with closed PR receipts. No canonicalization source leaf exists: canonicalization is in contract.py; do not invent a new owner.",
+        "quality": "Exact source/NAVIGATION/module docs plus independent source review. Host0c81418 and authority83b06897 unchanged; same exact prior failure retained without retry or reindex. Historical pending prose is noisy; verified PR #2012 closure wins. Semantic coverage unverified."
+      },
+      "prior_closure": {
+        "pr": 2012,
+        "merge": "8fe4ac6c7d18a7c5efc641d9b039ef45e87af1b8",
+        "head": "8cbabb8ca3733d569496ca868d55c04cc0e041f7",
+        "receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract\\final-accounting.json",
+        "receipt_sha256": "2a64ffecf6773c8ec5fe9679eaea7944d4bc7e8dc0160082efcc26b1f5c1e2b3"
+      },
+      "connected_implementation_dependencies": [
+        "Readiness currently requires principal-envelope v1; explicitly qualify v2 while preserving permission-snapshot v1.",
+        "Bound inner designation signing input including prefix to existing verifier 65536-byte ceiling, independently of1MiB artifact limit.",
+        "Expose authenticated manifest expiry for final in-lease time check; preserve legacy launch-selection shapes and do not substitute selection TTL.",
+        "Freeze exact designation wire fields/signed positives and full-role subset oracles; qualify v5 consumers and actual Linux ownership guard.",
+        "Use the selection already created by _manifest_selection_from_owner; do not abandon an extra one-use selection."
+      ],
+      "validation": {
+        "local": {
+          "tests": 95,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 95
+        },
+        "receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation\\candidate\\receipt.json",
+        "receipt_sha256": "e9c38e546926106335a0fc6fee0fbaeef4f43049a1690e4b0d54e8e6e0428b84",
+        "new_crypto_cases": 6,
+        "existing_conditional_cases": 82,
+        "structural_cases": 7,
+        "registry_total": 1666,
+        "quarantined": 269,
+        "hosted_selected_cases": 228,
+        "current_publication": "pending"
+      },
+      "authority_limits": [
+        "Test-only ephemeral Ed25519 keys/signatures; no production keys, configuration or signing.",
+        "Supplied key/runtime evidence remains unauthenticated provenance; no inner-designation positive yet.",
+        "Compatibility qualification of unchanged code is not measured improvement, quorum, effect permission or worker admission.",
+        "Python audit constraints are not OS isolation; source hashes are sampled."
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "installed_runtime_state": "unverified",
+      "selected_next": {
+        "task": "Implement connected scoped reviewer-key authority composition in existing owners",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 15,
+          "priority": "P1"
+        },
+        "scope": "Connected existing-owner key trust supply/resolution/actual effect-verifier composition with legacy and version-consumer coverage; independent frozen test plan and admissible evidence before source execution. Production provisioning/runtime/sovereign evidence remain separate."
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation\\final-accounting.json",
+      "source_bindings": {
+        "modules/communication/moltbot_bridge/src/reddog_authority_runtime_resolver_artifact_supply.py": "1c55fc99a66fd816cc6aa5c58f0194dcf7c7becf",
+        "modules/communication/moltbot_bridge/src/reddog_current_generation_manifest_launch_selection.py": "1d2b51fe01bf9b3810bbcbb593d85f4f44063667",
+        "modules/communication/moltbot_bridge/src/reddog_ed25519_signature_verifier_backend.py": "60567f8625a44f0c5b4d316729e1b7dc0b0d86b4",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_policy.py": "01db3d66ca1427c9b2ffa913dcd9c270e5d52502",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_reviewer_evidence.py": "ba74453b60f16823e7a26d43d52dc93aea496b12",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_verification.py": "e61acb261cbc17577de8290038cf73d1849d59f0",
+        "modules/communication/moltbot_bridge/src/reddog_grant_authority_service_owner_binding.py": "e660674b88c20dad4ae17719196c96ef458cd2a0",
+        "modules/communication/moltbot_bridge/src/reddog_grant_authority_source_policy_authority.py": "29b07b327712eddd28d8056d0cc0407916e80ef3",
+        "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py": "2bd3da62131bf761bbf147c558689b5a8b41a2f0",
+        "modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_authority.py": "0b0297eacf79f51c54aaa9d68f4f1a5d0c4b5e97",
+        "modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_contract.py": "c0bc336004e0d333da6832059baed23056a1cdbd",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_principal_authority_resolver.py": "a71a762458c322faa243468df8bb04f1e9190621",
+        "modules/communication/moltbot_bridge/src/reddog_signer_independent_grant_authority_client_supply.py": "f5d7e576ae6cf9a03a76c8a7f8095766bad9fc8d",
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_authority.py": "6d69503c0965560a3674a2bd29d41dbd149e8f86",
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_records.py": "9f1554f4800753aebb9b37cedb2e2f590ec72c66",
+        "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "f2c6353fa888a67495c05012569d894ed540a557"
+      }
     }
   }
 }
