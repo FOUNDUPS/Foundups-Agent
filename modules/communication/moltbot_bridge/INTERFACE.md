@@ -21,6 +21,46 @@ Local qualification: all 32 frozen new cases passed after all 32 baseline cases
 failed at the expected missing-API assertion; both runs had zero errors/skips.
 The prior pure-binding PR#2003 is merged/main-verified; see the current layer below.
 
+### Conditional effect-review verification API — 2026-10-01
+
+`verify_effect_reviewer_decision(*, decision, context, authority_request, target,
+expected_target, policy, signature_verifier, reviewer_key_resolver,
+runtime_evidence_resolver, now, revoked_key_epochs=frozenset()) -> bool` lives in
+the existing `reddog_elevated_authority_consensus_verification.py` owner.
+
+- Decode a plain dictionary with exactly the existing reviewer-decision fields:
+  every value nonempty ASCII text, at most4096 characters, total canonical JSON
+  at most8192 bytes, with strict lowercase SHA-256 context/selection/runtime
+  digests. The fixed schema is `reddog_effect_reviewer_decision.v1`.
+- Correlate the exact validated effect context with the current actual parent,
+  target and expected target through `effect_approval_context_matches`.
+- Require a valid supplied policy whose digest, roles and minimum approvals
+  match the context, with context lifetime no greater than policy maximum TTL.
+- Require exact reviewer id/provider/role membership; exclude parent, RedDog and
+  queue worker identities, parent/RedDog keys, and the author's runtime binding.
+- Resolve exact key/runtime evidence classes; match key epoch, model and receipt
+  identities/digests; reject revoked epochs and non-integer or expired timestamps
+  before signature verification. Verifier result must be exactly `True`.
+- Signed input is `reddog-effect-consensus-review.v1.` followed by sorted compact
+  ASCII JSON containing every validated decision field except `signature`.
+  The opaque nonempty signature is passed unchanged to the supplied verifier.
+  All invalid inputs and collaborator exceptions return `False`.
+
+`rehydrate_effect_reviewer_decision(value)` in the existing rehydration owner
+only decodes this strict data boundary; it does not authenticate a review.
+Delegated public receipt decoding and signing domains remain unchanged.
+
+One-review validity is conditional on supplied policy/resolvers/verifier. It is
+not authenticated production provenance, quorum, sovereign effect authority,
+requester/beneficiary authorization, a capability/permit, replay consumption or
+native admission. No production consumer is wired. An inert recording verifier
+tests byte/decision logic; these fixtures are not independent runtime receipts.
+
+Frozen qualification: 82 expected missing-API baseline failures → 82 local
+passes. Existing 140 CI cases retained, 222 total; hosted results pending.
+Earlier pure correlation PR #2009 and exact-main checks passed; historical
+pending prose below is superseded by its final accounting.
+
 ### Pure effect-context correlation API — 2026-10-01
 
 `effect_approval_context_matches(context, *, parent, target, expected_target, now)`

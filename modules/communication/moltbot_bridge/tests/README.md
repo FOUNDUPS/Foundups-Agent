@@ -1,3 +1,14 @@
+## Effect-review verifier qualification — 2026-10-01
+
+The new effect-review test siblings freeze 82 connected cases with recording
+inert resolvers and signature verifier, independent canonical preimage checks,
+strict wire/policy/context rejection and reviewer/evidence exclusions. No
+private-key/signing/provider/store/runtime constructor is called. Baseline82
+missing-API failures → candidate82 passes; existing140 hosted selections retained
+with 82 new exact nodes. Hosted results pending. Local reviewed tests use Python
+audit constraints, not an OS sandbox or an admitted WRE impact-plan execution.
+Fixtures cannot supply authentic production authority or retained RSI benefit.
+
 ## Effect-context correlation qualification — 2026-10-01
 
 `test_reddog_elevated_authority_consensus_effect_correlation.py` freezes 43 cases:

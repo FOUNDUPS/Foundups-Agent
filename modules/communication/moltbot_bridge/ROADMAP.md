@@ -1,33 +1,43 @@
-## Effect-context correlation checkpoint — 2026-10-01
+## Effect-specific reviewer checkpoint — 2026-10-01
 
-PR #2008 is merged/main-verified at `41b8834e`; its owned lane is closed.
-The earlier context checkpoint's pending status is historical. Fresh main has
-no intervening changes and no competing visible RSI/effect ownership lane.
+PR #2009 is merged/main-verified at `f0224007`; its owned lane is closed.
+Its context-correlation publication-pending status is historical. Current base
+is that merge; fresh ownership inspection found no competing RSI/effect lane.
 
-Selected 13/P1 (C2/I4/D4/Impact3): extend the existing context owner with a pure
-predicate connecting the inert context to actual parent and target inputs.
-It reuses the existing B matcher and target validator, rejects stale/mismatched
-digests and requires a current context no longer-lived than the target.
-It neither authenticates policy/sovereign references nor issues approval.
+Selected 14/P1 (C3/I4/D4/Impact3): connect one effect-specific reviewer decision
+to the existing current context/actual-target predicate and policy/key/runtime
+checks. Four existing consensus source owners are extended. No new orchestrator,
+store, module or approval carrier. Delegated v1 retains its separate domain.
+The existing packaged dependency closure gains the already merged effect-context
+leaf (1401 → 1402); manifest digests and exact compatibility limits are refreshed.
+This makes the dependency available without wiring a runtime approval call.
 
-Independent frozen 43 cases: baseline 43 expected missing-API assertion failures;
-candidate 43 passes, no errors/skips, stable source samples and no unexpected
-guard denials/database opens. Existing CI retains 97 nodes plus 43 new nodes
-(140 total); hosted verification is pending. Structural limits are unchanged.
-No production wiring, signing, runtime admission or retained gain is claimed.
+Independent frozen 82 cases: 82 expected missing-API baseline failures → 82
+candidate passes, zero errors/skips; stable source samples, no unexpected guard
+denials or database opens. Existing 140 CI nodes plus 82 new nodes = 222; hosted
+results pending. Source inventory remains 14; test inventory 19. Local
+Python audit constraints are not an OS sandbox or WRE runtime admission.
 
-Re-observed next 14/P1: qualify effect-specific reviewer-decision binding and
-trusted evidence ownership using existing consensus owners. Delegated v1's
-two-child context, decision prefix and parent-only sovereign evidence cannot
-stand in for effect approval. Native RSI and AmIBot G0 remain blocked.
-The old broad producer/resolver row is superseded by this concrete candidate.
+`True` means one review is valid relative to supplied collaborators. It does not
+authenticate their provenance, reach quorum, resolve effect-scoped sovereign
+authority, authorize requester/beneficiary mapping, mint a permit, consume a
+nonce, activate a worker or demonstrate retained improvement. Authentic
+production producer/resolver ownership was not found in the scoped source
+search; installed runtime state was not inventoried.
 
-Holo query host remains unchanged at its last failed authority-root/head scope;
-no repeated probe or reindex. Semantic freshness is unverified; bounded pinned
-source/NAVIGATION/module docs supplied retrieval. No new module/store/skill.
-WSP 00/5/6/10/11/15/22/49/50/62/84/95/97. Observation:
-`effect_context_correlation_20261001`; evidence and final publication receipt:
-`O:/Foundups-Agent-audits/20261001-rsi-effect-context-correlation/`.
+Next 14/P1: qualify the authentic effect-review producer/resolver boundary in
+existing owners, including requester/beneficiary and sovereign effect scope.
+Then independently qualify quorum and single-target permit/replay integration
+before one admitted bounded worker. Native RSI18/P0 and AmIBot G0 remain blocked.
+Do not turn this conditional verifier into a production approval by wiring test
+resolvers. Production key/runtime/effect evidence must come from its real owner.
+
+Holo semantic freshness remains unverified: unchanged shared query host and
+last-known authority-root mismatch. No repeat query or reindex; pinned source,
+NAVIGATION and canonical docs provided fallback. Historical prose is noisy;
+verified closure evidence outranks stale pending text. WSP 00/5/6/10/11/15/22/
+49/50/62/84/95/97. Observation `effect_reviewer_20261001`; evidence and final
+publication receipt: `O:/Foundups-Agent-audits/20261001-rsi-effect-reviewer/`.
 
 ## Inert effect-context checkpoint — 2026-10-01
 

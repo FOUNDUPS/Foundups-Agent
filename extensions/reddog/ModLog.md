@@ -1,3 +1,14 @@
+## 2026-10-01 — Effect-review dependency closure and compatibility pins
+
+The existing consensus verification owner now imports the already merged pure
+effect context. Regenerated backend closure adds exactly that one existing leaf
+(1401 → 1402) and updates the four modified consensus source hashes. Canonical
+manifest digest: `a88fc6eabcfdac210757ea916fa0ebe96744e8dafdaee6be6ef0a9a982208310`. Updated existing JavaScript and generator-test digest
+pins and exact Node count boundary (1402 allowed, 1403 rejected). Other limits,
+schema/API and checks remain unchanged; no new executable entry or activation.
+Generator write/check passed; exact test/publication evidence is recorded in
+`O:/Foundups-Agent-audits/20261001-rsi-effect-reviewer/`. WSP 22/50/84/97.
+
 ## 2026-10-01 — Pure binding publication integrity repair
 
 PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but

@@ -1,10 +1,10 @@
-## Effect-approval context and exact-input correlation — 2026-10-01
+## Conditional effect-review verification — 2026-10-01
 
-The [consensus interface](INTERFACE.md#pure-effect-context-correlation-api--2026-10-01)
-now connects the strict context from merged PR #2008 to actual parent/target
-inputs through existing validators. A current structural match is not approval.
-The new 43-case local qualification passes; exact hosted results remain pending.
-Policy/sovereign provenance and production integration are still unqualified.
+The [consensus interface](INTERFACE.md#conditional-effect-review-verification-api--2026-10-01)
+now checks one effect-specific review against the actual request and supplied
+policy/key/runtime evidence. 82 frozen local cases pass; exact hosted results
+pending. A conditional valid review is not quorum or runtime approval. Authentic
+production provenance, effect-scoped authority and worker admission remain open.
 
 ## Cross-process observer qualification — 2026-09-27
 

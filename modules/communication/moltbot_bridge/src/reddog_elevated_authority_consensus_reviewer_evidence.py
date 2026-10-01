@@ -7,6 +7,7 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
     APPROVE,
     DECISION_SCHEMA_VERSION,
+    EFFECT_DECISION_SCHEMA_VERSION,
     ElevatedAuthorityConsensusReceipt,
     canonical_consensus_context_digest,
     canonical_reviewer_decision_signing_input,
@@ -88,25 +89,29 @@ def _verified_decision_evidence(
     evidence_resolver: ReviewerRuntimeEvidenceResolver,
     now: int,
     revoked_key_epochs: frozenset[str],
+    *, schema_version: str = DECISION_SCHEMA_VERSION,
+    signing_input=canonical_reviewer_decision_signing_input,
 ) -> tuple[ReviewerKeyAuthority | None, ReviewerRuntimeEvidence | None]:
     if any(
         (
-            decision.schema_version != DECISION_SCHEMA_VERSION,
+            decision.schema_version != schema_version,
             decision.decision != APPROVE,
             decision.consensus_context_digest != context_digest,
             decision.reviewer_key_epoch in revoked_key_epochs,
         )
     ):
         return None, None
-    key = key_resolver.resolve(
-        decision.reviewer_principal_id, decision.reviewer_principal_provider
-    )
+    key = key_resolver.resolve(decision.reviewer_principal_id, decision.reviewer_principal_provider)
     evidence = evidence_resolver.resolve(
         decision.reviewer_principal_id,
         decision.model_selection_receipt_id,
         decision.model_runtime_binding_receipt_id,
     )
     if type(key) is not ReviewerKeyAuthority or type(evidence) is not ReviewerRuntimeEvidence:
+        return None, None
+    if schema_version == EFFECT_DECISION_SCHEMA_VERSION and any(
+        type(value) is not int for value in (key.expires_at, evidence.expires_at)
+    ):
         return None, None
     if key.public_key != decision.reviewer_public_key or any(
         (
@@ -119,7 +124,7 @@ def _verified_decision_evidence(
     try:
         verified = signature_verifier.verify(
             key.public_key,
-            canonical_reviewer_decision_signing_input(decision),
+            signing_input(decision),
             decision.signature,
         ) is True
     except Exception:
