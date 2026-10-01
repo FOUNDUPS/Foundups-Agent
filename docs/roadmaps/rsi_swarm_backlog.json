@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_context_correlation_20261001",
-    "base_commit": "41b8834eeb77f8fb12ee68f7e5a29ec2bf8ed08b",
-    "selected_action": "Qualify effect-specific reviewer-decision binding and trusted evidence ownership",
-    "status": "effect_context_correlation_locally_validated_publication_pending",
+    "observation_path": "current_observation.effect_reviewer_20261001",
+    "base_commit": "f022400737994b67138867ccc05734ff6059273f",
+    "selected_action": "Qualify authentic effect-review producer/resolver boundary and effect-scoped authority",
+    "status": "effect_reviewer_locally_validated_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-context-correlation\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-reviewer\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_context_20261001"
+    "previous_observation_path": "current_observation.effect_context_correlation_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -19290,6 +19290,289 @@
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-context-correlation",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-context-correlation\\final-accounting.json"
+    },
+    "effect_reviewer_20261001": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "external_principal",
+      "principal_ref": "012",
+      "base": "f022400737994b67138867ccc05734ff6059273f",
+      "selected": "Verify one effect-specific reviewer decision against actual inputs",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Effect-approval producer/resolver contract qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "superseded_by_current_effect_provenance_qualification",
+          "dependency": "Consolidated into the current reviewer-decision/provenance candidate; historical context-carrier selection is closed.",
+          "ownership": "RSI consensus owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Verify one effect-specific reviewer decision against actual inputs",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "locally_validated_publication_pending",
+          "dependency": "Independent exact-source review and hosted checks before owned closure",
+          "ownership": "RSI consensus owner",
+          "effort_cost_verification": "Bounded existing-owner qualification; independent tests before next source change, no paid model/signing/runtime scope",
+          "reason": "Current source review found existing reusable policy/key/runtime owners but delegated decision domain cannot verify effect context. Four existing leaves; no new orchestrator or authority."
+        },
+        {
+          "task": "Inert effect-approval context and strict canonical decoder",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "dependency": null,
+          "ownership": "Owned RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reason": "Inert context/decoder implemented; 47 frozen candidate cases and seven static functions pass; 97 exact PR/main qualification cases pass. Independent review, checks and owned closure complete. No runtime authority activated."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Correlate effect approval context with actual parent and target",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "dependency": null,
+          "ownership": "Owned RSI consensus lane",
+          "reason": "PR #2009 merged f0224007; exact PR/main hosted checks and owned lane closure verified in prior final accounting."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Consensus structural debt",
+          "dimensions": [
+            1,
+            2,
+            2,
+            2
+          ],
+          "total": 7,
+          "priority": "P3",
+          "state": "merged_main_verified_owned_lane_closed",
+          "dependency": null,
+          "ownership": "PR2005 closed",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        }
+      ],
+      "effort_cost_verification": "Four existing consensus owners extended with one connected conditional verifier and strict fixed-domain review decoding; two focused independent test siblings.82frozen local cases; no provider/model/signing calls or WRE admission.",
+      "source_reconciliation": "PR2009 fully closed; current main f022400737994b67138867ccc05734ff6059273f,97peer PR heads and no competing RSI/effect title. Existing delegated decision domain and parent-only sovereign evidence cannot authorize an effect. Reuse existing consensus owners; no new orchestrator/store/skill/decision dataclass.",
+      "retrieval": {
+        "last_known_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "query_host": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "repeated_probe": false,
+        "semantic_freshness": "unverified",
+        "fallback": "Exact main source/NAVIGATION/module docs. Historical pending prose reconciled with closed PR receipts. No canonicalization source leaf exists: canonicalization is in contract.py; do not invent a new owner.",
+        "quality": "Source read is bounded and current; historical statuses are noisy, current closure receipts win. requirements.txt/memory README absent at prior unchanged module boundary."
+      },
+      "prior_closure": {
+        "pr": 2009,
+        "merge": "f022400737994b67138867ccc05734ff6059273f",
+        "receipt": "O:/Foundups-Agent-audits/20261001-rsi-effect-context-correlation/final-accounting.json",
+        "receipt_sha256": "6604f53513d217f56c4f8441803d295a646adee5c2553f68127775df8bbb61bd"
+      },
+      "invariants": [
+        "True means one-review validity relative to supplied policy/resolvers/verifier, not trusted production provenance or quorum",
+        "No private-key/signing/provider/model/store calls, permit/grant, nonce consumption or runtime activation",
+        "Delegated v1 public domains/default behavior unchanged",
+        "Frozen new test oracles unchanged; legacy assertions preserved",
+        "Shared and external owners preserved",
+        "Generated backend closure adds exactly existing effect-context leaf; entrypoints/API unchanged"
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "source_qualification": {
+        "path": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-reviewer\\source-qualification-review.json",
+        "sha256": "c78fd81f6bacc7e9e0978ed37fdbcefc1e38bbd9ad9e196768bf27126b8b93ba"
+      },
+      "scope": [
+        "Existing consensus contract, rehydration, reviewer evidence and verification leaves",
+        "Independent inert tests, existing CI selection, registry and canonical documentation"
+      ],
+      "limits": [
+        "One review validity relative to supplied collaborators, not quorum or effect authority",
+        "No signing, provider, model, operational store, permit, replay consumption, deployment or native admission",
+        "No production resolver provenance supplied; synthetic tests are not RSI benefit",
+        "Last Holo mismatch remains last-known failure at unchanged shared host; semantic freshness unverified"
+      ],
+      "validation": {
+        "baseline": {
+          "tests": 82,
+          "failures": 82,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 0
+        },
+        "candidate": {
+          "tests": 82,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 82
+        },
+        "exact_cases": true,
+        "source_samples_stable": true,
+        "unexpected_denials": [],
+        "sqlite_opens": 0,
+        "ci_selected_cases": 222,
+        "hosted_status": "pending",
+        "independent_review": "execution-review-baseline.json / execution-review-candidate.json; reviewer did not execute tests"
+      },
+      "previous_closure": {
+        "pr": 2009,
+        "merge": "f022400737994b67138867ccc05734ff6059273f",
+        "terminal": "merged_main_verified_owned_lane_closed",
+        "final_accounting_sha256": "6604f53513d217f56c4f8441803d295a646adee5c2553f68127775df8bbb61bd"
+      },
+      "selected_next": {
+        "task": "Qualify authentic effect-review producer/resolver boundary and effect-scoped authority",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "scope": "Existing owners; resolve authentic provenance, sovereign effect scope and requester/beneficiary mapping before quorum/permit/replay and one admitted worker. No synthetic promotion."
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-reviewer",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-reviewer\\final-accounting.json"
     }
   }
 }

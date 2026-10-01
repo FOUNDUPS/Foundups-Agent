@@ -1,3 +1,18 @@
+## 2026-10-01 — Verify conditional effect-specific reviewer decisions
+
+- Reconciled PR #2009 merged/main/owned-closure evidence at `f0224007`.
+- Extended four existing consensus leaves with strict effect-domain review
+  decoding and connected policy, actual-input, key/runtime and independence
+  checks. Delegated defaults remain; no runtime wiring or new authority owner.
+- Frozen 82-case baseline: expected missing-API failures; candidate: 82 passes,
+  zero errors/skips, no unexpected guard denials or database opens. Local source
+  samples stable, not immutable execution. Seven structural checks retained.
+- CI140 → 222; source/test inventories14/19; registry1665/269
+  quarantined. Hosted publication pending; final accounting supplies closure.
+- No authentic producer, quorum, permit, worker activation or retained RSI gain.
+  WSP 00/5/6/10/11/15/22/49/50/62/84/95/97. Evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-effect-reviewer/`.
+
 ## 2026-10-01 — Correlate effect context with actual inputs
 
 - Reconciled PR #2008 closure and superseded the duplicate broad producer row.
