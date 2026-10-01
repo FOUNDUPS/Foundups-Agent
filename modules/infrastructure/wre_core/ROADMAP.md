@@ -1,3 +1,18 @@
+## Guided worker comparison stopped — 2026-10-02
+
+The supervised existing WRE route consumed the exact stored768-byte procedure:
+808 input/134 output tokens,39.485s; context fit and production cleanup verified.
+The unchanged parser rejected `len`; source review also found invented
+`self._cached_token`. Accepted0/1, generated executions/tests0. Later-use and
+disabled-control cases were not run; all unused budgets closed. A coordinator
+prelaunch KeyError was preserved separately from the sole actual parser failure.
+
+Next14/P1: qualify a different installed worker's metadata/template against
+existing selector/adapter/Gateway owners. No load, generation or provider call
+allocated. No retained benefit, production skill promotion or native admission.
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#guided-worker-comparison-stopped--2026-10-02)
+and backlog `retained_procedure_comparison_20261002`. Earlier entries are historical.
+
 ## Native baseline and loader qualification — 2026-10-02
 
 Actual supervised helper/adapter/native-chat baseline returned once: 658 input,

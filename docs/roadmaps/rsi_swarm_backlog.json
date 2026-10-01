@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.proposal_conformance_baseline_20261002",
-    "base_commit": "140492c10e474a8606b95c4466be328ffa179796",
-    "selected_action": "Qualify the finite retained-procedure comparison packet",
-    "status": "baseline_rejected_loader_qualified_next_packet_unadmitted",
+    "observation_path": "current_observation.retained_procedure_comparison_20261002",
+    "base_commit": "bbc517468c9b777d8a4ea9837aa09d69a682ba4c",
+    "selected_action": "Qualify one different installed worker artifact against existing runtime owners",
+    "status": "guided_case_rejected_next_worker_metadata_only",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
-      "deferability": 4,
+      "deferability": 5,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\closure\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\closure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.reviewer_authority_closure_20261002"
+    "previous_observation_path": "current_observation.proposal_conformance_baseline_20261002"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -21050,6 +21050,289 @@
         "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\loader-result-review.json": "1c938cda4b3d1d3406ff841ff6b06133ef348cdef688569594f85d83b294713b",
         "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\loader-receipt.json": "fb71fbbf45a0fc5f471459457db0520ea9142c6ea7f62064777b72da2236bc01",
         "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\loader-raw.json": "00743f603a7d7abc28f83cb1df56bda8bf67cc1afc687dbd63e8de2ea77453dd"
+      }
+    },
+    "retained_procedure_comparison_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "bbc517468c9b777d8a4ea9837aa09d69a682ba4c",
+      "status": "initial_guided_case_rejected_comparison_stopped",
+      "previous_observation": "current_observation.proposal_conformance_baseline_20261002",
+      "classification": "ENABLED_CASE_REJECTED_OR_STATIC_FAILED",
+      "scope": "Supervised existing WRE helper/adapter/native-chat with real disposable procedure loader; unrelated master collaborators inert. No native autonomous admission.",
+      "experiment": {
+        "planned_cases": [
+          "initial-treated",
+          "later-retained",
+          "disabled-control"
+        ],
+        "completed_cases": [
+          "initial-treated"
+        ],
+        "not_run_cases": [
+          "later-retained",
+          "disabled-control"
+        ],
+        "preflight_children": 1,
+        "native_children": 1,
+        "initializations": 1,
+        "completions": 1,
+        "prompt_tokens": 808,
+        "completion_tokens": 134,
+        "total_tokens": 942,
+        "child_wall_seconds": 39.485,
+        "generation_seconds": 34.719,
+        "output_reservation": 512,
+        "context_tokens": 2048,
+        "finish_reason": "stop",
+        "scope_accepted": 0,
+        "scope_rejected": 1,
+        "invalid_routes": 0,
+        "parser_invocations": 1,
+        "coordinator_prelaunch_errors": 1,
+        "generated_code_executions": 0,
+        "generated_code_tests": 0,
+        "retries": 0,
+        "provider_requests": 0,
+        "paid_provider_cost": null,
+        "procedure_bytes": 768,
+        "procedure_sha256": "5530879955720a9405eb7eea18c0ae04a97596e97456e2f7724accd4df266bfa",
+        "input_delta": [
+          "retained_procedure"
+        ],
+        "original_context_unchanged": true,
+        "token_fit_verified": true,
+        "production_engine_close_attempts": 1,
+        "production_engine_close_returns": 1,
+        "production_native_close_attempts": 1,
+        "production_native_close_returns": 1,
+        "owner_detached_and_reset": true,
+        "fallback_attempts": 0,
+        "guard_denials": 0,
+        "source_runtime_model_fixture_pre_post_match": true,
+        "rejection": "Actual unchanged AST inspector rejected extra name len at line27; independent source review also found invented self._cached_token outside allowed interface.",
+        "launcher_error": "Coordinator parent expected missing review command key before subprocess start. Original intent marker and KeyError receipt preserved; explicit-command supplemental review preceded the sole actual parser process.",
+        "budget_state": "closed_including_unused_later_and_control",
+        "generation_procedure_loader_calls": 1,
+        "preflight_procedure_loader_calls": 1,
+        "total_procedure_loader_calls": 2
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner"
+        },
+        {
+          "task": "Qualify one different installed worker artifact against existing runtime owners",
+          "dimensions": [
+            2,
+            4,
+            5,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "selected_metadata_preparation_only",
+          "dependency": "Read architecture/template metadata and compare runtime support; no load, generation, server mutation or provider request",
+          "ownership": "Existing local_model_selection, WRE adapter and AI Gateway owners"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner"
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners"
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane"
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator"
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane"
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator"
+        }
+      ],
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "next_step": "Metadata/source-only qualification of the installed GPT-OSS artifact against the existing native WRE route; fail closed on unsupported architecture/template. Existing exact-model LM Studio caller/lifecycle is a separately qualified alternative, not an automatic fallback. No model loads or calls allocated.",
+      "next_scope": {
+        "allowed": [
+          "GGUF architecture/template metadata",
+          "existing runtime and selector source",
+          "filesystem capacity metadata"
+        ],
+        "denied": [
+          "model loading",
+          "generation",
+          "downloads",
+          "paid providers",
+          "server start or configuration",
+          "production routing changes",
+          "prompt or acceptance tuning"
+        ]
+      },
+      "selection_rationale": "Critical worker prerequisite (I4), blocks further progress after rejected enabled case (D5), low-complexity metadata check (C2), reusable route qualification (Impact3). Higher 18/P0 admission and 15/P1 Holo work remain owner-blocked. Default7B artifact was already tried; filename/size do not certify identity or capability.",
+      "retrieval": {
+        "method": "Pinned source/NAVIGATION, canonical owner docs, exact experiment receipts and bounded installed-model source map",
+        "noise": "Historical baseline and prior7B framing separated from this single guided sample",
+        "ordering": "Actual route, actual parser, independent terminal review, then existing owner alternatives",
+        "missing": "Current governed Holo result, accepted coding candidate, held-out benefit, authentic runtime admission",
+        "staleness": "Base bbc517468; retained Holo host0c81418/authority83b0689 mismatch; higher blocked rows carried forward, not re-certified",
+        "duplication": "Reused caller, loader, parser, selector and Gateway/lifecycle owners; no production module, store, scheduler or skill added"
+      },
+      "limits": [
+        "Single known-task unseeded run is not a defect rate, causal comparison or general model-incapability result.",
+        "Later retained use and disabled control were not run; their outcomes are unknown, not failures or zero scores.",
+        "Stored procedure reached the model and fit its context, but no retained improvement was demonstrated.",
+        "AST rejection is scope evidence, not formal or semantic verification; no generated method was executed.",
+        "Explicit close and sampled hashes do not prove memory release or immutable execution; Python guards are not OS network/memory isolation.",
+        "Installed alternative file metadata establishes neither runtime compatibility nor capability.",
+        "No FoundUp launch, production account, deployment, Remote AutoPost, wallet/token action or native autonomous admission."
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\acceptance.json": "5939e07d759f85e281c39a56bc498c7ed926f5d4b7a9b7aa9aa3656ed25e5c0a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\worker-route-assessment.json": "711100fd035f710d9bde6db30bf8181cb7db719f1dea00d4d17beeabe9e1a15b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\manifest.json": "390f07cdacbc27ecdeee5cbaaf9bec51f9f02dddaf3bdf9aedfc2c5242498123",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\preflight-result-review.json": "6a21c92ebff17e6e2301b84f174010f8be6a7f8808ddcdd311769a255bb49b00",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\generation-result-review.json": "45bf913c610c02314b2a58e6d5bfc9c94058bddd66ab67a499a7b0769f8dc6f4",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\generate-receipt.json": "911a11815c4a2293a9c5941cf5be85ca6586d5d3ee38ea58eb4cc2ebf303c395",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\generate-raw.json": "081ad0765741c536df26afc0301f1cca9af642be78286784cffbee59f8c9acb4",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\proposal-inspector-launch-review.json": "223d704029753a952c9cf092fe7d239c2cb09d85393399216dfff188037922e4",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\parser-launcher-error.json": "29238f2eae68b226c2fb64d20a32d8a51f54229ef9534aeed90d35ad19cd10f8",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\parser-receipt.json": "dff3cd2474344332dcc030a6b70ad19a010b74e6128a2759ce7cc2c87042f1ed",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\parser.stderr": "c9c707d66c1e3b3174f1b047296ae850a2dad39cca7bf678ac99702276040592",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\final-result-review.json": "44ce51a1d17e6c8809ba859da1e622f04dd180e0cb088a9a016a6fe9a3e3a8a2"
       }
     }
   }

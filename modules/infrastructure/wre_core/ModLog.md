@@ -1,3 +1,21 @@
+## 2026-10-02 — Close unsuccessful guided worker comparison
+
+- Existing WRE route and disposable real loader delivered768-byte procedure;
+  1 init/1 completion,808 input+134 output=942 tokens,39.485s. Context fit,
+  exact source/runtime/model/fixture pre/post checks and explicit cleanup passed.
+- Actual unchanged parser rejected extra `len`; independent review also found
+  invented `_cached_token`. Accepted0/1; no generated execution/tests, no retry.
+  Frozen stop rule closed unrun later-use/control budgets; no retained benefit.
+- Preserved coordinator launcher KeyError before process launch, then separately
+  reviewed explicit command for the sole actual parser invocation.
+- WSP00/15/22/48/50/97: re-observed and selected14/P1 metadata-only worker
+  compatibility preparation using existing owners. Default7B already tried;
+  installed alternatives have no verified capability or runtime fit yet.
+- Updated six canonical documents, preserving prior observations. No production
+  module, skill, runtime configuration, deployment or native admission changed.
+  Evidence: backlog retained_procedure_comparison_20261002 and
+  O:/Foundups-Agent-audits/20261002-rsi-retained-procedure/.
+
 ## 2026-10-02 — Measure native baseline and existing-loader preparation
 
 - Independently reviewed actual WRE helper/adapter/native-chat baseline: 1 init,
