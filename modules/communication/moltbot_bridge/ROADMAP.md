@@ -1,3 +1,19 @@
+## Single-effect handoff planning checkpoint — 2026-10-01
+
+PR#2001 is merged at `a555687186568e8b74fdfebe037081b077ec8581` with
+11/11 local and exact PR/main qualification cases. CI and CodeQL passed;
+owned lane closure is verified. Previous publication-pending entries below
+are historical checkpoints, not current task assignments.
+
+The selected [single-effect handoff design](INTERFACE.md#single-effect-proof-handoff-design--2026-10-01) preserves delegated v1
+and proposes HIGH/worktree_create only, with a separately bound exact target.
+Authentic effect authorization is still unqualified. No runtime policy is
+activated. Next13/P1: Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners.
+Freeze independent finite cases before implementation. Synthetic structural
+agreement does not mint a permit, authenticate a producer or establish RSI gain.
+See backlog `current_observation.effect_proof_design_20261001` for scoring,
+source evidence, retrieval limits and remaining gates.
+
 ## Effect-lease qualification checkpoint — 2026-10-01
 
 The previously selected domain qualification passed11/11 local cases. It confirms

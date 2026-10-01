@@ -1,3 +1,17 @@
+## 2026-10-01 — Single-effect authorization handoff design
+
+- Reconciled PR#2001 exact main/CI/CodeQL and owned closure;11/11 qualification
+  controls remain rejection/domain evidence, not successful worker admission.
+- Specified proposed HIGH/worktree_create target binding in the existing
+  interface; preserve delegated v1, exact request bytes and independent proof
+  provenance. Pure binding qualification is the next13/P1 layer; authentic
+  producer/permit/signer composition and resident prerequisites remain gated.
+- WSP00/10/15/22/48/50/84/97/99. Documentation-only; no new runtime API, authority
+  policy, model execution or test result. Holo authority-root/head mismatch
+  preserved; exact-source fallback is not semantic freshness.
+- Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-proof-design/`;
+  canonical backlog observation `effect_proof_design_20261001`.
+
 ## 2026-10-01 — Effect-lease domain qualification
 
 - Added eleven bounded cases in three existing test owners and explicit guarded
