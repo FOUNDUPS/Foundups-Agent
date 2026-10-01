@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.nemotron_metadata_qualification_20261002",
-    "base_commit": "7c44c724bc1b61c0dea49c6488a2250083a32588",
-    "selected_action": "Qualify the saved Nemotron template through the existing model-free native-chat harness",
-    "status": "nemotron_metadata_complete_next_model_free_template_qualification",
+    "observation_path": "current_observation.nemotron_formatter_qualification_20261002",
+    "base_commit": "c4a31c5884400f3e9e64b3f968c17742776b0066",
+    "selected_action": "Prepare a single separately reviewed no-allocation native metadata/vocabulary diagnostic using the existing llama_cpp model-parameter/load/free boundary",
+    "status": "saved_template_qualified_next_native_metadata_preparation",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\closure\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-formatter\\closure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.worker_metadata_qualification_20261002"
+    "previous_observation_path": "current_observation.nemotron_metadata_qualification_20261002"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -21937,6 +21937,287 @@
         "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\closure\\final-accounting.json": "bebd18e65374301c2b603146f2a887fa904824f860f716c4ed77b5054b2b0fd2",
         "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-contract\\check_native_handler.py": "e61a5652d74d560cf630c69ce41f7a6b704115e79890c8aef22bb6490c50d08a",
         "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-contract\\handler-result-review.json": "d67de4744582d9af4eb3369051c7c6df0009750dab8296c385bf4a7936011a9f"
+      }
+    },
+    "nemotron_formatter_qualification_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "c4a31c5884400f3e9e64b3f968c17742776b0066",
+      "previous_observation": "current_observation.nemotron_metadata_qualification_20261002",
+      "status": "saved_template_qualified_native_runtime_unqualified",
+      "scope": "One model-free child using existing installed formatter/factory/converter source and complete current WRE engine; synthetic initialized model and tokens.",
+      "experiment": {
+        "invocations": 1,
+        "passed": 6,
+        "failed": 0,
+        "unrun": 0,
+        "case_ids": [
+          "fit",
+          "overflow",
+          "actual-context",
+          "exception",
+          "thinking-false",
+          "thinking-true"
+        ],
+        "child_wall_seconds": 0.4059999999590218,
+        "parent_wall_seconds": 0.5619999999180436,
+        "template_renders": 6,
+        "synthetic_tokenizer_entries": 6,
+        "synthetic_completion_entries": 2,
+        "native_constructor_attempts": 0,
+        "model_initializations": 0,
+        "native_generations": 0,
+        "real_tokenizer_calls": 0,
+        "provider_requests": 0,
+        "blocked_events": [],
+        "setup_failed": false,
+        "integrity_failed": false,
+        "source_pins": 38,
+        "budget_state": "One invocation consumed and closed; no retry",
+        "zero_count_provenance": "Reviewed call graph and sentinels; not independent native instrumentation"
+      },
+      "verified_properties": [
+        "Existing engine renders once and forwards the same saved-template prompt through the installed handler with synthetic tokens.",
+        "Exact capacity equality is accepted; overflow and smaller actual context reject before completion.",
+        "Synthetic completion error yields the stable redacted response.",
+        "Explicit false thinking control renders an empty closed thinking block; true renders an open thinking block. Provided system/user roles are retained."
+      ],
+      "verification_limits": [
+        "Six local source-composition cases, not six native-model tests or hosted CI cases.",
+        "Synthetic IDs/counts/sink do not establish real tokenizer fit, model output, stopping behavior, ABI, architecture support, load feasibility or coding quality.",
+        "Guards and sampled pre/post hashes are not OS isolation or immutable execution.",
+        "Native/model/provider allocation remains zero; no authenticated effect, accepted proposal or retained benefit."
+      ],
+      "receipt_interpretation": "Raw child limits copy historical preparation prose (no prior execution/zero preparation budget). Actual execution allocation and ordered case receipts govern this run. Historical limits are preserved, not presented as current zero renders.",
+      "runtime_source_findings": [
+        "The pinned installed llama.dll contains nemotron_h_moe and pixtral strings; names alone do not prove load or kernel support.",
+        "Installed bindings expose no_alloc and vocab_only. High-level Llama(vocab_only=True) still constructs a context; it is not a qualified metadata-only route.",
+        "Existing LM Studio capacity checks residency and maximum context, not measured RAM fit."
+      ],
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner"
+        },
+        {
+          "task": "Prepare a single separately reviewed no-allocation native metadata/vocabulary diagnostic using the existing llama_cpp model-parameter/load/free boundary",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "selected_source_preparation_only",
+          "dependency": "Prepare independent exact runtime/file/resource/cleanup qualification before any native call. No full model/context/generation allocation.",
+          "ownership": "Existing WRE native-chat, installed llama_cpp model/free and local-model selection owners"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner"
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners"
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane"
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator"
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane"
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator"
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners"
+        }
+      ],
+      "next_wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "next_step": "Prepare a single separately reviewed no-allocation native metadata/vocabulary diagnostic using the existing llama_cpp model-parameter/load/free boundary",
+      "selection_rationale": "After independent six-case formatter acceptance, this is the smallest connected native prerequisite available without immediately allocating the24.5GB weights or changing WRE. Existing compiled names prevent a simple source rejection; actual flag behavior must be qualified under explicit containment/resource/read limits.",
+      "next_scope": {
+        "allowed": [
+          "Source-only preparation of an existing-owner no-allocation metadata/vocabulary diagnostic",
+          "Pin compiled bindings and model identity; define file-read, resource, lifetime and cleanup bounds before execution"
+        ],
+        "denied": [
+          "Full WRE initialize or high-level Llama constructor",
+          "Native context, decode, generation, provider calls or service changes",
+          "Unreviewed no_alloc/vocab_only execution",
+          "Downloads, new runtime adapter or invented retained benefit"
+        ]
+      },
+      "effort_cost": "One minimal existing-binding diagnostic preparation; local deterministic source work. Native execution requires separate exact review and allocation.",
+      "retrieval": {
+        "method": "Pinned current source/NAVIGATION, WRE contracts and exact-source receipts",
+        "freshness": "Host0c81418/authority83b0689 unchanged. HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH remains UNKNOWN/gaptrue; no identical failed query repeated",
+        "noise": "Historical tests not counted as new qualification",
+        "ordering": "Current main/closure/owners -> source pins and oracle -> independent execution gate",
+        "missing": "Current governed Holo result; actual native compatibility, real-token fit, accepted worker output and retained gain",
+        "duplication": "Reuse existing six-case packet without new module/skill/orchestrator"
+      },
+      "skills_disposition": "Existing qwen roadmap auditor remains prototype/needs_validation and depends on unavailable current Holo evidence. Deterministic checks plus independent review used; no local-model calls for administration.",
+      "missing_artifacts": [
+        "WRE memory/README.md absent; no replacement created for this bounded diagnostic."
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-formatter\\selection.json": "5968a04fa4df39370cae655f5a298aceeeb428e799785262bee70398dda8f5f9",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-formatter\\diagnostic-allocation.json": "7d6360b180bd7191939169180f4f384b3aafa5a8dd19af57333d587cf4e95060",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-formatter\\diagnostic-return.json": "cd9ead9bb730955b86d02a62aba39cd343739e7ef1732b10c948f022dfc4caba",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-formatter\\next-runtime-source-assessment.json": "7762857c75eebc6f74a7991d48a58e792df66c98798afe0d7f797f370e943f4f",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\check_native_handler.py": "df92229d9be72bb5ab8216a669086f7348550b2401963ffc5b3dbe9ca8ca434f",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\run_once.py": "61d2c38b30e7985e08c94d2e3e4d4f4de52b1fb256ba2248eac9f3368bcbfb32",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\plan.json": "be3276568b5867e3a0296006729763635aa58fb117b166710a2175d5921102b9",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\bindings.json": "d2c4090257eb30167ab7231ca60a87c19ef53b55286f55ad12c8176b8674eb05",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\source-review-repaired.json": "afeebcf1d5c00a3b479f9a2e860b078c2450d40f10b07be2ff6fb2fc59d041d2",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\execution-review.json": "d2135bf0c034cc6d84217e2836d28bdf89c23f034188e21065669e27f00c097a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\started.json": "d0977b8fc1a2e3ccfba938b7a510acc18cda4fce64f1074a8c645e0e968f1b98",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\handler-result.json": "8007a0dc66b211f7a4952044251a2959ce3b2a7c33bcc581a9a79844c0893759",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\receipt.json": "0780017e152b94d0a39874a3179b43ff76b4dbf0996e3afa3d35c45cb3a21826",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\result-review.json": "29269dafa91d6f2356afce054b362c2bfca5e7a16b02c3dd8bab7dc8f0893c75"
       }
     }
   }

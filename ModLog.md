@@ -1,3 +1,16 @@
+## 2026-10-02 — Qualify the saved Nemotron formatter
+
+- One independently reviewed model-free child passed6/6 fixed cases, no unrun
+  cases; child0.406s/parent0.562s. All38 source pins matched; allowance closed.
+- Verified exact prompt/explicit thinking branches, synthetic capacity gates,
+  frozen handler forwarding and error redaction. No real tokenizer/model call.
+- Reused existing engine and installed formatter harness; no production code.
+- WSP00/15/22/48/50/97: next 14/P1 is bounded native metadata/vocabulary
+  diagnostic preparation. Existing low-level bindings require separate resource,
+  read and cleanup qualification. No native admission or retained gain claimed.
+- Evidence: backlog nemotron_formatter_qualification_20261002 and
+  O:/Foundups-Agent-audits/20261002-rsi-nemotron-formatter/.
+
 ## 2026-10-02 — Qualify alternative worker metadata
 
 - One separately reviewed Nemotron metadata call completed: 3,216,492 bytes,
