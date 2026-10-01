@@ -57,9 +57,75 @@ native admission. No production consumer is wired. An inert recording verifier
 tests byte/decision logic; these fixtures are not independent runtime receipts.
 
 Frozen qualification: 82 expected missing-API baseline failures → 82 local
-passes. Existing 140 CI cases retained, 222 total; hosted results pending.
-Earlier pure correlation PR #2009 and exact-main checks passed; historical
-pending prose below is superseded by its final accounting.
+passes. PR #2010 is merged/main-verified at `f4978e12`: exact PR and main CI
+each passed all 222 selected cases, plus 74 correspondence, 308 measurement
+(two known pytest configuration warnings) and 85 caller cases. All ten PR
+checks and both main workflows succeeded; the owned lane is closed. These are
+regression counts, not independent proof of runtime authority or retained gain.
+Historical pending prose below is superseded by the canonical backlog closure.
+
+### Authenticated effect-authority qualification — 2026-10-01
+
+Source-qualified at `f4978e12e94e1b0d151b38b16c295d2bda374b23` after
+PR #2010's verified merge. The conditional reviewer API above is implemented;
+the production authority composition below is **not implemented or admitted**.
+The earlier scoped absence finding applies to effect-consensus adapters, not
+to all identity/runtime verification infrastructure.
+
+| Existing owner | Evidence it actually supplies | Missing effect-review bridge |
+|---|---|---|
+| `modules/ai_intelligence/ai_gateway/src/model_runtime_binding_use_time_verifier.py` | Re-verifies persisted signed model evidence and issues a one-shot runtime capability; the existing topology consumes that capability. | Bind that authenticated runtime and selection to this reviewer principal and decision. A model capability alone is not review authority. |
+| `src/reddog_signer_current_principal_authority_resolver.py` | Selects and leases a signed generation for each resolution. | This is an effectful lease operation, not a passive lookup. Composition needs explicit lifetime/cleanup accounting. |
+| `src/reddog_signer_owner_e0_principal_authority.py` and `src/reddog_authority_runtime_store.py` | Confined, digest-bound principal records provide identity, key and repo/FoundUp scopes. | `PrincipalAuthorityRecord` has no reviewer role membership, key epoch/expiry or authorization of this effect. Do not synthesize them from identity. |
+| `src/reddog_elevated_authority_consensus_policy.py` | Protocols and strict supplied policy/evidence types; existing sovereign evidence binds a delegated parent. | Trusted policy origin, current reviewer key authority and explicit B/P/T/E plus requester/beneficiary authorization remain unresolved. |
+| `src/reddog_elevated_authority_consensus_verification.py` | Conditional verification of one effect review, including actual-input correlation. | Supplied resolver results do not authenticate their own provenance; quorum/permit/replay remain later gates. |
+
+**Next bounded design target: reviewer-key authority provenance.** Specify the
+signed supply fields and resolution semantics needed by `ReviewerKeyAuthority`
+in the existing current-principal resolver and principal-record parser/loader.
+Identify which authenticated authority may designate a reviewer and assert
+that key's epoch, expiry and role. A valid manifest of identity records alone
+does not grant reviewer permissions. Freeze the producer/trust-root mapping
+before implementation; retain current principal-resolution and delegated v1.
+
+This first extension must carry verified key evidence unchanged into the existing
+`verify_effect_reviewer_decision`. Runtime-to-reviewer binding and sovereign
+B/P/T/E/requester/beneficiary authority remain subsequent, independent edges;
+do not bundle them into this layer. The eventual signer integration belongs in
+the existing `ElevatedConsensusSignerAuthority.reserve` path, with independent
+re-verification and durable nonce reservation, not a second authority store.
+
+Acceptance for that design and its subsequent implementation:
+
+1. First slice: identify the authoritative producer, trust root/policy mapping,
+   signed reviewer permission, epoch/expiry and consumer. Resolve through the
+   actual verified generation/lease path; reject stale, mismatched, revoked or
+   expired evidence. Independent signed positive evidence or an explicitly
+   authorized fixture-generation budget is required before testing this edge
+   as authenticated. Missing ownership/evidence is not a fabricated receipt.
+2. Subsequent slice: bind sovereign authorization to recomputed B/P/T/E, repository, FoundUp,
+   work order, actual requester and beneficiary. State who may delegate each
+   role; matching work-order IDs or parent principal identity is insufficient.
+3. Specify current-generation lease acquisition, consumption/discard, minimum
+   lifetime, revocation and failure cleanup across existing owners. Independent
+   grant verification must recompute the same target and effect, not trust the
+   coordinator's Boolean. Do not consume a model capability twice.
+4. Freeze independent acceptance evidence before code: authentic-source
+   substitution, stale generation/key, wrong actor/runtime/effect, expiry,
+   cleanup failure and cross-domain negatives, plus an authorized positive.
+   Synthetic positives qualify mechanics only. Any installed-runtime inspection
+   and operational signing need their own actual scope and budget.
+5. A separate cryptographic integration check needs frozen public vectors for
+   the exact effect preimage. None was found in the scoped existing tests;
+   their recording verifier or signatures for other domains cannot substitute.
+   This check is dependent, not the selected executable task. No key generation
+   or signing is authorized by this documentation. Passing vectors alone still
+   cannot prove production provenance.
+
+This qualification executed no runtime resolver, signer, provider, model or
+operational store. Installed runtime/configuration is unknown. It removes an
+ambiguous next step; it does not clear native RSI, supervisor or AmIBot G0 gates.
+Do not repeat this source inventory unchanged as another completed RSI layer.
 
 ### Pure effect-context correlation API — 2026-10-01
 
