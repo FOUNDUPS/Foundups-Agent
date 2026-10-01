@@ -98,6 +98,7 @@ def load_system_service_independent_grant_authority_client(
     from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
         SCHEMA_VERSION_V3,
         SCHEMA_VERSION_V4,
+        SCHEMA_VERSION_V5,
         _load_owner_config,
     )
 
@@ -110,7 +111,7 @@ def load_system_service_independent_grant_authority_client(
         owner = _load_owner_config(owner_config_path, repo=repo)
         return _build_authenticated_supply(
             owner=owner, policy=admission.policy, owner_config_path=owner_config_path,
-            repo=repo, required_schemas={SCHEMA_VERSION_V3, SCHEMA_VERSION_V4},
+            repo=repo, required_schemas={SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5},
         )
 
 

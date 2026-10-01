@@ -1,3 +1,13 @@
+## 2026-10-02 — Scoped reviewer authority dependency closure
+
+Regenerated the existing backend manifest for two bounded reviewer-designation
+and current-verification leaves (1402 → 1404), updating exactly the eight
+changed source owners reachable from existing backend entrypoints. Three changed
+supply/readiness/service-binding owners remain outside this backend closure,
+as before; their tests bind them separately. Digest: `77d191b6bc8cd3fd8b056833d4c210d177d0a950f103a0210a0d614914a9422c`. Existing JS/runtime count
+and generator-test digest pins retain strict boundaries (1404 allowed,1405
+rejected). No production configuration or service is activated. WSP22/50/84/97.
+
 ## 2026-10-01 — Effect-review dependency closure and compatibility pins
 
 The existing consensus verification owner now imports the already merged pure

@@ -64,18 +64,68 @@ checks and both main workflows succeeded; the owned lane is closed. These are
 regression counts, not independent proof of runtime authority or retained gain.
 Historical pending prose below is superseded by the canonical backlog closure.
 
-The real-signature prerequisite now has 6 frozen test-only Ed25519 cases through
+Historical PR #2013 prerequisite (now merged/main-verified and closed): 6 frozen
+test-only Ed25519 cases through
 this unchanged API and the actual public verifier: valid signature accepts;
 payload/signature/key tampering and two wrong-domain signatures reject. Local 95
 cases pass including 82 prior and 7 structural controls; hosted 228 pending. Keys
 exist only in test memory. Supplied resolver provenance and inner-designation
 authentication remain unproven; no production caller or authority is added.
 
+### Connected current reviewer verification API — 2026-10-01
+
+**Implemented in the current 15/P1 layer; locally verified, hosted/publication pending.**
+PR #2013 closed at `c9d1273`. The existing consensus verification owner now exposes:
+
+```python
+verify_current_effect_reviewer_decision(
+    *, owner_config_path, repo_root, decision, context, authority_request,
+    target, expected_target, policy, runtime_evidence_resolver,
+    revoked_key_epochs=frozenset(),
+) -> bool
+```
+
+The caller does not inject owner data, a generation boundary, signature verifier or
+reviewer-key resolver. The private current-review leaf loads authenticated owner
+v5, derives one selection from that same config identity and holds its lease
+through confined principal-artifact reading and effect review. The strict
+`reddog_reviewer_designation_contract.py` leaf owns the exact 12/14/7-field root,
+inner designation and reviewer-entry wire shapes. It bounds the complete prefixed
+canonical signing input to 65536 bytes; validation alone authenticates nothing.
+Both designation and review use the existing real Ed25519 backend.
+
+Principal v2 adds exactly one designation to the existing identity envelope;
+`PrincipalAuthorityRecord` and strict v1 parsing remain unchanged. The existing
+supplier's optional `reviewer_authorizations` and `reviewer_principal_records`
+carry 1–8 distinct reviewer identities with exact pair/key/repository/FoundUp
+coverage; defaults retain v1 and the permission snapshot remains singular v1.
+Readiness accepts the v2 principal shape without claiming signature authentication.
+Existing grant-owner, transport and source-policy consumers recognize v5; their
+separate grant/replay semantics are preserved.
+
+Projection requires every role assigned to the reviewer pair in the pinned policy
+to be authorized by the signed designation. Explicit owner/designation/entry and
+manifest expiries bound the key; selection lifetime is checked separately. Inputs
+are captured and compared after callbacks. Before success, authenticated owner
+identity and trusted time are rechecked while the lease is held; the private key
+resolver is closed on exit. These sampled checks are not atomic revocation or a
+guarantee after return. Runtime evidence is still supplied by the caller.
+
+Local candidate-4 passed 198/198 with no failures/errors/skips, exact IDs, stable
+source samples and no unexpected denials. Hosted 331 portable and 8 Linux cases
+are pending. The five actual-root cases cover positive, UID, mode, symlink and
+anchor-tamper rejection; the last is not a valid signed-rotation proof. Three
+existing transport v3/v4/v5 cases complete the Linux selection. This is one scoped
+reviewer's conditional validity, not quorum, independent runtime provenance,
+effect-scoped sovereign permission, a permit, native admission or retained gain.
+
 ### Authenticated effect-authority qualification — 2026-10-01
 
 Source-qualified at `f4978e12e94e1b0d151b38b16c295d2bda374b23` after
 PR #2010's verified merge. The conditional reviewer API above is implemented;
-the production authority composition below is **not implemented or admitted**.
+the table below records the **historical pre-composition gaps**. The connected
+key portion is now implemented as documented above; runtime/effect authority
+and admission remain open.
 The earlier scoped absence finding applies to effect-consensus adapters, not
 to all identity/runtime verification infrastructure.
 
@@ -89,8 +139,8 @@ to all identity/runtime verification infrastructure.
 
 #### Reviewer-key designation contract — 2026-10-01
 
-**Planned source contract, qualified at `1ff01a9`; not an implemented API or
-runtime grant.** The architect selects an explicit, opt-in designation block in
+**Historical design contract, qualified at `1ff01a9`.** Its connected key
+implementation is documented above; this original design is not a runtime grant. The architect selects an explicit, opt-in designation block in
 the existing root-owned signer owner configuration as the trust source. This
 resolves the source-design choice; it does not select real issuer identities,
 provision keys, write operational configuration or authorize a worker.
@@ -171,7 +221,7 @@ Current-generation reviewer removal/key rotation and explicit owner-block
 removal/rotation revoke on the next observed use. Stronger monotonic revocation
 requires separate authorized evidence; no new revocation store is selected.
 
-**Connected implementation closure:** loader changes alone cannot advertise v5
+**Historical implementation prerequisites:** loader changes alone cannot advertise v5
 support. Existing `reddog_grant_authority_service_owner_binding.py` and
 `reddog_signer_independent_grant_authority_client_supply.py` accept v3/v4, while
 `reddog_grant_authority_source_policy_authority.py` load/revalidate requires v4.
@@ -198,7 +248,7 @@ messages or a recording verifier cannot supply that positive. Test-signing
 budget/fixtures and installed authority are separate inputs; this document
 authorizes neither operational signing nor production configuration.
 
-Next: one connected, nonactivating reviewer-key implementation with independent
+Historical next selection: one connected, nonactivating reviewer-key implementation with independent
 oracles and version-consumer tests, re-observed under WSP15. Runtime-to-reviewer,
 sovereign B/P/T/E/requester/beneficiary authority, quorum/permit/replay and native
 admission remain later gates. No source/runtime calls or retained RSI benefit

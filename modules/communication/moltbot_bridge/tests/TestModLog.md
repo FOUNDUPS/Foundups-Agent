@@ -1,3 +1,29 @@
+## 2026-10-01 — Connect scoped reviewer authority through existing owners
+
+Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now
+rejects unsupported collection before importing its helpers; the existing static
+classifier marks it operational/noncollectable. Its explicit eight-case CI path
+remains mandatory. Candidate-3 also passed198; candidate-4 reruns the same198
+after this collection guard changed a bound source file.
+
+- Reconciled PR #2013 closed at `c9d1273`; implemented the selected 15/P1 connected
+  key layer across 13 production files, including two bounded leaves. Existing
+  owner v5, principal v2, supplier/readiness and coupled consumers now compose
+  scoped reviewer designation with distinct identities and manifest expiry.
+- Public `verify_current_effect_reviewer_decision` uses one leased generation,
+  actual Ed25519 designation/review checks, complete policy-role containment,
+  owner/time/input rechecks and private resolver cleanup. No live configuration.
+- Local candidate-4: 198 passed, 0 failures/errors/skips; exact cases, stable source
+  samples, no unexpected denials. Earlier 196-case attempts (183/13 and 193/3)
+  retain their import-guard failure evidence; fixture/import closure was repaired.
+- Hosted 331 portable plus 8 Linux cases remain pending. Linux five actual-root
+  controls plus transport v3/v4/v5 do not prove valid signed-generation rotation.
+  Publication/merge/main/owned closure remain separate gates.
+- Independent runtime provenance, quorum, effect permission, native admission and
+  retained RSI benefit remain open. WSP00/5/6/11/15/22/49/50/62/84/95/97.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+  Earlier planned/pending log entries below preserve their historical scope.
+
 ## 2026-10-01 — Exercise real effect-review signatures
 
 - Reconciled PR #2012 merge/main/owned closure; selected the first runnable crypto

@@ -20,6 +20,11 @@ MODULES = tuple(
         + list((Path(__file__).parents[1] / "src").glob(
             "reddog_ed25519_elevated_consensus_*.py"
         ))
+        + [(Path(__file__).parents[1] / "src" / name) for name in (
+            "reddog_reviewer_designation_contract.py",
+            "reddog_current_effect_reviewer_verification.py",
+            "reddog_signer_current_principal_authority_resolver.py",
+        )]
     )
 )
 TEST_MODULES = tuple(
@@ -32,6 +37,8 @@ TEST_MODULES = tuple(
     + sorted(
         Path(__file__).parent.glob("test_reddog_elevated_consensus_*.py")
     )
+    + sorted(Path(__file__).parent.glob("reddog_reviewer_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_reviewer_*.py"))
 )
 LEGACY_RUNTIME_HOST_LIMITS = {
     "reddog_resident_queue_stage_handler_registry.py": (
@@ -68,7 +75,7 @@ def test_modules_have_no_shell_network_or_key_generation_imports() -> None:
 
 
 def test_consensus_modules_remain_bounded_lego_components() -> None:
-    assert len(MODULES) == 14
+    assert len(MODULES) == 17
     for path in MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name
@@ -86,7 +93,7 @@ def test_consensus_modules_remain_bounded_lego_components() -> None:
 
 
 def test_consensus_test_modules_are_bounded_lego_components() -> None:
-    assert len(TEST_MODULES) == 20
+    assert len(TEST_MODULES) == 29
     for path in TEST_MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name

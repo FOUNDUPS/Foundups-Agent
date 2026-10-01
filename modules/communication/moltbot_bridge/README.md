@@ -1,3 +1,14 @@
+## Connected current reviewer verification — 2026-10-01
+
+The [current reviewer API](INTERFACE.md#connected-current-reviewer-verification-api--2026-10-01)
+connects opt-in owner v5, a separately signed designation in principal-artifact v2,
+current-generation identity and two real signature checks. The existing supplier
+can carry distinct producer/reviewer identities; legacy defaults remain v1.
+Local candidate-4 passed 198/198; hosted 331 portable and 8 Linux cases and publication
+are pending. PR #2013 closed at `c9d1273`; older pending notes below are historical.
+The lease and owner/time rechecks do not establish atomic revocation, independent
+runtime provenance, quorum, effect permission, native admission or retained gain.
+
 ## Conditional effect-review verification — 2026-10-01
 
 The [consensus interface](INTERFACE.md#conditional-effect-review-verification-api--2026-10-01)

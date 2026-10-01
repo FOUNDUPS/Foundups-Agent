@@ -1,3 +1,28 @@
+## Connected reviewer authority composition — 2026-10-01
+
+PR #2013 is merged/main-verified at `c9d1273572d25cf7fccfc98c9c13994e41b913ad`
+and its owned lane is closed. The selected 15/P1 connected reviewer-key layer is
+implemented and locally verified; publication and hosted qualification are pending.
+Thirteen production source files change, including two focused leaves within the
+existing bridge. Opt-in owner v5 and principal-artifact v2 supply separately signed
+reviewer designation and distinct producer/reviewer identity records. The public
+`verify_current_effect_reviewer_decision` holds one current-generation lease through
+both real Ed25519 checks, scopes role projection to the pinned policy, includes
+trusted manifest expiry, rechecks owner/time and closes the private key resolver.
+
+Local candidate-4: **198 passed, 0 failures/errors/skips**, exact IDs, stable source
+samples and no unexpected guard denials. Hosted selection is **331 portable cases
+plus 8 Linux cases, pending**. Linux comprises five actual-root controls and three
+existing transport compatibility cases for v3/v4/v5; anchor tampering is not a
+valid signed-generation rotation test. Earlier 196-case attempts and their import
+guard failures remain preserved in the audit evidence.
+
+No operational configuration, native admission, independent reviewer-runtime
+provenance, quorum, effect permission or retained RSI gain is established. Re-observe
+and rescore after exact publication/main/owned-lane closure; this checkpoint grants
+no next execution budget. Earlier pending/planned checkpoints below are historical.
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+
 ## Real-signature review qualification — 2026-10-01
 
 PR #2012 is merged/main-verified at `8fe4ac6`; its owned lane is closed.

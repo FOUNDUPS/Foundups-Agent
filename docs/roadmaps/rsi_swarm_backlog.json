@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_review_crypto_qualification_20261001",
-    "base_commit": "8fe4ac6c7d18a7c5efc641d9b039ef45e87af1b8",
+    "observation_path": "current_observation.reviewer_authority_composition_20261002",
+    "base_commit": "c9d1273572d25cf7fccfc98c9c13994e41b913ad",
     "selected_action": "Implement connected scoped reviewer-key authority composition in existing owners",
-    "status": "crypto_prerequisite_locally_verified_publication_pending",
+    "status": "connected_composition_locally_verified_publication_pending",
     "wsp15": {
       "complexity": 4,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.reviewer_key_contract_20261001"
+    "previous_observation_path": "current_observation.effect_review_crypto_qualification_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -20221,6 +20221,251 @@
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation\\final-accounting.json",
+      "source_bindings": {
+        "modules/communication/moltbot_bridge/src/reddog_authority_runtime_resolver_artifact_supply.py": "1c55fc99a66fd816cc6aa5c58f0194dcf7c7becf",
+        "modules/communication/moltbot_bridge/src/reddog_current_generation_manifest_launch_selection.py": "1d2b51fe01bf9b3810bbcbb593d85f4f44063667",
+        "modules/communication/moltbot_bridge/src/reddog_ed25519_signature_verifier_backend.py": "60567f8625a44f0c5b4d316729e1b7dc0b0d86b4",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_policy.py": "01db3d66ca1427c9b2ffa913dcd9c270e5d52502",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_reviewer_evidence.py": "ba74453b60f16823e7a26d43d52dc93aea496b12",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_verification.py": "e61acb261cbc17577de8290038cf73d1849d59f0",
+        "modules/communication/moltbot_bridge/src/reddog_grant_authority_service_owner_binding.py": "e660674b88c20dad4ae17719196c96ef458cd2a0",
+        "modules/communication/moltbot_bridge/src/reddog_grant_authority_source_policy_authority.py": "29b07b327712eddd28d8056d0cc0407916e80ef3",
+        "modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py": "2bd3da62131bf761bbf147c558689b5a8b41a2f0",
+        "modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_authority.py": "0b0297eacf79f51c54aaa9d68f4f1a5d0c4b5e97",
+        "modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_contract.py": "c0bc336004e0d333da6832059baed23056a1cdbd",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_principal_authority_resolver.py": "a71a762458c322faa243468df8bb04f1e9190621",
+        "modules/communication/moltbot_bridge/src/reddog_signer_independent_grant_authority_client_supply.py": "f5d7e576ae6cf9a03a76c8a7f8095766bad9fc8d",
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_authority.py": "6d69503c0965560a3674a2bd29d41dbd149e8f86",
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_records.py": "9f1554f4800753aebb9b37cedb2e2f590ec72c66",
+        "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "f2c6353fa888a67495c05012569d894ed540a557"
+      }
+    },
+    "reviewer_authority_composition_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "external_principal",
+      "principal_ref": "012",
+      "base": "c9d1273572d25cf7fccfc98c9c13994e41b913ad",
+      "selected": "Implement connected scoped reviewer-key authority composition in existing owners",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 15,
+        "priority": "P1"
+      },
+      "status": "connected_composition_locally_verified_publication_pending",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Implement connected scoped reviewer-key authority composition in existing owners",
+          "dimensions": [
+            4,
+            4,
+            4,
+            3
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "locally_verified_publication_pending",
+          "dependency": "Independent packet review, exact-head hosted portable331/Linux8 verification and normal publication gates",
+          "ownership": "Existing root-owner loader, principal supply/parser/loader/current resolver and effect verification owners",
+          "effort_cost_verification": "One connected source slice with legacy and version-consumer tests; no paid models, operational configuration or native worker activation.",
+          "reason": "Source-design trust root now explicit. Implement the complete key edge rather than another inert parser; runtime/sovereign authority are separate."
+        },
+        {
+          "task": "Prepare bounded R15 developer procedure-retention experiment",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "eligible_preparation",
+          "dependency": "Freeze objective, independent fixtures, finite proposal/runtime budget and later-use/rollback controls before execution",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Local disposable procedure fixture; no generated code execution or live Skillz/PatternMemory writes; no existing qualified retained loop found."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        }
+      ],
+      "execution_plane": "Reviewed development under standing012authority; not an admitted autonomous WRE work order",
+      "manual_reason": "Deterministic source/crypto compatibility and current-generation lease wiring; no qualified local-model execution budget or need for paid inference",
+      "retrieval": {
+        "noise": "Large historical roadmap/status prose; read current entry and precise owners incrementally",
+        "ordering": "WSP00, roadmap/WSP15/WSP97, current API/adjacent version consumers, tests",
+        "missing": "No current semantic retrieval coverage",
+        "staleness": "Unchanged Holo authority root/head mismatch; reused exact error without retry/reindex",
+        "duplication": "Reuse owner config, principal artifact, current-generation lease and existing verifier; two bounded leaves for pure wire and connected composition, no new store/orchestrator"
+      },
+      "selection_reason": "Native18/P0 and governed Holo15/P1 remain blocked. Scoped reviewer-key composition15/P1 is executable using existing owners; finish this layer before rescoring. The developer-plane R15 alternative14/P1 can be prepared without native admission and must be reconsidered after closure.",
+      "execution_scope": "Connect existing root owner v5, generation-bound principal v2 and effect-review verifier; preserve v1-v4 owner and v1 principal behavior. Thirteen source files changed, including two bounded leaves rather than another store/orchestrator.",
+      "source_reconciliation": "PR2013 merged/main-verified and owned lane closed. Readiness, supplier identity multiplicity, coupled consumers and trusted manifest expiry are now integrated and locally tested; Linux provenance coverage remains pending hosted execution.",
+      "prior_closure": {
+        "pr": 2013,
+        "merge": "c9d1273572d25cf7fccfc98c9c13994e41b913ad",
+        "receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-implementation\\final-accounting.json",
+        "receipt_sha256": "96e57de7d8f04cafe2f98f12154aaa207c60ba32915fde084abebf9ab1dc2143"
+      },
+      "implemented": [
+        "Strict12/14/7-field designation wire and complete signing-input65536-byte bound",
+        "Root-owned owner_config.v5 designation trust anchor; duplicate owner keys reject only in v5",
+        "Generation-bound principal v2 supply/parser/loader, distinct reviewer identities, unchanged permission v1",
+        "Single current selection/lease; trusted manifest expiry; real inner and effect Ed25519 verification",
+        "Scoped roles/repo/FoundUp/policy/epochs; final owner/time/input checks and cleared ephemeral projection",
+        "Legacy owner consumers, principal readiness and source-policy v5 compatibility"
+      ],
+      "validation": {
+        "local": {
+          "tests": 198,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 198
+        },
+        "receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\candidate-4\\receipt.json",
+        "receipt_sha256": "a5b4ce510eab87a3fbe4a863e615f6cff979962e7ae87007675290b1533f7428",
+        "earlier_attempts": [
+          {
+            "cases": 196,
+            "passed": 183,
+            "failed": 13,
+            "cause": "Missing test-harness source read qualification"
+          },
+          {
+            "cases": 196,
+            "passed": 193,
+            "failed": 3,
+            "cause": "Readiness transitive import qualification incomplete"
+          }
+        ],
+        "registry_total": 1672,
+        "quarantined": 270,
+        "hosted_selected_cases": 331,
+        "linux_selected_cases": 8,
+        "linux_real_root_cases": 5,
+        "linux_transport_compatibility_cases": 3,
+        "current_publication": "pending",
+        "final_delta": "Privileged Linux fixture collection guard; now operational/noncollectable. Same198 portable cases rerun; production unchanged."
+      },
+      "authority_limits": [
+        "No production keys, owner configuration, service activation, paid calls or native worker admission.",
+        "Caller-supplied runtime evidence remains separate and unauthenticated by this key edge; no quorum or effect permission follows.",
+        "Root-owner checks and final sampled comparisons are not an atomic root/generation transaction or ABA-proof execution.",
+        "Python audit controls are not OS isolation. Linux anchor-tamper case is not a legitimate signed generation-rotation proof.",
+        "Passing compatibility/security tests is not retained RSI benefit."
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "installed_runtime_state": "unverified",
+      "next_gate": "After exact-source publication closure, re-observe WSP15/WSP97: reevaluate R15 bounded developer procedure-retention experiment against remaining runtime/sovereign authority dependencies; do not automatically inherit prior ranking.",
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\final-accounting.json",
       "source_bindings": {
         "modules/communication/moltbot_bridge/src/reddog_authority_runtime_resolver_artifact_supply.py": "1c55fc99a66fd816cc6aa5c58f0194dcf7c7becf",
         "modules/communication/moltbot_bridge/src/reddog_current_generation_manifest_launch_selection.py": "1d2b51fe01bf9b3810bbcbb593d85f4f44063667",

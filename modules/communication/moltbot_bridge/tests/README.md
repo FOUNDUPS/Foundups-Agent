@@ -1,3 +1,39 @@
+## Connected reviewer authority qualification — 2026-10-01
+
+Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now
+rejects unsupported collection before importing its helpers; the existing static
+classifier marks it operational/noncollectable. Its explicit eight-case CI path
+remains mandatory. Candidate-3 also passed198; candidate-4 reruns the same198
+after this collection guard changed a bound source file.
+
+Local candidate-4 passed **198/198**, zero failures/errors/skips, exact cases,
+stable source samples and no unexpected guard denials. The selection combines
+86 designation/composition/artifact/supplier cases, 15 owner/readiness cases,
+2 existing-owner consumer cases and 95 prior controls. Earlier 196-case attempts
+remain recorded as 183 passes/13 guard failures and 193 passes/3 guard failures;
+bounded fixture/import-closure corrections preceded the successful run.
+
+Portable composition uses real ephemeral test-only Ed25519 signatures and actual
+parsers/effect verification while substituting owner reads/generation leases.
+It therefore cannot qualify OS ownership. Separate mandatory Linux selection is
+five real-root cases (positive, wrong UID, writable owner, symlink, anchor tamper)
+plus the existing transport v3/v4/v5 cases. Every new negative first reaches a
+connected positive. Anchor corruption is not valid signed-generation rotation;
+transport fixture seams do not prove live socket services.
+
+CI selects **331 portable + 8 Linux cases; hosted results pending**. The Linux
+runner requires isolated assertion-enabled root Python, a disposable `/root`
+fixture, cleared environment, explicit eight nodes and a four-minute workflow
+limit. It confines test databases/writes and denies network/providers/processes
+through Python guards; this is not OS containment. Sources are sampled before
+and after execution, not made immutable. Actual installed runtime provenance,
+quorum/effect permission, native admission and retained gain remain unqualified.
+
+Frozen plans, source reviews, exact XML/logs and all attempts are retained under
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+PR #2013's earlier crypto prerequisite is closed at `c9d1273`; historical pending
+statements below describe their original checkpoints, not current closure.
+
 ## Real Ed25519 effect-review qualification — 2026-10-01
 
 `test_reddog_elevated_authority_consensus_effect_crypto.py` adds 6 independently

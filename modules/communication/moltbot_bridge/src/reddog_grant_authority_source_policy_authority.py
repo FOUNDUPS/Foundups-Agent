@@ -67,7 +67,7 @@ def load_grant_authority_source_policy_authority(
     """Load root-owned v4 policy and return one revalidatable capability."""
     repo = Path(repo_root).resolve()
     owner = _load_owner(owner_config_path, repo)
-    if owner.get("schema_version") != _owner_schema_v4():
+    if owner.get("schema_version") not in _owner_source_policy_schemas():
         raise RuntimeArtifactManifestError("grant_source_policy_owner_v4_required")
     policy = validate_grant_authority_source_policy_owner_config(owner, repo=repo)
     return _make_boundary(owner_config_path, repo, owner, policy)
@@ -92,7 +92,7 @@ def _make_boundary(
         def revalidate(self, value: object) -> Mapping[str, Any]:
             admitted = _require(value, capability_type, seal, issued)
             current = _load_owner(owner_config_path, repo)
-            if current.get("schema_version") != _owner_schema_v4():
+            if current.get("schema_version") not in _owner_source_policy_schemas():
                 raise RuntimeArtifactManifestError("grant_source_policy_owner_stale")
             current_policy = validate_grant_authority_source_policy_owner_config(
                 current, repo=repo
@@ -169,12 +169,13 @@ def _load_owner(path: Path | str, repo: Path) -> Mapping[str, Any]:
     return loader._load_owner_config(path, repo=repo)
 
 
-def _owner_schema_v4() -> str:
+def _owner_source_policy_schemas() -> frozenset[str]:
     from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (  # noqa: E501
         SCHEMA_VERSION_V4,
+        SCHEMA_VERSION_V5,
     )
 
-    return SCHEMA_VERSION_V4
+    return frozenset({SCHEMA_VERSION_V4, SCHEMA_VERSION_V5})
 
 
 __all__ = [
