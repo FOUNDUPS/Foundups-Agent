@@ -1,3 +1,20 @@
+## 2026-10-01 — Pure binding publication integrity repair
+
+PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but
+CI36814825254 failed the existing backend compatibility check: the two changed
+consensus source hashes had not been regenerated. Preserve that failed run;
+passing the qualification subset is not passing CI.
+
+Regenerated the existing backend manifest with its canonical AST/Git generator,
+then updated its existing JavaScript and generator-test digest pins to
+`3eefbd0321c31f55ecc27e5f3110812f591928b6edec7718d15301b30755d068`.
+Exactly two runtime digests changed; the1401-member inventory, schema/API and
+all validation assertions remain unchanged. The existing Node backend
+compatibility test now passes; all8 generator tests pass, including staged-index
+closure. Final exact-head CI remains pending.
+WSP50/84/97: source changes require generated closure/pin checks before publishing.
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
 ## Pure effect-target binding checkpoint — 2026-10-01
 
 Base `252f700fbac4c4adb98f3dd81c3d05eadb8fce66`; PR#2002 is merged,

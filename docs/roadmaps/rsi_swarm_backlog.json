@@ -18449,6 +18449,37 @@
             32
           ],
           "historical_observations_preserved": 55
+        },
+        "publication_integrity_repair": {
+          "initial_pr": 2003,
+          "initial_head": "edb62321d360c2c246fa8c90787b253c4a0c2278",
+          "failed_ci": 36814825254,
+          "failed_step": "Run RedDog fast test tier",
+          "cause": "Two modified Python owners retained stale generated runtime hashes",
+          "qualification_subset": {
+            "tests": 43,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "exact_cases": true,
+            "hashes_stable": true
+          },
+          "generated_inventory_count": 1401,
+          "changed_runtime_digests": [
+            "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_contract.py",
+            "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_evidence.py"
+          ],
+          "manifest_digest": "3eefbd0321c31f55ecc27e5f3110812f591928b6edec7718d15301b30755d068",
+          "node_compatibility_contract": "passed",
+          "final_ci": "pending",
+          "criteria_changed": false,
+          "generator_tests": {
+            "tests": 8,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "includes_staged_index_check": true
         }
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding",
