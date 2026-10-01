@@ -196,6 +196,56 @@ jobs:
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_modified_runtime_host_functions_do_not_add_wsp62_debt',
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_touched_legacy_runtime_hosts_do_not_exceed_base_debt',
           ]
+          # Frozen inert effect-context data controls; no approval is issued.
+          nodes += [
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_golden_roundtrip_and_immutable_copies',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_has_no_clock_or_ttl_admission[past]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_has_no_clock_or_ttl_admission[future_long]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_accepts_exact_field_bounds',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_whole_wire_byte_bound[at_limit]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_whole_wire_byte_bound[over_limit]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[non_mapping]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[dict_subclass]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[missing]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[context_domain]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[binding_domain]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[digest_parent_authority_request_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[digest_target_signing_request_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[digest_effect_request_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[digest_sovereign_authorization_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[digest_consensus_policy_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[uppercase_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[approval_bool]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[approval_zero]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[approval_nine]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[approval_float]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[roles_tuple]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[roles_empty]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[roles_duplicate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[roles_nine]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[role_type]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[role_non_ascii]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[role_too_long]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[nonce_empty]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[nonce_type]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[nonce_non_ascii]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[nonce_too_long]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[issued_bool]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[expires_bool]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[issued_negative]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[equal_times]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[reversed_times]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[expires_float]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_rejects_invalid_wire[json_error]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[mapping]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[subclass]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[roles_list]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[role_type]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[approval_bool]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_context.py::test_effect_context_canonical_apis_reject_invalid_internal_context[time]',
+          ]
           args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
               '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
               '--junitxml='+str(D/'results.xml')]
@@ -207,7 +257,7 @@ jobs:
           unexpected=[x for x in blocked if x['event']!='os.symlink']
           receipt={'returncode':status,'counts':counts,'exact_cases':exact,'hashes_stable':before==after,
               'blocked_events':blocked,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
-              'limits':['Python audit constraints, not OS isolation.','Domain, pure binding and structural controls; no issued effect lease or RSI benefit.']}
+              'limits':['Python audit constraints, not OS isolation.','Domain, pure binding/context and structural controls; no issued effect lease or RSI benefit.']}
           (D/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({k:receipt[k] for k in ('counts','exact_cases','hashes_stable')}))
           raise SystemExit(status or (2 if unexpected or not exact or before!=after or counts['skipped'] else 0))

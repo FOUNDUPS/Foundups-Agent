@@ -19,7 +19,49 @@ construction inputs. Neither function authenticates a principal or producer,
 issues a grant or permit, signs a request, consumes a lease, or admits a worker.
 Local qualification: all 32 frozen new cases passed after all 32 baseline cases
 failed at the expected missing-API assertion; both runs had zero errors/skips.
-Hosted checks and publication remain pending.
+The prior pure-binding PR#2003 is merged/main-verified; see the current layer below.
+
+### Inert effect-approval context API — 2026-10-01
+
+The pure binding and structural checks are merged/main-verified in PR#2003/2005;
+their owned lanes are closed. At source base `ae922cc30`, the focused sibling
+`src/reddog_elevated_authority_consensus_effect_context.py` adds a data carrier
+and decoder, not an authenticated producer or a production consumer.
+
+Public APIs: `EffectApprovalContext.to_dict()`,
+`rehydrate_effect_approval_context(value)`,
+`canonical_effect_approval_context_bytes(context)` and
+`canonical_effect_approval_context_digest(context)`.
+
+The wire mapping has exactly these12 fields:
+
+| Fields | Contract |
+|---|---|
+| `schema_version`, `binding_schema_version` | Exactly `reddog_effect_approval_context.v1` and existing `reddog_effect_target_binding.v1`. |
+| `parent_authority_request_digest`, `target_signing_request_digest`, `effect_request_digest` | Declared P/T/E; together with the binding schema they reconstruct B. No digest is recomputed from an actual target at this layer. |
+| `sovereign_authorization_digest`, `consensus_policy_digest` | Untrusted references to later independently resolved evidence. All five digests are exact strings containing canonical lowercase SHA-256. |
+| `required_approvals`, `required_roles` | Exact integer1–8; plain list of1–8 unique nonempty ASCII strings of at most256 characters. Multiple reviewers may share a role; no approvals≤roles rule. These are policy assertions, not policy decisions. |
+| `nonce`, `issued_at`, `expires_at` | Nonempty ASCII nonce≤256 characters; exact integers `0 <= issued_at < expires_at`. No clock, maximum TTL, provenance or freshness decision here. |
+
+The entire sorted compact ASCII JSON wire representation is bounded by the
+existing8192-byte consensus limit. No extra keys, subclasses or Boolean-as-integer
+coercion. The frozen internal context uses a tuple of roles; exports contain a
+fresh list. Canonical APIs reject malformed manually constructed contexts and
+non-tuple internal roles. Invalid data raises `ValueError`.
+
+Canonical bytes are `b"reddog-effect-approval-context.v1."` followed by that JSON;
+the digest is `sha256:` plus SHA-256 of those bytes. This is deliberately distinct
+from delegated v1 context/decision bytes. It is not a signature API or verified
+receipt, and cannot enter the existing delegated decoder or two-child permit.
+Future signed reviewer decisions must bind reviewer identity, role and admitted
+runtime as well as this context; no incomplete context-only approval is issued.
+
+Independent frozen47 cases: baseline47 expected missing-API failures; candidate
+47pass/0fail/0error/0skip, exact case IDs and stable source samples. Existing CI
+retains50 controls and adds47 (97total); hosted verification remains pending.
+Next qualify the existing-owner signed-decision/provenance boundary and exact
+B recomputation before permit/provider integration. Registry/identity evidence
+alone does not establish explicit effect approval. Native RSI remains unadmitted.
 
 ### Decision and evidence
 

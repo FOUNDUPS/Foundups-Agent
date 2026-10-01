@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.consensus_structure_20261001",
-    "base_commit": "28ee19a4ec574986cadea79798a33edbe4bb18fe",
-    "selected_action": "Qualify the explicit HIGH/worktree_create effect-approval producer and resolver contract in existing owners",
-    "status": "structure_locally_validated_publication_pending",
+    "observation_path": "current_observation.effect_context_20261001",
+    "base_commit": "ae922cc30ef6aeb827212365701a052fe7027072",
+    "selected_action": "Qualify effect reviewer-decision and authentic provenance binding in existing consensus owners",
+    "status": "effect_context_locally_validated_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-consensus-structure\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-context\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_target_binding_20261001"
+    "previous_observation_path": "current_observation.consensus_structure_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -18780,6 +18780,255 @@
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-consensus-structure",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-consensus-structure\\final-accounting.json"
+    },
+    "effect_context_20261001": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "ae922cc30ef6aeb827212365701a052fe7027072",
+      "selected": "Implement the inert effect-approval context and strict canonical decoder within the existing consensus module",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "execution_plane": "development-time pure data contract; not admitted WRE execution or effect authority",
+      "allocation": "Root implements one focused leaf; independent worker freezes tests; separate verifier reviews source, bounded runner and actual results. No model/provider/signing/operational-store calls in tests.",
+      "effort_cost_verification": "One source/test sibling inside existing moltbot_bridge, under existing 200-line/50-function limits; existing CI, registry and closure tooling. No new module, orchestrator, store or skill. Native model budgets are not implied.",
+      "reconciliation": "PR2005 is merged/main-verified/owned-lane-closed. PR2006 changes only protected YUMORI skill text. Existing INTERFACE already specifies the broad handoff, so another broad design would duplicate it. Select only the missing immutable context/decoder primitive. Existing current-generation principal resolver provides identity provenance, not effect approval.",
+      "retrieval": {
+        "last_known_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "unchanged_query_host": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "repeated_probe": false,
+        "semantic_freshness": "unverified",
+        "fallback": "Pinned source/NAVIGATION plus module README, INTERFACE, ROADMAP, ModLog and test docs",
+        "quality": "Historical pending checkpoints reconciled with exact closure receipts; existing owners and bounded missing carrier identified; no new document family. Module requirements.txt and memory/README.md absent, not fabricated."
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Effect-approval producer/resolver contract qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "source_scope_qualified_in_this_slice",
+          "dependency": "Broad contract already specified; carrier absent at selection, now locally implemented and validated in this slice. Authentic producer/consumer remains later, not supplied by the inert carrier.",
+          "ownership": "RSI consensus owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Qualify effect reviewer-decision and authentic provenance binding in existing consensus owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "next_source_qualification_after_closure",
+          "dependency": "New inert carrier is data only; existing authenticated effect producer/consumer remains missing",
+          "ownership": "RSI consensus owner",
+          "effort_cost_verification": "Bounded existing-owner qualification; independent tests before next source change, no paid model/signing/runtime scope"
+        },
+        {
+          "task": "Inert effect-approval context and strict canonical decoder",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "locally_validated_publication_pending",
+          "dependency": "Exact source review and hosted97 qualification before closure",
+          "ownership": "Owned RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Consensus structural debt",
+          "dimensions": [
+            1,
+            2,
+            2,
+            2
+          ],
+          "total": 7,
+          "priority": "P3",
+          "state": "merged_main_verified_owned_lane_closed",
+          "dependency": null,
+          "ownership": "PR2005 closed",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        }
+      ],
+      "invariants": [
+        "Delegated v1 unchanged",
+        "Context is untrusted data, not verified approval",
+        "No signing API, resolver invocation, receipt, permit, grant or native admission",
+        "No implicit runtime wiring",
+        "Protect shared checkout and all unrelated lanes",
+        "Exact frozen tests, source review and normal publication gates"
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "validation": {
+        "baseline": {
+          "tests": 47,
+          "failures": 47,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 0
+        },
+        "candidate": {
+          "tests": 47,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 47
+        },
+        "exact_cases": true,
+        "source_samples_stable": true,
+        "unexpected_denials": [],
+        "sqlite_opens": 0,
+        "ci_selected_cases": 97,
+        "hosted_status": "pending",
+        "independent_review": "execution-review-baseline.json / execution-review-candidate.json; no reviewer test execution"
+      },
+      "prior_closure": {
+        "pr": 2005,
+        "merge": "2e8944a76008a2f85537ac0047d4ff9195b4d3eb",
+        "state": "merged_main_verified_owned_lane_closed",
+        "receipt": "O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/final-accounting.json",
+        "receipt_sha256": "a4d2da332e24336f23b4f4736963511931261627878ef3066e9419cbdec909ad"
+      },
+      "selected_next": {
+        "task": "Qualify effect reviewer-decision and authentic provenance binding in existing consensus owners",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "scope": "Exact context/B recomputation, authenticated principal/policy/reviewer ownership and independent verification; no implicit authority or runtime activation"
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-context",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-context\\final-accounting.json"
     }
   }
 }

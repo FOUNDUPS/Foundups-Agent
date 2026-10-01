@@ -1,3 +1,29 @@
+## Inert effect-context checkpoint — 2026-10-01
+
+PR#2005 is merged/main-verified at `2e8944a7`; its owned lane is closed. Fresh
+base `ae922cc30` adds only PR#2006 protected YUMORI skill documentation. Existing
+broad handoff design already covers P/T/E/B and lifecycle; no duplicate design
+document is added. Current-generation principal resolution supplies identity,
+not explicit effect approval.
+
+Selected13/P1 (C2/I4/D4/Impact3): one inert context/strict decoder leaf inside
+the existing consensus module. It preserves delegated v1, carries untrusted
+policy/reference assertions and has no signer, resolver, permit or runtime path.
+Independent47 frozen data cases changed from47 expected missing-API failures to
+47passes, zero errors/skips. Source samples stable; no unexpected denied effects
+or database opens. Existing CI selects97 cases; hosted publication pending.
+Existing test registry regenerated:1662 files,269 quarantined. No gate loosened.
+
+Next: qualify effect reviewer-decision/provenance binding in existing owners,
+including exact B recomputation and independent evidence before any promotion.
+AmIBot stays G0; native admission and held-out retained gain remain unproven.
+Holo query host is unchanged; its last authority mismatch was not retried.
+Semantic coverage remains unverified, with exact-source/docs fallback.
+
+WSP00/5/6/10/11/15/22/49/50/62/84/95/97. Canonical observation:
+`effect_context_20261001`; evidence:
+`O:/Foundups-Agent-audits/20261001-rsi-effect-context/`.
+
 ## Current consensus gate — 2026-10-01
 
 PR#2003 is merged/main-verified and its owned lane closed. The following older
