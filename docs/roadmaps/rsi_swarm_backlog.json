@@ -1881,22 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.reviewer_authority_composition_20261002",
-    "base_commit": "c9d1273572d25cf7fccfc98c9c13994e41b913ad",
-    "selected_action": "Implement connected scoped reviewer-key authority composition in existing owners",
-    "status": "connected_composition_locally_verified_publication_pending",
+    "observation_path": "current_observation.reviewer_authority_closure_20261002",
+    "base_commit": "44d833c02de157d6441599a8c75086329be7099c",
+    "selected_action": "Qualify frozen proposal-conformance preflight for one finite retained-text observation",
+    "status": "preflight_frozen_execution_unadmitted",
     "wsp15": {
-      "complexity": 4,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 15,
-      "priority": "P1"
+      "total": 13,
+      "priority": "P1",
+      "rationale": "Narrow preparation reuses existing owners; conforming output is important and next-needed, but localized observation has limited impact. Prior14/P1 registry preparation closes objective-inconclusive, not as an improvement success."
     },
     "dispatchable": false,
     "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_review_crypto_qualification_20261001"
+    "previous_observation_path": "current_observation.reviewer_authority_composition_20261002"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -20523,6 +20524,309 @@
         "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_records.py": "9f1554f4800753aebb9b37cedb2e2f590ec72c66",
         "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "f2c6353fa888a67495c05012569d894ed540a557"
       }
+    },
+    "reviewer_authority_closure_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "internal_handoff",
+      "principal_ref": "012",
+      "base": "44d833c02de157d6441599a8c75086329be7099c",
+      "status": "prior_layer_merged_verified_closed_next_preflight_frozen",
+      "prior_observation": "current_observation.reviewer_authority_composition_20261002",
+      "prior_closure": {
+        "terminal_state": "REVIEWER_KEY_COMPOSITION_MERGED_MAIN_VERIFIED_OWNED_LANE_CLOSED",
+        "pr": 2014,
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2014",
+        "base": "c9d1273572d25cf7fccfc98c9c13994e41b913ad",
+        "head": "d6e2963e80ca4d888373826e778f4df6470ed9be",
+        "merge": "44d833c02de157d6441599a8c75086329be7099c",
+        "tree": "700980537774c579f8d0e028bcd8f59b43b6c918",
+        "local_cases": 198,
+        "integrity_cases": 8,
+        "node_contract": "passed",
+        "hosted_cases_each": {
+          "consensus": 331,
+          "linux": 8,
+          "correspondence": 74,
+          "measurement": 308,
+          "caller": 85
+        },
+        "pr_checks": 10,
+        "main_runs": [
+          {
+            "conclusion": "success",
+            "databaseId": 36895228192,
+            "headSha": "44d833c02de157d6441599a8c75086329be7099c",
+            "status": "completed",
+            "workflowName": "CI"
+          },
+          {
+            "conclusion": "success",
+            "databaseId": 36895224568,
+            "headSha": "44d833c02de157d6441599a8c75086329be7099c",
+            "status": "completed",
+            "workflowName": "CodeQL"
+          }
+        ],
+        "owned_worktree_removed": true,
+        "owned_branch_removed": true,
+        "recovery_bundle": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\owned-lane.bundle",
+        "bundle_sha256": "ef54ee6ce4708fa718497b0a0dee4ef3c89899e79024c76bfe0922d2965e74f1",
+        "retained_worktrees": 159,
+        "peer_pr_heads_unchanged": true,
+        "shared_head_status_diff_preserved": true
+      },
+      "registry_experiment_disposition": {
+        "registry_audit_improvement_target": "INCONCLUSIVE_OBJECTIVE_NOT_ESTABLISHED",
+        "previous_14_P1_preparation_can_close": true,
+        "closure_meaning": "The feasibility/objective gate is answered negatively for this selected fixture. No candidate-generation or retained-improvement objective has been achieved. Preserve the prior14/P1 plan as historical; do not spend a model budget on it.",
+        "production_patch_justified": false,
+        "model_budget_allocated": 0
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        },
+        {
+          "task": "Qualify frozen proposal-conformance preflight for one finite retained-text observation",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "Concrete worker/loader fixture, exact runtime/model/template/capacity and finite aggregate budget remain unqualified",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane",
+          "reason": "Observed historical scope rejection supplies a real problem; registry audit has no demonstrated improvement objective. No generated-code execution or unseeded causal claim."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score.",
+          "reobservation": "Carried-forward unresolved owner evidence; this docs slice does not claim a new runtime query or external-owner change."
+        }
+      ],
+      "next_preflight": {
+        "classification": "One future known-task retained-procedure conformance observation; no causal/population improvement, semantic correctness or RSI-admission claim",
+        "baseline": {
+          "instruction": {
+            "path": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\attempt2\\instruction.txt",
+            "raw_sha256": "0b8bbedc0a70c78cccd4112bfb39f7ebcbc1119358f127e2b3184af8134b5720",
+            "text_rule": "UTF-8 universal newline normalization, matching historical worker and normal read_text semantics."
+          },
+          "input": {
+            "path": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\attempt2\\input.json",
+            "raw_sha256": "6dfff3191ed9ea6ac01b8cf4202a921d4cea5aab559b393812f45cbfd10a4266",
+            "keys": [
+              "historical_method",
+              "scope",
+              "verifier_feedback"
+            ],
+            "rule": "Exact original JSON values, including existing verifier_feedback. No edits or answer additions."
+          },
+          "system_prompt": "You are drafting a WRE proposal. Do not claim effects.",
+          "derived_production_prompt_sha256": "63da9f1662865db492fefd01273621613a1bf72b3ce69442f9998218f261f680",
+          "derived_prompt_utf8_bytes": 2601,
+          "historical_rejection": "observed_watermark.strip() was outside strict AST scope and conflicted with opaque-token semantics. One prior failure is not a current rate estimate."
+        },
+        "immutable_inspector": {
+          "path": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\attempt2\\inspect_proposal.py",
+          "sha256": "a6d3d33909f198ea30a7d20cd39496b5cd8dda65dd74f37499a606041a7a1d95",
+          "scope": "Preserve exact AST grammar, signature/return/name checks and call/attribute whitelist. Rebind only owned receipt/raw/input paths for future packet under independent review. No source execution, fixtures or permissive fallback.",
+          "semantic_limit": "AST pass is scope/syntax conformance only. Independent source reviewer may reject obvious contract violations; no generated-code execution or full semantic correctness is claimed."
+        },
+        "single_change_surface": {
+          "key": "input_context.retained_procedure",
+          "baseline_and_disabled": "Key absent; original frozen context otherwise exact.",
+          "treatment": "Copy frozen context and add only this string returned from WRESkillsLoader.load_skill for one owned disposable procedure artifact. Historical skill_content remains immutable.",
+          "artifact_wrapper": "---\ncategory: workflow\npromotion_state: prototype\n---\n",
+          "mutable_body": "At most1024 UTF-8 bytes of reusable procedural guidance. No replacement method, executable code/fences, task answer, new output grammar, judge changes, hidden fixture contents or edits to original instruction/feedback. One candidate only.",
+          "loader": "Use explicit disposable repo_root and registry_path; fixed registry entry/location and wrapper; inject_context=False, enforce_hygiene=True. Freeze exact wrapper/registry and input composition before execution. No production Skillz registration.",
+          "consumer_evidence": "Bind artifact raw SHA, actual loader-returned text SHA and complete derived/rendered prompt SHA. Current filter is pass-through; do not assume metadata is removed.1024-byte bound does not establish token fit."
+        },
+        "acceptance_and_controls": [
+          "Fresh baseline must actually reproduce a strict-inspector rejection under unchanged original task and resources. If it already passes, stop objective-inconclusive; do not degrade it or retry for failure.",
+          "Procedure author sees only frozen original task and admitted development feedback, never evaluator-hidden tasks/answers. Independent reviewer accepts the procedure text before use; no source implementation swap.",
+          "One initial treated use must pass the unchanged inspector and independent static rejection screen. Then retain exactly that procedure artifact outside the terminating child. A later fresh process must read it through the loader and pass the same conformance gate; observe close/usage and exact hashes.",
+          "A separate fresh artifact-disabled control omits retained_procedure and consumes the exact baseline context. If outcomes do not distinguish artifact use, or any necessary call/result is missing or over budget, classify inconclusive. Retention/readback alone is not benefit.",
+          "No generated Python is executed. Passing this known historical method does not establish unseen-task transfer. New input fixtures for the same method remain known-task variants; genuinely unseen evaluator-owned tasks require their own preregistered validators before author exposure.",
+          "Native completion is temperature0.2 with no explicit seed passed. One failure/pass contrast cannot establish causality or a population improvement. Keep this packet limited to observed conformance/retention; any stronger seeded/repeated design needs separate qualification/budget, never silent temperature/model/runtime change."
+        ],
+        "next_execution_gates": [
+          "Finish PR2014 exact-main CI/CodeQL and owned closure; recheck fresh main/peer/owned state and exact source/interpreter/runtime/native/model/profile pins. Historical model hash is a reference, not a new immutable runtime check.",
+          "Reuse existing actual caller/adapter/engine and guarded worker/controller; independently qualify loader fixture/import additions and transparent observation/explicit close. Never run full unrelated master constructors with live collaborators. No DB/provider/network/authority effects.",
+          "Before execution independently freeze all task/author prompts, artifact paths, source/runtime closure, real template identity and full512-output token reservation under2048 context. Actual token-fit may be observed only inside a separately approved initialization budget; no truncation or cap increase.",
+          "Enumerate and cap every model operation explicitly: fresh baseline, one procedure-author allowance if model-authored, initial treated use, fresh retained use and disabled control. At most one of each is a candidate design ceiling, not allocated budget; no automatic retries and stop on unmet gates. Freeze per-call and aggregate time/resource caps before approval.",
+          "Preserve all rejection/error/timeout/cleanup evidence; actual response usage stays separate from eval/sample counts. All previous budgets remain closed."
+        ],
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1",
+          "rationale": "Narrow preparation reuses existing owners; conforming output is important and next-needed, but localized observation has limited impact. Prior14/P1 registry preparation closes objective-inconclusive, not as an improvement success."
+        },
+        "current_source_bindings": {
+          "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py": {
+            "raw_sha256": "de9a627743279f8f7fa701a705048d8e4c54fa60c4f41156b826ec8503e32ae9",
+            "git_blob": "5bb3a7cd747b66139d27f09fa33c384157b1cf6e"
+          },
+          "modules/infrastructure/wre_core/src/local_skill_inference.py": {
+            "raw_sha256": "3f33f058f5003a00a0b8a7b347a1409088e0bb3c8294fad8a32261f1332ee7c0",
+            "git_blob": "7c610c07e3a69a32a269bc00e401ba48dd2aa9c1"
+          },
+          "modules/infrastructure/wre_core/skillz/wre_skills_loader.py": {
+            "raw_sha256": "42f9e18ed50f55c82fd59705b85fe83010888491a01ecb3bf04b549b014ed106",
+            "git_blob": "bc621a8e14bbe53a20398112c8330e5618c228d5"
+          },
+          "holo_index/qwen_advisor/llm_engine.py": {
+            "raw_sha256": "2f550e9d45a5eb13cf4ee5a78828dedc8cc071ded38918e46126cc0f4fd99c31",
+            "git_blob": "71339d4b8c03c62eeadf503d6c6ff4376c46f61b"
+          },
+          "modules/infrastructure/shared_utilities/local_model_selection.py": {
+            "raw_sha256": "81f3967ac1cd75fbc2b5c04093ebe7cd908537fea5955fe877564de74203c74c",
+            "git_blob": "8a3fe70c12fa23f69fa4bd692fc212d2347f1230"
+          },
+          "modules/infrastructure/shared_utilities/local_llm_resolver.py": {
+            "raw_sha256": "468a586148f87ab883a6b9a7d52f064b67dd23a8c5e43810363d389384e888c8",
+            "git_blob": "5708a63a801a85c92d5a98263cd789c68bd836dd"
+          }
+        }
+      },
+      "retrieval": {
+        "method": "Pinned source/NAVIGATION and existing owner docs; historical Holo error retained",
+        "noise": "Prior pending checkpoints are superseded explicitly; no whole-repo dump",
+        "ordering": "Current closure, existing WRE owners, observed failure, then experiment gates",
+        "missing": "No current governed Holo result, new runtime grant or completed independent retained evaluation",
+        "staleness": "Fresh main source parity checked; external owner evidence remains carried forward",
+        "duplication": "Reuse existing caller, loader, inspector and canonical roadmap/backlog; no new module, skill or store"
+      },
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\final-accounting.json": "3985db5d3b5ee4753bc8553f7bdc79341dec08a58b55a6d62be853f2d5ecfa2c",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\hosted-pr.json": "5a8f67d4a19845f7024f9cbcc021695b1d709a6ec3cc94d1fa581ef503665899",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\hosted-main.json": "57fecaca5c1d0bd70fa0743b8c1da3cac3f63f4514e8e208401e35c23bbebc1c",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\hosted-pr-independent-review.json": "8ad7b7586c8690fb6d2f2af54f75edbf8546883baa9ce5b686c7e5b2a4d92620",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\preparation-baseline-assessment.json": "2f4058ce63718c3904b18bee71917d0cda0ac002e1b3f56c97e998aee8271c22",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\proposal-conformance-preflight.json": "5c0f6f1260d8f9ad0e0604d0ed8bb3fbe869121cd14af06dccc9a6fb62aa72e2",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\proposal-conformance-preflight-review.json": "6e1434f79d2f668f1e352f016fecf5b4183e46f62c60a7d9f27123cb3ab5a77c",
+        "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\fresh-main-selection.json": "57f360c7622b45f7bb94c501fbfc5d220031159e7f1493dd33bfc6dc8b1eea01"
+      },
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "model_calls_in_preparation": 0,
+      "authority_limits": [
+        "Documentation and preflight are not runtime authority or allocated model budget.",
+        "Unseeded known-task conformance does not establish semantic correctness, unseen transfer or causal retained improvement.",
+        "No production accounts, active FoundUps, Remote AutoPost, tokens or wallet actions."
+      ]
     }
   }
 }

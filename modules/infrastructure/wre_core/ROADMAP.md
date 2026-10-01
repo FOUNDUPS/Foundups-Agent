@@ -1,3 +1,15 @@
+## Reviewer-authority closure and next RSI test — 2026-10-02
+
+Reviewer-key composition closed in PR #2014 at `44d833c`. Registry-audit experiment
+preparation ended objective-inconclusive; its single deterministic baseline has
+no measured improvement target. Next 13/P1: qualify the frozen proposal-conformance
+preflight using existing caller/loader owners and one disposable procedure-text
+change. No model budget, generated-code execution or native admission is granted.
+Unseeded sampling and the task-specific AST gate limit improvement claims.
+Earlier pending/next-selection entries are historical. See the canonical
+[closure and test checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#reviewer-authority-closure-and-next-rsi-test--2026-10-02)
+and backlog observation `reviewer_authority_closure_20261002` for gates and receipts.
+
 ## Explicit per-call cleanup — 2026-10-01
 
 Existing Qwen engine and WRE adapter now own explicit per-call cleanup. The independently frozen portable selection reproduced22 missing-contract failures (40pass) before repair and passed62/62 after repair, without model/provider/database calls. This closes a resource-ownership contract, not native memory-release proof or RSI admission.

@@ -1,3 +1,38 @@
+## Reviewer-authority closure and next RSI test — 2026-10-02
+
+PR [#2014](https://github.com/FOUNDUPS/Foundups-Agent/pull/2014) is merged and
+verified on main `44d833c02de157d6441599a8c75086329be7099c`. The connected scoped
+reviewer-key path is closed: 198 local cases, eight integrity cases and the Node
+contract passed. PR and main CI each passed 331 portable authority, eight Linux,
+74 correspondence, 308 measurement and 85 caller cases; main CodeQL passed.
+These selections overlap local coverage and must not be added into a unique-case total.
+The Linux selection contains five actual-root cases and three transport compatibility
+cases. The owned branch/worktree were removed after a verified recovery bundle;
+97 peer PR heads, 159 prior worktrees and shared checkout state were preserved.
+Earlier publication-pending entries are historical, not current status.
+
+WSP97 reconciliation closed the proposed registry-audit improvement experiment
+as **objective-inconclusive**: its baseline already uses one deterministic check,
+and no accuracy defect or avoidable cost was demonstrated. No model call was spent.
+The next **13/P1 preparation** (complexity 2, importance 4, deferability 4, impact 3)
+uses the actual prior proposal-conformance failure. Its exact baseline instruction,
+input, strict inspector and current caller/loader/engine identities are frozen.
+Only disposable retained procedure text may change; no generated code is executed.
+Fresh-process retained and artifact-disabled controls are required. The current
+unseeded temperature 0.2 path permits a limited known-task observation, not a causal
+or population-improvement claim. A passing AST check is not semantic verification.
+
+Remaining before a model run: independently qualify the concrete worker/loader
+fixture, refresh exact runtime/model/template bindings, verify prompt capacity and
+allocate a finite aggregate budget. Existing budgets remain closed. Native worker
+admission, authentic reviewer runtime, quorum, sovereign effect permission and
+independent held-out retained benefit remain unresolved. AmIBot stays downstream.
+
+Evidence: canonical backlog observation `reviewer_authority_closure_20261002`;
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/` contains
+`final-accounting.json`, `hosted-pr.json`, `hosted-main.json`, the independent
+reviews and `proposal-conformance-preflight.json`. No new orchestrator or store.
+
 ## Connected reviewer authority composition — 2026-10-01
 
 PR #2013 is merged/main-verified at `c9d1273572d25cf7fccfc98c9c13994e41b913ad`
