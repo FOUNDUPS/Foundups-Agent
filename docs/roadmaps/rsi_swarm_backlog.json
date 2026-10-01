@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_caller_trial_20261001",
-    "base_commit": "4c37297f47e0774d5b380bd06a6b936bfa201550",
-    "selected_action": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
-    "status": "actual_caller_verified_proposal_rejected_reobserve_after_closure",
+    "observation_path": "current_observation.local_engine_lifecycle_20261001",
+    "base_commit": "904459651291db2e724ef4d94cc18d33f0e47f5b",
+    "selected_action": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+    "status": "cleanup_locally_verified_reobserve_after_publication",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-engine-lifecycle\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.native_proposal_caller_20260930"
+    "previous_observation_path": "current_observation.native_caller_trial_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -17287,6 +17287,185 @@
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20260930-rsi-native-caller-trial\\final-accounting.json",
       "publication_status": "Local experiment reviewed; PR/CI/merge/main closure separately recorded."
+    },
+    "local_engine_lifecycle_20261001": {
+      "source": "904459651291db2e724ef4d94cc18d33f0e47f5b",
+      "outcome": "portable_cleanup_contract_verified_publication_pending",
+      "signal_class": "execution_feedback",
+      "measurements": {
+        "baseline": {
+          "tests": 62,
+          "failures": 22,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 40
+        },
+        "candidate": {
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 62
+        },
+        "model_calls": 0,
+        "provider_calls": 0,
+        "database_opens": 0,
+        "retained_gain": null
+      },
+      "test_sha256": "c4ce2ee7655c93e802ccef39c8e4bd23c9d5dbd7e7bcb40a739879a98040789a",
+      "source_file_count": 19,
+      "artifact_hashes": {
+        "test-plan.json": "86b71c688702d8daf1bc73d55b8f9bc64823d6f74191aa0e0aa57160b7147fad",
+        "manifest-baseline.json": "a218ddd5b5e19beb0e740c7a01a25186d272d28f32fee914e16e2d771c6eef50",
+        "manifest-candidate.json": "3b87a19bc7d58bf66d4934b902b96779772f68f2883169525c2deca3ab739b5e",
+        "execution-review-baseline.json": "b1c94c8e0d3cde3c84447e8ae168e33ba0f210fa1603a18ce9f50531d520b1db",
+        "execution-review-candidate.json": "7c89e646cedd4becdbdad80090b8d52fb5048cdfd6d2973660fbd06df5ef8fb2",
+        "baseline/receipt.json": "f74c4d254b325c85a0e40e9b586050745af6cf6d2fbbb733804225f73a22201a",
+        "candidate/receipt.json": "c2806bb1e60437d6fcf10bfef2c62df65f949ad8ff46c5b06487dc4735e509ce",
+        "lifecycle-contract-review.json": "448aaf3461e397997c75ec43f3ce89a11a2d1582d1112f00272fa581305bcbca",
+        "result-review.json": "26bef18073609d57ca7c1b4326280a0ab8cd998402742eab4a9b42dcf9c83106",
+        "next-action-review.json": "418e5f67891921a647ba295fa16d02d52bddc190a7a9ecd159676033cbbb24a4"
+      },
+      "audit_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-engine-lifecycle",
+      "limits": [
+        "Fake native resources; no native memory-release proof.",
+        "Not admitted autonomous RSI or independent held-out benefit.",
+        "Pre/post source hashes are sampled observations."
+      ],
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "locally_qualified_publication_pending",
+          "reason": "Frozen62 portable cases passed:35 retained caller plus27 lifecycle cases; baseline40/22 matched. Native heap/destructor/runtime compatibility not measured. Publication and exact-main verification pending."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it."
+        },
+        {
+          "task": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "reobserve_required_after_current_publication",
+          "reason": "The caller and explicit per-call ownership layers now have finite evidence. Existing authority owners already exist, but resident use-time resolution deliberately returns no effect-use lease and semantic readiness keeps three missing generation dependencies. A narrow non-consuming supplier/consumer map can identify the exact missing owner handoff without another model call, duplicated store, or repeated predicate tests."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        }
+      ],
+      "next_action": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "prior_closure": {
+        "pr": 1997,
+        "merge": "904459651291db2e724ef4d94cc18d33f0e47f5b",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-engine-lifecycle\\final-accounting.json",
+      "publication_status": "pending_exact_head_checks_and_owned_closure",
+      "verification": "Separate test author and independent source/execution/result reviewer; result-review.json binds exact observed baseline/candidate receipts. Not independent native runtime witnessing.",
+      "next_action_prerequisites": [
+        "Current lifecycle candidate must complete publication/main verification and closure; refresh only changed source/doc bindings on fresh main.",
+        "Bind exact selected queue item, source/runtime-root identity, intended effect kind and request-digest contract from existing owners; if none authorized, record absent rather than invent one.",
+        "Map authentic external signer/grant-provider, current-generation authority, durable replay-store identity and trust evidence without invoking constructors, issue/lease/resolve/consume, socket probes or runtime reads that may consume state.",
+        "Any later runtime or integration experiment needs its own exact source/effect review and applicable owner authorization. No such budget is granted here."
+      ],
+      "next_action_limits": [
+        "Planning only; execution_approved=false.",
+        "No model/provider/DB/WSL/service calls, native admission, signing request issuance, replay consumption, lease grants or production edits.",
+        "Source support and synthetic regression results do not establish authentic runtime authority, retained learning or autonomous RSI."
+      ]
     }
   }
 }

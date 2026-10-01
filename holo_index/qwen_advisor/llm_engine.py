@@ -73,6 +73,18 @@ class QwenInferenceEngine:
         self.llm = None
         self._initialized = False
 
+    def close(self) -> None:
+        """Release this owner's model; generation retains it until explicit close."""
+        model = self.llm
+        self.llm = None
+        self._initialized = False
+        if model is not None:
+            try:
+                model.close()
+            except Exception as exc:
+                _log_error_type("Qwen model cleanup failed", exc)
+                raise RuntimeError("Qwen model cleanup failed") from None
+
     def initialize(self) -> bool:
         """
         Initialize the LLM model.

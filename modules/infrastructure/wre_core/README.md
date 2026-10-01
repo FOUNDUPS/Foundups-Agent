@@ -1,3 +1,12 @@
+## Local proposal lifetime
+
+Each WRE local proposal call now explicitly closes the engine it constructs.
+Cleanup failure makes the proposal unavailable. Direct Qwen engine clients
+retain reuse and must explicitly call `close()` when finished. See the
+[ownership contract](INTERFACE.md#explicit-local-model-ownership--2026-10-01).
+Portable tests cover this lifecycle; runtime admission and native memory
+release remain separate qualifications.
+
 ## Qualified native-chat proposal option
 
 The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
