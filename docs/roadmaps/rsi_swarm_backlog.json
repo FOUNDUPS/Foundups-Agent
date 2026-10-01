@@ -20459,6 +20459,19 @@
           "linux_executed": false,
           "cause": "Portable CI audit resolved a descriptor-relative lock as a repository path; reuse existing descriptor-aware observer without changing production/oracles",
           "evidence_sha256": "c3478df792593638eecdefe393182cda75640f4bbf8611119462f08c440293b1"
+        },
+        "second_hosted_attempt": {
+          "run_id": 36889849091,
+          "portable_passed": 331,
+          "linux_passed": 3,
+          "linux_failed": 5,
+          "cause": "Linux test guard misinterpreted confined SQLite read-only file URIs as plain paths; all five positive gates failed before negative mutations",
+          "evidence_sha256": "72150320d87384c9e4d695d2ee1353dd102cb81af486a691545304658baf68b4"
+        },
+        "uri_guard_cases": {
+          "passed": 20,
+          "plane": "Local non-root WSL pure path decoder only; no SQLite/root-owner execution",
+          "receipt_sha256": "f12cc8abe3eaec63c3bf3dcbc06ab67ab8706ede0bf649863610f0c94471c3b3"
         }
       },
       "authority_limits": [

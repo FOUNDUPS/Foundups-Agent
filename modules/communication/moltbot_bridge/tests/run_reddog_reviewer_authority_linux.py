@@ -11,6 +11,7 @@ import sys
 import tempfile
 import types
 import xml.etree.ElementTree as ET
+from urllib.parse import unquote, urlsplit
 
 _OPEN_TARGET = ContextVar("reviewer_fixture_open_target", default=None)
 
@@ -90,8 +91,11 @@ def _install_guard(repo, base, output, sources):
         if event == "import" and str(args[0]).split(".")[0] in {"openai", "anthropic", "requests", "httpx", "llama_cpp", "torch", "transformers", "dotenv", "psycopg", "psycopg2"}:
             deny("provider_import")
         if event == "sqlite3.connect":
-            path = Path(args[0]).resolve()
-            if not path.is_relative_to(base) or len(databases) >= 256:
+            try:
+                path = _database_path(args[0], base)
+            except (TypeError, ValueError):
+                deny("unqualified_database")
+            if len(databases) >= 256:
                 deny("unqualified_database")
             databases.append(str(path))
         if event == "open" and isinstance(args[0], (str, bytes)):
@@ -117,6 +121,24 @@ def _install_guard(repo, base, output, sources):
             deny("external_chdir")
     sys.addaudithook(guard)
     return blocked, databases, _observe_open_targets()
+
+
+def _database_path(value, base):
+    if type(value) is not str or value == ":memory:":
+        raise ValueError("invalid_database_target")
+    raw = value
+    if raw.startswith("file:"):
+        uri = urlsplit(raw)
+        if uri.netloc or uri.query != "mode=ro" or uri.fragment:
+            raise ValueError("noncanonical_database_uri")
+        path = Path(unquote(uri.path)).resolve()
+        if raw != path.as_uri() + "?mode=ro":
+            raise ValueError("noncanonical_database_uri")
+    else:
+        path = Path(raw).resolve()
+    if not path.is_relative_to(base):
+        raise ValueError("external_database")
+    return path
 
 
 def _observe_open_targets():
