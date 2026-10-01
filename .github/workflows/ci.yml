@@ -186,6 +186,16 @@ jobs:
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[extra]',
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[missing]',
           ]
+          # Retain the existing structural gates alongside domain/binding controls.
+          nodes += [
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_modules_have_no_shell_network_or_key_generation_imports',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_consensus_modules_remain_bounded_lego_components',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_consensus_test_modules_are_bounded_lego_components',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_test_only_downstream_consensus_never_enters_production_sources',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_production_runtime_does_not_compose_unsigned_elevated_sources',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_modified_runtime_host_functions_do_not_add_wsp62_debt',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py::test_touched_legacy_runtime_hosts_do_not_exceed_base_debt',
+          ]
           args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
               '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
               '--junitxml='+str(D/'results.xml')]
@@ -197,7 +207,7 @@ jobs:
           unexpected=[x for x in blocked if x['event']!='os.symlink']
           receipt={'returncode':status,'counts':counts,'exact_cases':exact,'hashes_stable':before==after,
               'blocked_events':blocked,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
-              'limits':['Python audit constraints, not OS isolation.','Domain controls and pure effect binding; no issued effect lease or RSI benefit.']}
+              'limits':['Python audit constraints, not OS isolation.','Domain, pure binding and structural controls; no issued effect lease or RSI benefit.']}
           (D/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({k:receipt[k] for k in ('counts','exact_cases','hashes_stable')}))
           raise SystemExit(status or (2 if unexpected or not exact or before!=after or counts['skipped'] else 0))

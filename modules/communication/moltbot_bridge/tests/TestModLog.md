@@ -1,3 +1,23 @@
+## Existing consensus structural gates — 2026-10-01
+
+Closed the previously recorded201-line helper debt by removing one blank line
+from `reddog_elevated_consensus_e2e_support.py`; AST unchanged, now200 lines.
+The test oracle `test_reddog_elevated_authority_consensus_structure.py` is
+unchanged. Direct invocation of its seven stdlib-only static functions gave
+baseline6 pass/1 size failure, candidate7 pass/0 fail, stable source samples.
+No pytest collection, test helper import, signing or runtime invocation occurred
+locally. Reproduce with the receipt-bound `observe_and_check.py` in the audit
+directory; baseline/candidate receipts preserve function names and source hashes.
+
+Existing CI now includes the seven exact structure nodes alongside the unchanged
+11 domain and32 binding cases, retaining its source/audit/XML checks (50 total).
+Hosted execution is pending. These structural checks do not establish authentic
+approval, worker admission or retained RSI benefit. PR#2003's prior43-case PR
+and main runs passed; its initial manifest failure remains historical evidence.
+
+WSP5/6/15/22/50/62/84/97. Evidence:
+`O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/`.
+
 ## 2026-10-01 — Pure binding publication integrity repair
 
 PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but

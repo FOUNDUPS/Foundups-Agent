@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_target_binding_20261001",
-    "base_commit": "252f700fbac4c4adb98f3dd81c3d05eadb8fce66",
-    "selected_action": "Qualify authentic effect-approval provenance and exact binding consumption in existing consensus owners",
-    "status": "pure_binding_locally_qualified_publication_pending",
+    "observation_path": "current_observation.consensus_structure_20261001",
+    "base_commit": "28ee19a4ec574986cadea79798a33edbe4bb18fe",
+    "selected_action": "Qualify the explicit HIGH/worktree_create effect-approval producer and resolver contract in existing owners",
+    "status": "structure_locally_validated_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-consensus-structure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_proof_design_20261001"
+    "previous_observation_path": "current_observation.effect_target_binding_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16975,7 +16975,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -17013,7 +17013,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -17024,7 +17024,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -17050,7 +17050,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper\u2192adapter\u2192engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",
@@ -18484,6 +18484,302 @@
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding\\final-accounting.json"
+    },
+    "consensus_structure_20261001": {
+      "base": "28ee19a4ec574986cadea79798a33edbe4bb18fe",
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "selected": "Close existing consensus structure debt and retain all seven gates in existing CI",
+      "wsp15": {
+        "complexity": 1,
+        "importance": 2,
+        "deferability": 2,
+        "impact": 2,
+        "total": 7,
+        "priority": "P3"
+      },
+      "execution_plane": "development_time_deterministic_static_checks_not_native_WRE",
+      "prior_closure": {
+        "pr": 2003,
+        "head": "81b3442557616de639343081d9ec24f67ea08aba",
+        "merge": "66ba2d6475baff4eff2e1763b3ccd643b3f33695",
+        "state": "merged_main_verified_owned_lane_closed",
+        "receipt_sha256": "286d1d91e5ec0a9e590a8deaf16da272c97ea05931f32a19fd768cf0b7a4b369"
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Last query failed authority-root/head mismatch, UNKNOWN/index gap; unchanged query host confirmed. No repeated probe this slice; current semantic freshness remains unverified.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport and strict-decoder qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "No accepted new strict-decoder/backend evidence or authentic owner/requester handoff supplied; do not repeat unchanged rejected backend audit.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify authentic effect-approval provenance and exact binding consumption in existing consensus owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "source_qualification_complete_integration_blocked",
+          "reason": "Independent pinned-source review found pure B APIs without production consumer; approval resolvers are injected protocols and constructors are test fixtures. Real verifier does not supply authentic issuance. Requires explicit trusted producer/resolver contract before integration; no installed-runtime absence claim.",
+          "effort_cost_verification": "Bounded exact-source trace and independent finite checks first; no paid calls, signing, stores or activation without separately admitted scope.",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify the explicit HIGH/worktree_create effect-approval producer and resolver contract in existing owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "next_contract_qualification_after_closure",
+          "reason": "Scoped source review identified the missing provenance/consumer seam. Specify exact B/P/T/E evidence, trusted resolver ownership and independent grant-boundary verification before source integration; no credentials or activation.",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Bounded existing-interface contract qualification and independent review; no new orchestrator or runtime authority."
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "Exact PR/main checks and full85-case hosted caller suite verified; owned lane retired with recovery bundle. Native release/admission/retention not claimed.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "Separate dependency owners"
+        },
+        {
+          "task": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2000 source map merged/main verified and owned lane retired; preserved closure receipts.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2001:11/11 local and exact PR/main cases;10 PR checks and main CI/CodeQL passed. Owned lane closed. No worker admission or retained gain.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2002 closed at252f700 with exact PR/main CI+CodeQL and owned cleanup.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2003 merge66ba2d6, ten PR checks and main CI/CodeQL successful, exact43 domain/binding cases; owned closure receipt verified.",
+          "effort_cost_verification": "Two existing source files, one existing test owner, existing CI harness; deterministic tests/no paid model or provider calls; independent API/oracle/source/result review",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Close pre-existing consensus test helper size debt",
+          "ownership": "consensus test owner",
+          "effort_cost_verification": "One formatting deletion plus existing CI selection; no production code, new test oracle or paid provider.",
+          "total": 7,
+          "state": "locally_validated_publication_pending",
+          "reason": "One blank line removed, helper AST unchanged; direct invocation of same7 static functions baseline6pass/1fail to candidate7pass. Existing CI now retains7 nodes plus43 unchanged controls; hosted50 pending.",
+          "dimensions": [
+            1,
+            2,
+            2,
+            2
+          ],
+          "priority": "P3"
+        }
+      ],
+      "selected_next": {
+        "task": "Qualify the explicit HIGH/worktree_create effect-approval producer and resolver contract in existing owners",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "scope": "Existing-owner contract qualification only; not runtime integration or issuance"
+      },
+      "validation": {
+        "baseline": {
+          "passed": 6,
+          "failed": 1
+        },
+        "candidate": {
+          "passed": 7,
+          "failed": 0
+        },
+        "execution": "Direct invocation of seven existing stdlib-only static test functions; not pytest collection",
+        "test_oracle_unchanged": true,
+        "helper_ast_unchanged": true,
+        "ci_selected_cases": 50,
+        "hosted_status": "pending",
+        "runtime_admitted": false,
+        "retained_gain": null
+      },
+      "retrieval": {
+        "method": "Pinned source, NAVIGATION and existing module docs",
+        "last_known_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "query_host": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "repeated_probe": false,
+        "semantic_freshness": "unverified",
+        "quality": "Historical checkpoint noise reconciled against receipts; must-include source/docs used, no duplicate owner; absent requirements/memory docs not created"
+      },
+      "independent_source_review": "Existing event_store_source_review agent, exact28ee19a; read-only, no tests/runtime. Qualified source gap only.",
+      "owner_reconciliation": {
+        "shared_checkout": "preserved",
+        "peer_pr_heads": 96,
+        "protected": "eSingularity/YUMORI, external AutoPost and all other worktrees"
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-consensus-structure",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-consensus-structure\\final-accounting.json"
     }
   }
 }
