@@ -86,7 +86,7 @@ def test_consensus_modules_remain_bounded_lego_components() -> None:
 
 
 def test_consensus_test_modules_are_bounded_lego_components() -> None:
-    assert len(TEST_MODULES) == 19
+    assert len(TEST_MODULES) == 20
     for path in TEST_MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name

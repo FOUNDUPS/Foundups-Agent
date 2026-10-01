@@ -1,3 +1,22 @@
+## Real Ed25519 effect-review qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_crypto.py` adds 6 independently
+authored cases using disposable in-memory keys and the real public verifier.
+Each case asserts the backend was called with an independently serialized exact
+preimage. One valid signature accepts; payload/signature/key tampering, delegated
+prefix and unrelated-message signatures reject. Private keys are never serialized.
+Missing cryptography fails collection; CI explicitly installs 46.0.7. This extends
+the earlier 82 recording-verifier controls without changing their meaning.
+
+Local reviewed 95-case command: qualified Python `-I -S -B` runs
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-implementation/execute_tests.py candidate`;
+the controller invokes the 90-second `-I -B` runner with frozen exact node IDs.
+Results: 95 passed,0 failures/errors/skips; source samples stable, no unexpected
+guard denials or database opens. Python audit constraints are not OS isolation.
+Hosted 228 selection/publication receipts are separate. Supplied resolver records
+remain synthetic; real test signatures do not authenticate production provenance,
+the planned inner designation, quorum, worker admission or retained RSI benefit.
+
 ## Effect-review verifier qualification — 2026-10-01
 
 The new effect-review test siblings freeze 82 connected cases with recording
