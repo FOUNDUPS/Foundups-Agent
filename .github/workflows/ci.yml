@@ -150,6 +150,42 @@ jobs:
 
           import pytest
           nodes=['modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_contract_security.py::test_effect_lease_request_preserves_distinct_consensus_domain[HIGH]', 'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_contract_security.py::test_effect_lease_request_preserves_distinct_consensus_domain[ULTRA]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[HIGH-missing]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[HIGH-foreign_mapping]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[ULTRA-missing]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[ULTRA-foreign_mapping]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_elevated_client_rejects_effect_role_before_provider_lease[HIGH]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_elevated_client_rejects_effect_role_before_provider_lease[ULTRA]', 'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py::test_delegated_request_pair_matches_without_authority_issuance', 'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py::test_effect_request_cannot_replace_delegated_child[principal]', 'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py::test_effect_request_cannot_replace_delegated_child[reddog]']
+
+          # Frozen pure binding controls; retain the original eleven domain controls.
+          nodes += [
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_golden_projection_and_no_mutation',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[mapping]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[operation]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[work_order_id]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[work_order_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[boolean_time]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[future]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[identity_bound]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[authority_bound]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_parent_mismatch[expired]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[proof]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[ultra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[target_mapping]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[expected_subclass]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[proof_key]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[boolean_now]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_target_shape[live_enqueue]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[requester]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[key]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[generation]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[replay]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[nonce]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[lifetime]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[bool_int]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_expected_target_substitution[float_int]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[None]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[schema_version]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[parent_authority_request_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[target_signing_request_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[effect_request_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_canonicalization.py::test_effect_binding_rejects_supplied_binding_substitution[missing]',
+          ]
           args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
               '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
               '--junitxml='+str(D/'results.xml')]
@@ -157,11 +193,11 @@ jobs:
           after=bindings();xml=ET.parse(D/'results.xml').getroot()
           cases=list(xml.iter('testcase'))
           counts={k:sum(int(s.get(k,0)) for s in xml) for k in ('tests','failures','errors','skipped')}
-          exact=len(cases)==11 and {x.get('name') for x in cases}=={n.split('::',1)[1] for n in nodes}
+          exact=len(cases)==len(nodes) and {x.get('name') for x in cases}=={n.split('::',1)[1] for n in nodes}
           unexpected=[x for x in blocked if x['event']!='os.symlink']
           receipt={'returncode':status,'counts':counts,'exact_cases':exact,'hashes_stable':before==after,
               'blocked_events':blocked,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
-              'limits':['Python audit constraints, not OS isolation.','Negative/domain controls; no issued effect lease or RSI benefit.']}
+              'limits':['Python audit constraints, not OS isolation.','Domain controls and pure effect binding; no issued effect lease or RSI benefit.']}
           (D/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({k:receipt[k] for k in ('counts','exact_cases','hashes_stable')}))
           raise SystemExit(status or (2 if unexpected or not exact or before!=after or counts['skipped'] else 0))

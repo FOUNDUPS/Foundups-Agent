@@ -6,8 +6,11 @@ from typing import Any
 
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
     CONSENSUS_SCHEMA_VERSION,
+    EFFECT_TARGET_BINDING_SCHEMA_VERSION,
     ElevatedAuthorityConsensusReceipt,
+    canonical_authority_request_digest,
     canonical_consensus_receipt_digest,
+    canonical_json_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_policy import (
     AuthorRuntimeEvidence,
@@ -119,4 +122,59 @@ def _sovereign_matches(evidence: Any, request: Any, digest: str, now: int) -> bo
     return evidence.expires_at > now and all(left == right for left, right in expected)
 
 
-__all__ = ["author_runtime_evidence_matches", "consensus_receipt_matches"]
+def build_effect_target_binding(*, parent, target, expected_target, now) -> dict[str, str] | None:
+    """Correlate pure HIGH/worktree data; authenticate neither parent nor target."""
+    from .reddog_signer_delegated_authority_runtime import (
+        DelegatedAuthorityRuntimeRequest, SigningRequest, delegated_authority_tier,
+    )
+    from .reddog_authoritative_use_lease_contract import validate_authoritative_use_lease_request
+    from .reddog_signer_secret_access_grant_contract import signer_secret_access_request_digest
+
+    try:
+        if (type(parent) is not DelegatedAuthorityRuntimeRequest or type(target) is not SigningRequest
+                or type(expected_target) is not dict or type(now) is not int):
+            return None
+        if parent.requested_operation != "worktree_create" or delegated_authority_tier(parent) != "HIGH":
+            return None
+        times = (parent.issued_at, parent.identity_expires_at, parent.work_authority_expires_at)
+        if not all(type(value) is int for value in times) or not times[0] <= now < min(times[1:]):
+            return None
+        if target.authority_tier != "HIGH" or target.elevated_consensus_proof is not None:
+            return None
+        target_payload = target.to_dict()
+        if "elevated_consensus_proof" in target_payload:
+            return None
+        payload = validate_authoritative_use_lease_request(target, now_epoch=now)
+        if payload is None or payload["effect_kind"] != "worktree_create":
+            return None
+        effect = payload["effect_payload"]
+        if (effect["work_order_id"] != parent.work_order_id
+                or effect["work_order_digest"] != parent.work_order_digest
+                or payload["expires_at"] > min(times[1:])):
+            return None
+        if canonical_json_digest(target_payload) != canonical_json_digest(expected_target):
+            return None
+        return {
+            "schema_version": EFFECT_TARGET_BINDING_SCHEMA_VERSION,
+            "parent_authority_request_digest": canonical_authority_request_digest(parent),
+            "target_signing_request_digest": signer_secret_access_request_digest(target_payload),
+            "effect_request_digest": payload["effect_request_digest"],
+        }
+    except Exception:
+        return None
+
+
+def effect_target_binding_matches(binding, *, parent, target, expected_target, now) -> bool:
+    """Recompute all binding fields; supplied digests confer no authority."""
+    if type(binding) is not dict or not all(type(value) is str for value in binding.values()):
+        return False
+    expected = build_effect_target_binding(
+        parent=parent, target=target, expected_target=expected_target, now=now,
+    )
+    return expected is not None and binding == expected
+
+
+__all__ = [
+    "author_runtime_evidence_matches", "consensus_receipt_matches",
+    "build_effect_target_binding", "effect_target_binding_matches",
+]

@@ -1,3 +1,25 @@
+## 2026-10-01 — Pure HIGH/worktree effect binding
+
+Static validation: registry current (1661 files,269 quarantined); source checks
+and changed-file bounds pass. The global test-module size check still fails on
+untouched `reddog_elevated_consensus_e2e_support.py` (201 lines at base and
+current against200). Recorded separately at7/P3; no gate weakened.
+
+- Froze 32 new cases in the existing canonicalization owner before production
+  implementation. Preserved the original four cases byte-for-byte and excluded
+  them locally because their fixture invokes a signing helper. The prior
+  31-case plan remains archived; independent review added valid HIGH/live_enqueue
+  rejection with a recomputed digest and exact expected target.
+- Recorded independent golden P/T/E/B data and inert fixtures. Baseline: 32
+  expected missing-API failures, zero errors/skips. Candidate: 32 passed, zero
+  failures/errors/skips, same IDs and bytes. Stable source samples, no unexpected
+  denials and zero SQLite opens. No independent second execution is claimed.
+- Added pure construction/correlation in existing owners; no authenticated
+  producer, grant/permit adaptation, signing, effect consumption or native
+  admission. Hosted checks and publication remain pending; no RSI gain claim.
+- WSP00/5/6/11/15/22/50/84/97. Frozen oracles, original XML/receipts and independent
+  source/execution gate: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
 ## 2026-10-01 — Effect-lease domain qualification
 
 Hosted attempt [CI36803912390](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36803912390)
