@@ -1,3 +1,42 @@
+## Nemotron metadata qualified — 2026-10-02
+
+Source `7c44c724bc1b61c0dea49c6488a2250083a32588`. The already installed alternative
+received one independently reviewed metadata-only diagnostic. Only the reader's
+fixed model path and size changed; existing Windows identity helpers and all caps
+were retained. Prior 15 generic fixtures transfer for unchanged code; they were
+not rerun or counted as new tests.
+
+| Verified observation | Result |
+|---|---|
+| Metadata invocation | 1 returned successfully; 2.485s; descriptor closed |
+| Read / seek-skipped / metadata end | 3,216,492 / 4,654,580 / 7,871,072 bytes |
+| Declared metadata / tensors | 48 keys / 401 tensors; tensors not validated |
+| Saved template | 10,152 UTF-8 bytes; SHA 82753bef5cedc4932c1ed509b5c9a12be680fd86d1adb65bc3f7398d11c8eebc |
+| New fixture runs / native loads / generations / renders / provider requests | 0 / 0 / 0 / 0 / 0 |
+
+Independent review reconciled counts, bounds and identity/closure evidence. The
+one-read allowance is closed. Metadata declares `nemotron_h_moe` and file type15;
+these labels do not establish native support, available capacity or coding quality.
+
+The saved template explicitly consumes `enable_thinking=False` and selects a
+ChatML assistant prefix with an empty `<think></think>` block. Provided system
+text stays in the system role; no date helper appears. This is a better source fit
+for WRE's existing control than the previously inspected GPT-OSS template, but it
+is **not yet an executed formatter or model result**.
+
+**Next WSP15: 13/P1 (C2/I4/D4/Impact3).** Reuse the existing model-free
+`check_native_handler.py` diagnostic from the native-caller audit. Bind current
+engine/installed-source bytes and this saved template; preserve four fit/error
+controls, with at most two separately reviewed thinking-mode controls. Previous
+synthetic-template passes do not certify this template. No new runtime adapter is
+needed for this test. Actual model support/load, tokenizer fit and coding quality
+remain later gates; no model-call budget or native admission is allocated.
+
+Evidence: backlog `nemotron_metadata_qualification_20261002`,
+`O:/Foundups-Agent-audits/20261002-rsi-nemotron-metadata/`, and the bound reader
+packet under the preceding audit's `nemotron-preparation/` directory. No retained
+RSI benefit is demonstrated. Earlier checkpoints below are historical.
+
 ## Worker metadata reader qualified — 2026-10-02
 
 Source `d425b1ed0cec9a921fe5bb0afb294bc646457e0d`. The metadata prerequisite now
