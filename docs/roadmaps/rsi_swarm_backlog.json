@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.retained_procedure_comparison_20261002",
-    "base_commit": "bbc517468c9b777d8a4ea9837aa09d69a682ba4c",
-    "selected_action": "Qualify one different installed worker artifact against existing runtime owners",
-    "status": "guided_case_rejected_next_worker_metadata_only",
+    "observation_path": "current_observation.worker_metadata_qualification_20261002",
+    "base_commit": "d425b1ed0cec9a921fe5bb0afb294bc646457e0d",
+    "selected_action": "Qualify the already inventoried Nemotron artifact with the existing bounded metadata reader",
+    "status": "metadata_reader_qualified_next_installed_worker_metadata_only",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\closure\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\closure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.proposal_conformance_baseline_20261002"
+    "previous_observation_path": "current_observation.retained_procedure_comparison_20261002"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -21333,6 +21333,314 @@
         "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\parser-receipt.json": "dff3cd2474344332dcc030a6b70ad19a010b74e6128a2759ce7cc2c87042f1ed",
         "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\parser.stderr": "c9c707d66c1e3b3174f1b047296ae850a2dad39cca7bf678ac99702276040592",
         "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\initial-treated\\final-result-review.json": "44ce51a1d17e6c8809ba859da1e622f04dd180e0cb088a9a016a6fe9a3e3a8a2"
+      }
+    },
+    "worker_metadata_qualification_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "d425b1ed0cec9a921fe5bb0afb294bc646457e0d",
+      "status": "bounded_metadata_complete_worker_compatibility_unqualified",
+      "previous_observation": "current_observation.retained_procedure_comparison_20261002",
+      "classification": "BOUNDED_METADATA_READ_COMPLETED_COMPATIBILITY_UNQUALIFIED",
+      "scope": "Developer diagnostic using the existing Windows verified-file owner; no production runtime changes or native autonomous admission.",
+      "repair": {
+        "owner": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_windows.py",
+        "functions": [
+          "open_windows_verified_regular_file",
+          "validate_windows_file_descriptor",
+          "validate_windows_file_descriptor_exact_path"
+        ],
+        "cross_api_identity": [
+          "st_dev",
+          "st_ino",
+          "st_size",
+          "st_mtime_ns",
+          "st_nlink"
+        ],
+        "same_api_identity": "Full path snapshots and full descriptor snapshots checked separately, retaining ctime and birthtime checks.",
+        "reason": "Earlier stat-only evidence showed unequal path/descriptor ctime values but stable same-API pairs. This does not retrospectively prove the original failed attempt cause or file immutability.",
+        "preexecution_findings": "Independent review caught an optimization-sensitive launcher guard and bytecode-cache read attempts; explicit interpreter guard and whole hash-bound trusted-source loading repaired them before execution.",
+        "parser_unchanged": "Reader and inspect AST match the previous bounded parser; no acceptance or read cap widened."
+      },
+      "experiment": {
+        "fixture_invocations": 1,
+        "fixture_passed": 15,
+        "fixture_failed": 0,
+        "fixture_actual_owner_opens": 6,
+        "fixture_wall_seconds": 0.156,
+        "metadata_invocations": 1,
+        "metadata_wall_seconds": 4.515,
+        "metadata_read_bytes": 5195563,
+        "metadata_seek_skipped_bytes": 7783825,
+        "metadata_end_offset": 12979388,
+        "metadata_keys_declared": 33,
+        "tensors_declared": 459,
+        "selected_fields_retained": 14,
+        "array_items_skipped": 848365,
+        "output_bytes": 19985,
+        "template_utf8_bytes": 15934,
+        "template_sha256": "f8d9255777615591a7cc1a7c932f5a69e181128902295e1b81221d20d983cac7",
+        "same_api_snapshots_stable": true,
+        "descriptor_closed": true,
+        "reviewed_source_pre_post_match": true,
+        "model_initializations": 0,
+        "generations": 0,
+        "tokenizer_calls": 0,
+        "template_renders": 0,
+        "provider_requests": 0,
+        "full_model_hashes": 0,
+        "zero_count_provenance": "Reviewed diagnostic call graph, not native instrumentation",
+        "budget_state": "fixture and metadata allowances consumed and closed; no automatic retry"
+      },
+      "artifact_declarations": {
+        "architecture": "gpt-oss",
+        "name": "Openai_Gpt Oss 20b",
+        "file_type_id": 38,
+        "declared_context_length": 131072,
+        "tokenizer_model": "gpt2",
+        "tokenizer_pre": "gpt-4o"
+      },
+      "compatibility": {
+        "template_control": "Stored GPT-OSS template does not reference enable_thinking and defaults reasoning_effort to medium. WRE supplies enable_thinking=False, not reasoning_effort.",
+        "output_conversion": "Inspected generic converter copies completion text into content without observed Harmony final-channel extraction. No actual generated-channel failure is claimed.",
+        "native_support": "Installed constants declare file type38/MXFP4; declarations do not establish compiled architecture/kernel support or a successful load.",
+        "qualification": "Unqualified: no template render, tokenizer fit, model load or coding capability test performed."
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner"
+        },
+        {
+          "task": "Qualify the already inventoried Nemotron artifact with the existing bounded metadata reader",
+          "dimensions": [
+            2,
+            4,
+            5,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "selected_metadata_preparation_only",
+          "dependency": "Separate exact path/size packet and independent review; no model load, generation, server mutation or provider request",
+          "ownership": "Existing local_model_selection, WRE adapter and AI Gateway owners"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner"
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners"
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane"
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator"
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane"
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator"
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners"
+        }
+      ],
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "next_step": "Qualify the already inventoried Nemotron artifact with the existing bounded metadata reader",
+      "next_scope": {
+        "allowed": [
+          "Prepare a separately reviewed exact path/size packet for the already inventoried Nemotron file",
+          "Reuse the bounded metadata reader and existing Windows identity owner",
+          "Compare saved architecture/template metadata against existing runtime owners"
+        ],
+        "denied": [
+          "Model loading or generation",
+          "Template execution without separate qualification",
+          "Downloads, paid calls or server mutation",
+          "Production routing changes",
+          "New model-specific orchestrator or decoder",
+          "Relaxing task acceptance criteria"
+        ]
+      },
+      "selection_rationale": "C2/I4/D5/Impact3=14/P1: inexpensive existing-reader reuse addresses the worker prerequisite. GPT-OSS-specific qualification is deferred11/P2 because visible control/channel questions remain even after rendering. Neither Nemotron filename nor size certifies compatibility; higher admission/Holo rows remain owner-blocked.",
+      "effort_cost": "One bounded metadata preparation/read after independent review; zero model/provider allocation. No promised capability gain.",
+      "retrieval": {
+        "method": "Pinned source/NAVIGATION, actual owner docs, current receipts, saved template and relevant installed formatter source",
+        "noise": "Historical failed reader and prior model proposals separated from this completed metadata experiment",
+        "ordering": "Exact main and ownership, existing Windows owner, disposable fixtures, bounded read, independent result review, compatibility assessment",
+        "missing": "Current governed Holo result, whole-model identity, runtime/load fit, accepted worker candidate, retained benefit",
+        "staleness": "Source d425b1ed; retained Holo host0c81418/authority83b0689 mismatch unchanged. Higher blocked rows carried forward, not re-certified.",
+        "duplication": "Existing handle helpers and parser reused; six canonical documents updated, no new production module/skill/report store."
+      },
+      "limits": [
+        "Metadata declarations are untrusted, not full model identity or complete tensor validation.",
+        "Sampled identity checks do not prove immutable contents or future stability.",
+        "Python audit guards and postcapture limits are not an OS sandbox or memory isolation.",
+        "Independent result review checked receipts/source, not an independent reread of original model bytes.",
+        "No model capability, accepted generated code, retained benefit, native RSI admission, FoundUp launch or deployment demonstrated.",
+        "YUMORI/eSingularity, Remote AutoPost and external-account lanes remain untouched."
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\selection.json": "0fb21724286bb112806ec59c1e92497e0fa95509ed906c1167e6c0e21fd231b9",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\identity-composition-review.json": "95888d7deb363d8b4e8ee794c6aa11c617fd49efa26203a6dad1246b5fbad3f5",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\fixture-source-findings.json": "d1971f3bca31f1a4552bbcaac04a4380e38742f692ba324a0d10ffc31a85d714",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\inspect_metadata.py": "925a99e7b4ca7d0109e61ed61275493cf654412d5cf026207a9ee7db92936cb9",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\fixture_checks.py": "df459704cf29eb8d2466b8741bf71d4b3d17eab356141a0fa672f70585893723",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\run_once.py": "b7b667b34e39c015d103ca11d1fd7c60785f8c0a66fbdbbac348ba2bdd909df9",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\plan.json": "f0fa86665c3282ca4bf159057c7fede9517fb065d23d922a2f2a22351e2581de",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\fixture-execution-review.json": "eb723ec24d5d30432cebee157bdeb6c838afdcbf99e948a3cbb4c368415077c8",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\fixture-receipt.json": "c8d0584fbf17b1573647d86db26c15d88df6947f81cb0e8e50b2e4c0ae518e41",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\fixture-results.json": "614ec4ba2b81da14f8516a500fffa5f9527128ce10f77d27d4cdc1303819d57e",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\fixture-result-review.json": "6034f12d68e4be3bcb894ac5577339db336d9f97fef78ab6406edee30d41af8f",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\execution-review.json": "a2fca2026e74be28d1d7ec7f2c62bf4fa80ee1b13c3552ce90ce5b606121fe9b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\metadata-receipt.json": "e75a63535e8ebf7057cb88d09d0ab3dbc2cea935949fa5a5bc8937d4b3012eba",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\metadata-result.json": "24f46d1c6bbf13ca69188630f8be06628282182d0a963d7b1ecd588bb73bb1fc",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\result-review.json": "f746b07c50d693d2e3a187abe9c7a29b2d835a24b0ea70240a435a368f15a414",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-worker-metadata\\compatibility-source-assessment.json": "949e07a8468d6533c0633249e8cc82ff2bbe7148f84e3d24b6cb8d5dc14e7260",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\metadata-preparation\\result-review.json": "de5f5a1b0dda05b38936ea454d5a2ac031efd7012fb07aee0e5d9ff57f97ac6a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-retained-procedure\\metadata-preparation\\stat-result-review.json": "ffa9a699811b3e9a09463952d5ff9484b45c8d74d5ad19f75dade01be744a6f5"
       }
     }
   }

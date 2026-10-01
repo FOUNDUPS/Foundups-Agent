@@ -1,3 +1,45 @@
+## Worker metadata reader qualified — 2026-10-02
+
+Source `d425b1ed0cec9a921fe5bb0afb294bc646457e0d`. The metadata prerequisite now
+runs through the existing Windows verified-file owner. Cross-API identity uses
+device/inode/size/mtime/link count; full path and descriptor snapshots retain
+their own ctime/birthtime checks. This addresses the measured API discrepancy
+without weakening same-API mutation checks or duplicating the production owner.
+The original failed read and later stat-only diagnostic remain historical.
+
+| Verified observation | Result |
+|---|---|
+| Disposable fixture invocation | 15 passed / 0 failed; 6 actual owner opens; 0.156s |
+| Bounded GPT-OSS metadata invocation | 1 completed; 4.515s; descriptor closed |
+| Bytes actually read / seek-skipped | 5,195,563 / 7,783,825 |
+| Declared metadata / tensors | 33 keys / 459 tensors; tensors not validated |
+| Saved template | 15,934 UTF-8 bytes; SHA f8d9255777615591a7cc1a7c932f5a69e181128902295e1b81221d20d983cac7 |
+| Model loads / generations / template renders / provider requests | 0 / 0 / 0 / 0 |
+
+Independent review caught two pre-execution tooling defects (an optimization-
+sensitive guard and bytecode-cache reads); both were repaired before the sole
+fixture run. Reader/parser AST and caps stayed unchanged. Independent result
+review accepted the completed bounded read; all invocation allowances are closed.
+
+**Worker compatibility remains unqualified.** The saved GPT-OSS template ignores
+WRE's `enable_thinking=False` control and defaults to medium reasoning. The inspected
+generic converter does not extract Harmony final-channel content. This is source
+evidence, not an observed generation failure. Installed MXFP4 constants do not prove
+compiled runtime support. No model, tokenizer or template execution was performed.
+
+**Next WSP15: 14/P1 (C2/I4/D5/Impact3).** Reuse the qualified reader for a separately
+reviewed metadata-only packet targeting the already inventoried Nemotron artifact.
+Its name/size do not establish family support or capability. Defer GPT-OSS-specific
+render/channel work at 11/P2 rather than introduce new runtime machinery before
+checking the existing alternative. No model-call, server or provider budget is
+allocated. Higher native admission and Holo authority work remain owner-blocked.
+
+The preceding guided worker comparison remains rejected; this diagnostic does not
+establish retained improvement or move AmIBot beyond G0. Evidence and limitations:
+backlog `worker_metadata_qualification_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-worker-metadata/`.
+Earlier entries below are historical. No production runtime code changed.
+
 ## Guided worker comparison stopped — 2026-10-02
 
 Source `bbc517468c9b777d8a4ea9837aa09d69a682ba4c`. The finite comparison

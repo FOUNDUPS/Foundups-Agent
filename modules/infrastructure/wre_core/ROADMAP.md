@@ -1,3 +1,20 @@
+## Worker metadata reader qualified — 2026-10-02
+
+Existing Windows verified-file helpers resolved the audit reader's cross-API
+timestamp problem while retaining full same-API mutation checks. Disposable
+fixtures: 15 passed, 6 real owner opens. One bounded metadata read completed:
+5,195,563 bytes, 4.515s, descriptor closed; no model load/generation/render.
+
+GPT-OSS compatibility remains unqualified: its template ignores WRE's
+enable_thinking control, while final-channel extraction and native load support
+are not established. No actual generation failure is claimed. Next 14/P1:
+separately reviewed metadata qualification of the already inventoried Nemotron
+artifact using the same reader. GPT-OSS-specific work deferred 11/P2; no new
+runtime adapter, model budget, admission or retained benefit claimed.
+
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#worker-metadata-reader-qualified--2026-10-02)
+and backlog `worker_metadata_qualification_20261002`. Earlier entries are historical.
+
 ## Guided worker comparison stopped — 2026-10-02
 
 The supervised existing WRE route consumed the exact stored768-byte procedure:
