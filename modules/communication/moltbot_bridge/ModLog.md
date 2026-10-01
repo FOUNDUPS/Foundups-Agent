@@ -1,3 +1,17 @@
+## 2026-10-01 — Specify explicit reviewer-key authority contract
+
+- Reconciled PR #2011 merged/main/clean owned closure at `1ff01a9`.
+- Extended the existing interface with an opt-in root-owned designation block,
+  versioned principal-artifact reviewer permissions and connected use-time scope,
+  role and generation rules. Existing identity is not reviewer authorization.
+- Recorded counterexamples for role projection, cross-policy reuse, stale owner/
+  boundary mixing and non-atomic revocation; mapped v3/v4-only consumer closure.
+- Documentation only; no new source, fixture, signature, runtime grant or module.
+  Static packet/source checks and independent review; hosted evidence separate.
+- Next15/P1 is connected key composition after independent test qualification.
+  Native RSI/AmIBot remain blocked. WSP00/15/22/50/84/97. Evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-contract/`.
+
 ## 2026-10-01 — Qualify effect-authority owners and reconcile RSI closure
 
 - Reconciled PR #2010 at `f4978e12`, exact PR/main checks and clean owned-lane
