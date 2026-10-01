@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-02 current layer:** one bounded Nemotron metadata read completed and passed independent review (3,216,492 bytes, 2.485s). Its saved template consumes WRE's non-thinking control at source level; no render or model ran. Next 13/P1: qualify this template through the existing model-free native-chat harness using current source bindings. Runtime support, real token fit, accepted worker output and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#nemotron-metadata-qualified--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+**2026-10-02 current layer:** saved Nemotron template qualification passed6/6 fixed model-free cases through the existing WRE engine and installed formatter source. No model loaded or generated. Next 14/P1: prepare a bounded native metadata/vocabulary diagnostic with existing owners, explicit resource/read limits and cleanup. Actual native support, real token fit, accepted output and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#nemotron-formatter-qualified--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

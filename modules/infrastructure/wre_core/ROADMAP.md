@@ -1,3 +1,19 @@
+## Nemotron formatter qualified — 2026-10-02
+
+One reviewed model-free invocation passed6/6 fixed cases through the current
+engine and installed formatter/factory/converter source. Six renders, six
+synthetic tokenizer entries, two synthetic completion entries; zero native
+constructor attempts. Fit rejection and error redaction remain intact. Existing
+template obeys explicit thinking control in these cases. Allowance closed.
+
+Next 14/P1: existing-owner native metadata/vocabulary diagnostic
+preparation with explicit read/resource/cleanup bounds. High-level vocab_only
+still constructs a context; DLL strings are not support proof. No native call,
+model generation, new adapter, admission or retained gain is allocated.
+
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#nemotron-formatter-qualified--2026-10-02)
+and backlog `nemotron_formatter_qualification_20261002`. Earlier entries are historical.
+
 ## Nemotron metadata qualified — 2026-10-02
 
 One exact-path metadata diagnostic passed independent review: 3,216,492 bytes

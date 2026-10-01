@@ -1,3 +1,37 @@
+## Nemotron formatter qualified — 2026-10-02
+
+Source `c4a31c5884400f3e9e64b3f968c17742776b0066`. One independently reviewed model-free child ran the saved
+Nemotron template through current WRE engine and installed formatter/handler
+source. All six fixed cases passed; no failed or unrun cases. Child0.406s,
+parent0.562s. All38 source pins matched before/after; no denied effects or
+native constructor attempts. The one-invocation allowance is closed.
+
+| Property checked | Result |
+|---|---|
+| Exact synthetic capacity equality | Accepted |
+| Overflow / smaller actual context | Rejected before completion |
+| Synthetic completion error | Stable redacted response |
+| Explicit thinking false / true | Closed empty / open thinking prefix |
+| Renders / synthetic tokenizer / synthetic completion entries | 6 / 6 / 2 |
+| Model loads / real tokenization / generations / providers | 0 / 0 / 0 / 0 |
+
+This is local source-composition evidence, not native-model or retained-gain
+evidence. Synthetic token IDs/counts and completion text cannot establish real
+capacity, model behavior or native support. Python guards are not an OS sandbox.
+
+**Next WSP15: 14/P1.** Prepare a single separately reviewed no-allocation native metadata/vocabulary diagnostic using the existing llama_cpp model-parameter/load/free boundary.
+The installed DLL contains architecture/tokenizer names, but strings alone do
+not prove runtime support. Existing bindings expose no_alloc/vocab_only; the
+high-level constructor still creates a context. Prepare a bounded low-level
+diagnostic using existing model/free owners, explicit read/resource limits and
+cleanup before allocating any native call. Do not initialize the full24.5GB
+model. Native execution remains unallocated; higher owner-blocked rows remain.
+
+Evidence: backlog `nemotron_formatter_qualification_20261002`,
+`O:/Foundups-Agent-audits/20261002-rsi-nemotron-formatter/` and the preserved
+`template-preparation/` packet in the preceding audit. No production runtime
+code changed. Earlier checkpoints below are historical.
+
 ## Nemotron metadata qualified — 2026-10-02
 
 Source `7c44c724bc1b61c0dea49c6488a2250083a32588`. The already installed alternative
