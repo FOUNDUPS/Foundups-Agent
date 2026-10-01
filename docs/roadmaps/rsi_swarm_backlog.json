@@ -17876,7 +17876,17 @@
         ]
       },
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-consensus\\final-accounting.json",
-      "publication_status": "pending_exact_head_checks_and_owned_closure"
+      "publication_status": "pending_exact_head_checks_and_owned_closure",
+      "initial_ci_collection": {
+        "run": 36803912390,
+        "head": "7ae94c76914359038205aa5857fa846290cc83ac",
+        "collection_errors": 2,
+        "selected_case_bodies": 0,
+        "cause": "jsonschema missing in CI setup",
+        "setup_delta": "Install jsonschema==4.26.0 before guarded process; existing declared owner range >=4.19.0,<5.0.0",
+        "oracles_changed": false,
+        "retry_status": "not_yet_observed"
+      }
     }
   }
 }

@@ -1,5 +1,13 @@
 ## Effect-lease consensus qualification — 2026-10-01
 
+Hosted attempt [CI36803912390](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36803912390)
+stopped at collection (two errors, zero selected case bodies) because `jsonschema`
+was absent before this new step. Setup now pins `jsonschema==4.26.0`, the locally
+qualified version within the existing `modules/foundups/requirements.txt` range.
+The dependency installs before the guarded test process. Test IDs, assertions
+and production sources are unchanged; the updated hosted run remains unverified
+until its actual result is recorded. Original failed log/XML/receipt are preserved.
+
 The finite existing-owner qualification passed **11/11 local cases**, with zero
 failures, errors or skips. HIGH/ULTRA effect requests are valid in their own
 contract but cannot enter the actual independent grant provider without its

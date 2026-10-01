@@ -77,6 +77,7 @@ jobs:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
+          python -m pip install "jsonschema==4.26.0"
           python -I -B - <<'PY'
           from pathlib import Path
           import hashlib,json,os,platform,subprocess,sys,tempfile,types

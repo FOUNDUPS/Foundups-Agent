@@ -1,5 +1,13 @@
 ## 2026-10-01 — Effect-lease domain qualification
 
+Hosted attempt [CI36803912390](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36803912390)
+stopped at collection (two errors, zero selected case bodies) because `jsonschema`
+was absent before this new step. Setup now pins `jsonschema==4.26.0`, the locally
+qualified version within the existing `modules/foundups/requirements.txt` range.
+The dependency installs before the guarded test process. Test IDs, assertions
+and production sources are unchanged; the updated hosted run remains unverified
+until its actual result is recorded. Original failed log/XML/receipt are preserved.
+
 - Added eleven bounded cases in three existing test owners and explicit guarded
   CI selection. Local retry:11pass/0fail/0error/0skip; first collection failure
   preserved. Existing registry remains current (1661 files,269 quarantined).
