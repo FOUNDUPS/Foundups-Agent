@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.admission_prerequisites_20261001",
-    "base_commit": "71e26ea598dae90865b16bf8dfd9eb9a34117088",
-    "selected_action": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
-    "status": "source_map_complete_reobserve_after_publication",
+    "observation_path": "current_observation.effect_consensus_qualification_20261001",
+    "base_commit": "2c856eab05df6222bf740d0b678a20e44c193500",
+    "selected_action": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
+    "status": "local_qualification_complete_reobserve_after_publication",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-admission-prerequisites\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-consensus\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.local_engine_lifecycle_20261001"
+    "previous_observation_path": "current_observation.admission_prerequisites_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -17660,6 +17660,223 @@
         "bound_source_files": 38,
         "runtime_execution_approved": false
       }
+    },
+    "effect_consensus_qualification_20261001": {
+      "source": "2c856eab05df6222bf740d0b678a20e44c193500",
+      "status": "locally_verified_publication_pending",
+      "signal_class": "execution_feedback",
+      "independent_review": true,
+      "counts": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 11
+      },
+      "collection_attempt": {
+        "exit_code": 4,
+        "collection_errors": 1,
+        "case_bodies_executed": 0
+      },
+      "retry": {
+        "case_ids_unchanged": true,
+        "added_source_binding": "empty bridge tests/__init__.py",
+        "oracles_changed": false
+      },
+      "measurement_limits": [
+        "Negative/domain contracts, not full issuer.issue composition or authorized native execution.",
+        "No held-out improvement or retained benefit measured.",
+        "Local source-read bindings include measurement reads, not import trace.",
+        "Python audit guards are not OS/native confinement."
+      ],
+      "model_calls": 0,
+      "operational_database_opens": 0,
+      "leases_issued": 0,
+      "retained_gain": null,
+      "artifact_hashes": {
+        "test-draft.json": "9239126e85cca4eecfa17b52ccc8d33e6a7aea4d41ccbafbba5ecd249c33217f",
+        "test-plan.json": "ca355aad82600abc620fd8ca161eaca243476b2dcd6d30e630b9e26a94957595",
+        "outcome-review.json": "3aaf1820c795b3ecf29f35645e273ce03279911ad4c0e80a3f28eaa90bd0876a",
+        "next-action-review.json": "fff91e1b1f71f75d46a509423aa4b5c7b044afa9d77179341598468f8f2c26a8",
+        "qualification/receipt.json": "bb39469293ae3cd112eb9a32b0d5e655f18465d3dc9dacff8f19aae2eeaf06c0",
+        "qualification-importfix/receipt.json": "8bb67192a825e3b9626ebf5c20ac8bb780dfa8589a0a4551cc382dc1aa48151b",
+        "execution-review-qualification-importfix.json": "3998371a6aeef5b5c2e8f4f385ae0a3567a9176f4d994117c695e3c2fd0a6e4f"
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "Exact PR/main checks and full85-case hosted caller suite verified; owned lane retired with recovery bundle. Native release/admission/retention not claimed."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it."
+        },
+        {
+          "task": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2000 source map merged/main verified and owned lane retired; preserved closure receipts."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        },
+        {
+          "task": "External supervisor transport and strict-decoder qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "No accepted new strict-decoder/backend evidence or authentic owner/requester handoff supplied; do not repeat unchanged rejected backend audit."
+        },
+        {
+          "task": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "locally_qualified_publication_pending",
+          "reason": "Eleven exact controls passed after one collection-only manifest correction; independent receipt review complete. Current fail-closed separation measured, downstream _issue/proof handoff not exercised."
+        },
+        {
+          "task": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "next_eligible_source_design_after_closure",
+          "reason": "Eleven controls now establish intentional current request-domain separation and early rejection. They do not establish the missing downstream proof carrier or which authorization semantics should change. A finite source/design comparison inside existing request, permit, grant and signer-verification owners is the smallest next prerequisite; no new runtime experiment or duplicated authority system is justified."
+        }
+      ],
+      "next_action": {
+        "task": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 13,
+          "priority": "P1"
+        },
+        "rationale": "Eleven controls now establish intentional current request-domain separation and early rejection. They do not establish the missing downstream proof carrier or which authorization semantics should change. A finite source/design comparison inside existing request, permit, grant and signer-verification owners is the smallest next prerequisite; no new runtime experiment or duplicated authority system is justified.",
+        "prerequisites": [
+          "Fresh source and peer/ownership observation after current test/documentation closure.",
+          "Use existing canonical owners and independently review the proposed contract before implementation; keep all current defaults closed.",
+          "Identify authentic proof origin, exact requester/effect/request digest bindings, allowed tier policy and replay/lifetime ownership. Do not infer these from a synthetic test dictionary."
+        ],
+        "acceptance": [
+          "Produce one bounded owner-to-owner contract table from effect request through provider._issue, grant signing request and independent signer proof verification, distinguishing target request data from grant proof carrier.",
+          "Compare reusing existing delegated consensus evidence with an explicitly domain-separated effect request adaptation; identify which existing contracts would have to change, and reject blanket role/tier widening or a digest-only bypass.",
+          "Specify canonical target digest, proof scope, HIGH/ULTRA treatment, expiry, replay and one-use semantics; unresolved policy choices remain explicit, not silently chosen to pass tests.",
+          "Preserve current None consensus effect-request rule and two-HIGH-child permit rule unless a separately approved design intentionally versions/changes a contract. No implementation in the source-only design slice.",
+          "Define a later finite falsification matrix only after contract selection; do not repeat the eleven closed negative controls as new progress."
+        ],
+        "limits": [
+          "Planning/source design only; no test/model/provider/signing/store/service budget.",
+          "No accepted effect lease, native admission, runtime deployment readiness or retained RSI claim."
+        ]
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-consensus\\final-accounting.json",
+      "publication_status": "pending_exact_head_checks_and_owned_closure"
     }
   }
 }

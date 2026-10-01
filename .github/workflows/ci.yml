@@ -72,6 +72,111 @@ jobs:
             --basetemp="$RUNNER_TEMP/correspondence-pytest" \
             modules/communication/moltbot_bridge/tests/test_reddog_recipient_preflight.py
 
+      - name: Run effect-lease consensus boundary qualification
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -I -B - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,platform,subprocess,sys,tempfile,types
+          import xml.etree.ElementTree as ET
+          if not __debug__ or not sys.dont_write_bytecode:
+              raise RuntimeError('Assertions and no-bytecode required')
+          R=Path.cwd().resolve()
+          D=Path(os.environ['RUNNER_TEMP'])/'effect-consensus-evidence'
+          D.mkdir();TMP=D/'temp';TMP.mkdir();PROFILE=D/'profile';PROFILE.mkdir()
+          config=D/'pytest.ini';config.write_text('[pytest]\n',encoding='utf-8')
+          # Tracked source at the exact CI checkout; no application import for inventory.
+          paths=set(subprocess.check_output(['git','ls-files','-z','--','*.py']).decode('utf-8').rstrip('\0').split('\0'))
+          def bindings():
+              return {p:hashlib.sha256((R/p).read_bytes()).hexdigest() for p in sorted(paths)}
+          before=bindings()
+          keep={k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL')}
+          os.environ.clear();os.environ.update(keep)
+          os.environ.update(HOME=str(PROFILE),TMPDIR=str(TMP),TMP=str(TMP),TEMP=str(TMP),
+              PYTHONDONTWRITEBYTECODE='1',PYTEST_DISABLE_PLUGIN_AUTOLOAD='1',
+              FOUNDUPS_DB_ENGINE='sqlite',DATABASE_URL='',FOUNDUPS_DB_PATH=str(TMP/'unrequested.db'))
+          tempfile.tempdir=str(TMP)
+          sys.path.insert(0,str(R))
+          platform._node=lambda default='':'rsi-disposable-test-host'
+          platform.machine=lambda:'x86_64'
+          blocked = []; sqlite_opens = []; repo_reads = set()
+          def norm(value):
+              p = os.fsdecode(value)
+              if p.startswith('\\\\?\\') and len(p)>5 and p[5]==':': p=p[4:]
+              return Path(p).resolve()
+          def owned(value):
+              try: return norm(value).is_relative_to(D)
+              except (TypeError,ValueError,OSError): return False
+          def deny(event, detail=''):
+              record={'event':event, 'detail':str(detail)[:200]}
+              blocked.append(record)
+              with (D/'blocked.jsonl').open('a',encoding='utf-8') as evidence: evidence.write(json.dumps(record)+'\n')
+              raise RuntimeError('caller_test_guard_denied:'+event+':'+str(detail)[:200])
+          def audit(event, args):
+              if event.startswith('socket.') or event in ('subprocess.Popen','os.system','os.posix_spawn','os.startfile','os.startfile/2','os.fork','os.exec','os.kill'):
+                  deny(event)
+              if event=='import' and str(args[0]).split('.')[0] in ('openai','anthropic','requests','httpx','llama_cpp','torch','transformers','dotenv','psycopg','psycopg2'):
+                  deny(event,'provider/model import')
+              if event=='sqlite3.connect': deny(event,'database access not selected')
+              if event=='open' and isinstance(args[0],(str,bytes)):
+                  p=norm(args[0]); mode=args[1]; flags=args[2]
+                  write=(isinstance(mode,str) and any(c in mode for c in 'wax+')) or bool(flags & (os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_TRUNC|os.O_APPEND))
+                  if write and not owned(p) and p!=norm(os.devnull): deny('open_write',p)
+                  if not write and not owned(p) and (p.name.startswith('.env') or p.suffix.lower() in ('.gguf','.safetensors','.pem','.key') or any(x in ('.ssh','.aws','.azure','.config') for x in p.parts)):
+                      deny('sensitive_read',p.name)
+                  if p.is_relative_to(R) and p.suffix=='.py':
+                      relative=str(p.relative_to(R)).replace('\\','/')
+                      if relative not in paths: deny('unlisted_repository_source',relative)
+                      repo_reads.add(relative)
+              if event in ('os.remove','os.rmdir','os.mkdir','os.chmod','os.utime','os.truncate') and not isinstance(args[0],int) and not owned(args[0]): deny(event,args[0])
+              if event in ('os.rename','os.replace','os.link') and (not owned(args[0]) or not owned(args[1])): deny(event)
+              if event=='os.symlink': deny(event,'pytest convenience symlink disabled')
+              if event=='os.chdir' and norm(args[0])!=R and not owned(args[0]): deny(event)
+          sys.addaudithook(audit)
+          isolated = ['modules','modules.communication','modules.communication.moltbot_bridge',
+                      'modules.communication.moltbot_bridge.src','modules.communication.moltbot_bridge.tests',
+                      'modules.infrastructure','modules.infrastructure.secrets_mcp']
+          for name in isolated:
+              assert name not in sys.modules
+              module=types.ModuleType(name)
+              module.__path__=[str(R/Path(*name.split('.')))]
+              sys.modules[name]=module
+              if '.' in name:
+                  parent, child=name.rsplit('.',1)
+                  setattr(sys.modules[parent],child,module)
+
+          import pytest
+          nodes=['modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_contract_security.py::test_effect_lease_request_preserves_distinct_consensus_domain[HIGH]', 'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_contract_security.py::test_effect_lease_request_preserves_distinct_consensus_domain[ULTRA]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[HIGH-missing]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[HIGH-foreign_mapping]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[ULTRA-missing]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_effect_request_provider_rejects_before_owner_admission[ULTRA-foreign_mapping]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_elevated_client_rejects_effect_role_before_provider_lease[HIGH]', 'modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py::test_elevated_client_rejects_effect_role_before_provider_lease[ULTRA]', 'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py::test_delegated_request_pair_matches_without_authority_issuance', 'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py::test_effect_request_cannot_replace_delegated_child[principal]', 'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py::test_effect_request_cannot_replace_delegated_child[reddog]']
+          args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
+              '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
+              '--junitxml='+str(D/'results.xml')]
+          status=int(pytest.main(args))
+          after=bindings();xml=ET.parse(D/'results.xml').getroot()
+          cases=list(xml.iter('testcase'))
+          counts={k:sum(int(s.get(k,0)) for s in xml) for k in ('tests','failures','errors','skipped')}
+          exact=len(cases)==11 and {x.get('name') for x in cases}=={n.split('::',1)[1] for n in nodes}
+          unexpected=[x for x in blocked if x['event']!='os.symlink']
+          receipt={'returncode':status,'counts':counts,'exact_cases':exact,'hashes_stable':before==after,
+              'blocked_events':blocked,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
+              'limits':['Python audit constraints, not OS isolation.','Negative/domain controls; no issued effect lease or RSI benefit.']}
+          (D/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({k:receipt[k] for k in ('counts','exact_cases','hashes_stable')}))
+          raise SystemExit(status or (2 if unexpected or not exact or before!=after or counts['skipped'] else 0))
+          PY
+
+      - name: Upload effect-lease qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: effect-consensus-qualification
+          path: |
+            ${{ runner.temp }}/effect-consensus-evidence/results.xml
+            ${{ runner.temp }}/effect-consensus-evidence/receipt.json
+            ${{ runner.temp }}/effect-consensus-evidence/blocked.jsonl
+          if-no-files-found: ignore
+
       - name: Run WRE local proposal caller contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

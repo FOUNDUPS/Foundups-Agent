@@ -1,3 +1,13 @@
+## 2026-10-01 — Effect-lease domain qualification
+
+- Added eleven bounded cases in three existing test owners and explicit guarded
+  CI selection. Local retry:11pass/0fail/0error/0skip; first collection failure
+  preserved. Existing registry remains current (1661 files,269 quarantined).
+- Qualified current rejection boundaries without changing production authority,
+  signing, model behavior or claiming an admitted lease/RSI gain.
+- WSP00/5/6/15/22/48/50/84/97. Evidence and independent review:
+  `O:/Foundups-Agent-audits/20261001-rsi-effect-consensus/`.
+
 ## 2026-09-30: Post-development correspondence contract coverage
 
 The existing recipient-preflight test owner now has74 cases: original48 unchanged
