@@ -1,3 +1,53 @@
+## Effect-lease admission map — 2026-10-01
+
+Source-only trace at `71e26ea598dae90865b16bf8dfd9eb9a34117088`; installed
+runtime/configuration remains **unknown**. No authority, model, socket, service,
+operational-store or application-test call was made. This map names existing
+owners and composition prerequisites; it does not admit a worker.
+
+| Boundary | Existing producer → consumer | Required evidence / present gap |
+|---|---|---|
+| Work identity | `reddog_main_resident_queue_serial_loop_bootstrap` → `GovernedValveUseTimeAuthorityResolver` | Exact queue/slice, full work-order/base digest, runtime root, trusted time and signed authority. No concrete selected runtime ticket was supplied or observed in this slice. |
+| Generation | Root-owned manifest selection → `verify_signer_current_generation_runtime_binding` → use-time collector | Accepted typed evidence removes only three of ten named trust reasons. Binding verification consumes a selection capability; it is not a passive status probe. |
+| Readiness | `reddog_resident_runtime_artifact_readiness` → canary readiness projection | Seven artifact files are checked; three generation reasons are added independently. This is not the resolver's complete reason set or authority. |
+| Remaining trust | Existing consensus, sovereign, principal, model, Memex and peer owners → resolver | Seven reasons remain even after accepted generation. This does not mean every lower-level verifier is absent; authentic consumer composition remains unqualified. |
+| Effect-lease request | `reddog_authoritative_use_lease_contract` → `ExternalSignerAuthoritativeUseLeaseIssuer` | Only HIGH/ULTRA; role `signer:authoritative-use-lease`. Builder and validator require absent consensus digest. |
+| Grant handoff | External issuer → `IndependentSignerSecretGrantProvider.lease` | Issuer supplies no elevated-consensus permit. Real provider rejects non-LOW without a consumed typed permit before owner/grant work. Positive issuer tests substitute `_LeasedGrantProvider`; they do not prove this direct production pairing. |
+| Permit domain | `prepare_elevated_authority_signing_permit` / `ElevatedConsensusExternalSignerClient` | Existing permit preparation binds exactly two HIGH principal/reddog requests and their consensus digest; client dispatch supports those roles. Adding a keyword alone cannot qualify the effect-lease role or ULTRA. Effect requests also hash the payload directly, while elevated canonical requests hash the signing-input mapping; these digest contracts are distinct. |
+| Effect consumer | Resolver → valve handler → worktree/live-enqueue admission registries | Resolver currently returns `authoritative_use_lease=None`. Rejection reasons close the valve; registries require an opaque exact-effect/digest lease and consume it once. Serialized acceptance is insufficient. |
+| Skill safety | `skill_runtime_admission.admit_runtime_skill` → registered skill executor | Exact bundle/manifest/scanner fingerprint is separate from signed per-effect permission. |
+| External supervision | Root-selected supervisor observation + actual requester → existing lifecycle owner | Existing corrected contract still needs authenticated transport, canonical consumption and qualified visibility. Earlier strict-decoder candidates remain rejected; no retry or new parser is selected here. |
+
+The seven remaining resolver anchors are consensus receipt, sovereign
+authorization, principal subject-key attestation, model signed-evidence trust,
+model-selection signed-evidence verification, Memex signed-evidence verification,
+and signer/client peer handshake. Other validation failures may also occur;
+ten/three/seven describes this named subset, not every possible rejection.
+
+`ExternalSignerAuthoritativeUseLeaseIssuer.issue` enters a grant lease, external
+signing and response rehydration. Rehydration consumes durable replay state;
+later effect use consumes the process-local one-use lease handle.
+Do not use these calls as read-only probes. The existing
+`load_system_service_signer_identity(owner_config_path, repo_root)` is a narrower
+non-consuming identity reader, but requires an explicit root-owned absolute
+owner-config path and Linux ownership checks. It was not called. Do not guess a
+service/path, infer installation absence, or turn a test receipt into live authority.
+
+**Next qualification, 13/P1 (C2/I4/D4/Impact3):** Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration.
+Freeze finite cases using actual existing issuer/provider/consensus leaves in
+the existing test owners, with isolated fake outer dependencies and no service,
+secret resolution or signing authority. First demonstrate the current rejection
+and identify the exact supported domain. Then select a separately reviewed
+contract repair only if justified. Preserve HIGH/ULTRA and independent consensus;
+do not demote to LOW, fabricate permits, relax validators, or extend role/tier
+coverage merely to make a test pass. Supervisor/transport and resident trust
+prerequisites remain separate; no generic orchestrator or new authority registry.
+
+Evidence: RSI backlog `current_observation.admission_prerequisites_20261001`,
+`O:/Foundups-Agent-audits/20261001-rsi-admission-prerequisites/resident-map.json`
+and `issuer-map.json`. Their hashes/source bindings distinguish this static
+assessment from the earlier portable and native-call experiments.
+
 ## Process visibility qualification boundary — 2026-09-27
 
 PR1922's connected socket mapper is merged/main-verified at `d6f9458b` with252

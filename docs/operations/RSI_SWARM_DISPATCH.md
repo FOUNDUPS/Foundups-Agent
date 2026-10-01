@@ -1,3 +1,31 @@
+## Admission prerequisite reconciliation — 2026-10-01
+
+Source-only mapping after PR#1999 main/cleanup closure found existing issuer and
+effect-consumer owners, plus a concrete elevated-consensus domain mismatch.
+The effect-lease issuer allows HIGH/ULTRA and requires no consensus digest;
+the actual independent grant provider requires a typed permit for non-LOW, but
+the issuer does not supply one. Existing permits/client roles cover the two HIGH
+principal/reddog requests, not this effect-lease domain. Positive issuer fixtures
+substitute the provider. This is source evidence, not an observed runtime test.
+
+The resolver still has seven remaining trust anchors after conditional removal
+of three generation reasons and returns no effect lease. The readiness projection
+is distinct. No operational state was consumed; installed authority remains
+unknown. Existing supervisor/strict-decoder blockers and actual-requester rules
+remain in force. Do not blindly wire the issuer or repeat closed predicate tests.
+
+Next13/P1: Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration.
+Freeze a finite real-owner composition qualification before any repair or role/
+tier change. No production activation is selected. Native18/P0 and supervisor14/P1
+remain blocked; this limited qualification is independently executable without
+authority issuance. Re-observe source/ownership and review its precise effect
+budget before executing. See [the canonical admission map](../../modules/communication/moltbot_bridge/INTERFACE.md#effect-lease-admission-map--2026-10-01).
+
+Evidence: backlog `current_observation.admission_prerequisites_20261001` and
+`O:/Foundups-Agent-audits/20261001-rsi-admission-prerequisites/`.
+Application tests/model/provider calls this source audit:0. Exact-head hosted
+regressions and publication status are recorded separately in closure receipts.
+
 ## Explicit per-call cleanup — 2026-10-01
 
 Existing Qwen engine and WRE adapter now own explicit per-call cleanup. The independently frozen portable selection reproduced22 missing-contract failures (40pass) before repair and passed62/62 after repair, without model/provider/database calls. This closes a resource-ownership contract, not native memory-release proof or RSI admission.

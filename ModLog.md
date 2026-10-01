@@ -1,3 +1,15 @@
+## 2026-10-01 — Existing admission-owner prerequisite map
+
+- Source-only producer/consumer trace separates work identity, generation,
+  readiness, trust anchors, exact effect leases, skill safety and supervision.
+- Found real issuer/grant-provider elevated-consensus domain mismatch; current
+  positive fixtures substitute the provider. No runtime failure claim or repair.
+- Next13/P1 finite actual-owner qualification; preserve existing role/tier and
+  consensus guards, blocked supervisor prerequisites and other ownership lanes.
+- WSP00/15/22/48/50/84/97; existing docs/backlog only. No model, authority,
+  operational-store or application-test invocation. Evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-admission-prerequisites/`.
+
 ## 2026-10-01 — Explicit per-call local-model cleanup
 
 - Existing engine gains idempotent explicit close; existing WRE adapter owns
