@@ -1,3 +1,14 @@
+## Effect-context correlation qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_correlation.py` freezes 43 cases:
+positive boundaries, malformed typed contexts, time bounds, stale B fields,
+consistently valid changed targets and actual parent/target substitutions.
+Reuses the existing pure `_binding_inputs`/golden fixture, never signing helpers.
+Baseline 43 missing-API assertion failures → candidate 43 passes; no errors/skips.
+Old 97 CI nodes remain unchanged; the 43 exact new nodes make 140, hosted pending.
+Local execution uses reviewed Python audit constraints, not an OS sandbox or WRE
+runtime admission. Synthetic positive correlation is not authentic approval.
+
 ## Inert effect-context qualification — 2026-10-01
 
 `test_reddog_elevated_authority_consensus_effect_context.py` contains47 frozen

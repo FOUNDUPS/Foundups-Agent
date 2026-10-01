@@ -21,6 +21,33 @@ Local qualification: all 32 frozen new cases passed after all 32 baseline cases
 failed at the expected missing-API assertion; both runs had zero errors/skips.
 The prior pure-binding PR#2003 is merged/main-verified; see the current layer below.
 
+### Pure effect-context correlation API — 2026-10-01
+
+`effect_approval_context_matches(context, *, parent, target, expected_target, now)`
+extends `reddog_elevated_authority_consensus_effect_context.py`. It returns an
+exact Boolean. `True` means structural, current correlation, never approval.
+
+- Require the exact `EffectApprovalContext` class and its strict canonical
+  validation, including tuple roles; reject malformed manually built values.
+- Require exact integer `now`; enforce `issued_at <= now < expires_at`.
+- Recompute B through existing `effect_target_binding_matches` using the
+  context's binding schema and P/T/E fields plus actual parent/target inputs.
+- Revalidate the target payload and require context expiry no later than target
+  expiry. The existing B matcher also bounds the target by both parent expiries.
+- Return `False` for invalid input or a rejected existing validator. Preserve
+  inputs and delegated v1. No production consumer is wired.
+
+Well-formed policy/sovereign references remain untrusted assertions. This does
+not resolve them, compare principal and requester identities, equate context
+and target nonces, require context issuance after target issuance, limit policy
+TTL/skew, or require approvals to be no greater than the number of roles.
+Authenticated provenance, independent review and promotion remain separate.
+
+The context decoder from PR #2008 is merged/main-verified (97 hosted controls).
+New frozen correlation cases: 43 expected missing-API baseline failures → 43
+candidate passes; existing CI now selects 140 cases, hosted results pending.
+The guarded local runner is not an OS sandbox or an admitted WRE execution.
+
 ### Inert effect-approval context API — 2026-10-01
 
 The pure binding and structural checks are merged/main-verified in PR#2003/2005;
@@ -58,9 +85,9 @@ runtime as well as this context; no incomplete context-only approval is issued.
 
 Independent frozen47 cases: baseline47 expected missing-API failures; candidate
 47pass/0fail/0error/0skip, exact case IDs and stable source samples. Existing CI
-retains50 controls and adds47 (97total); hosted verification remains pending.
-Next qualify the existing-owner signed-decision/provenance boundary and exact
-B recomputation before permit/provider integration. Registry/identity evidence
+retains50 controls and adds47 (97total); PR #2008 and exact main checks passed.
+The pure correlation API above now recomputes B. Next qualify the existing-owner
+signed-decision/provenance boundary before permit/provider integration. Registry/identity evidence
 alone does not establish explicit effect approval. Native RSI remains unadmitted.
 
 ### Decision and evidence
