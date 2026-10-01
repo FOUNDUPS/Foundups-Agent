@@ -116,7 +116,33 @@ def canonical_effect_approval_context_digest(context: EffectApprovalContext) -> 
     return "sha256:" + hashlib.sha256(canonical_effect_approval_context_bytes(context)).hexdigest()
 
 
+def effect_approval_context_matches(context, *, parent, target, expected_target, now) -> bool:
+    """Check current structural correlation only; authenticate no approval."""
+    from .reddog_elevated_authority_consensus_evidence import effect_target_binding_matches
+    from .reddog_authoritative_use_lease_contract import validate_authoritative_use_lease_request
+
+    try:
+        canonical_effect_approval_context_bytes(context)
+        if type(now) is not int or not context.issued_at <= now < context.expires_at:
+            return False
+        binding = {
+            "schema_version": context.binding_schema_version,
+            "parent_authority_request_digest": context.parent_authority_request_digest,
+            "target_signing_request_digest": context.target_signing_request_digest,
+            "effect_request_digest": context.effect_request_digest,
+        }
+        if not effect_target_binding_matches(
+            binding, parent=parent, target=target, expected_target=expected_target, now=now,
+        ):
+            return False
+        payload = validate_authoritative_use_lease_request(target, now_epoch=now)
+        return payload is not None and context.expires_at <= payload["expires_at"]
+    except Exception:
+        return False
+
+
 __all__ = [
     "EffectApprovalContext", "rehydrate_effect_approval_context",
     "canonical_effect_approval_context_bytes", "canonical_effect_approval_context_digest",
+    "effect_approval_context_matches",
 ]

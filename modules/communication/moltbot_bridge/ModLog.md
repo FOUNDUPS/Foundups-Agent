@@ -1,3 +1,17 @@
+## 2026-10-01 — Correlate effect context with actual inputs
+
+- Reconciled PR #2008 closure and superseded the duplicate broad producer row.
+- Added one pure predicate to the existing context source; reused B/target
+  validators. Added a focused 154-line test sibling because existing test
+  owners are 180/200 lines; no unrelated extraction or new module.
+- Frozen 43-case baseline: expected missing API failures; candidate: 43 passes,
+  zero errors/skips. Source samples stable; no unexpected denial/database open.
+- Existing CI 97 → 140; seven structural checks retained, source inventory stays
+  14 and test inventory becomes 17. Test registry 1663 / 269 quarantined.
+- No authentication, signing, runtime activation or retained RSI gain; hosted
+  publication remains pending. WSP 00/5/6/10/11/15/22/49/50/62/84/95/97.
+- Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-context-correlation/`.
+
 ## 2026-10-01 — Inert effect-approval context
 
 - Closed PR#2005 bookkeeping; independently qualified the next concrete gap

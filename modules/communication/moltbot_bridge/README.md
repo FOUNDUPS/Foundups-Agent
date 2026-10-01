@@ -1,11 +1,10 @@
-## Effect-approval context data boundary — 2026-10-01
+## Effect-approval context and exact-input correlation — 2026-10-01
 
-The [existing consensus interface](INTERFACE.md#inert-effect-approval-context-api--2026-10-01)
-now exposes an immutable effect context, strict decoder and domain-separated
-canonical bytes/digest. This is untrusted data preparation only; no approval,
-signature, permit or runtime consumer is activated. See the module roadmap and
-tests README for the47-case local baseline/candidate evidence and pending hosted
-qualification. Existing delegated v1 behavior remains unchanged.
+The [consensus interface](INTERFACE.md#pure-effect-context-correlation-api--2026-10-01)
+now connects the strict context from merged PR #2008 to actual parent/target
+inputs through existing validators. A current structural match is not approval.
+The new 43-case local qualification passes; exact hosted results remain pending.
+Policy/sovereign provenance and production integration are still unqualified.
 
 ## Cross-process observer qualification — 2026-09-27
 

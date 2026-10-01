@@ -1,3 +1,34 @@
+## Effect-context correlation checkpoint — 2026-10-01
+
+PR #2008 is merged/main-verified at `41b8834e`; its owned lane is closed.
+The earlier context checkpoint's pending status is historical. Fresh main has
+no intervening changes and no competing visible RSI/effect ownership lane.
+
+Selected 13/P1 (C2/I4/D4/Impact3): extend the existing context owner with a pure
+predicate connecting the inert context to actual parent and target inputs.
+It reuses the existing B matcher and target validator, rejects stale/mismatched
+digests and requires a current context no longer-lived than the target.
+It neither authenticates policy/sovereign references nor issues approval.
+
+Independent frozen 43 cases: baseline 43 expected missing-API assertion failures;
+candidate 43 passes, no errors/skips, stable source samples and no unexpected
+guard denials/database opens. Existing CI retains 97 nodes plus 43 new nodes
+(140 total); hosted verification is pending. Structural limits are unchanged.
+No production wiring, signing, runtime admission or retained gain is claimed.
+
+Re-observed next 14/P1: qualify effect-specific reviewer-decision binding and
+trusted evidence ownership using existing consensus owners. Delegated v1's
+two-child context, decision prefix and parent-only sovereign evidence cannot
+stand in for effect approval. Native RSI and AmIBot G0 remain blocked.
+The old broad producer/resolver row is superseded by this concrete candidate.
+
+Holo query host remains unchanged at its last failed authority-root/head scope;
+no repeated probe or reindex. Semantic freshness is unverified; bounded pinned
+source/NAVIGATION/module docs supplied retrieval. No new module/store/skill.
+WSP 00/5/6/10/11/15/22/49/50/62/84/95/97. Observation:
+`effect_context_correlation_20261001`; evidence and final publication receipt:
+`O:/Foundups-Agent-audits/20261001-rsi-effect-context-correlation/`.
+
 ## Inert effect-context checkpoint — 2026-10-01
 
 PR#2005 is merged/main-verified at `2e8944a7`; its owned lane is closed. Fresh
