@@ -1,3 +1,33 @@
+## Effect-lease consensus qualification — 2026-10-01
+
+The finite existing-owner qualification passed **11/11 local cases**, with zero
+failures, errors or skips. HIGH/ULTRA effect requests are valid in their own
+contract but cannot enter the actual independent grant provider without its
+typed consensus permit. The client rejects the effect role, and the existing
+delegated pair remains valid while effect substitutions fail. No production
+policy was changed; this is measured rejection/domain evidence, not successful
+issuer composition, native admission or retained RSI improvement.
+
+The first attempt stopped at collection (exit4, one collection error, zero case
+bodies): pytest accessed an empty package initializer omitted from the source
+inventory. A separately reviewed retry added only that binding; all eleven
+case IDs, expectations and production sources stayed fixed. No database opened
+and no unexpected guard denial occurred on the retry. Downstream counters stayed
+untouched except for the declared local clock/provider identity calls.
+
+Existing CI now selects these exact eleven cases with namespace isolation and
+the same Python audit constraints. Hosted results are recorded separately after
+execution. These constraints are not OS isolation or general native containment;
+model-framework imports are denied, while reviewed dependency imports remain.
+Source hashes are sampled before/after. The inherited local receipt field
+`loaded_source_bindings` includes hash-check reads and is **not an import trace**;
+CI uses the accurate `observed_source_read_bindings` name.
+
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-consensus/` and canonical
+backlog `current_observation.effect_consensus_qualification_20261001`.
+
+Next WSP15 13/P1: Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair. No runtime activation is granted.
+
 ## Effect-lease admission map — 2026-10-01
 
 Source-only trace at `71e26ea598dae90865b16bf8dfd9eb9a34117088`; installed

@@ -800,3 +800,120 @@ def test_new_secret_grant_modules_are_bounded_and_keyless() -> None:
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 assert node.end_lineno - node.lineno + 1 <= 50
+
+
+class _EffectDomainDenied:
+    """Record forbidden downstream access even if its exception is caught."""
+
+    def __init__(self, events: list[str], name: str) -> None:
+        self.events = events
+        self.name = name
+
+    def __call__(self, *args, **kwargs):
+        self.events.append(self.name)
+        raise AssertionError(f"unexpected effect-domain downstream call: {self.name}")
+
+    def __getattr__(self, name: str):
+        self.events.append(f"{self.name}.{name}")
+        raise AssertionError(f"unexpected effect-domain downstream access: {self.name}")
+
+
+@pytest.mark.parametrize(
+    ("tier", "permit_kind"),
+    [
+        ("HIGH", "missing"),
+        ("HIGH", "foreign_mapping"),
+        ("ULTRA", "missing"),
+        ("ULTRA", "foreign_mapping"),
+    ],
+    ids=["HIGH-missing", "HIGH-foreign_mapping", "ULTRA-missing", "ULTRA-foreign_mapping"],
+)
+def test_effect_request_provider_rejects_before_owner_admission(
+    monkeypatch: pytest.MonkeyPatch, tier: str, permit_kind: str
+) -> None:
+    from modules.communication.moltbot_bridge.tests.test_reddog_authoritative_use_lease_contract_security import (
+        _effect_domain_request,
+    )
+
+    request = _effect_domain_request(monkeypatch, tier)
+    events: list[str] = []
+
+    def clock() -> int:
+        events.append("clock")
+        return NOW
+
+    monkeypatch.setattr(
+        provider_module,
+        "lease_validated_owner_e0_current_admission",
+        _EffectDomainDenied(events, "owner_admission"),
+    )
+    monkeypatch.setattr(
+        IndependentSignerSecretGrantProvider, "_issue", _EffectDomainDenied(events, "issue")
+    )
+    provider = IndependentSignerSecretGrantProvider(
+        repo_root=_EffectDomainDenied(events, "repo_root"),
+        owner_config_path=_EffectDomainDenied(events, "owner_config_path"),
+        owner_policy={},
+        replay_store=_EffectDomainDenied(events, "replay_store"),
+        grant_authority=_EffectDomainDenied(events, "grant_authority"),
+        clock=clock,
+        nonce_factory=_EffectDomainDenied(events, "nonce"),
+    )
+    kwargs = (
+        {"elevated_consensus_signing_permit": {"permit": "foreign"}}
+        if permit_kind == "foreign_mapping"
+        else {}
+    )
+    with pytest.raises(ValueError, match="^secret_grant_consensus_invalid$"):
+        with provider.lease(request, **kwargs):
+            events.append("yielded_grant")
+            raise AssertionError("effect-domain request unexpectedly admitted")
+    assert events == ["clock"]
+
+
+@pytest.mark.parametrize("tier", ["HIGH", "ULTRA"], ids=["HIGH", "ULTRA"])
+def test_elevated_client_rejects_effect_role_before_provider_lease(
+    monkeypatch: pytest.MonkeyPatch, tier: str
+) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import (
+        ElevatedConsensusExternalSignerClient,
+        ElevatedConsensusGrantProviderIdentity,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+        RuntimeRejectCode,
+    )
+    from modules.communication.moltbot_bridge.tests.test_reddog_authoritative_use_lease_contract_security import (
+        _effect_domain_request,
+    )
+
+    request = _effect_domain_request(monkeypatch, tier)
+    events: list[str] = []
+
+    class Provider:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def elevated_consensus_provider_identity(self):
+            events.append(f"identity:{self.name}")
+            return ElevatedConsensusGrantProviderIdentity(
+                authority_principal_id=f"test:{self.name}",
+                authority_principal_provider="test",
+                authority_public_key=f"test-key:{self.name}",
+                authority_key_epoch="test-epoch-1",
+                authority_service_id=f"test-service:{self.name}",
+            )
+
+        def lease(self, *args, **kwargs):
+            events.append(f"lease:{self.name}")
+            raise AssertionError("effect role must not select a delegated provider")
+
+    client = ElevatedConsensusExternalSignerClient(
+        signer=_EffectDomainDenied(events, "signer"),
+        principal_grant_provider=Provider("principal"),
+        reddog_grant_provider=Provider("reddog"),
+    )
+    assert events == ["identity:principal", "identity:reddog"]
+    result = client.sign_with_elevated_consensus(request, {"permit": "foreign"})
+    assert result.accepted is False
+    assert result.rejection_code == RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED
+    assert events == ["identity:principal", "identity:reddog"]

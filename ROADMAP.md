@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-01 current layer:** PR#1999 model-lifetime repair is merged/main-verified with its owned lane closed. Source-only admission mapping now identifies an existing issuer/grant-provider elevated-consensus domain mismatch. Next13/P1: qualify that exact real-owner pairing before selecting a repair. Existing native authority and supervisor prerequisites remain blocked; installed runtime status is unknown. See [the admission map](modules/communication/moltbot_bridge/INTERFACE.md#effect-lease-admission-map--2026-10-01). No new worker activation or retained-RSI claim.
+**2026-10-01 current layer:** PR#2000 admission map is merged/main-verified and its owned lane is closed. The selected effect-lease/consensus qualification now passed11/11 local cases after a preserved zero-case collection failure. This confirms the current rejection boundary, not a repaired issuer/provider connection or admitted worker. Next13/P1: Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair. See [the measured qualification](modules/communication/moltbot_bridge/tests/README.md#effect-lease-consensus-qualification--2026-10-01).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

@@ -1,3 +1,12 @@
+## Effect-lease qualification checkpoint — 2026-10-01
+
+The previously selected domain qualification passed11/11 local cases. It confirms
+current incompatibility; it does not admit a worker. The first collection failure
+is preserved separately. See the canonical backlog observation
+`effect_consensus_qualification_20261001` and bridge tests README for exact limits.
+
+Next WSP15 13/P1: Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair. No runtime activation is granted.
+
 ## Admission prerequisite reconciliation — 2026-10-01
 
 Source-only mapping after PR#1999 main/cleanup closure found existing issuer and
