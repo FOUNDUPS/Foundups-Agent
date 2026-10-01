@@ -1,3 +1,42 @@
+## 2026-10-01 — Pure binding publication integrity repair
+
+PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but
+CI36814825254 failed the existing backend compatibility check: the two changed
+consensus source hashes had not been regenerated. Preserve that failed run;
+passing the qualification subset is not passing CI.
+
+Regenerated the existing backend manifest with its canonical AST/Git generator,
+then updated its existing JavaScript and generator-test digest pins to
+`3eefbd0321c31f55ecc27e5f3110812f591928b6edec7718d15301b30755d068`.
+Exactly two runtime digests changed; the1401-member inventory, schema/API and
+all validation assertions remain unchanged. The existing Node backend
+compatibility test now passes; all8 generator tests pass, including staged-index
+closure. Final exact-head CI remains pending.
+WSP50/84/97: source changes require generated closure/pin checks before publishing.
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
+## 2026-10-01 — Pure HIGH/worktree effect binding
+
+Static validation: registry current (1661 files,269 quarantined); source checks
+and changed-file bounds pass. The global test-module size check still fails on
+untouched `reddog_elevated_consensus_e2e_support.py` (201 lines at base and
+current against200). Recorded separately at7/P3; no gate weakened.
+
+- Froze 32 new cases in the existing canonicalization owner before production
+  implementation. Preserved the original four cases byte-for-byte and excluded
+  them locally because their fixture invokes a signing helper. The prior
+  31-case plan remains archived; independent review added valid HIGH/live_enqueue
+  rejection with a recomputed digest and exact expected target.
+- Recorded independent golden P/T/E/B data and inert fixtures. Baseline: 32
+  expected missing-API failures, zero errors/skips. Candidate: 32 passed, zero
+  failures/errors/skips, same IDs and bytes. Stable source samples, no unexpected
+  denials and zero SQLite opens. No independent second execution is claimed.
+- Added pure construction/correlation in existing owners; no authenticated
+  producer, grant/permit adaptation, signing, effect consumption or native
+  admission. Hosted checks and publication remain pending; no RSI gain claim.
+- WSP00/5/6/11/15/22/50/84/97. Frozen oracles, original XML/receipts and independent
+  source/execution gate: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
 ## 2026-10-01 — Effect-lease domain qualification
 
 Hosted attempt [CI36803912390](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36803912390)

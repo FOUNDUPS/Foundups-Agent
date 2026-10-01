@@ -1,3 +1,42 @@
+## 2026-10-01 — Pure binding publication integrity repair
+
+PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but
+CI36814825254 failed the existing backend compatibility check: the two changed
+consensus source hashes had not been regenerated. Preserve that failed run;
+passing the qualification subset is not passing CI.
+
+Regenerated the existing backend manifest with its canonical AST/Git generator,
+then updated its existing JavaScript and generator-test digest pins to
+`3eefbd0321c31f55ecc27e5f3110812f591928b6edec7718d15301b30755d068`.
+Exactly two runtime digests changed; the1401-member inventory, schema/API and
+all validation assertions remain unchanged. The existing Node backend
+compatibility test now passes; all8 generator tests pass, including staged-index
+closure. Final exact-head CI remains pending.
+WSP50/84/97: source changes require generated closure/pin checks before publishing.
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
+## Pure effect-target binding checkpoint — 2026-10-01
+
+Base `252f700fbac4c4adb98f3dd81c3d05eadb8fce66`; PR#2002 is merged,
+main-verified and its owned lane closed. Two existing consensus owners now
+construct/recompute `reddog_effect_target_binding.v1` for HIGH/worktree_create.
+The32 independent frozen cases changed from expected missing-API failures to
+32pass/0fail/0error/0skip; no unexpected guarded operation or source drift.
+This is structural qualification, not authenticated approval or measured RSI gain.
+Original delegated APIs and four canonicalization tests remain unchanged.
+
+CI extends its existing selection from11 to43 cases. Exact PR/main execution is
+pending; publication/closure receipts live at
+`O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+Re-observed next14/P1: qualify authentic effect-approval provenance and exact
+binding consumption in existing owners. Source evidence must identify the
+smallest reusable gap before another implementation. No producer, permit,
+worker, service or model is admitted. Holo retrieval still reports authority
+root/head mismatch; pinned-source fallback is not semantic freshness.
+See backlog `current_observation.effect_target_binding_20261001`.
+
+WSP00/5/6/15/22/48/50/62/84/97; reuse before extension.
+
 ## 2026-10-01 — Single-effect authorization handoff design
 
 - Reconciled PR#2001 exact main/CI/CodeQL and owned closure;11/11 qualification

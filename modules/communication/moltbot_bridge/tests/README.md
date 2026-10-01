@@ -1,3 +1,53 @@
+## Pure effect-target binding qualification — 2026-10-01
+
+Static validation: registry current (1661 files,269 quarantined); source checks
+and changed-file bounds pass. The global test-module size check still fails on
+untouched `reddog_elevated_consensus_e2e_support.py` (201 lines at base and
+current against200). Recorded separately at7/P3; no gate weakened.
+
+`test_reddog_elevated_authority_consensus_canonicalization.py` now contains 32
+new pure-binding cases plus its four unchanged original cases. Local execution
+selected only the new 32 IDs from the pre-implementation `test-plan.json`.
+The original cases call a signing helper and were excluded from this no-signing
+budget. The earlier 31-case plan is preserved as `test-plan-v1.json`; independent
+review added one valid HIGH/live_enqueue rejection before either run.
+
+The frozen suite checks independently calculated golden P/T/E/B values, parent
+projection, different parent/requester identities, immutability, both work-order
+fields, declared time bounds, exact typed target/no-proof rules, canonical
+expected-target substitutions, and malformed B. The live_enqueue control first
+asserts existing lease-validator acceptance, then tests the new worktree-only
+boundary. Boolean/integer/float expected-payload controls compare distinct
+canonical signing bytes without inventing numeric SigningRequest fields.
+
+Observed local results on the identical test bytes and IDs:
+
+| Run | Passed | Failed | Errors | Skipped |
+|---|---:|---:|---:|---:|
+| Baseline | 0 | 32 | 0 | 0 |
+| Candidate | 32 | 0 | 0 | 0 |
+
+Every baseline failure was the expected in-test missing-API assertion; collection
+succeeded. This is a new-feature control, not evidence of an old authority bypass.
+Candidate XML and receipt agree on all 32 names and outcomes. Before/after pins
+were stable, no unexpected denial occurred, and SQLite open count was zero.
+Independent source/execution approval is recorded in
+`execution-review-candidate.json`; it is not a second test execution.
+
+Fixtures construct inert parent data directly and replace the test-only public
+key helper before reusing the pure lease payload builder. They invoke no signing,
+permit, operational store, external provider or model. The Python audit guards
+are not an OS sandbox; source hash samples do not establish immutable execution,
+and `observed_source_read_bindings` includes hash reads rather than only imports.
+Exhaustive timestamp/TTL/skew permutations remain outside this finite selection.
+
+The existing guarded CI step is being extended to retain the previous eleven
+controls and these 32 IDs, for 43 selected cases. Hosted results are pending.
+Structural B agreement is not authenticated approval, successful issuance,
+worker admission, held-out benefit or retained RSI improvement. Evidence:
+`O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`; API contract:
+[Single-effect proof handoff](../INTERFACE.md#single-effect-proof-handoff-design--2026-10-01).
+
 ## Effect-lease consensus qualification — 2026-10-01
 
 PR#2001 closure is now verified: head `6ec636219f04cfd49af6280b2ad27b8e4daefe0f`,

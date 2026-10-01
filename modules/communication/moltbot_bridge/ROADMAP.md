@@ -1,3 +1,27 @@
+## Pure effect-target binding qualification — 2026-10-01
+
+The existing consensus evidence owner now implements
+`build_effect_target_binding` and `effect_target_binding_matches`, with schema
+`reddog_effect_target_binding.v1` in the existing contract owner. This is the
+selected 13/P1 pure layer (C2/I4/D4/Impact3), limited to HIGH/worktree_create.
+The API correlates P/T/E, exact expected target, both work-order fields and
+parent/target time bounds. It authenticates no producer and grants no effect.
+
+The independently frozen 32 new cases had 32 expected missing-API baseline
+failures, then 32 candidate passes; zero errors/skips in both runs. The baseline
+establishes feature absence, not a pre-existing security defect. The original
+four canonicalization cases remain unchanged and were excluded locally.
+Actual receipts report stable before/after source checks, exact selected IDs,
+no unexpected denials and zero SQLite opens. No model or signing was invoked.
+Hosted verification and publication remain pending.
+
+The following handoff work still requires authentic effect-specific producer
+provenance and independent signer re-verification before permit/provider
+composition. No grant, lease, native admission, held-out gain or retained RSI
+improvement follows from structural test agreement. Re-observe and score the
+next prerequisite using current source; the earlier checkpoints below are
+historical. Current evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
 ## Single-effect handoff planning checkpoint — 2026-10-01
 
 PR#2001 is merged at `a555687186568e8b74fdfebe037081b077ec8581` with

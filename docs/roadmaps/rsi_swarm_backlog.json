@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_proof_design_20261001",
-    "base_commit": "a555687186568e8b74fdfebe037081b077ec8581",
-    "selected_action": "Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners",
-    "status": "source_design_prepared_review_and_publication_pending",
+    "observation_path": "current_observation.effect_target_binding_20261001",
+    "base_commit": "252f700fbac4c4adb98f3dd81c3d05eadb8fce66",
+    "selected_action": "Qualify authentic effect-approval provenance and exact binding consumption in existing consensus owners",
+    "status": "pure_binding_locally_qualified_publication_pending",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-proof-design\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_consensus_qualification_20261001"
+    "previous_observation_path": "current_observation.effect_proof_design_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -18125,6 +18125,365 @@
       },
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-proof-design",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-proof-design\\final-accounting.json"
+    },
+    "effect_target_binding_20261001": {
+      "base_commit": "252f700fbac4c4adb98f3dd81c3d05eadb8fce66",
+      "scope": "Pure HIGH/worktree_create effect-target binding; existing two source owners and frozen tests",
+      "identity": {
+        "self": "0102",
+        "role": "coordinator",
+        "origin": "autonomous_trigger",
+        "principal_ref": "012"
+      },
+      "retrieval": {
+        "holo_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "quality": "Semantic evidence unavailable; exact pinned source, NAVIGATION and module docs fallback. Older checkpoint text reconciled by closure receipts. No query-side reindex; missing module requirements remains unchanged; no duplicate owner added."
+      },
+      "prior_closure": {
+        "pr": 2002,
+        "head": "6290d88cf4e1ed08f31c9b30b4f1486435f11efd",
+        "merge": "252f700fbac4c4adb98f3dd81c3d05eadb8fce66",
+        "pr_checks": 10,
+        "main_runs": [
+          {
+            "conclusion": "success",
+            "databaseId": 36808557591,
+            "headSha": "252f700fbac4c4adb98f3dd81c3d05eadb8fce66",
+            "status": "completed",
+            "workflowName": "CI"
+          },
+          {
+            "conclusion": "success",
+            "databaseId": 36808556754,
+            "headSha": "252f700fbac4c4adb98f3dd81c3d05eadb8fce66",
+            "status": "completed",
+            "workflowName": "CodeQL"
+          }
+        ],
+        "owned_worktree_removed": true,
+        "owned_branch_removed": true
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "Exact PR/main checks and full85-case hosted caller suite verified; owned lane retired with recovery bundle. Native release/admission/retention not claimed.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "Separate dependency owners"
+        },
+        {
+          "task": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2000 source map merged/main verified and owned lane retired; preserved closure receipts.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport and strict-decoder qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "No accepted new strict-decoder/backend evidence or authentic owner/requester handoff supplied; do not repeat unchanged rejected backend audit.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2001:11/11 local and exact PR/main cases;10 PR checks and main CI/CodeQL passed. Owned lane closed. No worker admission or retained gain.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "PR2002 closed at252f700 with exact PR/main CI+CodeQL and owned cleanup.",
+          "effort_cost_verification": "Source-only reuse of prior exact evidence; implementation/testing scoped separately",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify the pure HIGH worktree effect-target binding and correlation contract in existing owners",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "locally_qualified_publication_pending",
+          "reason": "Independent frozen32 cases: baseline32 expected missing-API failures, candidate32 passes. Pure structural contract only; source review approved, exact-head publication pending.",
+          "effort_cost_verification": "Two existing source files, one existing test owner, existing CI harness; deterministic tests/no paid model or provider calls; independent API/oracle/source/result review",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Qualify authentic effect-approval provenance and exact binding consumption in existing consensus owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "next_source_qualification_after_closure",
+          "reason": "The pure binding now exists; authentic producer/resolver evidence and downstream consumption remain unqualified. First inspect existing policy/sovereign/reviewer owners and reproduce the smallest concrete gap; do not invent approval or widen the delegated permit.",
+          "effort_cost_verification": "Bounded exact-source trace and independent finite checks first; no paid calls, signing, stores or activation without separately admitted scope.",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Close pre-existing consensus test helper size debt",
+          "ownership": "consensus test owner",
+          "effort_cost_verification": "Separate minimal formatting repair and original structure gate; not bundled here.",
+          "total": 7,
+          "state": "outstanding",
+          "reason": "Untouched reddog_elevated_consensus_e2e_support.py is201lines at base/current against existing200limit; global test-module structure check fails. Changed files comply; gate unchanged.",
+          "dimensions": [
+            1,
+            2,
+            2,
+            2
+          ],
+          "priority": "P3"
+        }
+      ],
+      "selected_next": {
+        "task": "Qualify authentic effect-approval provenance and exact binding consumption in existing consensus owners",
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
+        "reason": "Re-observation moves the completed pure contract out of execution. Native admission/Holo/supervisor remain blocked; authentic approval is the next eligible source qualification prerequisite, not permission to execute it now."
+      },
+      "validation": {
+        "baseline": {
+          "tests": 32,
+          "failures": 32,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 0
+        },
+        "candidate": {
+          "tests": 32,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 32
+        },
+        "baseline_interpretation": "Expected absent API, not a reproduced prior security defect",
+        "exact_cases": true,
+        "source_hashes_stable": true,
+        "unexpected_denials": [],
+        "local_case_count": 32,
+        "ci_selected_cases": 43,
+        "hosted_status": "pending",
+        "test_plan_sha256": "099a2f2df4c6868da0fb348f9a55e5ddf2d48a38271b958088781dba295e9a14",
+        "independent_source_review": "execution-review-candidate.json; reviewer did not execute tests",
+        "original_tests": "Original four canonicalization tests unchanged; excluded locally because their fixtures invoke signing",
+        "runtime_admitted": false,
+        "retained_gain": null,
+        "static_checks": {
+          "registry_current": true,
+          "static_structure_results": [
+            {
+              "test": "test_modules_have_no_shell_network_or_key_generation_imports",
+              "status": "passed"
+            },
+            {
+              "test": "test_consensus_modules_remain_bounded_lego_components",
+              "status": "passed"
+            },
+            {
+              "test": "test_consensus_test_modules_are_bounded_lego_components",
+              "status": "failed",
+              "detail": "reddog_elevated_consensus_e2e_support.py"
+            }
+          ],
+          "preexisting_debt": {
+            "path": "modules\\communication\\moltbot_bridge\\tests\\reddog_elevated_consensus_e2e_support.py",
+            "base_lines": 201,
+            "current_lines": 201,
+            "unchanged": true
+          },
+          "changed_files_within_bounds": true,
+          "source_modules": 13,
+          "test_modules": 15,
+          "frozen_tests_unchanged": true,
+          "ci_compiled_not_executed": true,
+          "ci_groups": [
+            11,
+            32
+          ],
+          "historical_observations_preserved": 55
+        },
+        "publication_integrity_repair": {
+          "initial_pr": 2003,
+          "initial_head": "edb62321d360c2c246fa8c90787b253c4a0c2278",
+          "failed_ci": 36814825254,
+          "failed_step": "Run RedDog fast test tier",
+          "cause": "Two modified Python owners retained stale generated runtime hashes",
+          "qualification_subset": {
+            "tests": 43,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "exact_cases": true,
+            "hashes_stable": true
+          },
+          "generated_inventory_count": 1401,
+          "changed_runtime_digests": [
+            "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_contract.py",
+            "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_evidence.py"
+          ],
+          "manifest_digest": "3eefbd0321c31f55ecc27e5f3110812f591928b6edec7718d15301b30755d068",
+          "node_compatibility_contract": "passed",
+          "final_ci": "pending",
+          "criteria_changed": false,
+          "generator_tests": {
+            "tests": 8,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "includes_staged_index_check": true
+        }
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-binding\\final-accounting.json"
     }
   }
 }

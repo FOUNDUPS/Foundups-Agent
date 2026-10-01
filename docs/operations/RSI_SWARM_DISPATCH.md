@@ -1,3 +1,25 @@
+## Pure effect-target binding checkpoint — 2026-10-01
+
+Base `252f700fbac4c4adb98f3dd81c3d05eadb8fce66`; PR#2002 is merged,
+main-verified and its owned lane closed. Two existing consensus owners now
+construct/recompute `reddog_effect_target_binding.v1` for HIGH/worktree_create.
+The32 independent frozen cases changed from expected missing-API failures to
+32pass/0fail/0error/0skip; no unexpected guarded operation or source drift.
+This is structural qualification, not authenticated approval or measured RSI gain.
+Original delegated APIs and four canonicalization tests remain unchanged.
+
+CI extends its existing selection from11 to43 cases. Exact PR/main execution is
+pending; publication/closure receipts live at
+`O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+Re-observed next14/P1: qualify authentic effect-approval provenance and exact
+binding consumption in existing owners. Source evidence must identify the
+smallest reusable gap before another implementation. No producer, permit,
+worker, service or model is admitted. Holo retrieval still reports authority
+root/head mismatch; pinned-source fallback is not semantic freshness.
+See backlog `current_observation.effect_target_binding_20261001`.
+
+WSP00/5/6/15/22/48/50/62/84/97; reuse before extension.
+
 ## Single-effect handoff planning checkpoint — 2026-10-01
 
 PR#2001 is merged at `a555687186568e8b74fdfebe037081b077ec8581` with
