@@ -1,3 +1,16 @@
+## 2026-10-02 — Restore concrete SQLite Path compatibility in Linux test guard
+
+Third PR2014 CI passed all331 portable cases, with3 Linux transport passes and
+5 fixture-construction failures before any database open. The URI guard added
+in the preceding attempt wrongly rejected concrete Path inputs used by the
+existing SQLite writer. Accept exact concrete Path values under the disposable
+root; preserve canonical read-only URI rules, containment and the256-open cap.
+The v1 pure oracle incorrectly required Path rejection; its result remains
+historical and does not establish writer compatibility. Corrected v2 pure WSL
+oracles passed20 cases (5 accepts/15 rejects), including concrete Path acceptance.
+No production code or any of the eight Linux integration oracles changed.
+Hosted Linux success remains pending. WSP5/6/22/97.
+
 ## 2026-10-02 — Confined read-only SQLite URI recognition in Linux test guard
 
 Second PR2014 CI passed all331 portable cases. Linux had3 transport passes and

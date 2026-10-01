@@ -20471,7 +20471,25 @@
         "uri_guard_cases": {
           "passed": 20,
           "plane": "Local non-root WSL pure path decoder only; no SQLite/root-owner execution",
-          "receipt_sha256": "f12cc8abe3eaec63c3bf3dcbc06ab67ab8706ede0bf649863610f0c94471c3b3"
+          "receipt_sha256": "f12cc8abe3eaec63c3bf3dcbc06ab67ab8706ede0bf649863610f0c94471c3b3",
+          "qualification": "Historical v1 result; Path-object rejection expectation was incorrect and is superseded by v2. Not valid writer compatibility evidence."
+        },
+        "third_hosted_attempt": {
+          "run_id": 36891796120,
+          "portable_passed": 331,
+          "linux_passed": 3,
+          "linux_failed": 5,
+          "allowed_database_opens": 0,
+          "cause": "New URI guard incorrectly rejected concrete Path inputs used by the unchanged SQLite writer; fixture construction failed before positive gates. Test-guard regression, not production defect.",
+          "evidence_sha256": "4fe88596a4a0053c591e0e4d383bacc037569dda7ca07477f0c0c39c40699751"
+        },
+        "uri_guard_cases_v2": {
+          "passed": 20,
+          "accepted": 5,
+          "rejected": 15,
+          "plane": "Local non-root WSL pure path decoder only; no SQLite/root-owner execution",
+          "receipt_sha256": "c91976f3c3602e7bbf51763ffe03ef68f8aaed8f01f64255627f074dd145db08",
+          "correction": "Exact concrete Path inputs under the disposable root accepted; canonical read-only URI and containment restrictions unchanged. Production and all eight Linux integration oracles unchanged."
         }
       },
       "authority_limits": [

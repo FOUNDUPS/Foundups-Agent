@@ -124,6 +124,8 @@ def _install_guard(repo, base, output, sources):
 
 
 def _database_path(value, base):
+    if type(value) is type(base):
+        value = str(value)
     if type(value) is not str or value == ":memory:":
         raise ValueError("invalid_database_target")
     raw = value
