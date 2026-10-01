@@ -1,3 +1,9 @@
+## Japan compute feasibility research — 2026-10-01
+
+- [Operating models and dated public benchmarks](docs/JAPAN_COMPUTE_COMPARABLES_20261001.md): school reuse, modular hosting, GPU rental and regional DR; explicit limits on pricing, power and cooling comparisons
+- [Japanese inquiry reference pack](docs/JAPAN_COMPUTE_INQUIRIES_JA_20261001.md): eight official organization routes and seven unsent draft templates with placeholder signatures
+- [Economic-model authority and evidence use](docs/YUMORI_ECONOMIC_MODEL.md#japan-grounded-feasibility-evidence--2026-10-01): no numerical model changes, customer commitments or send-completion claims
+
 # Project eSingularity FoundUp
 
 Project eSingularity combines a Japanese-first community campaign with a staged three-site distributed AI infrastructure / public-asset reuse program for Fukui. Hanyu is Priority 1 (Site 3), Shimousaka Priority 2 (Site 2), and Sukatto Priority 3 (Site 1), an optional onsen/community/education/thermal-reuse opportunity rather than a prerequisite for compute launch.
