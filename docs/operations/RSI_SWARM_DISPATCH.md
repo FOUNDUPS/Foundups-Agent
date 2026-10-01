@@ -1,3 +1,42 @@
+## Native baseline and loader qualification — 2026-10-02
+
+Source `140492c10e474a8606b95c4466be328ffa179796`. The next bounded experiment
+actually ran through the existing WRE helper → adapter → native-chat engine.
+Unrelated master collaborators were inert; this was supervised developer testing.
+
+| Observation | Result |
+|---|---|
+| Zero-init setup | 1 passed; no model call |
+| Actual native baseline | 1 initialization, 1 completion; 44.313s child |
+| Native usage | 658 input + 122 output = 780 tokens; stop finish |
+| Fixed capacity | 658 + 512 reserved ≤ 2048 context |
+| Production cleanup | Engine/native close each returned once; detached/reset; fallback 0 |
+| Strict proposal inspection | 0 accepted / 1 rejected; forbidden `observed_watermark.strip()` |
+| Generated-code executions / retries / providers | 0 / 0 / 0 |
+
+An independent reviewer confirmed the valid route and actual scope rejection.
+The unchanged parser rejected its Call whitelist; this was not a parser setup
+error. Exact 19 source/516 runtime pins and the full model hash matched before
+and after. Explicit close observation does not prove native memory release.
+
+Re-scoring selected the smallest existing-owner prerequisite at **13/P1**
+(C2/I4/D4/Impact3). A separate model-free child used the real `WRESkillsLoader`
+with a disposable registry, hygiene enabled and context injection disabled.
+It returned the exact reviewed 768-byte generic procedure. The original prompt
+remained 2601 bytes; adding only `retained_procedure` produced 3406 bytes.
+Independent result review passed; tokenizer/context fit remains unverified.
+
+**Next:** qualify a finite treated / later fresh-use / disabled-control packet
+through the same existing worker and loader. Original task, strict inspector,
+model and settings stay frozen. This observation allocates no further model
+calls. One known-task unseeded comparison cannot establish causal or population
+gain; no retained benefit, native admission, production skill or FoundUp launch
+is claimed. Higher owner-blocked priorities remain in the queue.
+
+Canonical evidence: backlog `proposal_conformance_baseline_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-conformance-baseline/`.
+Earlier checkpoints below retain historical scope. No production code changed.
+
 ## Reviewer-authority closure and next RSI test — 2026-10-02
 
 PR [#2014](https://github.com/FOUNDUPS/Foundups-Agent/pull/2014) is merged and
