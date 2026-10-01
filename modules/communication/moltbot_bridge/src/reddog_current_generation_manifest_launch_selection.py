@@ -476,6 +476,7 @@ def _launch_values(
             "generation_revision": activation.revision,
             "selection_issued_at": selected_at,
             "selection_expires_at": selected_at + SELECTION_TTL_SECONDS,
+            "manifest_expires_at": manifest["expires_at"],
             "owner_config_id": owner_config_id,
             "generation_public_key": generation_public_key,
             "repo_root": str(repo),
@@ -517,6 +518,7 @@ def _capability_type(seal: object) -> type:
 
 def _legacy_launch_values(value: Mapping[str, Any]) -> Mapping[str, Any]:
     hidden = {
+        "manifest_expires_at",
         "principal_authority_records_path",
         "principal_authority_records_digest",
         "generation_public_key",

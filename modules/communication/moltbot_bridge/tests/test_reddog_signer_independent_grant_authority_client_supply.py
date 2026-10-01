@@ -37,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     SCHEMA_VERSION_V3,
     SCHEMA_VERSION_V4,
+    SCHEMA_VERSION_V5,
     load_system_service_startup_selection,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_independent_secret_grant_provider import (
@@ -124,7 +125,7 @@ def _policy_value(tmp_path: Path, *, owner_config_id: str, grant_public: str) ->
     return value
 
 
-@pytest.mark.parametrize("owner_schema", [SCHEMA_VERSION_V3, SCHEMA_VERSION_V4])
+@pytest.mark.parametrize("owner_schema", [SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5])
 def test_supply_binds_root_transport_to_signed_policy(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, owner_schema: str
 ) -> None:

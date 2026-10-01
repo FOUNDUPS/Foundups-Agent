@@ -9,12 +9,16 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     PrincipalAuthorityRecord,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
+    MAX_ARTIFACT_BYTES,
     ascii_deep,
+    canonical_json,
     is_sha256,
 )
+from .reddog_reviewer_designation_contract import validate_reviewer_designation
 
 
 SCHEMA_VERSION = "reddog_authority_runtime_resolver_supply.v1"
+SCHEMA_VERSION_V2 = "reddog_authority_runtime_resolver_supply.v2"
 TOP_LEVEL_FIELDS = frozenset(
     {
         "schema_version",
@@ -80,6 +84,31 @@ def principal_record_key(principal_id: str, principal_provider: str) -> str:
     return f"{principal_provider}|{principal_id}"
 
 
+def parse_principal_artifact(
+    raw: bytes,
+) -> tuple[Mapping[str, PrincipalAuthorityRecord], tuple[dict[str, Any], ...]]:
+    """Read identity v1 or v2 data; a designation is not authenticated here."""
+    if type(raw) is not bytes or len(raw) > MAX_ARTIFACT_BYTES:
+        raise ValueError("e0_principal_authority_size_invalid")
+    try:
+        payload = json.loads(raw.decode("ascii"), object_pairs_hook=_unique_object)
+    except (UnicodeDecodeError, ValueError, RecursionError) as exc:
+        raise ValueError("e0_principal_authority_malformed") from exc
+    if type(payload) is not dict:
+        raise ValueError("e0_principal_authority_shape_invalid")
+    if payload.get("schema_version") != SCHEMA_VERSION_V2:
+        return parse_principal_records(raw), ()
+    if set(payload) != TOP_LEVEL_FIELDS | {"reviewer_authorizations"}:
+        raise ValueError("e0_principal_authority_shape_invalid")
+    authorizations = payload.pop("reviewer_authorizations")
+    if type(authorizations) is not list or len(authorizations) != 1:
+        raise ValueError("e0_reviewer_authorizations_invalid")
+    designation = validate_reviewer_designation(authorizations[0])
+    payload["schema_version"] = SCHEMA_VERSION
+    records = parse_principal_records(canonical_json(payload).encode("ascii"))
+    return records, (designation,)
+
+
 def _record(value: Mapping[str, Any]) -> PrincipalAuthorityRecord:
     text = (
         value["principal_id"],
@@ -135,4 +164,4 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return value
 
 
-__all__ = ["parse_principal_records", "principal_record_key"]
+__all__ = ["parse_principal_records", "parse_principal_artifact", "principal_record_key"]

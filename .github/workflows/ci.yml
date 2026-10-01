@@ -102,6 +102,11 @@ jobs:
           sys.path.insert(0,str(R))
           platform._node=lambda default='':'rsi-disposable-test-host'
           platform.machine=lambda:'x86_64'
+          # Reuse the reviewed descriptor observer without importing app packages.
+          import importlib.util
+          spec=importlib.util.spec_from_file_location('reviewer_path_observer',
+              R/'modules/communication/moltbot_bridge/tests/run_reddog_reviewer_authority_linux.py')
+          observer=importlib.util.module_from_spec(spec);spec.loader.exec_module(observer)
           blocked = []; sqlite_opens = []; repo_reads = set()
           def norm(value):
               p = os.fsdecode(value)
@@ -122,7 +127,7 @@ jobs:
                   deny(event,'provider/model import')
               if event=='sqlite3.connect': deny(event,'database access not selected')
               if event=='open' and isinstance(args[0],(str,bytes)):
-                  p=norm(args[0]); mode=args[1]; flags=args[2]
+                  p=observer._OPEN_TARGET.get() or norm(args[0]); mode=args[1]; flags=args[2]
                   write=(isinstance(mode,str) and any(c in mode for c in 'wax+')) or bool(flags & (os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_TRUNC|os.O_APPEND))
                   if write and not owned(p) and p!=norm(os.devnull): deny('open_write',p)
                   if not write and not owned(p) and (p.name.startswith('.env') or p.suffix.lower() in ('.gguf','.safetensors','.pem','.key') or any(x in ('.ssh','.aws','.azure','.config') for x in p.parts)):
@@ -131,11 +136,16 @@ jobs:
                       relative=str(p.relative_to(R)).replace('\\','/')
                       if relative not in paths: deny('unlisted_repository_source',relative)
                       repo_reads.add(relative)
-              if event in ('os.remove','os.rmdir','os.mkdir','os.chmod','os.utime','os.truncate') and not isinstance(args[0],int) and not owned(args[0]): deny(event,args[0])
-              if event in ('os.rename','os.replace','os.link') and (not owned(args[0]) or not owned(args[1])): deny(event)
+              if event in ('os.remove','os.rmdir','os.mkdir','os.chmod','os.utime','os.truncate') and not isinstance(args[0],int):
+                  index={'os.remove':1,'os.rmdir':1,'os.mkdir':2,'os.chmod':2,'os.utime':3}.get(event)
+                  descriptor=args[index] if index is not None and len(args)>index else None
+                  if not owned(observer._resolved(args[0],descriptor)): deny(event,args[0])
+              if event in ('os.rename','os.replace','os.link'):
+                  if not all(owned(observer._resolved(p,fd)) for p,fd in zip(args[:2],args[2:4])): deny(event)
               if event=='os.symlink': deny(event,'pytest convenience symlink disabled')
               if event=='os.chdir' and norm(args[0])!=R and not owned(args[0]): deny(event)
           sys.addaudithook(audit)
+          restore_open=observer._observe_open_targets()
           isolated = ['modules','modules.communication','modules.communication.moltbot_bridge',
                       'modules.communication.moltbot_bridge.src','modules.communication.moltbot_bridge.tests',
                       'modules.infrastructure','modules.infrastructure.secrets_mcp']
@@ -386,10 +396,118 @@ jobs:
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[delegated_prefix_signature]',
               'modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_effect_crypto.py::test_effect_review_real_ed25519_signature[unrelated_message_signature]',
           ]
+          # Scoped reviewer designation, connected signatures, producer and legacy versions.
+          nodes += [
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_independent_canonical_contract[golden]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_independent_canonical_contract[defensive_copy]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_missing]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_bool_time]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_float_time]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_empty_interval]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_negative_time]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_text_long]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_nonascii]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_privilege]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_domain]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_key]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[authority_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[inner_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[inner_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[inner_signature]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[inner_empty]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[inner_nine]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[inner_duplicate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[entry_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[entry_bool_time]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[entry_empty_interval]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[roles_empty]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[roles_nine]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[roles_duplicate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[roles_long]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[roles_nonascii]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[roles_tuple]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_designation_contract.py::test_designation_strict_rejection[signing_input_oversize]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[valid]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[last_current]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[designation_tamper]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[review_tamper]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[designation_domain]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[review_domain]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[issuer_id]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[issuer_provider]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[issuer_epoch]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[owner_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[repo]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[foundup]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[policy]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[decision_domain]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[principal_key]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[principal_repo]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[principal_foundup]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[role_subset]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_real_signatures_and_scope[revoked_epoch]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[owner_future]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[owner_expired]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[designation_future]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[designation_expired]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[entry_future]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[entry_expired]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[manifest_expired]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[selection_expired]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[expires_during_review]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[owner_changed]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[owner_removed]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[loader_throws]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[lease_throws]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[runtime_throws]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[mutated_inputs]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition.py::test_connected_lifetime_and_cleanup[escaped_resolver]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[v1]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[v2]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[v1_rejects_v2]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[unknown]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[missing]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[duplicate_json]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[none]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[empty]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[two]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py::test_principal_artifact_version_and_shape[bad_inner]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[two_principals]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[duplicate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[collision]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[missing]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[key_mismatch]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[repo_mismatch]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[foundup_mismatch]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[without_designation]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py::test_reviewer_principal_supply[separator_alias]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v1]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v2]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v3]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v4]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v5]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v1_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v2_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v3_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v4_extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v5_missing]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v5_duplicate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_owner_versions[v4_duplicate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_readiness_versions[v2_principals]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_readiness_versions[permission_v2]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_readiness_versions[invalid_designation]',
+          ]
+          nodes += ['modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_v5_existing_owner_consumers[v4]', 'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_owner_versions.py::test_reviewer_v5_existing_owner_consumers[v5]']
           args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
               '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
               '--junitxml='+str(D/'results.xml')]
-          status=int(pytest.main(args))
+          try:
+              status=int(pytest.main(args))
+          finally:
+              restore_open()
           after=bindings();xml=ET.parse(D/'results.xml').getroot()
           cases=list(xml.iter('testcase'))
           counts={k:sum(int(s.get(k,0)) for s in xml) for k in ('tests','failures','errors','skipped')}
@@ -413,6 +531,22 @@ jobs:
             ${{ runner.temp }}/effect-consensus-evidence/receipt.json
             ${{ runner.temp }}/effect-consensus-evidence/blocked.jsonl
           if-no-files-found: ignore
+
+      - name: Run current reviewer Linux ownership contracts
+        timeout-minutes: 4
+        run: |
+          sudo -- env -i PATH="$PATH" LANG=C.UTF-8 "$(command -v python)" -I -B \
+            modules/communication/moltbot_bridge/tests/run_reddog_reviewer_authority_linux.py \
+            "$RUNNER_TEMP/current-reviewer-linux"
+
+      - name: Upload current reviewer Linux evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-reviewer-linux
+          path: ${{ runner.temp }}/current-reviewer-linux/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Run WRE local proposal caller contracts
         env:

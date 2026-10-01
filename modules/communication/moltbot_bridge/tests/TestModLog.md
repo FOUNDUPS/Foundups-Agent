@@ -1,3 +1,67 @@
+## 2026-10-02 — Restore concrete SQLite Path compatibility in Linux test guard
+
+Third PR2014 CI passed all331 portable cases, with3 Linux transport passes and
+5 fixture-construction failures before any database open. The URI guard added
+in the preceding attempt wrongly rejected concrete Path inputs used by the
+existing SQLite writer. Accept exact concrete Path values under the disposable
+root; preserve canonical read-only URI rules, containment and the256-open cap.
+The v1 pure oracle incorrectly required Path rejection; its result remains
+historical and does not establish writer compatibility. Corrected v2 pure WSL
+oracles passed20 cases (5 accepts/15 rejects), including concrete Path acceptance.
+No production code or any of the eight Linux integration oracles changed.
+Hosted Linux success remains pending. WSP5/6/22/97.
+
+## 2026-10-02 — Confined read-only SQLite URI recognition in Linux test guard
+
+Second PR2014 CI passed all331 portable cases. Linux had3 transport passes and
+5 failures at each required positive check, with5 unqualified_database denials.
+The existing witness reader uses canonical target.as_uri() + ?mode=ro with
+uri=True. The guard incorrectly resolved that URI as a relative filesystem path.
+It now recognizes only canonical local read-only file URIs resolving within the
+disposable fixture root; host/query/fragment variants and in-memory targets reject.
+The256-open cap and real SQLite calls remain unchanged. No production or test
+oracle changed. All20 independently specified pure URI/path cases passed once
+in non-root WSL; this is not SQLite or root-owner execution. Linux success is
+pending rerun. Earlier failure receipts remain
+visible. The audit event does not itself attest the caller's uri flag. WSP5/6/22/97.
+
+## 2026-10-02 — Hosted descriptor-aware test guard correction
+
+First PR2014 CI passed330/331 portable cases; supplier positive rejected because
+Python's open audit event omits dir_fd. The unchanged supplier used its confined
+private temporary lock-root descriptor, but the guard resolved the lock relative to the
+checkout. Reused the existing Linux runner's descriptor observer for portable
+CI opens and descriptor-relative mutations; actual OS calls and confinement
+requirements remain unchanged. Production code, all331 oracles and Linux8 IDs
+are unchanged. Linux did not run in this failed attempt. Retry evidence remains
+separate; no passing hosted claim before observed success. WSP5/6/22/50/97.
+
+## 2026-10-01 — Connect scoped reviewer authority through existing owners
+
+Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now
+rejects unsupported collection before importing its helpers; the existing static
+classifier marks it operational/noncollectable. Its explicit eight-case CI path
+remains mandatory. Candidate-3 also passed198; candidate-4 reruns the same198
+after this collection guard changed a bound source file.
+
+- Reconciled PR #2013 closed at `c9d1273`; implemented the selected 15/P1 connected
+  key layer across 13 production files, including two bounded leaves. Existing
+  owner v5, principal v2, supplier/readiness and coupled consumers now compose
+  scoped reviewer designation with distinct identities and manifest expiry.
+- Public `verify_current_effect_reviewer_decision` uses one leased generation,
+  actual Ed25519 designation/review checks, complete policy-role containment,
+  owner/time/input rechecks and private resolver cleanup. No live configuration.
+- Local candidate-4: 198 passed, 0 failures/errors/skips; exact cases, stable source
+  samples, no unexpected denials. Earlier 196-case attempts (183/13 and 193/3)
+  retain their import-guard failure evidence; fixture/import closure was repaired.
+- Hosted 331 portable plus 8 Linux cases remain pending. Linux five actual-root
+  controls plus transport v3/v4/v5 do not prove valid signed-generation rotation.
+  Publication/merge/main/owned closure remain separate gates.
+- Independent runtime provenance, quorum, effect permission, native admission and
+  retained RSI benefit remain open. WSP00/5/6/11/15/22/49/50/62/84/95/97.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+  Earlier planned/pending log entries below preserve their historical scope.
+
 ## 2026-10-01 — Exercise real effect-review signatures
 
 - Reconciled PR #2012 merge/main/owned closure; selected the first runnable crypto
