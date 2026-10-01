@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.local_engine_lifecycle_20261001",
-    "base_commit": "904459651291db2e724ef4d94cc18d33f0e47f5b",
-    "selected_action": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
-    "status": "cleanup_locally_verified_reobserve_after_publication",
+    "observation_path": "current_observation.admission_prerequisites_20261001",
+    "base_commit": "71e26ea598dae90865b16bf8dfd9eb9a34117088",
+    "selected_action": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+    "status": "source_map_complete_reobserve_after_publication",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-engine-lifecycle\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-admission-prerequisites\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.native_caller_trial_20261001"
+    "previous_observation_path": "current_observation.local_engine_lifecycle_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -17466,6 +17466,200 @@
         "No model/provider/DB/WSL/service calls, native admission, signing request issuance, replay consumption, lease grants or production edits.",
         "Source support and synthetic regression results do not establish authentic runtime authority, retained learning or autonomous RSI."
       ]
+    },
+    "admission_prerequisites_20261001": {
+      "source": "71e26ea598dae90865b16bf8dfd9eb9a34117088",
+      "outcome": "source_map_complete_publication_pending",
+      "execution_plane": "source_inspection_only",
+      "signal_class": null,
+      "measurements": {
+        "application_tests": 0,
+        "model_calls": 0,
+        "provider_calls": 0,
+        "runtime_api_calls": 0,
+        "operational_store_reads": 0,
+        "leases_issued": 0,
+        "retained_gain": null
+      },
+      "source_maps": {
+        "resident_rows": 8,
+        "issuer_rows": 12
+      },
+      "artifact_hashes": {
+        "entry.json": "0d6ddaab939eda349feff45ce713bc01ebf6de200f2dc60e5e5fe2c2fb2ef464",
+        "resident-map.json": "f85fb5faf1c26e3b430cbd2d4fc67946cffd947182af329508448dedd2843706",
+        "issuer-map.json": "9c4cb73eb5e1f0fe059d7fd90d54ab9303c1f89c5acfc693a06d6df50405f1ab",
+        "admission-contract-review.json": "3ba89ff584694b0d4b549668a266b3a322fa047ad341c080b123d2cb67bdad7b",
+        "admission-map-review.json": "54e1b55b92c482ab06cbb197a73ebf080f6b47d57dcad2b1c13f5ab2659f6b1c",
+        "next-action-review.json": "54e1b55b92c482ab06cbb197a73ebf080f6b47d57dcad2b1c13f5ab2659f6b1c"
+      },
+      "audit_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-admission-prerequisites",
+      "findings": [
+        "Resolver named-anchor subset10/3/7 and no lease; semantic readiness is separate.",
+        "Existing issuer supports HIGH/ULTRA with absent consensus digest and no permit argument at provider handoff.",
+        "Real independent provider requires non-LOW typed permit; existing canonical permit/client domain covers exactly two HIGH principal/reddog requests.",
+        "Positive issuer tests use substitute provider; actual composed runtime not invoked.",
+        "Existing supervisor transport/canonical handoff and strict-decoder prerequisites remain blocked.",
+        "Effect payload digest and elevated signing-input mapping digest are distinct contracts; forwarding a permit or relabeling the role is insufficient."
+      ],
+      "limits": [
+        "Static evidence only; no live installation absence/readiness claim.",
+        "No new authority budget, policy repair or runtime admission.",
+        "Frozen actual-owner qualification must precede any repair; preserve all role/tier/consensus guards."
+      ],
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Exact runtime authority/effect-use lease absent; deterministic tests cannot mint admission."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "Exact-root/head R03 maintenance; query returned authority mismatch, UNKNOWN and index gap."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "reason": "Prior general-role cohort failed frozen acceptance; narrow known-case contract successes do not establish broad routing competence."
+        },
+        {
+          "task": "Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "merged_main_verified_owned_lane_closed",
+          "reason": "Exact PR/main checks and full85-case hosted caller suite verified; owned lane retired with recovery bundle. Native release/admission/retention not claimed."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete",
+          "reason": "Historical artifact replay and26post-development contract cases passed. Blinded held-out benefit and governed retention remain unproven; no more same-method expansion selected."
+        },
+        {
+          "task": "Separate Dependabot parent-chain resolution investigation",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "reason": "Observed Undici/gRPC updates blocked by existing parent constraints. No changed RSI Python dependency or observed new runtime blocker; protected FoundUp/other-owner package work stays separate. Preserve bot lifecycle and failure evidence rather than absorb it."
+        },
+        {
+          "task": "Map the existing external-signer issuer to resident admission prerequisites without consuming authority",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "source_reviewed_publication_pending",
+          "reason": "Issuer/resident maps and independent review complete; concrete effect-lease/elevated-consensus domain mismatch selected for separate finite qualification."
+        },
+        {
+          "task": "Isolated AmIBot lifecycle test",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "reason": "Requires admitted worker; protected active FoundUps and external AutoPost are not fixtures."
+        },
+        {
+          "task": "External supervisor transport and strict-decoder qualification",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "reason": "No accepted new strict-decoder/backend evidence or authentic owner/requester handoff supplied; do not repeat unchanged rejected backend audit."
+        },
+        {
+          "task": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "eligible_after_fresh_observation_and_execution_review",
+          "reason": "A concrete source-level incompatible composition is now identified. Finite real-owner negative controls can establish the exact boundary without live authority or selecting new policy. Qualification reuses existing owners; policy implementation complexity is not included in this score."
+        }
+      ],
+      "next_action": "Qualify the existing elevated-consensus and effect-lease request domains before issuer/provider integration",
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "prior_closure": {
+        "pr": 1999,
+        "merge": "71e26ea598dae90865b16bf8dfd9eb9a34117088",
+        "status": "merged_main_verified_owned_lane_closed"
+      },
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-admission-prerequisites\\final-accounting.json",
+      "publication_status": "pending_exact_head_checks_and_owned_closure",
+      "independent_source_review": {
+        "approved": true,
+        "bound_source_files": 38,
+        "runtime_execution_approved": false
+      }
     }
   }
 }

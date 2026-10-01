@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-01 current layer:** Existing Qwen engine and WRE adapter now own explicit per-call cleanup. The independently frozen portable selection reproduced22 missing-contract failures (40pass) before repair and passed62/62 after repair, without model/provider/database calls. This closes a resource-ownership contract, not native memory-release proof or RSI admission. Next13/P1: inspect existing native admission prerequisites before selecting another bounded attempt. See [cleanup qualification](modules/infrastructure/wre_core/ROADMAP.md#explicit-per-call-cleanup--2026-10-01). Prior real-caller trial PR#1997 is merged/main-verified; its rejected proposal remains rejected.
+**2026-10-01 current layer:** PR#1999 model-lifetime repair is merged/main-verified with its owned lane closed. Source-only admission mapping now identifies an existing issuer/grant-provider elevated-consensus domain mismatch. Next13/P1: qualify that exact real-owner pairing before selecting a repair. Existing native authority and supervisor prerequisites remain blocked; installed runtime status is unknown. See [the admission map](modules/communication/moltbot_bridge/INTERFACE.md#effect-lease-admission-map--2026-10-01). No new worker activation or retained-RSI claim.
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
