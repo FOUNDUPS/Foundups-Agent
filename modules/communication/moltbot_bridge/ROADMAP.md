@@ -1,3 +1,13 @@
+## Reviewer-key authority contract — 2026-10-01
+
+PR #2011 is merged/main-verified and its owned lane closed. The existing
+[reviewer-key contract](INTERFACE.md#reviewer-key-designation-contract--2026-10-01)
+now specifies opt-in root trust, separate signed reviewer permissions, coherent
+per-use scope/generation checks and version-consumer closure. It is not live
+authority. Next15/P1 is one connected nonactivating implementation after frozen
+independent oracles; native RSI/AmIBot and retained benefit remain open.
+Exact sequencing/closure: canonical backlog `reviewer_key_contract_20261001`.
+
 ## Effect-authority source qualification — 2026-10-01
 
 PR #2010 is merged/main-verified at `f4978e12`; its owned lane is closed.

@@ -80,52 +80,115 @@ to all identity/runtime verification infrastructure.
 | `src/reddog_elevated_authority_consensus_policy.py` | Protocols and strict supplied policy/evidence types; existing sovereign evidence binds a delegated parent. | Trusted policy origin, current reviewer key authority and explicit B/P/T/E plus requester/beneficiary authorization remain unresolved. |
 | `src/reddog_elevated_authority_consensus_verification.py` | Conditional verification of one effect review, including actual-input correlation. | Supplied resolver results do not authenticate their own provenance; quorum/permit/replay remain later gates. |
 
-**Next bounded design target: reviewer-key authority provenance.** Specify the
-signed supply fields and resolution semantics needed by `ReviewerKeyAuthority`
-in the existing current-principal resolver and principal-record parser/loader.
-Identify which authenticated authority may designate a reviewer and assert
-that key's epoch, expiry and role. A valid manifest of identity records alone
-does not grant reviewer permissions. Freeze the producer/trust-root mapping
-before implementation; retain current principal-resolution and delegated v1.
+#### Reviewer-key designation contract — 2026-10-01
 
-This first extension must carry verified key evidence unchanged into the existing
-`verify_effect_reviewer_decision`. Runtime-to-reviewer binding and sovereign
-B/P/T/E/requester/beneficiary authority remain subsequent, independent edges;
-do not bundle them into this layer. The eventual signer integration belongs in
-the existing `ElevatedConsensusSignerAuthority.reserve` path, with independent
-re-verification and durable nonce reservation, not a second authority store.
+**Planned source contract, qualified at `1ff01a9`; not an implemented API or
+runtime grant.** The architect selects an explicit, opt-in designation block in
+the existing root-owned signer owner configuration as the trust source. This
+resolves the source-design choice; it does not select real issuer identities,
+provision keys, write operational configuration or authorize a worker.
 
-Acceptance for that design and its subsequent implementation:
+**Version and ownership:** reserve owner-config v5 as v4 plus
+`reviewer_designation_authority`, validated by the existing
+`reddog_signer_system_service_manifest_selection_loader.py`. Preserve exact
+v1–v4 behavior; none implicitly grants reviewer-designation permission. Reuse
+the authenticated-read/revalidation pattern in
+`reddog_grant_authority_source_policy_authority.py`; do not reuse its privilege
+or secret-grant revocation evidence. The existing owner loader requires Linux,
+root ownership, confined paths and secure ancestors; Windows must keep rejecting
+this production path. An isolated Linux fixture is not a live installation.
 
-1. First slice: identify the authoritative producer, trust root/policy mapping,
-   signed reviewer permission, epoch/expiry and consumer. Resolve through the
-   actual verified generation/lease path; reject stale, mismatched, revoked or
-   expired evidence. Independent signed positive evidence or an explicitly
-   authorized fixture-generation budget is required before testing this edge
-   as authenticated. Missing ownership/evidence is not a fabricated receipt.
-2. Subsequent slice: bind sovereign authorization to recomputed B/P/T/E, repository, FoundUp,
-   work order, actual requester and beneficiary. State who may delegate each
-   role; matching work-order IDs or parent principal identity is insufficient.
-3. Specify current-generation lease acquisition, consumption/discard, minimum
-   lifetime, revocation and failure cleanup across existing owners. Independent
-   grant verification must recompute the same target and effect, not trust the
-   coordinator's Boolean. Do not consume a model capability twice.
-4. Freeze independent acceptance evidence before code: authentic-source
-   substitution, stale generation/key, wrong actor/runtime/effect, expiry,
-   cleanup failure and cross-domain negatives, plus an authorized positive.
-   Synthetic positives qualify mechanics only. Any installed-runtime inspection
-   and operational signing need their own actual scope and budget.
-5. A separate cryptographic integration check needs frozen public vectors for
-   the exact effect preimage. None was found in the scoped existing tests;
-   their recording verifier or signatures for other domains cannot substitute.
-   This check is dependent, not the selected executable task. No key generation
-   or signing is authorized by this documentation. Passing vectors alone still
-   cannot prove production provenance.
+The principal artifact remains `principal_authority_records.json`. A versioned
+v2 envelope adds a sibling `reviewer_authorizations` collection to its existing
+identity collection. `PrincipalAuthorityRecord` and strict v1 parsing remain
+unchanged. Extend the existing resolver artifact supplier, principal parser/
+loader and current-principal resolver; no new registry, database or orchestrator.
+The outer manifest authenticates generation membership and artifact bytes;
+the separately signed inner designation authenticates reviewer permission.
 
-This qualification executed no runtime resolver, signer, provider, model or
-operational store. Installed runtime/configuration is unknown. It removes an
-ambiguous next step; it does not clear native RSI, supervisor or AmIBot G0 gates.
-Do not repeat this source inventory unchanged as another completed RSI layer.
+| Boundary | Required signed or trusted fields and semantics |
+|---|---|
+| Root-owned designation block | Exact schema; explicit `designate_effect_reviewers` privilege; issuer principal/provider/public key/key epoch; exact repository, FoundUp, consensus-policy digest and `reddog_effect_reviewer_decision.v1` domain; exact integer issuance/expiry. Actual values are separately authorized installation inputs. Neither the inner artifact nor manifest signer may supply its own trust anchor. |
+| Inner designation | Distinct `reddog-reviewer-designation.v1.` signing domain; issuer identity/epoch and privilege; digest of the trusted designation block; exact repository/FoundUp/policy/decision-domain binding; issuance/expiry; bounded reviewer entries; signature. Canonical sorted compact ASCII JSON excludes only the signature from the signing input. Derive any audit digest; do not accept a self-asserted verified flag. |
+| Reviewer entry | Exact principal/provider, public key, reviewer key epoch, authorized roles and issuance/expiry. Require the public key and identity to match the current manifest-bound principal record and its repository/FoundUp scope. Reviewer epoch/expiry are explicit values, never the manifest-signing epoch or selection TTL renamed. |
+| Shape and bounds | Freeze exact wire keys before code; reject unknown/duplicate JSON keys and implicit coercions. Retain the existing 64 KiB owner-config and 1 MiB artifact ceilings. At most eight unique reviewer pairs, each with one key/epoch and 1–8 unique bounded ASCII roles. Exact integers only for time; false/zero/unknown evidence cannot become authenticated success. All lifetime intervals must be nonempty. |
+
+The table fixes required semantics and domain separation; final spelling of the
+new wire fields and canonical golden bytes must be frozen by the independent
+test plan before implementation. Existing v1 field sets are not relaxed.
+One exact scope/policy per verification keeps this first layer small; multiple
+FoundUps use separately authorized scoped instances, not a wildcard grant.
+
+**Connected use-time contract:** the narrow composition entry remains in the
+existing effect-verification owner. It loads one authenticated owner snapshot,
+checks the actual parent repository/FoundUp, actual policy digest and effect
+decision domain, and derives the generation boundary from that same config ID.
+Never combine a refreshed designation allowlist with a cached older boundary.
+It validates the current policy shape/digest and captures the exact policy and
+actual inputs used by `verify_effect_reviewer_decision`.
+
+Acquire the existing one-use selection and hold its generation lease through
+confined artifact reading, inner signature verification, scoped key resolution
+and the conditional effect check. Issuer key/privilege must match the explicit
+root-owned block before trusting any inner designation. The production composition
+uses the existing `reddog_ed25519_signature_verifier_backend.py` public verifier
+for designation and review signatures; caller-supplied recording or always-true
+verifiers cannot establish authenticated acceptance. The earlier conditional API
+keeps its explicit limits. Runtime evidence remains an independent required
+input; this slice cannot authenticate it by assertion.
+The consumer must not expose a reusable bare reviewer-key resolver/capability
+that remains accepted after this composition/lease ends.
+
+The existing `resolve(principal_id, provider)` cannot see a decision role.
+Therefore collect **all** roles assigned to that pair in the exact pinned
+policy's `reviewer_membership`; require a nonempty set wholly contained in the
+signed entry's authorized roles before projecting key/epoch/expiry. Checking
+only intersection or `required_roles` is insufficient. A policy assigning
+critic+verifier with only a critic grant must reject the projection, even for
+critic; this deliberate conservative rule preserves the existing protocol.
+Using that projection with another policy or actual scope must fail.
+
+Before acceptance, re-read authenticated owner configuration while the lease
+is still held and reject observed config identity changes; recheck trusted time.
+Effective authority expiry is the minimum of explicit owner/designation/entry
+and manifest expiries, additionally respecting the effect context's existing
+policy maximum-TTL/current-time checks. `ElevatedConsensusPolicy` has no absolute
+expiry field: do not invent one. Selection lifetime is an additional use-time
+gate, not reviewer-key lifetime. Every exception releases the lease and rejects.
+
+**Temporal limit:** these are authenticated sampled owner reads and a fenced
+generation at checked boundaries. They do not establish an atomic owner-config
+and generation transaction, detect all change-and-restore events, guarantee
+authority after return, or make revocation permanent across root-config rollback.
+Current-generation reviewer removal/key rotation and explicit owner-block
+removal/rotation revoke on the next observed use. Stronger monotonic revocation
+requires separate authorized evidence; no new revocation store is selected.
+
+**Connected implementation closure:** loader changes alone cannot advertise v5
+support. Existing `reddog_grant_authority_service_owner_binding.py` and
+`reddog_signer_independent_grant_authority_client_supply.py` accept v3/v4, while
+`reddog_grant_authority_source_policy_authority.py` load/revalidate requires v4.
+Qualify all affected schema consumers and preserve v1–v4 rejection/acceptance
+behavior before allowing a v5 startup composition. Keep independent grant
+re-verification/nonce ownership in the existing signer path; no effect permit,
+sovereign authorization or worker activation is added by the key layer.
+
+**Frozen acceptance before code:** legacy v1–v4 controls; exact-field/duplicate/
+size/time bounds; unauthorized issuer despite a valid outer manifest/signature;
+wrong issuer/key epoch/provider/role/repository/FoundUp/policy/domain; the
+critic-only projection and cross-policy reuse counterexamples; owner A versus
+boundary B; observed removal/rotation and stale selection; expiration during
+verification; lease cleanup and escaped-resolver use; an independently supplied
+signed positive reaching the existing effect verifier. Public vectors for other
+messages or a recording verifier cannot supply that positive. Test-signing
+budget/fixtures and installed authority are separate inputs; this document
+authorizes neither operational signing nor production configuration.
+
+Next: one connected, nonactivating reviewer-key implementation with independent
+oracles and version-consumer tests, re-observed under WSP15. Runtime-to-reviewer,
+sovereign B/P/T/E/requester/beneficiary authority, quorum/permit/replay and native
+admission remain later gates. No source/runtime calls or retained RSI benefit
+were produced by this contract-design sprint.
 
 ### Pure effect-context correlation API — 2026-10-01
 

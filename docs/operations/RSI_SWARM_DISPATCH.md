@@ -1,3 +1,29 @@
+## Reviewer-key authority contract — 2026-10-01
+
+PR #2011 is merged/main-verified at `1ff01a9`; the prior owned lane is closed.
+Fresh observation found97 unchanged peer PR heads,159 worktrees and no competing
+RSI/reviewer lane. The unchanged Holo authority/query-host mismatch was not retried;
+semantic coverage remains unverified and exact-source retrieval supplies fallback.
+
+Selected14/P1 (C2/I4/D5/Impact3) now specifies an opt-in root-owned designation
+block, a versioned reviewer collection inside the existing principal artifact,
+and a connected per-use consumer. Actual issuer identities remain installation
+inputs. Legacy principal records and owner configs confer no new permission.
+The interface records policy-role projection, config/generation coherence,
+Linux ownership, expiry/revocation limits and the v5 consumer-version closure.
+This is a source contract; no production code, signing or native authority changed.
+
+Next15/P1 (C4/I4/D4/Impact3): a connected nonactivating reviewer-key implementation
+through those existing owners, after freezing independent oracles/wire fields and
+qualifying test execution/evidence. A parser alone is not the acceptance target.
+Runtime provenance and effect-scoped sovereign permission remain separate;
+native RSI18/P0 and AmIBot G0 remain unadmitted. No retained gain is claimed.
+
+Canonical observation: `reviewer_key_contract_20261001`; contract in the existing
+consensus interface. WSP00/15/22/50/84/97. Audit/publication evidence:
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-contract/`.
+Prior publication-pending checkpoints below are historical.
+
 ## Effect-authority source qualification — 2026-10-01
 
 PR #2010 is merged/main-verified at `f4978e12`; its owned lane is closed.

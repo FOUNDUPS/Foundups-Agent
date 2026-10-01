@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_authority_qualification_20261001",
-    "base_commit": "f4978e12e94e1b0d151b38b16c295d2bda374b23",
-    "selected_action": "Specify reviewer-key authority provenance and signed supply contract in existing principal owners",
-    "status": "effect_authority_source_qualified_publication_pending",
+    "observation_path": "current_observation.reviewer_key_contract_20261001",
+    "base_commit": "1ff01a9f6575b675a8f68ee875813795a1087b86",
+    "selected_action": "Implement connected scoped reviewer-key authority composition in existing owners",
+    "status": "reviewer_key_contract_designed_publication_pending",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 4,
       "importance": 4,
-      "deferability": 5,
+      "deferability": 4,
       "impact": 3,
-      "total": 14,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-authority-qualification\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.effect_reviewer_20261001"
+    "previous_observation_path": "current_observation.effect_authority_qualification_20261001"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -19793,6 +19793,227 @@
       "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-authority-qualification",
       "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-authority-qualification\\final-accounting.json",
       "dependent_crypto_check": "No frozen public signature for the exact effect preimage found in scoped tests. Existing backend generates/signs other-domain fixtures; no signing/private-key execution was admitted for this slice. Qualification requires separately attributable exact-preimage vectors or an explicit test-signing budget."
+    },
+    "reviewer_key_contract_20261001": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "1ff01a9f6575b675a8f68ee875813795a1087b86",
+      "selected": "Specify reviewer-key authority provenance and signed supply contract in existing principal owners",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "status": "contract_design_complete_publication_pending",
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Implement connected scoped reviewer-key authority composition in existing owners",
+          "dimensions": [
+            4,
+            4,
+            4,
+            3
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "eligible_nonactivating_implementation_after_test_qualification",
+          "dependency": "Freeze independent wire/oracle and source execution plan; signed-positive fixture provenance or test-signing budget must be separately qualified. No operational authority from code.",
+          "ownership": "Existing root-owner loader, principal supply/parser/loader/current resolver and effect verification owners",
+          "effort_cost_verification": "One connected source slice with legacy and version-consumer tests; no paid models, operational configuration or native worker activation.",
+          "reason": "Source-design trust root now explicit. Implement the complete key edge rather than another inert parser; runtime/sovereign authority are separate."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Specify reviewer-key authority provenance and signed supply contract in existing principal owners",
+          "dimensions": [
+            2,
+            4,
+            5,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "contract_design_complete",
+          "dependency": null,
+          "ownership": "Existing signed-generation principal resolver/parser and consensus key-evidence owner",
+          "effort_cost_verification": "One bounded field-provenance/consumer design with independent source review; no paid calls or runtime invocation.",
+          "reason": "Explicit opt-in root-owned designation trust chosen as architecture; current grantor values are not inferred or provisioned. Source contract covers same-config generation, actual scope and role-blind projection. Implementation and live authority remain separate."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "effort_cost_verification": "Reuse exact existing evidence; rescope and qualify before changed implementation. No runtime authority from score."
+        }
+      ],
+      "effort_cost_verification": "One existing-interface contract plus canonical status reconciliation; independent source/counterexample review, no product execution.",
+      "source_reconciliation": "PR2011 closed. Strict identity records and generation manifests do not authorize reviewer designation. Explicit opt-in root-owned authority is an architectural extension, not existing runtime permission. Current Linux-only owner and v3/v4 consumer checks must be preserved/qualified.",
+      "retrieval": {
+        "last_known_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "query_host": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "repeated_probe": false,
+        "semantic_freshness": "unverified",
+        "fallback": "Exact main source/NAVIGATION/module docs. Historical pending prose reconciled with closed PR receipts. No canonicalization source leaf exists: canonicalization is in contract.py; do not invent a new owner.",
+        "quality": "Exact source and adjacent version-consumer trace; no TODO/FIXME found in scoped principal/resolver-artifact/manifest leaves. Historical pending prose reconciled with PR2011 closure. Same query host and authority root/head mismatch; no repeated failed probe, semantic coverage unverified."
+      },
+      "prior_closure": {
+        "pr": 2011,
+        "merge": "1ff01a9f6575b675a8f68ee875813795a1087b86",
+        "head": "61015683199b18975045f4a802b7c83ec5d5c303",
+        "receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-effect-authority-qualification\\final-accounting.json",
+        "receipt_sha256": "2f51d298ab926550b3ef7d1c93b9e2a77ad34e9cf7f3bc9f9d4304ade04e38f9"
+      },
+      "source_bindings": {
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_records.py": "9f1554f4800753aebb9b37cedb2e2f590ec72c66",
+        "modules/communication/moltbot_bridge/src/reddog_authority_runtime_resolver_artifact_supply.py": "1c55fc99a66fd816cc6aa5c58f0194dcf7c7becf",
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_authority.py": "6d69503c0965560a3674a2bd29d41dbd149e8f86",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_principal_authority_resolver.py": "a71a762458c322faa243468df8bb04f1e9190621",
+        "modules/communication/moltbot_bridge/src/reddog_signer_system_service_manifest_selection_loader.py": "f2c6353fa888a67495c05012569d894ed540a557",
+        "modules/communication/moltbot_bridge/src/reddog_current_generation_manifest_launch_selection.py": "1d2b51fe01bf9b3810bbcbb593d85f4f44063667",
+        "modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_authority.py": "0b0297eacf79f51c54aaa9d68f4f1a5d0c4b5e97",
+        "modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_contract.py": "c0bc336004e0d333da6832059baed23056a1cdbd",
+        "modules/communication/moltbot_bridge/src/reddog_grant_authority_source_policy_authority.py": "29b07b327712eddd28d8056d0cc0407916e80ef3",
+        "modules/communication/moltbot_bridge/src/reddog_grant_authority_service_owner_binding.py": "e660674b88c20dad4ae17719196c96ef458cd2a0",
+        "modules/communication/moltbot_bridge/src/reddog_signer_independent_grant_authority_client_supply.py": "f5d7e576ae6cf9a03a76c8a7f8095766bad9fc8d",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_policy.py": "01db3d66ca1427c9b2ffa913dcd9c270e5d52502",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_verification.py": "e61acb261cbc17577de8290038cf73d1849d59f0",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_reviewer_evidence.py": "ba74453b60f16823e7a26d43d52dc93aea496b12",
+        "modules/communication/moltbot_bridge/src/reddog_ed25519_signature_verifier_backend.py": "60567f8625a44f0c5b4d316729e1b7dc0b0d86b4"
+      },
+      "invariants": [
+        "PrincipalAuthorityRecord/v1 and owner v1-v4 meanings unchanged",
+        "No actual issuer identity, key, installation config, signature or runtime authority supplied",
+        "Role-blind projection requires nonempty ALL membership roles subset of signed allowed roles under exact consumer policy",
+        "Same authenticated owner config supplies designation and generation boundary; actual scope checked; no reusable escaped resolver",
+        "Sampled owner rechecks are not atomic transaction, ABA detection or permanent revocation",
+        "No new registry/database/orchestrator and no separate sovereign/runtime closure implied",
+        "Production key composition uses existing public Ed25519 verifier for both designation and review signatures; synthetic verifiers do not authenticate acceptance"
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "installed_runtime_state": "unverified",
+      "validation": {
+        "local": "Static documentation/history/score/source/reference validation only",
+        "product_tests_run": 0,
+        "current_publication": "pending"
+      },
+      "selected_next": {
+        "task": "Implement connected scoped reviewer-key authority composition in existing owners",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 15,
+          "priority": "P1"
+        },
+        "scope": "Connected existing-owner key trust supply/resolution/actual effect-verifier composition with legacy and version-consumer coverage; independent frozen test plan and admissible evidence before source execution. Production provisioning/runtime/sovereign evidence remain separate."
+      },
+      "evidence_directory": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract",
+      "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-key-contract\\final-accounting.json"
     }
   }
 }
