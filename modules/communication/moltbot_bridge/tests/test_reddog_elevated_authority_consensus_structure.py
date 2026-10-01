@@ -68,7 +68,7 @@ def test_modules_have_no_shell_network_or_key_generation_imports() -> None:
 
 
 def test_consensus_modules_remain_bounded_lego_components() -> None:
-    assert len(MODULES) == 13
+    assert len(MODULES) == 14
     for path in MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name
@@ -86,7 +86,7 @@ def test_consensus_modules_remain_bounded_lego_components() -> None:
 
 
 def test_consensus_test_modules_are_bounded_lego_components() -> None:
-    assert len(TEST_MODULES) == 15
+    assert len(TEST_MODULES) == 16
     for path in TEST_MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name

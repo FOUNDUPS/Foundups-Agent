@@ -1,3 +1,26 @@
+## Inert effect-context qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_context.py` contains47 frozen
+data-only cases. Golden bytes/digest, immutable round-trip, exact field bounds,
+8192/8193-byte boundary, malformed wire/manual contexts and past/future values
+are tested without clock/admission semantics. No signing fixtures are imported.
+Baseline47 failures were explicit missing-API assertions, not collection errors
+or an old security bypass. Candidate47passes; zero errors/skips in both runs.
+
+Exact local commands: qualified Python `-I -S -B` runs the reviewed audit
+`execute_tests.py baseline` / `execute_tests.py candidate`; it launches the
+90-second `-I -B` guarded pytest selection in `run_contract_tests.py`.
+Frozen IDs/oracles, manifests, original XML/logs and receipts are under
+`O:/Foundups-Agent-audits/20261001-rsi-effect-context/`.
+Independent source/runner/result review is separate from test execution.
+Python guards are not OS isolation; sampled hashes are not immutable execution.
+
+Existing CI qualification preserves all50 prior nodes and adds47 exact IDs;
+hosted97 pending. All seven structural checks remain, only exact leaf inventory
+counts increase; size limits unchanged. Registry generation uses the existing
+auto_test_registry_audit skill:1662 files/269 quarantined, new leaf collectable
+as unit. Runtime approval, worker admission and retained benefit are not tested.
+
 ## Existing consensus structural gates — 2026-10-01
 
 Closed the previously recorded201-line helper debt by removing one blank line

@@ -1,3 +1,18 @@
+## 2026-10-01 — Inert effect-approval context
+
+- Closed PR#2005 bookkeeping; independently qualified the next concrete gap
+  without duplicating the existing broad handoff design (WSP15:13/P1).
+- Added one focused context/decoder leaf and independent pure test owner inside
+  existing moltbot_bridge. Existing contract/rehydrator owners are near200 lines;
+  no unrelated extraction or compression, new module, orchestrator or store.
+- Frozen47-case baseline:47 expected missing-API failures; candidate47passes,
+  zero errors/skips, stable source samples/no unexpected denial/database open.
+- Existing CI50→97; structural inventory13→14 source/15→16 test leaves, with
+  unchanged200-line/50-function limits. Canonical registry1662/269 quarantined.
+- No authentic approval, runtime activation or retained RSI gain. Hosted checks
+  pending. WSP00/5/6/10/11/15/22/49/50/62/84/95/97; evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-effect-context/`.
+
 ## 2026-10-01 — Retain existing consensus structural checks in CI
 
 - Reconciled PR#2003 as merged, exact-main CI/CodeQL verified, owned lane closed.

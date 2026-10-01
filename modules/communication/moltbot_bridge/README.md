@@ -1,3 +1,12 @@
+## Effect-approval context data boundary — 2026-10-01
+
+The [existing consensus interface](INTERFACE.md#inert-effect-approval-context-api--2026-10-01)
+now exposes an immutable effect context, strict decoder and domain-separated
+canonical bytes/digest. This is untrusted data preparation only; no approval,
+signature, permit or runtime consumer is activated. See the module roadmap and
+tests README for the47-case local baseline/candidate evidence and pending hosted
+qualification. Existing delegated v1 behavior remains unchanged.
+
 ## Cross-process observer qualification — 2026-09-27
 
 PR1923 is merged/main-verified at `5578f7bd` with254 candidate cases passing.
