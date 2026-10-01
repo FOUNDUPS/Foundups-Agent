@@ -1,3 +1,19 @@
+## Native baseline and loader qualification — 2026-10-02
+
+Actual supervised helper/adapter/native-chat baseline returned once: 658 input,
+122 output tokens, 44.313s. Existing production engine/native close each returned
+once with detached/reset ownership and no fallback. The unchanged parser rejected
+the proposal's `.strip()` call; no generated code was executed or tested.
+
+The real loader separately returned the reviewed 768-byte disposable procedure
+with hygiene enabled. Original prompt2601bytes → single-key treated prompt3406;
+this model-free check does not establish token fit or benefit. Next13/P1: qualify
+the finite treated/later-use/disabled-control packet. All current model budget
+is closed; admission and retained benefit remain open. No production code changed.
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-baseline-and-loader-qualification--2026-10-02)
+and backlog `proposal_conformance_baseline_20261002` for independent evidence.
+Earlier entries below retain historical scope.
+
 ## Reviewer-authority closure and next RSI test — 2026-10-02
 
 Reviewer-key composition closed in PR #2014 at `44d833c`. Registry-audit experiment

@@ -1881,23 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.reviewer_authority_closure_20261002",
-    "base_commit": "44d833c02de157d6441599a8c75086329be7099c",
-    "selected_action": "Qualify frozen proposal-conformance preflight for one finite retained-text observation",
-    "status": "preflight_frozen_execution_unadmitted",
+    "observation_path": "current_observation.proposal_conformance_baseline_20261002",
+    "base_commit": "140492c10e474a8606b95c4466be328ffa179796",
+    "selected_action": "Qualify the finite retained-procedure comparison packet",
+    "status": "baseline_rejected_loader_qualified_next_packet_unadmitted",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
       "total": 13,
-      "priority": "P1",
-      "rationale": "Narrow preparation reuses existing owners; conforming output is important and next-needed, but localized observation has limited impact. Prior14/P1 registry preparation closes objective-inconclusive, not as an improvement success."
+      "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261001-rsi-reviewer-authority-composition\\final-accounting.json",
+    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\closure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.reviewer_authority_composition_20261002"
+    "previous_observation_path": "current_observation.reviewer_authority_closure_20261002"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16976,7 +16975,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -17014,7 +17013,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -17025,7 +17024,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -17051,7 +17050,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper\u2192adapter\u2192engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",
@@ -20827,6 +20826,231 @@
         "Unseeded known-task conformance does not establish semantic correctness, unseen transfer or causal retained improvement.",
         "No production accounts, active FoundUps, Remote AutoPost, tokens or wallet actions."
       ]
+    },
+    "proposal_conformance_baseline_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "140492c10e474a8606b95c4466be328ffa179796",
+      "status": "baseline_scope_rejected_loader_qualified",
+      "previous_observation": "current_observation.reviewer_authority_closure_20261002",
+      "classification": "BASELINE_SCOPE_REJECTED_REASSESS_ONLY",
+      "scope": "One supervised local WRE helper/adapter/native-chat baseline, then one model-free existing-loader observation; unrelated master collaborators inert. Not autonomous admission.",
+      "baseline": {
+        "model": "Qwen3.5-4B-Q4_K_M.gguf",
+        "runtime_version": "0.3.20",
+        "source_bindings": 19,
+        "runtime_bindings": 516,
+        "model_sha256": "25082a7dd3776cc3c741c6347d3bd04523f05796607b3fbc32fa3a25dfa1418c",
+        "preflight_children": 1,
+        "native_children": 1,
+        "initializations": 1,
+        "completions": 1,
+        "prompt_tokens": 658,
+        "completion_tokens": 122,
+        "total_tokens": 780,
+        "child_wall_seconds": 44.313,
+        "generation_seconds": 37.843,
+        "output_reservation": 512,
+        "context_tokens": 2048,
+        "finish_reason": "stop",
+        "scope_accepted": 0,
+        "scope_rejected": 1,
+        "invalid_routes": 0,
+        "parser_invocations": 1,
+        "generated_code_executions": 0,
+        "generated_code_tests": 0,
+        "retries": 0,
+        "provider_requests": 0,
+        "paid_provider_cost": null,
+        "production_engine_close_attempts": 1,
+        "production_engine_close_returns": 1,
+        "production_native_close_attempts": 1,
+        "production_native_close_returns": 1,
+        "owner_detached_and_reset": true,
+        "fallback_attempts": 0,
+        "guard_denials": 0,
+        "source_runtime_model_pre_post_match": true,
+        "rejection": "Unchanged parser Call whitelist at line36 rejects observed_watermark.strip(); also conflicts with opaque-token contract. This is proposal failure, not parser setup failure.",
+        "budget_state": "closed"
+      },
+      "loader_preparation": {
+        "status": "independently_verified_model_free",
+        "owner": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py",
+        "fixture": "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\fixture",
+        "registry_production_mutated": false,
+        "content_bytes": 768,
+        "content_sha256": "5530879955720a9405eb7eea18c0ae04a97596e97456e2f7724accd4df266bfa",
+        "inject_context": false,
+        "enforce_hygiene": true,
+        "baseline_prompt_bytes": 2601,
+        "baseline_prompt_sha256": "63da9f1662865db492fefd01273621613a1bf72b3ce69442f9998218f261f680",
+        "treated_prompt_bytes": 3406,
+        "treated_prompt_sha256": "3f60f7a733384dce9ceff0c48d09ef0bfa2d2384819e5f581c04094fddb1225b",
+        "input_delta": [
+          "retained_procedure"
+        ],
+        "child_wall_seconds": 1.188,
+        "token_fit_verified": false,
+        "model_calls": 0,
+        "treatment_calls": 0,
+        "bound_semantics": "Zero model fields describe reviewed model-free call graph, not native counters. File-read inventory includes pre/post verification reads."
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner"
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners"
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "Source-bound worker/loader integration and aggregate treatment/later-use/disabled-control budget; actual context fit unverified",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane"
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane"
+        }
+      ],
+      "next_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "next_step": "Qualify one existing-worker packet that loads the exact procedure for treated and later fresh use, omits it for disabled control, preserves original task/inspector/model/settings, and freezes per-call/aggregate budgets before any further generation. Stop on invalid or inconclusive evidence; no automatic retries.",
+      "retrieval": {
+        "method": "Pinned source/NAVIGATION and canonical owner docs; exact original task/inspector retained",
+        "noise": "Historical observations separated from fresh single-call denominator",
+        "ordering": "Current closure, actual baseline, independent rejection, then smallest loader prerequisite",
+        "missing": "Current governed Holo result; WRE memory README absent; admitted worker/evaluator and retained-benefit proof still absent",
+        "staleness": "Source140492c pinned; same shared/authority mismatch retained without repeating failed Holo query; higher blocked owner rows carried forward, not newly runtime-audited",
+        "duplication": "Existing caller, loader, guard and parser reused; no new production module, store, scheduler or skill"
+      },
+      "limits": [
+        "One known-task unseeded sample at temperature0.2 is not a defect rate or causal improvement estimate.",
+        "AST rejection is syntactic scope evidence; no generated method or semantic test was executed.",
+        "Observed explicit close is not proof of native memory release or later destructor behavior.",
+        "Python guards and sampled source hashes are not OS network/memory isolation or immutable execution.",
+        "Loaded persisted text and prompt construction do not establish token fit, retained benefit or production Skillz promotion.",
+        "No production account, deployment, active FoundUp, Remote AutoPost, token/wallet or native autonomous worker action."
+      ],
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\manifest.json": "1c49f42cf65f688cc1823859970c3a13479e6ce00e475b8097b520f716af60cd",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\acceptance.json": "e65bb84f83b2500f3a54f60fa48fa209b28339420048a544feb21219255f3b15",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\preflight-result-review.json": "cf47184c2f177f489bac93e50e798880d5d5ec3ee6b030634cbfcee6d078e76d",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\generation-result-review.json": "7175652c7c00ffbe6bc7b5b7610e0158957ec3107478766fa01d0f142fd70a63",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\final-result-review.json": "f0933d6ecdeeb32f018f4f29ae5c42f39d540b00743395d1c9eada202cf09690",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\post-baseline-selection.json": "a9d1865a6cbaa14e8afbb166d95c8566d808474d195f6ed7bb5641f767f665c0",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\design.json": "2bda40c3b3d31c3b6f19c035da871d1625e1f86904d37f0cfe2affa942380e04",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\review.json": "cc058e8e84671aecba2098f2aace93a1cfbd8bd69446f3e83474b3d8a6f4820c",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\loader-result-review.json": "1c938cda4b3d1d3406ff841ff6b06133ef348cdef688569594f85d83b294713b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\loader-receipt.json": "fb71fbbf45a0fc5f471459457db0520ea9142c6ea7f62064777b72da2236bc01",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-conformance-baseline\\retained-procedure-preparation\\loader-raw.json": "00743f603a7d7abc28f83cb1df56bda8bf67cc1afc687dbd63e8de2ea77453dd"
+      }
     }
   }
 }
