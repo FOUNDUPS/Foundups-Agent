@@ -1,3 +1,19 @@
+## Current consensus gate — 2026-10-01
+
+PR#2003 is merged/main-verified and its owned lane closed. The following older
+pending-publication entries are historical. Fresh base28ee19a has no production
+effect-binding consumer or qualified authentic effect-approval producer in the
+inspected source. Keep existing delegated v1 intact; first qualify the explicit
+HIGH/worktree_create producer/resolver contract, then implement independently
+verified consumption. Source absence is not an installed-runtime audit.
+
+The separately selected7/P3 structural debt is repaired locally: unchanged
+seven static functions, 6 pass/1 fail before → 7 pass/0 fail after; test helper
+201→200 lines, identical AST. Existing CI now selects all seven with43 prior
+domain/binding cases; hosted50 pending. No runtime behavior or authority change.
+See the current canonical backlog observation `consensus_structure_20261001`
+and `O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/`.
+
 ## Pure effect-target binding qualification — 2026-10-01
 
 The existing consensus evidence owner now implements

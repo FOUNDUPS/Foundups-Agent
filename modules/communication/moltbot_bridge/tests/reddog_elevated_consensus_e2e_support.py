@@ -1,5 +1,4 @@
 """Production-seam fixtures for elevated-consensus end-to-end tests."""
-
 from __future__ import annotations
 
 import hashlib

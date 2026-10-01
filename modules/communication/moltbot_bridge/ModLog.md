@@ -1,3 +1,17 @@
+## 2026-10-01 — Retain existing consensus structural checks in CI
+
+- Reconciled PR#2003 as merged, exact-main CI/CodeQL verified, owned lane closed.
+- Independent source qualification confirms injected approval seams and no
+  production effect-binding consumer in inspected source; authentic producer
+  contract remains prerequisite, without widening delegated authority.
+- Selected7/P3 debt: one blank line removed from the existing201-line helper.
+  AST and all test assertions unchanged; direct static baseline6/1 → candidate7/0.
+- Added the seven existing structure nodes to the existing CI selection (43→50).
+  Hosted checks pending; no production Python, runtime registry or manifest change.
+- WSP00/5/6/15/22/50/62/84/97; current backlog `consensus_structure_20261001`.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/`.
+
+
 ## Pure effect-target binding checkpoint — 2026-10-01
 
 Base `252f700fbac4c4adb98f3dd81c3d05eadb8fce66`; PR#2002 is merged,

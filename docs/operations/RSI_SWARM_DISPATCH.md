@@ -1,3 +1,35 @@
+## Consensus structural coverage checkpoint — 2026-10-01
+
+Fresh base `28ee19a4ec574986cadea79798a33edbe4bb18fe`. PR#2003 is merged
+at `66ba2d6475baff4eff2e1763b3ccd643b3f33695`, exact-main CI/CodeQL verified,
+and its owned lane closed. PR#2004 adds only separately owned eSingularity docs.
+Earlier publication-pending entries below are historical, not current status.
+
+The 14/P1 source qualification found no production consumer of the pure effect
+binding, and only injected approval resolver protocols/test producers in the
+inspected paths. Independent read-only review agrees. Real signature/evidence
+verification exists; that does not supply an authentic effect-approval issuer.
+This is a repository-source finding, not an installed-runtime inventory.
+
+Selected executable debt: C1/I2/D2/Impact2 = 7/P3. Removed one blank line from
+the existing e2e test helper (201→200 lines; identical AST). All seven unchanged
+stdlib-only structural test functions were invoked directly: baseline 6 pass /
+1 size failure; candidate 7 pass / 0 fail. This was not local pytest collection.
+The existing CI qualification now selects these seven plus the unchanged 43
+domain/binding cases (50 total); hosted execution remains pending.
+
+Next prerequisite: qualify an explicit HIGH/worktree_create effect-approval
+producer/resolver contract in existing owners before production integration.
+Do not reinterpret delegated v1 as effect authority. Native RSI/AmIBot G0,
+admission, independent held-out improvement and retained benefit remain open.
+Last known Holo query failed with authority-root/head mismatch; the query host
+is unchanged, so this slice did not repeat that probe. Semantic freshness is
+unverified; pinned source/NAVIGATION/module docs supplied the bounded fallback.
+
+WSP00/5/6/15/22/50/62/84/97. Exact evidence and publication receipts:
+`O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/`.
+Canonical observation: `current_observation.consensus_structure_20261001`.
+
 ## Pure effect-target binding checkpoint — 2026-10-01
 
 Base `252f700fbac4c4adb98f3dd81c3d05eadb8fce66`; PR#2002 is merged,
