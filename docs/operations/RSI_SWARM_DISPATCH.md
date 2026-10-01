@@ -1,3 +1,52 @@
+## Guided worker comparison stopped — 2026-10-02
+
+Source `bbc517468c9b777d8a4ea9837aa09d69a682ba4c`. The finite comparison
+reused the existing WRE helper → adapter → native-chat engine and real loader.
+The first guided case ran, then failed the unchanged proposal scope check.
+The frozen stop rule closed the remaining later-use and disabled-control budgets.
+
+| Measured observation | Result |
+|---|---|
+| Model-free setup / native child | 1 / 1 |
+| Model initializations / completions | 1 / 1 |
+| Native usage | 808 input + 134 output = 942 tokens |
+| Child / generation duration | 39.485s / 34.719s |
+| Procedure delivery | Exact 768 bytes through existing loader; original context preserved |
+| Capacity | 808 + 512 reserved ≤ 2048 context; stop finish |
+| Production cleanup | Engine/native close each returned once; detached/reset; fallback 0 |
+| Actual strict parser | 0 accepted / 1 rejected; extra name `len` at line27 |
+| Additional source defect | Invented `self._cached_token` outside allowed interface |
+| Generated executions / tests / retries / provider requests | 0 / 0 / 0 / 0 |
+| Later-use / disabled-control cases | Not run; unknown outcomes, unused budget closed |
+
+Independent review verified route and rejection. A separate coordinator launcher
+error occurred before parser process start: it expected a missing `command` key.
+That error and original intent marker are preserved. A supplemental explicit-command
+review preceded the sole actual parser invocation; this was not a model retry.
+
+This demonstrates procedure delivery and fail-closed rejection, **not retained
+benefit**. No acceptance criterion was relaxed. The single unseeded known-task
+sample does not establish general model incapability or causal improvement.
+
+**Next WSP15 selection: 14/P1 (C2/I4/D5/Impact3).** Qualify one materially different
+installed worker artifact's metadata/template against existing runtime owners.
+Start with the installed GPT-OSS file; its smaller size among the two untried
+candidates is a preparation choice, not evidence of capability. The default7B
+artifact already appears in historical framing trials, so repeating it is not
+a new candidate. Existing AI Gateway/LM Studio lifecycle and caller owners are
+the alternative route if separately qualified. File-existence availability alone
+does not establish identity, compatibility, capacity or coding quality.
+
+The selected slice is metadata/source inspection only: no model load, generation,
+server mutation, download, paid request or routing change is allocated. Semantic
+correspondence remains blocked without an accepted candidate; ROC evaluation lacks
+a demonstrated new deficient target. Higher owner-blocked priorities remain in the
+canonical queue. Native autonomous RSI and AmIBot G0 remain open.
+
+Evidence: backlog `retained_procedure_comparison_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-retained-procedure/`.
+Earlier checkpoints below are historical. No production code changed.
+
 ## Native baseline and loader qualification — 2026-10-02
 
 Source `140492c10e474a8606b95c4466be328ffa179796`. The next bounded experiment
