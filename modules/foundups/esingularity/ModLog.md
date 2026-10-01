@@ -1,3 +1,19 @@
+## 2026-10-01 — Japan compute comparables and Japanese inquiry references
+
+- Added public-primary-source research covering five operating models, Japanese
+  workload examples, GPU tariff units/caps, Hokuriku electricity components and
+  experimental pPUE boundaries. Pricing and capacity retain source/date caveats.
+- Added eight official organization contact routes and seven Japanese, unsent
+  inquiry templates with placeholder signatures. Supplier/reference/support roles
+  remain separate from YUMORI customer or partner commitments.
+- Linked evidence through the existing economic-model owner and module README.
+  No model values, private correspondence, provider IDs or credentials are added.
+- Utility template is reference-only; existing held draft remains canonical after
+  private reconciliation. Highreso inclusion is research, not a new outreach step.
+- WSP00/22/50/97: documented torch-free gate fallback, detector witness absent;
+  local source-bound lexical retrieval retained UNKNOWN freshness. Documentation
+  and privacy/link checks only; no external correspondence, merge or deployment.
+
 ## 2026-09-30 — YUMORI Work orchestration + capital-network expansion
 
 - Added `yumori_work_orchestrator` on current main as the YUMORI domain adapter from 012/Red Dog planning conversation to live-state-reconciled work items, canonical WSP 15 ordering, explicit 012 physical/decision actions, and bounded ChatGPT Work / RedDog handoff.
