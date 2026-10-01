@@ -1,3 +1,18 @@
+## Nemotron metadata qualified — 2026-10-02
+
+One exact-path metadata diagnostic passed independent review: 3,216,492 bytes
+read, 2.485s, descriptor closed. Existing reader/Windows owner reused with only
+path/size constants changed. Prior 15 generic fixtures reused, no new test count.
+
+Saved template consumes enable_thinking=False and selects an empty thinking
+prefix; actual formatter execution and native architecture/load support remain
+unverified. Next 13/P1: adapt the existing four-case installed-source native-chat
+harness to current engine and saved template, with at most two reviewed control
+cases. No model calls, new runtime adapter, native admission or retained gain.
+
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#nemotron-metadata-qualified--2026-10-02)
+and backlog `nemotron_metadata_qualification_20261002`. Earlier entries are historical.
+
 ## Worker metadata reader qualified — 2026-10-02
 
 Existing Windows verified-file helpers resolved the audit reader's cross-API

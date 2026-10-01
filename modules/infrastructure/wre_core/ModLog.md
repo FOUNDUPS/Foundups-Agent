@@ -1,3 +1,17 @@
+## 2026-10-02 — Qualify alternative worker metadata
+
+- One separately reviewed Nemotron metadata call completed: 3,216,492 bytes,
+  2.485s, descriptor closed, all source/receipt bindings verified. Allowance closed.
+- Reused reader and Windows owner; only fixed path/size changed. Prior 15 generic
+  fixtures transfer, but no additional test pass count or model capability claimed.
+- Saved template explicitly consumes WRE's non-thinking control. No rendering,
+  tokenization, native loading, generation, provider request or retained gain.
+- WSP00/15/22/48/50/97: re-observed and selected 13/P1 model-free template/handler
+  qualification through the existing four-case harness, freshly bound to current
+  source. Runtime/model qualification remains separate; no new module or skill.
+- Evidence: backlog nemotron_metadata_qualification_20261002 and
+  O:/Foundups-Agent-audits/20261002-rsi-nemotron-metadata/.
+
 ## 2026-10-02 — Qualify bounded worker metadata inspection
 
 - Reused existing Windows verified-file helpers in external audit tooling;
