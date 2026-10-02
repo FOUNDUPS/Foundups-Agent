@@ -1,3 +1,28 @@
+## Null-device guard controls — 2026-10-02
+
+Source `14b3988c15a3a0175e9d865a2bf4fe780f4c2cb9`. 20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials.
+
+The existing diagnostic guard now admits at most two exact source-derived
+canonical null-device write tuples while native_import is attempted. It retains ordinary
+write restrictions and adds bounded, redacted denial detail. Other candidate
+functions are unchanged. Tests use synthetic audit events and an injected hook
+collector; they do not open the null device or import the native package.
+
+No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred. The prior diagnostic's `setup_invalid` result remains preserved.
+Source supports the missing null-device exception as an explanation, but the
+historical denied target is still unknown. Fixed oracle expectations preceded
+implementation review; the oracle author also wrote the test runner, separately
+reviewed by the coordinator. This is not held-out runtime evaluation. Hosted CI
+does not replay this audit. PR2030 is main-verified and its owned lane closed.
+
+Next **14/P1:** Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits. The concrete missing import-guard rule is now qualified by twenty inert controls. The remaining useful observation is real fixed-fixture import/model acceptance under the original resource ceiling. Careful composition earns complexity3; this remains a worker-capability prerequisite with impact3, not demonstrated worker or RSI improvement.
+No native retry is allocated by this record; exact source/runtime/input review
+is still required before any future native attempt.
+
+Evidence: backlog `null_device_guard_controls_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-null-guard/`.
+Publication/main closure is separately recorded; older entries are historical.
+
 ## Native fixture diagnostic — 2026-10-02
 
 Source `a98497a3d1ddeeb2800af15b7f57ce641382fb52`. Result: **setup_invalid**. One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.

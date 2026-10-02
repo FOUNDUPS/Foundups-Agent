@@ -1,3 +1,11 @@
+## 2026-10-02 — Qualify narrow null-device import guard
+
+- 20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials.
+- Existing guard extended; ordinary writes remain denied, denial detail bounded/redacted.
+- No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred. Prior native setup failure and unknown denied target preserved.
+- WSP00/5/6/15/22/48/50/84/97/99: next 14/P1; PR2030 closure verified.
+- Evidence: backlog `null_device_guard_controls_20261002`. This slice publication/main closure separate.
+
 ## 2026-10-02 — Record bounded native fixture diagnostic
 
 - **setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.

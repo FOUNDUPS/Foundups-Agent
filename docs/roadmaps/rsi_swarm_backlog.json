@@ -1881,21 +1881,21 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_fixture_diagnostic_20261002",
-    "base_commit": "a98497a3d1ddeeb2800af15b7f57ce641382fb52",
-    "selected_action": "Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet.",
-    "status": "native_fixture_diagnostic_closed_next_preparation",
+    "observation_path": "current_observation.null_device_guard_controls_20261002",
+    "base_commit": "14b3988c15a3a0175e9d865a2bf4fe780f4c2cb9",
+    "selected_action": "Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.",
+    "status": "null_guard_controls_qualified_next_preparation",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.backend_lifetime_controls_20261002",
+    "previous_observation": "current_observation.native_fixture_diagnostic_20261002",
     "publication_state": "pending_exact_source_review_and_hosted_closure"
   },
   "current_observation": {
@@ -25101,6 +25101,446 @@
       "native_rsi_admitted": false,
       "retained_gain": null,
       "publication": "Observed local result; PR/CI/main readback and owned-lane cleanup separately evidenced."
+    },
+    "null_device_guard_controls_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "14b3988c15a3a0175e9d865a2bf4fe780f4c2cb9",
+      "recorded_utc": "2026-10-02T11:14:55.062425+00:00",
+      "previous_observation": "current_observation.native_fixture_diagnostic_20261002",
+      "status": "inert_null_device_guard_controls_qualified_native_import_unperformed",
+      "scope": "Narrow extension of existing audit install_guard; fixed synthetic audit tuples and injected callback only. All other candidate functions unchanged; no production module or registered test changes.",
+      "experiment": {
+        "invocations": 1,
+        "passed": 20,
+        "failed": 0,
+        "unrun": 0,
+        "case_ids": [
+          "allowed_read_unchanged",
+          "canonical_two_then_limit",
+          "denial_cap",
+          "fresh_guard_budget",
+          "integer_descriptors",
+          "invalid_attempt_preserves_budget",
+          "invalid_flag_type_range",
+          "invalid_raw_types",
+          "journal_output_independent",
+          "native_denial_unchanged",
+          "network_denial_unchanged",
+          "non_open_passthrough",
+          "noncanonical_tokens",
+          "ordinary_write_rejected",
+          "output_exclusive_required",
+          "redacted_details",
+          "report_exclusive_once",
+          "wrong_flag_bits",
+          "wrong_mode",
+          "wrong_phase"
+        ],
+        "child_wall_seconds": 0.0470000000204891,
+        "parent_wall_seconds": 0.3440000000409782,
+        "outer_guard_denials": 0,
+        "real_null_opens": 0,
+        "fixture_reads": 0,
+        "original_model_reads": 0,
+        "native_model_calls": 0,
+        "provider_calls": 0,
+        "zero_provenance": "Reviewed AST-only call graph and outer guard; synthetic expected candidate denials are test inputs, not blocked real effects. Existing parent Windows process APIs run normally.",
+        "budget_state": "One inert invocation consumed and closed; no native retry"
+      },
+      "verified_properties": [
+        "Exact canonical null-device token, write mode and source-supported flags admitted only during native_import and only twice.",
+        "Aliases, wrong types/mode/flags/phase and extra opens denied; ordinary exclusive-output constraints preserved.",
+        "Denied-write evidence is bounded and categorized without raw paths or arbitrary payloads."
+      ],
+      "verification_limits": [
+        "No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.",
+        "Source-derived Windows audit tuple is tested synthetically, not observed from a real null-device open.",
+        "Historical open_write target remains unknown; installed _utils null opens are the source-supported explanation.",
+        "Independent oracle/result reviewer authored test runner; coordinator reviewed oracle/runner. Not held-out runtime evaluation.",
+        "Python audit guards are not an OS/native sandbox; passing these controls does not establish native import, fixture compatibility or cleanup.",
+        "Hosted CI does not replay this external local suite."
+      ],
+      "prior_layer_closure": {
+        "pr": 2030,
+        "merge": "dfa727ff50893d4a0fbe1c03686887b3f4fad6de",
+        "state": "MERGED_VERIFIED_MAIN_OWNED_LANE_CLOSED",
+        "main_ci_and_codeql_verified": true
+      },
+      "incoming_external_main": {
+        "base": "dfa727ff50893d4a0fbe1c03686887b3f4fad6de",
+        "head": "14b3988c15a3a0175e9d865a2bf4fe780f4c2cb9",
+        "paths": [
+          "modules/communication/moltbot_bridge/src/reddog_correspondence_execution_mode.py",
+          "modules/foundups/esingularity/ModLog.md",
+          "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md",
+          "modules/foundups/esingularity/skillz/yumori_work_orchestrator/SKILLz.md",
+          "modules/foundups/esingularity/tests/TestModLog.md",
+          "modules/foundups/esingularity/tests/test_contracts.py"
+        ]
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Qualify optional committed-memory limits in the existing Windows Job and bounded-child owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2021; exact-main content and required hosted workflows verified. Does not resolve native read/ABI/lifetime or RSI retention.",
+          "ownership": "Existing foundups_mcp_bridge Windows Job and bounded-child process owners",
+          "evidence": "closure/final-accounting.json",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Qualify deterministic raw model-handle acquisition/vocabulary/free paths in the existing diagnostic scaffold",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2023; exact-main content and required hosted workflows verified. Does not establish native cleanup, model support or RSI retention.",
+          "ownership": "Existing WRE/llama_cpp owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify bounded GGUF tensor-directory and computed alignment boundaries using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "PR2024 closed on verified main. Original directory observed in prior PR2025 checkpoint; native support and RSI retention remain unqualified.",
+          "ownership": "Existing GGUF audit Reader and Windows verified-file owner",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Observe bounded original Nemotron metadata and tensor-directory boundaries with the qualified reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2025; original observation and exact-main documentation verified. Native behavior and retained benefit remain open.",
+          "ownership": "Existing audit Reader, verified-file and bounded-child owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify one-read prefix capture and exclusive output controls using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2026; inert capture/output controls and exact-main documentation verified. Original extraction was unresolved by that checkpoint and was accepted in prior PR2027; native behavior and retained benefit remain open.",
+          "ownership": "Existing audit reader, verified-file and bounded-child owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2027; prefix extraction/readback and exact-main documentation verified. Native behavior and retained benefit remain open.",
+          "ownership": "Existing audit reader and verified-file/process owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2028; inert backend lifetime controls and exact-main documentation verified. Actual native behavior and retained benefit remain open.",
+          "ownership": "Existing diagnostic and verified-file/process owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review.",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2030; one bounded native fixture diagnostic and exact-main documentation verified. Worker admission and retained benefit remain open.",
+          "ownership": "Existing audit diagnostic and native loader/process owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "The concrete missing import-guard rule is now qualified by twenty inert controls. The remaining useful observation is real fixed-fixture import/model acceptance under the original resource ceiling. Careful composition earns complexity3; this remains a worker-capability prerequisite with impact3, not demonstrated worker or RSI improvement.",
+          "ownership": "Existing audit native diagnostic and process/file owners",
+          "score_reassessment": "Re-observed after fixed inert guard qualification; new execution still requires exact packet review."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet.",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_local_null_guard_controls",
+          "dependency": "20 fixed inert guard controls passed. Native import completion remains unqualified; prior setup failure preserved. Publication/main closure separate.",
+          "ownership": "Existing diagnostic and native/process owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners",
+          "score_reassessment": "Fresh main, prior closure and thirteen next-step source pins rechecked. Incoming PR2032 is externally owned and disjoint; blocked/closed rows excluded. Existing scores retained only where evidence is unchanged."
+        }
+      ],
+      "next_task": {
+        "task": "Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.",
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1",
+        "rationale": "The concrete missing import-guard rule is now qualified by twenty inert controls. The remaining useful observation is real fixed-fixture import/model acceptance under the original resource ceiling. Careful composition earns complexity3; this remains a worker-capability prerequisite with impact3, not demonstrated worker or RSI improvement."
+      },
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\selection.json": "3b4d17e6c43059b3a4211da9b2912b13d03da576100b7307586714ab3e14514b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\work-packet.json": "50a3453dd8a9e16dac31ab80ff5d78c0c79b9c465181c68d3a9f66f7aac83421",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\compiler-receipt.json": "7754262a1bd1a2e0f0168261c6f8aeddf779ef4367995d341e3e42c6a00603bc",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\check_native.py": "c2946594ddd5cde97bbfea87bac98802e78ec12639d1e32495f9ea2c7954f55c",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\implementation-receipt.json": "22195a463f42af95ac2ba78bfd4c06acd82748647d49006555d55c77276d40be",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\guard-test-contract.json": "733f8c362cbd46b6b9f6c4bf8aae4b04fe93559792bcfb1fbcaee832005abb3b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\test_null_guard.py": "aaeafabd08d863aef721a213095a7af21a9666d3a738bb9dd960c446f33d75fa",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\check_guard.py": "1410cafb5c26cc8bc315623b7e2e5fcbe09dae0796c5b6bd209adeb66ad3ad14",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\coordinator-source-review.json": "f1d43e594d99af5f08ef5393b0e7ab20507c3fe8439c78cd2b89124e64bafe4d",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\run_once.py": "333474f6f11893989251eb75384d851240e567c023d640420b33bdd99f19d504",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\plan.json": "0afe15d136daaaa142dd57db4f4e41e5bdbaa65a0bb7b2b662fb0e0e9d18032a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\preparation-receipt.json": "07c5495e1f7633724e0217b66603eb7b81f401c0c2577eb319484c7f42ab5c1b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\execution-review.json": "38a3cca2962360e126f25b0b7aa8aab63656118b7511962d658a3df7b15e7b10",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\started.json": "11a56a8d6b2d9ebd08bc6741dcabd0c95ff9d96d08ae8b9813bd0f027399c512",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\guard-result.json": "a2e81c1ac3bf6d810435ccec8aa3b740f6153aa9634a6140a20fe7d6058f43a6",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\receipt.json": "616029773eb68adeafe19236013bda9f8bd0759e8bceb36099492d38f8374d69",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\stdout.txt": "c73dd74b0fb79db8570ec1fa6d9a0dc04637efcc360abaee4e59528eb117918a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\result-review.json": "e5a1b375f31f05c7f5de8130ceccfa62dd65a6e883624df71e0ebd32d7f4b460",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-null-guard\\next-preparation.json": "009f5a33b10f99fb080455d36f6689c428f5aac8b5b0f7dc730bd8121ced7c6b"
+      },
+      "dispatchable": false,
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "publication": "Local controls accepted; normal PR/CI/main and owned-lane closure separately recorded."
     }
   }
 }
