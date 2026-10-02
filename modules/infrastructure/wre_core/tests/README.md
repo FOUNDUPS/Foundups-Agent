@@ -1,3 +1,16 @@
+## Model-free logger connection controls — 2026-10-02
+
+9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials. The same 32 INFO chunks followed by an ERROR EOF hint saturate the default capture (65 counted writes, 4,097 received/4,096 inspected characters); existing ERROR verbosity preserves the hint untruncated (2 writes, 14 characters). CONT fragments are suppressed at ERROR. Generic and unknown messages remain insufficient explanations.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-logger-connection/run_once.py`.
+
+Exact callback/map/set_verbose bodies and builtin print run in private globals;
+only decorator/annotations are removed. Level and stream restoration, original
+exception identity and cleanup failure are checked. Prior sink tests are not
+recounted. The child performed no native-package import/registration, real stderr replacement, model/fixture/device access or provider call. Parent process/stdio owners were reused; no production change, WRE admission or retained RSI gain occurred. Native callback threading, descriptor coverage and real error wording remain unverified. Oracle and runner share author; coordinator review is separate.
+Hosted CI does not replay this audit. Backlog `logger_connection_controls_20261002` pins the evidence.
+
 ## Diagnostic capture inert controls — 2026-10-02
 
 24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Cases exercise bounded Python stream writes

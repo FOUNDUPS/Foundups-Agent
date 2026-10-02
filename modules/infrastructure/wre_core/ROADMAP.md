@@ -1,3 +1,11 @@
+## Logger connection controls — 2026-10-02
+
+9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials. ERROR filtering preserves the synthetic EOF hint but drops CONT.
+Native coverage, admission and retained benefit remain open.
+Next **14/P1:** Prepare one terminal, separately reviewed fixture-only native decision integrating the qualified ERROR-level capture helper after import; retain the existing input, loader, model parameters and resource limits, with outcome-specific owner handoffs and no further diagnostic-loop expansion.
+See [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#logger-connection-controls--2026-10-02) and backlog `logger_connection_controls_20261002`.
+Stop on insufficient diagnostic usefulness and rescore; no automatic native retry.
+
 ## Diagnostic capture controls — 2026-10-02
 
 24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Actual diagnostic capture remains unqualified; the prior null result is preserved.

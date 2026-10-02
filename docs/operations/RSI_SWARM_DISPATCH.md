@@ -1,3 +1,25 @@
+## Logger connection controls — 2026-10-02
+
+Source `1ffbdca209e4834b1cbcfc5b6eeff33c52c8599a`. 9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials.
+
+The same 32 INFO chunks followed by an ERROR EOF hint saturate the default capture (65 counted writes, 4,097 received/4,096 inspected characters); existing ERROR verbosity preserves the hint untruncated (2 writes, 14 characters). CONT fragments are suppressed at ERROR. Generic and unknown messages remain insufficient explanations.
+
+One audit helper scopes the existing logger level and capture. Normal/error/
+interrupt restoration and separate cleanup-failure reporting are qualified.
+The installed callback, accepted capture and native entrypoint remain unchanged.
+The child performed no native-package import/registration, real stderr replacement, model/fixture/device access or provider call. Parent process/stdio owners were reused; no production change, WRE admission or retained RSI gain occurred. Native callback threading, descriptor coverage and real error wording remain unverified. Callback decoding precedes the sink's bounds. Oracle and runner share
+an author; coordinator reviewed both. Hosted CI does not replay this local audit.
+
+Next **14/P1:** Prepare one terminal, separately reviewed fixture-only native decision integrating the qualified ERROR-level capture helper after import; retain the existing input, loader, model parameters and resource limits, with outcome-specific owner handoffs and no further diagnostic-loop expansion. The independently accepted connection comparison now demonstrates a specific synthetic error hint survives unchanged limits when INFO is excluded; the prior real null result had no retained explanation. One terminal observation could choose among input-contract, resource-envelope or loader-compatibility prerequisites. This is a fresh preparation recommendation after macro rescore, not inherited runtime approval or resident admission.
+This is observability progress, not resident admission closure. Generic-only,
+unknown, truncated or failed diagnostics must stop; no automatic cap, vocabulary,
+matrix expansion or native retry. A later native proposal needs an actionable
+uncertainty and explicit consequences for each possible outcome.
+
+PR2035 is main-verified and its owned lane closed. Evidence: backlog `logger_connection_controls_20261002`
+and `O:/Foundups-Agent-audits/20261002-rsi-logger-connection/`.
+This slice's publication/main closure is recorded separately.
+
 ## Diagnostic capture controls — 2026-10-02
 
 Source `ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2`. 24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials.

@@ -1,3 +1,11 @@
+## 2026-10-02 — Qualify existing logger/capture connection
+
+- 9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials.
+- Same-sequence filtering contrast, CONT loss and level/stream restoration verified.
+- The child performed no native-package import/registration, real stderr replacement, model/fixture/device access or provider call. Parent process/stdio owners were reused; no production change, WRE admission or retained RSI gain occurred. Native callback threading, descriptor coverage and real error wording remain unverified.
+- WSP00/5/6/15/22/48/50/84/97/99: next 14/P1; PR2035 closure verified.
+- Evidence: backlog `logger_connection_controls_20261002`. This slice publication/main closure separate.
+
 ## 2026-10-02 — Qualify bounded diagnostic capture
 
 - 24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials.
