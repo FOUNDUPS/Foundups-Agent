@@ -1,3 +1,39 @@
+## Bounded GGUF header controls qualified — 2026-10-02
+
+Source `6631f6a1d0e1f60a9c4462b0caba45912a227815`. One independently reviewed audit invocation passed **24/24
+inert cases**, with no failed, skipped, missing or denied cases. Child
+0.062s; parent 0.312s. The existing
+reader scaffold changes only `inspect()`; Reader and verified-file handling are
+unchanged. Tests extend the existing fixture scaffold with one selected function.
+
+Metadata and directory parsing share the existing 8 MiB actual-read ceiling,
+64 MiB stream-offset ceiling and 25-second deadline. The diagnostic caps tensor
+count at 4096, names at 64 UTF-8 bytes and ranks at 1–4; it requires positive
+dimensions and nonempty unique names. These diagnostic restrictions are distinct
+from GGUF rules. No dimension products or tensor-sized allocations occur.
+
+Alignment is uint32, positive and divisible by eight; absent metadata defaults
+to 32, while explicit 24 is valid. The final aligned offset is computed and
+checked, without reading/seeking padding or following tensor payload offsets.
+The computed offset can exceed an inert fixture's EOF: padding presence/content,
+payload validity, complete-file validity and native compatibility remain unknown.
+Raw type tags are read structurally and do not establish quantization support.
+
+The frozen cases cover exact offsets, malformed fields, truncation, duplicate
+names and cumulative read/offset/deadline limits. No original model stat/read,
+backend/provider call or native-model invocation occurred. The allowance is
+closed; no retry. Ordinary CI does not replay this external audit.
+
+PR2023 is merged/main-verified and its owned lane closed. Next
+**14/P1:** Prepare a separately reviewed one-shot original Nemotron metadata/tensor-directory boundary read using the qualified reader, verified-file owner and bounded child owner.
+Preserve the existing file identity/read/cleanup owners and caps. Any original
+read needs its own reviewed packet; no fixture copying or native execution is
+allocated here. Actual native lifetime, admission and retained benefit remain open.
+
+Evidence: backlog `gguf_header_boundary_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-header-boundary/`.
+Earlier entries retain historical evidence and publication state.
+
 ## Raw-handle diagnostic lifetime qualified — 2026-10-02
 
 Source `bbc4a3d5ab21c942ff177d7aa4216e03c5f36b50`. One source-bound audit invocation passed **17/17 inert

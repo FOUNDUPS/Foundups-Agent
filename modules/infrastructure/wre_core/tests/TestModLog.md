@@ -1,3 +1,20 @@
+## Audit GGUF header controls — 2026-10-02
+
+The external audit `20261002-rsi-header-boundary` records 24/24 fixed inert
+cases. It copies the existing metadata fixture scaffold and adds `header_cases`;
+the runner AST-loads only selected helpers/cases and reader definitions. Legacy
+model-file entrypoints and the prior 15 fixture cases are not executed or recounted.
+
+Coverage: exact directory/alignment offsets (including explicit 24), bounded
+names/ranks/count/dimensions, duplicate/malformed/truncated records and cumulative
+read/offset/deadline limits. Positive fixtures end at directory end and reject
+later read/seek. Computed padding remains uninspected; native support is unproven.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-header-boundary/run_once.py`.
+The single allowance is consumed and closed. A changed attempt requires separate
+review. No registered module test was added; ordinary hosted CI does not replay
+this external audit. Backlog `gguf_header_boundary_20261002` binds source, tests, results and review.
+
 ## Audit raw-handle lifetime controls — 2026-10-02
 
 The external source-bound diagnostic `20261002-rsi-native-lifetime` records
