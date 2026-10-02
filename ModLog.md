@@ -1,3 +1,17 @@
+## 2026-10-02 — Qualify bounded worker committed memory
+
+- Reused the two existing Job/process owners for optional aggregate memory;
+  defaults unchanged, invalid input/platform rejected before child creation.
+- Final local 48 deterministic / 2 memory / 4 connected / 8 manifest cases pass.
+  Actual 128 MiB Job allows 1 MiB and rejects 256 MiB; failed attempts remain.
+- Corrected physical fixture to reuse actual-image lookup; corrected two old
+  overflow exit oracles against unchanged termination behavior. No relaxed cap.
+- Regenerated existing 1,404-file manifest and digest pins; added focused CI.
+- WSP 00/15/22/48/50/62/84/97: next 14/P1 is bounded native input/read and cleanup
+  preparation. No model call, runtime admission or retained RSI gain claimed.
+- Evidence: backlog child_memory_limit_qualification_20261002 and
+  O:/Foundups-Agent-audits/20261002-rsi-child-memory/. Publication gates separate.
+
 ## 2026-10-02 — Qualify the saved Nemotron formatter
 
 - One independently reviewed model-free child passed6/6 fixed cases, no unrun

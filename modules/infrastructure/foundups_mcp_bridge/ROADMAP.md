@@ -1,5 +1,19 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-10-02: Optional Windows child Job memory limit
+
+The existing shared child runner and Job owner now accept opt-in aggregate
+committed-memory limits, preserving default callers, output bounds, deadlines,
+and cleanup. Invalid inputs fail before launch; configuration and assignment
+precede resume. Local evidence covers 62 distinct passing cases across separate
+selections: 48 deterministic, two Windows memory, four process/maintenance, and
+eight manifest checks. Publication and hosted CI remain pending.
+
+This is a resource-control prerequisite. Native-model file-read bounds and a
+separately reviewed disposable input remain unresolved before any native load.
+It supplies no working-set bound, complete sandbox, model support/capability,
+runtime admission, or measured RSI gain. (WSP 00/15/22/50/62/97)
+
 ## 2026-08-30: Held builder child phase 2C3c
 
 **Implemented and physically falsified as inert evidence; not retained

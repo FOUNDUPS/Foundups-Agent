@@ -1,6 +1,25 @@
 # foundups_mcp_bridge Tests
 
-## Held builder child evidence
+## Optional child Job memory contract (2026-10-02)
+
+The existing `test_reddog_bounded_child_process.py` retains its original 22
+cases. The new frozen selection has 29 deterministic cases for exact types,
+platform rejection before effects, aggregate flags/value, default call shape,
+forwarding, and failure cleanup/order. Candidate selection combines these with
+19 original no-child cases. Two separately selected Windows cases query the
+actual 128 MiB Job limit before requesting a 1 MiB successful allocation or a
+256 MiB rejected commit; they free any acquired allocation and use 10-second
+child deadlines. They do not empirically test cumulative descendant allocation.
+The physical fixture reuses the OS-observed process image rather than the venv
+redirector, whose nested Job confused the original configuration query.
+Local results: 48 deterministic + two memory + four legacy/maintenance process
+cases + eight manifest checks = 62 distinct passes across separate selections.
+The overflow tests require complete bounded capture, not zero exit after an
+intentional overflow kill. Failed attempts and that oracle correction remain
+in `TestModLog.md`; publication/hosted CI are pending. No model, provider,
+operational store, or production service is selected.
+
+## Held builder child evidence (2026-08-30 historical)
 
 - `test_reddog_bounded_child_process.py` preserves bounded output, timeout,
   process-tree cleanup, and no-shell/no-unbounded-read behavior after extracting

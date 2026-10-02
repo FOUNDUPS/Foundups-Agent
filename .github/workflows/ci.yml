@@ -548,6 +548,21 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Run bounded worker process and backend binding contracts
+        timeout-minutes: 10
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            -o pythonpath=. -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/bounded-worker-pytest" \
+            modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_bounded_child_process.py \
+            modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py::test_default_refresh_runner_bounds_retained_stdout \
+            scripts/tests/test_generate_reddog_backend_manifest.py
+
       - name: Run WRE local proposal caller contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

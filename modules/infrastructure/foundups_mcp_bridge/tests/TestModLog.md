@@ -1,5 +1,45 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-10-02] Optional Windows aggregate Job memory qualification
+
+- Frozen before implementation: 29 deterministic missing-API cases represent
+  one capability gap, not 29 independent defects. Candidate selection retains
+  19 original no-child cases alongside them; two Windows allocation controls
+  remain separately selected. The initial packet preserved the original
+  9,901-byte prefix; the later overflow-oracle correction is recorded below.
+- The first audit attempt stopped in pytest setup with a denied DLL load and
+  no executed case/test child; it is not a product assertion failure. The
+  versioned repair excludes optional interactive readline, retains the exact
+  kernel32-only DLL allowance, and records future denied DLL basenames. The
+  original failure did not identify its DLL; pyreadline's user32 dependency is
+  the source-grounded explanation, not an observed DLL name.
+- Revised baseline: 29 expected missing-API failures, zero errors/skips/test
+  children in 1.781s. The first candidate produced 48 passing assertions but
+  an invalid harness receipt: nine pytest current-temp symlink attempts were
+  denied. That attempt is preserved and is not accepted qualification.
+- Revised candidate: 48 passed in 2.047s with a valid harness receipt. The
+  initial two Windows controls failed the compound parent assertion with no
+  guard denials or source drift. Return code, oversized output, and read-failure
+  components were not recorded separately. A separately reviewed one-case
+  diagnostic then failed before allocation: the immediate nested Job reported
+  `0x3000` flags and zero memory limit. It does not retroactively prove the exact
+  failures of the first two controls.
+- The physical fixture now reuses existing `current_process_image_path`,
+  avoiding the venv redirector's nested Job. With the same 128 MiB limit,
+  V4 passed both controls in 1.203s parent time: 1 MiB commit/release succeeds,
+  256 MiB commit rejects; zero errors/skips/guard denials and stable bindings.
+- The first connected selection produced 11 passes / one failure in 75.61s.
+  The original stdout-overflow test incorrectly required zero exit even though
+  the unchanged runner deliberately terminates an oversized live writer.
+  Both it and the maintenance equivalent now require `output_read_failed is
+  False`, retaining overflow and exact-length assertions. The corrected four
+  process cases pass in 6.77s pytest / 8.656s parent time with stable bindings.
+  All eight manifest cases passed in the first selection and were not rerun.
+- Final local evidence is 62 distinct passing cases (48 + 2 + 4 + 8), not one
+  62-case invocation. Audit receipts are retained in the external
+  `20261002-rsi-child-memory` lane. Publication and hosted CI remain pending;
+  no native model/runtime admission or RSI gain follows. WSP 00/15/22/50/62/97.
+
 ## [2026-09-14] Dependency candidate and immutable-query qualification
 
 - Base `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`: `test_mcp_launcher_http.py`, `test_mcp_server_sse.py`, `test_holo_query_snapshot_store.py`: **38 passed, 2 deselected in 7.87s**. Includes a temporary real-Chroma export and subsequent immutable-reader query.

@@ -1,3 +1,34 @@
+## Worker committed-memory boundary qualified — 2026-10-02
+
+The existing bounded runner now accepts an optional Windows aggregate Job
+committed-memory limit. Invalid values/platforms reject before child creation;
+configuration and assignment precede resume. None preserves existing callers.
+Local evidence: 48 deterministic cases, two actual memory controls, four connected
+process cases and eight manifest cases pass (62 distinct cases). Under the same
+128 MiB cap, a 1 MiB commit succeeds/releases and a 256 MiB commit is rejected.
+
+Failed attempts remain in the evidence chain: two harness incompatibilities,
+an immediate-Job query of the venv redirector, and a timing-dependent overflow
+exit assertion. Tests now reuse the existing actual-process-image lookup and
+require intact bounded capture when overflow termination occurs. Production
+overflow behavior and the memory acceptance criteria were not relaxed.
+
+Manifest regenerated through its existing owner: 1,404 entries, digest
+`92b48c777b15080a781da9a4f703babb907a6be36bcd03210c47eb6709ad2428`.
+CI now selects the runner, its maintenance consumer and manifest contracts;
+Windows physical coverage is local, with platform skips expected on Ubuntu.
+
+**Next WSP15: 14/P1.** Prepare the existing native metadata/vocabulary diagnostic
+with explicit bounded input/read scope, no-allocation parameters and handle
+cleanup. This closes one resource prerequisite, not native admission or RSI.
+No model/provider call or retained improvement is claimed. Memory commit limits
+do not establish RSS, file IO or full runtime containment. Re-observe before
+allocating native execution; higher owner-blocked rows remain blocked.
+
+Evidence: backlog `child_memory_limit_qualification_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-child-memory/`. Exact-head publication and
+main closure are separate gates; preceding checkpoints are historical.
+
 ## Nemotron formatter qualified — 2026-10-02
 
 Source `c4a31c5884400f3e9e64b3f968c17742776b0066`. One independently reviewed model-free child ran the saved

@@ -678,6 +678,13 @@ signals the exact isolated process group, but a descendant that starts a new
 session escapes it. The reader exclusively owns pipe closure. This remains a
 trusted-host containment boundary, not an OS-privilege or hostile-kernel claim.
 
+Direct shared-runner callers may set `job_memory_limit_bytes` to a positive
+exact integer within `SIZE_T_MAX` on Windows. The limit applies to aggregate
+Job committed memory and is configured before the suspended child resumes.
+Invalid or unsupported explicit requests fail before process creation; omitted
+or `None` keeps existing behavior. It does not bound RSS or native file reads,
+and grants no model execution authority; see [the API contract](INTERFACE.md).
+
 For manual diagnostics only, set a strong shared token outside the repository,
 then launch the host-owned process:
 
