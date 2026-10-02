@@ -1,3 +1,13 @@
+## Bounded prefix capture controls qualified — 2026-10-02
+
+One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. Two small audit helpers extend existing source; prior parser/handle AST is unchanged.
+One-read capture, typed frozen comparison, actual synthetic padding and exclusive
+write/close failure accounting are covered. No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open.
+
+Next **14/P1:** Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#bounded-prefix-capture-controls-qualified--2026-10-02)
+and backlog `gguf_prefix_capture_controls_20261002`. Earlier entries remain historical.
+
 ## Bounded original GGUF directory observed — 2026-10-02
 
 One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.

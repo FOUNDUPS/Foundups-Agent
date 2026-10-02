@@ -1,3 +1,36 @@
+## Bounded prefix capture controls qualified — 2026-10-02
+
+Source `f76312b3c6990deeb473fa821161866a089ed45f`. One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials.
+
+The existing audit reader gains only two functions and `io`; all prior AST,
+including Reader, parser, verified-handle functions and original-file main, is
+preserved. The runner AST-loads only the selected parser/helpers and independent
+case function; the copied historical main never executes. Existing fixture
+scaffold and prior 24/15-case evidence remain unchanged and are not rerun.
+
+The frozen literal fixture separates 160 physical bytes from 135 parser reads,
+4 skipped bytes and 21 actual zero-padding bytes. Capture performs one read and
+parses its buffer; metadata/directory expectations are frozen before callbacks.
+Tests reject invalid bounds/types, drift, truncation and nonzero padding while
+preserving a payload sentinel. Output controls check exclusive `xb`, one write
+and one close attempt, short/invalid counts, collisions and separate primary/
+cleanup failures including interruptions. Input closure remains caller-owned.
+
+No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open. These are injected-stream controls, not real filesystem publication
+or durability evidence. Python guards/sampled hashes are not complete isolation.
+The oracle author independently reviewed implementation; this is not a held-out
+runtime evaluator or an authenticated WRE verification role. The one invocation
+is consumed and closed. Ordinary hosted CI does not replay this external audit.
+
+PR2025 is merged/main-verified with its owned lane closed. Next **14/P1:**
+Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet. The parser, one-read capture/output semantics and original boundary are now individually evidenced. A small callback connection and real owned-file composition are the remaining practical gap. One integrated packet can resolve it without global method swaps, duplicate readers or another orchestrator; actual extraction remains conditional on independent review.
+Any original extraction needs a separately reviewed exact packet; this checkpoint
+allocates no original read or binary output.
+
+Evidence: backlog `gguf_prefix_capture_controls_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-prefix-capture/`.
+Publication/main closure are separately recorded; older entries are historical.
+
 ## Bounded original GGUF directory observed — 2026-10-02
 
 Source `a66e3de904e9ae49a4da98159ce47e821fb062de`. One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
