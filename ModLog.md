@@ -1,3 +1,12 @@
+## 2026-10-02 — Qualify backend lifetime control flow
+
+- Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials.
+- One explicit backend wrapper around unchanged raw-model probe; existing test/process owners reused.
+- Init/parameter/probe/free ordering and separate primary/model/backend-cleanup outcomes covered. Native partial-init cleanup remains unknown on failure.
+- No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred.
+- WSP00/5/6/15/22/48/50/84/97/99: next 14/P1 is Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review..
+- PR2027 main closure verified; evidence in backlog `backend_lifetime_controls_20261002`. This slice publication/closure separate.
+
 ## 2026-10-02 — Verify original GGUF prefix extraction
 
 - Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent).

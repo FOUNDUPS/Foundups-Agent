@@ -1,3 +1,12 @@
+## Backend lifetime controls qualified — 2026-10-02
+
+Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials. One wrapper extends the existing audit probe; ownership and nested
+failure/cleanup accounting are tested with inert APIs. No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred.
+
+Next **14/P1:** Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#backend-lifetime-controls-qualified--2026-10-02)
+and backlog `backend_lifetime_controls_20261002`. Earlier entries remain historical.
+
 ## Verified GGUF prefix extraction — 2026-10-02
 
 Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Actual 14 zero padding bytes and prefix hash equality are verified.
