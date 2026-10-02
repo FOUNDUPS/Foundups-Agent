@@ -1,3 +1,39 @@
+## Raw-handle diagnostic lifetime qualified — 2026-10-02
+
+Source `bbc4a3d5ab21c942ff177d7aa4216e03c5f36b50`. One source-bound audit invocation passed **17/17 inert
+cases**, with no failures, errors, skips, missing cases or guard denials.
+Child 0.031s; parent 0.265s.
+The existing worker scaffold is unchanged except for one AST-loaded diagnostic
+function. Installed and production runtime owners are unchanged.
+
+Ownership is recorded before vocabulary lookup; owned handles receive exactly
+one free attempt after success, null vocabulary, error or interruption. Null or
+raised acquisition creates no free attempt. Primary and cleanup errors remain
+separate, type-only, and failed cleanup is never reported as release or retried.
+Independent tests also cover repeat acquisitions and unused void-return values.
+
+This establishes Python control flow with inert integers only. It does not
+establish native free completion, partial-allocation recovery, backend lifetime,
+model compatibility or retained benefit. No model/backend/provider call or
+model-file read occurred. The one-run allowance is closed. The pre-execution
+reporting correction remains in the evidence; no failed test was hidden.
+
+PR2021's preceding memory layer is merged/main-verified at this base and its
+owned lane is closed. Those resource controls do not establish native I/O limits.
+**Next 14/P1:** Prepare a bounded GGUF v3 tensor-directory/alignment extension of the existing metadata reader and freeze independent inert parser controls.
+Reuse existing Reader/verified-file owners and ceilings; qualify finite parser
+controls before original-file extraction. Saved selected metadata omits the
+401-entry tensor directory, so its end offset is not a complete header boundary.
+Truncated-fixture rejection would be inconclusive about original-model support.
+Backend and actual native cleanup remain separate gates.
+The next parser's format reference is the [pinned upstream GGUF specification](https://github.com/ggml-org/ggml/blob/6af560d55df03ad92116e3c0a697779584477e85/docs/gguf.md);
+it does not establish support in the installed model library.
+
+Evidence: backlog `native_raw_handle_lifetime_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-native-lifetime/`.
+These 17 cases ran locally; ordinary PR CI does not replay the external audit.
+Earlier entries below retain their historical evidence and publication state.
+
 ## Worker committed-memory boundary qualified — 2026-10-02
 
 The existing bounded runner now accepts an optional Windows aggregate Job

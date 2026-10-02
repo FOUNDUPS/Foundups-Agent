@@ -1,3 +1,20 @@
+## Audit raw-handle lifetime controls — 2026-10-02
+
+The external source-bound diagnostic `20261002-rsi-native-lifetime` records
+17/17 fixed local inert cases. `test_model_vocabulary_lifetime.py` AST-loads
+only `probe_model_vocabulary` from a copied existing worker; no worker top-level
+or installed model package executes. Matrix covers valid/null acquisition,
+ordinary/interrupt lookup failures, cleanup failures, simultaneous failures,
+type-only redaction and separate repeated acquisitions. Backend lifetime is
+outside this helper. These are not native release or model-support tests.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-lifetime/run_once.py`.
+That one reviewed invocation is consumed; do not rerun it. Receipts and frozen
+oracle are linked by backlog `native_raw_handle_lifetime_20261002`. Reuse them only at their exact
+source/environment scope. A future changed attempt needs a separately reviewed
+packet. No registered module test was added/removed; ordinary hosted CI does
+not replay these external cases. Existing high-level close tests are distinct.
+
 ## 2026-10-01 — Portable engine lifecycle regression
 
 Existing execution-truth owner adds27 cases; all35 previous portable caller IDs
