@@ -2426,44 +2426,37 @@ silently corrected.
 
 ### RedDog Correspondence Sender Boundary
 
-```javascript
-// Load the checked-in dependency-free host source in the operator/runtime isolate.
-// It exports:
-buildRecipientPreflightReceipt(...)
-prepareRecipientPreflightReceipt(...)
-executeSenderBoundary(...)
-```
+Canonical service-owned authority:
+`src/reddog_correspondence_sender_boundary.py::CorrespondenceSenderBoundary`.
 
-Canonical host:
-`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
+Trusted bootstrap injects provider, reconciler and native correspondence store;
+composers access only `issue(transaction, ttl_seconds=120, dry_run=False)` and
+`execute(transaction, receipt)` RPCs. They cannot supply evidence, state capsules
+or provider callbacks. The authority reuses `preflight_recipients` and
+`verify_sent_readback`; no parallel recipient resolver exists.
 
-This is the mechanical provider-call owner for correspondence. A composer, cached
-state capsule, draft, prompt instruction or prior provider success cannot grant send
-authority. The host adapter binds one fresh `SEND` receipt to the exact provider
-operation, scope/purpose, identity IDs, To/CC/BCC roles and addresses, content digest,
-draft/reply/thread identifiers and fresh Sent coverage.
+Receipts are registered in the private issuer DB and bind exact normalized
+recipients/roles/Contact IDs, account/scope/purpose, operation, subject/MIME tree,
+draft/reply/thread identity, provenance/state/coverage and issue/expiry time.
+Execution reconstructs current intent/state, reruns preflight, checks exact draft
+state and expiry after slow reads, commits a durable one-shot claim, then submits.
+Provider-Sent records and durable claims prevent repair/resend after ambiguity.
 
-Immediately before submission, `executeSenderBoundary(...)`:
+All send/reply/draft-send/repair and finalized create/update draft operations share
+this gate. Blocked draft actions return HOLD without mutation or draft deletion.
+Provider success requires immediate exact-ID Sent readback with explicit complete
+To/CC/BCC before VERIFIED_SENT. Per-recipient private state records submission
+verification, not delivery inferred from bounce absence. Dry-run is AUDIT_ONLY.
 
-1. rejects missing, `BLOCK`, malformed, expired or transaction-mismatched receipts
-   before any provider mutation;
-2. re-reads provider Sent coverage and rejects a changed watermark/coverage digest;
-3. for `send_draft`, reads the exact draft and rejects recipient, body, message-ID or
-   thread-ID drift before provider submission;
-4. invokes the injected provider submission exactly once only after all checks pass;
-5. reads the exact Sent message and requires exact message/thread identity and
-   To/CC/BCC equality before returning `VERIFIED_SENT`.
+The old caller-loadable V8 host is quarantined and always BLOCKs: its receipt
+hash was not authentication. It cannot wrap away direct Gmail capabilities.
+The current ChatGPT Gmail tool surface still bypasses this service. **#1779 remains
+OPEN and YUMORI external-send containment stays active.** See the
+[acceptance audit and concrete integration contract](docs/clarity/1779_sender_boundary_audit.md).
 
-The same boundary operation enum covers `send_email`, `reply`, `send_draft` and
-`delivery_repair`; callers do not implement alternate send helpers outside it.
-A provider exception returns `PROVIDER_STATE_UNKNOWN` and requires Sent
-reconciliation before retry. Missing/failed provider readback returns
-`PROVIDER_SENT_INTEGRITY_INCIDENT`; it never authorizes automatic resend.
-
-The adapter is dependency-free ECMAScript so the connected operator can load the
-exact verified `main` source into its V8 tool transaction and wrap Gmail calls.
-Its Node contract test is:
-`modules/communication/moltbot_bridge/tests/test_reddog_correspondence_sender_boundary.mjs`.
+Tests extend `tests/test_reddog_recipient_preflight.py`; the existing Node suite
+freezes all retired V8 operations at zero provider calls. Service credentials,
+source provenance and tool-host capability isolation require deployment evidence.
 
 
 ### RedDog Correspondence Continuity State

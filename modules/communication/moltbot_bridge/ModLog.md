@@ -1,3 +1,19 @@
+## 2026-10-02 — #1779 closure audit and service authority correction
+
+- Reopened #1779 after audit of merged #2029 found composer-recomputable receipts,
+  duplicated routing policy, no capsule/draft gate, no durable replay claims and
+  optional provider identities. Work direct Gmail actions still bypass the wrapper.
+- Added service-owned Python boundary using existing recipient preflight/readback;
+  extended the native store with receipt digests, atomic unique claims and per-recipient
+  submission state. No bodies/address dumps are persisted. Quarantined v2 V8 sends.
+- Extended existing recipient/state tests for pre-submit zero-call failures, exact BCC
+  and identity/role binding, restart/concurrency replay, delayed expiry, historical Sent
+  suppression, finalized draft gating and exact provider Sent verification.
+- Recorded the actual tool-host integration contract and STT Akida/Akita -> Akira
+  Hasegawa correction. No contact created, draft deleted or email sent. WSP00/50/78/97.
+- Actual-host isolation remains OPEN. Corrective PR cannot merge under 012's acceptance
+  condition; #1779 and external-send containment remain open/active.
+
 ## 2026-10-02 — Mechanical correspondence sender boundary (#1779)
 
 - Added the dependency-free host adapter

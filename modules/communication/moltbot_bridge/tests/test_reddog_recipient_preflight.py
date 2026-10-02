@@ -584,3 +584,378 @@ def test_correspondence_transfer_opaque_watermark_domain(
     assert store.provider_refresh_required("ORG::TRANSFER", observed) is refresh
     assert store.select("state") == before
     assert store.select("events") == events_before == []
+
+# Sender-boundary regressions extend this existing recipient/state test owner.
+from copy import deepcopy
+from dataclasses import replace
+from concurrent.futures import ThreadPoolExecutor
+
+from modules.communication.moltbot_bridge.src.reddog_correspondence_sender_boundary import (
+    CorrespondenceSenderBoundary, ReconciledContext, digest,
+)
+
+
+@pytest.fixture
+def sender(isolated_correspondence_db):
+    tx = {
+        "account_key": "test-account", "scope_key": "FUKUI_COUNCIL::PPP",
+        "purpose": "circulation reply", "operation": "send_email",
+        "recipients": [
+            {"identity_id": "council", "role": "TO", "address": "council@example.org"},
+            {"identity_id": "commission", "role": "CC", "address": "commission@example.org"},
+            {"identity_id": "hasegawa", "role": "BCC", "address": "akira@example.org"},
+        ],
+        "subject": "Three-site PPP", "payload": {"mime_type": "text/plain", "body": {"content": "reply"}},
+        "draft_id": None, "draft_message_id": None, "thread_id": None,
+        "reply_message_id": None, "from_address": None, "reply_to": None,
+    }
+    evidence = tuple(ev(r["identity_id"], r["address"]) for r in tx["recipients"])
+    state = CorrespondenceState(
+        scope_key=tx["scope_key"], active_thread_ids=("thread-1",),
+        sent_coverage_state=SentCoverageState.NO_SENT_MATCH_IN_CHECKED_SCOPE,
+        follow_up_gate=FollowUpGate.CLEAR, freshness=Freshness.VALID,
+        routing_state="ALLOW", next_allowed_action="SEND", provider_watermark="watermark-1",
+        reconciled_at="2026-10-02T09:00:00+00:00",
+    )
+    class Host:
+        now = 1790931601.0  # 2026-10-02 09:00:01 UTC; deterministic test clock
+        submits = 0
+        reads = 0
+        fail_submit = False
+        fail_read = False
+        result = {"id": "sent-1", "thread_id": "thread-1"}
+        patch = {}
+        draft_patch = {}
+        after_draft = None
+        after_reconcile = None
+        reconcile_calls = 0
+        context = ReconciledContext(
+            tx, state, evidence,
+            {k: "test:" + k for k in ("gmail_sent", "full_thread", "drafts", "email_log",
+                                     "action_queue", "correspondence_routing")},
+        )
+        def reconcile(self, account, scope):
+            assert account == "test-account" and scope == tx["scope_key"]
+            self.reconcile_calls += 1
+            result = self.context
+            if self.after_reconcile:
+                self.after_reconcile(self)
+            return result
+        def read_draft(self, account, draft_id):
+            result = {"draft_id": "draft-1", "message_id": "draft-mid-1", "thread_id": "thread-1",
+                      "subject": self.context.intended_transaction["subject"],
+                      "payload": deepcopy(self.context.intended_transaction["payload"]),
+                      **self.headers() , **self.draft_patch}
+            if self.after_draft:
+                self.after_draft(self)
+            return result
+        def headers(self):
+            intended = self.context.intended_transaction
+            return {role.lower(): [r["address"] for r in intended["recipients"] if r["role"] == role]
+                    for role in ("TO", "CC", "BCC")}
+        def submit(self, args):
+            self.submits += 1
+            assert args["bcc"] == ["akira@example.org"]
+            self.submitted = deepcopy(args)
+            if self.fail_submit:
+                raise TimeoutError("unknown provider state")
+            return self.result
+        def read_sent(self, account, mid):
+            self.reads += 1
+            if self.fail_read:
+                raise TimeoutError("readback unavailable")
+            return {"id": mid, "thread_id": "thread-1", "label_ids": ["SENT"], **self.headers(), **self.patch}
+    host = Host()
+    store = RedDogCorrespondenceStateStore()
+    boundary = CorrespondenceSenderBoundary(provider=host, reconcile=host.reconcile,
+                                            store=store, clock=lambda: host.now)
+    return tx, host, store, boundary
+
+
+def _assert_block(sender, tx, receipt):
+    _, host, _, boundary = sender
+    result = boundary.execute(tx, receipt)
+    assert result["decision"] in {"BLOCK", "HOLD"}, result
+    assert host.submits == 0
+    return result
+
+
+@pytest.mark.parametrize("defect", ["missing", "BLOCK", "expired", "malformed", "digest",
+    "to", "cc", "bcc", "missing_recipient", "extra_recipient", "role", "identity", "purpose", "scope",
+    "account", "payload", "subject", "reply", "fabricated", "empty_checks"])
+def test_sender_presubmission_failures_have_zero_mutations(sender, defect):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    assert receipt["decision"] == "SEND", receipt
+    changed = deepcopy(tx)
+    if defect == "missing":
+        receipt = None
+    elif defect == "malformed":
+        receipt = []
+    elif defect == "BLOCK":
+        receipt["decision"] = "BLOCK"
+    elif defect == "expired":
+        host.now += 120
+    elif defect == "digest":
+        receipt["transaction_digest"] = "wrong"
+    elif defect in {"to", "cc", "bcc"}:
+        next(r for r in changed["recipients"] if r["role"] == defect.upper())["address"] = "wrong@example.org"
+    elif defect == "missing_recipient":
+        changed["recipients"].pop()
+    elif defect == "extra_recipient":
+        changed["recipients"].append({"identity_id": "extra", "role": "BCC", "address": "extra@example.org"})
+    elif defect == "role":
+        changed["recipients"][1]["role"], changed["recipients"][2]["role"] = "BCC", "CC"
+    elif defect == "identity":
+        changed["recipients"][0]["identity_id"] = "another-contact"
+    elif defect in {"purpose", "scope", "account"}:
+        changed[{"scope": "scope_key", "account": "account_key"}.get(defect, defect)] = "different"
+    elif defect == "payload":
+        changed["payload"]["body"]["content"] = "changed"
+    elif defect == "subject":
+        changed["subject"] = "changed"
+    elif defect == "reply":
+        changed["reply_message_id"] = "different-inbound"
+    elif defect == "fabricated":
+        receipt["receipt_id"] = "caller-invented"
+    elif defect == "empty_checks":
+        receipt["checks"] = []
+    _assert_block(sender, changed, receipt)
+
+
+@pytest.mark.parametrize("gate", list(FollowUpGate)[1:])
+@pytest.mark.parametrize("operation", ["send_email", "create_draft", "update_draft"])
+def test_sender_capsule_gates_send_and_finalized_drafts(sender, gate, operation):
+    tx, host, _, boundary = sender
+    tx["operation"] = operation
+    if operation == "update_draft":
+        tx.update(draft_id="draft-1", draft_message_id="draft-mid-1", thread_id="thread-1")
+    receipt = boundary.issue(tx)
+    host.context = replace(host.context, state=replace(host.context.state, follow_up_gate=gate))
+    _assert_block(sender, tx, receipt)
+    assert boundary.issue(tx)["decision"] == "BLOCK"
+
+
+@pytest.mark.parametrize("defect", ["watermark", "conflict", "missing_source", "unknown", "third",
+    "duplicate", "closed", "near_match", "unverified", "route_change", "thread"])
+def test_sender_state_or_route_change_invalidates_receipt(sender, defect):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    ctx = host.context
+    if defect == "watermark":
+        ctx = replace(ctx, state=replace(ctx.state, provider_watermark="new"))
+    elif defect == "conflict":
+        ctx = replace(ctx, conflicts=("queue/provider disagreement",))
+    elif defect == "missing_source":
+        ctx = replace(ctx, source_refs={})
+    elif defect == "unknown":
+        ctx = replace(ctx, state=replace(ctx.state, freshness=Freshness.UNKNOWN))
+    elif defect == "third":
+        ctx = replace(ctx, state=replace(ctx.state, outbound_since_latest_inbound=2))
+    elif defect == "duplicate":
+        ctx = replace(ctx, sent_message_ids=("historical-integrity-incident",))
+    elif defect == "closed":
+        ctx = replace(ctx, evidence=(replace(ctx.evidence[0], policy=RoutePolicy.PERSONAL_ROUTE_CLOSED), *ctx.evidence[1:]))
+    elif defect == "near_match":
+        ctx = replace(ctx, evidence=(replace(ctx.evidence[0], address="counci1@example.org"), *ctx.evidence[1:]))
+    elif defect == "unverified":
+        ctx = replace(ctx, evidence=(replace(ctx.evidence[0], verified=False), *ctx.evidence[1:]))
+    elif defect == "route_change":
+        ctx = replace(ctx, source_refs={**ctx.source_refs, "correspondence_routing": "new-route-generation"})
+    else:
+        ctx = replace(ctx, state=replace(ctx.state, active_thread_ids=("new-thread",)))
+    host.context = ctx
+    _assert_block(sender, tx, receipt)
+
+
+@pytest.mark.parametrize("operation", ["send_email", "reply", "send_draft", "delivery_repair",
+                                       "create_draft", "update_draft"])
+def test_sender_all_operations_require_receipt_and_submit_once(sender, operation):
+    tx, host, store, boundary = sender
+    tx["operation"] = operation
+    if operation in {"send_draft", "update_draft"}:
+        tx.update(draft_id="draft-1", draft_message_id="draft-mid-1", thread_id="thread-1")
+    if operation == "reply":
+        tx.update(reply_message_id="inbound-1", thread_id="thread-1")
+    _assert_block(sender, tx, None)
+    receipt = boundary.issue(tx)
+    assert receipt["decision"] == "SEND", receipt
+    result = boundary.execute(tx, receipt)
+    assert result["decision"] == ("DRAFT_SAVED" if "draft" in operation and operation != "send_draft" else "VERIFIED_SENT"), result
+    assert host.submits == 1
+    result = boundary.execute(tx, receipt)
+    assert result["decision"] in {"BLOCK", "HOLD"}
+    assert host.submits == 1
+    statuses = store.select("recipient_submission_state")
+    assert len(statuses) == 3
+    assert {r["identity_id"] for r in statuses} == {"council", "commission", "hasegawa"}
+    assert all("address" not in r for r in statuses)
+
+
+@pytest.mark.parametrize("patch", [{"to": []}, {"cc": []}, {"bcc": []}, {"bcc": ["extra@example.org"]},
+    {"to": ["commission@example.org"], "cc": ["council@example.org"]}, {"id": "wrong"},
+    {"thread_id": "wrong"}, {"label_ids": []}, {"bcc": None}])
+def test_sender_readback_mismatch_never_verifies_and_never_retries(sender, patch):
+    tx, host, store, boundary = sender
+    receipt = boundary.issue(tx)
+    host.patch = patch
+    result = boundary.execute(tx, receipt)
+    assert result["decision"] == "PROVIDER_SENT_INTEGRITY_INCIDENT", result
+    assert host.submits == 1
+    # Restart service, make a new fresh receipt, and attempt 'repair' again.
+    restarted = CorrespondenceSenderBoundary(provider=host, reconcile=host.reconcile, store=store, clock=lambda: host.now)
+    second = restarted.issue(tx)
+    assert restarted.execute(tx, second)["decision"] == "BLOCK"
+    assert host.submits == 1
+
+
+@pytest.mark.parametrize("failure", ["submit", "readback", "missing_mid", "missing_thread"])
+def test_sender_provider_ambiguity_is_durable_no_retry(sender, failure):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    if failure == "submit":
+        host.fail_submit = True
+    elif failure == "readback":
+        host.fail_read = True
+    elif failure == "missing_mid":
+        host.result = {"thread_id": "thread-1"}
+    else:
+        host.result = {"id": "sent-1"}
+    result = boundary.execute(tx, receipt)
+    assert result["decision"] in {"PROVIDER_STATE_UNKNOWN", "PROVIDER_SENT_INTEGRITY_INCIDENT"}
+    assert boundary.execute(tx, boundary.issue(tx))["decision"] == "BLOCK"
+    assert host.submits == 1
+
+
+@pytest.mark.parametrize("change", ["expiry", "sent", "bcc", "subject", "thread"])
+def test_sender_draft_drift_and_slow_read_expiry_fail_before_submission(sender, change):
+    tx, host, _, boundary = sender
+    tx.update(operation="send_draft", draft_id="draft-1", draft_message_id="draft-mid-1", thread_id="thread-1")
+    receipt = boundary.issue(tx)
+    if change == "expiry":
+        host.after_draft = lambda h: setattr(h, "now", h.now + 120)
+    elif change == "sent":
+        host.after_draft = lambda h: setattr(h, "context", replace(h.context, sent_message_ids=("new-send",)))
+    elif change == "bcc":
+        host.draft_patch = {"bcc": ["another@example.org"]}
+    elif change == "subject":
+        host.draft_patch = {"subject": "changed subject"}
+    else:
+        host.draft_patch = {"thread_id": "another-thread"}
+    _assert_block(sender, tx, receipt)
+
+
+def test_sender_concurrent_replay_claim_is_atomic(sender):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: boundary.execute(tx, receipt), range(2)))
+    assert sorted(r["decision"] for r in results) == ["BLOCK", "VERIFIED_SENT"]
+    assert host.submits == 1
+
+
+def test_sender_dry_run_cannot_authorize_provider(sender):
+    tx, host, _, boundary = sender
+    audit = boundary.issue(tx, dry_run=True)
+    assert audit["decision"] == "AUDIT_ONLY"
+    _assert_block(sender, tx, audit["receipt"])
+
+
+def test_sender_historical_integrity_incident_blocks_delivery_repair(sender):
+    tx, host, _, boundary = sender
+    tx["operation"] = "delivery_repair"
+    host.context = replace(host.context, sent_message_ids=("historical-provider-sent",))
+    assert boundary.issue(tx)["decision"] == "BLOCK"
+    _assert_block(sender, tx, {"decision": "SEND"})
+
+
+def test_sender_scheduled_or_helper_caller_has_no_alternate_boundary(sender):
+    tx, host, _, boundary = sender
+    def scheduled_job(receipt):
+        return boundary.execute(tx, receipt)
+    def delivery_helper(receipt):
+        return scheduled_job(receipt)
+    assert delivery_helper(None)["decision"] == "BLOCK"
+    assert host.submits == 0
+    assert delivery_helper(boundary.issue(tx))["decision"] == "VERIFIED_SENT"
+    assert host.submits == 1
+
+
+def test_sender_same_provider_state_cannot_authorize_parallel_different_transaction(sender):
+    tx, host, _, boundary = sender
+    first = boundary.issue(tx)
+    assert boundary.execute(tx, first)["decision"] == "VERIFIED_SENT"
+    tx["subject"] = "different subject after send"
+    second = boundary.issue(tx)
+    assert boundary.execute(tx, second)["decision"] == "BLOCK"
+    assert host.submits == 1
+
+@pytest.mark.parametrize("defect", ["schema", "negative_count", "duplicate_asks", "dangling_delta", "policy"])
+def test_sender_malformed_capsule_or_policy_fails_closed(sender, defect):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    ctx = host.context
+    if defect == "schema":
+        ctx = replace(ctx, state=replace(ctx.state, schema_version="unknown"))
+    elif defect == "negative_count":
+        ctx = replace(ctx, state=replace(ctx.state, outbound_since_latest_inbound=-1))
+    elif defect == "duplicate_asks":
+        ctx = replace(ctx, state=replace(ctx.state, asks=(AskRecord("x", AskStatus.OPEN),)*2))
+    elif defect == "dangling_delta":
+        ctx = replace(ctx, state=replace(ctx.state, new_delta_ask_ids=("not-declared",)))
+    else:
+        ctx = replace(ctx, evidence=(replace(ctx.evidence[0], policy="UNKNOWN"), *ctx.evidence[1:]))
+    host.context = ctx
+    _assert_block(sender, tx, receipt)
+
+
+def test_sender_capsule_invalidation_during_second_read_blocks(sender):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    host.after_reconcile = lambda h: setattr(h, "context", replace(h.context, conflicts=("changed queue",)))
+    _assert_block(sender, tx, receipt)
+
+
+def test_sender_missing_intended_recipient_cannot_be_authorized_by_composer(sender):
+    tx, host, _, boundary = sender
+    proposed = deepcopy(tx)
+    proposed["recipients"].pop()
+    assert boundary.issue(proposed)["decision"] == "BLOCK"
+    assert host.submits == 0
+
+
+def test_sender_new_receipt_after_actual_bcc_policy_change_blocks(sender):
+    tx, host, _, boundary = sender
+    host.context = replace(host.context, evidence=tuple(
+        replace(e, policy=RoutePolicy.DO_NOT_ADDRESS_OR_CC) if e.identity_id == "hasegawa" else e
+        for e in host.context.evidence
+    ))
+    assert boundary.issue(tx)["decision"] == "BLOCK"
+    assert host.submits == 0
+
+
+def test_sender_finalized_draft_third_followup_fresh_session(sender):
+    tx, host, store, _ = sender
+    tx["operation"] = "create_draft"
+    host.context = replace(host.context, state=replace(
+        host.context.state, outbound_since_latest_inbound=2,
+        follow_up_gate=FollowUpGate.BLOCK_THIRD_FOLLOWUP,
+        next_allowed_action="HOLD / AWAIT INBOUND",
+    ))
+    fresh = CorrespondenceSenderBoundary(provider=host, reconcile=host.reconcile, store=store, clock=lambda: host.now)
+    assert fresh.issue(tx)["decision"] == "BLOCK"
+    assert fresh.execute(tx, None)["decision"] == "HOLD"
+    assert host.submits == 0
+
+
+def test_sender_fresh_read_timestamp_does_not_invalidate_or_release_state_claim(sender):
+    tx, host, _, boundary = sender
+    receipt = boundary.issue(tx)
+    host.now += 10
+    host.context = replace(host.context, state=replace(host.context.state, reconciled_at="2026-10-02T09:00:10+00:00"))
+    assert boundary.execute(tx, receipt)["decision"] == "VERIFIED_SENT"
+    host.now += 10
+    host.context = replace(host.context, state=replace(host.context.state, reconciled_at="2026-10-02T09:00:20+00:00"))
+    tx["subject"] = "changed after timestamp-only reconciliation"
+    assert boundary.execute(tx, boundary.issue(tx))["decision"] == "BLOCK"
+    assert host.submits == 1
