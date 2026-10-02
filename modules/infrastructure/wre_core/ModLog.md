@@ -1,3 +1,11 @@
+## 2026-10-02 — Record bounded native fixture diagnostic
+
+- **setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.
+- Existing lifetime, verified-file and process owners reused; source review repaired Windows environment-key and identity accounting before execution.
+- No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+- WSP00/5/6/15/22/48/50/84/97/99: next 13/P1 is Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet.
+- PR2028 main closure verified; evidence in backlog `native_fixture_diagnostic_20261002`. This slice publication/closure separate.
+
 ## 2026-10-02 — Qualify backend lifetime control flow
 
 - Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials.

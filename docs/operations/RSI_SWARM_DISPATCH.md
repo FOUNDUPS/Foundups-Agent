@@ -1,3 +1,30 @@
+## Native fixture diagnostic — 2026-10-02
+
+Source `a98497a3d1ddeeb2800af15b7f57ce641382fb52`. Result: **setup_invalid**. One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.
+
+One separately reviewed child was bounded to30s and128MiB aggregate Job commit,
+16KiB retained stdout,128KiB result JSON and4096-byte partial phase journal.
+The fixed input is the previously captured7,895,232-byte GGUF header fixture;
+no tensor payload was appended and no original-model fallback was permitted.
+The unchanged backend/model lifetime functions and existing Windows file/process
+owners are reused. The installed package's eager native calls are source-known,
+not instrumented. Native cumulative reads and transitive initialization are not
+measured; Python guards are not an OS/native filesystem sandbox.
+
+No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic. Fixture acceptance, valid failure evidence and successful transport
+are separate states. Missing evidence never becomes zero or successful cleanup.
+Prior inert suites are not rerun/recounted. This local one-shot allowance is
+consumed/closed; hosted CI does not replay it. PR2028 is main-verified and its
+owned lane closed.
+
+Next **13/P1:** Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet. A concrete setup failure blocked the native interval. Existing installed source and the historical guard identify a narrow omitted null-device allowance. Correct and independently qualify that one boundary, preserving denial of ordinary writes, rather than changing models, loaders, resource caps or production code.
+Further execution requires its own exact packet review; this record allocates
+no retry, model read, resource increase or WRE admission.
+
+Evidence: backlog `native_fixture_diagnostic_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-native-fixture/`.
+Publication/main closure is recorded separately; older entries are historical.
+
 ## Backend lifetime controls qualified — 2026-10-02
 
 Source `b24463eedd899f1612698435ba660775e1d62134`. Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials.

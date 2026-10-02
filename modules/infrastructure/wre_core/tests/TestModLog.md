@@ -1,3 +1,18 @@
+## Native fixture observation — 2026-10-02
+
+**setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-fixture/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `native_fixture_diagnostic_20261002` pins exact artifacts and resource/receipt limits.
+
 ## Inert backend lifetime controls — 2026-10-02
 
 Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials. Sixteen cases contain seventeen inert intervals; the repeated case checks fresh
