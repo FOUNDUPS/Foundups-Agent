@@ -1,3 +1,12 @@
+## 2026-10-02 — Verify original GGUF prefix extraction
+
+- Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent).
+- Reuse existing reader, capture/output helpers and Windows file/process owners; one callback seam and shared verified readback.
+- Actual padding and matching prefix/readback hash verified; source + readback 15,790,464 bytes, original 7,895,232 bytes.
+- No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred.
+- WSP00/5/6/15/22/48/50/84/97/99: next 14/P1 is Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet.
+- Evidence: backlog `gguf_prefix_extraction_20261002`; PR2026 main closure verified; this slice publication/closure separate.
+
 ## 2026-10-02 — Qualify bounded prefix capture/output controls
 
 - One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials.
