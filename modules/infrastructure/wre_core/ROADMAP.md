@@ -1,3 +1,11 @@
+## Native guarded diagnostic — 2026-10-02
+
+**fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+
+Next **13/P1:** Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-guarded-diagnostic--2026-10-02)
+and backlog `native_guarded_diagnostic_20261002`. Earlier entries remain historical.
+
 ## Null-device guard controls — 2026-10-02
 
 20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials. Native import remains unqualified; the prior setup failure is preserved.

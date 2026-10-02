@@ -1,3 +1,18 @@
+## Native guarded observation — 2026-10-02
+
+**fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-guarded/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `native_guarded_diagnostic_20261002` pins exact artifacts and resource/receipt limits.
+
 ## Null-device guard inert controls — 2026-10-02
 
 20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials. Cases exercise source-derived audit tuples with a captured callback;
