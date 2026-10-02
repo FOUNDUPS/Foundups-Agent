@@ -1,5 +1,26 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-10-02: Optional aggregate committed-memory limit for the existing child owner
+
+- Added `job_memory_limit_bytes=None` through the shared runner and Windows
+  Job owner. Exact positive integer/`SIZE_T_MAX` and platform checks precede
+  process/Job creation; `0x200` combines with existing kill-on-close `0x2000`.
+  Configuration and assignment complete before resume. Default call shapes,
+  existing output/deadline controls, and cleanup paths remain intact.
+- Appended independent deterministic and Windows controls to the existing test
+  owner. Local evidence is 48 deterministic + two physical memory + four
+  process/maintenance + eight manifest cases: 62 distinct passes across separate
+  runs. Original failed attempts remain documented in `tests/TestModLog.md`.
+- The physical fixture now reuses the existing OS process-image owner to avoid
+  the venv launcher's nested Job; the 128 MiB limit and allocation oracles stayed
+  fixed. Two older overflow tests now require intact bounded capture instead
+  of a timing-dependent zero exit after deliberate tree termination.
+- Publication and hosted CI are pending; these are local qualification results.
+- Aggregate commit is separate from RSS, native file I/O, or full containment.
+  No model, provider, production service, runtime activation, or RSI gain is
+  part of this change. Historical totals below remain dated evidence.
+  WSP 00, 15, 22, 50, 62, 97.
+
 ## 2026-09-14: Existing MCP dependency candidates qualified without activation
 
 - Extended section 6 of the existing `docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md`; its expired historical decision is not renewed. Traced direct tool registration and immutable Holo snapshots against the FastMCP/Chroma advisories. Live topology remains unverified; alerts stay open.

@@ -1,3 +1,17 @@
+## Worker committed-memory boundary qualified — 2026-10-02
+
+Existing process owners now provide an optional aggregate Windows Job commit
+cap, validated before creation and applied before resume. Defaults preserved.
+Local final evidence: 48 deterministic + 2 actual memory + 4 connected process
+and 8 manifest cases pass. The same 128 MiB bound accepts/releases 1 MiB and
+rejects 256 MiB. Prior failed harness/fixture/overflow-oracle attempts remain recorded.
+
+Next 14/P1: qualify input/read scope and cleanup for the existing no-allocation
+native metadata diagnostic. No native/model/provider execution, admission,
+retained benefit or whole-host containment is established by this layer.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#worker-committed-memory-boundary-qualified--2026-10-02)
+and backlog `child_memory_limit_qualification_20261002`. Earlier entries are historical.
+
 ## Nemotron formatter qualified — 2026-10-02
 
 One reviewed model-free invocation passed6/6 fixed cases through the current

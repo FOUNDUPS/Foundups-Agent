@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.nemotron_formatter_qualification_20261002",
-    "base_commit": "c4a31c5884400f3e9e64b3f968c17742776b0066",
-    "selected_action": "Prepare a single separately reviewed no-allocation native metadata/vocabulary diagnostic using the existing llama_cpp model-parameter/load/free boundary",
-    "status": "saved_template_qualified_next_native_metadata_preparation",
+    "observation_path": "current_observation.child_memory_limit_qualification_20261002",
+    "base_commit": "278e896804e1ca6048f516dfad89d50498401428",
+    "selected_action": "Prepare the existing-owner native metadata/vocabulary diagnostic with bounded input/read scope, no-allocation parameters and handle cleanup; memory prerequisite is locally qualified",
+    "status": "memory_boundary_qualified_next_native_read_preparation",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,9 +1894,9 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "publication_receipt": "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-formatter\\closure\\final-accounting.json",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation_path": "current_observation.nemotron_metadata_qualification_20261002"
+    "previous_observation_path": "current_observation.nemotron_formatter_qualification_20261002",
+    "publication_state": "pending_normal_independent_review_and_exact_head_CI"
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -22219,6 +22219,274 @@
         "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\receipt.json": "0780017e152b94d0a39874a3179b43ff76b4dbf0996e3afa3d35c45cb3a21826",
         "O:\\Foundups-Agent-audits\\20261002-rsi-nemotron-metadata\\template-preparation\\result-review.json": "29269dafa91d6f2356afce054b362c2bfca5e7a16b02c3dd8bab7dc8f0893c75"
       }
+    },
+    "child_memory_limit_qualification_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "278e896804e1ca6048f516dfad89d50498401428",
+      "recorded_utc": "2026-10-02T00:58:52.621305+00:00",
+      "previous_observation": "current_observation.nemotron_formatter_qualification_20261002",
+      "status": "memory_boundary_locally_qualified_publication_pending",
+      "scope": "Optional aggregate Windows Job commit limit in the existing two process owners; defaults preserved; no new orchestrator.",
+      "accepted_local_evidence": {
+        "deterministic_cases": 48,
+        "physical_memory_cases": 2,
+        "connected_process_cases": 4,
+        "manifest_cases": 8,
+        "distinct_passing_cases": 62,
+        "failed_final_cases": 0,
+        "skipped_final_cases": 0,
+        "job_memory_limit_bytes": 134217728,
+        "small_commit_bytes": 1048576,
+        "rejected_commit_bytes": 268435456,
+        "native_model_calls": 0,
+        "provider_calls": 0,
+        "retained_rsi_gain": null
+      },
+      "attempt_history": [
+        "First baseline stopped before cases on a denied unidentified DLL; optional readline excluded in harness.",
+        "Baseline29 expected missing-API failures establish one capability gap, not29 defects.",
+        "First candidate48 assertion passes had9 denied optional pytest temp-alias attempts; harness result invalid.",
+        "Revised candidate48 passed with exact IDs, stable source, zero guard denials and zero test children.",
+        "Initial physical2 failed the compound result assertion; one small diagnostic then proved query mismatch before allocation.",
+        "Diagnostic observed flags0x3000/memory0: consistent with CPython venv nested Job. Test reuses OS-observed actual-image owner, keeping128MiB and all allocation assertions.",
+        "Connected12 first run:11passed/1failed; eight manifest cases passed. Two overflow oracles corrected against unchanged baseline termination behavior, then four process cases rerun."
+      ],
+      "source_bindings": {
+        "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_bounded_child_process.py": {
+          "status": "verified",
+          "sha256": "dc620f385c74a1251da85964a37072947a11bcd3eca7a46f921ccdce31294514"
+        },
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py": {
+          "status": "verified",
+          "sha256": "abf0ade7ea9e880a21b6bf5b63c80ec6eaa9fe9fbe5a7051feed56a686e2f0e1"
+        },
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py": {
+          "status": "verified",
+          "sha256": "037b80f31b977c72c3a26f3abc284602a649a6bfc35f3c9373571a091230665e"
+        },
+        "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_process_image.py": {
+          "status": "verified",
+          "sha256": "bf253a0556b885e48c2479584df8f1f9ff8faf85f55b4bb4aff5ad678dc91901"
+        }
+      },
+      "manifest_digest": "92b48c777b15080a781da9a4f703babb907a6be36bcd03210c47eb6709ad2428",
+      "runtime_files": 1404,
+      "verification_limits": [
+        "Aggregate commit is not RSS, file IO, native-loader isolation or full host containment.",
+        "Two direct allocations do not empirically establish cumulative descendant memory behavior.",
+        "Reviewed supervised developer tests; no WRE runtime grant, model load, retained improvement, deployment or production RSI.",
+        "Point-in-time hashes and process-image lookup are not immutable execution or retained executable authority.",
+        "Hosted CI, main convergence and owned-lane closure remain separate publication gates."
+      ],
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner"
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane"
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner"
+        },
+        {
+          "task": "Qualify optional committed-memory limits in the existing Windows Job and bounded-child owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "locally_validated_pending_publication",
+          "dependency": "Preserve defaults; independently freeze and validate deterministic and disposable-child controls before claiming enforcement; native-model read/ABI/lifetime remain separate",
+          "ownership": "Existing foundups_mcp_bridge Windows Job and bounded-child process owners"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner"
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners"
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane"
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator"
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane"
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator"
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners"
+        },
+        {
+          "task": "Prepare the existing-owner native metadata/vocabulary diagnostic with bounded input/read scope, no-allocation parameters and handle cleanup; memory prerequisite is locally qualified",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "Independent exact-source packet and finite resource/read budget before native execution",
+          "ownership": "Existing WRE/llama_cpp owners"
+        }
+      ],
+      "next_action": "Prepare the existing-owner native metadata/vocabulary diagnostic with bounded input/read scope, no-allocation parameters and handle cleanup; memory prerequisite is locally qualified",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\selection.json": "6e2f3e2d152df7ffde100914c323ad413881e8cca449158c315a044dc35f9181",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\reviewed-tests-v2\\baseline\\receipt.json": "01382005c321a8f5a0f7aecbc7222c60ef892658a5c2ecdb3eadeec5c7a1ea71",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\reviewed-tests-v3\\candidate\\receipt.json": "349a20969015377edc329fd75e58cb07adabb75853bf3c3b0133ee201c0c9694",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\reviewed-tests-v3\\windows\\receipt.json": "a1bebd7886c6e94583408487cc934f2e87bd25991ea34417cbdb8a82bd050465",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\diagnostic-small\\windows\\receipt.json": "03be7c035f64d3a55d078b452fe4c8b0728d5a2d41b69cbc9a3fb10ba6c0a253",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\reviewed-tests-v4\\windows\\receipt.json": "cba13dace2065b78182558de1873629aaac1867597e12b7a2667a7a4bb473396",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\reviewed-tests-v4\\result-review.json": "1958b4a8f25e806f3d8ef1fc966a56bf4cf8f1285dc9e121a5ea7d0b311729e3",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\connected\\receipt.json": "242c580ad7b3c5b56baedf582b1f153246a27cbedede650977b92d0c52af6671",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\connected-replay\\connected\\receipt.json": "2b6075778bdefa98a53ae530bbc5d5935c9c670064ac3791eec2df6bd24393a4"
+      },
+      "production_rsi_eligible": false,
+      "dispatchable": false
     }
   }
 }
