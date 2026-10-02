@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_raw_handle_lifetime_20261002",
-    "base_commit": "bbc4a3d5ab21c942ff177d7aa4216e03c5f36b50",
-    "selected_action": "Prepare a bounded GGUF v3 tensor-directory/alignment extension of the existing metadata reader and freeze independent inert parser controls",
-    "status": "raw_handle_control_flow_qualified_next_bounded_header_preparation",
+    "observation_path": "current_observation.gguf_header_boundary_20261002",
+    "base_commit": "6631f6a1d0e1f60a9c4462b0caba45912a227815",
+    "selected_action": "Prepare a separately reviewed one-shot original Nemotron metadata/tensor-directory boundary read using the qualified reader, verified-file owner and bounded child owner",
+    "status": "inert_header_qualified_next_bounded_original_read_preparation",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1895,7 +1895,7 @@
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.child_memory_limit_qualification_20261002",
+    "previous_observation": "current_observation.native_raw_handle_lifetime_20261002",
     "publication_state": "pending_exact_source_review_and_hosted_closure"
   },
   "current_observation": {
@@ -22798,6 +22798,342 @@
         "O:\\Foundups-Agent-audits\\20261002-rsi-native-lifetime\\gguf-wire-reference.json": "ffc062ba0aa339b5a64a004d623527be00410f1866bb4029e7b0b3803e6d8e1b",
         "O:\\Foundups-Agent-audits\\20261002-rsi-native-lifetime\\upstream-gguf.md": "1dead27b6a522709f0127d194e58c21dbbbf00ba1c64fe37c54d1a9048b05020",
         "O:\\Foundups-Agent-audits\\20261002-rsi-child-memory\\closure\\final-accounting.json": "b32792d579777a49fc1c97d9f39150068a8f19de1f13abb36cf08d67f5532557"
+      },
+      "native_rsi_admitted": false,
+      "dispatchable": false,
+      "retained_gain": null
+    },
+    "gguf_header_boundary_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "6631f6a1d0e1f60a9c4462b0caba45912a227815",
+      "recorded_utc": "2026-10-02T03:38:33.679257+00:00",
+      "previous_observation": "current_observation.native_raw_handle_lifetime_20261002",
+      "status": "audit_inert_header_boundaries_qualified_original_directory_unread",
+      "scope": "Existing audit inspect function extended; Reader and verified-file AST unchanged. No installed or production runtime change.",
+      "experiment": {
+        "invocations": 1,
+        "passed": 24,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "unrun": 0,
+        "case_ids": [
+          "alignment_not_multiple_of_eight",
+          "alignment_wrong_wire_type",
+          "alignment_zero",
+          "computed_alignment_offset_cap_exact",
+          "computed_alignment_offset_over_cap",
+          "cumulative_read_cap_exact",
+          "cumulative_read_cap_one_byte_short",
+          "deadline_expires_before_alignment_check",
+          "deadline_expires_between_metadata_and_directory",
+          "declared_tensor_count_exceeds_present_records",
+          "default_alignment_computed_padding",
+          "diagnostic_tensor_count_at_limit",
+          "diagnostic_tensor_count_over_limit",
+          "explicit_non_power_of_two_already_aligned",
+          "maximum_name_rank_and_dimension",
+          "tensor_dimension_zero",
+          "tensor_name_duplicate",
+          "tensor_name_empty",
+          "tensor_name_invalid_utf8",
+          "tensor_name_over_64_bytes",
+          "tensor_offset_misaligned",
+          "tensor_rank_over_four",
+          "tensor_rank_zero",
+          "truncated_last_tensor_field"
+        ],
+        "child_wall_seconds": 0.06200000015087426,
+        "parent_wall_seconds": 0.3119999999180436,
+        "model_native_calls": 0,
+        "backend_calls": 0,
+        "model_reads": 0,
+        "provider_requests": 0,
+        "blocked_events": [],
+        "budget_state": "Consumed and closed; no retry",
+        "zero_count_provenance": "Reviewed inert call graph and child guard, not native instrumentation"
+      },
+      "verified_properties": [
+        "Metadata and tensor-directory parsing share the unchanged cumulative Reader budget/deadline.",
+        "Absent alignment defaults to32; explicit uint32 multiples of8 including24 are retained and validated.",
+        "Tensor count is limited to4096; names to64 UTF-8 bytes; diagnostic names are nonempty/unique and ranks1..4 with positive dimensions. No dimension product or tensor allocation.",
+        "Final boundary computation checks reach and deadline without reading/seeking padding or following payload offsets.",
+        "Frozen synthetic cases cover exact boundaries, malformed fields, truncation, duplicate names and cumulative limits."
+      ],
+      "verification_limits": [
+        "24 local inert cases, not hosted or native-model executions.",
+        "Computed data start may exceed inert EOF; padding presence/content, payload extents and complete GGUF validity are not established.",
+        "Actual Nemotron directory length/alignment remain unread. Raw ggml type is structural only, not runtime support evidence.",
+        "Python guards and sampled hashes are not complete OS isolation or immutable execution.",
+        "No authenticated worker admission, accepted generated candidate or retained RSI improvement."
+      ],
+      "prior_layer_closure": {
+        "pr": 2023,
+        "merge": "6631f6a1d0e1f60a9c4462b0caba45912a227815",
+        "state": "MERGED_VERIFIED_MAIN_OWNED_LANE_CLOSED",
+        "main_ci_and_codeql_verified": true
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Qualify optional committed-memory limits in the existing Windows Job and bounded-child owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2021; exact-main content and required hosted workflows verified. Does not resolve native read/ABI/lifetime or RSI retention.",
+          "ownership": "Existing foundups_mcp_bridge Windows Job and bounded-child process owners",
+          "evidence": "closure/final-accounting.json",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Qualify deterministic raw model-handle acquisition/vocabulary/free paths in the existing diagnostic scaffold",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2023; exact-main content and required hosted workflows verified. Does not establish native cleanup, model support or RSI retention.",
+          "ownership": "Existing WRE/llama_cpp owners",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify bounded GGUF tensor-directory and computed alignment boundaries using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_local_inert_header_qualification",
+          "dependency": "One24-case source-bound invocation independently accepted; actual file directory, padding/payload presence and native support remain unobserved.",
+          "ownership": "Existing GGUF audit Reader and Windows verified-file owner",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Prepare a separately reviewed one-shot original Nemotron metadata/tensor-directory boundary read using the qualified reader, verified-file owner and bounded child owner",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "Fresh exact source/file identity and separate bounded read packet; no implicit copy, native invocation or retry",
+          "ownership": "Existing audit Reader, verified-file and bounded-child owners"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners",
+          "score_reassessment": "Four canonical WSP15 dimensions rechecked against main checkpoint; no evidence changes relative importance/complexity/urgency/impact. Completion changes eligibility, not historical score."
+        }
+      ],
+      "next_action": "Prepare a separately reviewed one-shot original Nemotron metadata/tensor-directory boundary read using the qualified reader, verified-file owner and bounded child owner",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "selection_rationale": "The proposed observation resolves actual alignment, directory length and bounded-read fit through existing owners. One narrowly rebound read packet is sufficient; no native loader, fixture capture or new production component is needed.",
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\selection.json": "1850c5f022d999d24843e1172d4852ba6a5f85b0b48f2b503d74d8cf0ed82e1d",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\work-packet.json": "c51c3e12c83adc54bed002380408df586e72294524f517c11ff93e1bbdeca395",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\compiler-receipt.json": "161a2897e424cdb5f0911b6e0061e9981060c3ad501f194da3c75e6ed3a67869",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\scaffold-reuse.json": "0d3521f4632db65f0c7a10ade2ce90db4cc58b921eb462fb535c6a55fec62a5a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\inspect_metadata.py": "0daf9bb165dd25bdfe23f22aeda3777bc2e1320e12b82d7af39019482db7421c",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\header-test-contract.json": "8cb684b120acca1a2abcfb38cc6544c1673d13b981e765ba62874ad733461b23",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\fixture_checks.py": "b8a8b4c50a34b743770bc2cefdd7bf5ff1d6a4c17480d1602a942eeb45b84184",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\test-author-receipt.json": "e32c74a44176c72ea75632da4c9f29b243466505ed0f51e6fe4147b6bbe8ea0b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\source-review.json": "6f3328eb1891cfa8b0d110c5fbad6630031bda22b9c387c82cc469b78fcad7ab",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\plan.json": "e8f7a37192ca73e9d3bd74ea65fb82f45c82ae9104f4ec61b06919ab347eb51f",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\run_once.py": "cc44a6ca0ca0bad87f7badf91b651f8d6b2a58ce3edb77db7e3ed553137480d9",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\check_header.py": "2ed2d1153c6532a68778d025910691cd36016e0c61bde6ee887d2091d89955ec",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\execution-review.json": "2012d429d5335dda74d58bb7efb525d050e12a83e0a4c106ebaf3f7d6347c8a6",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\started.json": "1e37f8b2f1b53550a2eeb0ad27d4feff8a92bedc34c5157e39cdd07c7a5d7eb8",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\header-result.json": "e88546ff0f44a79ffcc6afd22166c5470057f968f2a5a5ae4156aff097a1aa29",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\receipt.json": "9d5873322871ca260be5f6f7918cc90ac73bd2ecda65a5c5077438687d6f5a45",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\result-review.json": "97e4e14f02c043605b5a7f50b4d81eb29b2d730b7f70d655b61d92019a3fb430",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-header-boundary\\next-read-preparation.json": "fb62d745bb51f8c6a8f092ca60202983fb568e457a61f1fe230fda2a267c9b26",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-lifetime\\closure\\final-accounting.json": "13c58c115792d7a493e52ff39b1884f0fee9e4cacdf178d3ee7bee5d1c902ed2"
       },
       "native_rsi_admitted": false,
       "dispatchable": false,

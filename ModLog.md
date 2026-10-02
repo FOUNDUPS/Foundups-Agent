@@ -1,3 +1,15 @@
+## 2026-10-02 — Qualify bounded GGUF directory parsing
+
+- Extended existing audit `inspect()` and fixture scaffold; Reader/handle AST unchanged.
+- One independently reviewed invocation: 24 passed / 0 failed, skipped, missing or denied;
+  child 0.062s / parent 0.312s.
+- Validated structural directory bounds, explicit/default alignment and cumulative
+  limits. Padding/data offsets are computed, not proof of bytes or native support.
+- WSP 00/5/6/15/22/48/50/84/97/99: next 14/P1 is bounded original-file
+  read preparation. No native-model/backend/provider execution or RSI retention claimed.
+- PR2023 verified on main; this slice's exact publication/closure is separately recorded.
+- Evidence: backlog `gguf_header_boundary_20261002`; `O:/Foundups-Agent-audits/20261002-rsi-header-boundary/`.
+
 ## 2026-10-02 — Qualify diagnostic raw-handle control flow
 
 - Reused the existing audit scaffold; only one inert-callable function added.

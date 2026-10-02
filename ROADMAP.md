@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-02 current layer:** the audit raw-handle lifetime helper passed 17/17 fixed inert cases in one independently reviewed invocation. Ownership precedes vocabulary lookup; cleanup is attempted once with separate error evidence. Production and installed runtime owners are unchanged. Next 14/P1: bounded GGUF header/parser preparation using existing owners. Actual native/backend cleanup, model support, admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#raw-handle-diagnostic-lifetime-qualified--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+**2026-10-02 current layer:** the existing audit reader passed 24/24 fixed inert header/directory cases in one independently reviewed invocation. Cumulative read/offset/deadline limits remain intact; aligned data start is computed without padding/payload access. Production and installed runtime owners are unchanged. Next 14/P1: bounded original-file read preparation using existing owners. Actual native/backend behavior, admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#bounded-gguf-header-controls-qualified--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

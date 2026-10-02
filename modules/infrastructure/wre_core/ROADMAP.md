@@ -1,3 +1,16 @@
+## Bounded GGUF header controls qualified — 2026-10-02
+
+One independently reviewed audit child passed 24/24 fixed inert cases. Only
+existing `inspect()` changed; Reader and verified-file ownership stay unchanged.
+Computed alignment does not inspect padding or payload. No model/backend/provider
+call or original-file read occurred; no production runtime change.
+
+Next 14/P1: bounded original-file directory-read
+preparation, with fresh source/file identity and a separately reviewed allowance.
+Native compatibility, admitted execution and retained improvement remain open.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#bounded-gguf-header-controls-qualified--2026-10-02)
+and backlog `gguf_header_boundary_20261002`. Earlier entries are historical.
+
 ## Raw-handle diagnostic lifetime qualified — 2026-10-02
 
 One reviewed audit child passed 17/17 fixed inert cases. The source-pinned
