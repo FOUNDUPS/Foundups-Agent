@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-02 current layer:** optional worker committed-memory control is locally qualified: 62 distinct regression cases, including real 1 MiB acceptance and 256 MiB rejection under a 128 MiB Windows Job limit. Existing owners/defaults are preserved. Next 14/P1: bound the native metadata diagnostic's input/read scope and cleanup. Native admission, accepted output and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#worker-committed-memory-boundary-qualified--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+**2026-10-02 current layer:** the audit raw-handle lifetime helper passed 17/17 fixed inert cases in one independently reviewed invocation. Ownership precedes vocabulary lookup; cleanup is attempted once with separate error evidence. Production and installed runtime owners are unchanged. Next 14/P1: bounded GGUF header/parser preparation using existing owners. Actual native/backend cleanup, model support, admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#raw-handle-diagnostic-lifetime-qualified--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

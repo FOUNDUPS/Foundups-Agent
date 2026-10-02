@@ -1,3 +1,17 @@
+## Raw-handle diagnostic lifetime qualified — 2026-10-02
+
+One reviewed audit child passed 17/17 fixed inert cases. The source-pinned
+existing scaffold gains one AST-only helper: own before vocabulary lookup,
+attempt free once, preserve primary/cleanup errors and never claim failed free
+as release. No installed or production code changed. Backend/native cleanup,
+model support and retained benefit are still unqualified; allowance closed.
+
+Next 14/P1: bounded GGUF header/parser preparation with the existing
+Reader and verified-file owners, preserving current ceilings. No original-file
+extraction or native call is allocated by this checkpoint.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#raw-handle-diagnostic-lifetime-qualified--2026-10-02)
+and backlog `native_raw_handle_lifetime_20261002`. Earlier entries are historical.
+
 ## Worker committed-memory boundary qualified — 2026-10-02
 
 Existing process owners now provide an optional aggregate Windows Job commit
