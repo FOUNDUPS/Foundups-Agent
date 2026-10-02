@@ -1,3 +1,16 @@
+## Bounded original-file observation — 2026-10-02
+
+One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+
+One separately reviewed local diagnostic invocation, **zero new test cases**.
+Existing 24-case header and 15-case primitive/handle evidence transfers only to
+unchanged qualified functions; none was rerun. Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-original-header/run_once.py`.
+The single allowance is consumed and closed. No registered module test changed;
+hosted CI does not replay this external audit. Source, runtime, review and result
+bindings are in backlog `original_gguf_directory_20261002`.
+
 ## Audit GGUF header controls — 2026-10-02
 
 The external audit `20261002-rsi-header-boundary` records 24/24 fixed inert
