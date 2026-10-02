@@ -1,3 +1,14 @@
+## 2026-10-02 — Separate 012-directed Work from Red Dog AUTO
+
+- Applied 012's explicit 19:09 JST operating correction: #1779 is not a blanket
+  block on specifically directed Work correspondence while Red Dog is developed.
+- Canonical correspondence/Work Skillz now bind execution origin and instruction
+  reference, retain every live Sent/recipient/capsule/readback gate, and keep AUTO
+  containment and message-specific engineering holds. Added a non-authorizing mode
+  classifier and regressions in the existing test owner. No mail/contact mutation.
+- Akida/Akita STT means Akira Hasegawa. #1779 remains open; no mechanical Work
+  connector isolation or Red Dog deployment is claimed. WSP00/50/95/97.
+
 ## 2026-10-01 — Japan compute comparables and Japanese inquiry references
 
 - Added public-primary-source research covering five operating models, Japanese

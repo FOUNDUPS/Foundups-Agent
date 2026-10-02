@@ -104,6 +104,8 @@ work_item_id:
 title:
 lane:
 origin:
+execution_origin: 012_DIRECTED_WORK | REDDOG_AUTO | UNKNOWN
+principal_instruction_ref:
 current_state:
 evidence_refs:
 truth_class: VERIFIED | REPORTED_BY_012 | SCENARIO | UNVERIFIED | CONFLICT
@@ -172,7 +174,12 @@ A work item enters Work only after:
 7. allowed/forbidden effects explicit;
 8. correspondence tasks have a current Correspondence State Capsule and recipient preflight;
 9. no physical/signature/meeting step is impersonated;
-10. the existing RedDog governed-work chain authorizes the exact proposal/digest.
+10. classify execution origin: the existing RedDog governed-work chain authorizes
+    `REDDOG_AUTO` proposals; `012_DIRECTED_WORK` uses the actual work-item-bound 012
+    instruction and the correspondence owner's directed-Work checks. Do not require
+    an undeployed Red Dog signer to rediscover or replace 012's existing direction.
+    `UNKNOWN` remains HOLD. #1779 alone blocks AUTO sends, not explicitly directed
+    Work; message-specific engineering holds and all recipient/Sent gates still win.
 
 ## Capital-network expansion protocol
 

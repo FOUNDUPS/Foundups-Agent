@@ -159,6 +159,54 @@ Correspondence Routing is binding state.
 
 A human-friendly internal disambiguation alias may exist in live/private state when needed (for example two people sharing a surname), but do not turn an unverified alias into a formal identity.
 
+## Execution origin — 012-directed Work and unattended Red Dog
+
+Apply the 2026-10-02 instruction from 012: developing the Red Dog schema must not
+become a blanket veto on correspondence 012 has explicitly directed in Work.
+
+Classify each work item before applying #1779 containment:
+
+- `012_DIRECTED_WORK`: an identifiable current or still-valid 012 instruction
+  authorizes this specific work item/send. Continue through the existing live
+  capsule, Sent-first, recipient preflight and provider-readback checks. An open
+  #1779 alone is not a blocker in this lane. Do not ask again for authorization
+  already given. The live connector remains a directly callable provider surface;
+  this lane does not claim mechanical sender-boundary enforcement.
+- `REDDOG_AUTO`: schedules, background triggers, autonomous queue processing and
+  agent-selected outreach. Keep external sends draft/HOLD-only until #1779's actual
+  service/tool-host boundary is deployed and qualified. A Work-origin instruction
+  cannot be copied into a later automated run as standing send authority.
+- `UNKNOWN`: HOLD / RECONCILE; never silently promote an unclear origin to Work.
+
+Bind `execution_origin`, `work_item_id` and `principal_instruction_ref` in the
+working handoff/receipt. Recover direction from the actual 012 instruction, never
+from a model-created label, a draft, urgency, a PR, or a stale queue row. Retain any
+message-specific hold: the instruction not to send the Fukui reply during the
+#1779 engineering task remains `HOLD_ENGINEERING` in that task.
+
+For a directed Work send, immediately before submission:
+
+1. read fresh relevant Sent, complete thread and current canonical draft;
+2. reconcile capsule/CRM/routing and reject duplicates, third follow-ups, closed or
+   unknown routes; engineering holds and recipient BLOCK results still win;
+3. reuse `reddog_recipient_preflight` for identity/policy and exact To/CC/BCC;
+   bind Contact IDs/roles, purpose, body/attachments and reply target to the reviewed
+   transaction; do not let the composer authorize its own list;
+4. use the actual Gmail tool only within the established 012 direction, after
+   re-reading the exact saved draft or reconstructing the exact explicit headers;
+5. read back the exact provider message/thread and full To/CC/BCC; only exact equality
+   becomes VERIFIED_SENT. Missing/extra recipients are integrity incidents, not
+   automatic resend work. Record actual verification separately from delivery.
+
+This is a user-directed operating-policy correction, not resolution of #1779 and
+not a software bypass around recipient/Sent checks. Do not weaken Red Dog AUTO,
+close #1779, or claim the direct Work connector has been mechanically isolated.
+The schema classifier `reddog_correspondence_execution_mode.py` returns only mode/
+checks-required labels; it grants no provider capability or SEND receipt.
+
+STT correction: recent “Akida” / “Akita” means **Akira Hasegawa**. Resolve the
+existing contact; do not create an Akita identity or guess a new address.
+
 ## Sent-first reconciliation
 
 **Assume-Sent invariant:** every proposed outbound must begin from the presumption that it may already have crossed the provider boundary. A Gmail draft, Drive manuscript, CRM row, queue label, Moshpit entry, or prior session statement is never proof that the message is unsent.

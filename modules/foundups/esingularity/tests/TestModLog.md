@@ -1,3 +1,11 @@
+## 2026-10-02 — Directed Work versus AUTO origin regression
+
+- Extended existing contract tests: origin/schema classification never grants SEND;
+  explicit Work direction requires work-item/instruction binding; copied direction
+  cannot authorize AUTO; unknown origin and engineering holds remain blocked.
+- Canonical text regressions retain live Sent/state/preflight/readback requirements
+  and #1779's autonomous containment. No parallel tests or live Gmail effects.
+
 ## 2026-09-30 — Work orchestration and capital-network contracts
 
 - Reused `test_contracts.py`; no parallel test file or investor fixture was created.
