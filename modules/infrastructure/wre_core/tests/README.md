@@ -1,3 +1,23 @@
+## Verified-file connection and prefix extraction — 2026-10-02
+
+Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Zero failed/skipped/missing cases and no guard denials. Eight fixed
+cases cover default/explicit callbacks, exception closure, pre-open rejection,
+actual capture/output/readback, collision preservation and wrong hash/size.
+
+Historical commands (both allowances consumed; no replay):
+
+```text
+python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/connection/run_once.py
+python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/capture/run_once.py
+```
+
+Actual capture is one observation, not another unit-test case. Original prefix
+and fixture readback total 15,790,464 bytes; 14 actual padding bytes are zero. Hash
+`f0006566efd440a0274c4dcade54f94fe577c32630218f273999a8896df158ee`. No full-model hash or durability claim.
+No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred. Prior 32/24/15 controls are not rerun/recounted. Oracle author reviewed
+implementation; no held-out runtime evaluator claim. Hosted CI does not replay
+these external audits. Backlog `gguf_prefix_extraction_20261002` pins the sources, oracle and receipts.
+
 ## Audit prefix capture/output controls — 2026-10-02
 
 One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. The 32 IDs are frozen in the external capture contract; independent

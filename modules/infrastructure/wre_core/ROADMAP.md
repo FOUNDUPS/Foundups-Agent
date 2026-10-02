@@ -1,3 +1,12 @@
+## Verified GGUF prefix extraction — 2026-10-02
+
+Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Actual 14 zero padding bytes and prefix hash equality are verified.
+No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred.
+
+Next **14/P1:** Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-gguf-prefix-extraction--2026-10-02)
+and backlog `gguf_prefix_extraction_20261002`. Prior entries remain historical.
+
 ## Bounded prefix capture controls qualified — 2026-10-02
 
 One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. Two small audit helpers extend existing source; prior parser/handle AST is unchanged.

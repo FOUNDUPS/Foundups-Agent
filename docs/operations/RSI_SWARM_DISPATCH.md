@@ -1,3 +1,34 @@
+## Verified GGUF prefix extraction — 2026-10-02
+
+Source `c0493c69c420dabe93429a8415192821aee80303`. Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent).
+
+The source capture and fixture readback total **15,790,464 bytes**, not an 8 MiB
+aggregate budget. Original capture alone stays under 8 MiB. The actual 14 padding
+bytes are now read and zero-verified; prior PR2025 only computed that boundary.
+The prefix hash is `f0006566efd440a0274c4dcade54f94fe577c32630218f273999a8896df158ee`. Metadata/directory observations and
+same-API historical identity matched; original descriptor closure and fixture
+readback closure were observed. No full-model hash or fsync durability is claimed.
+
+The existing verified reader gains one optional parser callback. Default parser
+behavior, explicit single callback, callback error closure, invalid callback,
+connected capture/output/readback, output collision, wrong hash and wrong size
+are tested on actual disposable files. Existing capture/output/parser helpers are
+unchanged. Historical 32/24/15-case evidence is reused only at unchanged scope and
+is not rerun or added to this eight-case count.
+
+No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred. A header-only fixture retains original tensor offsets beyond EOF;
+native rejection would be fixture-inconclusive, not proof the original model is
+unsupported. Python guards/sampled hashes are not a full OS filesystem sandbox.
+Oracle authorship and source review are disclosed; no held-out WRE verifier claim.
+Both reviewed invocations are consumed/closed. Hosted CI does not replay this
+external local audit. PR2026 is main-verified with its owned lane closed.
+
+Next **14/P1:** Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet. The authentic capped input now exists and the raw model-handle interval has prior17-case inert qualification. Backend ownership is expressly excluded from that interval, so one small audit wrapper and independent failure-order controls close the remaining caller-lifetime seam. This is a connected prerequisite, not another model/data carrier or native execution grant.
+This checkpoint allocates no native execution or additional original read.
+Evidence: canonical backlog `gguf_prefix_extraction_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/`.
+Publication/main closure is recorded separately; older entries are historical.
+
 ## Bounded prefix capture controls qualified — 2026-10-02
 
 Source `f76312b3c6990deeb473fa821161866a089ed45f`. One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials.
