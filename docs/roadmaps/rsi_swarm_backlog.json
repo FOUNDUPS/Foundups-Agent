@@ -1881,21 +1881,21 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.null_device_guard_controls_20261002",
-    "base_commit": "14b3988c15a3a0175e9d865a2bf4fe780f4c2cb9",
-    "selected_action": "Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.",
-    "status": "null_guard_controls_qualified_next_preparation",
+    "observation_path": "current_observation.native_guarded_diagnostic_20261002",
+    "base_commit": "0ff259b8a5a851c4c34542cedb4c23fc50ecc8bd",
+    "selected_action": "Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.",
+    "status": "native_fixture_diagnostic_closed_next_preparation",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 14,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.native_fixture_diagnostic_20261002",
+    "previous_observation": "current_observation.null_device_guard_controls_20261002",
     "publication_state": "pending_exact_source_review_and_hosted_closure"
   },
   "current_observation": {
@@ -25541,6 +25541,533 @@
       "native_rsi_admitted": false,
       "retained_gain": null,
       "publication": "Local controls accepted; normal PR/CI/main and owned-lane closure separately recorded."
+    },
+    "native_guarded_diagnostic_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "0ff259b8a5a851c4c34542cedb4c23fc50ecc8bd",
+      "recorded_utc": "2026-10-02T12:26:24.913844+00:00",
+      "previous_observation": "current_observation.null_device_guard_controls_20261002",
+      "status": "fixture_inconclusive",
+      "scope": "One installed-runtime diagnostic on the existing captured header-only fixture; reused raw-model/backend lifetime and Windows process/file owners. No production implementation or registered-test change.",
+      "experiment": {
+        "parent_runner_attempted": true,
+        "maximum_invocations": 1,
+        "parent_returncode": 0,
+        "parent_wall_seconds": 4.155999999959022,
+        "process_error": null,
+        "transport_valid": true,
+        "fixture_accepted": false,
+        "classification": "fixture_inconclusive",
+        "fixture": {
+          "acquired": true,
+          "hash_read_attempted": true,
+          "requested_bytes": 7895232,
+          "actual_bytes": 7895232,
+          "sha256": "f0006566efd440a0274c4dcade54f94fe577c32630218f273999a8896df158ee",
+          "path_before": {
+            "st_dev": 7231371317507634368,
+            "st_ino": 562949957354524,
+            "st_size": 7895232,
+            "st_mtime_ns": 1790925353786145700,
+            "st_ctime_ns": 1790925353784601200,
+            "st_nlink": 1,
+            "st_birthtime_ns": 1790925353784601200
+          },
+          "path_after": {
+            "st_dev": 7231371317507634368,
+            "st_ino": 562949957354524,
+            "st_size": 7895232,
+            "st_mtime_ns": 1790925353786145700,
+            "st_ctime_ns": 1790925353784601200,
+            "st_nlink": 1,
+            "st_birthtime_ns": 1790925353784601200
+          },
+          "descriptor_before": {
+            "st_dev": 7231371317507634368,
+            "st_ino": 562949957354524,
+            "st_size": 7895232,
+            "st_mtime_ns": 1790925353786145700,
+            "st_ctime_ns": 1790925353786145700,
+            "st_nlink": 1,
+            "st_birthtime_ns": 1790925353784601200
+          },
+          "descriptor_after": {
+            "st_dev": 7231371317507634368,
+            "st_ino": 562949957354524,
+            "st_size": 7895232,
+            "st_mtime_ns": 1790925353786145700,
+            "st_ctime_ns": 1790925353786145700,
+            "st_nlink": 1,
+            "st_birthtime_ns": 1790925353784601200
+          },
+          "close_attempted": true,
+          "close_returned": true
+        },
+        "cleanup_status": "returned",
+        "child_phases": {
+          "setup": "returned",
+          "owner_import": "returned",
+          "fixture_validation": "returned",
+          "native_import": "returned",
+          "native_interval": "returned",
+          "descriptor_close": "returned",
+          "report": "attempted"
+        },
+        "backend_result": {
+          "success": false,
+          "phases": {
+            "backend_init": "returned",
+            "parameters": "returned",
+            "model_probe": "returned",
+            "backend_free": "returned"
+          },
+          "primary_error": null,
+          "cleanup_error": null,
+          "model_result": {
+            "success": false,
+            "phases": {
+              "load": "null",
+              "vocab": "not_attempted",
+              "free": "not_attempted"
+            },
+            "primary_error": "NullModelHandle",
+            "cleanup_error": null
+          },
+          "backend_cleanup_status": "returned"
+        },
+        "parameters": {
+          "attempted": true,
+          "default_returned": true,
+          "returned": true,
+          "defaults_null": {
+            "devices": true,
+            "tensor_buft_overrides": true,
+            "tensor_split": true,
+            "progress_callback": true,
+            "progress_callback_user_data": true,
+            "kv_overrides": true
+          },
+          "values": {
+            "n_gpu_layers": 0,
+            "split_mode": 0,
+            "main_gpu": 0,
+            "vocab_only": false,
+            "use_mmap": false,
+            "use_direct_io": false,
+            "use_mlock": false,
+            "check_tensors": false,
+            "use_extra_bufts": false,
+            "no_host": false,
+            "no_alloc": true
+          }
+        },
+        "child_failure_flags": {
+          "setup_invalid": false,
+          "cleanup_invalid": false,
+          "evidence_integrity_failure": false
+        },
+        "blocked_event_count": 0,
+        "blocked_events": [],
+        "journal_error": null,
+        "journal_bytes": 394,
+        "unit_test_cases": 0,
+        "budget_state": "One attempt consumed and closed; no retries or increased cap"
+      },
+      "summary": "One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry.",
+      "verification_limits": [
+        "No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.",
+        "128MiB aggregate committed-memory and30s are fixed ceilings, not native capacity measurements.",
+        "Header-only rejection cannot prove original-model or architecture incompatibility.",
+        "Source-known eager import calls and native cumulative reads are not instrumented. Missing phase/call/cleanup evidence remains unknown.",
+        "Sampled hashes and Python guards do not provide immutable execution or an OS/native filesystem sandbox.",
+        "Independent source/result review is not an independent held-out evaluator of model quality.",
+        "Prior inert controls are preserved without rerunning or recounting; hosted CI does not replay this local diagnostic."
+      ],
+      "prior_layer_closure": {
+        "pr": 2033,
+        "merge": "0ff259b8a5a851c4c34542cedb4c23fc50ecc8bd",
+        "state": "MERGED_VERIFIED_MAIN_OWNED_LANE_CLOSED",
+        "main_ci_and_codeql_verified": true
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify optional committed-memory limits in the existing Windows Job and bounded-child owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2021; exact-main content and required hosted workflows verified. Does not resolve native read/ABI/lifetime or RSI retention.",
+          "ownership": "Existing foundups_mcp_bridge Windows Job and bounded-child process owners",
+          "evidence": "closure/final-accounting.json",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify deterministic raw model-handle acquisition/vocabulary/free paths in the existing diagnostic scaffold",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2023; exact-main content and required hosted workflows verified. Does not establish native cleanup, model support or RSI retention.",
+          "ownership": "Existing WRE/llama_cpp owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify bounded GGUF tensor-directory and computed alignment boundaries using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "PR2024 closed on verified main. Original directory observed in prior PR2025 checkpoint; native support and RSI retention remain unqualified.",
+          "ownership": "Existing GGUF audit Reader and Windows verified-file owner",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Observe bounded original Nemotron metadata and tensor-directory boundaries with the qualified reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2025; original observation and exact-main documentation verified. Native behavior and retained benefit remain open.",
+          "ownership": "Existing audit Reader, verified-file and bounded-child owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify one-read prefix capture and exclusive output controls using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2026; inert capture/output controls and exact-main documentation verified. Original extraction was unresolved by that checkpoint and was accepted in prior PR2027; native behavior and retained benefit remain open.",
+          "ownership": "Existing audit reader, verified-file and bounded-child owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2027; prefix extraction/readback and exact-main documentation verified. Native behavior and retained benefit remain open.",
+          "ownership": "Existing audit reader and verified-file/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2028; inert backend lifetime controls and exact-main documentation verified. Actual native behavior and retained benefit remain open.",
+          "ownership": "Existing diagnostic and verified-file/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review.",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2030; one bounded native fixture diagnostic and exact-main documentation verified. Worker admission and retained benefit remain open.",
+          "ownership": "Existing audit diagnostic and native loader/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_local_native_guarded_diagnostic",
+          "dependency": "One bounded diagnostic recorded as fixture_inconclusive; no further attempt allocated. Native admission and retained benefit remain open. Publication/main closure separate.",
+          "ownership": "Existing audit native diagnostic and process/file owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet.",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2033; inert null-device guard controls and exact-main documentation verified. Actual native behavior and retained benefit remain open.",
+          "ownership": "Existing diagnostic and native/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "The native interval now executes but returns only a null handle, leaving the rejection cause unavailable because existing stderr is discarded. A small audit-only evidence correction using existing stream/logging owners is the next useful layer. It avoids changing parameters or repeating a truncated-input attempt without a new observable question. Impact is diagnostic progress, not demonstrated worker ability or RSI gain.",
+          "ownership": "Existing diagnostic and native/process owners",
+          "score_reassessment": "Re-observed actual diagnostic; WSP15 reapplied and blocked/closed rows excluded."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners",
+          "score_reassessment": "Fresh main unchanged since PR2033 closure; next-step source pins and peers rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        }
+      ],
+      "next_task": {
+        "task": "Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.",
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1",
+        "rationale": "The native interval now executes but returns only a null handle, leaving the rejection cause unavailable because existing stderr is discarded. A small audit-only evidence correction using existing stream/logging owners is the next useful layer. It avoids changing parameters or repeating a truncated-input attempt without a new observable question. Impact is diagnostic progress, not demonstrated worker ability or RSI gain."
+      },
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\selection.json": "abfa4b0dd49eba8eef0f88c529cff15e3be98af3415b88ed2b9c92cc392e305b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\work-packet.json": "b630adfcca69fada811dd1162ccd596e74764a0d8af1dbdde0c0737421ca116d",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\compiler-receipt.json": "7754262a1bd1a2e0f0168261c6f8aeddf779ef4367995d341e3e42c6a00603bc",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\native-acceptance.json": "9c11f31141cd84ab8ea3ffed3e7368f88c65da3fc0dc8475481822fe0eee0def",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\check_native.py": "c2946594ddd5cde97bbfea87bac98802e78ec12639d1e32495f9ea2c7954f55c",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\prepare_native.py": "45db1659b07c8261b5c117534c98b47ab00152c771524e5417cef0e848369715",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\implementation-receipt.json": "e1e178a05b168d1bcec4c60eac05f0baf301687a62d057d9d52081791f39621a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\coordinator-source-review.json": "22f2d0ab85ff49d17667787c8c91723cefea01b02a71f40c239219ee6f394f0e",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\run_once.py": "2777a71601d58d9918d8a9313faf2b5bf36a939c1ebca153d25a0f65dd5a4752",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\plan.json": "f7dc4e65c5e9ba30e5da7e9e66730e578f353306a469b6e7e96c6b81bd6e41f8",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\preparation-receipt.json": "7de25a99125e8efbb9eb20f3ad237b4d21200547d7a32a3f929652f32fbdf440",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\execution-review.json": "ff650e7a6f9dd60930c3e035f36f6065e620ea9d632939a81625e4681a085660",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\started.json": "c84f1999eb6ec92e70db6b6a2f215dcde6d376d548c7a67939a6671b01bd081b",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\receipt.json": "68c02a4133028dda94c1853145f2f37a87b0698272839233f5b47d6d0f1c30e8",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\stdout.txt": "fe2bcabaed8a2507d71dc5256154f1662d3ca1b7ccfd066952f928423f6f9324",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\result-review.json": "6589172d479cb84d6a1a45f12cb84634d3e72b30165bebae85a9265f7243a45e",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\next-preparation.json": "93280b28ad5ae4b26257a59bf39a3660b28e5cafc42fe6635127c3b507e425c2",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\native-result.json": "42405ae2629d210ae70bceaf7c7285aa10d2e7f042f52c915480f7b0b3026087",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-native-guarded\\phases.jsonl": "89e44c3fe0097ccc4a15ef2997d3698f7bc1d661a172b729caf9d7078dd63141"
+      },
+      "dispatchable": false,
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "publication": "Observed local result; PR/CI/main readback and owned-lane cleanup separately evidenced."
     }
   }
 }
