@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-02 current layer:** The bounded native fixture test now completes import and backend initialization/cleanup with zero audit denials. Model loading returns a null handle: **fixture_inconclusive**. Next **13/P1:** qualify bounded diagnostic capture before any further native attempt. WRE admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#native-guarded-diagnostic--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+**2026-10-02 current layer:** 24 fixed inert diagnostic-capture controls passed. Actual native log coverage and the prior null-model cause remain unverified; WRE admission and retained benefit remain open. Next 13/P1: Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance. See the [checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#diagnostic-capture-controls--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
