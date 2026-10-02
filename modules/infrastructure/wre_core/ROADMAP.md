@@ -1,3 +1,13 @@
+## Bounded original GGUF directory observed — 2026-10-02
+
+One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+
+Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+
+Next **14/P1:** Prepare a governed one-read, exact-length disposable GGUF prefix capture using the existing verified-file owner and unchanged parser, with independent finite capture oracles before any extraction.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#bounded-original-gguf-directory-observed--2026-10-02)
+and backlog `original_gguf_directory_20261002`. Earlier entries remain historical.
+
 ## Bounded GGUF header controls qualified — 2026-10-02
 
 One independently reviewed audit child passed 24/24 fixed inert cases. Only

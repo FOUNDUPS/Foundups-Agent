@@ -1,3 +1,30 @@
+## Bounded original GGUF directory observed — 2026-10-02
+
+Source `a66e3de904e9ae49a4da98159ce47e821fb062de`. One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+
+Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+
+The existing qualified Reader, parser and verified-file functions are unchanged.
+Only the external diagnostic entrypoint and existing bounded-child launcher were
+rebound. The child used a 30-second timeout, 128 MiB aggregate Windows Job committed-memory
+cap and 16 KiB retained stdout cap. Reader ceilings remain 8 MiB actual reads,
+64 MiB reach and 25 seconds. Sampled hashes and Python guards are not immutable
+execution or an OS filesystem sandbox. Failure/absent receipts retain unknown
+read and cleanup states; no automatic retry is available.
+
+This is one local observation, not a new test suite. The earlier 24 inert header
+cases and 15 primitive/handle cases remain historical at their unchanged scopes;
+they were not rerun or counted as new results. Hosted CI does not replay this audit.
+The single original-read allowance is consumed and closed.
+
+PR2024 is merged/main-verified with its owned lane closed. Next **14/P1:**
+Prepare a governed one-read, exact-length disposable GGUF prefix capture using the existing verified-file owner and unchanged parser, with independent finite capture oracles before any extraction. The observed computed data boundary now fits below the existing8MiB ceiling. An authentic capped prefix can remove the need to give a future native diagnostic the24.5GB original path. The missing piece is a small capture/accounting/output contract, not another runtime abstraction. Capture alone still supplies no native support proof.
+This checkpoint allocates no additional original read, native call or provider request.
+
+Evidence: backlog `original_gguf_directory_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-original-header/`.
+Publication and main closure are separately evidenced; older entries are historical.
+
 ## Bounded GGUF header controls qualified — 2026-10-02
 
 Source `6631f6a1d0e1f60a9c4462b0caba45912a227815`. One independently reviewed audit invocation passed **24/24

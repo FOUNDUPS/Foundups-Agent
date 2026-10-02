@@ -1,3 +1,12 @@
+## 2026-10-02 — Observe original GGUF directory through qualified owners
+
+- One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+- One local observation, zero new tests; existing 24/15-case qualification reused only at unchanged scope.
+- Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+- WSP 00/5/6/15/22/48/50/84/97/99: next 14/P1 is Prepare a governed one-read, exact-length disposable GGUF prefix capture using the existing verified-file owner and unchanged parser, with independent finite capture oracles before any extraction.
+- PR2024 main closure verified; current publication/closure recorded separately.
+- Evidence: backlog `original_gguf_directory_20261002`; `O:/Foundups-Agent-audits/20261002-rsi-original-header/`.
+
 ## 2026-10-02 — Qualify bounded GGUF directory parsing
 
 - Extended existing audit `inspect()` and fixture scaffold; Reader/handle AST unchanged.
