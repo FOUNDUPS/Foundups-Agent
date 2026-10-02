@@ -1,3 +1,18 @@
+## Terminal fixture observation — 2026-10-02
+
+**fixture_inconclusive.** One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-terminal-fixture/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `terminal_fixture_observation_20261002` pins exact artifacts and resource/receipt limits.
+
 ## Model-free logger connection controls — 2026-10-02
 
 9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials. The same 32 INFO chunks followed by an ERROR EOF hint saturate the default capture (65 counted writes, 4,097 received/4,096 inspected characters); existing ERROR verbosity preserves the hint untruncated (2 writes, 14 characters). CONT fragments are suppressed at ERROR. Generic and unknown messages remain insufficient explanations.
