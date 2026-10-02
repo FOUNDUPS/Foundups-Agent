@@ -444,3 +444,49 @@ def test_candidate_site_registry_is_demand_led_and_capacity_unverified() -> None
     ):
         assert superseded not in registry
     assert "Only `AWARDED` grants may reduce base-case financing need." in registry
+
+
+
+def test_directed_work_policy_preserves_auto_containment_and_all_send_checks():
+    text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    for required in (
+        "012_DIRECTED_WORK", "REDDOG_AUTO", "HOLD_ENGINEERING",
+        "An open", "#1779 alone is not a blocker in this lane",
+        "Do not ask again for authorization", "principal_instruction_ref",
+        "cannot be copied into a later automated run", "engineering holds",
+        "recipient BLOCK results still win", "reddog_recipient_preflight",
+        "exact To/CC/BCC", "not resolution of #1779",
+        "do not create an Akita identity",
+    ):
+        assert required in text
+    work = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    assert "execution_origin: 012_DIRECTED_WORK | REDDOG_AUTO | UNKNOWN" in work
+    assert "Do not require" in work and "an undeployed Red Dog signer" in work
+
+
+def test_correspondence_origin_schema_never_grants_send_authority():
+    from modules.communication.moltbot_bridge.src.reddog_correspondence_execution_mode import (
+        CorrespondenceExecutionContext, correspondence_execution_mode,
+    )
+    cases = (
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "current-reply",
+          "principal_instruction_ref": "012:current-session:send-directive", "explicit_send_requested": True},
+         "WORK_DIRECTED_CHECKS_REQUIRED"),
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "current-reply", "explicit_send_requested": True},
+         "HOLD_MISSING_012_DIRECTION"),
+        ({"origin": "012_DIRECTED_WORK", "principal_instruction_ref": "instruction", "explicit_send_requested": True},
+         "HOLD_MISSING_012_DIRECTION"),
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "reply", "principal_instruction_ref": "instruction"},
+         "HOLD_MISSING_012_DIRECTION"),
+        ({"origin": "REDDOG_AUTO", "work_item_id": "reply", "principal_instruction_ref": "old-work-directive",
+          "explicit_send_requested": True}, "REDDOG_BOUNDARY_REQUIRED"),
+        ({"origin": "UNKNOWN"}, "HOLD_UNKNOWN_ORIGIN"),
+        ({"origin": "made-up"}, "HOLD_UNKNOWN_ORIGIN"),
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "reply", "principal_instruction_ref": "instruction",
+          "explicit_send_requested": True, "engineering_hold": True}, "HOLD_ENGINEERING"),
+        ({"origin": "REDDOG_AUTO", "engineering_hold": True}, "HOLD_ENGINEERING"),
+    )
+    for args, expected in cases:
+        result = correspondence_execution_mode(CorrespondenceExecutionContext(**args))
+        assert result == expected
+        assert result not in {"SEND", "VERIFIED_SENT"}
