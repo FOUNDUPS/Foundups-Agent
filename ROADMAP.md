@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-02 current layer:** Nine model-free logger connection cases passed. ERROR filtering preserves the synthetic error hint but suppresses continuation fragments. Native coverage, WRE admission and retained benefit remain open. Next 14/P1: Prepare one terminal, separately reviewed fixture-only native decision integrating the qualified ERROR-level capture helper after import; retain the existing input, loader, model parameters and resource limits, with outcome-specific owner handoffs and no further diagnostic-loop expansion. See the [checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#logger-connection-controls--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+**2026-10-02 current layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

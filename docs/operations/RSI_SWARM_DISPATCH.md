@@ -1,3 +1,40 @@
+## Terminal fixture observation — 2026-10-02
+
+Source `5e7faccfeeda635b342d37849b18769f74db13e2`. **fixture_inconclusive; diagnostic usefulness insufficient.**
+One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established.
+
+One separately reviewed attempt used the unchanged 7,895,232-byte header fixture,
+loader, parameters, 30s deadline and 128MiB aggregate Job commit cap. The existing
+ERROR-level helper ran after import. Model loading returned null; backend/file
+cleanup and logger/stream restoration returned normally. Capture was empty:
+zero observed writes and no labels. This does not prove absence of native errors
+or logging, and does not identify a rejection cause.
+
+**This prefix-diagnostic branch is closed.** No retry, expanded logging, new
+matrix, changed vocabulary/parameters, larger memory cap or original-model
+fallback follows from this result. The single allowance is consumed. WSP15/97
+now returns to existing owner/prerequisite selection.
+
+Blocked prerequisite **18/P0:** Native autonomous RSI admission. The terminal prefix observation supplied no specific hint and its diagnostic branch is closed. No other executable action is justified by the inspected24-row queue.18/P0 remains the existing blocked parent, not a duplicate sprint: authentic owner/evidence inputs AND a qualified issuer-to-effect-consumer implementation are missing. Inputs or approval alone cannot change the current hardcoded authoritative_use_lease=None. More synthetic carriers cannot supply deployed authority.
+
+The next owner handoff must identify one actual queue/effect ticket and the
+current owner configuration and public trust-evidence references. Then qualify
+the existing external issuer → use-time resolver → exact-effect consumer path.
+`ExternalSignerAuthoritativeUseLeaseIssuer.issue` consumes/signs authority;
+it is not a readiness probe. Reuse the PR2014 reviewer-key composition.
+Preserve scoped, expiring, one-use capabilities; do not replace the missing lease
+with a Boolean or test receipt. No unchanged-evidence diagnostic retry is selected.
+
+No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic. Python guards and sampled hashes are not an OS/native sandbox or
+immutable execution. Callback concurrency/decoding and cumulative native reads
+remain unqualified. Source/result review does not establish held-out model quality.
+Zero new unit-test cases; prior controls are not rerun or recounted. Hosted CI
+does not replay this local observation. PR2036 is main-verified and its lane closed.
+
+Evidence: backlog `terminal_fixture_observation_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-terminal-fixture/`.
+This slice's publication/main closure is recorded separately.
+
 ## Logger connection controls — 2026-10-02
 
 Source `1ffbdca209e4834b1cbcfc5b6eeff33c52c8599a`. 9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials.
