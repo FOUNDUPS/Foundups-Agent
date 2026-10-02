@@ -299,12 +299,12 @@ export async function prepareRecipientPreflightReceipt({transaction,evidence,pro
   return buildRecipientPreflightReceipt({transaction,evidence,sentCoverage:current,issuedAt,ttlSeconds});
 }
 
-function validateReceipt(transaction, receipt, now) {
+function validateReceipt(transaction, receipt, nowMs) {
   const reasons = [];
   if (!receipt || typeof receipt !== "object") return ["MISSING_PREFLIGHT_RECEIPT"];
   if (receipt.schema !== RECEIPT_SCHEMA) reasons.push("INVALID_RECEIPT_SCHEMA");
   if (receipt.decision !== DECISION_SEND) reasons.push("PREFLIGHT_NOT_SEND");
-  const nowMs=Date.parse(now), issuedMs=Date.parse(receipt.issued_at), expiresMs=Date.parse(receipt.expires_at);
+  const issuedMs=Date.parse(receipt.issued_at), expiresMs=Date.parse(receipt.expires_at);
   if (![nowMs,issuedMs,expiresMs].every(Number.isFinite)) reasons.push("INVALID_RECEIPT_TIME");
   else {
     if (expiresMs <= issuedMs || expiresMs-issuedMs > MAX_RECEIPT_TTL_SECONDS*1000) reasons.push("INVALID_RECEIPT_WINDOW");
@@ -358,9 +358,10 @@ function blocked(reasons, providerInvoked=false) {
   return {decision:DECISION_BLOCK,provider_invoked:providerInvoked,reasons:[...new Set(reasons)]};
 }
 
-export async function executeSenderBoundary({transaction,receipt,provider,now}) {
+export async function executeSenderBoundary({transaction,receipt,provider}) {
   const tx = normalizeTransaction(transaction);
-  const initial = validateReceipt(tx,receipt,now);
+  const boundaryNowMs = Date.now();
+  const initial = validateReceipt(tx,receipt,boundaryNowMs);
   if (initial.length) return blocked(initial);
   if (!provider || typeof provider.readSentCoverage !== "function") return blocked(["MISSING_SENT_COVERAGE_READER"]);
 
