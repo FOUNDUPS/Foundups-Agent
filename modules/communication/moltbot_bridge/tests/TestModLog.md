@@ -1,3 +1,20 @@
+## 2026-10-02 — Correspondence sender-boundary fail-closed qualification
+
+- Added `test_reddog_correspondence_sender_boundary.mjs` to the existing CI
+  correspondence step.
+- Fixed controls require provider submit count = 0 for missing receipt, BLOCK
+  receipt, stale receipt, transaction substitution, changed Sent coverage, and
+  changed draft recipients/body.
+- Positive controls cover the shared `send_email`, reply, `send_draft`, and
+  delivery-repair operation set. A successful provider call is accepted only
+  after exact Sent message/thread and To/CC/BCC readback.
+- Negative post-provider controls classify recipient/readback mismatch as
+  `PROVIDER_SENT_INTEGRITY_INCIDENT` and ambiguous send exceptions as
+  `PROVIDER_STATE_UNKNOWN`, never automatic retry authority.
+- The exact host source also passed a code-mode V8 smoke check: standard SHA-256
+  vector, missing-receipt BLOCK with zero submit, and exact `VERIFIED_SENT`
+  success with one submit. Hosted PR/main CI remain separate evidence.
+
 ## 2026-10-02 — Restore concrete SQLite Path compatibility in Linux test guard
 
 Third PR2014 CI passed all331 portable cases, with3 Linux transport passes and
