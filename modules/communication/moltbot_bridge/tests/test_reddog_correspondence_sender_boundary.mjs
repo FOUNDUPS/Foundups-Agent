@@ -15,7 +15,7 @@ import {
 } from "../host/reddog_correspondence_sender_boundary.mjs";
 
 const BODY = "Council reply body\n";
-const NOW = "2026-10-02T09:10:00.000Z";
+const isoOffset = (ms) => new Date(Date.now() + ms).toISOString();
 
 function tx(operation="send_draft") {
   return {
@@ -93,7 +93,7 @@ function rolesFor(transaction) {
   return result;
 }
 
-async function sendReceipt(transaction, provider, issuedAt="2026-10-02T09:09:30.000Z", ttlSeconds=120) {
+async function sendReceipt(transaction, provider, issuedAt=isoOffset(-1000), ttlSeconds=120) {
   return prepareRecipientPreflightReceipt({
     transaction,evidence:evidence(),provider,issuedAt,ttlSeconds,
   });
@@ -122,7 +122,7 @@ test("unknown or unverified route produces BLOCK receipt", () => {
     transaction,
     evidence:evidence().filter((item)=>item.identity_id !== "YMC-0118"),
     sentCoverage:{message_ids:[],already_sent_addresses:[]},
-    issuedAt:"2026-10-02T09:09:30.000Z",
+    issuedAt:isoOffset(-1000),
   });
   assert.equal(blocked.decision,DECISION_BLOCK);
   assert.ok(blocked.reasons.includes("YMC-0118:UNKNOWN_ROUTE"));
@@ -133,7 +133,7 @@ test("duplicate Sent coverage produces BLOCK receipt", () => {
   const blocked=buildRecipientPreflightReceipt({
     transaction,evidence:evidence(),
     sentCoverage:{message_ids:["sent-old"],already_sent_addresses:["giji@city.fukui.lg.jp"]},
-    issuedAt:"2026-10-02T09:09:30.000Z",
+    issuedAt:isoOffset(-1000),
   });
   assert.equal(blocked.decision,DECISION_BLOCK);
   assert.ok(blocked.reasons.includes("YMC-0145:DUPLICATE_SENT_COVERAGE"));
@@ -142,7 +142,7 @@ test("duplicate Sent coverage produces BLOCK receipt", () => {
 test("missing receipt makes provider entirely unreachable", async () => {
   const transaction=tx();
   const provider=new Provider(transaction);
-  const result=await executeSenderBoundary({transaction,receipt:null,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt:null,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.deepEqual(result.reasons,["MISSING_PREFLIGHT_RECEIPT"]);
   assert.deepEqual(provider.calls,{coverage:0,draft:0,submit:0,sent:0});
@@ -154,10 +154,10 @@ test("BLOCK receipt cannot reach provider mutation", async () => {
   const receipt=await prepareRecipientPreflightReceipt({
     transaction,
     evidence:evidence().map((item)=>item.identity_id === "YMC-0145" ? {...item,address:"wrong@city.fukui.lg.jp"} : item),
-    provider,issuedAt:"2026-10-02T09:09:30.000Z",
+    provider,issuedAt:isoOffset(-1000),
   });
   assert.equal(receipt.decision,DECISION_BLOCK);
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.ok(result.reasons.includes("PREFLIGHT_NOT_SEND"));
   assert.equal(provider.calls.submit,0);
@@ -166,9 +166,9 @@ test("BLOCK receipt cannot reach provider mutation", async () => {
 test("stale receipt blocks before any second provider read or mutation", async () => {
   const transaction=tx();
   const provider=new Provider(transaction);
-  const receipt=await sendReceipt(transaction,provider,"2026-10-02T09:00:00.000Z",30);
+  const receipt=await sendReceipt(transaction,provider,isoOffset(-120000),30);
   const before={...provider.calls};
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.ok(result.reasons.includes("STALE_PREFLIGHT_RECEIPT"));
   assert.deepEqual(provider.calls,before);
@@ -179,7 +179,7 @@ test("transaction substitution blocks before provider mutation", async () => {
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   const changed={...transaction,content_digest:digestContent("changed")};
-  const result=await executeSenderBoundary({transaction:changed,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction:changed,receipt,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.ok(result.reasons.includes("TRANSACTION_MISMATCH"));
   assert.equal(provider.calls.submit,0);
@@ -190,7 +190,7 @@ test("new Sent event after receipt invalidates coverage before provider mutation
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   provider.messageIds.push("concurrent-send-mid");
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.deepEqual(result.reasons,["STALE_SENT_COVERAGE"]);
   assert.equal(provider.calls.submit,0);
@@ -201,7 +201,7 @@ test("changed draft recipients fail closed before send_draft", async () => {
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   provider.draftPatch={bcc:["wrong@example.org"]};
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.ok(result.reasons.includes("SENT_READBACK_MISSING_RECIPIENT"));
   assert.ok(result.reasons.includes("SENT_READBACK_EXTRA_RECIPIENT"));
@@ -213,7 +213,7 @@ test("changed draft body fails closed before send_draft", async () => {
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   provider.draftPatch={body:"mutated body"};
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,DECISION_BLOCK);
   assert.deepEqual(result.reasons,["DRAFT_CONTENT_MISMATCH"]);
   assert.equal(provider.calls.submit,0);
@@ -224,7 +224,7 @@ for (const operation of ["send_email","reply","delivery_repair"]) {
     const transaction=tx(operation);
     const provider=new Provider(transaction);
     const receipt=await sendReceipt(transaction,provider);
-    const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+    const result=await executeSenderBoundary({transaction,receipt,provider});
     assert.equal(result.decision,VERIFIED_SENT);
     assert.equal(provider.calls.submit,1);
     assert.equal(provider.calls.sent,1);
@@ -236,7 +236,7 @@ test("send_draft exact transaction reaches provider once and requires exact Sent
   const transaction=tx();
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,VERIFIED_SENT);
   assert.equal(result.provider_invoked,true);
   assert.deepEqual(provider.calls,{coverage:2,draft:1,submit:1,sent:1});
@@ -248,7 +248,7 @@ test("post-send recipient mismatch is an integrity incident, never VERIFIED_SENT
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   provider.sentPatch={cc:[]};
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,PROVIDER_SENT_INTEGRITY_INCIDENT);
   assert.ok(result.reasons.includes("SENT_READBACK_MISSING_RECIPIENT"));
   assert.equal(provider.calls.submit,1);
@@ -259,7 +259,7 @@ test("provider exception is state unknown and cannot be treated as retry permiss
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   provider.submitError=true;
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,PROVIDER_STATE_UNKNOWN);
   assert.deepEqual(result.reasons,["PROVIDER_SEND_RAISED_RECONCILE_BEFORE_RETRY"]);
   assert.equal(provider.calls.submit,1);
@@ -271,7 +271,7 @@ test("post-send readback failure is an integrity incident", async () => {
   const provider=new Provider(transaction);
   const receipt=await sendReceipt(transaction,provider);
   provider.readbackError=true;
-  const result=await executeSenderBoundary({transaction,receipt,provider,now:NOW});
+  const result=await executeSenderBoundary({transaction,receipt,provider});
   assert.equal(result.decision,PROVIDER_SENT_INTEGRITY_INCIDENT);
   assert.deepEqual(result.reasons,["PROVIDER_READBACK_FAILED"]);
   assert.equal(provider.calls.submit,1);
