@@ -1,3 +1,14 @@
+## 2026-10-02 — Council transaction topology regression (#2031)
+
+- Audited existing service/tests before extending them; no new resolver or wrapper.
+- Added fully synthetic one-To/one-CC/three-BCC reply/PDF fixture to the existing
+  test owner. Seventeen cases bind attachment, roles, reply/thread, purpose/scope,
+  Sent watermark, exact provider IDs/recipients, durable replay/unknown/no-resend.
+- Independently read the reported live Sent transaction; reconciled its existing
+  private Moshpit event in place. No duplicate log, private fixture or mail mutation.
+- Audit explicitly separates repository properties from external tool-host denial.
+  Direct Work Gmail mutations remain exposed. #1779 OPEN; #2031 remains draft.
+
 ## 2026-10-02 — #1779 closure audit and service authority correction
 
 - Reopened #1779 after audit of merged #2029 found composer-recomputable receipts,

@@ -154,6 +154,45 @@ production deployment remain **OPEN**. #1779 remains OPEN; external-send contain
 cannot be removed. Under 012's explicit merge condition, this corrective PR remains
 unmerged until actual send-path acceptance is met. No historical message is resent.
 
+## October 2 live evidence and regression update
+
+The Council reply crossed provider Sent at 18:45 JST on October 2. Independent
+exact-message readback confirmed SENT, the reported MID/TID, one To, one CC,
+three BCC and the three-site PDF. The private canonical YUMORI Moshpit already
+contained this event; its existing entry was reconciled in place, without duplicate
+activity, private BCC disclosure or another send. State: provider-Sent with exact
+recipient readback passed; Council owns the next move. Never recreate this message
+as delivery repair. No real addresses, body or provider IDs are in public fixtures.
+
+This is positive evidence of one transaction's recipient integrity and negative
+evidence for any claim that the live operator was capability-isolated. It did not
+pass through the repository service. Successful readback does not qualify #1779.
+
+**A — Repository-enforceable:** the existing service owns canonical preflight,
+private issuance, freshness, exact identity/role/BCC/attachment/reply/purpose/scope
+binding, state and finalized-draft gates, Sent watermark, durable one-shot claims,
+exact provider readback, unknown-state retention and no automatic incident resend.
+The existing test owner now has one fully synthetic Council-shape fixture and
+17 additional cases: exact submission/replay, missing/extra/role-moved BCC,
+one-character address, thread/reply/purpose/scope/attachment drift, changed watermark,
+MID/TID/recipient readback incident, provider ambiguity and already-Sent repair.
+All pre-submission defects assert zero provider submissions (and zero Sent reads).
+
+**B — Host-enforceable:** active Work still exposes send_email, send_draft and
+recipient-finalized create/update draft with no receipt/capsule parameter. Repository
+code cannot intercept tools outside its runtime. Host must deny those direct actions
+and alternate mutation capabilities in every governed autonomous/operator/background
+session, expose only authenticated service issue/execute, isolate credentials and
+receipt/state storage, and qualify immutable/conditional draft submission. Until actual
+host-denial evidence exists, #1779 remains OPEN and global mechanical external-send
+containment cannot be declared removed. No second wrapper is proposed.
+
+The separately merged #2032 operating policy permits specifically 012-directed Work
+with its live checks; this policy distinction is not mechanical enforcement. Red Dog
+AUTO remains contained. Neither this engineering task nor its fixtures send mail.
+WSP97 lexical retrieval was source-bound to this feature head, with UNKNOWN freshness
+and an index gap; direct tests/source/tool schemas filled the missing evidence.
+
 ## Recipient interpretation correction
 
 Recent STT “Akida” / “Akita” refers to **Akira Hasegawa**. It is not a separate person

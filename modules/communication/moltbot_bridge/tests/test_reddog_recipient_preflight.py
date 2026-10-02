@@ -655,7 +655,8 @@ def sender(isolated_correspondence_db):
                     for role in ("TO", "CC", "BCC")}
         def submit(self, args):
             self.submits += 1
-            assert args["bcc"] == ["akira@example.org"]
+            for role, addresses in self.headers().items():
+                assert sorted(args[role]) == sorted(addresses)
             self.submitted = deepcopy(args)
             if self.fail_submit:
                 raise TimeoutError("unknown provider state")
@@ -670,6 +671,111 @@ def sender(isolated_correspondence_db):
     boundary = CorrespondenceSenderBoundary(provider=host, reconcile=host.reconcile,
                                             store=store, clock=lambda: host.now)
     return tx, host, store, boundary
+
+
+@pytest.fixture
+def council_reply_shape(sender):
+    """October 2 transaction topology only: no live IDs, contacts or content."""
+    tx, host, _, _ = sender
+    tx.update(operation="reply", thread_id="thread-1", reply_message_id="inbound-1")
+    tx["recipients"] = [
+        {"identity_id": "office", "role": "TO", "address": "office@example.org"},
+        {"identity_id": "association", "role": "CC", "address": "association@example.org"},
+        {"identity_id": "supporter-c", "role": "BCC", "address": "supporter-c@example.org"},
+    ]
+    tx["recipients"].extend([
+        {"identity_id": "supporter-a", "role": "BCC", "address": "supporter-a@example.org"},
+        {"identity_id": "supporter-b", "role": "BCC", "address": "supporter-b@example.org"},
+    ])
+    tx["payload"] = {"mime_type": "multipart/mixed", "parts": [
+        {"mime_type": "text/plain", "body": {"content": "Synthetic regression content"}},
+        {"mime_type": "application/pdf", "filename": "synthetic-three-site.pdf",
+         "body": {"content": "Synthetic PDF attachment bytes"}},
+    ]}
+    host.context = replace(host.context, evidence=tuple(
+        ev(r["identity_id"], r["address"]) for r in tx["recipients"]
+    ))
+    return sender
+
+
+def test_council_reply_shape_exact_submission_and_consumed_receipt(council_reply_shape):
+    tx, host, store, boundary = council_reply_shape
+    receipt = boundary.issue(tx)
+    assert receipt["decision"] == "SEND", receipt
+    result = boundary.execute(tx, receipt)
+    assert result["decision"] == "VERIFIED_SENT", result
+    assert (result["message_id"], result["thread_id"]) == ("sent-1", "thread-1")
+    assert host.submits == 1 and host.reads == 1
+    assert [len(host.submitted[r]) for r in ("to", "cc", "bcc")] == [1, 1, 3]
+    for field in ("payload", "reply_message_id", "thread_id"):
+        assert host.submitted[field] == tx[field]
+    assert len(store.select("recipient_submission_state")) == 5
+    assert boundary.execute(tx, receipt)["decision"] == "BLOCK"
+    assert host.submits == 1
+
+
+@pytest.mark.parametrize("change", ["remove_bcc", "add_bcc", "bcc_to_cc", "one_character",
+                                   "thread", "reply", "purpose", "scope", "attachment", "watermark"])
+def test_council_reply_shape_drift_blocks_with_zero_provider_calls(council_reply_shape, change):
+    tx, host, _, boundary = council_reply_shape
+    receipt = boundary.issue(tx)
+    assert receipt["decision"] == "SEND", receipt
+    proposed = deepcopy(tx)
+    bcc = next(r for r in proposed["recipients"] if r["identity_id"] == "supporter-a")
+    if change == "remove_bcc":
+        proposed["recipients"].remove(bcc)
+    elif change == "add_bcc":
+        proposed["recipients"].append(
+            {"identity_id": "extra", "role": "BCC", "address": "extra@example.org"})
+    elif change == "bcc_to_cc":
+        bcc["role"] = "CC"
+    elif change == "one_character":
+        bcc["address"] = "supporter-x@example.org"
+    elif change in {"thread", "reply", "purpose", "scope"}:
+        proposed[{"thread": "thread_id", "reply": "reply_message_id",
+                  "scope": "scope_key"}.get(change, change)] = "changed"
+    elif change == "attachment":
+        proposed["payload"]["parts"][1]["body"]["content"] = "Different attachment"
+    else:
+        host.context = replace(host.context, state=replace(
+            host.context.state, provider_watermark="watermark-after-new-sent"))
+    _assert_block(council_reply_shape, proposed, receipt)
+    assert host.reads == 0
+
+
+@pytest.mark.parametrize("patch", [{"id": "different-mid"}, {"thread_id": "different-tid"},
+    {"bcc": ["supporter-c@example.org", "supporter-a@example.org"]},
+    {"cc": ["association@example.org", "supporter-a@example.org"]}])
+def test_council_reply_shape_readback_incident_never_allows_repair(council_reply_shape, patch):
+    tx, host, store, boundary = council_reply_shape
+    receipt = boundary.issue(tx)
+    host.patch = patch
+    assert boundary.execute(tx, receipt)["decision"] == "PROVIDER_SENT_INTEGRITY_INCIDENT"
+    restarted = CorrespondenceSenderBoundary(provider=host, reconcile=host.reconcile,
+                                             store=store, clock=lambda: host.now)
+    # Changing operation to repair does not release the same-state claim.
+    tx["operation"] = "delivery_repair"
+    assert restarted.execute(tx, restarted.issue(tx))["decision"] == "BLOCK"
+    assert host.submits == 1
+
+
+def test_council_reply_shape_ambiguity_is_unknown_and_cannot_resend(council_reply_shape):
+    tx, host, store, boundary = council_reply_shape
+    host.fail_submit = True
+    assert boundary.execute(tx, boundary.issue(tx))["decision"] == "PROVIDER_STATE_UNKNOWN"
+    restarted = CorrespondenceSenderBoundary(provider=host, reconcile=host.reconcile,
+                                             store=store, clock=lambda: host.now)
+    host.fail_submit = False
+    assert restarted.execute(tx, restarted.issue(tx))["decision"] == "BLOCK"
+    assert host.submits == 1 and host.reads == 0
+
+
+def test_council_reply_shape_already_sent_cannot_be_delivery_repair(council_reply_shape):
+    tx, host, _, boundary = council_reply_shape
+    tx["operation"] = "delivery_repair"
+    host.context = replace(host.context, sent_message_ids=("synthetic-council-already-sent",))
+    assert boundary.issue(tx)["decision"] == "BLOCK"
+    _assert_block(council_reply_shape, tx, None)
 
 
 def _assert_block(sender, tx, receipt):

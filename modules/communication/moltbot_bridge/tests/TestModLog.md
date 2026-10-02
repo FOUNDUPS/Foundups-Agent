@@ -1,3 +1,15 @@
+## 2026-10-02 — Synthetic Council-shape sender regression
+
+- Reused existing provider spy with exact role-array assertions instead of a
+  hardcoded one-BCC assertion; no prior case removed or weakened.
+- Fully synthetic IDs/addresses, content, attachment and provider watermark preserve
+  the live transaction topology without publishing private data or real provider IDs.
+- Seventeen new cases cover exact one-shot submission, BCC removal/addition/role
+  change, one-character address, reply/thread/purpose/scope/attachment change,
+  stale watermark, exact readback IDs/roles, durable ambiguity and already-Sent repair.
+- Focused owner: 177 passed; determinism/connected/hosted evidence recorded in PR.
+- All pre-submit failures assert zero spy submissions. No live provider mutation.
+
 ## 2026-10-02 — #1779 authenticated service regression qualification
 
 - Existing Python recipient/state owner extended to cover service boundary, without
