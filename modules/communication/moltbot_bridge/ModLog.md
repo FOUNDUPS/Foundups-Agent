@@ -1,3 +1,20 @@
+## 2026-10-02 — Mechanical correspondence sender boundary (#1779)
+
+- Added the dependency-free host adapter
+  `host/reddog_correspondence_sender_boundary.mjs` as the mandatory final seam
+  between recipient preflight and provider mutation.
+- Bound each receipt to operation, purpose/scope, Contact identities, exact
+  To/CC/BCC, content, draft/reply/thread identity and fresh Sent coverage.
+- The boundary fails closed before provider submission on missing/BLOCK/stale/
+  mismatched receipts, changed Sent coverage, or changed draft recipients/body.
+- Provider success is not `VERIFIED_SENT`: the exact Sent message/thread and
+  To/CC/BCC must read back identically. Provider ambiguity requires Sent
+  reconciliation before retry; readback mismatch is an integrity incident.
+- The host source is Node- and code-mode-V8 compatible so the live connected
+  operator can execute the checked-in boundary around Gmail rather than relying
+  on prompt-only compliance.
+- No external correspondence was sent by this repository change. WSP15/50/97.
+
 ## 2026-10-02 — Reviewer authority closed; next RSI test narrowed
 
 - PR #2014 merged/main-verified at `44d833c`; owned lane recovered and removed.

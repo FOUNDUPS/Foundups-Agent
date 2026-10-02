@@ -2423,6 +2423,49 @@ Search snippets, memory, autocomplete, and visually similar addresses are not ex
 routing evidence. A one-character or punctuation difference blocks rather than being
 silently corrected.
 
+
+### RedDog Correspondence Sender Boundary
+
+```javascript
+// Load the checked-in dependency-free host source in the operator/runtime isolate.
+// It exports:
+buildRecipientPreflightReceipt(...)
+prepareRecipientPreflightReceipt(...)
+executeSenderBoundary(...)
+```
+
+Canonical host:
+`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
+
+This is the mechanical provider-call owner for correspondence. A composer, cached
+state capsule, draft, prompt instruction or prior provider success cannot grant send
+authority. The host adapter binds one fresh `SEND` receipt to the exact provider
+operation, scope/purpose, identity IDs, To/CC/BCC roles and addresses, content digest,
+draft/reply/thread identifiers and fresh Sent coverage.
+
+Immediately before submission, `executeSenderBoundary(...)`:
+
+1. rejects missing, `BLOCK`, malformed, expired or transaction-mismatched receipts
+   before any provider mutation;
+2. re-reads provider Sent coverage and rejects a changed watermark/coverage digest;
+3. for `send_draft`, reads the exact draft and rejects recipient, body, message-ID or
+   thread-ID drift before provider submission;
+4. invokes the injected provider submission exactly once only after all checks pass;
+5. reads the exact Sent message and requires exact message/thread identity and
+   To/CC/BCC equality before returning `VERIFIED_SENT`.
+
+The same boundary operation enum covers `send_email`, `reply`, `send_draft` and
+`delivery_repair`; callers do not implement alternate send helpers outside it.
+A provider exception returns `PROVIDER_STATE_UNKNOWN` and requires Sent
+reconciliation before retry. Missing/failed provider readback returns
+`PROVIDER_SENT_INTEGRITY_INCIDENT`; it never authorizes automatic resend.
+
+The adapter is dependency-free ECMAScript so the connected operator can load the
+exact verified `main` source into its V8 tool transaction and wrap Gmail calls.
+Its Node contract test is:
+`modules/communication/moltbot_bridge/tests/test_reddog_correspondence_sender_boundary.mjs`.
+
+
 ### RedDog Correspondence Continuity State
 
 ```python
