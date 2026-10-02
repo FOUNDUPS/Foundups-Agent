@@ -1,3 +1,18 @@
+## Null-device guard inert controls — 2026-10-02
+
+20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials. Cases exercise source-derived audit tuples with a captured callback;
+expected synthetic denials are separate from outer guard violations.
+Canonical token, flags, mode, phase, two-open limit, ordinary output constraints
+and redacted denial detail are covered. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-null-guard/run_once.py`.
+
+The oracle author also authored the runner; coordinator review is separate.
+No held-out runtime, real-open compatibility or historical-target confirmation
+is claimed. Hosted CI does not replay this local audit. Backlog `null_device_guard_controls_20261002` pins
+source, oracle, runner, execution and review evidence.
+
 ## Native fixture observation — 2026-10-02
 
 **setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.
