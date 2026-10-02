@@ -1,3 +1,21 @@
+## Audit prefix capture/output controls — 2026-10-02
+
+One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. The 32 IDs are frozen in the external capture contract; independent
+fixture expectations do not call the implementation to derive expected values.
+Original fixture AST remains unchanged except added `capture_cases`.
+
+Coverage: exact/over-cap one-read capture, separate physical/parser byte counts,
+typed immutable expectations, metadata/directory drift, malformed/truncated input,
+nonzero padding, untouched payload sentinel, exclusive-output collision, short/
+invalid writes and separate write/close errors. Outputs and inputs are synthetic.
+No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open. Existing 24/15 controls are retained at unchanged scope, not recounted.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-capture/run_once.py`.
+The allowance is consumed and closed; no replay. No registered module test changed
+and hosted CI does not replay this audit. Backlog `gguf_prefix_capture_controls_20261002` binds sources/oracle/results.
+Oracle authorship, implementation review and coordinator acceptance are distinct
+from an independent held-out runtime evaluator.
+
 ## Bounded original-file observation — 2026-10-02
 
 One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.

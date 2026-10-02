@@ -1,3 +1,12 @@
+## 2026-10-02 — Qualify bounded prefix capture/output controls
+
+- One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials.
+- Reused existing reader/fixture/runner owners; only two helper functions plus `io`, one independent case function, and inert runner adaptation.
+- Literal physical/parser/skip/padding accounting, frozen expectations and separate write/close failures verified. Input closure remains caller-owned.
+- No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open.
+- WSP00/5/6/15/22/48/50/84/97/99: next 14/P1 is Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet.
+- PR2025 main closure verified; this slice publication/closure separate. Evidence: backlog `gguf_prefix_capture_controls_20261002` and `O:/Foundups-Agent-audits/20261002-rsi-prefix-capture/`.
+
 ## 2026-10-02 — Observe original GGUF directory through qualified owners
 
 - One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
