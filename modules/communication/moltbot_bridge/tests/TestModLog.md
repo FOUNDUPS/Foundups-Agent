@@ -5,9 +5,11 @@
 - Original Node successful composer-issued receipts are intentionally rejected;
   successful exact/readback paths are tested in the stronger Python authority instead.
 - First run: 149 Python passed; after capsule validation additions: 158 passed.
-  Final source: 159 Python passed repeatedly, 7 Node quarantine cases passed.
+  Final source: 160 Python passed repeatedly, 7 Node quarantine cases passed.
   Connected eSingularity: 79 Python and 18 Node cases passed; registry current
   (1672 files, 270 quarantined). Hosted exact-head results belong to the PR.
+- Added final expiry recheck after potentially contended durable claim; test retains
+  the claim and proves zero submissions if the authorization expires during DB wait.
 - Zero provider mutations asserted for every pre-submit failure. No live Gmail effects.
 
 ## 2026-10-02 — Correspondence sender-boundary fail-closed qualification

@@ -959,3 +959,15 @@ def test_sender_fresh_read_timestamp_does_not_invalidate_or_release_state_claim(
     tx["subject"] = "changed after timestamp-only reconciliation"
     assert boundary.execute(tx, boundary.issue(tx))["decision"] == "BLOCK"
     assert host.submits == 1
+
+
+def test_sender_receipt_expiring_during_durable_claim_never_submits(sender, monkeypatch):
+    tx, host, store, boundary = sender
+    receipt = boundary.issue(tx)
+    claim = store.claim_submission
+    def slow_claim(*args):
+        claim(*args)
+        host.now += 120
+    monkeypatch.setattr(store, "claim_submission", slow_claim)
+    _assert_block(sender, tx, receipt)
+    assert len(store.select("send_claims")) == 1

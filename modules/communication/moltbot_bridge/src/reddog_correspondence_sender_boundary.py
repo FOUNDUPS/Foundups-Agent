@@ -267,6 +267,12 @@ class CorrespondenceSenderBoundary:
         args = {role.value.lower(): [r.address for r in _recipients(tx) if r.role is role]
                 for role in RecipientRole}
         args.update({k: tx[k] for k in TX_KEYS - {"recipients", "purpose", "scope_key"}})
+        # A contended durable claim can outlive the authorization window. Retain
+        # the claim conservatively but do not cross the provider boundary.
+        try:
+            self.__fresh(bound)
+        except Exception as exc:
+            return _blocked(str(exc), draft)
         try:
             sent = self.__provider.submit(args)
         except Exception:
