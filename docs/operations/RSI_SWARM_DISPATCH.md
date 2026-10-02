@@ -1,3 +1,34 @@
+## Backend lifetime controls qualified — 2026-10-02
+
+Source `b24463eedd899f1612698435ba660775e1d62134`. Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials.
+
+One explicit backend wrapper extends the existing external diagnostic. The raw
+model acquisition/vocabulary/free probe and remaining worker AST are unchanged.
+The wrapper establishes ownership on normal backend initialization return,
+prepares parameters, completes the model interval and attempts backend cleanup
+once. Init failure or interruption skips the probe and does not invent successful
+cleanup of possible partial native state. Parameter/probe failures and nested
+model errors remain distinct from backend-free failure; successful cleanup
+cannot convert a failed probe into success.
+
+No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred. These are inert call-order controls, not native memory-reclamation or
+compatibility proof. Prior 17 raw-model cases are preserved and not rerun. The
+oracle/test runner author reviewed separate implementation; coordinator reviewed
+the oracle/runner. Neither is a held-out runtime evaluator or WRE admission.
+The one invocation is consumed/closed. Hosted CI does not replay this local audit.
+PR2027 is main-verified with its owned lane closed; its prefix artifact remains
+historical accepted evidence and was not reopened by this slice.
+
+Next **14/P1:** Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review. The captured input, process-memory boundary and inert lifetime controls now exist. The next useful observation is actual native acceptance of this exact truncated fixture under fixed resources, not another carrier or loader. Preparing and independently reviewing native import effects and fixed parameters is the remaining connected prerequisite.
+Any future native packet must separately qualify fixed loader/DLL-directory/PATH
+effects, fixture identity, resource limits and exact calls. A truncated fixture
+rejection remains inconclusive about original-model support. No native execution
+or additional model/fixture access is allocated here.
+
+Evidence: backlog `backend_lifetime_controls_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-backend-lifetime/`.
+Publication/main closure is recorded separately; older entries are historical.
+
 ## Verified GGUF prefix extraction — 2026-10-02
 
 Source `c0493c69c420dabe93429a8415192821aee80303`. Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent).

@@ -1,3 +1,19 @@
+## Inert backend lifetime controls — 2026-10-02
+
+Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials. Sixteen cases contain seventeen inert intervals; the repeated case checks fresh
+receipts, not repeated native initialization. Fixed expectations cover initialization, parameter
+preparation, model-probe completion and backend cleanup order, including
+interruptions and combined failures. The copied worker is AST-loaded only for
+the two diagnostic functions; its original main/imports are never executed.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-backend-lifetime/run_once.py`.
+
+No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred. Prior 17 raw-model controls are not rerun/recounted. No native reclaim,
+ABI or fixture compatibility is established. Oracle/runner authorship and
+coordinator review are disclosed; no held-out runtime-evaluator claim. Hosted CI
+does not replay this external suite. Backlog `backend_lifetime_controls_20261002` pins exact evidence.
+
 ## Verified-file connection and prefix extraction — 2026-10-02
 
 Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Zero failed/skipped/missing cases and no guard denials. Eight fixed
