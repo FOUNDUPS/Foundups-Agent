@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_guarded_diagnostic_20261002",
-    "base_commit": "0ff259b8a5a851c4c34542cedb4c23fc50ecc8bd",
-    "selected_action": "Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.",
-    "status": "native_fixture_diagnostic_closed_next_preparation",
+    "observation_path": "current_observation.diagnostic_capture_controls_20261002",
+    "base_commit": "ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2",
+    "selected_action": "Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance.",
+    "status": "diagnostic_capture_qualified_next_preparation",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1895,7 +1895,7 @@
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.null_device_guard_controls_20261002",
+    "previous_observation": "current_observation.native_guarded_diagnostic_20261002",
     "publication_state": "pending_exact_source_review_and_hosted_closure"
   },
   "current_observation": {
@@ -26068,6 +26068,475 @@
       "native_rsi_admitted": false,
       "retained_gain": null,
       "publication": "Observed local result; PR/CI/main readback and owned-lane cleanup separately evidenced."
+    },
+    "diagnostic_capture_controls_20261002": {
+      "self": "0102",
+      "role": "coordinator",
+      "origin": "autonomous_trigger",
+      "principal_ref": "012",
+      "base": "ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2",
+      "recorded_utc": "2026-10-02T13:42:34.496171+00:00",
+      "previous_observation": "current_observation.native_guarded_diagnostic_20261002",
+      "status": "inert_diagnostic_capture_controls_qualified_native_capture_unperformed",
+      "scope": "Existing audit diagnostic gains bounded Python stream capture and minimal native-interval integration. AST-only capture controls with injected holders; no production module or registered test changes.",
+      "experiment": {
+        "invocations": 1,
+        "passed": 24,
+        "failed": 0,
+        "unrun": 0,
+        "case_ids": [
+          "body_and_restore_failure",
+          "body_exception",
+          "body_interrupt",
+          "enter_and_restore_failure",
+          "enter_setter_after_mutation",
+          "enter_setter_before_mutation",
+          "exact_character_boundary",
+          "failure_stops_inspection",
+          "flush_no_effect",
+          "fragmented_markers",
+          "huge_write",
+          "initial_and_empty",
+          "invalid_types",
+          "lexical_markers",
+          "literal_matching_only",
+          "normal_restore",
+          "redacted_inputs",
+          "reentry_rejected",
+          "restore_failure",
+          "reuse_rejected",
+          "snapshot_detached",
+          "unicode_breaks_markers",
+          "write_call_boundary",
+          "write_outside_context"
+        ],
+        "child_wall_seconds": 0.0779999999795109,
+        "parent_wall_seconds": 0.9370000001508743,
+        "outer_guard_denials": 0,
+        "real_null_opens": 0,
+        "fixture_reads": 0,
+        "original_model_reads": 0,
+        "native_model_calls": 0,
+        "provider_calls": 0,
+        "zero_provenance": "Reviewed AST-only call graph and outer guard; synthetic stream operations are test inputs, not actual native log observations. Existing parent Windows process APIs run normally.",
+        "budget_state": "One inert invocation consumed and closed; no native retry"
+      },
+      "verified_properties": [
+        "Input/work and write limits under fixed sequential controls; finite lexical labels, no raw text or tails retained.",
+        "Truthful empty, unknown, failed and truncated states; scoped stream restoration and original errors preserved.",
+        "Actual native callback, parent stdio policy, installed sources and qualified guard/lifetime paths unchanged."
+      ],
+      "verification_limits": [
+        "No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.",
+        "Capture is tested with synthetic sequential Python stream events; concurrent callbacks and actual native coverage remain unqualified.",
+        "Historical null model rejection cause remains unknown; prefix saturation can hide later diagnostics.",
+        "Independent oracle/result reviewer authored test runner; coordinator reviewed oracle/runner. Not held-out runtime evaluation.",
+        "Python stream capture is not complete native stderr coverage; lexical labels are untrusted hints, not proof of cause.",
+        "Hosted CI does not replay this external local suite."
+      ],
+      "prior_layer_closure": {
+        "pr": 2034,
+        "merge": "ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2",
+        "state": "MERGED_VERIFIED_MAIN_OWNED_LANE_CLOSED",
+        "main_ci_and_codeql_verified": true
+      },
+      "incoming_external_main": {
+        "base": "ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2",
+        "head": "ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2",
+        "paths": []
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "dimensions": [
+            4,
+            5,
+            5,
+            4
+          ],
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "dependency": "Authentic runtime/effect-use authority and resident prerequisites",
+          "ownership": "RSI lane",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Governed Holo current-source authority",
+          "dimensions": [
+            3,
+            4,
+            4,
+            4
+          ],
+          "total": 15,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Governed R03 maintenance at exact root/head; unchanged failed query not repeated",
+          "ownership": "Holo maintenance owner",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Broad operational decision capability",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "rejected_candidate",
+          "dependency": "Prior fixed cohort failed; no changed evidence",
+          "ownership": "RSI lane",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "External supervisor transport",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "Independent authentic producer/strict decoder evidence",
+          "ownership": "Supervisor owner",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify optional committed-memory limits in the existing Windows Job and bounded-child owners",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2021; exact-main content and required hosted workflows verified. Does not resolve native read/ABI/lifetime or RSI retention.",
+          "ownership": "Existing foundups_mcp_bridge Windows Job and bounded-child process owners",
+          "evidence": "closure/final-accounting.json",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify deterministic raw model-handle acquisition/vocabulary/free paths in the existing diagnostic scaffold",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2023; exact-main content and required hosted workflows verified. Does not establish native cleanup, model support or RSI retention.",
+          "ownership": "Existing WRE/llama_cpp owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify bounded GGUF tensor-directory and computed alignment boundaries using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "PR2024 closed on verified main. Original directory observed in prior PR2025 checkpoint; native support and RSI retention remain unqualified.",
+          "ownership": "Existing GGUF audit Reader and Windows verified-file owner",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Observe bounded original Nemotron metadata and tensor-directory boundaries with the qualified reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2025; original observation and exact-main documentation verified. Native behavior and retained benefit remain open.",
+          "ownership": "Existing audit Reader, verified-file and bounded-child owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify one-read prefix capture and exclusive output controls using the existing audit reader",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2026; inert capture/output controls and exact-main documentation verified. Original extraction was unresolved by that checkpoint and was accepted in prior PR2027; native behavior and retained benefit remain open.",
+          "ownership": "Existing audit reader, verified-file and bounded-child owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2027; prefix extraction/readback and exact-main documentation verified. Native behavior and retained benefit remain open.",
+          "ownership": "Existing audit reader and verified-file/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2028; inert backend lifetime controls and exact-main documentation verified. Actual native behavior and retained benefit remain open.",
+          "ownership": "Existing diagnostic and verified-file/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review.",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2030; one bounded native fixture diagnostic and exact-main documentation verified. Worker admission and retained benefit remain open.",
+          "ownership": "Existing audit diagnostic and native loader/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.",
+          "dimensions": [
+            3,
+            4,
+            4,
+            3
+          ],
+          "total": 14,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2034; guarded native diagnostic evidence and exact-main documentation verified. Actual native behavior and retained benefit remain open.",
+          "ownership": "Existing audit native diagnostic and process/file owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Independent held-out and later-use benefit",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "partially_complete_blocked",
+          "dependency": "Admitted independent evaluation and later retained use; more synthetic cases cannot supply it",
+          "ownership": "RSI evaluator owner",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Dependabot parent-chain resolution",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "external_dependency",
+          "dependency": "Separate package owners; preserve prior unresolved evidence",
+          "ownership": "Separate FoundUp/dependency owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify the finite retained-procedure comparison packet",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_unsuccessful",
+          "dependency": "Initial guided case rejected by unchanged inspector; remaining cases never started and budgets closed",
+          "ownership": "Existing WRE caller/loader and RSI evaluator lane",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Functional correspondence for an accepted generated method",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "blocked",
+          "dependency": "No scope-accepted candidate; preserve existing correspondence tests, do not execute rejected code",
+          "ownership": "Existing recipient preflight evaluator",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet.",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_merged_verified_main",
+          "dependency": "Resolved by PR2033; inert null-device guard controls and exact-main documentation verified. Actual native behavior and retained benefit remain open.",
+          "ownership": "Existing diagnostic and native/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged.",
+          "evidence": "closure/final-accounting.json"
+        },
+        {
+          "task": "Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "closed_local_diagnostic_capture_controls",
+          "dependency": "24 fixed inert capture controls passed. Actual diagnostic capture remains unqualified; prior native null result preserved. Publication/main closure separate.",
+          "ownership": "Existing diagnostic and native/process owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance.",
+          "dimensions": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "total": 13,
+          "priority": "P1",
+          "state": "selected_preparation_only",
+          "dependency": "The sink has independent inert qualification, but default INFO traffic can exhaust its fixed prefix and the installed ERROR filter suppresses CONT fragments. A small existing-owner connection experiment can establish the useful observation window without native access or a larger capture. Impact is diagnostic eligibility only; worker capability, native rejection cause and RSI benefit remain unproven.",
+          "ownership": "Existing audit diagnostic and Python stream/logger owners",
+          "score_reassessment": "Re-observed after fixed inert capture qualification; new native execution still requires exact packet review."
+        },
+        {
+          "task": "AmIBot lifecycle experiment",
+          "dimensions": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "total": 12,
+          "priority": "P2",
+          "state": "downstream",
+          "dependency": "Worker admission; remains G0",
+          "ownership": "FoundUp test lane",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "ROC evaluator improvement experiment",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "not_eligible",
+          "dependency": "No demonstrated deficient target; do not manufacture an objective",
+          "ownership": "Existing AutoResearcher/evaluator",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        },
+        {
+          "task": "GPT-OSS template rendering and output-channel qualification",
+          "dimensions": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "total": 11,
+          "priority": "P2",
+          "state": "deferred_existing_control_mismatch",
+          "dependency": "Current template ignores enable_thinking; native architecture/load and final-channel handling remain unqualified. Compare existing alternative first, do not add model-specific machinery.",
+          "ownership": "Existing WRE native-chat and runtime owners",
+          "score_reassessment": "Fresh main unchanged since PR2034 closure; next-step source pins and reviewed canonical roadmap transition rechecked. Resolved/blocked rows excluded; scores retained only where evidence unchanged."
+        }
+      ],
+      "next_task": {
+        "task": "Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance.",
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1",
+        "rationale": "The sink has independent inert qualification, but default INFO traffic can exhaust its fixed prefix and the installed ERROR filter suppresses CONT fragments. A small existing-owner connection experiment can establish the useful observation window without native access or a larger capture. Impact is diagnostic eligibility only; worker capability, native rejection cause and RSI benefit remain unproven."
+      },
+      "evidence": {
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\selection.json": "9da5a54323a79539e07b04cddea0ee7ccd9c5ddb62821babcc9201f90b0df2e4",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\work-packet.json": "bd5312af4a5c57e1807fd7290b303d99eb420dc195a94d4a12aa851846bb9cf1",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\compiler-receipt.json": "7754262a1bd1a2e0f0168261c6f8aeddf779ef4367995d341e3e42c6a00603bc",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\check_native.py": "1bde1dde893dd244bb113a46b62d72a74f7ed98bbc010297ec523f2f9f589810",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\implementation-receipt.json": "95b8fb332b030b31984ba65b1da9cbc1d1db4714100d3b0b1f7a1ce570823312",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\diagnostic-test-contract.json": "9cd57a5cb3b89ee6dc0b5a1933d4761f48a77e2e0662de86841ffe44a3527fd3",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\test_diagnostic_capture.py": "df1779a7ee6c6da0bd2f6e3b543ef58504a90288d4d7a3e4728ae542f2ae5766",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\check_capture.py": "5bcb41bea9fd592b1856dc62082533bbd169de6eb97bf95a33852226054537a7",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\coordinator-source-review.json": "8cf0cde496215ed9ec051e9aba2bf13e71bfa0ab5f199472bf0525d5903041ba",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\run_once.py": "fd58d4ce287ccd87c4e623d437d6f09709ddeb047bd9aef7460079e5b145f4b0",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\plan.json": "c6211a1914767d257e7e3166c90de1b111309917bd7f0328b71246ac33369d58",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\preparation-receipt.json": "1ae407b97b4b958c79b3583ba664910473ab049d092b077a2e1ad573e0466f72",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\execution-review.json": "f903101c5f8f840976d8c81e250f3e63579f13f99f89319fdadafe30df041176",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\started.json": "ec70d3d820136cd3457ae51e342dcf9c0bbaab3038a0ed155f57c6488f30b7e8",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\capture-result.json": "a04d32f6d3c50d0b0be145f40f4d1e4263b8717f30370223b9a15332d41dec0a",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\receipt.json": "6b35114f93c393c3941af7c64f96947137378f930f615fc22503cba37346325d",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\stdout.txt": "5add185418f3ca07fa743fdd027ae2f4731d3155febcdf0e237632052c4b83a1",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\result-review.json": "18fd7f900453e24d58ee640e77fb3354d0c4cff7dcb25682dcb000a3c04fe5c5",
+        "O:\\Foundups-Agent-audits\\20261002-rsi-diagnostic-capture\\next-preparation.json": "dcef4c43ffe40bd2102811bf45e7f9418ac624e4927265597189e7468d8d2e26"
+      },
+      "dispatchable": false,
+      "native_rsi_admitted": false,
+      "retained_gain": null,
+      "publication": "Local controls accepted; normal PR/CI/main and owned-lane closure separately recorded."
     }
   }
 }

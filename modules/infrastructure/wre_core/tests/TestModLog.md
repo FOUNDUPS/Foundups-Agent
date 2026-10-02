@@ -1,3 +1,17 @@
+## Diagnostic capture inert controls — 2026-10-02
+
+24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Cases exercise bounded Python stream writes
+and restoration with injected holders. Finite labels, caps, redaction and
+truthful failure/unknown/truncation states are covered. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-diagnostic-capture/run_once.py`.
+
+The oracle author also authored the runner; coordinator review is separate.
+No held-out runtime, actual callback coverage or rejection-cause confirmation
+is claimed. Hosted CI does not replay this local audit. Backlog `diagnostic_capture_controls_20261002` pins
+source, oracle, runner, execution and review evidence.
+
 ## Native guarded observation — 2026-10-02
 
 **fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry.

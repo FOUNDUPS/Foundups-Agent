@@ -1,3 +1,28 @@
+## Diagnostic capture controls — 2026-10-02
+
+Source `ad5efedcfc3ae52b12312aba1c5fe32c37cc4ad2`. 24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials.
+
+The existing audit child now has bounded Python-stream evidence capture. It
+retains finite lexical labels instead of raw text, with 64-write and
+4,096-inspected-character limits. Fixed inert cases exercise caps, fragmented
+input, redaction, failure handling and stream restoration with injected holders.
+The installed callback and parent stderr policy are unchanged.
+
+No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred. The prior native `fixture_inconclusive` result remains preserved.
+Actual callback coverage and rejection cause remain unknown; logging verbosity
+may fill the prefix before later error messages. The oracle author also wrote
+the runner, separately reviewed by the coordinator. This is not held-out native
+evaluation. Hosted CI does not replay this audit. PR2034 is main-verified and
+its owned lane is closed.
+
+Next **13/P1:** Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance. The sink has independent inert qualification, but default INFO traffic can exhaust its fixed prefix and the installed ERROR filter suppresses CONT fragments. A small existing-owner connection experiment can establish the useful observation window without native access or a larger capture. Impact is diagnostic eligibility only; worker capability, native rejection cause and RSI benefit remain unproven.
+No native retry is allocated by this record; exact source/runtime/input review
+is still required before any future native attempt.
+
+Evidence: backlog `diagnostic_capture_controls_20261002` and
+`O:/Foundups-Agent-audits/20261002-rsi-diagnostic-capture/`.
+Publication/main closure is separately recorded; older entries are historical.
+
 ## Native guarded diagnostic — 2026-10-02
 
 Source `0ff259b8a5a851c4c34542cedb4c23fc50ecc8bd`. Result: **fixture_inconclusive**. One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry.

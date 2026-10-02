@@ -1,3 +1,10 @@
+## Diagnostic capture controls — 2026-10-02
+
+24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Actual diagnostic capture remains unqualified; the prior null result is preserved.
+Next **13/P1:** Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance.
+See [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#diagnostic-capture-controls--2026-10-02) and
+backlog `diagnostic_capture_controls_20261002`. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
 ## Native guarded diagnostic — 2026-10-02
 
 **fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
