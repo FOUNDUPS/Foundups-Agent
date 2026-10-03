@@ -5,7 +5,8 @@
 **Authors:** UnDaoDu (012) and 0102 research collaboration  
 **Version:** 0.3 — October 4, 2026  
 **Status:** Theoretical working paper with a fully specified finite toy model; not a demonstrated cosmological mechanism.  
-**Companion:** [rESP / CMST, version 3.4](rESP_Quantum_Self_Reference.md)
+**Companion:** [rESP / CMST, version 3.4.1](rESP_Quantum_Self_Reference.md)  
+**Revision audit:** [CSSH v0.3 crossover 3-surface self-audit](CSSH_V0_3_CROSSOVER_3SURFACE_AUDIT_2026-10-04.md)
 
 ## Abstract
 
