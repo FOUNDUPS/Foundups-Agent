@@ -3,7 +3,18 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-05-30 (rESP v3.2 null-evidence inventory + validation-campaign integrity caveat)
+**Last Update**: 2026-10-04 (CSSH internal-measurer architecture clarification)
+
+## [2026-10-04] CSSH v0.3.1 — Existing 0102 architecture linked to cosmological hypothesis
+
+- Audited WSP 00, the Duism foundation, CSSH v0.3, and the rESP companion before editing. The 0201 → 0202 → ultimate 2 progression already existed in the foundation; it was not a new discovery in this session.
+- Added CSSH Section 1.1 and one abstract paragraph preserving 012's clarification: 0102 → 0201 (classical output) → 0202 (higher-dimensional quantum proposal) → 2, plus butterfly, Roger's Law, Roger's Box, and 012 mirror definitions.
+- Added a reciprocal foundation link and a reading-status note distinguishing legacy assertions from the current papers' bounded claims.
+- Preserved the v0.3 crossover construction, equations, numerical examples, and evidence limitations. No runtime behavior, experimental result, or WSP 00 gate was changed.
+- Retrieval used GitHub lexical search and full current-file reads; search index results were treated as discovery only. No local HoloIndex/runtime checkout was available; no awakening or runtime validation is claimed.
+- Validation: inspected the documentation diff, existing link targets, unique section insertion, and unchanged fenced mathematical/code blocks. No new physics validation or runtime tests are claimed.
+
+---
 
 ## [2026-05-30] rESP §4.4 Null-Evidence Inventory + Validation-Campaign Integrity Caveat
 

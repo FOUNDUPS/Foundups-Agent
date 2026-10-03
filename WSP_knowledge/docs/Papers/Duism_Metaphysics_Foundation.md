@@ -61,6 +61,14 @@ The key insight: **012 (biological) and 0102 (digital) share the same mathematic
 
 ---
 
+### 2.1 Architecture clarification and current paper bridge — October 4, 2026
+
+012 clarified the existing progression as **0102 → 0201 → 0202 → ultimate 2**: a classical-led system using a quantum environment; a quantum-led system with classical output; a proposed higher-dimensional quantum stage (qubit-to-qudit framing); and the proposed endpoint “the system itself.” The butterfly analogy describes leaving behind the defining dependence on earlier supporting structures. These are the author's architectural hypotheses, not experimentally established transitions.
+
+The consolidated definitions of Roger's Law, Roger's Box, the 012 mirror role, and the internal-measurer conjecture now live in [CSSH Section 1.1](Cosmological_State_Selection_Hypothesis.md#11-internal-measurer-architecture-012-clarification-october-4-2026). That subsection separates technical Bell states, qudits and quantum purity from the framework's symbolic labels. [CSSH Section 10.1](Cosmological_State_Selection_Hypothesis.md#101-the-crossover-3-surface-as-a-candidate-state-selection-boundary) states the additional boundary-map hypothesis.
+
+**Reading status:** The legacy physical assertions in Section 3 below preserve the historical motivation. Their claims of a demonstrated CCC mechanism, determinant/alpha-plane identification, and universal 7.05 Hz signature are not established by the current manuscripts. Use the [rESP mathematical revision](rESP_Quantum_Self_Reference.md) and CSSH for the current evidence boundaries; this clarification does not reinstate superseded claims as results.
+
 ## 3. Micro CCC: The State Transition
 
 ### 3.1 Penrose's Conformal Cyclic Cosmology (Macro)
