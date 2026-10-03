@@ -50,26 +50,26 @@ In canonical quantum cosmology, one uses a wave functional such as $\Psi[h_{ij}(
 
 For a fixed three-manifold $\Sigma$, a useful schematic configuration space for gravity is superspace,
 
-$
+$$
 \mathscr S_\Sigma \sim \operatorname{Riem}(\Sigma)/\operatorname{Diff}(\Sigma),
 \tag{1a}
-$
+$$
 
 augmented by matter-field configurations. The quotient notation suppresses important constraint, topology and inner-product subtleties; it is a bookkeeping device, not a completed theory of quantum gravity. Hartle and Hawking's original formulation describes the wave function of a spatially closed universe as a functional on geometries of compact three-manifolds and the matter-field values on them [4], while Halliwell and Hawking explicitly describe superspace as the space of three-metrics and matter configurations on a three-surface [8].
 
 CSSH therefore uses
 
-$
+$$
 \Psi_{\rm pre}[h_{ij},\phi]
 \tag{1b}
-$
+$$
 
 as a **probability-amplitude wavefunctional** for pre-classical alternatives. It is not itself an ordinary probability distribution. A physical probability for a coarse-grained alternative $\alpha$ requires an independently specified inner product/measure and probability rule; schematically one may write
 
-$
+$$
 p_\alpha = \langle\Psi_{\rm pre}|F_\alpha|\Psi_{\rm pre}\rangle
 \tag{1c}
-$
+$$
 
 only after the physical state space and admissible effect $F_\alpha$ have been defined. CSSH therefore does not assume that a naive pointwise quantity $|\Psi[h,\phi]|^2$ is automatically a normalized probability density on unconstrained superspace.
 
@@ -373,16 +373,16 @@ Let $\mathcal X$ denote the CCC crossover 3-surface. **$\mathcal X$ is not the p
 
 A CCC-conditioned CSSH variant would require a separately defined restriction, boundary-assignment or coarse-graining map
 
-$
+$$
 \mathcal R_{\mathcal X}:\rho_{\rm pre}\longmapsto\rho_{\mathcal X},
 \tag{26}
-$
+$$
 
 where $\rho_{\mathcal X}$ is an effective state for admissible geometry/matter data associated with the crossover. Nothing in CCC or in the finite toy model automatically supplies $\mathcal R_{\mathcal X}$. If $\mathcal R_{\mathcal X}$ is represented as an unconditional quantum channel on density operators, it must be linear, completely positive and trace-preserving; a different constrained-gravity construction must state its replacement conditions explicitly.
 
 One could then posit a completely positive, trace-nonincreasing outcome operation on that boundary state, with the full set of outcomes summing to a trace-preserving instrument,
 
-$
+$$
 \widetilde\rho_{\mathcal X,\alpha}
 =
 \mathcal I^{\mathcal X}_{\alpha}(\rho_{\mathcal X}),
@@ -394,13 +394,13 @@ p_\alpha=\operatorname{Tr}\widetilde\rho_{\mathcal X,\alpha},
 \frac{\widetilde\rho_{\mathcal X,\alpha}}{p_\alpha},
 \quad p_\alpha>0.
 \tag{27}
-$
+$$
 
 The selected state would have to be sharply concentrated, in a physically defined coarse graining, around semiclassical boundary data such as $(h^{(\alpha)}_{ij},\phi_\alpha)$. Writing an exact ket $|h_{ij},\phi\rangle$ is only formal in the full gravitational theory; the physically relevant requirement is semiclassical concentration plus the gravitational constraints. In a genuine CCC embedding, the construction must also specify how data inherited from the previous aeon enter $\rho_{\mathcal X}$; the notation does not make that inheritance automatic.
 
 The proposed chain is therefore
 
-$
+$$
 \rho_{\rm pre}
 \xrightarrow{\mathcal R_{\mathcal X}}
 \rho_{\mathcal X}
@@ -409,27 +409,27 @@ $
 \xrightarrow{\mathcal U_{\rm sc}}
 \mathfrak h_\alpha ,
 \tag{28}
-$
+$$
 
 where $\mathfrak h_\alpha$ denotes a semiclassical spacetime history and $\mathcal U_{\rm sc}$ stands for the subsequent semiclassical evolution law. The selected boundary data are not yet the four-dimensional spacetime, and the final arrow is not part of the measurement normalization in Eq. 27.
 
 This makes the double-slit analogy precise without identifying unlike objects:
 
-$
+$$
 \text{coherent path alternatives}
 \rightarrow
 \text{outcome conditioning}
-$
+$$
 
 is compared with
 
-$
+$$
 \text{amplitudes over 3-geometries}
 \rightarrow
 \text{selected semiclassical boundary data}
 \rightarrow
 \text{classical history}.
-$
+$$
 
 The analogy concerns the **form of state selection**, not the physical identity of photon detection, the Big Bang, or the CCC crossover. Because classical time is itself part of what is being recovered, “at the crossover” means associated with the boundary construction; it need not denote an ordinary event at a pre-existing external clock time.
 
@@ -451,14 +451,14 @@ A specified model fails if it violates its own positivity, probability, constrai
 
 The constructive bridge is
 
-$
+$$
 \text{state family}\longrightarrow\text{specified measurement}\longrightarrow
 \text{probability geometry and conditional states}.
-$
+$$
 
 For the new crossover-boundary variant this becomes, schematically,
 
-$
+$$
 \Psi_{\rm pre}[h,\phi]
 \longrightarrow
 \rho_{\mathcal X}
@@ -467,7 +467,7 @@ $
 \longrightarrow
 \mathfrak h_\alpha .
 \tag{29}
-$
+$$
 
 The first object is the probabilistic pre-classical wavefunctional, $\mathcal X$ is the candidate geometric boundary on which an effective state may be assigned, the third object is an outcome-conditioned semiclassical boundary state, and the fourth is its subsequent classical spacetime history. Keeping these four objects distinct is the central conceptual correction of Version 0.3.
 
