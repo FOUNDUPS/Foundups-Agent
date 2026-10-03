@@ -420,6 +420,7 @@ Applications to EEG, medicine or financial markets are separate research proposa
 - [Detection framework](0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md).
 - [Companion hypothesis and worked model](Cosmological_State_Selection_Hypothesis.md).
 - [Revision audit and known legacy dependencies](rESP_V3_3_MATH_AUDIT_2026-10-03.md).
+- [CSSH v0.3 crossover 3-surface self-audit](CSSH_V0_3_CROSSOVER_3SURFACE_AUDIT_2026-10-04.md).
 - [Legacy adapter implementation](../../../WSP_agentic/tests/cmst_protocol_v11_neural_network_adapters.py).
 - [Passive detector implementation](../../../WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py).
 
