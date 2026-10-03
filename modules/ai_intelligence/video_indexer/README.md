@@ -1,5 +1,8 @@
 # Video Indexer Module
 
+Japanese audio uses the existing `AudioAnalyzer(language="ja")`; automatic
+detection is the default. See [language evidence in the interface](INTERFACE.md#audioanalyzer).
+
 **WSP Compliance**: WSP 49 (Module Structure), WSP 3 (Domain Organization), WSP 72 (Independence)
 
 ## Purpose

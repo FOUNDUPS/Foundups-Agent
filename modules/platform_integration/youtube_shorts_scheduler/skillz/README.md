@@ -4,6 +4,14 @@ This directory contains AI skills for the youtube_shorts_scheduler module follow
 
 ## Available Skills
 
+### publish_daily_clips (existing Work prototype)
+
+Prior Work created this workflow on
+`feat/move2japan-daily-clips-skill-20260921`. Its source is not yet present in
+this checkout. Retrieve that implementation before extending daily discovery;
+do not create a parallel publisher. See the [prior Work audit](../docs/PRIOR_WORK_AUDIT_2026-09-22.md)
+for source provenance, Save/readback requirements and the recent-clips default.
+
 | Skill | Intent Type | Agent | Status |
 |-------|-------------|-------|--------|
 | `ffcpln_title_enhance` | GENERATION | Qwen + Gemma | prototype |
@@ -50,3 +58,9 @@ from modules.platform_integration.youtube_shorts_scheduler.skills.ffcpln_title_e
 skill = FFCPLNTitleEnhanceSkill()
 result = skill.execute(context)
 ```
+
+## Remote diagnostic skill
+
+[youtube-remote-audit](youtube-remote-audit/SKILL.md) is a module-local, read-only
+Codex instruction artifact; no personal installation or WRE registration.
+Evidence: [September 21 remote audit](../docs/REMOTE_AUDIT_2026-09-21.md).

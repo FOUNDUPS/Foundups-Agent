@@ -1,5 +1,46 @@
 # YouTube Shorts Scheduler - TestModLog
 
+## 2026-09-22 - Isolated current-main validation
+
+**85 passed**, one pre-existing Pydantic annotation warning. Same seven-file
+focused suite below, including three new unscoped-command regressions.
+Compared with the historical shared checkout run, current main also contains
+six previously merged STT language cases. Windows temporary fixture access
+required the approved rerun. No live browser or model calls.
+
+The Work source audit supersedes the proposed remote publisher registration;
+no new WRE publisher is registered in this patch. The retained diagnostic
+skill links to the existing `publish_daily_clips` owner.
+
+## 2026-09-21 - Remote CLI and nonpersistent preview regressions
+
+After 012's whole-batch clarification: remote CLI plus adapter suite **49 passed**.
+Includes uncapped default, exact selection, 3/8/13 mocked scheduling calls,
+61-clip pagination, missing clip/partial result, stalled pagination, malformed
+selection/limit and exclusion of unrelated uploads. No live publication occurred.
+
+Final combined targeted rerun: **75 passed**, one existing Pydantic annotation
+warning. Includes remote CLI, private-visibility regressions, adapter, batch/voice
+and audio-language tests. The broader tracker/configuration baseline mismatch
+recorded below remains; this focused rerun does not claim it is repaired.
+
+Combined targeted run: 90 passed, 2 skipped, 1 existing configuration failure.
+The failure expects Move2Japan registry max_per_day=3; HEAD baseline and current
+source both return saved configuration value 8. Tracker HARD_CAP_PER_DAY=3
+remains enforced and its boundary tests pass. No operator configuration changed.
+
+New remote tests cover real async API wiring, registry browser mismatch,
+transport versus authentication, error receipts, optional bounds, shared browser
+detach, planned versus actual counts, combined visibility limits, nonpersistent
+tracker copies, and no dry-run autoheal/repeated unchanged batch. Dependencies
+are mocked; no live YouTube mutation is part of this suite. Windows tmp_path
+needed the approved temporary-directory access. Cross-module collection uses
+`--import-mode=importlib` because several modules name their package `tests`.
+
+The transcript subset plus remote tests passed 29/29 before the additional
+missing-dependency JSON regression. WRE staged discovery and full skill loading
+passed, as did Codex skill validation. Actual preflight returned browser_unavailable.
+
 ## 2026-06-19 - test_schedule_include_private: flag-gated PRIVATE pass (mock-only, MUST-FAIL proven)
 
 **By:** 0102 (Worker-Lane SCHED-PRIVATE)

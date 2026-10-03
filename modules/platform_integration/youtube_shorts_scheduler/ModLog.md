@@ -1,5 +1,51 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-09-21 - Repair existing remote adapter contract and preview isolation
+
+WSP 00/11/22/50/84/95/97. Reused the scheduler and existing Red Dog adapter;
+no replacement publisher. Corrected stale CLI constructor/method calls,
+added transport-only preflight and metadata preservation, normalized JSON
+planned/actual receipts, and respected payload failures. A shared attached
+browser is detached rather than closed. Missing imports return JSON failures.
+
+Preview trackers no longer create/write storage; slot preview deep-copies
+the current tracker, dry-run cannot trigger postcycle autoheal, and preview
+stops after the first visible batch. One limit covers all visibility passes.
+The later Work audit located the existing `publish_daily_clips` prototype;
+the proposed parallel remote skill registration was excluded from this branch.
+The diagnostic skill points to that owner and its source-export boundary.
+
+Actual adapter preflight returned `browser_unavailable` for Move2Japan/9222.
+No YouTube mutation occurred. Metadata-plan binding, unattended
+ingress and live saved-result proof remain outstanding; see
+[remote runbook](docs/REMOTE_SCHEDULING.md). Offline regression evidence and
+the existing channel-density configuration mismatch are in tests/TestModLog.
+
+Retrieval evaluation: owner query failed `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`
+(freshness UNKNOWN, index gap true). Direct source/Git checks were used.
+Noise: broad YouTube hits include old live-content skills. Ordering: actual
+callers/definitions before historical docs. Missing artifacts: video_indexer
+memory README/requirements and actual clip transcripts. Staleness: branch
+differs from inspected main. Duplication: existing adapter/scheduler reused.
+Japanese STT primitives already present on inspected origin/main were reused
+and extended through batch evidence rather than introducing another backend.
+Manual interface repair was necessary to reproduce stale API calls and verify
+their replacement against the actual scheduler and regression tests.
+
+012 clarified that every recorded clip belongs in the request. Removed the
+adapter's default five and CLI's default ten caps; both now default to all.
+Added exact `video_ids` selection with existing Studio pagination, per-visibility
+order, exclusion of unrelated uploads and explicit incomplete-batch receipts.
+Tests exercise 3/8/13-clip execution with mocked DOM and 61-clip paginated preview.
+No hard cap on total batch size is imposed; existing daily spacing is separate.
+
+September 22 reconciliation: moved only this lane's changes to an isolated
+main-based worktree. Unqualified remote CLI requests now stop with
+`clip_selection_required` before connecting, preventing old backlog selection
+while the existing Work prototype's source is retrieved. The requested recent
+window and unresolved source/readback integration are recorded in
+[the Work audit](docs/PRIOR_WORK_AUDIT_2026-09-22.md).
+
 ## 2026-06-20 - Unified Shorts+Videos live priority signal (flag-gated, fallback-safe)
 
 **By:** 0102 (Worker-Lane: UNIFIED-PRIORITY)
@@ -2714,3 +2760,21 @@ python -m modules.platform_integration.youtube_shorts_scheduler.scripts.launch -
 ### WSP Compliance
 - WSP 50: Pre-action verification (menu shows current channel)
 - WSP 22: This ModLog documents the change
+
+## 2026-09-21 - Read-only remote audit
+
+WSP 00/50/84/97: retained Holo authority mismatch and used source/Git evidence.
+Added [diagnostic skill](skillz/youtube-remote-audit/SKILL.md) and
+[evidence report](docs/REMOTE_AUDIT_2026-09-21.md). Observed 13 unlisted clips.
+Recorded legacy CLI drift and preview tracker writes; neither repaired.
+Source/AST and live read-only inventory verified; no runtime code changed,
+no scheduling tests or public actions performed. Existing dirty files preserved.
+
+## 2026-09-21 - YUMORI source context and factual-scope correction
+
+WSP 50/84/97: added [source context](docs/YUMORI_SOURCE_CONTEXT_2026-09-21.md)
+from current Drive masters, the live site, FIN inspection and municipal records.
+Recorded coverage limits, conflicting request wording, modeled/verified boundaries,
+and the existing ASR path's forced-English behavior. Linked it from the audit
+skill and corrected the initial overbroad factual-content restriction.
+Documentation only; no new publisher, runtime repair, outreach or YouTube write.
