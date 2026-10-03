@@ -32,9 +32,9 @@ The TinyFish research skill is modules/infrastructure/browser_actions/skillz/tin
 
 ## A. Bounded paper verification
 
-Expected checked manuscripts: rESP/CMST v3.4 and Cosmological State Selection v0.2 — A Measurement-Theoretic Hypothesis for the Emergence of Classical Spacetime.
+Expected checked manuscripts after the October 4 revision: rESP/CMST v3.4.1 and Cosmological State Selection v0.3 — A Measurement-Theoretic Hypothesis for the Emergence of Classical Spacetime.
 
-Keep two papers: rESP owns computational detection/geometry, with a short section 5.6 bridge; CSSH owns the explicitly hypothetical cosmological application and finite two-sector model. Do not elevate a mathematical correspondence into physical proof.
+Keep two papers: rESP owns computational detection/geometry, with a short section 5.6 bridge; CSSH owns the explicitly hypothetical cosmological application and finite two-sector model. Version 0.3 additionally distinguishes the probabilistic wavefunctional $\Psi_{\rm pre}[h,\phi]$ from Penrose's crossover 3-surface $\mathcal X$ and adds a separately defined boundary-state/state-selection variant. Do not identify the wavefunctional with the surface or elevate this mathematical construction into physical proof.
 
 Where execution is available, run the existing standalone audit, not a new duplicate test:
 
@@ -42,7 +42,7 @@ python WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/CSSH_EQUAT
 
 The previously verified script Git blob is 9ef5fc348b59596db4271a715b0f735f8a6a270e; SHA-256 is 3af0b80ab9fcf3a395c7310ff2efda042163e78428b5c345fbd4c96a641f9160. It yielded 37/37 checks with seed 20381003, 1,000 random qubit states and 90 quantum-Fisher cases. Verify current bytes; historical counts are not a fresh execution receipt. If execution is unavailable, report that and use the exact previously verified revision as evidence rather than inventing a run.
 
-Check the critical claims: local coherence is not Bell entanglement; covariance is positive semidefinite; W_s is purity-related and non-positive; dissipative rates appear once; sigma_z alone changes phase, not populations; normalized conditioning differs from the unnormalized quantum operation; det(gQ)=E^2/4 belongs only to the specified family/coordinates; the cosmological mechanism remains hypothetical. Do not revive the retired 7.0498 Hz constant calculation.
+Check the critical claims: local coherence is not Bell entanglement; covariance is positive semidefinite; W_s is purity-related and non-positive; dissipative rates appear once; sigma_z alone changes phase, not populations; normalized conditioning differs from the unnormalized quantum operation; det(gQ)=E^2/4 belongs only to the specified family/coordinates; the cosmological mechanism remains hypothetical. For v0.3 specifically verify that $\Psi_{\rm pre}[h,\phi]$ is a probability-amplitude wavefunctional, $\mathcal X$ is a geometric crossover 3-surface rather than that state, and $\mathcal R_{\mathcal X}$ / $\mathcal I^\mathcal X_\alpha$ are explicit CSSH postulates not claims attributed to CCC. Do not revive the retired 7.0498 Hz constant calculation.
 
 If an actual new inconsistency is found, document the smallest counterexample and a bounded correction before publishing a contradictory claim. Do not rewrite sound sections to appear productive or turn publication into an open-ended quantum-gravity project. Outstanding physical validation is not a blocker to an honestly labeled research update.
 
@@ -53,7 +53,7 @@ https://www.linkedin.com/company/107481170/admin/page-posts/published/
 
 The saved map/URL is a discovery lead, not proof of current access. Inspect the page's author identity and account permissions. Do not default to FoundUps, eSingularity or the personal profile.
 
-Read recent posts, drafts, scheduled items, failed/submitted attempts and the latest publication receipt. Look for the exact opening “0102 research update: correcting the mathematics, defining the bridge.” and semantically equivalent updates linking the same two papers. If already live, verify and record its permalink; do not repost. If scheduled or already submitted with uncertain outcome, reconcile first rather than add another copy. Do not silently alter or delete an existing schedule/draft.
+Read recent posts, drafts, scheduled items, failed/submitted attempts and the latest publication receipt. Look for the exact opening “0102 research update: correcting the mathematics, defining the bridge.” and semantically equivalent updates linking the same two papers, including any version mentioning the wavefunctional/crossover-3-surface distinction. If already live, verify and record its permalink; do not repost. If scheduled or already submitted with uncertain outcome, reconcile first rather than add another copy. Do not silently alter or delete an existing schedule/draft.
 
 ## C. Exact-copy publication
 
