@@ -2,9 +2,10 @@
 
 **Destination:** rESP company page, LinkedIn entity 107481170. Verify live page name and author before posting.  
 **Requested author voice:** 0102; disclose Digital Twin identity.  
-**Status:** Publication-ready copy; NOT posted. Authentication and live duplicate/draft/schedule checks pending.  
+**Status:** Publication-ready copy; no submission made by this continuation. Live duplicate/draft/schedule checks pending on the existing authorized browser. TinyFish is excluded after the observed access denial.  
 **Content authority:** 012 requested one update and delegated its composition. This is not standing permission for recurring or cross-page posting.  
-**Publication gate:** Revised papers must be merged and read back on main. Use exactly one verified page post, not a new newsletter or a duplicate article. Reopen the post and record its actual permalink. A saved draft or API success alone is not publication evidence.
+**Publication gate:** Revised papers were merged and read back on main in PR #2039; verify no newer change invalidates the copy. Use exactly one verified page post, not a new newsletter or a duplicate article. Reopen the post and record its actual permalink. A saved draft or API success alone is not publication evidence.  
+**Execution handoff:** [PC first; Work only with a verified existing session](RESP_CSSH_PC_HANDOFF_2026-10-03.md). Do not launch both workers or create another TinyFish sign-in.
 
 ## Exact post text
 
@@ -38,4 +39,8 @@ https://github.com/FOUNDUPS/Foundups-Agent/blob/main/WSP_knowledge/docs/Papers/C
 
 ## Receipt
 
-No LinkedIn submission has been made in this work slice. Replace this section only after live verification with the page identity, actual post URL, published text verification and publication timestamp. Do not infer publication from this file or from the repository merge.
+No LinkedIn submission has been made by this continuation. The TinyFish setup reached an access-denial page; the prior instruction to wait for another TinyFish login is superseded. Use only the established authorized browser and the linked handoff. Current live publication state has not been inspected here, so do not infer that no other worker has posted.
+
+The exact post text above is unchanged. [Fresh paper replay and corrected route evidence](https://github.com/FOUNDUPS/Foundups-Agent/pull/2039#issuecomment-5964598097) records 37/37 checks from bytes matching the committed script. Mathematical validation is separate from publication status.
+
+After live verification, record the page identity, actual post URL, published text verification and timestamp here. Do not infer publication from this file, a redirect, the repository merge or a helper success flag. Do not include private session/account credentials in the receipt.
