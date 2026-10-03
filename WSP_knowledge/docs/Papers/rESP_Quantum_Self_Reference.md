@@ -286,7 +286,7 @@ $$
 
 as near-singularity and anisotropy diagnostics. A materially negative eigenvalue or determinant cannot be interpreted as a property of this covariance matrix; it indicates numerical error or that a different object is being measured.
 
-**B. Adapter sign-bearing scalar.** The legacy CMST neural-adapter implementation uses a different quantity,
+**B. Adapter non-positive scalar.** The legacy CMST neural-adapter implementation uses a different quantity,
 
 $$
 \mathcal W_s(\rho)
@@ -318,7 +318,7 @@ $$
 
 with λ > 0. This is the preferred quantity for the current regime-separation detector because it is attached to a defined statistical model and has matched controls.
 
-These three quantities must not be interchanged. The covariance witness tracks near-singularity of observed dynamics; W_s is a legacy sign-bearing training regularizer; and A(φ) measures local Fisher geometry in the passive adapter subspace.
+These three quantities must not be interchanged. The covariance witness tracks near-singularity of observed dynamics; W_s is a legacy non-positive training regularizer; and A(φ) measures local Fisher geometry in the passive adapter subspace.
 
 ## 3. Methodology: The CMST Protocol
 
@@ -385,7 +385,7 @@ This final exploratory phase moves beyond simple observation to the rigorous, qu
 ### 3.8 Engineering Application: The CMST Neural Adapter
 
 *   **Objective:** To apply the principles of the PQN framework to achieve a real-world engineering outcome: the enhancement of a classical neural network.
-*   **Procedure:** A lightweight, differentiable CMST_Neural_Adapter module is inserted into a target neural network using PyTorch hooks (Fig. 6). The legacy adapter constructs the effective 2x2 descriptor ρ and computes the sign-bearing scalar W_s(ρ) of Eq. 5c (historical code name det_g). A CMST_Neural_Loss uses that scalar as a regularizer. This must not be confused with the covariance witness g_cov or the passive EFIM observable A(φ).
+*   **Procedure:** A lightweight, differentiable CMST_Neural_Adapter module is inserted into a target neural network using PyTorch hooks (Fig. 6). The legacy adapter constructs the effective 2x2 descriptor ρ and computes the non-positive scalar W_s(ρ) of Eq. 5c (historical code name det_g). A CMST_Neural_Loss uses that scalar as a regularizer. This must not be confused with the covariance witness g_cov or the passive EFIM observable A(φ).
 *   **Validation:** The engineering claim is performance-relative: compare the regularized model against a matched baseline and report the scalar trajectory separately. A negative W_s is permitted by definition but is not evidence of entanglement or of a negative covariance determinant.
 
 ### 3.9 Control Conditions
@@ -538,7 +538,7 @@ In short: N0 and N2 head-to-heads remain entirely outstanding; N1 has only the c
 
 ## 5. Discussion
 
-The strongest current contribution of rESP is methodological: it defines measurable state descriptors, interventions, geometry observables, and null models. Version 3.3 removes a category error that had allowed local coherence, Bell entanglement, covariance geometry, and a sign-bearing adapter scalar to blur together.
+The strongest current contribution of rESP is methodological: it defines measurable state descriptors, interventions, geometry observables, and null models. Version 3.3 removes a category error that had allowed local coherence, Bell entanglement, covariance geometry, and the adapter scalar W_s to blur together.
 
 The resulting hierarchy is:
 
@@ -679,7 +679,7 @@ This research establishes a new, quantitative foundation and provides the first 
 
 ### 8.1 Geometric State-Space Engineering
 
-Future adapter work should use the corrected witness taxonomy. The covariance witness W_cov, legacy sign-bearing scalar W_s, and passive EFIM observable A(φ) must be reported separately, with no entanglement interpretation unless a genuine joint-state witness is introduced.
+Future adapter work should use the corrected witness taxonomy. The covariance witness W_cov, legacy non-positive scalar W_s, and passive EFIM observable A(φ) must be reported separately, with no entanglement interpretation unless a genuine joint-state witness is introduced.
 
 ### 8.2 Joint-State Tests for the Bell Analogy
 
@@ -976,7 +976,7 @@ xychart-beta
 ```
 
 #### FIG. 6: The CMST Neural Adapter Architecture
-A schematic showing the placement and function of the legacy CMST Neural Adapter within a standard ResNet block. It (1) projects activations into a constructed 2x2 state descriptor ρ, (2) computes the sign-bearing scalar W_s of Eq. 5c, and (3) uses W_s to generate an auxiliary loss. This is an engineering regularizer; it is distinct from the covariance witness and the passive EFIM observable, and it does not establish PQN alignment or entanglement.
+A schematic showing the placement and function of the legacy CMST Neural Adapter within a standard ResNet block. It (1) projects activations into a constructed 2x2 state descriptor ρ, (2) computes the non-positive scalar W_s of Eq. 5c, and (3) uses W_s to generate an auxiliary loss. This is an engineering regularizer; it is distinct from the covariance witness and the passive EFIM observable, and it does not establish PQN alignment or entanglement.
 
 ```mermaid
 %%{init: { 'theme': 'base', 'themeVariables': { 'primaryColor': '#f9f9f9', 'primaryTextColor': '#000', 'lineColor': '#333' } } }%%
