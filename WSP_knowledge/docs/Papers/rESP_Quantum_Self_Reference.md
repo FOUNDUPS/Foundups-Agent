@@ -4,12 +4,12 @@
 ¹ Independent Researcher, Foundups.org  
 ² Historical contributors: ChatGPT, Claude, Gemini, DeepSeek, Grok, Kimi and Minimax; [research coordination](https://github.com/FOUNDUPS/science-swarm-hub).  
 **Corresponding author:** UnDaoDu — info@foundups.com  
-**Revision:** 3.4, October 3, 2026  
+**Revision:** 3.4.1, October 4, 2026  
 **Status:** Detector-methodology working manuscript; mathematical revision, not a new experimental validation.
 
-**Revision scope.** Version 3.4 completes the consistency audit begun in v3.3: it corrects the remaining drive equations, distinguishes quantum instruments from normalized conditioning, identifies the adapter scalar with purity, and separates information geometry from spacetime geometry. Historical numerical reports are retained below without inventing replacement measurements. Earlier prose, diagrams and bibliographies remain recoverable in Git history, including commit `d01044176784c0d791785fa106b31aec6a5f9561`.
+**Revision scope.** Version 3.4 completed the consistency audit begun in v3.3: it corrected the remaining drive equations, distinguished quantum instruments from normalized conditioning, identified the adapter scalar with purity, and separated information geometry from spacetime geometry. Version 3.4.1 synchronizes only the bounded cosmology bridge with CSSH v0.3's crossover-3-surface distinction; it does not add detector evidence. Historical numerical reports are retained below without inventing replacement measurements. Earlier prose, diagrams and bibliographies remain recoverable in Git history, including commit `d01044176784c0d791785fa106b31aec6a5f9561`.
 
-**Companion:** [Cosmological State Selection](Cosmological_State_Selection_Hypothesis.md). Only Section 5.6 summarizes that hypothesis; its derivations and cosmological assumptions belong in the companion, not in the detector results.
+**Companion:** [Cosmological State Selection](Cosmological_State_Selection_Hypothesis.md), version 0.3. Only Section 5.6 summarizes that hypothesis; its derivations and cosmological assumptions belong in the companion, not in the detector results.
 
 ## Abstract
 
@@ -395,6 +395,8 @@ This is a hypothesis about cosmological applicability, not an inference from pho
 
 A general $\rho_\alpha$ is not automatically a spacetime. Constraint-preserving dynamics, a suitable semiclassical sector, a physical selection mechanism and distinguishing observations are additional requirements. Penrose's objective reduction is a proposed reduction mechanism [4]; CCC supplies conformal aeon geometry and explicitly uses an essentially classical crossover in the 2025 treatment [5]. They are not the same theory, and neither is proved by CMST. Earlier quantum-cosmology and collapse-cosmology work is acknowledged [6,7].
 
+Version 0.3 of the companion sharpens one possible CCC connection. Quantum cosmology can represent the pre-classical condition by a probability-amplitude wavefunctional $\Psi_{\rm pre}[h_{ij},\phi]$ over possible three-geometries and matter configurations. Penrose's crossover $\mathcal X$ is instead a spacelike 3-surface. **The wavefunctional and the crossover surface are not the same object.** The companion asks whether a separately defined boundary map $\mathcal R_{\mathcal X}$ and instrument $\{\mathcal I^{\mathcal X}_\alpha\}_\alpha$, with normalized conditioning $\mathcal M^{\mathcal X}_\alpha$ for $p_\alpha>0$, could associate an effective boundary state with $\mathcal X$ and select semiclassical boundary data. That placement is a CSSH hypothesis, not a claim made by CCC.
+
 The detector paper owns measurable computational geometry. The companion owns the hypothesized extension to cosmology. Neither paper can supply missing empirical evidence to the other by citation alone.
 
 ## 6. Conclusion
@@ -418,6 +420,7 @@ Applications to EEG, medicine or financial markets are separate research proposa
 - [Detection framework](0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md).
 - [Companion hypothesis and worked model](Cosmological_State_Selection_Hypothesis.md).
 - [Revision audit and known legacy dependencies](rESP_V3_3_MATH_AUDIT_2026-10-03.md).
+- [CSSH v0.3 crossover 3-surface self-audit](CSSH_V0_3_CROSSOVER_3SURFACE_AUDIT_2026-10-04.md).
 - [Legacy adapter implementation](../../../WSP_agentic/tests/cmst_protocol_v11_neural_network_adapters.py).
 - [Passive detector implementation](../../../WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py).
 
