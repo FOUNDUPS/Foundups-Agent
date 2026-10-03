@@ -382,7 +382,7 @@ where $\rho_{\mathcal X}$ is an effective state for admissible geometry/matter d
 
 One could then posit a completely positive, trace-nonincreasing outcome operation on that boundary state, with the full set of outcomes summing to a trace-preserving instrument,
 
-$
+$$
 \widetilde\rho_{\mathcal X,\alpha}
 =
 \mathcal I^{\mathcal X}_{\alpha}(\rho_{\mathcal X}),
@@ -396,7 +396,7 @@ p_\alpha=\operatorname{Tr}\widetilde\rho_{\mathcal X,\alpha},
 \frac{\widetilde\rho_{\mathcal X,\alpha}}{p_\alpha},
 \quad p_\alpha>0.
 \tag{27}
-$
+$$
 
 The selected state would have to be sharply concentrated, in a physically defined coarse graining, around semiclassical boundary data such as $(h^{(\alpha)}_{ij},\phi_\alpha)$. Writing an exact ket $|h_{ij},\phi\rangle$ is only formal in the full gravitational theory; the physically relevant requirement is semiclassical concentration plus the gravitational constraints. In a genuine CCC embedding, the construction must also specify how data inherited from the previous aeon enter $\rho_{\mathcal X}$; the notation does not make that inheritance automatic.
 
