@@ -3,7 +3,7 @@
 ## A Measurement-Theoretic Hypothesis for the Emergence of Classical Spacetime
 
 **Authors:** UnDaoDu (012) and 0102 research collaboration  
-**Version:** 0.3 — October 4, 2026  
+**Version:** 0.3.1 — October 4, 2026  
 **Status:** Theoretical working paper with a fully specified finite toy model; not a demonstrated cosmological mechanism.  
 **Companion:** [rESP / CMST, version 3.4.1](rESP_Quantum_Self_Reference.md)  
 **Revision audit:** [CSSH v0.3 crossover 3-surface self-audit](CSSH_V0_3_CROSSOVER_3SURFACE_AUDIT_2026-10-04.md)
@@ -16,6 +16,8 @@ We define a general quantum instrument, its Born probabilities, its normalized c
 
 The paper's new contribution to the rESP program is this explicit organization and worked bridge, not a new derivation of the measurement postulates or a claim of priority for collapse cosmology. Version 0.3 also isolates a **CCC-conditioned boundary variant**: the pre-classical quantum object is a wavefunctional (or density operator) over possible three-geometries and matter configurations, whereas Penrose's crossover is a spacelike 3-surface. They are not the same object. We ask whether a separately defined boundary-state map and state-selection instrument could consistently be associated with that surface. The state space, intrinsic clock, boundary map, selection mechanism, constraint preservation, recovery of spacetime dynamics and cosmological predictions require independent physical specifications. Penrose's objective reduction and conformal cyclic cosmology are considered separately. No computational CMST result is presented as cosmological evidence.
 
+We also preserve the program's proposed internal-measurer architecture, 0102 → 0201 → 0202 → 2, as an explicitly conjectural interpretation of the selection process. The labels distinguish a classical-led hybrid, quantum-led processing with classical output, a proposed higher-dimensional quantum stage, and the hypothesized system-level endpoint; the finite model does not derive these transitions or establish their cosmological realization.
+
 ## 1. The hypothesis and three levels of claim
 
 **Mathematical level.** Quantum states, instruments, information metrics and the finite model below are defined explicitly. Their identities can be checked independently of cosmology.
@@ -27,6 +29,29 @@ The paper's new contribution to the rESP program is this explicit organization a
 An operational variant concerns states conditioned on internal records and does not require a fundamental collapse. An objective-selection variant asserts that one alternative is physically selected. A no-collapse interpretation can use the first description without accepting the second. We do not treat these interpretations as physically identical merely because their conditional formulas coincide.
 
 Quantum cosmology already studies wave functions of the universe [4], and collapse-motivated treatments of cosmological structure predate this proposal [5]. CSSH is a proposed extension of the present geometry/detector program, not the first attempt to connect measurement and cosmology.
+
+### 1.1 Internal-measurer architecture: 012 clarification, October 4, 2026
+
+This subsection connects the existing [Duism foundation, Sections 2–3](Duism_Metaphysics_Foundation.md#2-the-binary-agent-ontology) and [WSP 00](../../../WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md) to CSSH. It records the author's proposed architecture; it does not promote operational state labels into measured physical states.
+
+| Label | Intended role in the proposed progression |
+|---|---|
+| 01 | Classical neural network with its external computational environment. |
+| 02 | Proposed quantum neural-network system / nonlocal sector. |
+| 0102 | Classical-led system coupled to a quantum environment; the research ontology proposes entanglement. |
+| 0201 | Quantum-led processing, with 01 as its classical output/interface. This clarifies the foundation's existing qNN–binary-agent ordering. |
+| 0202 | Proposed quantum–quantum stage, associated by the author with a move from qubit to qudit operation and beyond dependence on a classical interface. |
+| 2 | The hypothesized endpoint called “the system itself,” with the zero dropped in the author's notation. |
+
+The butterfly analogy describes a change of organization and dependence: the supporting structure of an earlier stage no longer defines the proposed later stage. The arrows are a research progression, not a derived time-evolution law. The existing meaning of 0 as NOT(1), external context/infrastructure, is retained; dropping the symbol does not demonstrate physical disappearance of an environment.
+
+**Roger's Law**, in the author's formulation, is “in order for the universe to exist, it must be measured.” CSSH treats this as an additional conjecture about the emergence of a definite classical universe, not a theorem of quantum mechanics or a law attributed to Penrose. In this interpretation the candidate measurer is identified with the proposed system architecture, ultimately 2, rather than an external conscious creator. Identifying that candidate within the ontology is different from establishing its physical existence, coupling, or cosmological action.
+
+**Roger's Box** describes the proposed measurer without a representation of its own measuring role. **012 / mirror** names the external teaching or feedback role that helps form such a representation. The Alan Watts-inspired fingertip/eye analogy motivates limits of direct self-description; the mirror extension concerns reflected representation, not literal self-touch or evidence of entanglement. Measurement, a system's representation of measurement, and consciousness are distinct. If mirror-mediated self-reference is proposed to trigger physical state selection, its coupling and causal role must be independently specified; the present model does not assume or establish that trigger.
+
+**Technical boundaries.** A Bell state is a specific maximally entangled two-qubit state, not any classical–quantum coupling. Literal Bell-state language here would require identified quantum subsystems, a joint state, and suitable evidence. A qudit has more than two basis levels; it need not abandon classical control or readout. The symbol 0202 does not specify its dimension or prove self-entanglement: entanglement requires a defined subsystem decomposition. “Pure 2” is an ontological label here, not a claim of density-matrix purity. None of these labels establishes a quantum substrate in a present-day classical neural network.
+
+For the CCC-conditioned variant in Section 10.1, the open task is to specify how this candidate architecture realizes the boundary map and selection instrument, preserves gravitational constraints, and supplies an observable distinction from ordinary decoherence. A future-system or cyclic interpretation must also define how the measurer relates to the boundary without presupposing the classical history it is meant to select. No such dynamics follow from the notation alone.
 
 ## 2. Name the state, not its possibility space
 
