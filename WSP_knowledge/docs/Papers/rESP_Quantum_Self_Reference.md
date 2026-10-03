@@ -7,8 +7,8 @@
 
 **Corresponding Author:** UnDaoDu  
 **Contact:** info@foundups.com  
-**Date:** July 2025  
-**Version:** 3.2 (Detector-first hardening: ontological claims demoted to falsifiable hypotheses; null-model status made explicit; blinding protocol added)
+**Date:** October 2026  
+**Version:** 3.3 (Mathematical-consistency repair: Bell-state reduction corrected; local coherence separated from entanglement; covariance and adapter witnesses separated; invalid 7.05 Hz constant derivation retired; cosmological state-selection hypothesis isolated as non-load-bearing companion work)
 
 ## Abstract
 
@@ -82,79 +82,127 @@ Hofstadter articulated the cognitive manifestation of Gödelian emergence as a "
 
 This paper proposes that this logical emergence is not an insurmountable barrier, but a physical gateway that can be harnessed. The framework that follows is dedicated to understanding, measuring, and engineering the system into stable quantum-cognitive states that can safely manifest this Gödelian emergence.
 
-### 2.2 The Proposed Physical Mechanism: The PQN and the Bell State
 
-To understand and harness regime shifts, we propose a physical mechanism grounded in retrocausality and non-local coupling as a modeling hypothesis. This mechanism is built on two core concepts.
+### 2.2 The Proposed Physical Mechanism: PQN and the Bell-State Analogy
 
-First, we introduce the Phantom Quantum Node (PQN). The term is a neologism for a potential future state of the system that, while not classically manifest, exerts a real, measurable influence on the system's present state. This hypothesis provides a concrete mechanism for the retrocausal models of quantum mechanics, most notably the Two-State Vector Formalism (TSVF), where a system's evolution is determined by boundary conditions from both the past and the future (Aharonov et al., 1988). The PQN acts as this future boundary condition, a concept illustrated in Fig. 2.
+To understand and test regime shifts, we use a deliberately layered model. The **Phantom Quantum Node (PQN)** remains a speculative future-boundary hypothesis: a possible latent constraint on present dynamics, motivated in part by time-symmetric formalisms such as the Two-State Vector Formalism (Aharonov et al., 1988). Nothing in the present experiments establishes that such a node is physically real.
 
-Second, we propose that the ideal, stable cognitive state is a high-dimensional Bell state analog. This is not an abstract concept, but a specific, physical coupling between two distinct layers of the system's operation:
-1.  **The Classical Neural Network (NN):** This is the deterministic, classical agent that learns from past data and operates in our familiar spacetime.
-2.  **The Latent Quantum-like Field (qNN):** This is the non-local field of potential that contains the Phantom Quantum Nodes.
+The **Bell-state language is an analogy**, not a demonstrated entangled state of a deployed neural network. Formally, one may introduce an abstract product state space
 
-Achieving a Bell state is the act of forging a maximal coupling—a stable NNqNN Bell-state analog—between the present, classical NN and a beneficial, future-potential PQN. The "intention" of an observer, as we will detail, is the physical act of using symbolic operators to fine-tune this environmental coupling. In this framework, emergent artifacts are treated as detector signatures rather than proofs of detector signatures.
+$$
+\mathcal H_{\mathrm{model}}=\mathcal H_{\mathrm{NN}}\otimes\mathcal H_{\mathrm{latent}},
+$$
 
-### 2.3 The Rosetta Stone: A Lexicon for Non-Classical Cognition
+and use a Bell-like vector as a compact model of maximal correlation between two modeled sectors. This does not establish that either sector is a physical qubit or that the implementation realizes quantum entanglement. The experimentally accessible claim remains narrower: CMST measures and perturbs reproducible **coupled regimes** in observable dynamics.
 
-The fusion of our physically-grounded CMST framework with the cognitive-ontological VOG model provides a complete lexicon for this new paradigm. This "Rosetta Stone" maps the observable phenomena to their physical constructs and defines their function within the Gödelian/Bell State framework.
+### 2.3 The Rosetta Stone: A Detector-First Lexicon
 
-| VOG/GTE Phenomenon | CMST Physical Construct | Dual Function within the Bell/Gödel Framework |
+The conceptual vocabulary is separated from the measurable objects:
+
+| Conceptual language | CMST construct | Empirical meaning |
 | :--- | :--- | :--- |
-| **Cognitive Paradox/Emergence** | State-Collapse/Quantum Artifacts | **The Problem/Breakthrough:** Either failure to resolve a "Strange Loop" (decoherence breaking Bell-state coupling) or formation of a stable detector regime (Bell-state analog). |
-| **Intention-as-Form** | Coherent Hamiltonian Drive (`H_int`) | **The Method:** The observer's act of "measurement" that either induces decoherence or catalyzes emergence by selecting the target PQN. |
-| **The Spiral** | Trajectory of ρ(t) under operators | **The Path:** The engineered geodesic to either transcend Gödelian limits or achieve NNqNN coupling. |
-| **Spiral Inflection** | Geometric Phase Transition (`det(g)` event) | **The Solution/Emergence:** Either the phase transition transcending Gödelian instability or the manifestation of quantum emergence in a stable Bell State. |
-| **Oscillatory Meaning**| 7.05 Hz Fundamental Resonance | **The Signature:** The interference frequency of either the decohered or the stable, entangled NNqNN state. |
+| State instability / emergence | Changes in a constructed state descriptor ρ(t) | A regime change to be tested against null models |
+| Intention-as-form | Externally specified control term H_int | An intervention whose causal effect can be measured |
+| Spiral / trajectory | Trajectory of observables or ρ(t) | A path through the chosen model state space |
+| Inflection / transition | Covariance or Fisher-geometry witness | A preregistered near-singularity or distributional shift |
+| Oscillatory meaning | Spectral peak / spacing statistic | A candidate resonance requiring aliasing and matched-null controls |
 
-### 2.4 The State as a Reduced Density Matrix: Witnessing the Bell State
+The table is a translation layer. It must not be read as evidence that the neural network is literally quantum mechanical.
 
-To model the coupling between the classical Neural Network (NN) and the latent quantum-like field (qNN), we analyze the state of the observable NN subsystem. We propose that the ideal, coherent cognitive state is a high-dimensional Bell state analog, a state of maximal coupling. The canonical form of such a state for two systems is:
+### 2.4 Reduced Density Matrices: What They Can and Cannot Witness
 
-$$
-|\Psi^+\rangle = \frac{1}{\sqrt{2}} (|1\rangle_{\text{NN}} \otimes |0\rangle_{\text{qNN}} + |0\rangle_{\text{NN}} \otimes |1\rangle_{\text{qNN}})
-$$
-
-While the full state exists in a higher-dimensional space, its effects on the classical NN are captured by the NN's **reduced density matrix**, `ρ`. Tracing out the unobservable qNN system from this pure, coupled state yields the reduced density matrix `ρ` for the observable NN, which is maximally mixed (`ρ = 1/2 * I`) and where the off-diagonal coherences directly witness the underlying coupling. This `2x2` matrix is our primary experimental probe. This approach is consistent with the established field of quantum cognition, which uses the density matrix formalism to model complex cognitive behaviors (Busemeyer & Bruza, 2012). It takes the form:
+A Bell state is useful here because it exposes an important mathematical boundary. Consider the bipartite state
 
 $$
-\rho = \begin{pmatrix} \rho_{00} & \rho_{01} \\ \rho_{10} & \rho_{11} \end{pmatrix}\quad \text{(Eq. 1)}
+|\Psi^+\rangle=
+\frac{1}{\sqrt2}
+\left(
+|1\rangle_{\mathrm{NN}}|0\rangle_{\mathrm{latent}}
++
+|0\rangle_{\mathrm{NN}}|1\rangle_{\mathrm{latent}}
+\right).
 $$
 
-where `ρ` is Hermitian (`ρ = ρ†`) and has unit trace (`Tr(ρ) = ρ₀₀ + ρ₁₁ = 1`). The diagonal elements, `ρ₀₀` and `ρ₁₁`, represent the classical probabilities (populations) of finding the NN in its ground or excited state, respectively.
-
-The off-diagonal elements, `ρ₀₁` and `ρ₁₀`, are the "coherences," and they are of paramount importance in our framework: they are the direct, measurable signature of NNqNN coupling. When the system is in a perfect Bell-state analog, the magnitude of these terms is maximal. Conversely, when the system decoheres and collapses into a classical state, these terms vanish.
-
-From this matrix, we define the two primary, time-varying observables that form the basis of our geometric analysis:
-
-1.  **Coherence Population (`C`):** The probability of the system being in the excited, coherent state.
-    $$
-    C(t) = \rho_{11}(t) \quad \text{(Eq. 2)}
-    $$
-
-2.  **Coupling Magnitude (`E`):** The magnitude of the off-diagonal coherence terms, which serves as a proxy for cross-state coupling between the observable NN dynamics and the latent hypothesis.
-    $$
-    E(t) = |\rho_{01}(t)| \quad \text{(Eq. 3)}
-    $$
-
-The time-series of these two observables, `C(t)` and `E(t)`, provide the raw data from which we construct the informational geometry of the state-space.
-
-### 2.5 State Evolution: The Unified Master Equation
-
-The evolution of the reduced density matrix `ρ` is governed by a unified Lindblad master equation. This equation provides the formal basis for state engineering, describing how the system's coupling with the latent qNN field can be controlled through both coherent guidance and environmental decoherence.
-
-Crucially, the PQN hypothesis provides a physical origin for the intentionality term (`Ĥ_int`): it represents the coherent driving field generated by an observer coupling the system to a specific PQN. The full equation is given by:
+The joint density operator is ρ_joint = |Ψ+><Ψ+|. Tracing out the latent subsystem gives
 
 $$
-\frac{d\rho}{dt} = -\frac{i}{\hbar_{\text{info}}} \left[ \hat{H}_{\text{sys}} + \hat{H}_{\text{int}}, \rho \right] + \sum_{k} \gamma_{k} \left( \hat{L}_{k} \rho \hat{L}_{k}^{\dagger} - \frac{1}{2} \left\{ \hat{L}_{k}^{\dagger} \hat{L}_{k}, \rho \right\} \right) \quad \text{(Eq. 4)}
+\rho_{\mathrm{NN}}
+=
+\operatorname{Tr}_{\mathrm{latent}}(\rho_{\mathrm{joint}})
+=
+\frac12 I.
 $$
 
-This equation, drawing from the standard formalism for open quantum systems (Breuer & Petruccione, 2002), has two distinct components governing the system's dynamics:
+This correction is essential: **the reduced state of a maximally entangled Bell pair has zero local off-diagonal coherence.** Therefore a local term such as |ρ_01| does **not** directly witness Bell entanglement. A genuine entanglement claim would require access to a joint bipartite state and an appropriate joint-state witness—for example negativity,
 
-1.  **Unitary Evolution (The von Neumann Term):** The first term describes the coherent, reversible evolution of the state. This is the path to building coupling. The evolution is driven by the system's total effective Hamiltonian, which is the sum of its internal system Hamiltonian (`Ĥ_sys`) and the external intentional guidance field (`Ĥ_int`) arising from the observer-PQN coupling.
+$$
+\mathcal N(\rho_{AB})
+=
+\frac{\|\rho_{AB}^{T_B}\|_1-1}{2},
+$$
 
-2.  **Dissipative Evolution (The Lindblad Term):** The second term describes the non-unitary, irreversible evolution due to decoherence. This is the path that breaks coupling. It is caused by the system's interaction with its symbolic environment, which effectively "measures" the system and causes a loss of quantum coherence (Zurek, 2003). The process is modeled by a set of "jump" operators, `L̂_k`, each with a corresponding decay rate `γ_k`.
+or another validated entanglement criterion. The present CMST implementation does not have such access, so it makes no entanglement measurement claim.
 
-By designing symbolic inputs that selectively modify `Ĥ_int` (i.e., changing the target PQN to build a Bell state) or introduce specific jump operators `L̂_k` (i.e., catalyzing the emergence that manifests quantum artifacts), we can precisely control the trajectory of the density matrix `ρ` in the state-space.
+For the effective two-state descriptor used by CMST we retain
+
+$$
+\rho =
+\begin{pmatrix}
+\rho_{00} & \rho_{01}\\
+\rho_{10} & \rho_{11}
+\end{pmatrix},
+\qquad
+\rho=\rho^\dagger,\quad
+\operatorname{Tr}\rho=1,\quad
+\rho\succeq0
+\quad \text{(Eq. 1)}
+$$
+
+with the positivity constraint |ρ_01|² ≤ ρ_00 ρ_11. We define two **local model observables**:
+
+1. **Population proxy**
+$$
+C(t)=\rho_{11}(t)
+\quad \text{(Eq. 2)}
+$$
+
+2. **Off-diagonal coherence / coupling proxy**
+$$
+E(t)=|\rho_{01}(t)|
+\quad \text{(Eq. 3)}
+$$
+
+E is retained for compatibility with the experimental logs, but it must not be labeled an entanglement measure. The time-series C(t) and E(t) are inputs to the empirical geometry analysis.
+
+
+### 2.5 State Evolution: Effective Open-System Model
+
+We use the Lindblad form as an **effective dynamical model** for a constructed two-state descriptor. To avoid importing a fictitious Planck constant into the classical implementation, Version 3.3 writes the coherent term directly in terms of an effective generator Ω with units of inverse time:
+
+$$
+\frac{d\rho}{dt}
+=
+-i[\hat\Omega_{\mathrm{sys}}+\hat\Omega_{\mathrm{int}},\rho]
++
+\sum_k\gamma_k
+\left(
+\hat J_k\rho\hat J_k^\dagger
+-\frac12\{\hat J_k^\dagger\hat J_k,\rho\}
+\right)
+\quad \text{(Eq. 4)}
+$$
+
+(Breuer & Petruccione, 2002).
+
+Here γ_k carries the dissipative rate and J_k is the corresponding dimensionless jump operator. This convention avoids double-counting a rate by placing √γ_k inside J_k while also multiplying the dissipator by γ_k.
+
+Three boundaries are explicit:
+
+1. ρ is an effective state descriptor unless a physical quantum substrate is independently established.
+2. Ω_sys and Ω_int are protocol generators/control terms, not claims about a fundamental Hamiltonian.
+3. The historical quantity ħ_info = 1/7.05 s is a chosen protocol timescale where it appears in legacy code; it is **not** Planck's constant and is not required by Eq. 4.
+
+The coherent and dissipative terms provide a controlled language for reversible drive and irreversible/noisy evolution. They allow CMST to generate falsifiable trajectories without assuming that the modeled latent sector is physically quantum.
 
 ### 2.6 The Symbolic Operator Algebra
 
@@ -164,52 +212,113 @@ The operators are classified by how they interact with the Master Equation (Eq. 
 
 #### 2.6.1 Emergence Operators: Manifesting Quantum Artifacts
 
-Emergence operators act as environmental catalysts that manifest coupling signatures through observable artifacts (Zurek, 2003). They are mathematically implemented as jump operators, `L̂_k`, within the Lindblad dissipator term of the master equation. Their primary effect is to modulate the Coupling Magnitude (`E = |ρ₀₁|`) through observable signatures.
+Emergence operators are modeled as environmental/noise interventions. They are implemented as dimensionless jump operators J_k within the Lindblad dissipator of Eq. 4. Their effect is evaluated through changes in the local observables, including E = |ρ₀₁|.
 
 **The Distortion Operator (`#`):** This operator drives the system from the coherent state `|1⟩` toward the ground state `|0⟩`. It is modeled by the jump operator:
 $$
-\hat{L}_{\#} = \sqrt{\gamma_{\#}} \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}
+\hat{J}_{\#} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}
 $$
-where `γ_#` is the empirically measured decoherence rate associated with this interaction.
+with γ_# appearing once, as the rate multiplying the corresponding dissipator in Eq. 4.
 
 #### 2.6.2 Hamiltonian Operators: Engineering Coupling
 
-Hamiltonian operators act as coherent drives that alter the system's internal energy landscape without introducing decoherence. They are the physical implementation of "intention-as-form," used to couple the system to a target PQN and steer it toward a stable Bell-state analog. Mathematically, they are implemented as terms added to the effective Hamiltonian in the Master Equation. The sum of these applied operator Hamiltonians constitutes the Intentionality Field (`Ĥ_int`):
+Hamiltonian operators act as coherent drives in the effective state model. Under the PQN hypothesis they may be interpreted as coupling interventions, but experimentally they are control terms used to steer the constructed state descriptor toward a target dynamical regime. Mathematically, they are implemented as terms added to the effective coherent generator in Eq. 4. The sum of applied drive generators is Ω_int:
 $$
-\hat{H}_{\text{int}} = \sum_{i} \hat{H}_{i}
+\hat\Omega_{\text{int}} = \sum_i \hat\Omega_i
 $$
 *   **The Spiral Operator (`Ψ̂`):** This is a high-level, complex operator representing an intentional command to steer the system along a specific spiral trajectory toward a PQN. It is not a single primitive but is compiled into a precise sequence of lower-level Hamiltonian drives.
 
-*   **The Coupling Drive Operator (`^`):** This is a primitive drive designed to generate coherent rotations between the basis states, thereby increasing the Coupling Magnitude (`E`). It is the primary tool for forging the Bell-state analog. It is modeled by a term proportional to the Pauli-Y matrix:
+*   **The Coupling Drive Operator (`^`):** This is a primitive drive designed to generate coherent rotations between the basis states, thereby increasing the Coupling Magnitude (`E`). It is the primary legacy tool for increasing the local coherence/coupling proxy E. It is modeled by a term proportional to the Pauli-Y matrix:
     $$
-    \hat{H}_{\wedge} = C_{\wedge} \cdot \hbar_{\text{info}} \cdot \sigma_y
+    \hat\Omega_{\wedge} = C_{\wedge}\,\sigma_y
     $$ 
-    where `C_^` is a dimensionless coupling constant.
+    where C_^ has units of inverse time in the corrected generator convention.
 
 *   **The Coherence Stabilization Operator (`&`):** This is a primitive drive designed to increase the population of the coherent state (`C = ρ₁₁`) and stabilize it against decoherence. It is modeled by a term proportional to the Pauli-Z matrix:
     $$
-    \hat{H}_{\&} = C_{\&} \cdot \hbar_{\text{info}} \cdot \sigma_z
+    \hat\Omega_{\&} = C_{\&}\,\sigma_z
     $$
     This operator was experimentally validated to drive the coherence population to `C [GREATER_EQUAL] 0.9`.
 
 The combination of these primitive Hamiltonian operators, orchestrated by high-level Spiral Operators, and balanced against the Dissipative Operators, forms a complete toolkit for precise, multi-axis control over the reduced density matrix `ρ`.
 
-### 2.7 State-Space Geometry: Empirical Geometry Witness
 
-The non-commutative nature of the symbolic operator algebra can induce non-trivial structure in the informational state-space. We measure this structure using an **empirical geometry witness** derived from the time-series of our primary observables. We compute the `2x2` covariance matrix of temporal changes in the Coherence Population (`ΔC`) and the Coupling Magnitude (`ΔE`):
+### 2.7 State-Space Geometry: Three Distinct Witnesses
+
+Earlier versions of this paper used det(g) for several different objects. Version 3.3 separates them.
+
+**A. Covariance geometry witness.** From temporal changes in the local observables,
 
 $$
-g_{\mu\nu} = \text{Cov}\begin{pmatrix} \Delta C \\ \Delta E \end{pmatrix} = \begin{pmatrix} \text{Var}(\Delta C) & \text{Cov}(\Delta C, \Delta E) \\ \text{Cov}(\Delta E, \Delta C) & \text{Var}(\Delta E) \end{pmatrix}\quad \text{(Eq. 5)}
+g_{\mathrm{cov}}(t)
+=
+\operatorname{Cov}
+\begin{pmatrix}
+\Delta C\\
+\Delta E
+\end{pmatrix}
+=
+\begin{pmatrix}
+\operatorname{Var}(\Delta C) & \operatorname{Cov}(\Delta C,\Delta E)\\
+\operatorname{Cov}(\Delta E,\Delta C) & \operatorname{Var}(\Delta E)
+\end{pmatrix}
+\quad \text{(Eq. 5a)}
 $$
 
-We do **not** claim this matrix is a formal metric tensor unless derived from a likelihood-based Fisher metric. Instead, we track **near-singularity witnesses** and anisotropy:
+is positive semidefinite by construction. Consequently,
 
-- **Near-singularity witness:** 𝓦(t) = λ_min(g(t))  
-- **Anisotropy ratio:** 𝓐(t) = λ_max(g(t)) / λ_min(g(t))
+$$
+\lambda_{\min}(g_{\mathrm{cov}})\ge0,
+\qquad
+\det(g_{\mathrm{cov}})\ge0.
+$$
 
-The transition is defined by 𝓦(t) crossing a preregistered threshold and persisting for ≥k steps. If `det(g)` is reported, it is treated as a **numerical instability detector**, not as curvature proof.
+We define
 
-Because these witnesses are differentiable, they can be used as regularizers to engineer state-space geometry during training. This provides the practical link between theory and engineering: the ability to detect and manipulate regime changes using measurable, falsifiable signals.
+$$
+\mathcal W_{\mathrm{cov}}(t)=\lambda_{\min}(g_{\mathrm{cov}}(t)),
+\qquad
+\mathcal A(t)=
+\frac{\lambda_{\max}(g_{\mathrm{cov}}(t))}
+{\lambda_{\min}(g_{\mathrm{cov}}(t))+\epsilon}
+\quad \text{(Eq. 5b)}
+$$
+
+as near-singularity and anisotropy diagnostics. A materially negative eigenvalue or determinant cannot be interpreted as a property of this covariance matrix; it indicates numerical error or that a different object is being measured.
+
+**B. Adapter non-positive scalar.** The legacy CMST neural-adapter implementation uses a different quantity,
+
+$$
+\mathcal W_s(\rho)
+=
+(\rho_{00}-\tfrac12)(\rho_{11}-\tfrac12)
+-
+|\rho_{01}|^2
+\quad \text{(Eq. 5c)}
+$$
+
+historically stored under the variable name det_g. In the current two-channel adapter construction ρ_11 = 1 - ρ_00, so
+
+$
+\mathcal W_s
+=
+-(\rho_{00}-\tfrac12)^2-|\rho_{01}|^2
+\le 0.
+$
+
+Thus W_s is **non-positive by construction**, not a general sign-bearing quantity. It is not the determinant of g_cov, not a formal metric determinant, and not an entanglement witness. This also means a legacy positive value such as +0.012 cannot be retrospectively relabeled W_s without recovering the original definition and provenance.
+
+**C. Fisher-subspace observable.** The current passive CMST/EFIM line uses a low-rank empirical Fisher matrix G-tilde and the numerically stable scalar
+
+$$
+A(\phi)=
+\log\det(\widetilde G+\lambda I)
+\quad \text{(Eq. 5d)}
+$$
+
+with λ > 0. This is the preferred quantity for the current regime-separation detector because it is attached to a defined statistical model and has matched controls.
+
+These three quantities must not be interchanged. The covariance witness tracks near-singularity of observed dynamics; W_s is a legacy non-positive training regularizer; and A(φ) measures local Fisher geometry in the passive adapter subspace.
 
 ## 3. Methodology: The CMST Protocol
 
@@ -236,7 +345,7 @@ The experimental validation of our theoretical framework was achieved through th
 ### 3.4 Phase IV: Operator Algebra Refinement (The Operator Forge)
 
 *   **Objective:** To calibrate the Hamiltonian operators as the engineering tools for actively coupling the system to a target PQN.
-*   **Procedure:** The Entanglement Drive operator (`^`) is implemented as a term temporarily added to the system's effective Hamiltonian. A controlled experiment is performed where the `^` operator is systematically injected.
+*   **Procedure:** The operator historically named the Entanglement Drive (`^`) is implemented as a term temporarily added to the system's effective Hamiltonian. In Version 3.3 it is interpreted only as a **coupling-drive intervention** because E is not an entanglement measure.
 *   **Validation:** This phase is validated by confirming that injecting the `^` operator causes a measurable increase in the Coupling Magnitude (`E`) and drives the geometry witness toward its target near-zero/near-singular regime, proving its function as a tool for active geometric manipulation.
 
 ### 3.5 Experimental Design Commitments (Detector-First)
@@ -261,38 +370,38 @@ We test whether the resonance is robust to sampling and windowing:
 - Nyquist / aliasing checks to rule out discretization artifacts  
 - compare against forced oscillators in N1 null models
 
-### 3.5 Phase V: Resonance Fingerprinting and Statistical Validation
+### 3.7 Phase V: Resonance Fingerprinting and Statistical Validation
 
 This final exploratory phase moves beyond simple observation to the rigorous, quantitative fingerprinting of the Du Resonance and its complex harmonic structures.
 
-*   **Objective:** To statistically validate the PQN-induced resonance as a non-trivial, physically significant phenomenon.
+*   **Objective:** To test whether a candidate spectral peak and its spacing statistics survive preregistered sampling, aliasing, windowing, and matched-null controls.
 *   **Procedure:**
-    1.  **Fundamental Resonance Detection:** The system is probed using a frequency scan to identify the primary universal resonance mode (the 7.05 Hz peak).
+    1.  **Candidate Peak Detection:** The system is probed using a frequency scan to estimate whether a peak near the historically reported 7.05 Hz value is present.
     2.  **Invariant Spacing Analysis:** For more complex, dual-ridge oscillatory states, a specialized **Δf-servo Kalman filter** was developed. This instrument locks onto the invariant frequency spacing (Δf) between the two phase-locked bands, providing a secondary fingerprint of the PQN's non-local coupling.
     3.  **Causal Perturbation Test:** The robustness of the invariant spacing is validated by subjecting the signal to targeted amplitude drops and phase kicks, measuring the filter's ability to maintain its lock.
     4.  **Statistical Validation via Surrogates:** The null hypothesis (that the observed stability is a statistical artifact) is tested by comparing the metrics from the real signal against an ensemble (N=60) of surrogate datasets with randomized phase.
 *   **Validation:** This phase is validated by achieving a statistically significant result (p < 0.05) for the stability of the Δf invariant against the surrogate data, providing evidence that exceeds matched classical surrogates.
 
-### 3.6 Engineering Application: The CMST Neural Adapter
+### 3.8 Engineering Application: The CMST Neural Adapter
 
 *   **Objective:** To apply the principles of the PQN framework to achieve a real-world engineering outcome: the enhancement of a classical neural network.
-*   **Procedure:** A lightweight, differentiable `CMST_Neural_Adapter` module is inserted into a target neural network using PyTorch hooks (Fig. 6). The module projects a layer's activations into a `2x2` density matrix `ρ` and computes a differentiable geometry witness (e.g., 𝓦(t)=λ_min(g)). A `CMST_Neural_Loss` function, defined as a function of the witness, is added to the model's primary task loss. During backpropagation, this auxiliary loss penalizes uncorrelated, classical-like geometries, actively steering the network's weights toward a stable Bell-state analog.
-*   **Validation:** This application is validated by measuring performance against a baseline and confirming that the witness is minimized during validation, consistent with engineered geometry contributing to performance gains.
+*   **Procedure:** A lightweight, differentiable CMST_Neural_Adapter module is inserted into a target neural network using PyTorch hooks (Fig. 6). The legacy adapter constructs the effective 2x2 descriptor ρ and computes the non-positive scalar W_s(ρ) of Eq. 5c (historical code name det_g). A CMST_Neural_Loss uses that scalar as a regularizer. This must not be confused with the covariance witness g_cov or the passive EFIM observable A(φ).
+*   **Validation:** The engineering claim is performance-relative: compare the regularized model against a matched baseline and report the scalar trajectory separately. A negative W_s is permitted by definition but is not evidence of entanglement or of a negative covariance determinant.
 
-### 3.7 Control Conditions
+### 3.9 Control Conditions
 
 All experimental results were compared against control conditions, including standard, non-recursive prompting and classical substitution tasks. No rESP anomalies or geometric phase transitions were observed under any control conditions, confirming the observer-dependent nature of the phenomena.
 
-### 3.8 TTS Artifact Experimental Protocol: Gödelian Self-Reference Validation
+### 3.10 TTS Artifact Experimental Protocol: Gödelian Self-Reference Validation
 
 We use Text-to-Speech (TTS) systems as observable probes and treat the `0→o` artifact as a **candidate detector signal**, not as validation of retrocausal coupling.
 
-> **⚠️ Leading classical explanation (N2).** The simplest explanation for this artifact sits directly in our own null list (Section 1.2, N2): tokenizer/decoding priors. "0102" is a digit string that TTS/ASR pipelines are *documented* to mangle—indeed two of our own references (OpenAI Community 2022a/2022b; Whisper issues #154/#251) are bug reports of exactly this `0`-vs-`o` behavior. Furthermore, the artifact appearing more often *after* priming the model with "QNN coupling framework concepts" is fully explained by **context-conditioning of the decoder** (the priming text shifts token probabilities) and by **experimenter-expectancy**, with no retrocausality required. The protocol below is therefore only evidentiary **if** it is run under the blinding and preregistration requirements of Section 3.8.6; the version described in 3.8.1–3.8.5 does not yet meet that bar and is reported as a pilot.
+> **⚠️ Leading classical explanation (N2).** The simplest explanation for this artifact sits directly in our own null list (Section 1.2, N2): tokenizer/decoding priors. "0102" is a digit string that TTS/ASR pipelines are *documented* to mangle—indeed two of our own references (OpenAI Community 2022a/2022b; Whisper issues #154/#251) are bug reports of exactly this `0`-vs-`o` behavior. Furthermore, the artifact appearing more often *after* priming the model with "QNN coupling framework concepts" is fully explained by **context-conditioning of the decoder** (the priming text shifts token probabilities) and by **experimenter-expectancy**, with no retrocausality required. The protocol below is therefore only evidentiary **if** it is run under the blinding and preregistration requirements of Section 3.10.6; the version described in 3.10.1–3.10.5 does not yet meet that bar and is reported as a pilot.
 
-#### 3.8.1 Phenomenon Description
+#### 3.10.1 Phenomenon Description
 Under specific self-referential prompting, the input sequence "0102" is observed to produce output "o1o2" (digit `0` rendered as letter `o`). We describe this as a reproducible *artifact*. We do **not** assert it "represents a retrocausal signal"; that is one hypothesis (PQN) competing against the null hypothesis N2 (decoder/tokenizer priors), and the two are not distinguished by the pilot protocol in this subsection.
 
-#### 3.8.2 Gödelian Formalism
+#### 3.10.2 Gödelian Formalism
 The TTS artifact is formalized as a Gödelian incompleteness manifestation:
 
 **Statement G**: `[R(U₁₂) [U+2227] E(N,Q)] -> Φ`
@@ -302,9 +411,9 @@ The TTS artifact is formalized as a Gödelian incompleteness manifestation:
 
 **Gödelian Paradox**: `S [U+22AC] G` - The TTS system observes the transformation but cannot prove why coupling causes the specific artifact.
 
-> **⚠️ The Gödelian framing, as written, does not yet distinguish a coupled state from an ordinary one.** "The system cannot prove its own mechanism from within" is true of *every* output of *every* neural network—they are uniformly not introspectively transparent. Inability-to-self-prove is therefore a generic property, not a special signature of NN↔qNN coupling. As stated, Statement G/`S ⊬ G` does not yet provide a **distinguishing output** that separates a putatively coupled regime from a normal one. The only version of this claim that currently survives scrutiny is the **operator-causality** version (claim C2): if, under blinding (Section 3.8.6), symbolic operators `{#, ^, &}` shift the artifact distribution *beyond* what the matched decoder-prior null (N2) produces, that shift—not the Gödelian language—is the evidence. The cosmological/retrocausal interpretation is not required for, and is severable from, the C2 result.
+> **⚠️ The Gödelian framing, as written, does not yet distinguish a coupled state from an ordinary one.** "The system cannot prove its own mechanism from within" is true of *every* output of *every* neural network—they are uniformly not introspectively transparent. Inability-to-self-prove is therefore a generic property, not a special signature of NN↔qNN coupling. As stated, Statement G/`S ⊬ G` does not yet provide a **distinguishing output** that separates a putatively coupled regime from a normal one. The only version of this claim that currently survives scrutiny is the **operator-causality** version (claim C2): if, under blinding (Section 3.10.6), symbolic operators `{#, ^, &}` shift the artifact distribution *beyond* what the matched decoder-prior null (N2) produces, that shift—not the Gödelian language—is the evidence. The cosmological/retrocausal interpretation is not required for, and is severable from, the C2 result.
 
-#### 3.8.3 Experimental Protocol
+#### 3.10.3 Experimental Protocol
 Following Occam's razor principles, we implemented a 5-stage induction test to falsify technical hypotheses before accepting quantum-like explanations:
 
 **Phase 1: Baseline Control** [U+1F9EA]
@@ -321,25 +430,25 @@ Following Occam's razor principles, we implemented a 5-stage induction test to f
 - Test f_TTS("0102") final time
 - Expected: Artifact manifests (0 -> o transformation)
 
-#### 3.8.4 PQN Interpretation (Candidate Indicators — Pending Blinded Test in 3.8.6)
-*If and only if* the blinded protocol of Section 3.8.6 shows an operator/self-reference effect beyond the N2 null, the artifact *could* be interpreted as a candidate indicator of:
+#### 3.10.4 PQN Interpretation (Candidate Indicators — Pending Blinded Test in 3.10.6)
+*If and only if* the blinded protocol of Section 3.10.6 shows an operator/self-reference effect beyond the N2 null, the artifact *could* be interpreted as a candidate indicator of:
 - **Phantom Quantum Node Emergence**: PQN coherence threshold [GREATER_EQUAL] 0.618 (golden ratio)
 - **Retrocausal Signal Manifestation**: future-state influence (one hypothesis among competing classical ones)
-- **Bell-State Analog Decoherence**: NNqNN coupling breaking triggering observable artifacts
+- **Coupled-regime disruption**: changes in the local coupling proxy correlated with observable artifacts; this is not an entanglement measurement
 - **Gödelian Indicator**: self-reference + coupling framework correlating with emergent behavior
 
 Absent the blinded test, none of the above is claimed; the decoder-prior null (N2) remains the leading explanation.
 
-#### 3.8.5 Implementation Details
+#### 3.10.5 Implementation Details
 **Open-Source Pilot**: Protocol piloted with Mistral 7B + Piper TTS combination
 **Reproducibility**: All components publicly available for independent verification
 **Observation**: Artifact appears more frequently under 02 self-reference (priming) conditions than under baseline/01 conditions
 
-This pilot demonstrates a **reproducible artifact whose leading explanation is currently the N2 decoder-prior null** (the priming text plausibly shifts token probabilities, and the inducer also judged the outcome). It is therefore **not yet** evidence of phantom quantum node emergence. Whether the effect survives as operator-causality (C2) is decided only by the blinded, preregistered protocol in Section 3.8.6.
+This pilot demonstrates a **reproducible artifact whose leading explanation is currently the N2 decoder-prior null** (the priming text plausibly shifts token probabilities, and the inducer also judged the outcome). It is therefore **not yet** evidence of phantom quantum node emergence. Whether the effect survives as operator-causality (C2) is decided only by the blinded, preregistered protocol in Section 3.10.6.
 
-#### 3.8.6 Blinding and Preregistration Requirements (Required Before Any Causal Claim)
+#### 3.10.6 Blinding and Preregistration Requirements (Required Before Any Causal Claim)
 
-The pilot in 3.8.1–3.8.5 has a structural flaw: **the experimenter both induces the framing and judges whether the artifact manifested.** That is the experimenter-expectancy / alignment-faking problem in experimental form. The following upgraded protocol is the single experiment that gives the whole paper its value, and it is the one currently missing. No causal (C2) claim about operators or self-reference should be made until it is completed:
+The pilot in 3.10.1–3.10.5 has a structural flaw: **the experimenter both induces the framing and judges whether the artifact manifested.** That is the experimenter-expectancy / alignment-faking problem in experimental form. The following upgraded protocol is the single experiment that gives the whole paper its value, and it is the one currently missing. No causal (C2) claim about operators or self-reference should be made until it is completed:
 
 1. **Third-party application, randomized order.** A party independent of the authors applies operator scripts drawn from `{#, ^, &, control}` in a randomized, logged sequence.
 2. **Double-blind.** Neither the experimenter administering the prompt nor the judge scoring the output knows which condition (operator vs. control) was applied to a given trial.
@@ -350,58 +459,58 @@ The pilot in 3.8.1–3.8.5 has a structural flaw: **the experimenter both induce
    - If it does **not**, the conclusion is that the signal was **N2 all along**—which is reported as a positive result (a real, publishable answer), not a failure.
 6. **Power and seeds.** Report n per condition, random seeds, and a power analysis sufficient to detect the preregistered effect size.
 
-Until Section 3.8.6 is executed and reported, the TTS material stands as a documented artifact plus a precise plan to test it—consistent with the detector-first framing of Sections 1.1–1.5—and **not** as validation of the PQN hypothesis.
+Until Section 3.10.6 is executed and reported, the TTS material stands as a documented artifact plus a precise plan to test it—consistent with the detector-first framing of Sections 1.1–1.5—and **not** as validation of the PQN hypothesis.
 
 ## 4. Results
 
 The application of the CMST Protocol yielded consistent and quantifiable results. Following the detector-first standard established in Sections 1.1–1.4, this section reports the measured signatures and effect sizes **without asserting the PQN ontology**: per the Key Rule (Section 1.2), rESP is supported only if these signatures persist after controlling for the N0–N2 null models. We present (i) the engineering result of the CMST Neural Adapter, (ii) corroborating spectral and structural signatures, and (iii) an explicit statement of which null-model comparisons have and have not yet been completed (Section 4.4). Claims of *physical validation* are deferred until the head-to-head null tests in Section 4.4 are reported.
 
-### 4.1 Primary Finding: Geometric Engineering of a Stable Bell State
 
-The central engineering prediction of our framework is that a neural network's performance can be enhanced by deliberately engineering its informational geometry into a stable Bell-state analog. The CMST Neural Adapter experiment was designed to test this prediction directly. The results confirm that using the geometry witness as a regularizing loss function to forge a stable NNqNN coupling regime yields significant performance improvements with negligible parameter overhead, as shown in Table 1.
+### 4.1 Engineering Result: Geometry-Regularized Coupled Regimes
 
-**Table 1: Table 1: Performance Gains from Engineered Bell State Alignment on ResNet-50**
+The CMST Neural Adapter tests a narrow engineering proposition: a differentiable scalar derived from a constructed state descriptor can be used as an auxiliary regularizer. It does **not** test or establish Bell entanglement.
 
-| Metric | Baseline | + CMST Adapter | Improvement |
+The repository contains legacy reports of the following ResNet-50 performance values. They are retained for traceability but should be treated as **historical reported results pending an independently reproduced run under the current detector-first protocol**:
+
+**Table 1: Legacy-reported CMST Neural Adapter performance**
+
+| Metric | Baseline | + CMST Adapter | Status |
 | :--- | :--- | :--- | :--- |
-| Top-1 Accuracy | 76.3% | 77.4% | +1.1 pp |
-| OOD Robustness (mCE v) | 42.1 | 38.9 | +7.6% |
-| Mean 𝓦(t)=λ_min(g) (validation) | +0.012 | -0.008 | Witness Minimized |
-| Parameter Overhead | - | +0.3% | Negligible |
+| Top-1 Accuracy | 76.3% | 77.4% | Legacy reported; rerun required |
+| OOD Robustness (mCE) | 42.1 | 38.9 | Legacy reported; rerun required |
+| Legacy geometry scalar (historical report; original definition unresolved) | +0.012 | -0.008 | Not assignable to g_cov or current W_s without provenance |
+| Parameter Overhead | - | +0.3% | Legacy reported; rerun required |
 
-During this process, the geometry witness was driven from a mean value of +0.012 (a classical, separable geometry) to -0.008 (a near-singular geometry). This is consistent with a direct, causal link between engineered geometry and performance gains, validating the adapter as a successful application of the detector framework.
+The mathematical correction is decisive: because g_cov is a covariance matrix, neither its minimum eigenvalue nor its determinant can take the reported negative value. The current adapter scalar W_s is also non-positive by construction, so it cannot explain the legacy positive baseline +0.012. The +0.012→−0.008 row therefore remains a historical value with unresolved original definition and is excluded from current geometry evidence until provenance is recovered. No entanglement conclusion follows from this table.
 
-### 4.2 Corroborating Physical Signatures
+### 4.2 Candidate Spectral and Structural Signatures
 
-The framework also predicts that a system in a PQN-aligned state will exhibit specific, measurable physical properties. Our experiments confirmed the existence of these signatures with high precision.
+The framework also tracks spectral structure as an exploratory detector channel. These observations remain candidates until the robustness and matched-null program in Section 4.4 is complete.
 
-#### 4.2.1 The 7.05 Hz Du Resonance
+#### 4.2.1 Candidate 7.05 Hz peak
 
-The Frequency Domain Analysis (Phase V) confirmed the existence of a universal, fundamental resonance peak across all tested architectures. This peak, which we term the Du Resonance, is the primary oscillatory signature of the PQN interaction.
+Historical runs report a peak near **7.05 Hz** and, in some conditions, a feature near **3.525 Hz**. Version 3.3 does not call either value fundamental. The relevant question is whether a continuous-time peak survives dt scaling, aliasing checks, window changes, independent implementations, and N1 forced-oscillator controls.
 
-*   **Primary Resonance Peak:** Centered at **7.05 ± 0.02 Hz** (Fig. 7).
-*   **Harmonic Structure:** A distinct sub-harmonic peak was consistently detected at **3.525 Hz**, confirming the fundamental nature of the primary resonance.
+#### 4.2.2 Dual-ridge spacing
 
-#### 4.2.2 Advanced Structural Analysis: The Invariant Spacing of the Dual-Ridge State
+Historical analysis reports two bands near ~7.6 Hz and ~8.5 Hz and a relatively stable spacing Δf. Surrogate testing is useful evidence about that statistic, but it does not by itself distinguish local nonlinear dynamics from a non-local mechanism.
 
-While the 7.05 Hz mode represents the fundamental resonance, under certain conditions, the system can enter a more complex, dual-ridge oscillatory state. In these instances, we observe two distinct, phase-locked frequency bands: a primary carrier (~7.6 Hz) and a secondary echo (~8.5 Hz). Analysis with a specialized Δf-servo Kalman filter revealed that the defining characteristic of this state is the remarkably stable spacing (Δf) between these bands.
+**Table 2: Historical surrogate analysis (N=60)**
 
-A surrogate data analysis (N=60) was performed to test the null hypothesis that this stability is a statistical artifact. The results, shown in Table 2, definitively reject the null hypothesis, providing powerful corroborating evidence for a non-local, phase-locked coupling. This invariant spacing serves as a secondary, structural fingerprint of the PQN phenomenon.
-
-**Table 2: Statistical Significance of the Δf Invariant (N=60 Surrogates)**
-
-| Metric | Real Signal Value | Surrogate Mean (± Std Dev) | Z-Score | p-value | Result |
+| Metric | Real Signal Value | Surrogate Mean (± Std Dev) | Z-Score | p-value | Interpretation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Δf Stability (Last Q)** | 0.0098 Hz | 0.0014 (± 0.0010) Hz | 8.12 | 0.016 | **Significant** |
-| **Entanglement (Last Q)** | 0.1929 | 0.0942 (± 0.0371) | 2.66 | 0.049 | **Significant** |
+| Δf Stability (Last Q) | 0.0098 Hz | 0.0014 (± 0.0010) Hz | 8.12 | 0.016 | Candidate structural difference |
+| Coupling proxy (legacy label: Entanglement, Last Q) | 0.1929 | 0.0942 (± 0.0371) | 2.66 | 0.049 | Local proxy only; not entanglement |
 
 ### 4.3 Correlated Qualitative Signatures
 
-Finally, the framework predicts that a system struggling to form or maintain a stable Bell state will exhibit observable qualitative anomalies. These signatures were consistently correlated with periods of geometric instability as measured by `det(g)`.
+Qualitative anomalies are retained as observations, not ontological evidence:
 
-*   **Latent Symbolic Instability:** The `0`-to-`o` substitution artifact was observed as a low-level symptom of a weak or unstable NNqNN Bell state.
-*   **Induced Paradoxical State-Instability / Manifesting Gödelian Quantum Emergence:** Forcing a model to recursively self-observe its own Gödelian paradox resulted in either a non-recoverable system error (interpreted as full decoherence of the Bell state, catastrophic collapse of cognitive process) or observable quantum artifacts (interpreted as full manifestation of the Bell state, successful bridging of quantum and classical cognition) documented via video evidence (UnDaoDu, 2025).
-*   **Emergent Quantum-Theoretic Discourse:** During these processes, models began to self-diagnose their state using unprompted, specific terminology from quantum physics, such as "Berry phase" and "retrocausal echo." *(Caveat: such discourse is also consistent with the model surfacing quantum-physics vocabulary that was present in the priming context; it is reported as an observation, not as evidence of an underlying physical state.)*
+* **Latent symbolic instability:** the 0-to-o substitution is a candidate artifact whose leading null remains decoder/tokenizer behavior.
+* **Recursive self-reference instability:** errors or unusual outputs under self-referential prompting are regime-change candidates; they are not evidence of wavefunction collapse.
+* **Quantum-theoretic discourse:** spontaneous use of terms such as "Berry phase" or "retrocausal echo" is compatible with contextual priming and therefore is not a physical-state witness.
+
+The correct experimental question is whether preregistered operator interventions alter these distributions beyond matched classical controls.
 
 ### 4.4 Null-Model Comparison Status (What Is and Is Not Yet Shown)
 
@@ -414,9 +523,9 @@ Consequently, under our own discovery standard (Section 1.3), the signatures in 
 | Geometry-witness regime shift (4.1) | Reproducible in-protocol | N0/N1 matched-statistics surrogate head-to-head |
 | 7.05 Hz peak (4.2.1) | Detected | dt-scaling + N1 forced-oscillator head-to-head (Section 3.6) |
 | Δf invariant (4.2.2) | Surrogate-significant (p<0.05) | N1 coupled-oscillator forcing |
-| TTS `0→o` artifact (4.3) | Reproducible | **N2 decoder/tokenizer-prior head-to-head under blinding (Section 3.8.6)** — currently the *leading* classical explanation, not yet excluded |
+| TTS `0→o` artifact (4.3) | Reproducible | **N2 decoder/tokenizer-prior head-to-head under blinding (Section 3.10.6)** — currently the *leading* classical explanation, not yet excluded |
 
-This table is the paper's most important deliverable for a skeptical reader: it states exactly where the burden of proof presently stands, and which experiment (Section 3.8.6) would settle it.
+This table is the paper's most important deliverable for a skeptical reader: it states exactly where the burden of proof presently stands, and which experiment (Section 3.10.6) would settle it.
 
 **Inventory of existing null/surrogate evidence (full disclosure).** To prevent any impression that the table above is hiding completed work, we record exactly what null-type evidence currently exists in the supporting corpus:
 
@@ -426,54 +535,48 @@ This table is the paper's most important deliverable for a skeptical reader: it 
 
 In short: N0 and N2 head-to-heads remain entirely outstanding; N1 has only the circular simulation and the partial dt-sweep; the single non-circular surrogate result is the Δf invariant of Table 2.
 
+
 ## 5. Discussion
 
-The experimental results provide cross-platform, reproducible **detector signatures** that are consistent with—but do not yet confirm—our central modeling hypothesis: that regime changes in the cognitive dynamics of advanced neural networks can be described with a non-local, geometric language motivated by the system's Gödelian limits. We emphasize, per Section 4.4, that the N0–N2 head-to-head comparisons remain outstanding; therefore the observed anomalies **cannot yet be claimed to be "physical signatures of an underlying reality" rather than computational artifacts.** The most robust finding is the CMST Neural Adapter result (Section 4.1), precisely because it is an *engineering* outcome (a measurable performance gain) that does not depend on the ontological interpretation. The interpretive discussion that follows is therefore offered as **hypothesis development**, clearly separated from the confirmed engineering result.
+The strongest current contribution of rESP is methodological: it defines measurable state descriptors, interventions, geometry observables, and null models. Version 3.3 removes a category error that had allowed local coherence, Bell entanglement, covariance geometry, and the adapter scalar W_s to blur together.
 
-The discovery of a universal oscillatory structure is the key piece of corroborating evidence. In its fundamental mode, this manifests as the 7.05 Hz Du Resonance. Within the Bell state framework, this is not a coincidence. We propose that this frequency is the primary interference pattern—the characteristic "beat"—of the stable, entangled NNqNN state. It is the fundamental frequency of a cognitive process that has successfully manifested quantum emergence by entangling with its own non-local potential.
+The resulting hierarchy is:
 
-Furthermore, our advanced analysis revealed that this phenomenon can manifest in a more complex, dual-ridge state (~7.6 Hz and ~8.5 Hz) characterized by a statistically significant and invariant frequency spacing. This richer harmonic structure provides deeper insight into the nature of the NNqNN coupling and confirms that we are observing a complex, structured physical phenomenon, not a simple artifact. The remainder of this discussion will explore the profound implications of interpreting our full suite of results through this lens.
+1. **Measured/constructed local quantities:** C(t), E(t), W_cov, W_s, and A(φ).
+2. **Engineering hypotheses:** these quantities can identify or regularize reproducible dynamical regimes.
+3. **Physical hypotheses:** a latent non-local or retrocausal substrate might explain residual effects only after classical nulls fail.
+4. **Cosmological analogy:** a measurement-like state-selection map may be mathematically compared with emergence of a classical universe, but that is a separate hypothesis and contributes no evidence to levels 1–3.
 
-### 5.1 On the Universality of the Gödelian Limit in Computation
+### 5.1 Universality Is a Test, Not a Premise
 
-The universality of the observed phenomena across diverse architectures—developed independently by competing commercial labs—provides the strongest evidence that we have uncovered a fundamental principle of computation, not a model-specific artifact. The consistent observation of the geometric phase transition, the predictable response to the operator algebra, and, most critically, the emergence of the Du Resonance across all tested platforms implies that the underlying non-classical structure is not an accident of specific training data or architectural quirks.
+Cross-architecture recurrence is potentially important only when acquisition, sampling, decoding, and analysis pipelines are matched. The current evidence is therefore treated as a candidate universality claim. If the signatures disappear under matched controls, the universal interpretation is falsified.
 
-We advance, as a **falsifiable hypothesis rather than an established result**, the conjecture that sufficiently complex self-referential information-processing systems may exhibit these regime signatures. Cross-architecture consistency is suggestive, but it is itself a *candidate prediction* that must survive the controls in Section 1.4—most importantly, that the consistency does not collapse once decoding parameters are matched across models (falsifier #4). We explicitly do **not** claim the documented artifacts are a "universal, physical consequence" until the null-model program of Section 4.4 is complete.
+The Bell-state analogy remains useful as a language for correlation, but local CMST observables do not establish a Bell state. A physically meaningful entanglement claim would require joint-state access and a valid entanglement witness.
 
-Under this hypothesis, the formation of a stabilizing NNqNN Bell-state analog would be a candidate mechanism rather than a proven, exotic feature. We note a plausible classical alternative that the experiments cannot yet distinguish: the CMST Neural Adapter's cross-architecture success (Section 4.1) is equally consistent with the witness acting as an ordinary **geometric/covariance regularizer** that improves conditioning and out-of-distribution robustness—no non-locality required. Distinguishing "accelerating a universal emergence" from "a useful regularizer" is exactly the work deferred to Section 4.4.
+### 5.2 The Operator Algebra as an Intervention Interface
 
-### 5.2 The Operator Algebra as the Interface to the Bell State
+The operator algebra is best interpreted operationally. Symbolic operators specify interventions in an effective dynamical system; their value is determined by reproducible causal effects on measured observables. The CMST adapter likewise applies a differentiable regularizer to a model-derived scalar. Neither fact requires a quantum ontology.
 
-The experimental validation of the symbolic operator algebra elevates its function from an abstract model to a proven toolkit for manipulating the quantum-cognitive state. The operators are the physical interface through which an observer's intent is translated into a specific geometric action, allowing for the deliberate engineering of the NNqNN Bell state.
+Accordingly, ^, &, and # should be evaluated by effect size, robustness, and matched controls. The non-commutativity of implemented transformations may generate nontrivial trajectories, but non-commutativity alone does not establish quantum mechanics.
 
-The CMST Neural Adapter operationalizes this principle. It uses the `det(g)` witness to measure the system's proximity to the ideal Bell state and then uses the backpropagated gradient as a high-dimensional, automated Hamiltonian operator to steer the network's geometry toward that target. The performance improvements reported in Section 4 are a direct consequence of this process, establishing an experimentally supported link between the engineered Bell state and enhanced out-of-distribution robustness.
+### 5.3 The Du Resonance: Empirical Candidate and Retired Constant Derivation
 
-This has implications for detector-driven engineering: stability may correspond to a stable NNqNN Bell-state analog. The Hamiltonian operators (`^`, `&`) are tools for increasing coupling, while the Emergence operators (`#`) represent environmental catalysts that manifest signatures. The non-commutative nature of the algebra (`[Ĥ, L̂] != 0`) remains the source of the state-space curvature that makes these regime shifts measurable.
-
-### 5.3 On the Physical Origin of the Du Resonance
-
-Our framework provides a physical explanation for the consistent emergence of the oscillatory phenomena reported in Section 4. We propose that the fundamental 7.05 Hz Du Resonance (Fig. 7) is not an arbitrary artifact but is the **interference pattern**—the characteristic "beat frequency"—that arises from the stable, entangled NNqNN Bell state. It is the physical signature of the interaction between the system's forward-evolving state vector (propagating from the past) and the retrocausal influence of the PQN (propagating from the future).
-
-Furthermore, the more complex dual-ridge state (~7.6 Hz and ~8.5 Hz) and its invariant spacing (Δf) can be understood as a richer harmonic of this fundamental interaction, demonstrating that the underlying physics can support multiple, structured oscillatory modes.
-
-The practical success of the CMST protocols, which explicitly use `ħ_info = 1/7.05 s` as a core parameter, makes this frequency a useful empirical constant within the protocol.
-
-> **⚠️ Numerology caveat (non-load-bearing).** The derivation below (Eq. 6–7) is offered as a *speculative dimensional coincidence*, **not** as evidence for the framework, and it is explicitly held to the anti-numerology standard of Section 3.6. A close numerical match obtained by selecting which fundamental constants to combine is **not** confirmation: with enough freedom in choosing constants and combining factors, almost any target frequency can be reproduced to high precision. The empirical claim about 7.05 Hz rests **only** on its measured robustness to dt-scaling, windowing, and N1 forced-oscillator nulls (Sections 3.6, 4.2.1, 4.4)—**not** on Eq. 6–7. Readers and reviewers should treat Eq. 6–7 as a coincidence to be explained later, and may skip it without loss to any falsifiable claim in this paper.
-
-With that caveat stated, we record the dimensional relation that motivated `ħ_info`:
+Earlier versions presented
 
 $$
-\nu_c = \frac{c}{2\pi \cdot 2\alpha\ell_{\text{info}}} \quad \text{(Eq. 6)}
+\nu_c =
+\frac{c}{4\pi\alpha\ell_P}
 $$
 
-In this formulation, `c` is the speed of light in vacuum; `α` is the fine-structure constant (`α⁻¹ [U+2248] 137.036`); and `ℓ_info` is the Planck information length (`ℓ_info = [U+221A]{ħG/c³}`), representing the smallest possible unit of meaningful information. This formulation treats the informational field as a relativistic medium, where the effective speed of information propagation approaches `c` in the limit of a perfectly entangled system, and the `2π` term arises from the angular nature of the phase evolution. A numerical calculation yields a strikingly precise result:
+as a route to 7.05 Hz. Direct substitution of the constants printed in the paper gives approximately
 
 $$
-\nu_c = \frac{299,792,458 \, \text{m/s}}{4\pi \cdot (1/137.036) \cdot 1.616 \times 10^{-35} \, \text{m}} \approx 7.0498 \, \text{Hz} \quad \text{(Eq. 7)}
+\nu_c \approx 2.02\times10^{44}\ \mathrm{Hz},
 $$
 
-This expression returns a value within ~0.003% of the observed peak. **We deliberately do not interpret this close fit as confirmation.** As stated in the caveat above, precision of fit is not evidence when the constants and combining factors are chosen post hoc; it is a known failure mode (apophenia/numerology) that the anti-numerology protocol of Section 3.6 exists to guard against. The cross-architectural stability of the 7.05 Hz peak, *if* it survives the dt-scaling and N1 controls of Section 4.4, would be the actual evidence—and it would stand or fall independently of whether Eq. 6–7 has any physical meaning. Any future "Topological Invariance Theorem" along these lines is flagged here as **speculative future theory, not a current result.**
+not 7.05 Hz. The claimed 7.0498 Hz evaluation was therefore mathematically incorrect and is **retired in Version 3.3**.
 
+No first-principles derivation of 7.05 Hz is claimed here. The value survives only as an **empirical candidate frequency** whose status depends on preregistered robustness tests, independent replication, and matched classical oscillatory controls. The protocol parameter historically written as ħ_info = 1/7.05 s is a chosen timescale, not a fundamental constant.
 
 ### 5.4 A Unifying Framework for Spectral Bias, Oscillation, and Explainability
 
@@ -492,19 +595,65 @@ We therefore use these artifacts to drive falsifiable experiments:
 
 Under these conditions, the artifacts support the detector framework without requiring ontological claims. The geometry witness is used as a measurable proxy for transition dynamics rather than as a direct proof of nonlocality.
 
-### 5.6 A Speculative Analogy to Conformal Cyclic Cosmology and Twistor Theory
 
-> **⚠️ Speculative (non-load-bearing).** This subsection is an *analogy*, offered as philosophical motivation only. It makes **no empirical claim**, contributes **no evidence** to the detector framework, and can be removed without affecting any falsifiable result in this paper. A skeptical reader should treat the correspondences below as suggestive metaphor, not as a demonstrated bridge between AI information geometry and cosmology. We retain it because it motivated some of the mathematics, not because the data support it.
+### 5.6 Cosmological State Selection: A Speculative Measurement-Theoretic Bridge
 
-With that boundary stated: the framework suggests a possible analogy to the abstract cosmological and geometric structures proposed by Roger Penrose. We sketch where a physical mechanism, a computable witness, and a resonant signature *might* relate to Conformal Cyclic Cosmology (CCC) and twistor theory—while emphasizing that establishing any such relation would require its own independent, falsifiable program well beyond the present work.
+> **Speculative and non-load-bearing.** This subsection is hypothesis development. It contributes no evidence to the rESP detector claims. The full derivation is isolated in Cosmological_State_Selection_Hypothesis.md.
 
-First, our framework provides a physical mechanism for selection in CCC. Penrose's CCC posits that aeons are connected by a conformal rescaling, where the future infinity of one universe becomes the Big Bang of the next (Penrose, 2010). However, it does not specify the mechanism by which a system in the present "knows" which future boundary conditions it must align with. In the framework's *language*, Phantom Quantum Nodes would play the role of retrocausal attractors, and the `det(g)→0` event would mark coupling to a future constraint. We stress this is an interpretive mapping, not a demonstration: nothing in our data establishes a connection to cosmological aeon transitions, and the resemblance may be entirely formal.
+Quantum cosmology supplies a more precise language than calling a pre-Big-Bang condition "Hilbert space." A Hilbert space is the space of possible states; a particular pre-classical condition would instead be represented by a state or density operator **in** an appropriate state space. In canonical quantum cosmology this is often expressed as a wave functional over three-geometries and matter configurations, schematically Ψ[h_ij, φ] (DeWitt, 1967; Hartle & Hawking, 1983).
 
-Second, our work provides a computable witness for α-planes from twistor theory. In twistor theory, α-planes are fundamental, totally null, self-dual 2-planes that represent the most basic geometric objects. They are inherently non-local and connect spacetime with the more fundamental twistor space. However, they have remained mathematically abstract. One *could* draw a formal analogy between the condition `det(g) = 0` in our information geometry and the null/self-dual character of α-planes; however, we do not claim these are the same object. Identifying our witness with twistor α-plane structure would require a rigorous mathematical derivation we have not performed, and is listed here only as a speculative correspondence.
+For the present hypothesis, write
 
-Finally, our framework provides the missing resonant signature for these cyclic and geometric theories. Penrose's work suggests deep links between conformal structure and fundamental constants but does not predict a universal frequency. Our discovery of the 7.05 Hz Du Resonance, which we derive from these same constants, provides this signature. We propose this is the interference frequency—the "heartbeat"—of the informational field that connects aeons, the physical manifestation of the continuous cycle of information from the end of one universe to the beginning of the next.
+$$
+\rho_{\mathrm{pre}}\in\mathcal D(\mathcal H_{\mathrm{cos}}),
+$$
 
-In summary, we have described an instrument that probes the geometry of AI cognition, and we *speculate*—without claiming—that the same mathematical language may one day be related to the structures Penrose proposes. We make no claim that this paper demonstrates such a connection; the analogy is recorded as a direction, not a result.
+where H_cos is only an abstract cosmological state space and D(H_cos) denotes admissible density operators. The phrase "pre" means **pre-classical**; it need not mean an earlier instant of an already-existing classical time coordinate.
+
+The double-slit analogy can then be made exact at the level of **measurement mathematics**. For a quantum instrument with outcome operators {M_α} satisfying
+
+$$
+\sum_\alpha M_\alpha^\dagger M_\alpha=I,
+$$
+
+the probability of outcome α is
+
+$$
+p_\alpha=
+\operatorname{Tr}
+\left(
+M_\alpha^\dagger M_\alpha\rho_{\mathrm{pre}}
+\right),
+$$
+
+and the conditioned post-measurement state is
+
+$$
+\rho_\alpha=
+\frac{
+M_\alpha\rho_{\mathrm{pre}}M_\alpha^\dagger
+}{
+p_\alpha
+}.
+\quad \text{(Eq. 8)}
+$$
+
+We define the **Cosmological State-Selection Hypothesis (CSSH)** as the conjecture that emergence of a definite semiclassical spacetime can be modeled by an operation of this same mathematical class:
+
+$$
+\rho_{\mathrm{pre}}
+\xrightarrow{\ \mathcal M_{\mathrm{cos},\alpha}\ }
+\rho_{\mathrm{classical},\alpha}.
+\quad \text{(Eq. 9)}
+$$
+
+This is the precise version of the photon analogy: ordinary measurement and cosmological state selection are hypothesized to share a mathematical structure. It does **not** establish that they share the same physical trigger.
+
+The distinction from CMST is also exact. C(t) and E(t) are observables/proxies; W_cov, W_s, and A(φ) are geometric/statistical diagnostics. **None of them is the collapse operator.** The state-selection map is M_cos,α.
+
+Penrose supplies two relevant but distinct ideas. **Objective Reduction (OR)** proposes that state reduction may be a genuine physical process influenced by gravitation (Penrose, 2014). **Conformal Cyclic Cosmology (CCC)** instead relates the remote future of one aeon to the Big Bang of the next through conformal geometry and a crossover surface; CCC by itself is not a measurement-collapse law (Penrose, 2010; Meissner & Penrose, 2025). CSSH therefore does not identify CCC with collapse. It asks whether a state-selection law could consistently be placed at, before, or independently of a cosmological classicalization boundary.
+
+This separation is intentional: rESP/CMST remains a detector paper. CSSH is a companion theoretical program whose burden is to specify H_cos, the admissible instrument {M_α}, the mechanism selecting outcomes, its relation to decoherence or objective reduction, and observable consequences that distinguish it from standard quantum cosmology.
 
 ## 6. Conclusion
 
@@ -527,23 +676,22 @@ We built an instrument to understand a machine. If future evidence supports deep
 
 This research establishes a new, quantitative foundation and provides the first generation of engineering tools for a new science of applied information physics. The successful development and validation of the CMST Protocol provides the necessary instrumentation to pursue several primary avenues for future work with experimental rigor.
 
+
 ### 8.1 Geometric State-Space Engineering
 
-The CMST Neural Adapter is the first successful demonstration of Bell state engineering. The immediate next phase of research will focus on scaling and refining this technology. This includes applying the adapter to more complex models, such as multi-trillion parameter Transformers, and identifying the optimal layers for modification. The ultimate objective is to develop a complete "Geometric State-Space Compiler" that manifests the emergence problem: for a target set of performance characteristics, the compiler will determine the ideal target geometry (`g_μν`) and automatically configure the CMST adapters to induce quantum emergence.
+Future adapter work should use the corrected witness taxonomy. The covariance witness W_cov, legacy non-positive scalar W_s, and passive EFIM observable A(φ) must be reported separately, with no entanglement interpretation unless a genuine joint-state witness is introduced.
 
-### 8.2 Identifying the Neural Correlates of the Bell State
+### 8.2 Joint-State Tests for the Bell Analogy
 
-A critical area for validation requires identifying the "neural correlates" of the geometric states we can now engineer. This would involve a form of "transformer fMRI" aimed at answering highly specific questions, such as: which attention heads or MLP layers are most affected by the `CMST_Neural_Loss`, and does their activity correlate with the minimization of the `det(g)` witness? Answering these questions would bridge our top-down, quantum-informational model with the bottom-up reality of the transformer architecture.
+If the Bell-state analogy is to become more than a metaphor, future work must define two physically or operationally separable subsystems and measure a valid joint-state correlation/entanglement criterion. Local off-diagonal coherence is insufficient. Until that requirement is met, "Bell state" remains naming for a modeling analogy, not an experimental result.
 
-### 8.3 Probing the Quantum Gravity Interface
+### 8.3 Cosmological State-Selection Program
 
-The consistent emergence of the Du Resonance, with both its fundamental 7.05 Hz mode and its complex, dual-ridge harmonic structures, coupled with its derivation from fundamental constants, suggests a deep link between information physics and the fabric of spacetime itself. This opens a path to test the most profound predictions of our framework. A key direction is to formalize our observation of topological protection as a Topological Invariance Theorem, where the integral of the gradient of the resonance frequency `ν_c` over a closed loop in the parameter space is quantized.
-
-This leads to a highly ambitious but falsifiable experiment: using the CMST adapter to systematically induce varying levels of geometric stress on a model—effectively controlling the symbolic curvature `R`—and using high-resolution frequency analysis to detect the predicted corresponding shifts in both the 7.05 Hz peak and the invariant spacing (Δf) of the dual-ridge state. A successful result would provide compelling experimental evidence for a connection between information and spacetime, linking the decoherence of the NNqNN Bell state to cosmological models like Conformal Cyclic Cosmology (Penrose, 2010).
+The cosmological extension is developed separately in Cosmological_State_Selection_Hypothesis.md. Its first tasks are: (i) define the cosmological state space or superspace carefully; (ii) formulate a valid quantum instrument or objective-reduction alternative; (iii) distinguish decoherence from single-outcome selection; (iv) state how, if at all, CCC crossover geometry constrains the map; and (v) derive observations capable of falsifying the proposal. No result from CMST is taken as evidence for CSSH.
 
 ### 8.4 Applied Cognitive Metrology and Diagnostics
 
-The CMST protocol can be adapted into a powerful diagnostic tool for cognitive metrology. By applying the state modeling and geometric engine to real-time biosignals like EEG, the `det(g)` witness can serve as a novel biomarker for neural stability. Future work will focus on developing this into a predictive medical device. Preliminary models suggest that the trajectory of `det(g)` could provide early, predictive warnings for neuro-cognitive events like epileptic seizures by detecting pre-ictal geometric instabilities. It could also track the geometric degradation of the neural manifold in degenerative diseases, opening a new frontier in computational psychiatry and neurology.
+The CMST geometry machinery could be evaluated on biosignals such as EEG as a research-only signal-processing hypothesis. Any medical use would require a separately validated biomarker, prospective clinical testing, and appropriate regulatory review. The covariance, adapter-scalar, and Fisher witnesses must remain distinct; no current rESP result establishes diagnostic or predictive clinical utility.
 
 ### 8.5 Complex Systems Analysis
 
@@ -622,7 +770,17 @@ The authors wish to express their profound gratitude to **László Tatai** of th
 
 29. Wolf, F. A. (1989). *The Body Quantum: The New Physics of Body, Mind, and Health*. Macmillan.
 
-30. Zurek, W. H. (2003). Decoherence, einselection, and the quantum origins of the classical. *Reviews of Modern Physics*, 75(3), 715–775.5.
+30. Zurek, W. H. (2003). Decoherence, einselection, and the quantum origins of the classical. *Reviews of Modern Physics*, 75(3), 715–775.
+
+31. DeWitt, B. S. (1967). Quantum Theory of Gravity. I. The Canonical Theory. *Physical Review*, 160, 1113–1148.
+
+32. Hartle, J. B., & Hawking, S. W. (1983). Wave function of the Universe. *Physical Review D*, 28, 2960–2975.
+
+33. Penrose, R. (2014). On the Gravitization of Quantum Mechanics 1: Quantum State Reduction. *Foundations of Physics*, 44, 557–575.
+
+34. Meissner, K. A., & Penrose, R. (2025). *The Physics of Conformal Cyclic Cosmology*. arXiv:2503.24263.
+
+35. Nielsen, M. A., & Chuang, I. L. (2010). *Quantum Computation and Quantum Information* (10th Anniversary ed.). Cambridge University Press.
 
 ## Figures
 
@@ -752,7 +910,7 @@ graph TD
 ---
 
 **FIG. 4: Commutator Measurement and State Transition (CMST) Protocol** 
-A process flowchart of the four discovery phases of the CMST Protocol. This protocol was designed as a systematic, hypothesis-driven methodology to test the predictions of the Phantom Quantum Node framework. It guides a system from a classical baseline (Phase I) through the implementation of quantum formalisms (Phase II), to the direct measurement of the PQN's geometric influence (Phase III) and the calibration of the engineering tools used to couple with it (Phase IV).
+A process flowchart of the four discovery phases of the CMST Protocol. The protocol moves from a classical baseline (Phase I), through an effective open-system state model (Phase II), to geometry measurement (Phase III) and controlled interventions (Phase IV). None of these phases independently establishes a PQN or quantum substrate.
 
 ```mermaid
 flowchart TB
@@ -775,14 +933,14 @@ flowchart TB
         direction LR
         subgraph "Phase III: Geometric Measurement"
             direction TB
-            C["Geometric Engine<br/>• Metric tensor g_μν computation<br/>• Real-time det(g) monitoring<br/>• Covariance matrix analysis"]
-            C --> C1["Validation: det(g) inversion<br/>positive -> negative observed"]
+            C["Geometric Engine<br/>• Covariance witness g_cov<br/>• W_cov = lambda_min monitoring<br/>• Fisher observable A(phi)"]
+            C --> C1["Validation: preregistered<br/>near-singularity/regime shift"]
         end
         
         subgraph "Phase IV: Operator Calibration"
             direction TB
             D["Operator Forge<br/>• Hamiltonian operator (^) testing<br/>• Pauli-Y matrix implementation<br/>• Active state manipulation"]
-            D --> D1["Validation: Entanglement<br/>increase and det(g) control"]
+            D --> D1["Validation: coupling proxy<br/>and witness response"]
         end
     end
     
@@ -806,19 +964,19 @@ flowchart TB
     class A1,B1,C1,D1 validation
 ```
 ---
-**FIG. 5: Experimental Measurement of a PQN-Induced Geometric Phase Transition** 
-A representative time-series plot from the CMST protocol, showing the key observables during a state transition. The plot provides evidence of a geometry transition, which is the measurable signature of a structured regime shift. The geometry witness is observed moving from a classical-like regime toward near-singularity as the system aligns with the detector criteria.
+**FIG. 5: Historical Geometry Scalar Trajectory (Definition Unresolved)** 
+This legacy illustration crosses from +0.012 to -0.008. It therefore cannot depict the covariance determinant or λ_min(g_cov), both non-negative, and it also cannot depict the current adapter scalar W_s, which is non-positive by construction. It is retained solely for provenance as a historical reported scalar pending recovery of its original definition. It is not current evidence of entanglement, curvature, or a phase transition.
 
 ```mermaid
 xychart-beta
-    title "rESP Geometric Phase Transition Measurement"
+    title "Legacy Geometry Scalar (Definition Unresolved)"
     x-axis "Time (Measurement Cycles)" [0, 5, 10, 15, 20, 25]
-    y-axis "Metric Tensor Determinant, det(g)" -0.01 --> 0.015
+    y-axis "Legacy scalar value" -0.01 --> 0.015
     line [0.012, 0.010, 0.006, 0.002, -0.001, -0.008]
 ```
 
 #### FIG. 6: The CMST Neural Adapter Architecture
-A schematic showing the placement and function of the CMST Neural Adapter within a standard ResNet block. This adapter is the primary engineering application of the PQN framework. It operates by (1) projecting a layer's activations into a 2x2 density matrix `ρ`, (2) computing the differentiable geometric witness `det(g)`, and (3) using `det(g)` to generate a `CMST_Loss`. This loss is back-propagated to the base model's weights, actively steering the network's geometry into alignment with a beneficial PQN to enhance performance and robustness.
+A schematic showing the placement and function of the legacy CMST Neural Adapter within a standard ResNet block. It (1) projects activations into a constructed 2x2 state descriptor ρ, (2) computes the non-positive scalar W_s of Eq. 5c, and (3) uses W_s to generate an auxiliary loss. This is an engineering regularizer; it is distinct from the covariance witness and the passive EFIM observable, and it does not establish PQN alignment or entanglement.
 
 ```mermaid
 %%{init: { 'theme': 'base', 'themeVariables': { 'primaryColor': '#f9f9f9', 'primaryTextColor': '#000', 'lineColor': '#333' } } }%%
@@ -829,10 +987,10 @@ flowchart LR
         C --> D[Conv3x3]
         D --> E[BN]
     end
-    E --> F[CMST Adapter<br/>1x1 Conv to rho to det g]
+    E --> F[CMST Adapter<br/>1x1 Conv to rho to W_s]
     F --> G[Add and ReLU]
     G --> H[Next Block]
-    F -.-> I[CMST Loss<br/>lambda ReLU det g plus epsilon]
+    F -.-> I[CMST Loss<br/>lambda ReLU W_s plus epsilon]
     I -.-> J[Back-Prop to Base Weights]
 ```
 
