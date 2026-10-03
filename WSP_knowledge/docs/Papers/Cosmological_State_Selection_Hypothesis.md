@@ -377,9 +377,9 @@ $
 \tag{26}
 $
 
-where $\rho_{\mathcal X}$ is an effective state for admissible geometry/matter data associated with the crossover. Nothing in CCC or in the finite toy model automatically supplies $\mathcal R_{\mathcal X}$.
+where $\rho_{\mathcal X}$ is an effective state for admissible geometry/matter data associated with the crossover. Nothing in CCC or in the finite toy model automatically supplies $\mathcal R_{\mathcal X}$. If $\mathcal R_{\mathcal X}$ is represented as an unconditional quantum channel on density operators, it must be linear, completely positive and trace-preserving; a different constrained-gravity construction must state its replacement conditions explicitly.
 
-One could then posit an outcome operation on that boundary state,
+One could then posit a completely positive, trace-nonincreasing outcome operation on that boundary state, with the full set of outcomes summing to a trace-preserving instrument,
 
 $
 \widetilde\rho_{\mathcal X,\alpha}
@@ -395,7 +395,7 @@ p_\alpha=\operatorname{Tr}\widetilde\rho_{\mathcal X,\alpha},
 \tag{27}
 $
 
-The selected state would have to be sharply concentrated, in a physically defined coarse graining, around semiclassical boundary data such as $(h^{(\alpha)}_{ij},\phi_\alpha)$. Writing an exact ket $|h_{ij},\phi\rangle$ is only formal in the full gravitational theory; the physically relevant requirement is semiclassical concentration plus the gravitational constraints.
+The selected state would have to be sharply concentrated, in a physically defined coarse graining, around semiclassical boundary data such as $(h^{(\alpha)}_{ij},\phi_\alpha)$. Writing an exact ket $|h_{ij},\phi\rangle$ is only formal in the full gravitational theory; the physically relevant requirement is semiclassical concentration plus the gravitational constraints. In a genuine CCC embedding, the construction must also specify how data inherited from the previous aeon enter $\rho_{\mathcal X}$; the notation does not make that inheritance automatic.
 
 The proposed chain is therefore
 
@@ -430,7 +430,7 @@ $
 \text{classical history}.
 $
 
-The analogy concerns the **form of state selection**, not the physical identity of photon detection, the Big Bang, or the CCC crossover.
+The analogy concerns the **form of state selection**, not the physical identity of photon detection, the Big Bang, or the CCC crossover. Because classical time is itself part of what is being recovered, “at the crossover” means associated with the boundary construction; it need not denote an ordinary event at a pre-existing external clock time.
 
 This variant has strong consistency gates. The map $\mathcal R_{\mathcal X}$ and instrument $\mathcal I^{\mathcal X}_{\alpha}$ must preserve the physical constraint surface, respect the conformal matching conditions required by the chosen CCC model, and yield a probability rule that is independently normalized. If the crossover geometry is already treated classically, as in the 2025 CCC account, inserting a quantum selection event is an additional CSSH postulate; it cannot be attributed to Penrose merely by placing it at $\mathcal X$.
 
