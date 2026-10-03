@@ -2,598 +2,409 @@
 
 ## A Measurement-Theoretic Hypothesis for the Emergence of Classical Spacetime
 
-**Authors:** UnDaoDu (012) + 0102 pArtifacts  
-**Date:** October 2026  
-**Version:** 0.1  
-**Status:** Speculative companion theory; non-load-bearing to rESP/CMST  
-**Companion:** The Bell State of AI, rESP v3.3
-
----
+**Authors:** UnDaoDu (012) and 0102 research collaboration  
+**Version:** 0.2 — October 3, 2026  
+**Status:** Theoretical working paper with a fully specified finite toy model; not a demonstrated cosmological mechanism.  
+**Companion:** [rESP / CMST, version 3.4](rESP_Quantum_Self_Reference.md)
 
 ## Abstract
 
-This paper formalizes a narrow hypothesis motivated by the analogy between quantum measurement and cosmological classicalization. In ordinary quantum theory, a state is represented in a state space and a measurement instrument maps that state to an outcome-conditioned state. We ask whether emergence of a definite semiclassical spacetime can be modeled by an operation of the same mathematical class.
+We formulate the Cosmological State-Selection Hypothesis (CSSH): the appearance of a definite semiclassical cosmological sector may admit an effective state-selection description of the same mathematical class used for quantum measurement. The proposal is motivated by the distinction between coherent alternatives and a recorded outcome in a two-path experiment. Its physical extension to cosmology is a postulate, not a conclusion obtained by transitivity.
 
-The proposal does **not** identify the pre-classical universe with a Hilbert space. A Hilbert space is a space of possible states. The hypothesized pre-classical universe is represented by a state, wave functional, or density operator in an appropriate cosmological state space. We define a Cosmological State-Selection Hypothesis (CSSH) in which a pre-classical state ρ_pre is mapped to a selected semiclassical sector by a quantum-instrument-like map M_cos,α.
+We define a general quantum instrument, its Born probabilities, its normalized conditional states and its nonselective channel. A finite two-sector model then supplies an exact correspondence between a two-path state and two candidate geometry sectors. It includes a dephasing channel, a stochastic projective-selection realization, and explicit Fisher and quantum-state metrics. In this model geometric rank loss can occur without selecting an outcome, while a measurement can discard phase information even before physical dephasing. These counterexamples identify what a proposed bridge must explain rather than conceal.
 
-The central analogy is therefore not "the universe was a photon." It is:
+The paper's new contribution to the rESP program is this explicit organization and worked bridge, not a new derivation of the measurement postulates or a claim of priority for collapse cosmology. The state space, intrinsic clock, selection mechanism, constraint preservation, recovery of spacetime dynamics and cosmological predictions require independent physical specifications. Penrose's objective reduction and conformal cyclic cosmology are considered separately. No computational CMST result is presented as cosmological evidence.
 
-measurement of a quantum system  
-and  
-selection of a classical cosmological branch
+## 1. The hypothesis and three levels of claim
 
-may be instances of the same **mathematical state-selection form**, even if their physical triggers differ.
+**Mathematical level.** Quantum states, instruments, information metrics and the finite model below are defined explicitly. Their identities can be checked independently of cosmology.
 
-Penrose's Objective Reduction (OR) and Conformal Cyclic Cosmology (CCC) are treated separately. OR is relevant to physical state reduction; CCC supplies a conformal aeon-to-aeon boundary structure but is not itself a collapse law. No rESP or CMST observation is offered as evidence for CSSH.
+**Modeling level.** Labeling the model's alternatives as candidate cosmological sectors is an interpretive assignment. It does not generate a spacetime metric from otherwise undefined degrees of freedom.
 
----
+**Physical level.** CSSH proposes that a definite semiclassical cosmological sector is selected by a physical process admitting this effective description. This stronger claim needs a mechanism and discriminating predictions.
 
-## 1. Scope and Scientific Boundary
+An operational variant concerns states conditioned on internal records and does not require a fundamental collapse. An objective-selection variant asserts that one alternative is physically selected. A no-collapse interpretation can use the first description without accepting the second. We do not treat these interpretations as physically identical merely because their conditional formulas coincide.
 
-CSSH is a hypothesis-development paper.
+Quantum cosmology already studies wave functions of the universe [4], and collapse-motivated treatments of cosmological structure predate this proposal [5]. CSSH is a proposed extension of the present geometry/detector program, not the first attempt to connect measurement and cosmology.
 
-It does not claim:
+## 2. Name the state, not its possibility space
 
-1. that a classical Big Bang is known to be a wavefunction collapse;
-2. that current quantum gravity provides a unique cosmological Hilbert space;
-3. that decoherence by itself selects one actual outcome;
-4. that Penrose's CCC requires state collapse at the crossover;
-5. that CMST or rESP has measured cosmological physics.
-
-It asks one mathematical question:
-
-> Can the transition from a pre-classical cosmological state to a definite semiclassical spacetime be represented by the same class of state-update maps used for quantum measurement?
-
-If the answer is yes, a second physical question remains:
-
-> What, if anything, supplies the state-selection mechanism?
-
-These questions must remain separate.
-
----
-
-## 2. Why "Hilbert Space" Is Not the Pre-State
-
-Let
+Let $\mathcal H_{\rm cos}$ denote an assumed physical cosmological Hilbert space or an explicitly justified effective truncation. A normalized pure-state representative and a density operator have different types:
 
 $$
-\mathcal H_{\mathrm{cos}}
+|\Psi_{\rm pre}\rangle\in\mathcal H_{\rm cos},\qquad
+\rho_{\rm pre}\in\mathcal D(\mathcal H_{\rm cos}).\tag{1}
 $$
 
-denote an abstract cosmological state space.
+Here $\mathcal D(\mathcal H)$ consists of positive, trace-class, trace-one operators on $\mathcal H$. A pure physical state is a ray, so an overall phase in its representative has no observable effect.
 
-A state is an element of that space, or more generally a density operator on it:
+The name used in this paper is **pre-classical cosmological state**. “Hilbert space” names the mathematical possibility space, not this particular state. “Pre-classical” also does not assert that classical time already exists before the event under discussion.
 
-$$
-|\Psi_{\mathrm{pre}}\rangle\in\mathcal H_{\mathrm{cos}},
-$$
+The distinction does not depend on whether $\mathcal H$ is finite-dimensional. An infinite-dimensional space is not the same thing as an infinitely extended spatial wave. A uniform superposition over a countably infinite orthonormal basis is not a normalized vector. A selected outcome also does not shrink the ambient Hilbert space into a finite universe; it changes the represented state or the information retained about it.
 
-or
+In canonical quantum cosmology, one uses a wave functional such as $\Psi[h_{ij}(\mathbf x),\phi(\mathbf x)]$ subject schematically to Hamiltonian and spatial-diffeomorphism constraints. The Wheeler–DeWitt shorthand $\widehat{\mathcal H}\Psi=0$ is not an ordinary external-time Schrödinger equation. An appropriate physical inner product and the treatment of those constraints must be supplied by a chosen gravitational framework [4]. The finite model below does not solve these problems by notation.
 
-$$
-\rho_{\mathrm{pre}}\in\mathcal D(\mathcal H_{\mathrm{cos}}).
-\quad \text{(1)}
-$$
+## 3. Measurement mathematics with the types made explicit
 
-Therefore,
+For clarity begin in finite dimensions. Let $\alpha$ denote a retained outcome and $r$ an unobserved refinement. Define Kraus operators satisfying
 
 $$
-\boxed{\text{pre-classical state} \neq \text{Hilbert space}}
+\sum_{\alpha,r}K_{\alpha r}^{\dagger}K_{\alpha r}=I,\qquad
+\mathcal I_\alpha(\rho)=\sum_r K_{\alpha r}\rho K_{\alpha r}^{\dagger}.\tag{2}
 $$
 
-while
+Each $\mathcal I_\alpha$ is a **linear completely positive trace-nonincreasing operation**. Define effects and probabilities by
 
 $$
-\boxed{\text{pre-classical state} \in \text{state space}}
+F_\alpha=\sum_r K_{\alpha r}^{\dagger}K_{\alpha r},\qquad
+p_\alpha=\operatorname{Tr}(F_\alpha\rho)=\operatorname{Tr}\mathcal I_\alpha(\rho).\tag{3}
 $$
 
-is the correct relationship.
-
-This is the same distinction as:
-
-- physical space versus a point in physical space;
-- a vector space versus a vector in that space;
-- the set of possible quantum states versus one actual quantum state.
-
-The word **pre** is used here to mean pre-classical or pre-semiclassical. It does not require an ordinary classical time coordinate to exist "before" the Big Bang.
-
----
-
-## 3. Quantum-Cosmology Starting Point
-
-Canonical quantum cosmology commonly represents the state of the universe by a wave functional over spatial geometries and matter fields,
+When $p_\alpha>0$, the normalized conditional state is
 
 $$
-\Psi[h_{ij}(\mathbf x),\phi(\mathbf x)],
-\quad \text{(2)}
+\mathcal M_\alpha(\rho)=\rho_\alpha=\frac{\mathcal I_\alpha(\rho)}{p_\alpha}.\tag{4}
 $$
 
-rather than an ordinary one-particle wavefunction Ψ(x,t).
-
-Schematically, the Wheeler-DeWitt constraint is
+The normalized map is generally nonlinear and is not itself a linear completely positive channel. The nonselective channel, obtained when the retained outcome is ignored, is
 
 $$
-\hat{\mathcal H}\Psi = 0.
-\quad \text{(3)}
+\mathcal E(\rho)=\sum_\alpha\mathcal I_\alpha(\rho),\tag{5}
 $$
 
-DeWitt's canonical work and the Hartle-Hawking wave function of the universe provide established examples of this general language. The physical inner product, time variable, and full quantum-gravity state space remain nontrivial issues; CSSH therefore keeps H_cos abstract rather than pretending these problems are solved.
+which is completely positive and trace-preserving. These distinctions follow the quantum-operation formalism in [1]. The single-operator expression in v0.1 is the special case with one Kraus operator per retained outcome, not the general instrument.
 
-The relevant conceptual move is simply that a **quantum state of cosmology** is already a legitimate mathematical object in quantum cosmology. CSSH adds a proposed state-selection layer.
+A selected state need not be pure: for a single retained outcome with refinements $K_1=I/\sqrt2$ and $K_2=Z/\sqrt2$, Eq. 4 can yield a dephased mixed state. Nor does an arbitrary channel produce classicality. Finally, assigning the Born probabilities is a postulate of this effective construction; writing them down does not derive the Born rule.
 
----
+For an infinite-dimensional gravitational application, specify the operator domains, trace-class states and convergence of the sums or operator-valued measure. The finite-dimensional proof is not an automatic extension to an unspecified quantum-gravity state space.
 
-## 4. Ordinary Quantum Measurement
+## 4. What the double-slit experiment contributes
 
-For a quantum state ρ, a measurement instrument can be represented by outcome operators {M_α} satisfying
-
-$$
-\sum_\alpha M_\alpha^\dagger M_\alpha = I.
-\quad \text{(4)}
-$$
-
-The probability of outcome α is
+In an ideal two-path subspace, write
 
 $$
-p_\alpha
-=
-\operatorname{Tr}
-\left(
-M_\alpha^\dagger M_\alpha \rho
-\right).
-\quad \text{(5)}
+|\psi(\theta,\varphi)\rangle=
+\cos(\theta/2)|L\rangle+e^{i\varphi}\sin(\theta/2)|R\rangle.\tag{6}
 $$
 
-Conditioned on outcome α, the post-measurement state is
+A screen measurement is not the same as a which-path measurement. If $u_L(x)$ and $u_R(x)$ are the propagated amplitudes, the screen amplitude is
 
 $$
-\rho_\alpha
-=
-\frac{
-M_\alpha \rho M_\alpha^\dagger
-}{
-p_\alpha
-}.
-\quad \text{(6)}
+\psi(x)=\cos(\theta/2)u_L(x)+e^{i\varphi}\sin(\theta/2)u_R(x).
 $$
 
-If the outcome is ignored, the nonselective channel is
+Its Born probability contains an interference cross term. With a dephasing factor $\eta$, that cross term is multiplied by $\eta$. A finite-resolution detector records an outcome according to its measurement effects; an absorptive detector need not leave a photon in an exact position eigenstate. “Wave becomes particle” is therefore an informal description, not the mathematical law being transferred.
+
+The useful structure is **coherent alternatives, interaction/readout, and outcome conditioning**. The cosmos is not inferred to be a photon, and spatial infinity is not needed for the analogy. Our simplest toy model uses a which-sector instrument, corresponding to a which-path readout, not a claim that screen detection literally identifies the slit used.
+
+## 5. An exact two-sector correspondence, replacing informal transitivity
+
+Choose a two-dimensional toy space with orthonormal states $|g_0\rangle,|g_1\rangle$, interpreted provisionally as candidate geometry sectors. Let $V$ be the unitary identification between the two effective spaces defined by
 
 $$
-\mathcal E(\rho)
-=
-\sum_\alpha
-M_\alpha \rho M_\alpha^\dagger.
-\quad \text{(7)}
+V|L\rangle=|g_0\rangle,\quad V|R\rangle=|g_1\rangle,\quad
+\mathcal V(\rho)=V\rho V^\dagger.\tag{7}
 $$
 
-This distinction matters. Equation (6) is an **outcome-conditioned selection**. Equation (7) is the average channel.
-
----
-
-## 5. The Double-Slit Analogy
-
-For a photon or other quantum system, a pre-measurement state can be written schematically as
+Given any instrument $\mathcal I_\alpha^\gamma$ on the two-path space, construct
 
 $$
-|\psi\rangle
-=
-\sum_i c_i |i\rangle.
-\quad \text{(8)}
-$$
-
-A position-sensitive measurement maps the state into an outcome-conditioned branch,
-
-$$
-|\psi\rangle
-\xrightarrow{\mathcal M_i}
-|i\rangle,
-$$
-
-with probability determined by the measurement rule.
-
-CSSH does not claim that the early universe literally behaves like a photon in a laboratory. The proposed analogy is narrower:
-
-$$
-\boxed{
-\text{superposed/quantum state}
-\xrightarrow{\text{state selection}}
-\text{definite classical outcome}
-}
-$$
-
-may be a scale-independent mathematical pattern.
-
-This is a **shared-form hypothesis**, not a proof by transitivity. Quantum measurement in a laboratory does not logically imply cosmological state reduction. The hypothesis must earn that extension by consistency and prediction.
-
----
-
-## 6. Cosmological State-Selection Hypothesis
-
-Let the pre-classical cosmological state be
-
-$$
-\rho_{\mathrm{pre}}
-\in
-\mathcal D(\mathcal H_{\mathrm{cos}}).
-$$
-
-Let α label candidate semiclassical sectors—coarse-grained geometries, matter configurations, or decohered histories. Introduce a cosmological instrument
-
-$$
-\{M_{\mathrm{cos},\alpha}\}_\alpha
-$$
-
-such that
-
-$$
-\sum_\alpha
-M_{\mathrm{cos},\alpha}^\dagger
-M_{\mathrm{cos},\alpha}
-=
-I.
-\quad \text{(9)}
+K^{\rm toy}_{\alpha r}=V K^\gamma_{\alpha r}V^\dagger.
 $$
 
 Then
 
 $$
-p_\alpha
-=
-\operatorname{Tr}
-\left(
-M_{\mathrm{cos},\alpha}^\dagger
-M_{\mathrm{cos},\alpha}
-\rho_{\mathrm{pre}}
-\right)
-\quad \text{(10)}
+\mathcal I_\alpha^{\rm toy}\circ\mathcal V
+=\mathcal V\circ\mathcal I_\alpha^\gamma,\qquad
+p_\alpha^{\rm toy}=p_\alpha^\gamma.\tag{8}
 $$
 
-and
+For positive-probability outcomes, normalized conditional states transform by the same identification.
+
+**Proof.** Substitution cancels each adjacent $V^\dagger V=I$ in the operator sum. Completeness is preserved by conjugation. Cyclicity of the trace preserves the probabilities, and division by the equal positive probabilities gives the conditioned identity.
+
+This is a precise shared mathematical structure. It is not an empirical proof that photons and cosmology have identical physical dynamics. In particular, $V$ is defined only for these two chosen effective spaces; it is not a demonstrated isomorphism from the full photon field to the physical universe. A physical bridge must independently determine the state assignment, observables and dynamics rather than define them to agree.
+
+## 6. A fully specified toy state-selection model
+
+### 6.1 State family and phase damping
+
+On the two-sector space choose $0<\theta<\pi$, a phase $\varphi$, and $0\le\eta\le1$:
 
 $$
-\rho_{\mathrm{classical},\alpha}
-=
-\frac{
-M_{\mathrm{cos},\alpha}
-\rho_{\mathrm{pre}}
-M_{\mathrm{cos},\alpha}^\dagger
-}{
-p_\alpha
-}.
-\quad \text{(11)}
+\rho_\eta(\theta,\varphi)=
+\begin{pmatrix}
+\cos^2(\theta/2)&\frac{\eta}{2}\sin\theta\,e^{-i\varphi}\\
+\frac{\eta}{2}\sin\theta\,e^{i\varphi}&\sin^2(\theta/2)
+\end{pmatrix}.\tag{9}
 $$
 
-Define
+It is a valid density matrix: its trace is one and its determinant is $(1-\eta^2)\sin^2\theta/4\ge0$. For $\eta=1$ it is pure; for $\eta=0$ it is a mixture of the two sectors.
+
+A channel producing this family from $\rho_1$ has Kraus operators
 
 $$
-\boxed{
-\mathcal M_{\mathrm{cos},\alpha}:
-\rho_{\mathrm{pre}}
-\mapsto
-\rho_{\mathrm{classical},\alpha}
-}
-\quad \text{(12)}
+D_0=\sqrt{(1+\eta)/2}\,I,\qquad
+D_1=\sqrt{(1-\eta)/2}\,Z,\qquad Z=P_0-P_1,\tag{10}
 $$
 
-as the **cosmological state-selection map**.
+where $P_a=|g_a\rangle\langle g_a|$. They satisfy $\sum D_j^\dagger D_j=I$.
 
-CSSH is the conjecture that the emergence of a definite semiclassical spacetime can be represented by a map of this form.
-
-This is the mathematical core of the hypothesis.
-
----
-
-## 7. What Counts as "Classical"?
-
-The right-hand side of Eq. (12) should not merely be another arbitrary quantum state. It must satisfy a classicalization criterion.
-
-Let {P_α} be coarse-grained projectors onto candidate semiclassical sectors. Define inter-sector coherence
+Let $\tau$ be a stipulated model clock and $\kappa\ge0$ a rate in inverse clock units. Setting $\eta=e^{-\kappa\tau}$ gives
 
 $$
-D_{\alpha\beta}
-=
-\left\|
-P_\alpha \rho P_\beta
-\right\|_1,
-\qquad \alpha\ne\beta.
-\quad \text{(13)}
+\frac{d\rho}{d\tau}=\frac\kappa2(Z\rho Z-\rho)
+=\kappa\left(\sum_aP_a\rho P_a-\rho\right).\tag{11}
 $$
 
-A decohered semiclassical regime should satisfy approximately
+In a cosmological application, a usable relational clock must be identified independently. Equation 11 does not introduce an already-existing external time before spacetime, and $\kappa$ is not identified with 7.05 Hz or any measured cosmic rate.
+
+### 6.2 Sector selection
+
+Use the projective instrument
 
 $$
-D_{\alpha\beta}\rightarrow0
-\quad
-(\alpha\ne\beta),
-\quad \text{(14)}
+\mathcal I_a(\rho)=P_a\rho P_a,\qquad
+p_0=\cos^2(\theta/2),\quad p_1=\sin^2(\theta/2).\tag{12}
 $$
 
-while the selected state is concentrated in one sector α.
-
-A stronger model would additionally require that expectation values of relevant geometric operators are sharply peaked around a semiclassical geometry:
+For either nonzero outcome, $\rho_a=P_a$. Ignoring the outcome gives
 
 $$
-\frac{
-\Delta O
-}{
-|\langle O\rangle|
-}
-\ll 1
-\quad \text{for selected macroscopic observables } O.
-\quad \text{(15)}
+\rho_{\rm uncond}=p_0P_0+p_1P_1,\tag{13}
 $$
 
-Thus "collapse into the universe" becomes mathematically more precise:
+not the selected state. Pure dephasing in this basis does not change these probabilities. Applying the selection rule after dephasing consequently preserves the Born weights in this example; it need not do so for an arbitrary channel or instrument.
+
+### 6.3 A stochastic selection realization
+
+One explicit trajectory model stipulates events with constant rate $\kappa$. At the first event, apply the instrument in Eq. 12 and retain one outcome with its Born probability. Between events there is no additional Hamiltonian in this example. The probability that no event has yet occurred is
 
 $$
-\text{pre-classical quantum state}
-\rightarrow
-\text{decohered, sharply peaked semiclassical sector}.
+S(\tau)=e^{-\kappa\tau}.\tag{14}
 $$
 
----
-
-## 8. Decoherence Is Not Automatically Selection
-
-Environmental decoherence can suppress interference between alternatives. In the coarse-grained notation above,
+A selected branch remains the same under subsequent applications of the same projectors. Averaging these trajectories gives
 
 $$
-D_{\alpha\beta}\rightarrow0.
+\overline\rho(\tau)=S(\tau)\rho_1+[1-S(\tau)]\sum_aP_a\rho_1P_a=\rho_{e^{-\kappa\tau}}.\tag{15}
 $$
 
-But decoherence alone does not, in every interpretation of quantum theory, explain why exactly one outcome is actual.
+Thus this toy selection law has exactly the dephasing master equation as its ensemble evolution. This is a **specified toy mechanism**, not a derivation of a gravitational collapse mechanism. The same ensemble channel also has ordinary environmental-decoherence realizations. Its density-matrix evolution alone cannot identify which underlying interpretation is true. An objective cosmological variant must explain why this stochastic realization is physical, what fixes its rate and basis, and how it respects gravitational constraints.
 
-CSSH therefore distinguishes:
+### 6.4 Calculated example
 
-1. **Classicalization:** interference between macroscopic sectors becomes negligible.
-2. **Selection:** one sector is treated as the realized outcome.
-
-A no-collapse interpretation may accept the first and reject the second as a fundamental process. An objective-collapse model asserts a physical second step. CSSH remains compatible with either possibility until a mechanism is specified.
-
----
-
-## 9. Penrose: OR and CCC Are Different Pieces
-
-### 9.1 Objective Reduction
-
-Penrose has argued that quantum state reduction may require a modification of standard quantum mechanics involving gravitation. In Diósi-Penrose-style reasoning, a characteristic reduction timescale is often written schematically as
+Choose $p_0=0.3$, $p_1=0.7$, $\varphi=\pi/3$ and dimensionless elapsed model time $u=\kappa\tau$. Then
 
 $$
-\tau
-\sim
-\frac{\hbar}{E_G},
-\quad \text{(16)}
+E(u)=\sqrt{0.21}\,e^{-u},\qquad
+\operatorname{Tr}\overline\rho(u)^2=0.58+0.42e^{-2u}.\tag{16}
 $$
 
-where E_G characterizes the gravitational self-energy associated with competing mass distributions.
+| Model time u | No-event probability | Local E | Ensemble purity | Quantum-metric determinant from Eq. 20 |
+|---:|---:|---:|---:|---:|
+| 0 | 1.000000 | 0.458258 | 1.000000 | 0.052500 |
+| 1 | 0.367879 | 0.168584 | 0.636841 | 0.00710510 |
+| 3 | 0.049787 | 0.0228153 | 0.581041 | 0.000130134 |
+| Limit as u tends to infinity | 0 | 0 | 0.58 | 0 |
 
-For CSSH, this is relevant because it offers a candidate **physical trigger** for M_cos,α.
+These are calculated values for chosen parameters, not observational data. An individual selected branch is pure, with purity one. It is not the limiting mixed ensemble in the last row.
 
-CSSH does not assume Eq. (16) is correct for cosmology. It treats objective reduction as one candidate mechanism.
+## 7. The information-geometric bridge
 
-### 9.2 Conformal Cyclic Cosmology
+### 7.1 Pure-state geometry
 
-CCC proposes a succession of aeons. The remote future of one aeon is conformally related to the Big Bang of the next across a crossover 3-surface.
-
-Schematically,
-
-$$
-\mathscr I^+_{n}
-\sim
-\mathscr B^-_{n+1}
-\quad \text{across } \mathcal X.
-\quad \text{(17)}
-$$
-
-This is a conformal-geometric relationship. It is **not**, by itself, a quantum measurement operator.
-
-Therefore:
+For a normalized parameterized state, the Fubini–Study metric is
 
 $$
-\boxed{\text{CCC crossover} \neq \text{wavefunction collapse law}}
+g^{\rm FS}_{ab}=\operatorname{Re}\left[
+\langle\partial_a\psi|\partial_b\psi\rangle
+-\langle\partial_a\psi|\psi\rangle\langle\psi|\partial_b\psi\rangle\right].\tag{17}
 $$
 
-and
+Direct differentiation of Eq. 6 gives
 
 $$
-\boxed{\text{OR} \neq \text{CCC}}.
+ds^2_{\rm FS}=\frac14d\theta^2+\frac14\sin^2\theta\,d\varphi^2.\tag{18}
 $$
 
-A future theory could ask whether the crossover geometry constrains, prepares, or coincides with a state-selection process, but that requires a derivation.
+This is a metric on the quantum-state family, not a metric on physical spacetime. At the polar-coordinate endpoints $\theta=0,\pi$, phase is redundant; the coordinate determinant alone is not a physical singularity.
 
----
+### 7.2 Mixed-state quantum Fisher geometry
 
-## 10. A Combined Penrose-Compatible Question
+Define symmetric logarithmic derivatives by $\partial_a\rho=(L_a\rho+\rho L_a)/2$ and the quantum Fisher matrix by $F^Q_{ab}=\operatorname{Re}\operatorname{Tr}(\rho L_aL_b)$ [2]. We use the convention $g^Q=F^Q/4$.
 
-The strongest version of the present research question is not:
-
-> Is CCC collapse?
-
-It is:
-
-> Could a cosmological state-selection law be compatible with Penrose-style objective reduction and with the conformal boundary conditions of CCC?
-
-One schematic possibility is
+For fixed $\eta$ and interior $\theta$, Eq. 9 has Bloch vector
 
 $$
-\rho_{\mathcal X^-}
-\xrightarrow{
-\mathcal R_{\mathrm{OR}}
-}
-\rho_{\mathcal X^+,\alpha},
-\quad \text{(18)}
+\mathbf r=(\eta\sin\theta\cos\varphi,\eta\sin\theta\sin\varphi,\cos\theta).
 $$
 
-where X denotes a cosmological classicalization/crossover boundary and R_OR is a hypothetical reduction law.
-
-Equation (18) is **not Penrose's equation** and is not asserted as CCC. It is a research placeholder showing where an objective-selection mechanism would have to enter.
-
----
-
-## 11. Relationship to rESP and CMST
-
-CSSH was motivated by the same general question that motivates CMST: how does a distributed state become an observed state?
-
-The mathematics must nevertheless remain separated.
-
-In rESP v3.3:
+For the full-rank interior the qubit formula
 
 $$
-C(t)=\rho_{11}(t)
+F^Q_{ab}=\partial_a\mathbf r\cdot\partial_b\mathbf r+
+\frac{(\mathbf r\cdot\partial_a\mathbf r)(\mathbf r\cdot\partial_b\mathbf r)}{1-|\mathbf r|^2}
 $$
 
-is a population proxy,
+therefore yields
 
 $$
-E(t)=|\rho_{01}(t)|
+F^Q=\begin{pmatrix}1&0\\0&\eta^2\sin^2\theta\end{pmatrix},\qquad
+g^Q=\frac14\begin{pmatrix}1&0\\0&\eta^2\sin^2\theta\end{pmatrix}.\tag{19}
 $$
 
-is a local coherence/coupling proxy,
+The tangential pure-state limit $\eta=1$ agrees with Eq. 18. This is a two-parameter metric at fixed $\eta$, not the full three-parameter metric obtained by also estimating $\eta$.
+
+Consequently,
 
 $$
-\mathcal W_{\mathrm{cov}}
-=
-\lambda_{\min}(g_{\mathrm{cov}})
+\det g^Q=\frac{\eta^2\sin^2\theta}{16}=\frac{E^2}{4}.\tag{20}
 $$
 
-is a covariance near-singularity witness,
+The final equality is an exact identity **within this particular family and coordinate convention**, not a universal relation between every CMST statistic and a quantum metric. With nonzero sector probabilities, $\eta\to0$ makes phase indistinguishable while the state remains a mixed ensemble. Metric-rank loss is therefore not proof of a single selected outcome.
+
+### 7.3 Geometry of the observed probabilities
+
+A fixed measurement induces a classical probability model. Its Fisher matrix is
 
 $$
-\mathcal W_s
+F^{P}_{ab}=\sum_{\alpha:p_\alpha>0}
+\frac{\partial_a p_\alpha\,\partial_b p_\alpha}{p_\alpha}.\tag{21}
 $$
 
-is a sign-bearing adapter regularizer, and
+For the sector measurement in Eq. 12,
 
 $$
-A(\phi)
-=
-\log\det(\widetilde G+\lambda I)
+F^{P}=\begin{pmatrix}1&0\\0&0\end{pmatrix},\tag{22}
 $$
 
-is a Fisher-subspace observable.
+even when the underlying state is fully coherent. This measurement cannot estimate phase; its zero determinant is a limitation of the chosen readout, not evidence of physical collapse. A phase-sensitive alternative measurement can access information absent from Eq. 22.
 
-None is a collapse operator.
+For a parameter-independent POVM, the classical Fisher matrix is bounded by the symmetric-logarithmic-derivative quantum Fisher matrix in each parameter direction [2]. The example explicitly realizes that distinction. It also exposes why the information geometry of a recorded distribution must not be silently identified with the geometry of the underlying state.
 
-The cosmological state-selection operation is
+Once a rank-one sector outcome is selected, its normalized state $P_a$ does not depend on the original $\theta,\varphi$. The classical outcome frequencies still contain information about $\theta$. Thus the information in the record and the geometry of the conditioned state are different objects.
 
-$$
-\mathcal M_{\mathrm{cos},\alpha}.
-$$
+### 7.4 Relation to CMST
 
-CMST may serve as a **toy laboratory for comparing dynamical and state-selection mathematics**, but rESP data cannot be promoted into evidence for cosmological collapse without an independent physical bridge.
+The [detector paper](rESP_Quantum_Self_Reference.md) uses $C=\rho_{11}$ and $E=|\rho_{01}|$ as local model descriptors. In Eq. 9 they become $C=\sin^2(\theta/2)$ and $E=\eta\sin\theta/2$. This gives an explicit toy interface between the two manuscripts.
 
----
+But CMST's temporal covariance, purity-related scalar and empirical predictive-score matrix are not $g^Q$. A classical learned readout may have $\widetilde G=N^{-1}\sum_ns_ns_n^T$ and $A_\lambda=\log\det(\widetilde G+\lambda I)$; connecting it to Eq. 21 requires a specified likelihood, sampling measure and measurement model. Connecting it to cosmological geometry requires further physical work. Neither correspondence follows from the shared word “geometry.”
 
-## 12. Naming
+## 8. When does a selected sector count as semiclassical spacetime?
 
-To prevent category errors, use:
-
-| Object | Recommended name |
-|---|---|
-| H_cos | cosmological state space |
-| ρ_pre or Ψ_pre | pre-classical cosmological state |
-| {M_cos,α} | cosmological measurement/state-selection instrument |
-| M_cos,α | outcome-conditioned state-selection map |
-| ρ_classical,α | selected semiclassical branch/state |
-| X | possible cosmological classicalization/crossover boundary |
-| C, E | CMST local observables/proxies |
-| W_cov, W_s, A(φ) | CMST geometry/statistical diagnostics |
-
-Do **not** use "Hilbert space" as the name of the state itself.
-
----
-
-## 13. What Would Make CSSH Physics Rather Than Analogy?
-
-CSSH must clear at least five gates.
-
-### Gate 1 — State-space definition
-
-Specify the physical state space, constraints, and inner product rather than leaving H_cos abstract.
-
-### Gate 2 — Selection dynamics
-
-Derive M_cos,α or an alternative nonlinear reduction law from a physical mechanism rather than inserting it by hand.
-
-### Gate 3 — Born consistency
-
-Explain whether and why the resulting weights reproduce
+Replace the two-dimensional illustration by a proposed physical state space and admissible macroscopic sectors $P_\alpha$. Merely writing $K_\alpha$ does not guarantee that the output lies in the intended sector. A sufficient support condition is
 
 $$
-p_\alpha
-=
-\operatorname{Tr}(E_\alpha \rho)
+P_\alpha K_{\alpha r}=K_{\alpha r}\quad\text{for all refinements }r.\tag{23}
 $$
 
-or predict a controlled deviation.
+Then $P_\alpha\rho_\alpha P_\alpha=\rho_\alpha$. Degenerate sectors can contain mixed quantum states; a macroscopically definite sector need not be a globally pure state.
 
-### Gate 4 — Semiclassical limit
+Semiclassical interpretation additionally requires defined geometric/matter observables $O_A$, concentration such as $\Delta O_A/O_{A,\rm ref}\ll1$ relative to nonzero specified macroscopic scales, acceptable correlations, and approximate dynamical equations. Using a reference scale avoids dividing by a mean that might be zero.
 
-Show that the selected state yields general relativity and quantum field theory in the appropriate limit.
-
-### Gate 5 — Distinguishing prediction
-
-Derive an observation that differs from standard decoherence, no-boundary/tunneling cosmology, objective-collapse alternatives, or CCC without selection.
-
-Until Gate 5 exists, CSSH is a mathematically organized hypothesis, not a tested cosmological theory.
-
----
-
-## 14. Candidate Falsifiers
-
-The proposal should be rejected or substantially revised if:
-
-1. no consistent state-selection map can be defined on the relevant constrained quantum-gravity state space;
-2. the map violates probability conservation or positivity without a justified replacement theory;
-3. it cannot recover known semiclassical physics;
-4. it predicts uncontrolled energy-momentum violation;
-5. its observable predictions reduce exactly to standard decoherence with no additional explanatory or predictive content;
-6. an alleged CCC connection requires treating the conformal crossover as a measurement despite no such structure in the theory.
-
----
-
-## 15. Minimal Hypothesis
-
-The entire proposal can be compressed to:
+If the physical states obey gravitational constraints, each operation must preserve their admissible subspace. With physical projector $P_{\rm phys}$, a sufficient domain condition is
 
 $$
-\boxed{
-\rho_{\mathrm{pre}}
-\in
-\mathcal D(\mathcal H_{\mathrm{cos}})
-}
+P_{\rm phys}K_{\alpha r}P_{\rm phys}=K_{\alpha r}P_{\rm phys},
+\qquad \sum_{\alpha,r}K_{\alpha r}^\dagger K_{\alpha r}=I_{\rm phys}.\tag{24}
 $$
 
-and
+The projector notation presupposes that the physical inner product/subspace has actually been defined; it does not solve gauge constraints.
+
+A quantum state mapped into a geometry-labeled basis does not yet derive the metric, Einstein dynamics, matter production, a low-entropy initial condition or the arrow of time. The present toy model assumes its candidate sectors. It is therefore pre-classical, not a derivation of geometry from genuinely pre-geometric degrees of freedom.
+
+## 9. Clock, records, conservation and selection
+
+A cosmological application needs a relational clock or another explicit ordering prescription. The model parameter $\tau$ is not evidence of a classical era before the Big Bang. Ordinary decoherence may concern internal matter/geometry degrees of freedom; it does not require a conscious observer outside the universe. Any subsystem split in a constrained gravitational theory needs justification.
+
+A closed system can be modeled unitarily while reduced states decohere through internal correlations. An objective-collapse variant changes the physical account and must specify its law; a boundary condition that selects allowed histories is a third kind of proposal, not automatically a measurement interaction.
+
+Probability preservation does not imply energy conservation. For a toy Hamiltonian $H$, an unconditional channel changes the mean energy by
 
 $$
-\boxed{
-\rho_{\mathrm{pre}}
-\xrightarrow{
-\mathcal M_{\mathrm{cos},\alpha}
-}
-\rho_{\mathrm{classical},\alpha}
-}
+\Delta\langle H\rangle=
+\operatorname{Tr}\left[\rho\left(\sum_{\alpha,r}K_{\alpha r}^\dagger H K_{\alpha r}-H\right)\right].\tag{25}
 $$
 
-with M_cos,α belonging to the same mathematical family used to describe quantum state selection.
+In the dephasing example this vanishes for $H$ diagonal in the selected basis, but not generally for a noncommuting $H$. For full cosmology, a globally conserved Hamiltonian need not exist in the same form; local stress-energy conservation and the gravitational constraint/Bianchi identities must be addressed in the chosen theory. The toy conservation example is not a proof of covariant consistency.
 
-Everything beyond those two statements—the trigger, the relation to gravity, OR, CCC, retrocausality, or rESP—is additional hypothesis.
+## 10. Penrose: a possible physical motivation, not an identification
 
----
+Penrose's objective-reduction proposal relates a characteristic reduction timescale to a gravitational self-energy scale, schematically $\tau_{\rm OR}\sim\hbar/E_G$ [3]. The usual mass-distribution reasoning presupposes a gravitational setting; extending it to an origin-of-spacetime problem is additional work. The timescale alone does not specify every Kraus operator, Born weight or relativistic collapse dynamics.
+
+Conformal Cyclic Cosmology (CCC) instead proposes successive expanding aeons, whose remote future and next Big Bang meet through conformal geometry at a crossover 3-surface. Meissner and Penrose's 2025 account explicitly treats the crossover geometry as essentially classical and conformally smooth, subject to its stated exceptions [6]. It is not a contracting-universe bounce or a measurement-collapse equation.
+
+CSSH could ask whether a specified reduction law is compatible with particular CCC boundary conditions. It does not attribute Eq. 11, the toy rate, or the state-selection instrument to CCC. No equality between a CMST determinant, a twistor alpha-plane and a CCC crossover has been derived here.
+
+## 11. What would distinguish a cosmological theory?
+
+An arbitrary initial state plus arbitrary instrument can accommodate many outcome distributions. Without independently constrained choices, the model is too flexible to generate a distinctive cosmological prediction. The finite calculations above establish consistency of one mathematical construction, not evidence for its interpretation.
+
+A physical extension must fix the admissible state family, a relational clock, the rate and selected observables, their gravitational couplings, and a semiclassical limit. It must then derive a likelihood for accessible observations and compare it against standard decoherence, existing collapse models and alternative cosmologies with equivalent calibration freedom. CMB or other cosmological data are relevant only after such an observation model is derived; no anomaly in those data is claimed here.
+
+A specified model fails if it violates its own positivity, probability, constraint or physical conservation conditions, fails the required semiclassical limit, or conflicts with its predictions. If two proposed mechanisms produce the same accessible statistics, the correct conclusion is **non-identifiability with those observations**, not automatic falsification of either mechanism. In particular, Eq. 15 demonstrates why the present ensemble trajectory cannot distinguish intrinsic selection from environmental dephasing.
+
+## 12. How the two papers fit together
+
+The constructive bridge is
+
+$$
+\text{state family}\longrightarrow\text{specified measurement}\longrightarrow
+\text{probability geometry and conditional states}.
+$$
+
+rESP/CMST asks which changes in computational dynamics can be measured reliably. CSSH asks whether a state-selection description can apply to cosmology, and supplies a controlled model in which to study that question. The same foundational quantum formalism can guide the second question without the first paper becoming evidence for a cosmic mechanism.
+
+A useful next computational study compares coherent evolution, unobserved dephasing, observed selective trajectories, classical mixtures and sampling artifacts under locked readouts and held-out parameters. In particular, test whether a claimed selection detector confuses Eq. 20 or Eq. 22 with actual selection. This study can evaluate the instrument's discriminating power; it cannot by itself observe the state of a pre-Big-Bang universe.
+
+The hypothesis is now mathematically specified at the finite-model level. The physical bridge to an actual cosmological state remains the research claim to establish.
+
+## Reproducibility note
+
+A fresh numerical equation audit used seed `20381003`, 1,000 valid random qubit states for the purity identity and 90 parameter choices for the quantum Fisher calculation. All 37 focused checks passed. The largest purity-identity residual was about $1.53\times10^{-16}$; the largest checked quantum-Fisher residual was about $1.22\times10^{-15}$. These are numerical consistency checks, not new neural-network experiments, a repository-wide test run or cosmological validation. The revision audit records their scope.
+
+A minimal reproduction of the table and state checks is:
+
+```python
+import numpy as np
+
+p0, p1 = 0.3, 0.7
+phi = np.pi / 3
+P0 = np.diag([1.0, 0.0])
+P1 = np.diag([0.0, 1.0])
+
+for u in (0.0, 1.0, 3.0):
+    eta = np.exp(-u)
+    z = eta * np.sqrt(p0 * p1) * np.exp(-1j * phi)
+    rho = np.array([[p0, z], [z.conjugate(), p1]])
+    assert np.isclose(np.trace(rho), 1)
+    assert np.linalg.eigvalsh(rho).min() >= -1e-12
+    purity = np.trace(rho @ rho).real
+    det_gq = eta**2 * p0 * p1 / 4
+    assert np.isclose(purity, p0**2 + p1**2 + 2*abs(z)**2)
+    assert np.isclose(det_gq, abs(z)**2 / 4)
+    for P in (P0, P1):
+        outcome = P @ rho @ P
+        probability = np.trace(outcome).real
+        if probability > 0:
+            assert np.allclose(outcome / probability, P)
+    print(u, eta, abs(z), purity, det_gq)
+```
 
 ## References
 
-1. DeWitt, B. S. (1967). Quantum Theory of Gravity. I. The Canonical Theory. *Physical Review*, 160, 1113–1148.
-2. Hartle, J. B., & Hawking, S. W. (1983). Wave function of the Universe. *Physical Review D*, 28, 2960–2975.
-3. Halliwell, J. J., Hartle, J. B., & Hertog, T. (2019). What is the no-boundary wave function of the Universe? *Physical Review D*, 99, 043526.
-4. Nielsen, M. A., & Chuang, I. L. (2010). *Quantum Computation and Quantum Information* (10th Anniversary ed.). Cambridge University Press.
-5. Zurek, W. H. (2003). Decoherence, einselection, and the quantum origins of the classical. *Reviews of Modern Physics*, 75, 715–775.
-6. Penrose, R. (2014). On the Gravitization of Quantum Mechanics 1: Quantum State Reduction. *Foundations of Physics*, 44, 557–575.
-7. Penrose, R. (2010). *Cycles of Time: An Extraordinary New View of the Universe*. The Bodley Head.
-8. Meissner, K. A., & Penrose, R. (2025). *The Physics of Conformal Cyclic Cosmology*. arXiv:2503.24263.
+[1] Preskill, J. *Quantum Information, Chapter 3: Foundations II—Measurement and Evolution*, updated October 2018. General operations: §3.2.4, Eqs. 3.51–3.55; dephasing and master equations: §§3.4–3.5. https://www.preskill.caltech.edu/ph219/chap3_15.pdf
 
----
+[2] Liu, J., Yuan, H., Lu, X.-M., and Wang, X. (2020). Quantum Fisher information matrix and multiparameter estimation. *Journal of Physics A* 53, 023001. https://arxiv.org/abs/1907.08037
 
-**Boundary statement:** CSSH is a speculative mathematical hypothesis. Its purpose is to turn the double-slit/cosmology analogy into equations precise enough to criticize, extend, or falsify.
+[3] Penrose, R. (2014). On the Gravitization of Quantum Mechanics 1: Quantum State Reduction. *Foundations of Physics* 44, 557–575. https://doi.org/10.1007/s10701-013-9770-0
+
+[4] Hartle, J. B., and Hawking, S. W. (1983). Wave function of the Universe. *Physical Review D* 28, 2960–2975. doi:10.1103/PhysRevD.28.2960. See also Halliwell, J. J., Hartle, J. B., and Hertog, T. (2019), *What is the No-Boundary Wave Function of the Universe?*, https://arxiv.org/abs/1812.01760.
+
+[5] Perez, A., Sahlmann, H., and Sudarsky, D. (2006). On the quantum origin of the seeds of cosmic structure. *Classical and Quantum Gravity* 23, 2317–2354. https://arxiv.org/abs/gr-qc/0508100
+
+[6] Meissner, K. A., and Penrose, R. (2025). *The Physics of Conformal Cyclic Cosmology*. https://arxiv.org/abs/2503.24263
+
+[7] UnDaoDu and 0102 research collaboration. [rESP / CMST, version 3.4](rESP_Quantum_Self_Reference.md). Computational detector framework, not evidence for CSSH.
