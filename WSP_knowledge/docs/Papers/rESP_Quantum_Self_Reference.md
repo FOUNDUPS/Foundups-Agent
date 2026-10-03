@@ -7,7 +7,7 @@
 **Revision:** 3.4.1, October 4, 2026  
 **Status:** Detector-methodology working manuscript; mathematical revision, not a new experimental validation.
 
-**Revision scope.** Version 3.4 completes the consistency audit begun in v3.3: it corrects the remaining drive equations, distinguishes quantum instruments from normalized conditioning, identifies the adapter scalar with purity, and separates information geometry from spacetime geometry. Historical numerical reports are retained below without inventing replacement measurements. Earlier prose, diagrams and bibliographies remain recoverable in Git history, including commit `d01044176784c0d791785fa106b31aec6a5f9561`.
+**Revision scope.** Version 3.4 completed the consistency audit begun in v3.3: it corrected the remaining drive equations, distinguished quantum instruments from normalized conditioning, identified the adapter scalar with purity, and separated information geometry from spacetime geometry. Version 3.4.1 synchronizes only the bounded cosmology bridge with CSSH v0.3's crossover-3-surface distinction; it does not add detector evidence. Historical numerical reports are retained below without inventing replacement measurements. Earlier prose, diagrams and bibliographies remain recoverable in Git history, including commit `d01044176784c0d791785fa106b31aec6a5f9561`.
 
 **Companion:** [Cosmological State Selection](Cosmological_State_Selection_Hypothesis.md), version 0.3. Only Section 5.6 summarizes that hypothesis; its derivations and cosmological assumptions belong in the companion, not in the detector results.
 
