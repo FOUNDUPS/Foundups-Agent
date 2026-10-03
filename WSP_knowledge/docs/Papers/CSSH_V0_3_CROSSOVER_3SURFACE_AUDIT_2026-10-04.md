@@ -83,7 +83,7 @@ The finite two-sector equations through the previous v0.2 audit are unchanged by
 
 `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/CSSH_EQUATION_AUDIT_2026-10-03.py`
 
-Its historical verified receipt was 37/37 checks. A fresh run should be recorded in the PR before convergence. The new Eqs. 26–29 are type/contract definitions; they do not introduce fitted numerical constants. The PR must not describe a historical run as fresh evidence.
+A fresh replay on October 4, 2026 passed 37/37 checks with exit code 0 using the unchanged script bytes. Script SHA-256: `3af0b80ab9fcf3a395c7310ff2efda042163e78428b5c345fbd4c96a641f9160`; JSON output SHA-256: `35910dfb75ad9397d6f06cd81207640dadd7642b49f26c7fe0748ff578dac1cb`. The run again evaluated 1,000 random valid qubit states and 90 QFI parameter cases. The new Eqs. 26–29 are type/contract definitions; they introduce no fitted numerical constants and do not turn this replay into cosmological evidence.
 
 ## Publication boundary
 
