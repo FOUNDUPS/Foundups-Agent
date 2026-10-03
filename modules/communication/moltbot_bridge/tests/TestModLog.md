@@ -1,3 +1,29 @@
+## 2026-10-02 — Synthetic Council-shape sender regression
+
+- Reused existing provider spy with exact role-array assertions instead of a
+  hardcoded one-BCC assertion; no prior case removed or weakened.
+- Fully synthetic IDs/addresses, content, attachment and provider watermark preserve
+  the live transaction topology without publishing private data or real provider IDs.
+- Seventeen new cases cover exact one-shot submission, BCC removal/addition/role
+  change, one-character address, reply/thread/purpose/scope/attachment change,
+  stale watermark, exact readback IDs/roles, durable ambiguity and already-Sent repair.
+- Focused owner: 177 passed; determinism/connected/hosted evidence recorded in PR.
+- All pre-submit failures assert zero spy submissions. No live provider mutation.
+
+## 2026-10-02 — #1779 authenticated service regression qualification
+
+- Existing Python recipient/state owner extended to cover service boundary, without
+  adding a parallel test module. Existing Node owner freezes quarantined v2 entrypoints.
+- Original Node successful composer-issued receipts are intentionally rejected;
+  successful exact/readback paths are tested in the stronger Python authority instead.
+- First run: 149 Python passed; after capsule validation additions: 158 passed.
+  Final source: 160 Python passed repeatedly, 7 Node quarantine cases passed.
+  Connected eSingularity: 79 Python and 18 Node cases passed; registry current
+  (1672 files, 270 quarantined). Hosted exact-head results belong to the PR.
+- Added final expiry recheck after potentially contended durable claim; test retains
+  the claim and proves zero submissions if the authorization expires during DB wait.
+- Zero provider mutations asserted for every pre-submit failure. No live Gmail effects.
+
 ## 2026-10-02 — Correspondence sender-boundary fail-closed qualification
 
 - Added `test_reddog_correspondence_sender_boundary.mjs` to the existing CI

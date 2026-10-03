@@ -1,3 +1,10 @@
+## Sender boundary acceptance correction — 2026-10-02
+
+PR #2029's caller-loadable V8 adapter did not mechanically isolate Work Gmail.
+The [#1779 audit](docs/clarity/1779_sender_boundary_audit.md) records its concrete
+counterexamples and the service-owned Python replacement. The old host is quarantined.
+Repository tests do not qualify the external tool host; containment remains active.
+
 ## Connected current reviewer verification — 2026-10-01
 
 The [current reviewer API](INTERFACE.md#connected-current-reviewer-verification-api--2026-10-01)

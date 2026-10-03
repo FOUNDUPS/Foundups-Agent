@@ -1,3 +1,30 @@
+## 2026-10-02 — Council transaction topology regression (#2031)
+
+- Audited existing service/tests before extending them; no new resolver or wrapper.
+- Added fully synthetic one-To/one-CC/three-BCC reply/PDF fixture to the existing
+  test owner. Seventeen cases bind attachment, roles, reply/thread, purpose/scope,
+  Sent watermark, exact provider IDs/recipients, durable replay/unknown/no-resend.
+- Independently read the reported live Sent transaction; reconciled its existing
+  private Moshpit event in place. No duplicate log, private fixture or mail mutation.
+- Audit explicitly separates repository properties from external tool-host denial.
+  Direct Work Gmail mutations remain exposed. #1779 OPEN; #2031 remains draft.
+
+## 2026-10-02 — #1779 closure audit and service authority correction
+
+- Reopened #1779 after audit of merged #2029 found composer-recomputable receipts,
+  duplicated routing policy, no capsule/draft gate, no durable replay claims and
+  optional provider identities. Work direct Gmail actions still bypass the wrapper.
+- Added service-owned Python boundary using existing recipient preflight/readback;
+  extended the native store with receipt digests, atomic unique claims and per-recipient
+  submission state. No bodies/address dumps are persisted. Quarantined v2 V8 sends.
+- Extended existing recipient/state tests for pre-submit zero-call failures, exact BCC
+  and identity/role binding, restart/concurrency replay, delayed expiry, historical Sent
+  suppression, finalized draft gating and exact provider Sent verification.
+- Recorded the actual tool-host integration contract and STT Akida/Akita -> Akira
+  Hasegawa correction. No contact created, draft deleted or email sent. WSP00/50/78/97.
+- Actual-host isolation remains OPEN. Corrective PR cannot merge under 012's acceptance
+  condition; #1779 and external-send containment remain open/active.
+
 ## 2026-10-02 — Mechanical correspondence sender boundary (#1779)
 
 - Added the dependency-free host adapter

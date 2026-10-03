@@ -1,3 +1,12 @@
+## #1779 remains open — operator authority integration
+
+The corrective service boundary reuses canonical preflight, durable native claims,
+state/draft gates and exact provider readback. Remaining prerequisite: authenticated
+live reconciliation/provider deployment plus removal of direct Gmail mutation
+capabilities in all governed Work/background sessions. Qualify immutable draft
+submission and actual-host bypass rejection before merge/closure or lifting containment.
+See [integration contract](docs/clarity/1779_sender_boundary_audit.md).
+
 ## Reviewer-authority closure and next RSI test — 2026-10-02
 
 The connected reviewer-key layer is merged/main-verified in PR #2014 at `44d833c`.
