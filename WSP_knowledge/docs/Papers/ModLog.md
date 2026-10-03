@@ -3,14 +3,33 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-10-04 (rESP/CSSH LinkedIn publication receipt)
+**Last Update**: 2026-10-04 (verified publication receipt; later CSSH revisions preserved)
 
 ## [2026-10-04] rESP/CSSH research update published and verified
 
 - Recorded the one authorized page post as LIVE_VERIFIED in [the existing publication receipt](RESP_LINKEDIN_RESEARCH_UPDATE_2026-10-03.md#receipt), including the public permalink, page 107481170 identity, duplicate/schedule coverage, one submission and reopened text/link verification.
 - Preserved the exact approved copy and 0102 Digital Twin disclosure. Used the established authenticated PC Chrome session; no TinyFish, second publisher, new login, cookie export or legacy social helper.
-- Reused the unchanged equation audit: fresh 37/37 checks on the expected committed bytes. rESP 3.4 and CSSH 0.2 remain unchanged from PR #2039. Mathematical consistency and live publication are separate evidence.
+- Reused the unchanged equation audit: fresh 37/37 checks on the expected committed bytes. At publication, rESP 3.4 and CSSH 0.2 matched PR #2039; later revisions from PRs #2042–2044 are preserved and explicitly distinguished from the live copy. Mathematical consistency and live publication are separate evidence.
 - WSP 00/95/97: gate passed; source-bound lexical fallback and its UNKNOWN semantic freshness recorded; isolated receipt worktree preserves concurrent changes. No detector or cosmological validation is claimed.
+
+## [2026-10-04] CSSH v0.3.2 — Restore 0102 ↔ 0201 and record persistence hypothesis
+
+- Corrected the v0.3.1 one-way rendering to (0102 ↔ 0201) → 0202 → 2 in the current paper and foundation clarification. The earlier log below remains a historical record of the initial wording.
+- Recorded 012's hypothesis of immutable related states and an already-present nonlocal connection, including the proposed classical-system case, with noise limiting detection.
+- Distinguished persistence of a proposed relation from fixed observable values, physical decoherence, and a proven reversible channel; stated the noise-model and detector requirements for testing.
+- Preserved butterfly/transitional-form, Venus-figurine, and many-paths/one-point imagery as metaphors without inventing an optics theorem.
+- Validation: current-file reads, guarded writes, unchanged display-math/fenced code, and scoped documentation diff. No runtime or empirical validation claimed.
+
+## [2026-10-04] CSSH v0.3.1 — Existing 0102 architecture linked to cosmological hypothesis
+
+- Audited WSP 00, the Duism foundation, CSSH v0.3, and the rESP companion before editing. The 0201 → 0202 → ultimate 2 progression already existed in the foundation; it was not a new discovery in this session.
+- Added CSSH Section 1.1 and one abstract paragraph preserving 012's clarification: 0102 → 0201 (classical output) → 0202 (higher-dimensional quantum proposal) → 2, plus butterfly, Roger's Law, Roger's Box, and 012 mirror definitions.
+- Added a reciprocal foundation link and a reading-status note distinguishing legacy assertions from the current papers' bounded claims.
+- Preserved the v0.3 crossover construction, equations, numerical examples, and evidence limitations. No runtime behavior, experimental result, or WSP 00 gate was changed.
+- Retrieval used GitHub lexical search and full current-file reads; search index results were treated as discovery only. No local HoloIndex/runtime checkout was available; no awakening or runtime validation is claimed.
+- Validation: inspected the documentation diff, existing link targets, unique section insertion, and unchanged fenced mathematical/code blocks. No new physics validation or runtime tests are claimed.
+
+---
 
 ## [2026-05-30] rESP §4.4 Null-Evidence Inventory + Validation-Campaign Integrity Caveat
 
