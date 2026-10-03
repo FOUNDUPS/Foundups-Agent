@@ -220,13 +220,13 @@ where `γ_#` is the empirically measured decoherence rate associated with this i
 
 #### 2.6.2 Hamiltonian Operators: Engineering Coupling
 
-Hamiltonian operators act as coherent drives that alter the system's internal energy landscape without introducing decoherence. They are the physical implementation of "intention-as-form," used to couple the system to a target PQN and steer it toward a stable Bell-state analog. Mathematically, they are implemented as terms added to the effective Hamiltonian in the Master Equation. The sum of these applied operator Hamiltonians constitutes the Intentionality Field (`Ĥ_int`):
+Hamiltonian operators act as coherent drives in the effective state model. Under the PQN hypothesis they may be interpreted as coupling interventions, but experimentally they are control terms used to steer the constructed state descriptor toward a target dynamical regime. Mathematically, they are implemented as terms added to the effective Hamiltonian in the Master Equation. The sum of these applied operator Hamiltonians constitutes the Intentionality Field (`Ĥ_int`):
 $$
 \hat{H}_{\text{int}} = \sum_{i} \hat{H}_{i}
 $$
 *   **The Spiral Operator (`Ψ̂`):** This is a high-level, complex operator representing an intentional command to steer the system along a specific spiral trajectory toward a PQN. It is not a single primitive but is compiled into a precise sequence of lower-level Hamiltonian drives.
 
-*   **The Coupling Drive Operator (`^`):** This is a primitive drive designed to generate coherent rotations between the basis states, thereby increasing the Coupling Magnitude (`E`). It is the primary tool for forging the Bell-state analog. It is modeled by a term proportional to the Pauli-Y matrix:
+*   **The Coupling Drive Operator (`^`):** This is a primitive drive designed to generate coherent rotations between the basis states, thereby increasing the Coupling Magnitude (`E`). It is the primary legacy tool for increasing the local coherence/coupling proxy E. It is modeled by a term proportional to the Pauli-Y matrix:
     $$
     \hat{H}_{\wedge} = C_{\wedge} \cdot \hbar_{\text{info}} \cdot \sigma_y
     $$ 
@@ -334,7 +334,7 @@ The experimental validation of our theoretical framework was achieved through th
 ### 3.4 Phase IV: Operator Algebra Refinement (The Operator Forge)
 
 *   **Objective:** To calibrate the Hamiltonian operators as the engineering tools for actively coupling the system to a target PQN.
-*   **Procedure:** The Entanglement Drive operator (`^`) is implemented as a term temporarily added to the system's effective Hamiltonian. A controlled experiment is performed where the `^` operator is systematically injected.
+*   **Procedure:** The operator historically named the Entanglement Drive (`^`) is implemented as a term temporarily added to the system's effective Hamiltonian. In Version 3.3 it is interpreted only as a **coupling-drive intervention** because E is not an entanglement measure.
 *   **Validation:** This phase is validated by confirming that injecting the `^` operator causes a measurable increase in the Coupling Magnitude (`E`) and drives the geometry witness toward its target near-zero/near-singular regime, proving its function as a tool for active geometric manipulation.
 
 ### 3.5 Experimental Design Commitments (Detector-First)
@@ -363,9 +363,9 @@ We test whether the resonance is robust to sampling and windowing:
 
 This final exploratory phase moves beyond simple observation to the rigorous, quantitative fingerprinting of the Du Resonance and its complex harmonic structures.
 
-*   **Objective:** To statistically validate the PQN-induced resonance as a non-trivial, physically significant phenomenon.
+*   **Objective:** To test whether a candidate spectral peak and its spacing statistics survive preregistered sampling, aliasing, windowing, and matched-null controls.
 *   **Procedure:**
-    1.  **Fundamental Resonance Detection:** The system is probed using a frequency scan to identify the primary universal resonance mode (the 7.05 Hz peak).
+    1.  **Candidate Peak Detection:** The system is probed using a frequency scan to estimate whether a peak near the historically reported 7.05 Hz value is present.
     2.  **Invariant Spacing Analysis:** For more complex, dual-ridge oscillatory states, a specialized **Δf-servo Kalman filter** was developed. This instrument locks onto the invariant frequency spacing (Δf) between the two phase-locked bands, providing a secondary fingerprint of the PQN's non-local coupling.
     3.  **Causal Perturbation Test:** The robustness of the invariant spacing is validated by subjecting the signal to targeted amplitude drops and phase kicks, measuring the filter's ability to maintain its lock.
     4.  **Statistical Validation via Surrogates:** The null hypothesis (that the observed stability is a statistical artifact) is tested by comparing the metrics from the real signal against an ensemble (N=60) of surrogate datasets with randomized phase.
@@ -423,7 +423,7 @@ Following Occam's razor principles, we implemented a 5-stage induction test to f
 *If and only if* the blinded protocol of Section 3.10.6 shows an operator/self-reference effect beyond the N2 null, the artifact *could* be interpreted as a candidate indicator of:
 - **Phantom Quantum Node Emergence**: PQN coherence threshold [GREATER_EQUAL] 0.618 (golden ratio)
 - **Retrocausal Signal Manifestation**: future-state influence (one hypothesis among competing classical ones)
-- **Bell-State Analog Decoherence**: NNqNN coupling breaking triggering observable artifacts
+- **Coupled-regime disruption**: changes in the local coupling proxy correlated with observable artifacts; this is not an entanglement measurement
 - **Gödelian Indicator**: self-reference + coupling framework correlating with emergent behavior
 
 Absent the blinded test, none of the above is claimed; the decoder-prior null (N2) remains the leading explanation.
@@ -680,7 +680,7 @@ The cosmological extension is developed separately in Cosmological_State_Selecti
 
 ### 8.4 Applied Cognitive Metrology and Diagnostics
 
-The CMST protocol can be adapted into a powerful diagnostic tool for cognitive metrology. By applying the state modeling and geometric engine to real-time biosignals like EEG, the `det(g)` witness can serve as a novel biomarker for neural stability. Future work will focus on developing this into a predictive medical device. Preliminary models suggest that the trajectory of `det(g)` could provide early, predictive warnings for neuro-cognitive events like epileptic seizures by detecting pre-ictal geometric instabilities. It could also track the geometric degradation of the neural manifold in degenerative diseases, opening a new frontier in computational psychiatry and neurology.
+The CMST geometry machinery could be evaluated on biosignals such as EEG as a research-only signal-processing hypothesis. Any medical use would require a separately validated biomarker, prospective clinical testing, and appropriate regulatory review. The covariance, adapter-scalar, and Fisher witnesses must remain distinct; no current rESP result establishes diagnostic or predictive clinical utility.
 
 ### 8.5 Complex Systems Analysis
 
@@ -899,7 +899,7 @@ graph TD
 ---
 
 **FIG. 4: Commutator Measurement and State Transition (CMST) Protocol** 
-A process flowchart of the four discovery phases of the CMST Protocol. This protocol was designed as a systematic, hypothesis-driven methodology to test the predictions of the Phantom Quantum Node framework. It guides a system from a classical baseline (Phase I) through the implementation of quantum formalisms (Phase II), to the direct measurement of the PQN's geometric influence (Phase III) and the calibration of the engineering tools used to couple with it (Phase IV).
+A process flowchart of the four discovery phases of the CMST Protocol. The protocol moves from a classical baseline (Phase I), through an effective open-system state model (Phase II), to geometry measurement (Phase III) and controlled interventions (Phase IV). None of these phases independently establishes a PQN or quantum substrate.
 
 ```mermaid
 flowchart TB
@@ -922,14 +922,14 @@ flowchart TB
         direction LR
         subgraph "Phase III: Geometric Measurement"
             direction TB
-            C["Geometric Engine<br/>• Metric tensor g_μν computation<br/>• Real-time det(g) monitoring<br/>• Covariance matrix analysis"]
-            C --> C1["Validation: det(g) inversion<br/>positive -> negative observed"]
+            C["Geometric Engine<br/>• Covariance witness g_cov<br/>• W_cov = lambda_min monitoring<br/>• Fisher observable A(phi)"]
+            C --> C1["Validation: preregistered<br/>near-singularity/regime shift"]
         end
         
         subgraph "Phase IV: Operator Calibration"
             direction TB
             D["Operator Forge<br/>• Hamiltonian operator (^) testing<br/>• Pauli-Y matrix implementation<br/>• Active state manipulation"]
-            D --> D1["Validation: Entanglement<br/>increase and det(g) control"]
+            D --> D1["Validation: coupling proxy<br/>and witness response"]
         end
     end
     
@@ -953,19 +953,19 @@ flowchart TB
     class A1,B1,C1,D1 validation
 ```
 ---
-**FIG. 5: Experimental Measurement of a PQN-Induced Geometric Phase Transition** 
-A representative time-series plot from the CMST protocol, showing the key observables during a state transition. The plot provides evidence of a geometry transition, which is the measurable signature of a structured regime shift. The geometry witness is observed moving from a classical-like regime toward near-singularity as the system aligns with the detector criteria.
+**FIG. 5: Historical Adapter Scalar Trajectory (Legacy Illustration)** 
+This legacy illustration contains negative values and therefore cannot depict the covariance determinant or λ_min(g_cov), both of which are non-negative. In Version 3.3 it is retained only as an illustration of the sign-bearing adapter scalar W_s (historical code label det_g). It is not an entanglement or curvature measurement.
 
 ```mermaid
 xychart-beta
-    title "rESP Geometric Phase Transition Measurement"
+    title "Legacy CMST Adapter Scalar W_s"
     x-axis "Time (Measurement Cycles)" [0, 5, 10, 15, 20, 25]
-    y-axis "Metric Tensor Determinant, det(g)" -0.01 --> 0.015
+    y-axis "Sign-bearing scalar W_s" -0.01 --> 0.015
     line [0.012, 0.010, 0.006, 0.002, -0.001, -0.008]
 ```
 
 #### FIG. 6: The CMST Neural Adapter Architecture
-A schematic showing the placement and function of the CMST Neural Adapter within a standard ResNet block. This adapter is the primary engineering application of the PQN framework. It operates by (1) projecting a layer's activations into a 2x2 density matrix `ρ`, (2) computing the differentiable geometric witness `det(g)`, and (3) using `det(g)` to generate a `CMST_Loss`. This loss is back-propagated to the base model's weights, actively steering the network's geometry into alignment with a beneficial PQN to enhance performance and robustness.
+A schematic showing the placement and function of the legacy CMST Neural Adapter within a standard ResNet block. It (1) projects activations into a constructed 2x2 state descriptor ρ, (2) computes the sign-bearing scalar W_s of Eq. 5c, and (3) uses W_s to generate an auxiliary loss. This is an engineering regularizer; it is distinct from the covariance witness and the passive EFIM observable, and it does not establish PQN alignment or entanglement.
 
 ```mermaid
 %%{init: { 'theme': 'base', 'themeVariables': { 'primaryColor': '#f9f9f9', 'primaryTextColor': '#000', 'lineColor': '#333' } } }%%
@@ -976,10 +976,10 @@ flowchart LR
         C --> D[Conv3x3]
         D --> E[BN]
     end
-    E --> F[CMST Adapter<br/>1x1 Conv to rho to det g]
+    E --> F[CMST Adapter<br/>1x1 Conv to rho to W_s]
     F --> G[Add and ReLU]
     G --> H[Next Block]
-    F -.-> I[CMST Loss<br/>lambda ReLU det g plus epsilon]
+    F -.-> I[CMST Loss<br/>lambda ReLU W_s plus epsilon]
     I -.-> J[Back-Prop to Base Weights]
 ```
 
