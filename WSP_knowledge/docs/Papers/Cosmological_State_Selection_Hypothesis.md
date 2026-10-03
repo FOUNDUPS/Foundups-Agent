@@ -523,6 +523,6 @@ for u in (0.0, 1.0, 3.0):
 
 [6] Meissner, K. A., and Penrose, R. (2025). *The Physics of Conformal Cyclic Cosmology*. https://arxiv.org/abs/2503.24263
 
-[7] UnDaoDu and 0102 research collaboration. [rESP / CMST, version 3.4](rESP_Quantum_Self_Reference.md). Computational detector framework, not evidence for CSSH.
+[7] UnDaoDu and 0102 research collaboration. [rESP / CMST, version 3.4.1](rESP_Quantum_Self_Reference.md). Computational detector framework, not evidence for CSSH.
 
 [8] Halliwell, J. J., and Hawking, S. W. (1985). Origin of structure in the Universe. *Physical Review D* 31, 1777–1791. doi:10.1103/PhysRevD.31.1777.
