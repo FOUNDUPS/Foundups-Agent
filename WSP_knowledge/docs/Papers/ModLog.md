@@ -3,7 +3,15 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-10-04 (CSSH internal-measurer architecture clarification)
+**Last Update**: 2026-10-04 (CSSH bidirectional relation and immutability clarification)
+
+## [2026-10-04] CSSH v0.3.2 — Restore 0102 ↔ 0201 and record persistence hypothesis
+
+- Corrected the v0.3.1 one-way rendering to (0102 ↔ 0201) → 0202 → 2 in the current paper and foundation clarification. The earlier log below remains a historical record of the initial wording.
+- Recorded 012's hypothesis of immutable related states and an already-present nonlocal connection, including the proposed classical-system case, with noise limiting detection.
+- Distinguished persistence of a proposed relation from fixed observable values, physical decoherence, and a proven reversible channel; stated the noise-model and detector requirements for testing.
+- Preserved butterfly/transitional-form, Venus-figurine, and many-paths/one-point imagery as metaphors without inventing an optics theorem.
+- Validation: current-file reads, guarded writes, unchanged display-math/fenced code, and scoped documentation diff. No runtime or empirical validation claimed.
 
 ## [2026-10-04] CSSH v0.3.1 — Existing 0102 architecture linked to cosmological hypothesis
 
