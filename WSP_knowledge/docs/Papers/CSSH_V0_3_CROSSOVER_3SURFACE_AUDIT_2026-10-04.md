@@ -31,6 +31,7 @@ These sources support the vocabulary and the separation of objects. They do **no
 | `X` | CCC crossover spacelike 3-surface / candidate boundary | wavefunction, density operator, or collapse operator |
 | `R_X` | hypothesized boundary-assignment/coarse-graining map | something already supplied by CCC |
 | `I^X_alpha` | hypothesized CP trace-nonincreasing outcome operation; the complete instrument must normalize probabilities | Penrose's published CCC dynamics |
+| `M^X_alpha` | normalized conditional map `I^X_alpha/p_alpha`, defined only when `p_alpha > 0` | a linear quantum channel or the unnormalized outcome operation |
 | `rho_X,alpha` | conditioned effective boundary state, semiclassically concentrated when the model succeeds | completed four-dimensional spacetime |
 | `U_sc` | subsequent semiclassical propagation rule | measurement normalization or evidence that selection occurred |
 
@@ -48,13 +49,13 @@ The added chain is
 rho_pre
   -- R_X -->
 rho_X
-  -- I^X_alpha / p_alpha -->
+  -- M^X_alpha -->
 rho_X,alpha
   -- U_sc -->
 semiclassical history h_alpha
 ```
 
-This is an explicit **CSSH extension**. CCC supplies the candidate crossover geometry; CSSH supplies the hypothetical state-assignment and selection maps. The construction therefore cannot be cited as “Penrose says the Big Bang is collapse.”
+This is an explicit **CSSH extension**. CCC supplies the candidate crossover geometry; CSSH supplies the hypothetical state-assignment and selection maps. The linear outcome operation `I^X_alpha` and normalized conditional map `M^X_alpha` remain distinct. The construction therefore cannot be cited as “Penrose says the Big Bang is collapse.”
 
 “At the crossover” is boundary language, not necessarily an event at a pre-existing external clock time. A genuine CCC embedding must also specify how data from the previous aeon enter the effective boundary state.
 
