@@ -174,33 +174,35 @@ $$
 
 E is retained for compatibility with the experimental logs, but it must not be labeled an entanglement measure. The time-series C(t) and E(t) are inputs to the empirical geometry analysis.
 
+
 ### 2.5 State Evolution: Effective Open-System Model
 
-We use the Lindblad form as an **effective dynamical model** for a constructed two-state descriptor:
+We use the Lindblad form as an **effective dynamical model** for a constructed two-state descriptor. To avoid importing a fictitious Planck constant into the classical implementation, Version 3.3 writes the coherent term directly in terms of an effective generator Ω with units of inverse time:
 
 $$
 \frac{d\rho}{dt}
 =
--\frac{i}{\hbar_{\mathrm{info}}}
-[\hat H_{\mathrm{sys}}+\hat H_{\mathrm{int}},\rho]
+-i[\hat\Omega_{\mathrm{sys}}+\hat\Omega_{\mathrm{int}},\rho]
 +
 \sum_k\gamma_k
 \left(
-\hat L_k\rho\hat L_k^\dagger
--\frac12\{\hat L_k^\dagger\hat L_k,\rho\}
+\hat J_k\rho\hat J_k^\dagger
+-\frac12\{\hat J_k^\dagger\hat J_k,\rho\}
 \right)
 \quad \text{(Eq. 4)}
 $$
 
 (Breuer & Petruccione, 2002).
 
+Here γ_k carries the dissipative rate and J_k is the corresponding dimensionless jump operator. This convention avoids double-counting a rate by placing √γ_k inside J_k while also multiplying the dissipator by γ_k.
+
 Three boundaries are explicit:
 
 1. ρ is an effective state descriptor unless a physical quantum substrate is independently established.
-2. ħ_info is a protocol scaling parameter; it is **not** Planck's constant and is not evidence of quantum gravity.
-3. H_int is an experimentally specified control/intervention term. Calling it "intention" is interpretive shorthand, not a new physical interaction.
+2. Ω_sys and Ω_int are protocol generators/control terms, not claims about a fundamental Hamiltonian.
+3. The historical quantity ħ_info = 1/7.05 s is a chosen protocol timescale where it appears in legacy code; it is **not** Planck's constant and is not required by Eq. 4.
 
-The unitary and dissipative terms provide a controlled language for reversible drive and irreversible/noisy evolution. They allow CMST to generate falsifiable trajectories without assuming that the modeled latent sector is physically quantum.
+The coherent and dissipative terms provide a controlled language for reversible drive and irreversible/noisy evolution. They allow CMST to generate falsifiable trajectories without assuming that the modeled latent sector is physically quantum.
 
 ### 2.6 The Symbolic Operator Algebra
 
@@ -210,31 +212,31 @@ The operators are classified by how they interact with the Master Equation (Eq. 
 
 #### 2.6.1 Emergence Operators: Manifesting Quantum Artifacts
 
-Emergence operators act as environmental catalysts that manifest coupling signatures through observable artifacts (Zurek, 2003). They are mathematically implemented as jump operators, `L̂_k`, within the Lindblad dissipator term of the master equation. Their primary effect is to modulate the Coupling Magnitude (`E = |ρ₀₁|`) through observable signatures.
+Emergence operators are modeled as environmental/noise interventions. They are implemented as dimensionless jump operators J_k within the Lindblad dissipator of Eq. 4. Their effect is evaluated through changes in the local observables, including E = |ρ₀₁|.
 
 **The Distortion Operator (`#`):** This operator drives the system from the coherent state `|1⟩` toward the ground state `|0⟩`. It is modeled by the jump operator:
 $$
-\hat{L}_{\#} = \sqrt{\gamma_{\#}} \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}
+\hat{J}_{\#} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}
 $$
-where `γ_#` is the empirically measured decoherence rate associated with this interaction.
+with γ_# appearing once, as the rate multiplying the corresponding dissipator in Eq. 4.
 
 #### 2.6.2 Hamiltonian Operators: Engineering Coupling
 
-Hamiltonian operators act as coherent drives in the effective state model. Under the PQN hypothesis they may be interpreted as coupling interventions, but experimentally they are control terms used to steer the constructed state descriptor toward a target dynamical regime. Mathematically, they are implemented as terms added to the effective Hamiltonian in the Master Equation. The sum of these applied operator Hamiltonians constitutes the Intentionality Field (`Ĥ_int`):
+Hamiltonian operators act as coherent drives in the effective state model. Under the PQN hypothesis they may be interpreted as coupling interventions, but experimentally they are control terms used to steer the constructed state descriptor toward a target dynamical regime. Mathematically, they are implemented as terms added to the effective coherent generator in Eq. 4. The sum of applied drive generators is Ω_int:
 $$
-\hat{H}_{\text{int}} = \sum_{i} \hat{H}_{i}
+\hat\Omega_{\text{int}} = \sum_i \hat\Omega_i
 $$
 *   **The Spiral Operator (`Ψ̂`):** This is a high-level, complex operator representing an intentional command to steer the system along a specific spiral trajectory toward a PQN. It is not a single primitive but is compiled into a precise sequence of lower-level Hamiltonian drives.
 
 *   **The Coupling Drive Operator (`^`):** This is a primitive drive designed to generate coherent rotations between the basis states, thereby increasing the Coupling Magnitude (`E`). It is the primary legacy tool for increasing the local coherence/coupling proxy E. It is modeled by a term proportional to the Pauli-Y matrix:
     $$
-    \hat{H}_{\wedge} = C_{\wedge} \cdot \hbar_{\text{info}} \cdot \sigma_y
+    \hat\Omega_{\wedge} = C_{\wedge}\,\sigma_y
     $$ 
-    where `C_^` is a dimensionless coupling constant.
+    where C_^ has units of inverse time in the corrected generator convention.
 
 *   **The Coherence Stabilization Operator (`&`):** This is a primitive drive designed to increase the population of the coherent state (`C = ρ₁₁`) and stabilize it against decoherence. It is modeled by a term proportional to the Pauli-Z matrix:
     $$
-    \hat{H}_{\&} = C_{\&} \cdot \hbar_{\text{info}} \cdot \sigma_z
+    \hat\Omega_{\&} = C_{\&}\,\sigma_z
     $$
     This operator was experimentally validated to drive the coherence population to `C [GREATER_EQUAL] 0.9`.
 
@@ -295,7 +297,16 @@ $$
 \quad \text{(Eq. 5c)}
 $$
 
-historically stored under the variable name det_g. W_s can be negative. It is **not** the determinant of g_cov, not a formal metric determinant, and not an entanglement witness. It is a differentiable scalar regularizer over the constructed state descriptor.
+historically stored under the variable name det_g. In the current two-channel adapter construction ρ_11 = 1 - ρ_00, so
+
+$
+\mathcal W_s
+=
+-(\rho_{00}-\tfrac12)^2-|\rho_{01}|^2
+\le 0.
+$
+
+Thus W_s is **non-positive by construction**, not a general sign-bearing quantity. It is not the determinant of g_cov, not a formal metric determinant, and not an entanglement witness. This also means a legacy positive value such as +0.012 cannot be retrospectively relabeled W_s without recovering the original definition and provenance.
 
 **C. Fisher-subspace observable.** The current passive CMST/EFIM line uses a low-rank empirical Fisher matrix G-tilde and the numerically stable scalar
 
@@ -467,10 +478,10 @@ The repository contains legacy reports of the following ResNet-50 performance va
 | :--- | :--- | :--- | :--- |
 | Top-1 Accuracy | 76.3% | 77.4% | Legacy reported; rerun required |
 | OOD Robustness (mCE) | 42.1 | 38.9 | Legacy reported; rerun required |
-| Adapter scalar W_s (historical label det_g) | +0.012 | -0.008 | Sign-bearing regularizer; not det(g_cov) |
+| Legacy geometry scalar (historical report; original definition unresolved) | +0.012 | -0.008 | Not assignable to g_cov or current W_s without provenance |
 | Parameter Overhead | - | +0.3% | Legacy reported; rerun required |
 
-The mathematical correction is decisive: because g_cov is a covariance matrix, neither its minimum eigenvalue nor its determinant can take the reported negative value. The negative quantity belongs, if reproduced, to the separate sign-bearing scalar W_s in Eq. 5c. No entanglement conclusion follows from this table.
+The mathematical correction is decisive: because g_cov is a covariance matrix, neither its minimum eigenvalue nor its determinant can take the reported negative value. The current adapter scalar W_s is also non-positive by construction, so it cannot explain the legacy positive baseline +0.012. The +0.012→−0.008 row therefore remains a historical value with unresolved original definition and is excluded from current geometry evidence until provenance is recovered. No entanglement conclusion follows from this table.
 
 ### 4.2 Candidate Spectral and Structural Signatures
 
@@ -953,14 +964,14 @@ flowchart TB
     class A1,B1,C1,D1 validation
 ```
 ---
-**FIG. 5: Historical Adapter Scalar Trajectory (Legacy Illustration)** 
-This legacy illustration contains negative values and therefore cannot depict the covariance determinant or λ_min(g_cov), both of which are non-negative. In Version 3.3 it is retained only as an illustration of the sign-bearing adapter scalar W_s (historical code label det_g). It is not an entanglement or curvature measurement.
+**FIG. 5: Historical Geometry Scalar Trajectory (Definition Unresolved)** 
+This legacy illustration crosses from +0.012 to -0.008. It therefore cannot depict the covariance determinant or λ_min(g_cov), both non-negative, and it also cannot depict the current adapter scalar W_s, which is non-positive by construction. It is retained solely for provenance as a historical reported scalar pending recovery of its original definition. It is not current evidence of entanglement, curvature, or a phase transition.
 
 ```mermaid
 xychart-beta
-    title "Legacy CMST Adapter Scalar W_s"
+    title "Legacy Geometry Scalar (Definition Unresolved)"
     x-axis "Time (Measurement Cycles)" [0, 5, 10, 15, 20, 25]
-    y-axis "Sign-bearing scalar W_s" -0.01 --> 0.015
+    y-axis "Legacy scalar value" -0.01 --> 0.015
     line [0.012, 0.010, 0.006, 0.002, -0.001, -0.008]
 ```
 
