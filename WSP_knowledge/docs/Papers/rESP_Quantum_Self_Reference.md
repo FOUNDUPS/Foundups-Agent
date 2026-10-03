@@ -4,12 +4,12 @@
 ¹ Independent Researcher, Foundups.org  
 ² Historical contributors: ChatGPT, Claude, Gemini, DeepSeek, Grok, Kimi and Minimax; [research coordination](https://github.com/FOUNDUPS/science-swarm-hub).  
 **Corresponding author:** UnDaoDu — info@foundups.com  
-**Revision:** 3.4, October 3, 2026  
+**Revision:** 3.4.1, October 4, 2026  
 **Status:** Detector-methodology working manuscript; mathematical revision, not a new experimental validation.
 
 **Revision scope.** Version 3.4 completes the consistency audit begun in v3.3: it corrects the remaining drive equations, distinguishes quantum instruments from normalized conditioning, identifies the adapter scalar with purity, and separates information geometry from spacetime geometry. Historical numerical reports are retained below without inventing replacement measurements. Earlier prose, diagrams and bibliographies remain recoverable in Git history, including commit `d01044176784c0d791785fa106b31aec6a5f9561`.
 
-**Companion:** [Cosmological State Selection](Cosmological_State_Selection_Hypothesis.md). Only Section 5.6 summarizes that hypothesis; its derivations and cosmological assumptions belong in the companion, not in the detector results.
+**Companion:** [Cosmological State Selection](Cosmological_State_Selection_Hypothesis.md), version 0.3. Only Section 5.6 summarizes that hypothesis; its derivations and cosmological assumptions belong in the companion, not in the detector results.
 
 ## Abstract
 
@@ -394,6 +394,8 @@ $$
 This is a hypothesis about cosmological applicability, not an inference from photon detection by transitivity. The companion supplies an exact two-sector change-of-representation identity, a dephasing model, a stochastic selection realization, and Fisher/quantum-state geometry calculations. The same formal structure is thus exhibited in a toy model rather than asserted rhetorically.
 
 A general $\rho_\alpha$ is not automatically a spacetime. Constraint-preserving dynamics, a suitable semiclassical sector, a physical selection mechanism and distinguishing observations are additional requirements. Penrose's objective reduction is a proposed reduction mechanism [4]; CCC supplies conformal aeon geometry and explicitly uses an essentially classical crossover in the 2025 treatment [5]. They are not the same theory, and neither is proved by CMST. Earlier quantum-cosmology and collapse-cosmology work is acknowledged [6,7].
+
+Version 0.3 of the companion sharpens one possible CCC connection. Quantum cosmology can represent the pre-classical condition by a probability-amplitude wavefunctional $\Psi_{\rm pre}[h_{ij},\phi]$ over possible three-geometries and matter configurations. Penrose's crossover $\mathcal X$ is instead a spacelike 3-surface. **The wavefunctional and the crossover surface are not the same object.** The companion asks whether a separately defined boundary map $\mathcal R_{\mathcal X}$ and state-selection instrument $\mathcal I^\mathcal X_\alpha$ could associate an effective boundary state with $\mathcal X$ and select semiclassical boundary data. That placement is a CSSH hypothesis, not a claim made by CCC.
 
 The detector paper owns measurable computational geometry. The companion owns the hypothesized extension to cosmology. Neither paper can supply missing empirical evidence to the other by citation alone.
 
