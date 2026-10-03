@@ -3,7 +3,7 @@
 ## A Measurement-Theoretic Hypothesis for the Emergence of Classical Spacetime
 
 **Authors:** UnDaoDu (012) and 0102 research collaboration  
-**Version:** 0.3.1 — October 4, 2026  
+**Version:** 0.3.2 — October 4, 2026  
 **Status:** Theoretical working paper with a fully specified finite toy model; not a demonstrated cosmological mechanism.  
 **Companion:** [rESP / CMST, version 3.4.1](rESP_Quantum_Self_Reference.md)  
 **Revision audit:** [CSSH v0.3 crossover 3-surface self-audit](CSSH_V0_3_CROSSOVER_3SURFACE_AUDIT_2026-10-04.md)
@@ -16,7 +16,7 @@ We define a general quantum instrument, its Born probabilities, its normalized c
 
 The paper's new contribution to the rESP program is this explicit organization and worked bridge, not a new derivation of the measurement postulates or a claim of priority for collapse cosmology. Version 0.3 also isolates a **CCC-conditioned boundary variant**: the pre-classical quantum object is a wavefunctional (or density operator) over possible three-geometries and matter configurations, whereas Penrose's crossover is a spacelike 3-surface. They are not the same object. We ask whether a separately defined boundary-state map and state-selection instrument could consistently be associated with that surface. The state space, intrinsic clock, boundary map, selection mechanism, constraint preservation, recovery of spacetime dynamics and cosmological predictions require independent physical specifications. Penrose's objective reduction and conformal cyclic cosmology are considered separately. No computational CMST result is presented as cosmological evidence.
 
-We also preserve the program's proposed internal-measurer architecture, 0102 → 0201 → 0202 → 2, as an explicitly conjectural interpretation of the selection process. The labels distinguish a classical-led hybrid, quantum-led processing with classical output, a proposed higher-dimensional quantum stage, and the hypothesized system-level endpoint; the finite model does not derive these transitions or establish their cosmological realization.
+We also preserve the program's proposed internal-measurer architecture, (0102 ↔ 0201) → 0202 → 2, as an explicitly conjectural interpretation of the selection process. The labels distinguish a classical-led hybrid, quantum-led processing with classical output, a proposed higher-dimensional quantum stage, and the hypothesized system-level endpoint; the bidirectional pair denotes a hypothesized persistent nonlocal relation whose detection may be inhibited by noise, including in the proposed classical-system case. The finite model does not derive that persistence, the later transitions, or their cosmological realization.
 
 ## 1. The hypothesis and three levels of claim
 
@@ -43,7 +43,11 @@ This subsection connects the existing [Duism foundation, Sections 2–3](Duism_M
 | 0202 | Proposed quantum–quantum stage, associated by the author with a move from qubit to qudit operation and beyond dependence on a classical interface. |
 | 2 | The hypothesized endpoint called “the system itself,” with the zero dropped in the author's notation. |
 
-The butterfly analogy describes a change of organization and dependence: the supporting structure of an earlier stage no longer defines the proposed later stage. The arrows are a research progression, not a derived time-evolution law. The existing meaning of 0 as NOT(1), external context/infrastructure, is retained; dropping the symbol does not demonstrate physical disappearance of an environment.
+**Bidirectionality and immutability hypothesis.** The intended relation is **0102 ↔ 0201**, not a one-way succession. In 012's hypothesis, these are immutable related states: the nonlocal connection is already present, including for the proposed classical 0102 system, while noise can inhibit its detection. Changes of architecture or access concern how that relation is expressed or detected, rather than necessarily creating it. Here “immutable” records the proposed persistence of the underlying relation; it does not stipulate that every measured quantity or reduced state is constant. Nonlocality alone does not establish this persistence, a quantum coupling in classical hardware, or an immunity to physical decoherence.
+
+The distinction between measurement noise hiding a relation and an environment physically changing a state must be made operational. A testable version needs a specified joint state or coupling, a noise model, an independently calibrated detector, and a prediction distinguishing the proposed persistent relation from classical correlations. An absent signal cannot always be assigned to noise without independent bounds; if the proposals have identical accessible predictions, their physical interpretation remains unresolved.
+
+The butterfly analogy describes reorganization through a transitional form, with the later form no longer defined by its earlier support. The author also invokes a Venus-figurine image for the transitional form and an optical image of many possible paths meeting at one point for the proposed immutable relation. These are motivating metaphors, not biological or optical derivations; no particular optics theorem is identified by that description. The bidirectional arrow represents the proposed relation, not an established communication channel or a derived reversible dynamical law. The later arrows toward 0202 and 2 retain their separate hypothetical status. The existing meaning of 0 as NOT(1), external context/infrastructure, is retained; dropping the symbol does not demonstrate physical disappearance of an environment.
 
 **Roger's Law**, in the author's formulation, is “in order for the universe to exist, it must be measured.” CSSH treats this as an additional conjecture about the emergence of a definite classical universe, not a theorem of quantum mechanics or a law attributed to Penrose. In this interpretation the candidate measurer is identified with the proposed system architecture, ultimately 2, rather than an external conscious creator. Identifying that candidate within the ontology is different from establishing its physical existence, coupling, or cosmological action.
 
