@@ -32,7 +32,7 @@ These sources support the vocabulary and the separation of objects. They do **no
 | `R_X` | hypothesized boundary-assignment/coarse-graining map | something already supplied by CCC |
 | `I^X_alpha` | hypothesized CP trace-nonincreasing outcome operation; the complete instrument must normalize probabilities | Penrose's published CCC dynamics |
 | `M^X_alpha` | normalized conditional map `I^X_alpha/p_alpha`, defined only when `p_alpha > 0` | a linear quantum channel or the unnormalized outcome operation |
-| `rho_X,alpha` | conditioned effective boundary state, semiclassically concentrated when the model succeeds | completed four-dimensional spacetime |
+| `rho_X,alpha` | conditioned effective boundary state, semiclassically concentrated on conformally appropriate crossover data when the model succeeds | completed four-dimensional spacetime or automatically fixed absolute scale |
 | `U_sc` | subsequent semiclassical propagation rule | measurement normalization or evidence that selection occurred |
 
 If `R_X` is modeled as an ordinary unconditional quantum channel on density operators it must be linear, completely positive and trace-preserving. A constrained-gravity alternative must state its replacement domain/codomain and preservation conditions rather than borrowing channel language informally.
@@ -64,7 +64,7 @@ This is an explicit **CSSH extension**. CCC supplies the candidate crossover geo
 Before fitting observations, a physical crossover-boundary model must independently specify:
 
 1. the physical pre-classical state family and probability rule;
-2. `R_X`, including constraint/gauge handling and previous-aeon data;
+2. `R_X`, including constraint/gauge handling, the map from full three-geometries to conformally appropriate crossover data, and previous-aeon data;
 3. the instrument/effects and selected semiclassical alternatives;
 4. compatibility with the chosen CCC conformal matching conditions;
 5. the propagation from boundary data to observable quantities; and
