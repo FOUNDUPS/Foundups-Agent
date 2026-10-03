@@ -478,7 +478,7 @@ The hypothesis is now mathematically specified at the finite-model level. The ph
 
 ## Reproducibility note
 
-A fresh numerical equation audit used seed `20381003`, 1,000 valid random qubit states for the purity identity and 90 parameter choices for the quantum Fisher calculation. All 37 focused checks passed. The largest purity-identity residual was about $1.53\times10^{-16}$; the largest checked quantum-Fisher residual was about $1.22\times10^{-15}$. These are numerical consistency checks, not new neural-network experiments, a repository-wide test run or cosmological validation. The revision audit records their scope.
+A fresh numerical equation audit was replayed for Version 0.3 using seed `20381003`, 1,000 valid random qubit states for the purity identity and 90 parameter choices for the quantum Fisher calculation. All 37 focused checks passed. The largest purity-identity residual was about $1.53\times10^{-16}$; the largest checked quantum-Fisher residual was about $1.11\times10^{-15}$. The script SHA-256 remained `3af0b80ab9fcf3a395c7310ff2efda042163e78428b5c345fbd4c96a641f9160`, and the JSON output SHA-256 remained `35910dfb75ad9397d6f06cd81207640dadd7642b49f26c7fe0748ff578dac1cb`. These are numerical consistency checks, not new neural-network experiments, a repository-wide test run or cosmological validation. The revision audit records their scope.
 
 A minimal reproduction of the table and state checks is:
 
