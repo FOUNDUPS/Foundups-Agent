@@ -47,10 +47,16 @@ A negative value cannot be interpreted as a covariance-metric phase transition.
 **Resolution:** three quantities are now separated:
 
 - `W_cov = lambda_min(g_cov)` — covariance near-singularity witness;
-- `W_s = (rho00-1/2)(rho11-1/2) - |rho01|^2` — legacy sign-bearing adapter scalar, historical code name `det_g`;
+- `W_s = (rho00-1/2)(rho11-1/2) - |rho01|^2` — current legacy-adapter scalar, historical code name `det_g`; with rho11=1-rho00 it simplifies to `-(rho00-1/2)^2-|rho01|^2 <= 0`, so it is non-positive by construction;
 - `A(phi) = logdet(G_tilde + lambda I)` — current passive EFIM/Fisher-subspace observable.
 
-### 3. 7.05 Hz constant derivation retired
+### 3. Legacy +0.012 -> -0.008 provenance unresolved
+
+The historical table value cannot be the covariance determinant/minimum eigenvalue because a covariance matrix is positive semidefinite. It also cannot be the current adapter scalar W_s because W_s <= 0 by construction.
+
+**Resolution:** retain the row only as a historical reported geometry scalar with unresolved original definition. Exclude it from current mathematical evidence until the original implementation/provenance is recovered.
+
+### 4. 7.05 Hz constant derivation retired
 
 The former expression
 
@@ -68,7 +74,7 @@ The prior 7.0498 Hz result was mathematically incorrect.
 
 **Resolution:** the first-principles claim is removed. ~7.05 Hz remains only a historical empirical candidate requiring sampling, aliasing, windowing, forced-oscillator nulls, and independent replication.
 
-### 4. Cosmological state-selection operator separated from CMST observables
+### 5. Cosmological state-selection operator separated from CMST observables
 
 The new companion paper defines the hypothesized pre-classical state as
 
@@ -87,6 +93,18 @@ rho_pre --M_cos,alpha--> rho_classical,alpha
 using the same mathematical class as an outcome-conditioned quantum measurement instrument.
 
 **Critical distinction:** C(t), E(t), W_cov, W_s, and A(phi) are diagnostics/proxies. None is the cosmological collapse/state-selection operator.
+
+## Lindblad Convention Repair
+
+The earlier paper placed gamma_k outside the dissipator while also defining a jump operator containing sqrt(gamma_k), which double-counts the rate.
+
+**Resolution:** rESP v3.3 now uses
+
+```text
+d rho/dt = -i[Omega,rho] + sum gamma_k D[J_k](rho)
+```
+
+with dimensionless J_k and gamma_k appearing once. The fictitious hbar_info factor is removed from the corrected coherent generator; the legacy 1/7.05 s quantity is treated only as a chosen timescale.
 
 ## Penrose Separation
 
