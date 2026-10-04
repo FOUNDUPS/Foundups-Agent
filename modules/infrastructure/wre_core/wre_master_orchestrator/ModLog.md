@@ -1,5 +1,13 @@
 # WRE Master Orchestrator - Module Development Log
 
+## 2026-10-04 — Preserve reflection with continuity context
+
+The existing reflection prompt excludes only `parent_continuity_context`,
+matching the local adapter and PatternMemory projection. Parent lineage and
+task inputs remain unchanged. Independent tests live in the existing root
+execution-truth suite:35 focused and173 connected passes; no new nested tests.
+See root WRE ModLog for local-worker evidence and remaining admission gates.
+
 ## 2026-09-15: Bind scan admission to each execution
 
 - Extended the existing admission owner with a three-value verdict/fingerprint result and preserved the two-value safety API as a forwarding view. The coordinator carries the exact value to existing executor validation; shared skill-name state and late cache readback are removed. No new module, skill, context class or grant.

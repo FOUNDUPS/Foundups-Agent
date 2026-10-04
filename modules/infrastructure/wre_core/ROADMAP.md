@@ -1,3 +1,11 @@
+## Local continuity proposal canary — 2026-10-04
+
+Existing local proposal/reflection repair:35 focused and173 connected passes.
+A real local Qwen native-chat worker supplied two expressions after raw mode
+failed the task. Publication and later retained use remain separate. Follow
+the canonical root roadmap/backlog for fresh selection; native18/P0 admission
+is still blocked. This supervised diagnostic does not activate production RSI.
+
 ## Current repository repair layer — 2026-10-04
 
 Failure recall now separates execution success from structural fidelity.

@@ -1,3 +1,25 @@
+## Continuity proposal regression — 2026-10-04
+
+The OpenClaw continuity object remains available to its lineage owner but is
+omitted from local proposal and reflection prompt JSON, matching existing
+PatternMemory handling. Ordinary task fields, input objects, indentation and
+reflection truncation are preserved; unrelated nonserializable values still
+fail. Two existing expressions changed; no new runtime module or admission.
+
+Independent frozen baseline:8 expected failures/27 passes across35 cases;
+repaired source:35/35 and173/173 connected cases pass (selections overlap,
+14 new cases). The raw local worker returned only “Do not claim effects.” and
+was rejected. The existing native-chat route supplied the exact two accepted
+expressions in27.172s after a counted metadata-only model load. Same task/model,
+different formatting and stop behavior: this is a route comparison, not isolated
+causal proof. Tokens unavailable; paid inference calls0; coordinator cost unknown.
+Model text remains unverified; independent source review, publication and later
+retained use are separate gates. No native Hermes/OpenClaw ticket admitted.
+
+Existing CI already selects `test_wre_execution_truth.py` plus PatternMemory,
+skill-evolution continuity and master suites. No workflow or criteria change.
+Commands/source pins/results: `O:/Foundups-Agent/outputs/rsi-local-continuity-proposal-20261004/`.
+
 ## Failure recall regression — 2026-10-04
 
 Extended the existing `test_recall_failure_patterns` with independent success

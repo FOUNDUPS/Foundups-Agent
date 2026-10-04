@@ -1,3 +1,23 @@
+## 2026-10-04 — Local continuity proposal canary
+
+The OpenClaw continuity object remains available to its lineage owner but is
+omitted from local proposal and reflection prompt JSON, matching existing
+PatternMemory handling. Ordinary task fields, input objects, indentation and
+reflection truncation are preserved; unrelated nonserializable values still
+fail. Two existing expressions changed; no new runtime module or admission.
+
+Independent frozen baseline:8 expected failures/27 passes across35 cases;
+repaired source:35/35 and173/173 connected cases pass (selections overlap,
+14 new cases). The raw local worker returned only “Do not claim effects.” and
+was rejected. The existing native-chat route supplied the exact two accepted
+expressions in27.172s after a counted metadata-only model load. Same task/model,
+different formatting and stop behavior: this is a route comparison, not isolated
+causal proof. Tokens unavailable; paid inference calls0; coordinator cost unknown.
+Model text remains unverified; independent source review, publication and later
+retained use are separate gates. No native Hermes/OpenClaw ticket admitted.
+
+WSP00/5/15/22/48/50/84/97/99. Reuse before extension; no skill duplication.
+
 ## 2026-10-04 — Compose current-generation review quorum
 
 - Close PR2048 at `3df09e895`: all ten PR checks/main CI/CodeQL passed, PR/main
