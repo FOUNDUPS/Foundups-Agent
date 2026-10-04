@@ -1,4 +1,21 @@
-## 2026-10-05 — Qualify named scope telemetry (in progress)
+## 2026-10-05 — Preserve measured zero in fidelity statistics
+
+- Coordinator repair replaces truthiness fallbacks with explicit `None` checks
+  for three means. SQL/time windows, ranking, threshold rate and schema unchanged;
+  shortened semantic docstring brings method 58 → 50/file 1280 → 1272 lines.
+- Frozen valid baseline: 4 failures/5 passes (3.625s) becomes 9 passes (3.266s); 42 disjoint
+  connected cases pass (7.109s), zero errors/skips/denials, stable 17 source pins.
+  Actual reopened selection changes from zero misreported 0.5 to measured 0.4.
+- One local Qwen attempt rejected and unused: 971/99/1070 SDK tokens, 68.719s,
+  zero paid calls, no retry or worker repair credit. Earlier harness failures
+  remain preserved. Publication and retained-use observations are pending.
+- Manifest 8/8 and RedDog fast 15 pass separately; 1408 runtime members unchanged,
+  only PatternMemory digest changed and existing compatibility pins synchronized.
+- Reconciled PR2061 closure; WSP97 withdraws a duplicate registry operation in
+  favor of conditional existing `reddog_operations` investigation after closure.
+  WSP00/5/6/11/15/22/62/97. See the [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
+
+## 2026-10-05 — Qualify named scope telemetry
 
 - Reuse the existing projection, manifest-bound dispatcher and PatternMemory
   event table for `auto_test_registry_audit`; no new planner, store or skill.
@@ -13,8 +30,8 @@
   side, one projected event, zero outcomes/variations and false effect success.
   Two earlier failures are preserved. Isolated Cisco2.2.0 passes four fixed
   compatibility controls; short owned TEMP resolves the demonstrated Windows
-  path-length barrier without global changes. PR2061 source checks passed;
-  documentation/publication closure remains open.
+  path-length barrier without global changes. PR2061 is merged/main-verified;
+  owned lane/branches retired with recovery and short TEMP preserved.
 - One local Qwen helper proposal was rejected and not applied; the coordinator
   implemented the candidate. No worker repair credit or learning gain.
 - Reconciled PR2060 exact-main/owned-lane closure. Selected 15/P1; native 18/P0

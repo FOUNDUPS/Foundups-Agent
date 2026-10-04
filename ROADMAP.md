@@ -12,18 +12,16 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — P14:** PR2060 is merged/main-verified at `b99d05309`, with
-its owned lane retired. Selected 15/P1 now qualifies the existing named WRE
-registry-scope TELEMETRY connection. The unchanged75 cases and39 additive
-controls pass; stable connected validation has306 passes/two Windows link skips.
-The real admitted planner now projects155 shards per revision and persists
-one truthful observation. Two earlier runtime failures led to an isolated
-scanner qualification and shorter owned TEMP; all outcomes remain preserved.
-Exact publication/main closure remains open in PR2061. The unsuccessful initial
-connected run is also retained as historical evidence.
-One local helper proposal was rejected, not applied. Native unattended 18/P0,
-effect permits/provider wiring and compatible authority deployment remain open.
-See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint)
+**Current layer — P15:** P14 PR2061 is merged/main-verified at `0b3f6cbc3`,
+with its owned lane retired and recovery preserved. Selected 14/P1 now repairs
+measured-zero fidelity in existing PatternMemory statistics. The valid baseline
+has 4 expected failures/5 passes; the coordinator repair passes 9 frozen cases
+and 42 disjoint connected controls. The actual reopened selector now prefers
+measured 0.4 over measured 0.0. One local Qwen proposal was rejected and unused.
+P15 publication and later retained-use validation remain pending; structural
+fidelity is not model fitness or native authority. The existing registered
+`reddog_operations` proposal route is only a conditional next 14/P1 candidate.
+See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint)
 and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
 
 **2026-10-04 retained-source checkpoint:** PR2055 is merged/main-verified and its three

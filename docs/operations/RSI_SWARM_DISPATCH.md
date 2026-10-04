@@ -1,3 +1,52 @@
+## Measured-zero fidelity — P15 checkpoint
+
+Selected 14/P1 (C2/I4/D4/Impact4) at main `0b3f6cbc37ef27eadb63ff979c847b7932745d61`:
+reuse `PatternMemory.get_skill_fidelity_stats` and the actual `SkillSelector`.
+The valid frozen baseline has 4 expected failures/5 passes (3.625s parent).
+After SQLite close/reopen, the selector chose `zero_skill`, misreported as 0.5,
+over `positive_skill` measured 0.4. Two earlier pretest harness failures and a
+prelaunch pin omission remain preserved; they are not product-baseline cases.
+
+One supervised native-chat Qwen call returned a rejected proposal: wrong
+JSON top-level shape, unmatched literal replacement and an unrelated cutoff
+refactor that leaves the defect intact and would exceed the 58-line limit.
+No application or retry occurred. One SDK event reports 971 input/99 output,
+1070 total tokens; parent 68.719s/child 58.250s, zero paid calls, cost unknown.
+The coordinator separately implemented explicit `None` fallbacks for three
+means and clarified the docstring, reducing the method 58 → 50 lines. SQL/time
+windows, ranking, rate threshold, schema and other methods remain unchanged.
+
+Unchanged frozen criteria now pass 9/9 (3.266s); 42 connected controls pass
+(7.109s). These are 51 disjoint cases, not a fitness score. Both runs have zero
+errors/skips/guard denials and stable 17 source pins. Separate manifest 8/8 and
+RedDog fast 15 checks pass; runtime closure remains 1408 members with only the
+PatternMemory runtime digest changed and both existing compatibility pins
+synchronized. Counts/thresholds are unchanged. Saved actual consumer
+returns now select `positive_skill` 0.4 over `zero_skill` 0.0. Independent source/
+result review is `cb359e6fb9efdbb5905c758074ebebb5a079d3bf4010bb94903dcca418c6f19b`.
+Publication, exact-main closure and later retained use remain pending. The
+preserved baseline SQLite snapshot has SHA256
+`b552a862630ebbb5c5e9aacebc85003a94a1ef477770d99eb6a6c2f6ed023541`;
+planned fresh-process retained/control/recovery observations must use private
+copies and verified source, without rewriting the original rows or timestamps.
+Synthetic structural fidelity is not model fitness, training or effect success.
+
+P14 PR2061 is closed: 11 PR checks plus exact-main CI 37217454010 and
+CodeQL 37217453672 passed. Owned root/branches retired; recovery receipt
+`6c33a34ec6abdd96c37bd54e4d7c82107439c234d7f9c56da711eb893e480361`
+preserves bundle/ignored evidence and unchanged shared state. Its short TEMP
+remains preserved because cleanup was blocked by tool policy.
+
+After P15 closure/retention, re-observe the existing production DECISION skill
+`reddog_operations` as a conditional 14/P1 admitted proposal candidate. The
+proposed new registry-audit operation is withdrawn under WSP97; prototype
+skills are not promoted. Actual scanner verdict, full-skill context capacity
+and the existing possible evolution call remain unresolved. Preserve proposal
+quarantine, false effect success and disposable persistence; no authority is
+fabricated. This is not dispatch approval or native unattended 18/P0 closure.
+Evidence: `outputs/rsi-zero-fidelity-20261005`; canonical backlog
+`current_observation.zero_fidelity_20261005`.
+
 ## Named registry-scope telemetry — P14 checkpoint
 
 Selected 15/P1 (C3/I4/D4/Impact4): the existing `auto_test_registry_audit` v2.3
@@ -57,10 +106,11 @@ was applied. This does not identify the hidden exception of the earlier run.
 Existing archive limits, timeout/Job/output bounds and source bindings remain.
 The temporary archive directories were absent after the successful return.
 
-Independent result reviews accept the three observed outcomes. Draft PR2061's
-source checkpoint passed all11 hosted checks, including331 WRE and675 separate
-effect-boundary cases. Final documentation/publication and exact-main closure
-remain open. Runtime evidence is in `scanner-upgrade/short-temp/wre-canary/`
+Independent result reviews accept the three observed outcomes. PR2061 is now
+merged/main-verified at 0b3f6cbc3, with 11 PR checks and both exact-main workflows
+passed. Hosted selections include331 WRE and675 separate effect-boundary cases.
+Owned lane/branches are retired with recovery preserved; short TEMP remains
+preserved after a tool-policy cleanup block. Runtime evidence is in `scanner-upgrade/short-temp/wre-canary/`
 under the P14 evidence directory; earlier attempts remain alongside it.
 
 One local Qwen helper proposal was semantically rejected and not applied, with
@@ -70,12 +120,9 @@ The coordinator implemented the candidate separately. Unit scanner verdicts
 are substituted; the separately reviewed PC observations above use the actual
 scanner, producer and private database. These do not establish native authority. Native unattended RSI remains blocked at 18/P0; effect-specific
 permit work is deferred, and Holo authority mismatch remains a separate owner
-issue. After publication closure, re-observe the concrete14/P1 candidate:
-preserve measured zero fidelity in existing PatternMemory statistics and
-verify the actual SkillSelector consequence through a supervised local
-worker repair. The current `AVG(...) or default` behavior can replace0.0
-with0.5. This source-derived candidate needs a frozen executed baseline;
-structural fidelity is not correctness or fitness. No dispatch is granted.
+issue. The earlier14/P1 measured-zero candidate is now the P15 layer above, with
+executed baseline and coordinator repair. Structural fidelity remains distinct
+from correctness or fitness; no later dispatch is granted.
 
 P13 PR2060 is closed: exact reviewed tree merged as
 `b99d05309385e272cd5d0691fa23e5abb654864a`; all 11 PR checks and exact-main CI

@@ -1092,19 +1092,9 @@ class PatternMemory(PatternABEvidenceMixin):
     # ------------------------------------------------------------------ #
 
     def get_skill_fidelity_stats(self, skill_name: str, days: int = 30) -> Dict:
-        """
-        Get historical fidelity statistics for a skill.
-
-        Per WRE_COT_DEEP_ANALYSIS.md Gap B: ToT skill selection
-
-        Returns:
-            {
-                "skill_name": str,
-                "total_executions": int,
-                "avg_fidelity": float,
-                "success_rate": float,  # fidelity >= 0.7
-                "recent_trend": float   # last 7 days vs previous
-            }
+        """Return fidelity statistics without treating measured zero as missing.
+        Absent means use 0.5 overall, or the overall mean for empty time windows.
+        success_rate counts fidelity >= 0.7, independently of execution success.
         """
         cursor = self.conn.cursor()
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
@@ -1122,7 +1112,7 @@ class PatternMemory(PatternABEvidenceMixin):
         row = cursor.fetchone()
 
         total = row['total'] or 0
-        avg_fidelity = row['avg_fidelity'] or 0.5
+        avg_fidelity = row['avg_fidelity'] if row['avg_fidelity'] is not None else 0.5
         success_rate = (row['successes'] or 0) / max(total, 1)
 
         # Recent trend (last 7 days vs previous)
@@ -1131,14 +1121,16 @@ class PatternMemory(PatternABEvidenceMixin):
             FROM skill_outcomes
             WHERE skill_name = ? AND timestamp >= ?
         """, (skill_name, recent_cutoff))
-        recent_avg = cursor.fetchone()['recent_avg'] or avg_fidelity
+        recent_avg = cursor.fetchone()['recent_avg']
+        recent_avg = avg_fidelity if recent_avg is None else recent_avg
 
         cursor.execute("""
             SELECT AVG(pattern_fidelity) as older_avg
             FROM skill_outcomes
             WHERE skill_name = ? AND timestamp >= ? AND timestamp < ?
         """, (skill_name, cutoff, recent_cutoff))
-        older_avg = cursor.fetchone()['older_avg'] or avg_fidelity
+        older_avg = cursor.fetchone()['older_avg']
+        older_avg = avg_fidelity if older_avg is None else older_avg
 
         recent_trend = recent_avg - older_avg
 

@@ -512,6 +512,85 @@ class TestPatternMemory:
             memory.conn.cursor()
 
 
+    @staticmethod
+    def _store_fidelity_sample(memory, execution_id, skill_name, age_days, fidelity, success=False):
+        memory.store_outcome(SkillOutcome(
+            execution_id=execution_id, skill_name=skill_name, agent="qwen",
+            timestamp=(datetime.now() - timedelta(days=age_days)).isoformat(),
+            input_context="{}", output_result="{}", success=success,
+            pattern_fidelity=fidelity, outcome_quality=0.0,
+            execution_time_ms=1, step_count=0,
+            notes="Synthetic structural-fidelity observation; no execution claim",
+        ))
+
+    @pytest.mark.parametrize("samples,expected", [
+        ([(1, 0.0)], (1, 0.0, 0.0, 0.0)),
+        ([(10, 0.8), (1, 0.0)], (2, 0.4, 0.5, -0.8)),
+        ([(10, 0.0), (1, 0.8)], (2, 0.4, 0.5, 0.8)),
+        ([], (0, 0.5, 0.0, 0.0)),
+        ([(10, 0.8)], (1, 0.8, 1.0, 0.0)),
+        ([(1, 0.8)], (1, 0.8, 1.0, 0.0)),
+        ([(10, 0.4), (1, 0.8)], (2, 0.6, 0.5, 0.4)),
+    ], ids=["zero_overall", "zero_recent", "zero_older", "no_history",
+            "missing_recent_window", "missing_older_window", "nonzero_unchanged"])
+    def test_fidelity_statistics_preserve_observations_and_absence(self, memory, samples, expected):
+        """An observed zero is data; absent history retains its established default."""
+        try:
+            for index, (age, fidelity) in enumerate(samples):
+                self._store_fidelity_sample(memory, f"sample_{index}", "measured_skill", age, fidelity)
+            stats = memory.get_skill_fidelity_stats("measured_skill", days=30)
+            count, average, threshold_rate, trend = expected
+            assert stats["skill_name"] == "measured_skill"
+            assert stats["total_executions"] == count
+            assert stats["avg_fidelity"] == pytest.approx(average)
+            assert stats["success_rate"] == pytest.approx(threshold_rate)
+            assert stats["recent_trend"] == pytest.approx(trend)
+        finally:
+            memory.close()
+
+    def test_fidelity_threshold_rate_is_not_outcome_success(self, memory):
+        """The historical rate measures fidelity >=0.7, independently of effect success."""
+        try:
+            self._store_fidelity_sample(memory, "below", "threshold_skill", 1, 0.699, success=True)
+            self._store_fidelity_sample(memory, "at", "threshold_skill", 1, 0.7, success=False)
+            stats = memory.get_skill_fidelity_stats("threshold_skill")
+            assert stats["total_executions"] == 2
+            assert stats["success_rate"] == pytest.approx(0.5)
+            rows = memory.conn.execute(
+                "SELECT execution_id, success FROM skill_outcomes ORDER BY execution_id"
+            ).fetchall()
+            assert [(row["execution_id"], row["success"]) for row in rows] == [("at", 0), ("below", 1)]
+        finally:
+            memory.close()
+
+    def test_retained_zero_fidelity_does_not_outrank_measured_positive(self, memory, temp_db):
+        """The real selector consumes retained measurements, without a model or dispatch."""
+        from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
+
+        try:
+            self._store_fidelity_sample(memory, "zero", "zero_skill", 1, 0.0)
+            self._store_fidelity_sample(memory, "positive", "positive_skill", 1, 0.4)
+        finally:
+            memory.close()
+        reopened = PatternMemory(db_path=temp_db)
+        try:
+            ranked = reopened.rank_skills_for_context(["zero_skill", "positive_skill"], [])
+            selection = SkillSelector(pattern_memory=reopened).select_skill(
+                ["zero_skill", "positive_skill"], {}
+            )
+            assert [row["skill_name"] for row in ranked] == ["positive_skill", "zero_skill"]
+            assert ranked[0]["score"] > ranked[1]["score"]
+            assert ranked[1]["components"]["fidelity"] == 0.0
+            assert selection.selected.skill_name == "positive_skill"
+            assert selection.branch_count == 2
+            assert {item.skill_name: item.fidelity for item in selection.candidates} == {
+                "zero_skill": 0.0, "positive_skill": 0.4,
+            }
+            assert reopened.conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0] == 2
+        finally:
+            reopened.close()
+
+
 class TestSkillOutcome:
     """Test SkillOutcome dataclass"""
 

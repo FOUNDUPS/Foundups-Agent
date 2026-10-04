@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.test_scope_telemetry_20261004",
-    "base_commit": "b99d05309385e272cd5d0691fa23e5abb654864a",
-    "selected_action": "Named admitted scope projection with truthful telemetry observation",
-    "status": "runtime_qualified_publication_pending",
+    "observation_path": "current_observation.zero_fidelity_20261005",
+    "base_commit": "0b3f6cbc37ef27eadb63ff979c847b7932745d61",
+    "selected_action": "Preserve measured zero fidelity and verify the existing selection consumer",
+    "status": "locally_qualified_publication_and_retained_use_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 15,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised source work and scanner-admitted deterministic planning observation; no native effect authority",
+    "execution_plane": "ordinary coordinator-supervised source repair; rejected local proposal supplies no effect authority",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.authenticated_effect_consent_20261004",
-    "next_action": "Close PR2061 with final exact-source checks/main verification and owned-lane recovery; then re-observe the14/P1 measured-zero fidelity candidate before any dispatch."
+    "previous_observation": "current_observation.test_scope_telemetry_20261004",
+    "next_action": "Complete P15 publication/exact-main closure and separately reviewed retained/control/recovery use; then rescore existing reddog_operations proposal feasibility without adding a registry operation."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -29270,7 +29270,7 @@
     },
     "test_scope_telemetry_20261004": {
       "base": "b99d05309385e272cd5d0691fa23e5abb654864a",
-      "state": "runtime_qualified_publication_pending",
+      "state": "merged_main_verified_owned_lane_retired",
       "scope": "Existing named auto_test_registry_audit TELEMETRY projection and event-only persistence; no SkillOutcome or runtime authority",
       "wsp15": {
         "complexity": 3,
@@ -29525,14 +29525,12 @@
           "scope": "source checkpoint only; final documentation head and main require fresh checks"
         }
       },
-      "open_gates": [
-        "Final documentation/source review and exact PR/main publication closure"
-      ],
+      "open_gates": [],
       "native_effect_admission": false,
       "unattended_rsi_complete": false,
       "actual_scanner_runtime_observation": "reviewed_projection_and_private_persistence_completed_after_two_preserved_rejections",
       "retained_gain": null,
-      "next_action": "Close PR2061 with final exact-source checks/main verification and owned-lane recovery; then re-observe the14/P1 measured-zero fidelity candidate before any dispatch.",
+      "next_action": "P15 measured-zero statistics repair selected on fresh main; publication and retained use remain its own gates.",
       "alternatives": [
         {
           "task": "Native unattended RSI admission",
@@ -29606,14 +29604,24 @@
         "scanner-upgrade/result.json": "981ea7df7aa8c4914c436de8a33e404af2f2e724cccdd41630244b3bfbe43570",
         "scanner-upgrade/controls-result-review.json": "46c0df82ed8fa22235fcee432a45524faac7b2f48383f7b8b12353de1a307137",
         "scanner-upgrade/install-receipt.json": "20501e3e77d6d8a905d53b6095c20148e19fe72ada62739541847c356cae5934",
-        "scanner-upgrade/path-length-probe.json": "4f3df512598136ebb9dff40d6e41db4376b4c0fbe63ef0e41544fc4721a3b9a6"
+        "scanner-upgrade/path-length-probe.json": "4f3df512598136ebb9dff40d6e41db4376b4c0fbe63ef0e41544fc4721a3b9a6",
+        "closure-receipt.json": "6c33a34ec6abdd96c37bd54e4d7c82107439c234d7f9c56da711eb893e480361"
       },
       "publication": {
-        "status": "draft_pr_source_checks_passed_final_docs_pending",
+        "status": "merged_main_verified_owned_lane_retired",
         "pr": 2061,
         "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2061",
         "source_head": "b674106ff2e3cd3e553af9a030fbd48db89b57e9",
-        "main_verified": false
+        "main_verified": true,
+        "head": "f3e4c20445c20e38d374a2a9267bc6b482ed0eb9",
+        "merge": "0b3f6cbc37ef27eadb63ff979c847b7932745d61",
+        "pr_checks_passed": 11,
+        "main_ci": 37217454010,
+        "main_codeql": 37217453672,
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "recovery_receipt_sha256": "6c33a34ec6abdd96c37bd54e4d7c82107439c234d7f9c56da711eb893e480361",
+        "short_temp": "preserved after tool-policy cleanup block"
       },
       "integrity": {
         "test_registry_files": 1685,
@@ -29621,6 +29629,149 @@
         "runtime_members": 1408,
         "manifest_digest": "1cae5e88497899ef4021912002b85ad495cdb172196cc72a9dc9f46c58d59428",
         "count_boundary": "admit1408/reject1409"
+      }
+    },
+    "zero_fidelity_20261005": {
+      "base": "0b3f6cbc37ef27eadb63ff979c847b7932745d61",
+      "state": "locally_qualified_publication_and_retained_use_pending",
+      "scope": "Only existing get_skill_fidelity_stats mean fallbacks and semantic docstring; coordinator repair, no ranking/schema change",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-zero-fidelity-20261005",
+      "prior_observation": "test_scope_telemetry_20261004",
+      "measurements": {
+        "valid_baseline": {
+          "cases": 9,
+          "failed": 4,
+          "passed": 5,
+          "errors": 0,
+          "skips": 0,
+          "parent_seconds": 3.625,
+          "actual_selected_skill": "zero_skill",
+          "reported_zero_fidelity": 0.5,
+          "positive_fidelity": 0.4
+        },
+        "candidate": {
+          "cases": 9,
+          "passed": 9,
+          "errors": 0,
+          "skips": 0,
+          "parent_seconds": 3.266,
+          "actual_selected_skill": "positive_skill",
+          "reported_zero_fidelity": 0.0
+        },
+        "connected": {
+          "cases": 42,
+          "passed": 42,
+          "errors": 0,
+          "skips": 0,
+          "parent_seconds": 7.109
+        },
+        "selection_scope": "9 and 42 disjoint cases; 51 total, not fitness evidence",
+        "source_pins_stable": 17,
+        "guard_denials": 0,
+        "prior_failures": "Two pretest harness failures and prelaunch pin omission preserved; no product-baseline cases inferred",
+        "worker": {
+          "attempts": 1,
+          "disposition": "REJECT_FORMAT_LITERAL_SCOPE_AND_SEMANTICS",
+          "prompt_tokens": 971,
+          "completion_tokens": 99,
+          "total_tokens": 1070,
+          "sdk_events": 1,
+          "parent_seconds": 68.719,
+          "child_seconds": 58.25,
+          "paid_calls": 0,
+          "cost": null,
+          "applied": false,
+          "retry": false,
+          "repair_credit": false
+        },
+        "coordinator": {
+          "repair": "Explicit None fallback for three means; shortened docstring",
+          "function_lines_before": 58,
+          "function_lines_after": 50,
+          "file_lines_before": 1280,
+          "file_lines_after": 1272,
+          "sql_ranking_rate_schema_unchanged": true
+        }
+      },
+      "retained_use": {
+        "status": "pending",
+        "snapshot": "retained-use/input_snapshot.db",
+        "sha256": "b552a862630ebbb5c5e9aacebc85003a94a1ef477770d99eb6a6c2f6ed023541",
+        "plan": "Fresh private copies and verified source; retained/control/recovery without changing original rows/timestamps"
+      },
+      "open_gates": [
+        "Publication and exact-main verification",
+        "Independent retained-use review and bounded saved-row observation",
+        "Fresh next-action rescore"
+      ],
+      "native_effect_admission": false,
+      "unattended_rsi_complete": false,
+      "retained_gain": null,
+      "proof_limits": "Synthetic structural-fidelity consumer behavior, not model fitness/training/effect success; rejected worker repair receives no credit",
+      "next_candidate": {
+        "skill": "reddog_operations",
+        "promotion_state": "production",
+        "intent": "DECISION",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "dispatchable": false,
+        "requires": [
+          "P15 closure and retention",
+          "Actual scanner/manifest verdict",
+          "Full-skill context capacity",
+          "Explicit finite existing evolution budget"
+        ],
+        "withdrawn": "New registry-audit proposal operation; historical advisory preserved",
+        "evidence": "next-gate-existing-proposal-route-correction.json"
+      },
+      "artifact_bindings": {
+        "work-order.json": "d75341390efc57d5f8e679c4948fc79b24f755d3abd6a9e40101480bfa55258e",
+        "test-freeze.json": "7c18f1068173a0f10643dd293e56ded73fc6bcdce4fffe7517e7027be68afbc3",
+        "test-selection.json": "13fca1d7a0dc0d571584ff5e3023a8c79fdd46f27a7388f05deb728e4ca302d3",
+        "baseline-review.json": "068bafecb04c7093be333b8028f2613167ece5d7d262160d9811fcae1e7eadcd",
+        "baseline3-result.json": "c7b676701ae3c14eabc83c1dbdce9b0920f56e0801cc70b273e2b9acce0cccdf",
+        "baseline3-tests.xml": "ef67720ec72aa1d53ab286e074fbe0573bd1b7feb7b46fe9106973f91cdbf8ed",
+        "candidate-result.json": "ab899626215034873382fde45ca41285f85d9ab5a81e99b7d1b55c4f6dc6be6a",
+        "candidate-tests.xml": "d4f28107cab8a14f52d53486b8c608d24208d0c251358cd5145b774ce8559ca8",
+        "connected-result.json": "34e02e88fe639e1e0b226beb64dc3794d990e9f4f80ef01184c16beae464ec99",
+        "connected-tests.xml": "e25a590402851eedbe127ecfe7992d7b3b3fad7ad115bc15c005276883d120e9",
+        "source-result-review.json": "cb359e6fb9efdbb5905c758074ebebb5a079d3bf4010bb94903dcca418c6f19b",
+        "worker-preparation/native_worker-result.json": "403538bf011dc4c881326c893d1544e38f65bddb52d3661a5d72dd8889f89dfe",
+        "worker-preparation/native_worker-parent.json": "7b843013097099192a59c08e84cd8b74a0c3f1ec394c02e65a501df70035d2b9",
+        "worker-preparation/proposal-review.json": "2eb852c1ab2eb82674b9b3f6ed44254f1d84d1a96611f1566a1ca960d977d14c",
+        "retained-use/snapshot-receipt.json": "297398c5ed3662e205ff0e2a201f6fcf964feeccb4c8096c38234ebe5fe1077d",
+        "next-gate-existing-proposal-route-correction.json": "de8fe0b3c2d5b29872133379f2711aba7e8e1541068217faf7ebf017bf98ac97",
+        "manifest-integrity-result.json": "01643d1fc8d0cc1f63ad48459c1f9688fee0e1027d8ddcb9d04cd96b620d4b8a",
+        "fast-integrity-result.json": "9ba4fcdd4f751037dbc8f839ede1eef2eb9e70c78e102798746e2869709a000e"
+      },
+      "integrity": {
+        "runtime_members": 1408,
+        "changed_runtime_members": [
+          "modules/infrastructure/wre_core/src/pattern_memory.py"
+        ],
+        "canonical_digest": "3938f30d19cd46ecc909fc429fad9f2e967a1beb5709d7e75dc69965ff84d183",
+        "compatibility_pins_synchronized": true,
+        "count_thresholds_unchanged": true,
+        "manifest_cases": 8,
+        "manifest_passed": 8,
+        "manifest_parent_seconds": 63.719,
+        "fast_members": 15,
+        "fast_parent_seconds": 10.0,
+        "scope": "Separate integrity selections; not additional semantic coverage or model fitness"
       }
     }
   }
