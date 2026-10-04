@@ -59,7 +59,7 @@ def verify_current_effect_review(*, owner_config_path, repo_root, **inputs):
         before = _input_snapshot(inputs)
         repo = Path(repo_root).resolve()
         owner = loader._load_owner_config(owner_config_path, repo=repo)
-        if owner["schema_version"] != loader.SCHEMA_VERSION_V5:
+        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V5, loader.SCHEMA_VERSION_V6}:
             return False
         selected, boundary = loader._manifest_selection_from_owner(owner, repo=repo)
         with boundary._lease_current(selected) as selection:

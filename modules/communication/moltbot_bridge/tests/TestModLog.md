@@ -1,3 +1,12 @@
+## Authenticated effect consent — 2026-10-04
+
+Local source qualification:97/97 and connected328/328 pass. The original95-case
+baseline failed on absent APIs; two later independent-review regressions failed
+before repair. Original criteria remain unchanged. See the module ModLog and
+canonical RSI backlog `authenticated_effect_consent_20261004` for exact commands,
+source bindings and test-provenance limits. Native effect admission and hosted
+publication are separate gates; retain fail-closed defaults.
+
 ## Supplied effect-sovereign evidence — 2026-10-04
 
 Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy

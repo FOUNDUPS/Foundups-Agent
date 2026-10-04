@@ -1,3 +1,53 @@
+## Authenticated effect consent — 2026-10-04
+
+The15/P1 source slice adds a distinct `authorize_exact_high_worktree_effect`
+privilege through opt-in owner config v6. Existing owner v1-v5 and principal
+artifact v1/v2 semantics remain. A registered identity or reviewer designation
+alone grants no effect consent.
+
+The static `effect_consent_authority` selects one exact issuer tuple/key/epoch,
+requester tuple, beneficiary tuple, repository, FoundUp, policy, RedDog ID and
+target signer tuple, with an issue/expiry interval. Scope is HIGH/worktree_create
+only. A detached `reddog_effect_consent.v1` assertion carries matching scope,
+that registration digest, the full nested parent reference, P/T/E bindings and
+an Ed25519 signature. Per-effect data must not be embedded in the owner or
+manifest already committed by T, which would create a digest cycle.
+
+Canonical message: `reddog-effect-consent.v1.` plus sorted compact ASCII JSON
+of the unsigned assertion body. D is the existing SHA256 digest of those message
+bytes; neither D nor signature is in the body. Context refers to D. The body,
+signature and static registration use exact bounded shapes; identifiers are
+nonblank ASCII of at most256 characters, new wire times are exact integers from
+0 through2**63-1, and complete assertion/message encodings are each at most8192
+bytes. Existing codecs, canonical JSON and digest implementations are reused.
+
+Public entry: `resolve_current_effect_sovereign_authorization(*,
+owner_config_path, repo_root, assertion, context, parent, target, expected_target,
+policy) -> EffectSovereignAuthorizationEvidence | None`. The existing principal
+resolver exposes it. Internally one current lease supplies registered principals
+and generation bindings. Resolve exact actual ID/provider tuples (a delimiter
+lookup key alone is insufficient), key and repo/FoundUp scope; bind the detached
+signature to the explicit privilege and actual P/T/E. Final owner/time/input
+checks and successful lease exit are required before returning. The initial input
+snapshot precedes the first clock callback; all three relevant principal records
+are compared again after the final owner/clock sample. No caller-chosen
+trusted key, verifier, clock or selected generation is accepted.
+
+Return remains ordinary data, never a bearer permit. Later effect-permit code
+must authenticate inside its held lease; it may not trust an old returned record.
+This endorsement does not grant general parent sovereignty or authenticate
+independent reviewer model use. Registration replacement/key rotation is the
+specified revocation path; there is no new per-assertion store or nonce owner.
+
+Placement review approves two bounded leaves: pure `reddog_effect_consent_contract`
+and `reddog_current_effect_consent_verification`, reusing existing owners with a
+thin facade export. Both retain200-line/50-line-function limits. No new registry,
+scheduler, provider or principal-artifact schema is introduced. Existing Linux
+owner checks remain; source tests are not Windows/WSL deployment evidence.
+Frozen specification, test provenance and review hashes are tracked in the
+canonical RSI backlog. Final97 local and328 connected cases pass; actual owner
+provenance is substituted in these fixtures, not established by their success.
+
 ## Supplied effect-sovereign evidence API — 2026-10-04
 
 `EffectSovereignAuthorizationEvidence` in the existing consensus policy owner is

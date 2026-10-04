@@ -1,3 +1,12 @@
+## Authenticated effect-consent source qualification — 2026-10-04
+
+The existing current-owner path now authenticates detached exact-effect consent
+through opt-in v6 registration. Final local97/97 and connected328/328 pass after
+two independent-review defects were reproduced and repaired; one bounded local
+Qwen helper proposal was used. Native RSI admission and publication remain
+separate gates. See the [module change record](modules/communication/moltbot_bridge/ModLog.md#authenticated-effect-consent--2026-10-04)
+and canonical backlog `authenticated_effect_consent_20261004`. WSP00/15/22/97.
+
 ## Supplied effect-sovereign evidence — 2026-10-04
 
 Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy

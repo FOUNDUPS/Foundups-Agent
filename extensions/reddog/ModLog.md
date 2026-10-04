@@ -1,3 +1,20 @@
+## 2026-10-04 — Authenticated consent closure count repair
+
+PR2060 CI37209280885 reproduced an overlooked compatibility boundary: the
+regenerated manifest contains1406 runtime members but the production ceiling
+and its boundary test still expected1404. The two additions are the reviewed
+consent-contract and current-consent-verification leaves. Raise only the exact
+count ceiling to1406; preserve rejection at1407, byte caps, digest pins and
+allowlists. The manifest itself remains unchanged.
+
+Local original test reproduced exit1; the repaired existing fast tier passes
+all15 members, including actual backend preflight and both count boundaries.
+No installed extension or runtime activation is claimed. Initial CI and review
+omissions remain historical evidence; replacement-head hosted checks are pending.
+Future closure refreshes must run the existing consumer fast tier as well as
+generator hash checks. Evidence: `outputs/rsi-authenticated-effect-consent-20261004`.
+WSP15/22/50/84/97.
+
 ## 2026-10-02 — Scoped reviewer authority dependency closure
 
 Regenerated the existing backend manifest for two bounded reviewer-designation

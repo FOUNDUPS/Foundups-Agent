@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_sovereign_binding_20261004",
-    "base_commit": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
-    "selected_action": "Pure exact-effect sovereign-evidence matching in existing policy/evidence owners",
-    "status": "locally_verified_pending_publication",
+    "observation_path": "current_observation.authenticated_effect_consent_20261004",
+    "base_commit": "25b740edfe5877f6cfcc6ae7fbe0dbcb472ce423",
+    "selected_action": "Authenticated exact-effect consent under existing current-owner lease",
+    "status": "local_qualification_complete_independent_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 14,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised source maintenance; no native WRE effect admission",
+    "execution_plane": "ordinary supervised source qualification with disposable signatures; native WRE admission remains separate",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.effect_request_preparation_20261004",
-    "next_action": "Independent source review and exact-source CI/publication; then fresh WSP15/97 selection toward authentic evidence and effect permit composition."
+    "previous_observation": "current_observation.effect_sovereign_binding_20261004",
+    "next_action": "Complete exact-source independent review, generated bindings and hosted PR/main gates; then re-observe WSP15/WSP97 for effect-specific permit/provider composition."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28967,7 +28967,7 @@
     },
     "effect_sovereign_binding_20261004": {
       "base": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
-      "state": "locally_verified_pending_publication",
+      "state": "merged_main_verified_owned_lane_retired",
       "scope": "Pure exact-effect sovereign-evidence matching in existing policy/evidence owners",
       "wsp15": {
         "complexity": 3,
@@ -29027,7 +29027,7 @@
       },
       "native_effect_admission": false,
       "retained_gain": null,
-      "next_action": "Independent source review and exact-source CI/publication; then fresh WSP15/97 selection toward authentic evidence and effect permit composition.",
+      "next_action": "Closed; fresh WSP15/97 selects authenticated exact-effect consent source composition.",
       "worker_attribution": {
         "model": "local Qwen2.5-Coder-7B Q4_K_M",
         "scope": "lifetime helper only; coordinator specified formula",
@@ -29078,6 +29078,169 @@
         "registry_quarantined": 270,
         "ci_exact_cases": 578,
         "ci_guard_changed": false
+      },
+      "publication": {
+        "pr": 2059,
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2059",
+        "head": "edf083c164489b2686178939de958e2926be83de",
+        "merge": "25b740edfe5877f6cfcc6ae7fbe0dbcb472ce423",
+        "tree": "7f2d87182241e99cec71849efa8236df8276f760",
+        "pr_checks_passed": 11,
+        "main_ci": 37206032946,
+        "main_codeql": 37206032961,
+        "pr_and_main_effect_cases": 578,
+        "pr_and_main_mcp_cases": 49,
+        "same_reviewed_tree": true
+      },
+      "closure": {
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "shared_state_preserved": true,
+        "recovery_bundle_sha256": "3e890deb5388e1632d1eaa28a296098ddb9d3ca2f4eb76060748a1c07b76f54c",
+        "receipt_sha256": "6819ed2a7f5b5f1f233e37bd5cc2f57ad362849231c27bd08fa86536c0b75f74"
+      }
+    },
+    "authenticated_effect_consent_20261004": {
+      "base": "25b740edfe5877f6cfcc6ae7fbe0dbcb472ce423",
+      "state": "local_qualification_complete_independent_publication_pending",
+      "scope": "Authenticate detached exact-effect consent under existing current-owner lease; no runtime activation",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "execution_plane": "ordinary supervised source qualification with disposable signatures; native WRE admission remains separate",
+      "prior_observation": "effect_sovereign_binding_20261004",
+      "retrieval": {
+        "noise": "Bounded source-contract/owner evidence; historical WSL version record labeled historical",
+        "ordering": "WSP00 gate, merged/main-verifiedP12 closure, WSP15/97, governedquery, exactsource and independent design review",
+        "missing_artifacts": [
+          "modules/communication/moltbot_bridge/requirements.txt",
+          "modules/communication/moltbot_bridge/memory/README.md"
+        ],
+        "freshness": "Holo rejects AUTHORITY_ROOT_HEAD_MISMATCH; UNKNOWN/gaptrue; zeroattempts/mutations/reindex. Exact main source fallback, no semantic authority claim.",
+        "duplication": "Reuse current principal registry, lease, signature codec and P12 matcher; new privilege needs explicit source contract, not another supplied-data wrapper."
+      },
+      "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-authenticated-effect-consent-20261004",
+      "measurements": {
+        "initial_baseline": {
+          "cases": 95,
+          "failures": 95,
+          "errors": 0,
+          "skips": 0,
+          "reason": "48 contract API missing,47 resolver API missing"
+        },
+        "initial_candidate": {
+          "pass": 95,
+          "connected_pass_including_candidate": 326
+        },
+        "independent_review_rejections": 2,
+        "additional_defect_baseline": {
+          "cases": 2,
+          "false_acceptances": 2
+        },
+        "final_candidate": {
+          "cases": 97,
+          "pass": 97,
+          "errors": 0,
+          "skips": 0
+        },
+        "final_connected": {
+          "cases": 328,
+          "pass": 328,
+          "errors": 0,
+          "skips": 0,
+          "includes_candidate": true
+        },
+        "criteria": "Original95 unchanged; two separately frozen additive cases. No denominator mixing.",
+        "worker": {
+          "actual_local_calls": 1,
+          "route": "existing WRE local_skill_inference native_chat",
+          "model": "qwen2.5-coder-7b-instruct-q4_k_m",
+          "prompt_tokens": 688,
+          "completion_tokens": 126,
+          "total_tokens": 814,
+          "telemetry": "One observed SDK event; not independent hardware measurement",
+          "parent_seconds": 63.344,
+          "child_seconds": 52.656,
+          "paid_calls": 0,
+          "total_cost": null,
+          "automatic_retries": 0,
+          "raw_format": "ACCEPT",
+          "coordinator_supplied_formula": true,
+          "integrated_helper_ast_unchanged": true
+        },
+        "coordinator": "Authentication layer and two sampled-state repairs; no autonomous full-slice claim",
+        "validation_plane": "Real disposable Ed25519 and confined artifact parsing; synthetic authenticated-owner/generation/lease provenance."
+      },
+      "native_effect_admission": false,
+      "retained_gain": null,
+      "host_limit": "Existing owner loader explicitly requires Linux/root-owned paths; historical WSL tool versions do not prove a current signer deployment or Windows authority bridge.",
+      "next_action": "Complete exact-source independent review, generated bindings and hosted PR/main gates; then re-observe WSP15/WSP97 for effect-specific permit/provider composition.",
+      "contract": {
+        "status": "implemented_local_qualification",
+        "sha256": "e2453c2a63f5b99b9ffd55e09dfebd327ac1449c39e04efb057450a3929e4e10",
+        "independent_review_sha256": "d90872c6ea944950dfa378decb9328fdaed0c90a435a7d8cb3dc5cb849256e91",
+        "layout_review_sha256": "d3f7471d06063a96cd5ce6af44d0b4155f1ffa43b5cbc2cf9280a24f3b3d1002",
+        "canonical_interface": "modules/communication/moltbot_bridge/INTERFACE.md#authenticated-effect-consent--2026-10-04",
+        "new_runtime_leaves": [
+          "modules/communication/moltbot_bridge/src/reddog_effect_consent_contract.py",
+          "modules/communication/moltbot_bridge/src/reddog_current_effect_consent_verification.py"
+        ],
+        "authority_scope": "Source contract only; no operating issuer registration, service deployment or native effect grant"
+      },
+      "test_commands": [
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-authenticated-effect-consent-20261004/run_tests.py baseline",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-authenticated-effect-consent-20261004/run_tests.py candidate",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-authenticated-effect-consent-20261004/run_tests.py connected",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-authenticated-effect-consent-20261004/run_tests.py repair-baseline",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-authenticated-effect-consent-20261004/run_tests.py candidate-2",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-authenticated-effect-consent-20261004/run_tests.py connected-2",
+        "Earlier baseline/candidate/connected used initial-run_tests.py bytes and initial-test-freeze/selection; saved parent receipts bind actual invocations."
+      ],
+      "artifact_bindings": {
+        "accepted-consent-contract.json": "e2453c2a63f5b99b9ffd55e09dfebd327ac1449c39e04efb057450a3929e4e10",
+        "test-freeze.json": "755e5e9ad5bde6d889af878fd024c6ee87f9ca6149085ff51f3264e23c62e01e",
+        "test-selection.json": "b998305c3e5ae8de6199e5a666bb5061ad25d834b787cee134e7747590858b28",
+        "initial-test-freeze.json": "89997a92ffcb4d798ebdf62945b9d99675656ddfa23167f588fe913680bc3e4a",
+        "initial-test-selection.json": "fe754bd0f26c1c6dd04894fb90c9545fee9b1cb244882056b5272bb478eaa21d",
+        "baseline-review.json": "6e02adade8ea25cd52ddc6988efb96faa071e14c10fdbaf91cb3699134924091",
+        "baseline-independent-review.json": "2306af795e6ee894d7812d5919d93378bee38e412bf997f70ba40936cc4901fc",
+        "source-independent-review.json": "3f65195695ad6f2522e00855d2ffd395262efba73c9d737ef575373bbd6d9b7d",
+        "repair-baseline-review.json": "27fbbba281a43607536fceccf0549cce4e3d64c9a478179e343bf4df91fa4096",
+        "final-local-test-review.json": "442566b12f19656db3e2cd801e5b895e70e532caa95fffea009b433f7c659334",
+        "final-independent-review.json": "5b4fa7c019a603eb22aa29f37fba2fff716933aa988677b7373e6905faa41351",
+        "generated-binding-review.json": "1fce85c4feee64880d798497903b0c16b253dcd2f7e88e444590496cd448eb54",
+        "worker-preparation/native-packet.json": "a45ae1bab49bad6e88c0306b35ffcb3ed4749e99bdbbb7a9830bc190352316fc",
+        "worker-preparation/native_worker-result.json": "9b6fad41fc815fda5240ce4bb166d069ed20951ac74731a658e0fb6d35d7197e",
+        "worker-preparation/native_worker-parent.json": "03a9b13b323ba359ddc373144b9e54f3d2ed288e8f34de97457e8034fff4b2ab",
+        "worker-preparation/proposal-review.json": "7ab5549c71e596cddcb854a71256981a5b9a9d0afbf257bae188db028cb6b4a2",
+        "worker-preparation/benchmark-receipt.json": "77647fcb025d0d564e6f8d0abb330522c32719aac51e4a2a737fb603fc1d8a37",
+        "worker-preparation/benchmark-provenance.json": "cee694141e59b0cf7884207d51437a1bfdaa85579c8030d91d42ec2f6ee6d1a6"
+      },
+      "independent_review": {
+        "approved_bounded_source": true,
+        "review_sha256": "5b4fa7c019a603eb22aa29f37fba2fff716933aa988677b7373e6905faa41351",
+        "scope": "Read-only source and saved95+2/97/328 evidence; test author independent of production implementer, not independent of test authorship.",
+        "publication_approved": false
+      },
+      "benchmark": {
+        "existing_owner": "modules/ai_intelligence/ai_gateway/src/model_combination_benchmark_harness.py",
+        "receipt_sha256": "77647fcb025d0d564e6f8d0abb330522c32719aac51e4a2a737fb603fc1d8a37",
+        "samples": 1,
+        "accepted": 1,
+        "new_calls_during_recording": 0,
+        "rehydration_equal": true,
+        "held_out_limit": "Disclosed initial frozen criteria plus separately frozen additive regressions, no blind comparison or same-task retained improvement.",
+        "pattern_memory_written": false
+      },
+      "publication": {
+        "status": "pending",
+        "ci_selection_cases": 675,
+        "main_verified": false
       }
     }
   }

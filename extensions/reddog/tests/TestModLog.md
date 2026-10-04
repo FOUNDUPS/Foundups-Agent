@@ -1,3 +1,17 @@
+## 2026-10-04 — Consent manifest consumer boundary
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduces
+the1406-versus1404 assertion failure on the original PR2060 head. Production
+MAX_RUNTIME_FILES and its exact boundary fixture now admit1406/reject1407;
+the strict digest, byte caps and all other assertions are unchanged.
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` passes15 members
+locally (Node24.11.1,13.142s). Hosted Node22.23.3 failed on the historical head;
+replacement-head CI remains required. Package projection remains67 files and
+950438 bytes; refreshed content digest
+`0a928318bc551f96dcae974c72d36cccde28fb1f994c0d619057476929d3b8bd`.
+No packaging, installation or deployment is implied by the projection test.
+WSP5/6/22/50/97.
+
 ## 2026-09-28 - Correspondence-state Skillz backend manifest reconciliation
 
 - RedDog fast tier initially failed the existing backend compatibility preflight after `skills_registry_v2.json` changed.
