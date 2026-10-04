@@ -836,9 +836,9 @@ def test_native_contract_branch_wiring(
                                 {"role": "user", "content": _NATIVE_PROMPT}], "enable_thinking": False}]
         assert state.model.tokens == [(b"fixed synthetic rendered prompt", False, True)] * 2
         assert state.model.completions[0]["prompt"] == list(range(1536))
-        assert state.model.completions[0]["stop"] == ["###", "<eos>"]
+        assert state.model.completions[0]["stop"] == ["<eos>"]
         assert state.handlers[0][1] == {"max_tokens": 512, "temperature": 0.2,
-                                         "stream": False, "stop": ["###"]}
+                                         "stream": False, "stop": []}
         assert state.formatter_init == [{"template": _NATIVE_PROFILE_TEMPLATE,
                                         "eos_token": "<eos>", "bos_token": "<bos>",
                                         "stop_token_ids": [2], "add_generation_prompt": True}]
@@ -1231,3 +1231,35 @@ def test_continuity_proposal_reflection_rejects_unrelated_object():
     with pytest.raises(TypeError):
         _continuity_reflection(context)
     assert context["business_value"] is unrelated
+
+
+@pytest.mark.parametrize("body", [
+    "## Workflow Steps\n### Inspect\nRead the registered skill and report findings.",
+    "Keep the literal ### marker inside the proposal body.",
+    "Inspect the registered skill and report findings.",
+], ids=["heading", "inline", "eos-only"])
+def test_native_contract_markdown_preserves_body_and_eos(
+        body, native_contract_boundary, monkeypatch):
+    """Synthetic string-stop semantics; not a native formatter or quality proof."""
+    state = native_contract_boundary
+    original = _NativeContractModel.create_completion
+    def stop_aware_completion(model, **kwargs):
+        result = original(model, **kwargs)
+        generated = body + "<eos>FORBIDDEN_AFTER_EOS"
+        ends = [generated.index(stop) for stop in kwargs["stop"] if stop in generated]
+        result["choices"][0]["text"] = generated[:min(ends)] if ends else generated
+        return result
+    monkeypatch.setattr(_NativeContractModel, "create_completion", stop_aware_completion)
+    master = WREMasterOrchestrator(local_proposal_mode="native_chat",
+                                   local_native_chat_profile=_native_profile())
+    result = _native_contract_call(master)
+    assert result["proposal"] == body
+    assert "<eos>" not in result["proposal"] and "FORBIDDEN_AFTER_EOS" not in result["proposal"]
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert result["steps_completed"] == 0 and result["error_code"] == "unverified_model_proposal"
+    assert state.handlers[0][1] == {"max_tokens": 512, "temperature": 0.2,
+                                    "stream": False, "stop": []}
+    assert state.model.completions[0]["stop"] == ["<eos>"]
+    assert state.formatter_init[0]["stop_token_ids"] == [2]
+    assert state.model.raw == [] and len(state.model.completions) == 1
+    assert state.model.close_calls == 1

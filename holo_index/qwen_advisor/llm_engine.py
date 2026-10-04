@@ -260,7 +260,7 @@ class QwenInferenceEngine:
         # A second Jinja render could differ (e.g. strftime_now); freeze this response.
         handler = handler_factory(lambda **_kwargs: rendered)
         return handler(llama=self.llm, messages=messages, max_tokens=self.max_tokens,
-                       temperature=self.temperature, stream=False, stop=["###"])
+                       temperature=self.temperature, stream=False, stop=[])
 
     def analyze_code_context(
         self,

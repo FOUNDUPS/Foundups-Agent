@@ -1,3 +1,15 @@
+## 2026-10-04 — Observe real Skillz path and repair native text stop
+
+- Merged PR2052 real WRE canary passed scanner/manifest admission, generated
+  twice, and stored one failed outcome plus matching lineage breadcrumb.
+  Frozen semantic usefulness failed; zero retained variations/learning events.
+- Native chat no longer stops at Markdown `###`; qualified EOS, raw behavior,
+  limits, source/runtime authentication and unverified-proposal truth remain.
+- Independent baseline 59 pass/4 fail becomes 63 pass; 176 connected pass.
+  Qwen's one repair proposal was rejected; coordinator repair, not autonomous.
+- WSP00/5/11/15/22/48/50/84/95/97. Exact evidence/metrics and next gate are in
+  the canonical dispatch checkpoint and backlog; no production RSI claim.
+
 ## 2026-10-04 — Local continuity proposal canary
 
 The OpenClaw continuity object remains available to its lineage owner but is

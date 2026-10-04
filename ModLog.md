@@ -1,3 +1,12 @@
+## 2026-10-04 — Real WRE observation and native delimiter repair
+
+PR2052 closed on exact main with passing CI/CodeQL; its real WRE canary passed
+production Skillz admission and persisted failure correctly, but useful output
+failed independent acceptance. Reconciled current selection and prior closure.
+Native caller drops `###` text stopping, retains qualified EOS: 63 focused and
+176 connected tests pass. Worker proposal rejected; coordinator intervention
+recorded. WSP00/15/22/48/95/97; no autonomous RSI/promotion claim.
+
 ## 2026-10-04 — Offline scanner prerequisite for WRE canary
 
 WSP00/15/22/48/95/97: local Qwen supplies four fixed child-environment entries;

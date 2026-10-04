@@ -1,3 +1,13 @@
+## Current native proposal layer — 2026-10-04
+
+The real production Skillz scanner/admission/proposal/persistence path ran once
+on merged PR2052; semantic usefulness failed, and no variation was retained.
+The existing native chat owner now omits the `###` text stop while retaining
+formatter EOS and all limits. 63 focused/176 connected cases pass; publication
+and a later unchanged-criteria canary remain open. See the
+[canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-chat-delimiter-repair--2026-10-04).
+Earlier entries below are historical, not current native admission claims.
+
 ## Local continuity proposal canary — 2026-10-04
 
 Existing local proposal/reflection repair:35 focused and173 connected passes.
