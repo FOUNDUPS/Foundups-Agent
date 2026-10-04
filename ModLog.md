@@ -1,3 +1,11 @@
+## 2026-10-04 — Offline scanner prerequisite for WRE canary
+
+WSP00/15/22/48/95/97: local Qwen supplies four fixed child-environment entries;
+independent corrected baseline4 fail/8 pass becomes12 pass. Connected64 pass/3 skip.
+Existing missing-scanner fixture corrected; initial unintended invocation remains recorded.
+PR2051 closure and failed retained semantic usefulness reconciled in canonical roadmap/backlog.
+No native admission or retained RSI gain. See moltbot_bridge ModLog and dispatch checkpoint.
+
 ## 2026-10-04 — Local continuity proposal canary
 
 The OpenClaw continuity object remains available to its lineage owner but is

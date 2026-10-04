@@ -1,3 +1,35 @@
+## Offline scanner environment — 2026-10-04
+
+The existing scanner child environment now fixes dotenv disabled, LiteLLM
+production/local-cost-map mode and bytecode suppression. Parent values cannot
+override these controls. Launch allowlist, private TMP/TEMP, UTF-8, real scanner,
+manifest and severity/verdict gates remain. These dependency controls are not
+an OS network/filesystem sandbox. No new module or admission bypass.
+
+Independent corrected baseline:4 failures/8 passes; repaired:12/12.
+Connected scanner/manifest/admission contracts:64 passes,3 skips. Selections overlap.
+Initial baseline5 failures/7 passes is retained: an old missing-scanner fixture
+mocked only PATH discovery and unexpectedly invoked a real scanner; its exact
+binary was not observed. Installed fallback is one source-supported route.
+Its lookup-boundary mock is corrected without changing expected assertions;
+network effects from that initial invocation are unknown.
+
+WSP00/5/6/11/15/22/48/50/84/95/97/99. C2/I4/D5/Impact3=14/P1.
+Local Qwen supplied the four fixed entries after independent criteria freeze;
+the coordinator specified the defect. This is supervised implementation, not
+autonomous discovery. Independent review/publication are separate gates.
+Evidence: canonical backlog `offline_skill_scanner_20261004` and
+`O:/Foundups-Agent/outputs/rsi-offline-skill-scanner-20261004/`.
+
+PR2051 is merged/main-verified at `6ba78fd26731e49eaca02baf06cb12dd7130b565`.
+All ten PR checks and main CI37182598395/CodeQL37182598226 passed; PR/main
+each passed173 WRE and452 separate guarded cases. Owned lanes retired.
+A fresh retained raw call returned only “Do not execute anything.” Availability
+improved, but independent frozen semantic usefulness failed. No retry or
+retained RSI benefit is claimed. Next: one bounded public WRE production
+Skillz proposal canary, after this offline prerequisite clears. Preserve the
+0.90 structural threshold and all scanner gates; native18/P0 remains blocked.
+
 ## Local continuity proposal canary — 2026-10-04
 
 The OpenClaw continuity object remains available to its lineage owner but is

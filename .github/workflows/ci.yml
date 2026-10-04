@@ -692,6 +692,29 @@ jobs:
             modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py::test_default_refresh_runner_bounds_retained_stdout \
             scripts/tests/test_generate_reddog_backend_manifest.py
 
+      - name: Run scanner environment and WRE admission contracts
+        timeout-minutes: 5
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          LITELLM_MODE: PRODUCTION
+          LITELLM_LOCAL_MODEL_COST_MAP: 'True'
+          WRE_ENABLE_IRONCLAW_WORKER: '0'
+          FOUNDUPS_DB_ENGINE: sqlite
+          DATABASE_URL: ''
+          FOUNDUPS_DB_PATH: ${{ runner.temp }}/scanner-foundups.db
+          WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/scanner-pattern.db
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          python -B -m pytest -v --tb=short -c /dev/null --noconftest \
+            -o pythonpath=. -p no:cacheprovider -k 'not openclaw_dae' \
+            --basetemp="$RUNNER_TEMP/scanner-contract-pytest" \
+            modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py \
+            modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py \
+            modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py
+
       - name: Run WRE proposal and memory contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
