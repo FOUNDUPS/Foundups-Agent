@@ -1074,6 +1074,10 @@ jobs:
             modules/infrastructure/wre_core/tests/test_wre_execution_truth.py \
             modules/infrastructure/wre_core/tests/test_pattern_memory.py \
             modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py \
+            modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_contract.py \
+            modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_executor.py \
+            modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_master.py \
+            modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_shape_regressions.py \
             modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py
 
       - name: Run WRE RSI measurement contract tests

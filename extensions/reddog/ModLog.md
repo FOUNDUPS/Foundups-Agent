@@ -1,3 +1,13 @@
+## 2026-10-05 — Named WRE telemetry source closure
+
+The existing backend manifest now binds the registry-audit executor and its
+adjacent Skillz manifest explicitly, including the executor's imported source.
+Runtime members increase1406→1408. Refresh both digest pins and admit exactly1408,
+reject1409; byte caps and other compatibility rules remain. No installed
+extension, authority deployment or autonomous execution is claimed.
+Consumer validation and publication evidence belong to the existing P14 RSI
+checkpoint. WSP5/15/22/50/84/95/97.
+
 ## 2026-10-04 — Authenticated consent closure count repair
 
 PR2060 CI37209280885 reproduced an overlooked compatibility boundary: the

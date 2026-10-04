@@ -1,3 +1,41 @@
+## Named registry-scope telemetry — P14 contract
+
+Source-qualified contract with independently reviewed actual scanner,
+projection and private-persistence observation; publication closure is pending. Existing `auto_test_registry_audit` v2.3 supports the
+named `operation="project_scope"` with a `request` containing `base_sha`,
+`head_sha`, `expected_changed_paths` and `projection_input`. Only existing
+reserved `parent_continuity_context` is additionally accepted. Caller roots,
+commands, results, receipts, `skill_name` and `agent` do not authorize dispatch.
+The adjacent executor derives its own checkout and delegates once to existing
+`produce_registry_scope_projection`; temporary commit materialization remains
+inside that owner. It does not regenerate the canonical registry or run tests.
+
+`normalize_registry_scope_projection(value, *, request) -> dict | None` in
+`src/skill_execution_truth.py` validates bounded builtin report data, request
+bindings, non-execution flags and the canonical projection ID, then detaches
+accepted data. This is validation, not authentication or independent scope proof.
+The public named result separates `telemetry_completed`, `telemetry_status`,
+`projection` and `observation_persisted` from false `success`,
+`execution_success` and `_effect_evidence`. Persistence failure preserves the
+projection and returns a stable `observation_error`; it does not retry.
+
+Registry/frontmatter, scanner, bundle, load and A/B gates remain. The named
+single/ReAct path stops before fallback, fidelity evaluation, `SkillOutcome`,
+evolution, variation and AgentDB breadcrumbs. Existing scanner counters remain;
+one `PatternMemory.record_learning_event(event_type="telemetry_projection")`
+records only execution/projection identifiers, base/head, status and bounded
+reasons. It supplies no quality, learning, permit or native admission evidence.
+Other effect/proposal paths and the manual registry CLI retain their contracts.
+
+The [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) binds the accepted design and
+qualification evidence. Shapes/digest types and identity-only builtin traversal
+are covered by39 additive controls; original75 criteria remain unchanged.
+Stable connected validation passes306 with two Windows link skips. The initial
+source-drifted run remains historical. The separate PC observation produces
+a155-shard-per-side projection and persists one projected event, with false effect success.
+Two earlier rejected attempts remain recorded; isolated scanner2.2.0 and short
+owned TEMP qualify this environment, not native authority or automatic updates.
+
 ## Prototype CodeAct file containment — 2026-10-04
 
 The existing read-file action checks resolved Path components before reading.

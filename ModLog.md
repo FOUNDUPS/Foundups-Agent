@@ -1,10 +1,24 @@
+## Named registry-scope telemetry qualification — 2026-10-05
+
+Selected 15/P1 candidate connects the existing named WRE scope planner to
+truthful event-only telemetry. Original75 and additive39 cases pass after
+independent-review repairs; stable connected306pass/two Windows link skips.
+Actual scanner/producer/private persistence now complete after two preserved
+runtime failures: isolated Cisco2.2.0 qualification and short owned TEMP resolve
+the observed environment barriers. One projected event,155 shards per side,
+zero outcomes/variations; effect success remains false. PR2061 publication
+closure remains open. One local Qwen helper proposal was rejected, not applied. No new learning
+or native RSI admission is claimed. PR2060 is merged/main-verified and its
+owned lane retired. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) and
+canonical backlog `test_scope_telemetry_20261004`. WSP00/15/22/97.
+
 ## Authenticated effect-consent source qualification — 2026-10-04
 
 The existing current-owner path now authenticates detached exact-effect consent
 through opt-in v6 registration. Final local97/97 and connected328/328 pass after
 two independent-review defects were reproduced and repaired; one bounded local
-Qwen helper proposal was used. Native RSI admission and publication remain
-separate gates. See the [module change record](modules/communication/moltbot_bridge/ModLog.md#authenticated-effect-consent--2026-10-04)
+Qwen helper proposal was used. PR2060 is now merged/main-verified with its
+owned lane retired; native RSI admission remains separate. See the [module change record](modules/communication/moltbot_bridge/ModLog.md#authenticated-effect-consent--2026-10-04)
 and canonical backlog `authenticated_effect_consent_20261004`. WSP00/15/22/97.
 
 ## Supplied effect-sovereign evidence — 2026-10-04

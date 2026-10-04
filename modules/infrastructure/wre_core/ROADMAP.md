@@ -1,3 +1,23 @@
+## Current named telemetry layer — P14 checkpoint
+
+Selected 15/P1 (C3/I4/D4/Impact4): connect the existing registry scope projection
+to the named WRE TELEMETRY path and record one observation without effect success,
+outcome learning or model retries. Initial 75 cases pass after 75 missing-API
+baseline failures. Independent source review is accepted:39 additive controls
+and unchanged75 pass; stable connected306pass/two Windows link skips. Actual
+scanner/producer/private-persistence observation now completes:155 shards
+per side, one projected event and zero outcomes/variations. Earlier scanner
+and materialization failures are preserved. Isolated Cisco2.2.0 and short
+owned TEMP are qualified; shared runtime and global settings are unchanged.
+PR2061 publication closure remains open. The initial failed, source-drifted
+connected observation remains historical.
+
+P13 PR2060 is now merged/main-verified at `b99d05309385e272cd5d0691fa23e5abb654864a`;
+its owned lane is retired with recovery preserved. Native unattended RSI remains
+blocked at 18/P0. Re-observe after this bounded layer; no new module or later
+runtime dispatch is selected here. See the [canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
+Earlier entries below are historical.
+
 ## Retained local source layer — 2026-10-04
 
 PR2055 is merged/main-verified with its owned lanes retired. Existing saved

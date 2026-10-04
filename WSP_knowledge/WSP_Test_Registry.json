@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1681,
+  "total_tests": 1685,
   "quarantined_tests": 270,
   "tests": [
     {
@@ -19620,6 +19620,58 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_registry_telemetry_contract",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_contract.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Finite independent report-shape and truth oracles; no effect authority."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_registry_telemetry_executor",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_executor.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Registry-bound telemetry connection; real producer coverage uses owned Git fixtures."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_registry_telemetry_master",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_master.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Public named WRE telemetry truth and durable observation, never SkillOutcome."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_registry_telemetry_shape_regressions",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_registry_telemetry_shape_regressions.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Additive source-review controls; original 75 acceptance cases unchanged."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_wre_research_evaluator_inputs",

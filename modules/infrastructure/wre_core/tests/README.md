@@ -1,3 +1,27 @@
+## Named registry telemetry qualification — P14
+
+Three new bounded test leaves plus `wre_registry_telemetry_test_support.py`
+freeze 75 cases: 44 report-normalization, 17 executor and 14 public-master cases.
+The original75 cases remain unchanged. Initial baseline:75 missing-API failures;
+initial candidate: 75 passes, zero errors/skips. Exact commands, source hashes,
+node selection, XML and case order are in `outputs/rsi-test-scope-telemetry-20261004`.
+
+Most producer reports and scanner verdicts are substituted; actual manifest and
+admission paths remain. Two owned Git fixtures exercise the real projection
+owner; two private SQLite close/reopen checks prove event persistence and no
+outcome/variation pollution. These do not qualify a real scanner or native
+runtime. Independent review added39 shape/digest/metaclass controls:37fail/2pass
+before repair,39pass after. The original75 still pass. Stable connected selection
+passes306 with two Windows link skips; these selections overlap. The original
+source-drifted connected failure remains historical. Legacy generic effect
+fixtures use an inert name and retain all55 assertions;23 master cases pass.
+A separate real PC observation now completes scanner admission,155-shard
+per-side projection and one private persisted event. Two prior rejected
+attempts remain visible. Isolated scanner2.2.0 passes four frozen actual-byte
+controls; short TEMP addresses the demonstrated Windows path-length limit.
+These runtime results are separate from the substituted unit scanner verdicts
+and do not establish effect authority or learned benefit. See the [checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
+
 ## Local proposal framing regression — 2026-10-04
 
 Independent frozen prompt baseline:12expected failures/67passes,25deselected,

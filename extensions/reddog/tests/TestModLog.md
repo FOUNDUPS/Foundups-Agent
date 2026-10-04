@@ -1,3 +1,12 @@
+## 2026-10-05 — WRE telemetry manifest boundary
+
+The existing compatibility boundary fixture now admits1408 members/rejects1409
+for the two declared audit-skill runtime additions. The generator test pins
+canonical digest `1cae5e88497899ef4021912002b85ad495cdb172196cc72a9dc9f46c58d59428`.
+No other assertions or byte limits changed. Exact consumer validation is
+recorded in the existing P14 RSI checkpoint; no installation/deployment implied.
+WSP5/6/22/50/95/97.
+
 ## 2026-10-04 — Consent manifest consumer boundary
 
 `node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduces

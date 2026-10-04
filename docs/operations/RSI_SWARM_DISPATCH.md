@@ -1,3 +1,96 @@
+## Named registry-scope telemetry — P14 checkpoint
+
+Selected 15/P1 (C3/I4/D4/Impact4): the existing `auto_test_registry_audit` v2.3
+candidate delegates one bounded `project_scope` request to the existing planner.
+The named WRE path keeps admission gates, reports telemetry completion separately
+from false effect/execution success, and records one existing `telemetry_projection`
+event without SkillOutcome, fidelity, fallback, evolution or ReAct retry. This is
+planning evidence, not test execution, authority, learned fitness or native RSI.
+
+Initial independent baseline: 75 missing-API failures; candidate: 75/75 pass,
+zero errors/skips, frozen criteria unchanged. Saved command/XML and unique case
+names/order agree. Initial connected observation: 257 pass/10 fail/2 skip;
+bound source changed during that run, so it provides no exact-source pass.
+Independent source review found malformed side-field/digest acceptance and
+caller-metaclass comparison. Frozen39 additive cases reproduce37fail/2pass;
+the repaired owner passes39/39 and the unchanged original75/75. Stable connected
+validation passes306 cases with two unavailable-Windows-link skips (308 total,
+overlapping selections). Generic effect fixtures now use an inert fixture name;
+all55 assertions remain unchanged, with23/23 master cases passing. No production
+fixture registration was added. Source review accepted these repairs.
+
+The existing test registry has1685 files/270 quarantined. Backend source closure
+adds the adjacent executor and Skillz manifest, exactly1408 members; both digest
+pins and admit1408/reject1409 count boundaries agree. Generator contracts8/8
+and the existing15-member RedDog fast tier pass. These are separate selections.
+Existing large master functions did not grow; new functions remain within50lines.
+Actual PC observations at clean source `b674106ff2e3cd3e553af9a030fbd48db89b57e9`:
+
+| Attempt | Actual result | Parent elapsed | Persisted telemetry events |
+| --- | --- | --- | --- |
+| Installed scanner 2.0.9 | Manifest passed; MEDIUM Markdown/YAML finding blocked admission | 18.250s | 0 |
+| Isolated scanner 2.2.0 | Admission passed; repository materialization rejected | 23.984s | 1 rejected |
+| Qualified scanner plus short owned TEMP | Both exact commits projected; observation persisted | 162.860s | 1 projected |
+
+All attempts are retained independently; each consumed one separately reviewed
+allowance without automatic retry. The successful projection has155 shards and
+five batches per revision, with1411 base/1415 candidate test paths. The private
+database was closed and reopened read-only: one matching `telemetry_projection`
+event, null fidelity/variation fields, zero SkillOutcome/variation rows. One
+ReAct attempt, stable41 named source pins and zero watched agent/generative
+calls were observed. The scanner's bundled local file classifier did run;
+the Python profile is not a complete provider/OS monitor. Planning completion
+remains separate from false effect/execution success and grants no test runner.
+
+The first scanner failure led to qualification of official Cisco2.2.0 through
+the existing `OPENCLAW_SKILL_SCANNER_BIN` seam. Four frozen real-byte controls
+pass: actual Skillz and fixed Markdown accepted, disguised archive HIGH,
+shell text mislabeled as Python MEDIUM. Required/enforced admission, manifest
+validation and the MEDIUM threshold are unchanged. The shared2.0.9 installation
+is untouched; this is an isolated qualified environment, not an automatic update
+deployment. The initial wheel-only installation failure is also preserved.
+
+Windows long-path support is disabled. A separate same-relative-path probe
+fails with WinError206 at279 characters and succeeds at182. Short owned TEMP
+then permits the real projection; no machine-wide setting or source workaround
+was applied. This does not identify the hidden exception of the earlier run.
+Existing archive limits, timeout/Job/output bounds and source bindings remain.
+The temporary archive directories were absent after the successful return.
+
+Independent result reviews accept the three observed outcomes. Draft PR2061's
+source checkpoint passed all11 hosted checks, including331 WRE and675 separate
+effect-boundary cases. Final documentation/publication and exact-main closure
+remain open. Runtime evidence is in `scanner-upgrade/short-temp/wre-canary/`
+under the P14 evidence directory; earlier attempts remain alongside it.
+
+One local Qwen helper proposal was semantically rejected and not applied, with
+no retry or worker repair credit. One saved SDK event reports 555 input/145
+output tokens; parent 59.641s, child 49.313s, zero paid calls, cost unknown.
+The coordinator implemented the candidate separately. Unit scanner verdicts
+are substituted; the separately reviewed PC observations above use the actual
+scanner, producer and private database. These do not establish native authority. Native unattended RSI remains blocked at 18/P0; effect-specific
+permit work is deferred, and Holo authority mismatch remains a separate owner
+issue. After publication closure, re-observe the concrete14/P1 candidate:
+preserve measured zero fidelity in existing PatternMemory statistics and
+verify the actual SkillSelector consequence through a supervised local
+worker repair. The current `AVG(...) or default` behavior can replace0.0
+with0.5. This source-derived candidate needs a frozen executed baseline;
+structural fidelity is not correctness or fitness. No dispatch is granted.
+
+P13 PR2060 is closed: exact reviewed tree merged as
+`b99d05309385e272cd5d0691fa23e5abb654864a`; all 11 PR checks and exact-main CI
+37210594932/CodeQL 37210594700 passed. Hosted evidence includes 675 effect-boundary
+cases, 49 Windows MCP cases and all 15 fast-tier members (separate selections).
+Owned root/branch retired; four ignored artifacts and recovery bundle preserved;
+shared state unchanged during cleanup. Its consent source qualification does
+not deploy authority or complete native admission.
+
+Canonical records: `current_observation.test_scope_telemetry_20261004` and
+`authenticated_effect_consent_20261004` in the [backlog](../roadmaps/rsi_swarm_backlog.json).
+PC evidence: `outputs/rsi-test-scope-telemetry-20261004` and P13
+`outputs/rsi-authenticated-effect-consent-20261004/closure-receipt.json`.
+WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
 ## Authenticated effect consent — 2026-10-04
 
 Selected15/P1 (C3/I4/D4/Impact4). Opt-in owner v6 now registers a distinct
@@ -22,7 +115,7 @@ qualification uses disposable signatures and substituted owner/lease provenance.
 No native admission, deployed authority, parent sovereignty, execution permit,
 model learning or new retained RSI benefit is claimed.
 
-Publication remains a separate gate; do not dispatch from this planning record. Exact evidence/commands and review hashes:
+PR2060 publication and owned-lane closure are verified by the current P14 checkpoint above; this planning record grants no dispatch authority. Exact evidence/commands and review hashes:
 `current_observation.authenticated_effect_consent_20261004` in the canonical RSI
 backlog; PC artifacts `outputs/rsi-authenticated-effect-consent-20261004`.
 Next prerequisite: effect-specific permit/provider composition under the same

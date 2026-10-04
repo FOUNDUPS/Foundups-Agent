@@ -34,3 +34,5 @@ extensions/reddog/tests/contract_shards/manifest.json text eol=lf
 # registered inputs as their committed LF bytes on every checkout platform.
 modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md text eol=lf
 modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md text eol=lf
+modules/infrastructure/wre_core/skillz/auto_test_registry_audit/executor.py text eol=lf
+modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILL_MANIFEST.json text eol=lf

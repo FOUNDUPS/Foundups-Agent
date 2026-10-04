@@ -532,6 +532,49 @@ class WREMasterOrchestrator:
             evolve_on_low_fidelity=True,
         )
 
+    def _registry_projection_result(self, result, execution_id, agent, request):
+        """Persist a planning observation without effect/fidelity training."""
+        result = dict(result) if result is not None else {
+            "error": "registered registry projection executor is unavailable",
+            "blocked_by": "registry_projection_executor",
+        }
+        output = {
+            **result, "execution_id": execution_id,
+            "skill_name": "auto_test_registry_audit", "agent": agent,
+            "success": False, "execution_success": False, "_effect_evidence": False,
+            "telemetry_completed": result.get("telemetry_completed") is True,
+            "telemetry_status": result.get("telemetry_status", "unavailable"),
+            "observation_persisted": False,
+        }
+        projection = result.get("projection")
+        if projection is None:
+            return output
+        evidence = projection["evidence"]
+        description = {
+            "execution_id": execution_id, "projection_id": evidence.get("projection_id"),
+            "status": output["telemetry_status"],
+            "rejection_reasons": projection["rejection_reasons"],
+        }
+        for field in ("base_sha", "head_sha"):
+            value = request.get(field) if type(request) is dict else None
+            description[field] = value if (
+                type(value) is str and len(value) in (40, 64)
+                and all(c in "0123456789abcdef" for c in value)
+            ) else None
+        if self.sqlite_memory is None:
+            output["observation_error"] = "telemetry_memory_unavailable"
+            return output
+        try:
+            self.sqlite_memory.record_learning_event(
+                event_id=str(uuid.uuid4()), skill_name="auto_test_registry_audit",
+                event_type="telemetry_projection", description=stable_json_record(description),
+                execution_id=execution_id,
+            )
+            output["observation_persisted"] = True
+        except Exception:
+            output["observation_error"] = "telemetry_observation_write_failed"
+        return output
+
     def _execute_skill_once(
         self,
         skill_name: str,
@@ -639,9 +682,12 @@ class WREMasterOrchestrator:
         if os.getenv("WRE_AGENTIC_RAG", "0").strip() == "1":
             logger.warning("[WRE-RAG] BLOCKED: governed Holo owner adapter is not bound")
 
-        # Step 3: Check for programmatic executor (executor.py alongside SKILLz.md)
         # Captured executor bytes must match the exact scanner admission receipt.
         executor_result = self._try_executor_dispatch(skill_name, input_context, agent, fingerprint)
+        if skill_name == "auto_test_registry_audit":
+            return self._registry_projection_result(
+                executor_result, execution_id, agent, input_context.get("request"),
+            )
         if executor_result is not None:
             execution_result = executor_result
         else:
@@ -652,11 +698,7 @@ class WREMasterOrchestrator:
                 agent=agent
             )
 
-        # Step 4: Calculate execution time
         execution_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-
-        # Step 5: Validate with Gemma (pattern fidelity check)
-        # Convert output string to dict for Gemma validation
         step_output_dict = structural_step_output(execution_result)
         expected_patterns = ["output", "steps_completed"]  # Required fields
 
@@ -839,13 +881,14 @@ class WREMasterOrchestrator:
             )
             results.append(result)
 
-            # Telemetry: count retries
+            if skill_name == "auto_test_registry_audit":
+                return {**result, "execution_success": False, "_react_metadata": {
+                    "iterations": 1, "max_iterations": max_iterations,
+                    "all_attempts": [{"success": False}], "early_success": False,
+                }}
             if iteration > 1 and self.sqlite_memory:
                 self.sqlite_memory.increment_counter("react_retry_count")
-
-            # Observation: Check fidelity
             fidelity = result.get("pattern_fidelity", 0)
-
             if result.get("success") is True and fidelity >= fidelity_threshold:
                 logger.info(
                     f"[WRE-REACT] Success on iteration {iteration} - "
@@ -866,7 +909,6 @@ class WREMasterOrchestrator:
                 f"[WRE-REACT] Exhausted {max_iterations} iterations for {skill_name}"
             )
 
-        # Record telemetry
         if self.sqlite_memory:
             self.sqlite_memory.record_learning_event(
                 event_id=str(uuid.uuid4()),
