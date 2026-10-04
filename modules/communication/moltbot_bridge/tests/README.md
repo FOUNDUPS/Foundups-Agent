@@ -1,3 +1,36 @@
+## Bounded effect-review quorum qualification — 2026-10-04
+
+A separate worker froze 63 acceptance cases before production edits. Original
+source: 63 expected missing-API failures, zero errors/skips (26 original cases
+deselected). Candidate: all 63 pass, and all 315 connected consensus, signer,
+author-runtime, nonce/transaction, composed-e2e and structure cases pass locally.
+The 63 cases and prior 70-case split check overlap that 315-case run.
+
+Tests cover 1/2/8 reviews, 8192/8193-byte envelopes, roles/counts, duplicated
+identity/key/model/runtime, author exclusions, tampered or stale evidence,
+invalid extras and exact signing preimages/resolver call counts. Inert resolver
+fixtures do not establish deployed independence. One arbitrary-sovereign-digest
+positive deliberately preserves the distinction from sovereign authorization.
+
+The original reviewer file was restored exactly. Frozen test function/decorator
+ASTs and all case parameters moved unchanged into two bounded test leaves;
+existing 200-line/50-line limits remain. Broader validation initially found two
+structural failures (208 passed), then three missing-import failures after the
+move (301 passed). One missing `_digest` import was repaired; expectations were
+not changed. Exact movement/attempt receipts remain in
+`O:/Foundups-Agent/outputs/rsi-review-quorum-20261004/`.
+
+Existing guarded CI explicitly adds 63 quorum cases and ten old-domain
+verification/signer regressions; its seven structure checks were already present.
+Eight staged manifest tests and the Node compatibility contract passed. Two
+local attempts at the exact guarded CI script stopped during collection (three
+errors each): isolated default Python lacked jsonschema; the qualified Windows
+interpreter failed an asyncio import (base_events undefined). These are not executed
+acceptance cases. Guard controls remain unchanged; hosted Linux is required.
+Hosted/main results remain separate. The canonical registry now has 1673 test
+files, 270 quarantined; inventory counts are not passing test counts.
+
+
 ## Connected reviewer authority qualification — 2026-10-01
 
 Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now

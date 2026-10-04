@@ -1,3 +1,31 @@
+## Bounded effect-review quorum API — 2026-10-04
+
+`verify_effect_reviewer_decisions(*, decisions, context, authority_request,
+target, expected_target, policy, signature_verifier, reviewer_key_resolver,
+runtime_evidence_resolver, now, revoked_key_epochs=frozenset()) -> bool` extends
+`src/reddog_elevated_authority_consensus_verification.py`.
+
+- Accept an exact list/tuple containing 1–8 strict effect-review dictionaries.
+  The canonical sorted compact ASCII JSON `{"decisions": [...]}` envelope must
+  be at most 8192 bytes. This bounds accepted wire data, not peak memory.
+- Freeze decoded reviews; validate actual parent/target/context and supplied
+  policy before resolvers. Require minimum approvals and every required role.
+- Every review must approve this exact effect context and match membership.
+  Invalid extras are rejected, never dropped to obtain a passing subset.
+- Require distinct reviewer identities, public keys, model IDs and runtime
+  binding digests. Exclude parent/RedDog/worker identities, parent/RedDog keys,
+  and author runtime. Use each resolved verified key/runtime pair once.
+- Preserve `reddog-effect-consensus-review.v1.` signing bytes and effect schema.
+  Malformed data, stale/revoked/substituted evidence or collaborator exceptions
+  return `False`; no nonce is consumed and no permit is issued.
+
+Success is conditional on the supplied trusted policy, verifier and resolvers.
+An arbitrary sovereign digest can still pass structural review; authenticating
+sovereign effect authority is a separate mandatory gate. This API is not yet
+composed with the current-generation multi-review owner, deployed independent
+runtime provenance, a single-target effect permit or native worker admission.
+The old single-review and delegated consensus APIs remain compatible.
+
 ## Single-effect proof handoff design — 2026-10-01
 
 **Pure binding API implemented; authenticated effect handoff remains planned.**

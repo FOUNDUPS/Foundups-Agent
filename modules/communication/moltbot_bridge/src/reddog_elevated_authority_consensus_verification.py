@@ -15,13 +15,14 @@ from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensu
 )
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_effect_context import (
     canonical_effect_approval_context_digest, effect_approval_context_matches,
+    _effect_review_set_preflight,
 )
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_evidence import (
     author_runtime_evidence_matches,
     consensus_receipt_matches,
 )
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_policy import (
-    AuthorRuntimeEvidenceResolver, elevated_consensus_policy_valid,
+    AuthorRuntimeEvidenceResolver, _effect_policy_matches,
     ElevatedConsensusPolicyResolver,
     ReviewerKeyAuthorityResolver,
     ReviewerRuntimeEvidenceResolver,
@@ -31,6 +32,7 @@ from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensu
     rehydrate_consensus_receipt, rehydrate_effect_reviewer_decision,
 )
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_reviewer_evidence import (
+    _decisions_verify,
     consensus_decisions_verify, _verified_decision_evidence,
     _forbidden_reviewer_ids, _reviewer_membership,
 )
@@ -90,7 +92,6 @@ def verify_elevated_authority_consensus(
     return _mint_verified_capability(receipt, request_digest, authority_request)
 
 
-
 def verify_effect_reviewer_decision(
     *, decision, context, authority_request, target, expected_target, policy,
     signature_verifier, reviewer_key_resolver, runtime_evidence_resolver,
@@ -123,6 +124,32 @@ def verify_effect_reviewer_decision(
     except Exception:
         return False
 
+def verify_effect_reviewer_decisions(
+    *, decisions, context, authority_request, target, expected_target, policy,
+    signature_verifier, reviewer_key_resolver, runtime_evidence_resolver,
+    now: int, revoked_key_epochs: frozenset[str] = frozenset(),
+) -> bool:
+    """Verify a bounded review quorum relative to supplied trusted resolvers.
+
+    This does not authenticate sovereign approval or runtime provenance, issue
+    a permit, or establish deployed reviewer independence. Every supplied review
+    must pass; invalid extras are never discarded to form a passing subset.
+    """
+    try:
+        reviews, digest = _effect_review_set_preflight(
+            decisions, context, authority_request, target, expected_target, policy, now,
+        )
+        return _decisions_verify(
+            decisions=reviews, context_digest=digest, required_roles=context.required_roles,
+            request=authority_request, signature_verifier=signature_verifier,
+            key_resolver=reviewer_key_resolver, evidence_resolver=runtime_evidence_resolver,
+            policy=policy, now=now, revoked_key_epochs=revoked_key_epochs,
+            schema_version=EFFECT_DECISION_SCHEMA_VERSION,
+            signing_input=_effect_reviewer_signing_input,
+        )
+    except Exception:
+        return False
+
 
 def verify_current_effect_reviewer_decision(
     *, owner_config_path, repo_root, decision, context, authority_request, target,
@@ -139,15 +166,6 @@ def verify_current_effect_reviewer_decision(
         runtime_evidence_resolver=runtime_evidence_resolver,
         revoked_key_epochs=revoked_key_epochs,
     )
-
-
-def _effect_policy_matches(context, policy) -> bool:
-    return elevated_consensus_policy_valid(policy) and all((
-        context.consensus_policy_digest == policy.policy_digest,
-        context.required_approvals == policy.minimum_approvals,
-        context.required_roles == policy.required_roles,
-        context.expires_at - context.issued_at <= policy.maximum_ttl_seconds,
-    ))
 
 
 def _effect_reviewer_signing_input(decision) -> str:
@@ -178,5 +196,5 @@ def _mint_verified_capability(receipt, request_digest, authority_request):
 __all__ = [
     "ElevatedConsensusSignerAuthority",
     "verify_elevated_authority_consensus", "verify_effect_reviewer_decision",
-    "verify_current_effect_reviewer_decision",
+    "verify_current_effect_reviewer_decision", "verify_effect_reviewer_decisions",
 ]

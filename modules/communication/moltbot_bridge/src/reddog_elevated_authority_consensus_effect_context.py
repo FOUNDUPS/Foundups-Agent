@@ -141,6 +141,39 @@ def effect_approval_context_matches(context, *, parent, target, expected_target,
         return False
 
 
+def _effect_review_set_preflight(decisions, context, parent, target, expected_target, policy, now):
+    """Freeze bounded wire assertions before consulting evidence resolvers."""
+    from .reddog_elevated_authority_consensus_contract import APPROVE
+    from .reddog_elevated_authority_consensus_policy import _effect_policy_matches
+    from .reddog_elevated_authority_consensus_rehydration import rehydrate_effect_reviewer_decision
+    from .reddog_elevated_authority_consensus_reviewer_evidence import (
+        _forbidden_reviewer_ids, _reviewer_membership,
+    )
+
+    if type(decisions) not in (list, tuple) or not 1 <= len(decisions) <= MAX_CONSENSUS_DECISIONS:
+        raise ValueError("effect_review_set_count_invalid")
+    reviews = tuple(rehydrate_effect_reviewer_decision(item) for item in decisions)
+    _canonical_wire_bytes({"decisions": [review.to_dict() for review in reviews]})
+    if (not effect_approval_context_matches(
+            context, parent=parent, target=target, expected_target=expected_target, now=now,
+        ) or not _effect_policy_matches(context, policy)
+            or len(reviews) < policy.minimum_approvals):
+        raise ValueError("effect_review_set_context_invalid")
+    digest = canonical_effect_approval_context_digest(context)
+    forbidden_ids = _forbidden_reviewer_ids(parent)
+    forbidden_keys = {parent.principal_public_key, parent.reddog_public_key}
+    if any(
+        review.consensus_context_digest != digest or review.decision != APPROVE
+        or _reviewer_membership(review) not in policy.reviewer_membership
+        or review.reviewer_principal_id in forbidden_ids
+        or review.reviewer_public_key in forbidden_keys
+        or review.model_runtime_binding_digest == parent.model_runtime_binding_digest
+        for review in reviews
+    ):
+        raise ValueError("effect_review_set_membership_invalid")
+    return reviews, digest
+
+
 __all__ = [
     "EffectApprovalContext", "rehydrate_effect_approval_context",
     "canonical_effect_approval_context_bytes", "canonical_effect_approval_context_digest",

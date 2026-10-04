@@ -1,3 +1,23 @@
+## 2026-10-04 — Bounded effect-review quorum
+
+Selected 14/P1 (C3/I4/D4/Impact3) after closing PR2047 at `f1c183173`.
+The existing consensus owners now verify every member of a bounded effect-review
+set, policy quorum/roles and distinct reviewer IDs, keys, models and runtimes.
+No new runtime module, authority issuer or orchestrator was added. Independent
+acceptance preceded implementation: 63 expected missing-API failures; all 63
+now pass. The connected consensus/signing/replay/structure suite passes 315
+cases locally, zero failures/errors/skips. These are overlapping selections.
+
+Source review found no blocker. Publication/main evidence is a separate gate.
+Supplied resolver evidence is not authenticated runtime provenance or sovereign
+approval. Effect permission, native worker admission and retained RSI benefit
+remain open. Reuse the existing current-generation reviewer composition next,
+then qualify the effect-specific sovereign proof/provider handoff. WSP00/5/6/
+11/15/22/48/49/50/62/84/97. Canonical backlog observation:
+`effect_review_quorum_20261004`; local evidence:
+`O:/Foundups-Agent/outputs/rsi-review-quorum-20261004/`.
+
+
 ## 2026-10-02 — Mechanical correspondence sender boundary (#1779)
 
 - Added the dependency-free host adapter

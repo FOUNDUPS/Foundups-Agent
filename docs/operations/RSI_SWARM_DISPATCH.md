@@ -1,3 +1,30 @@
+## Bounded effect-review quorum — 2026-10-04
+
+Selected 14/P1 (C3/I4/D4/Impact3) after closing PR2047 at `f1c183173`.
+The existing consensus owners now verify every member of a bounded effect-review
+set, policy quorum/roles and distinct reviewer IDs, keys, models and runtimes.
+No new runtime module, authority issuer or orchestrator was added. Independent
+acceptance preceded implementation: 63 expected missing-API failures; all 63
+now pass. The connected consensus/signing/replay/structure suite passes 315
+cases locally, zero failures/errors/skips. These are overlapping selections.
+
+Source review found no blocker. Publication/main evidence is a separate gate.
+Supplied resolver evidence is not authenticated runtime provenance or sovereign
+approval. Effect permission, native worker admission and retained RSI benefit
+remain open. Reuse the existing current-generation reviewer composition next,
+then qualify the effect-specific sovereign proof/provider handoff. WSP00/5/6/
+11/15/22/48/49/50/62/84/97. Canonical backlog observation:
+`effect_review_quorum_20261004`; local evidence:
+`O:/Foundups-Agent/outputs/rsi-review-quorum-20261004/`.
+
+PR2047 closure: reviewed head `79cec3cfa5c3487b72bd28d35db002693aee045a`,
+merge `f1c1831737879127782ec32d8a04c1ba872c4ac6`; all ten PR checks, main
+CI37176313703 and CodeQL37176313588 passed. Merge tree equals reviewed head.
+Two default-queue cases passed in a fresh post-merge invocation; owned lane
+retired with verified recovery bundle. No social delivery occurred. This
+supersedes the earlier pending queue-default checkpoint below.
+
+
 ## Queue-default repair — 2026-10-04
 
 Previous PatternMemory repair PR2046 is merged at `a9d2b07a3`; all 10 PR checks,

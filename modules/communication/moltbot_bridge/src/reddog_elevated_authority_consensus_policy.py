@@ -136,6 +136,15 @@ def elevated_consensus_policy_valid(policy: object) -> bool:
     )
 
 
+def _effect_policy_matches(context, policy) -> bool:
+    return elevated_consensus_policy_valid(policy) and all((
+        context.consensus_policy_digest == policy.policy_digest,
+        context.required_approvals == policy.minimum_approvals,
+        context.required_roles == policy.required_roles,
+        context.expires_at - context.issued_at <= policy.maximum_ttl_seconds,
+    ))
+
+
 __all__ = [
     "AuthorRuntimeEvidence",
     "AuthorRuntimeEvidenceResolver",
