@@ -1031,6 +1031,26 @@ jobs:
             modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py::test_default_refresh_runner_bounds_retained_stdout \
             scripts/tests/test_generate_reddog_backend_manifest.py
 
+      - name: Run HoloIndex admitted recovery and lifecycle contracts
+        timeout-minutes: 4
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            -o pythonpath=. -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/holo-resume-pytest" \
+            modules/communication/moltbot_bridge/tests/test_holoindex_persisted_resume.py \
+            modules/communication/moltbot_bridge/tests/test_holoindex_resume_controller.py \
+            modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_controller.py \
+            modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_admission.py \
+            modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_liveness.py \
+            modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_owner_proof.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_holoindex_incident_repair_runtime.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_holoindex_preowner_incident_repair.py \
+            modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_coordinator.py
+
       - name: Run scanner environment and WRE admission contracts
         timeout-minutes: 5
         env:

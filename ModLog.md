@@ -1,3 +1,16 @@
+## Existing Holo recovery repair in progress — 2026-10-05
+
+P16 now selects 16/P0 under WSP00/15/97. Four actual controller attempts retain
+startup failure, snapshot-probe failure, built-in retry-wait, and semantic-backend
+failure after canonical invalidation. The in-progress receipt and task history
+remain intact. Exact Pydantic/Git/cache controls qualified one cached MiniLM
+constructor and one finite 384-element CPU encode (8.047s parent); they do not
+prove a completed refresh. Existing-owner incident resume repair passes181 local
+connected tests; one Qwen proposal was rejected and not applied. Publication,
+merged-source runtime verification and native RSI closure remain open.
+P15 closure and retained consumer proof remain preserved. See the
+[P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
+
 ## Preserve measured-zero fidelity — 2026-10-05
 
 Selected 14/P1 (C2/I4/D4/Impact4). The coordinator changed only three mean
@@ -6,8 +19,11 @@ SQL, ranking, threshold-rate semantics and return schema remain unchanged.
 Method 58 → 50 lines. Valid baseline: 4 failures/5 passes becomes 9 passes; 42 disjoint connected
 controls pass. The reopened actual selector now prefers measured 0.4 over 0.0.
 One local Qwen attempt was rejected and unused, with no retry or repair credit.
-Publication and later use of the preserved baseline SQLite snapshot remain
-pending. PR2061/main 0b3f6cbc3 is closed, with recovery and short TEMP preserved.
+PR2062 is merged/main-verified at `6efbc3ac1`; all 11 PR checks and exact-main
+CI/CodeQL passed. Three retained/control/recovery phases select positive → zero
+control → positive on unchanged saved rows. The owned lane is retired, recovery
+bundle preserved and shared state unchanged. No worker repair or model-learning
+credit is inferred. PR2061/main 0b3f6cbc3 remains closed with short TEMP preserved.
 See the [checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint)
 and backlog `zero_fidelity_20261005`. WSP00/15/22/62/97.
 

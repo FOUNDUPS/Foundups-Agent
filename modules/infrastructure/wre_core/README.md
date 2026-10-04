@@ -4,7 +4,9 @@
 means use the existing fallbacks. The actual reopened selector now prefers a
 measured 0.4 skill over zero. Nine frozen cases and 42 disjoint connected controls
 pass. The coordinator authored the repair after one local proposal was rejected;
-publication and later retained use remain pending. This is a statistics repair,
+PR2062 is merged/main-verified and the owned lane retired. Retained/control/
+recovery use selects positive → zero control → positive on unchanged saved rows.
+This verifies retention of a statistics repair,
 not model fitness, learning or native authority. See the [interface](INTERFACE.md#measured-zero-fidelity--p15-contract)
 and [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
 

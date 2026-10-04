@@ -1,3 +1,10 @@
+## Recover an admitted HoloIndex refresh — 2026-10-05
+
+Use the existing post-merge controller with the original `incident_id` as
+`resume_incident_id`. It validates persisted admission and current source before
+reusing the bounded retry path. See the [runtime contract](docs/HOLOINDEX_RUNTIME.md#post-merge-controller).
+Source tests pass locally; merged-source runtime recovery remains a separate gate.
+
 ## Detached effect consent — 2026-10-04
 
 Use `resolve_current_effect_sovereign_authorization` from the existing principal

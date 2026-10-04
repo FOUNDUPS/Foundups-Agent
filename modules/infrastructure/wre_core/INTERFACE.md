@@ -7,7 +7,9 @@ an empty temporal window uses the overall mean. `success_rate` still counts
 fidelity >= 0.7, independently of execution-success flags. Ranking weights and
 `SkillSelector` are unchanged. These values describe structural fidelity,
 not authenticated effects or model fitness. Nine frozen and 42 disjoint controls
-pass locally; publication and later retained-use observations remain separate.
+pass locally. PR2062 is merged/main-verified; separate retained/control/recovery
+observations confirm positive → zero control → positive on unchanged saved rows.
+This is retained consumer behavior, not worker learning or effect authority.
 
 ## Named registry-scope telemetry — P14 contract
 

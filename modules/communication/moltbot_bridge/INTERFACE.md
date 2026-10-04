@@ -1016,6 +1016,13 @@ Canonical product and deployment boundaries are in
 
 `run_holoindex_postmerge_runtime_once(...)` owns one clean exact-main maintenance lifecycle;
 `query_holoindex_owner(...)` and `GenerationBoundHoloIndexQueryAdapter.query(...)` own reads.
+The controller and JSON CLI accept optional `resume_incident_id`; results add
+`incident_id` after accepted admission. The pointer selects an existing durable
+incident, and `resume_holoindex_incident_repair(...)` revalidates its task/request
+and current HEAD/root before existing bounded retry. Generic stale-index errors
+do not authorize recovery. Resumed retry-wait returns non-success without runtime
+startup. The existing [runtime contract](docs/HOLOINDEX_RUNTIME.md#post-merge-controller)
+defines states, evidence, limits and source-change behavior.
 Success requires exact task/completion, HEAD/root/generation, replica, ranker, runtime, CURRENT,
 and no-reindex evidence. A canonical-store lease contains owned runtime start/stop and cleanup.
 Holo-only launch receives the exact task ID and requires same-root/mode resident acknowledgment; its sealed receipt authority digest is rechecked against AgentDB. Pre-existing bindings release exactly, while owned supervisors stay bound until stop; runtime/task drift rejects during polling;

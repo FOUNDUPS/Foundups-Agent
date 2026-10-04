@@ -1,3 +1,20 @@
+## Existing incident resume repair selected — 2026-10-05
+
+Selected 16/P0 (C3/I4/D5/Impact4), in progress. Four actual existing-controller
+attempts preserve startup/probe failures, scheduler retry-wait and the latest
+semantic-backend failure after canonical invalidation. Task history and the
+in-progress index receipt remain intact. Supported plugin configuration, exact
+process-only Git trust replay and private TorchInductor cache qualified the local
+runtime; one cached MiniLM load/fixed encode passed (8.047s, 384 finite nonzero
+float32 values on CPU). No completed refresh or native effect closure follows.
+The existing incident/controller owners now validate explicit durable resume
+binding; no new store or generic stale admission. Local181 connected cases pass
+without errors/skips. A rejected Qwen proposal was not applied: coordinator wrote
+the repair. Existing stop/wait helpers moved unchanged to the liveness owner to
+preserve the675-line controller ceiling. Publication and merged-source execution
+remain separate gates; no additional live retry is allocated. See the
+[P16 checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
+
 ## Authenticated effect consent — 2026-10-04
 
 Selected15/P1 (C3/I4/D4/Impact4). Opt-in owner v6 now registers a distinct

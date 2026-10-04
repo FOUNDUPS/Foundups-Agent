@@ -15,9 +15,13 @@ The worker proposal is rejected/unused, not candidate code under these tests.
 
 Commands, XML, fixed IDs, bounded observations and source review are saved in
 `outputs/rsi-zero-fidelity-20261005`. The reopened selector now chooses 0.4 over
-measured 0.0. A preserved baseline SQLite snapshot supports a future separately
-reviewed retained/control/recovery observation; it has not run. Structural
-fidelity and synthetic persistence do not prove model improvement or authority.
+measured 0.0. PR2062 and exact-main CI/CodeQL passed. Three separately reviewed
+retained/control/recovery phases passed in 0.218s/0.219s/0.219s parent time:
+positive → zero control → positive, with identical original rows/timestamps,
+source pins and SQLite byte hashes. All database closes returned; no errors or
+denials were recorded. Hosted 340 WRE and 675 effect selections are not summed.
+Structural fidelity and retained consumer behavior do not prove model
+improvement, worker repair credit or authority.
 
 ## Named registry telemetry qualification — P14
 

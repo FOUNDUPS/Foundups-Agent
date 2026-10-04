@@ -1881,23 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.zero_fidelity_20261005",
-    "base_commit": "0b3f6cbc37ef27eadb63ff979c847b7932745d61",
-    "selected_action": "Preserve measured zero fidelity and verify the existing selection consumer",
-    "status": "locally_qualified_publication_and_retained_use_pending",
+    "observation_path": "current_observation.holo_grounding_20261005",
+    "base_commit": "6efbc3ac19beb4191608e1bce18f6b56b4f2605b",
+    "selected_action": "Validate explicit existing incident pointer and reuse bounded coordinator retry through existing controller",
+    "status": "in_progress",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
-      "deferability": 4,
+      "deferability": 5,
       "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "total": 16,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary coordinator-supervised source repair; rejected local proposal supplies no effect authority",
-    "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.test_scope_telemetry_20261004",
-    "next_action": "Complete P15 publication/exact-main closure and separately reviewed retained/control/recovery use; then rescore existing reddog_operations proposal feasibility without adding a registry operation."
+    "execution_plane": "ordinary supervised existing-owner source repair; no new live maintenance allocation",
+    "previous_observation": "current_observation.zero_fidelity_20261005",
+    "next_action": "Complete independent source review and repository integrity checks, then authorized publication and exact merged-source runtime qualification. Preserve old task history; never use its incident pointer for a new HEAD."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -29633,7 +29632,7 @@
     },
     "zero_fidelity_20261005": {
       "base": "0b3f6cbc37ef27eadb63ff979c847b7932745d61",
-      "state": "locally_qualified_publication_and_retained_use_pending",
+      "state": "merged_main_verified_retained_use_verified_owned_lane_retired",
       "scope": "Only existing get_skill_fidelity_stats mean fallbacks and semantic docstring; coordinator repair, no ranking/schema change",
       "wsp15": {
         "complexity": 2,
@@ -29702,19 +29701,62 @@
         }
       },
       "retained_use": {
-        "status": "pending",
+        "status": "verified",
         "snapshot": "retained-use/input_snapshot.db",
         "sha256": "b552a862630ebbb5c5e9aacebc85003a94a1ef477770d99eb6a6c2f6ed023541",
-        "plan": "Fresh private copies and verified source; retained/control/recovery without changing original rows/timestamps"
+        "plan": "Executed once with private copies and exact Git-exported source; original rows and timestamps unchanged.",
+        "phases": [
+          {
+            "phase": "retained",
+            "source_version": "merged",
+            "selected_skill": "positive_skill",
+            "zero_average": 0.0,
+            "positive_average": 0.4,
+            "parent_seconds": 0.218,
+            "child_seconds": 0.063,
+            "rows_and_timestamps_unchanged": true,
+            "close_returned": true,
+            "denial_count": 0
+          },
+          {
+            "phase": "rollback-control",
+            "source_version": "baseline",
+            "selected_skill": "zero_skill",
+            "zero_average": 0.5,
+            "positive_average": 0.4,
+            "parent_seconds": 0.219,
+            "child_seconds": 0.047,
+            "rows_and_timestamps_unchanged": true,
+            "close_returned": true,
+            "denial_count": 0
+          },
+          {
+            "phase": "recovery",
+            "source_version": "merged",
+            "selected_skill": "positive_skill",
+            "zero_average": 0.0,
+            "positive_average": 0.4,
+            "parent_seconds": 0.219,
+            "child_seconds": 0.047,
+            "rows_and_timestamps_unchanged": true,
+            "close_returned": true,
+            "denial_count": 0
+          }
+        ],
+        "rows_and_timestamps_unchanged": true,
+        "source_stable": true,
+        "snapshot_and_private_database_hashes_unchanged": true,
+        "errors": 0,
+        "denials": 0,
+        "close_returned_all_phases": true,
+        "scope": "Retained coordinator-authored consumer repair on saved synthetic observations; rollback control reproduces old faulty selection, not a failed run."
       },
       "open_gates": [
-        "Publication and exact-main verification",
-        "Independent retained-use review and bounded saved-row observation",
-        "Fresh next-action rescore"
+        "Fresh next-action rescore and evidence-bound qualification of existing owner/skill prerequisites"
       ],
       "native_effect_admission": false,
       "unattended_rsi_complete": false,
-      "retained_gain": null,
+      "retained_gain": "Verified retained source repair of the actual statistics/selection consumer; no model fitness, training, worker repair credit or unattended RSI claim.",
       "proof_limits": "Synthetic structural-fidelity consumer behavior, not model fitness/training/effect success; rejected worker repair receives no credit",
       "next_candidate": {
         "skill": "reddog_operations",
@@ -29730,7 +29772,6 @@
         },
         "dispatchable": false,
         "requires": [
-          "P15 closure and retention",
           "Actual scanner/manifest verdict",
           "Full-skill context capacity",
           "Explicit finite existing evolution budget"
@@ -29756,7 +29797,12 @@
         "retained-use/snapshot-receipt.json": "297398c5ed3662e205ff0e2a201f6fcf964feeccb4c8096c38234ebe5fe1077d",
         "next-gate-existing-proposal-route-correction.json": "de8fe0b3c2d5b29872133379f2711aba7e8e1541068217faf7ebf017bf98ac97",
         "manifest-integrity-result.json": "01643d1fc8d0cc1f63ad48459c1f9688fee0e1027d8ddcb9d04cd96b620d4b8a",
-        "fast-integrity-result.json": "9ba4fcdd4f751037dbc8f839ede1eef2eb9e70c78e102798746e2869709a000e"
+        "fast-integrity-result.json": "9ba4fcdd4f751037dbc8f839ede1eef2eb9e70c78e102798746e2869709a000e",
+        "closure-receipt.json": "d1f48bc564386d1c31131f134b4444429de8705114b1c3d5c86b0742a806d5e9",
+        "retained-use/receipt.json": "f894d8e5b4b49c40a30f2941c9c8bed927e4c3b9cefbc2e0e6c35f135b447f61",
+        "retained-use/independent-result-review.json": "825c3d3d8868f7f1aead138027b3ad42f58de0d92b2cd63121a6a4c14690ccc3",
+        "retained-use/packet.json": "882f759b1dd071b0caa9ceb8cdae7f30d1f8e063c462817815618c26065f0e1e",
+        "retained-use/independent-sealed-review.json": "3c0f5b17092212efbd162768484dae85439dcd6c222f72ba026406056d810e7e"
       },
       "integrity": {
         "runtime_members": 1408,
@@ -29772,6 +29818,302 @@
         "fast_members": 15,
         "fast_parent_seconds": 10.0,
         "scope": "Separate integrity selections; not additional semantic coverage or model fitness"
+      },
+      "publication": {
+        "pr": 2062,
+        "base": "0b3f6cbc37ef27eadb63ff979c847b7932745d61",
+        "head": "937172882b544ad237a768fddae766d5db27373e",
+        "merge": "6efbc3ac19beb4191608e1bce18f6b56b4f2605b",
+        "tree": "206dad7964b12a6b91f19a366cd41746604ff6e3",
+        "reviewed_merge_tree_equal": true,
+        "pr_checks_passed": 11,
+        "main_ci": 37220878232,
+        "main_codeql": 37220878018,
+        "hosted_selections": {
+          "wre": 340,
+          "effect": 675,
+          "overlap_not_summed": true
+        },
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "recovery_bundle": "pr2062-recovery.bundle",
+        "recovery_bundle_sha256": "aaf354a162eecf2e6e638bd5c2b5d24d49fc56d69ebfa217931f349f7af9a7d0",
+        "shared_status_unchanged_during_cleanup": true
+      }
+    },
+    "holo_grounding_20261005": {
+      "base_commit": "6efbc3ac19beb4191608e1bce18f6b56b4f2605b",
+      "status": "in_progress",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 4,
+        "total": 16,
+        "priority": "P0"
+      },
+      "owner": "scripts/reddog_holoindex_postmerge_runtime_once.py / run_holoindex_postmerge_runtime_once",
+      "evidence_root": "outputs/rsi-holo-grounding-20261005",
+      "previous_closed_observation": "current_observation.zero_fidelity_20261005",
+      "startup": {
+        "invocations": 4,
+        "denied": 3,
+        "qualified": 1,
+        "readiness_returned_true_all_four": true,
+        "configuration": "supported PYDANTIC_DISABLE_PLUGINS=__all__; no outside-read guard relaxation"
+      },
+      "controller_observations": [
+        {
+          "attempt": 1,
+          "status": "REJECTED",
+          "reason": [
+            "openclaw_start_timeout",
+            "openclaw_stop_failed"
+          ],
+          "parent_seconds": 6.844,
+          "finding": "External output sink lacked isatty required by installed formatter; failure retained."
+        },
+        {
+          "attempt": 2,
+          "status": "REJECTED",
+          "reason": [
+            "postmerge_task_failed"
+          ],
+          "parent_seconds": 19.297,
+          "executor_detail": "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED",
+          "cleanup": "both owned runtimes reported stopped in reverse order",
+          "partial_effect": "authority advanced to selected HEAD; no new verified generation"
+        },
+        {
+          "attempt": 3,
+          "status": "REJECTED",
+          "reason": [
+            "postmerge_task_retry_wait"
+          ],
+          "parent_seconds": 13.719,
+          "cleanup": "both owned runtimes reported stopped in reverse order"
+        },
+        {
+          "attempt": 4,
+          "status": "REJECTED",
+          "reason": [
+            "postmerge_task_failed"
+          ],
+          "parent_seconds": 51.188,
+          "executor_detail": "HOLOINDEX_MAINTENANCE_SEMANTIC_BACKEND_REQUIRED",
+          "executor_milliseconds": 39921,
+          "cleanup": "both owned runtimes reported stopped in reverse order; normal parent Job close",
+          "partial_effect": "Canonical receipt invalidated at selected HEAD with cli_maintenance_in_progress; preserved, not restored or removed."
+        }
+      ],
+      "runtime_diagnostic": {
+        "version": 3,
+        "passed": true,
+        "stages_returned": 9,
+        "git_metadata_calls": 3,
+        "recorded_denials": 0,
+        "recorded_traced_exceptions": 0,
+        "child_seconds": 5.64,
+        "parent_seconds": 6.438,
+        "change": "Exact already-existing primary safe.directory replay in child process environment; private HOME preserved; no global config edit.",
+        "limit": "Preparation only; no maintenance or generation proof."
+      },
+      "admission_observation": {
+        "classification": "current_invocation_model_runtime_binding_unconfigured",
+        "path_variables_absent": 9,
+        "provider_variable_absent": true,
+        "query_executed": false,
+        "global_artifact_absence_claim": false,
+        "architect_binding_is_worker_verifier_grant": false
+      },
+      "maintenance_outcome": "failed_after_canonical_invalidation",
+      "verified_new_generation": null,
+      "fresh_owner_query": null,
+      "implementation_change_claim": true,
+      "test_pass_claim": true,
+      "native_rsi_complete": false,
+      "evidence_bindings": {
+        "work-order.json": "27c865c0b579238f9699363cd11f02a55ae361e20fd267b08b8e8c1b8190cc99",
+        "startup-qualified-config/result-review.json": "e5502ba2f64d0e074ec49cd8853d9c55673bc8253c7815fa60f7dfcc706f507f",
+        "maintenance-preparation/controller-result.json": "bc03b3a804824806f80a453ae05c699c65885e990e97b71f3a5564c87c0215f3",
+        "maintenance-preparation/parent-result.json": "60902dc3922de16fc66ab27f3a344b83c25888df3f7c2cd7f1837cfdeafdf28a",
+        "maintenance-recovery/controller-result.json": "c3dc21405f0059d462009bb3339949116f93f1c4649225d7116d1966001f03e2",
+        "maintenance-recovery/parent-result.json": "e224895445284c987dfc61ac5bd496fdf18f52ece854a0d4fddd3f624ce2ae2b",
+        "runtime-stages-diagnostic-v3/result-review.json": "7a8afd9cf45507f13677582875653249137a09dd984dbe938f25f919614c9786",
+        "maintenance-environment-recovery/controller-result.json": "803f0a0e905d0b725be833d25e1229ac0b7340c47d75ef76b4503b4ee05ede1b",
+        "maintenance-environment-recovery/parent-result.json": "403f20b02cdb810f09f107a2d21738371ac5cb88a5585a53e4028f4013abb830",
+        "maintenance-environment-retry/scheduling-reconciliation.json": "4756fb6cc3211eca807e3ea91e55967aafe41898a26a22aa0d1c11f89f34ee87",
+        "model-runtime-binding-presence-observation.json": "2d023626ece76a2ba031733d613ccce29224d23915d4dd7c07af5c6e6af45b05",
+        "work-order-resume-repair.json": "113991fe90898b87a4f4521ea8ca5e5ba645576125615cc25a236ad830c4c4ec",
+        "maintenance-environment-retry/controller-result.json": "c3dc21405f0059d462009bb3339949116f93f1c4649225d7116d1966001f03e2",
+        "maintenance-environment-retry/parent-result.json": "04905f6fdc48335b8157450454d49c5ed32b0216bb0a3670e67fb58e6b26a3f4",
+        "semantic-import-diagnostic/reconciliation.json": "7bdb97f99e915dfcc62569002f8c2f82021e616cdf0d1fc9e3f7c43c5a273e16",
+        "semantic-import-diagnostic/child-result.json": "a8e0bf2d810a8b1db21a9e854dbd824dbc8e0bea82dc905fb94896565aef55ec",
+        "semantic-import-cache-qualification/baseline/child-result.json": "c516f04a81bd30c233f621852f07c1365ec5a894e2e585e83cd5538935c655dc",
+        "semantic-import-cache-qualification/baseline/parent-result.json": "5dbb6314b81a90719ec50483829f7f019ddf590ab9ed9b3b3b2ad7d76b567eae",
+        "semantic-import-cache-qualification/candidate/child-result.json": "c8b65baaac8118570b6667c71ac4a905259a86de426edb5be741a4a6c55a5a26",
+        "semantic-import-cache-qualification/candidate/parent-result.json": "21a0e4158f168a9ee8e0c1367bdd6c549861224b1e94eb1834eaf8c555d610d1",
+        "semantic-model-qualification/child-result.json": "974ab714bb332945ee6c8b815890b6c7b9395bb437020081828393b3d470ef53",
+        "semantic-model-qualification/parent-result.json": "d3eea8501c1500800e24dc6c041d69471485dedc67e0d34c33db1015e663f80d",
+        "semantic-model-qualification/result-review.json": "571e6abe55aafdca30c342e678920b91dd088584704024e215c40822034e614f",
+        "freshness-gate-after-semantic-failure.json": "b42763fb3a5d93383bb2c854f0dfc9cc0f7984ac34fc6c9a597eb58eb94632f3"
+      },
+      "initial_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "selected_source_repair": "Validate explicit existing incident pointer and reuse bounded coordinator retry through existing controller",
+      "scheduler_history": [
+        {
+          "task_rows": 1,
+          "status": "retry_wait",
+          "retry_count": 1,
+          "retry_not_before": "2026-10-04T18:44:58.431915Z",
+          "source": "SELECT-only immutable external snapshot; not a live readiness proof"
+        }
+      ],
+      "scheduler_snapshot": {
+        "task_rows": 1,
+        "status": "failed",
+        "retry_count": 1,
+        "retry_not_before": null,
+        "context_retry_not_before": "2026-10-04T18:44:58.431915+00:00",
+        "source": "SELECT-only immutable saved snapshot after fourth attempt"
+      },
+      "current_freshness": "STALE_INDEX",
+      "freshness_receipt_state": "cli_maintenance_in_progress",
+      "environment_controls": {
+        "pydantic": "PYDANTIC_DISABLE_PLUGINS=__all__",
+        "git": {
+          "GIT_CONFIG_COUNT": "1",
+          "GIT_CONFIG_KEY_0": "safe.directory",
+          "GIT_CONFIG_VALUE_0": "O:/Foundups-Agent"
+        },
+        "cache": "TORCHINDUCTOR_CACHE_DIR=O:/rsi-p16-temp-20261005/maintenance/torchinductor",
+        "global_configuration_changed": false,
+        "username_exposed": false
+      },
+      "semantic_import_comparison": {
+        "baseline_parent_seconds": 6.75,
+        "baseline": "missing pwd",
+        "candidate_parent_seconds": 8.0,
+        "candidate": "import passed",
+        "changed_environment": "TORCHINDUCTOR_CACHE_DIR only",
+        "recorded_denials_each": 0,
+        "allowed_ipv6_probe_closed_each": true,
+        "pth_change": false
+      },
+      "cached_encoder": {
+        "parent_seconds": 8.047,
+        "child_seconds": 7.25,
+        "constructors": 1,
+        "encodes": 1,
+        "dimension": 384,
+        "finite_nonzero": true,
+        "dtype": "float32",
+        "device": "cpu",
+        "recorded_denials": 0,
+        "exceptions": 0,
+        "pins_stable": true,
+        "job_closed": true,
+        "retrieval_quality_proved": false
+      },
+      "repair_state": {
+        "status": "reviewed_source_publication_pending",
+        "worker_accepted_claim": false,
+        "test_pass_claim": true,
+        "additional_live_retry_allocated": false,
+        "generic_stale_index_admission": false
+      },
+      "source_qualification": {
+        "existing_baseline": {
+          "tests": 146,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "frozen_baseline": {
+          "tests": 29,
+          "failures": 28,
+          "errors": 0,
+          "skipped": 0
+        },
+        "frozen_candidate": {
+          "tests": 29,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "first_connected": {
+          "tests": 152,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "final_connected": {
+          "tests": 181,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "final_seconds": 5.516,
+        "criteria_unchanged": true,
+        "limitations": [
+          "In-memory DB/Git/runtime doubles; no live resumed maintenance.",
+          "Six additional controller tests were candidate-only.",
+          "Private admission tuple test migrated to require the new blank incident field; size ceiling preserved.",
+          "New main requires fresh exact-HEAD admission; original failed6efbc task retained as history."
+        ],
+        "evidence": {
+          "tests-connected-baseline/receipt.json": "7498e21bdfbd1de334a2c8f46857eb9fa07fac95bde0e379076442d585dfe8a6",
+          "tests-resume-baseline/receipt.json": "fda619d9ebdd7d5b06cfe36c6e715bcf2b59d8dd258c3a494b936e96f6177312",
+          "tests-resume-candidate/receipt.json": "bfaf9efeafd9bd7c600d00660473bc856a8c2184012d47e483bf5a30b8c677ce",
+          "tests-controller-candidate/receipt.json": "11264a3f3644383b94facfc838319ebe9fff8122ccc544fcd85d0b04bca3c1f7",
+          "tests-connected-candidate/receipt.json": "2ac9897ada01c68112bb58fc9a1d0d89a171e1c32c5df147d93367a640a54abc",
+          "resume-repair-review/test-freeze.json": "2723af5fa0d5b40b84f5b37667b9ec4ebe5309cee59f78949670f53dba72bcec",
+          "resume-repair-review/controller-test-freeze.json": "6ae882d1a580aceecc1cd3d9c032e82ee2feaac16bfd8086e3bb3842f40617df",
+          "resume-worker-proposal/result-review.json": "4dfab11ea07588f3269cd25ba7639b5f2381081b0edb5665997ba3176759a746",
+          "resume-worker-proposal/native_worker-result.json": "400b26061a413da90d8fa71eb88cde4a77d1aaddbe3387f32f844dc545400a06",
+          "resume-worker-proposal/native_worker-parent.json": "0e916917f74a1362efbe60bf4778e1c63f703ff6717dd52548a680418f2d3fa9",
+          "tests-manifest-candidate/receipt.json": "226fe8d75a4a42737ebc97f7cc0d3fe0037c52c89f1ec98c2cc0bb02c40f08f2",
+          "reddog-fast-tests.log": "94097bd1696621cf413f8963aba576032176b41e17fd8630a572b9a21c455483",
+          "maintenance-environment-propagation-review.json": "724de39380c7edee4d31d0b9558bc098d8a0978eb68aaac77c587314097dabc0"
+        },
+        "independent_source_review": {
+          "path": "outputs/rsi-holo-grounding-20261005/resume-repair-review/source-independent-review.json",
+          "sha256": "96e35a7029bb79daf3bd09c88b070ba4f7e918403b4376f69e18024e0868b5c8",
+          "accepted": true,
+          "independent_execution": false
+        },
+        "integrity": {
+          "manifest_tests": 8,
+          "manifest_seconds": 62.906,
+          "fast_groups": 15,
+          "fast_milliseconds": 6711,
+          "runtime_files": 1408,
+          "manifest_sha256": "f1c85cad8dfba356169780fa84028745ee52ea6daec776dfe800f4035a69a1a4",
+          "remote_ci_verified": false
+        }
+      },
+      "local_worker": {
+        "calls": 1,
+        "format_accepted": true,
+        "semantic_accepted": false,
+        "applied": false,
+        "automatic_retry": false,
+        "author": "coordinator",
+        "reason": "Wrong digest comparison and missing input/error guards; original output retained.",
+        "sdk_input_tokens": 903,
+        "sdk_output_tokens": 304,
+        "sdk_total_tokens": 1207,
+        "parent_seconds": 112.016,
+        "child_seconds": 98.907,
+        "paid_calls": 0,
+        "total_cost": null
       }
     }
   }

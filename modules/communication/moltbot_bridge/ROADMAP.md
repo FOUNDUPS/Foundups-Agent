@@ -1389,3 +1389,11 @@ claim is made while historical monolith debt remains.
 - Production remains `VALVE_CLOSED` until independent signed model-selection,
   Memex, runtime-artifact manifest, consensus, sovereign, principal-subject,
   and signer peer-handshake anchors are implemented and adversarially verified.
+## Admitted HoloIndex recovery — 2026-10-05
+
+16/P0 existing-owner resume repair is locally qualified:181 connected cases pass.
+The explicit original incident pointer must match current authority and durable
+task/request records; existing retry and completion gates remain. One local
+worker proposal was rejected; coordinator authored the change. Next: exact-source
+publication and current-main operational grounding. Old-head task history is
+retained. See the canonical RSI backlog `holo_grounding_20261005`.
