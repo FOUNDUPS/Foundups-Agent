@@ -12,15 +12,14 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** PR2054 is merged/main-verified and its owned
-lane is retired. A new local repair benchmark rejected one proposal. Existing
-WRE prompt framing contradicted the requested output format; the selected14/P1
-shared repair yields a reviewed worker expression that passes29 frozen path cases;
-the baseline failed3. Integrated217 cases and8 manifest cases pass. The paired
-task/acceptance criteria are unchanged; no general capability claim.
-Publication closure and verified repair/retention remain separate gates; native
-autonomous18/P0 remains blocked. See the
-[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#local-worker-format-benchmark--2026-10-04)
+**2026-10-04 current layer:** PR2055 is merged/main-verified and its three
+owned lanes are retired. One local worker repair now has verified retained
+source benefit:29 frozen cases pass, controlled rollback reproduces26pass/3fail,
+and restoring the exact repair returns29pass in a fresh process. Existing
+benchmark evidence was consumed before that later invocation. This is a
+supervised local loop; native autonomous18/P0 and learned variation retention
+remain open. No whole-system completion percentage is claimed. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#retained-local-repair-and-remaining-admission-gate--2026-10-04)
 and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).

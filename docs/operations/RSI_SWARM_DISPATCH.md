@@ -1,3 +1,74 @@
+## Retained local repair and remaining admission gate — 2026-10-04
+
+PR2055 is merged as `a2b130247c010419e1cb918e48c0595258831075`.
+All ten exact-head checks and exact-main CI37192480744/CodeQL37192480395
+passed. Reviewed and merged trees match. Both hosted test logs contain217 WRE,
+67 scanner and452 separate guarded cases; these are different selections.
+The three owned publication/validation/retention worktrees and publication
+branches are retired. Recovery bundle, changed validation files and ignored
+runtime artifacts are preserved; shared checkout status was unchanged.
+
+The later invocation rehydrated both existing AI Gateway benchmark receipts
+and recorded their IDs before testing merged source. It used no new model call,
+selection receipt, catalog score, champion promotion or authority assertion.
+
+| Frozen29-case comparison | Passed | Failed | Errors/skips |
+|---|---:|---:|---:|
+| Original source / controlled rollback | 26 | 3 | 0/0 |
+| Merged worker repair, fresh process | 29 | 0 | 0/0 |
+| Exact repair bytes restored, fresh process | 29 | 0 | 0/0 |
+
+Each phase has identical test names/order and unchanged test content after
+normalizing Git line endings. Rollback reproduces the exact three original
+failures; restoration is observed and final source is clean. The retained
+benefit is three additional passing cases out of29, on one repair task.
+Repeated phases are not87 independent cases. These are execution-feedback
+measurements, not formal verification, an external RSI standard, causal model
+improvement, a new held-out task, or production rollback proof.
+
+This closes one **supervised local improvement loop**: observe failure → adjust
+the shared prompt → obtain a local worker repair → independent frozen tests →
+reviewed publication → evidence readback → retained-use/rollback/recovery.
+The coordinator authored the prompt repair and supervised application/merge;
+the worker supplied the exact containment predicate. Across the paired task:
+two actual local model calls, first rejected and second accepted; token counts
+and total coordinator cost remain unknown. Native effect admission and retained
+learned variation benefit remain unestablished.
+
+Re-observation applies WSP15/WSP97 rather than dispatching the previous queue:
+
+| Candidate | C/I/D/Impact | Priority | Disposition |
+|---|---|---|---|
+| Native autonomous RSI admission | 4/5/5/4 =18 | P0 | Blocked on authentic effect provenance and missing issuer/provider/resolver composition |
+| Existing effect-specific authority handoff | 3/4/4/3 =14 | P1 | Blocked on designated producer/domain and reviewer actual-use contract; already documented in the bridge interface |
+| Another supervised local repair | 2/4/4/4 =14 | P1 | Usable lane, but no new defect/task or model-call budget selected by this observation |
+| Reconcile retained source evidence in existing canonical documents | 1/3/3/3 =10 | P2 | Selected executable closure; no production source changes |
+
+Current source still sets `authoritative_use_lease=None` in
+`GovernedValveUseTimeAuthorityResolver.resolve`, with seven unresolved trust
+reasons. The existing lease issuer calls the independent grant provider without
+the HIGH/ULTRA permit it requires; the existing delegated two-child permit is
+not an effect-specific permit. Current reviewer quorum returns a Boolean and
+does not prove sovereign permission or reviewer/model actual use. These are
+source findings, not observations of a failing deployed service.
+
+The next native prerequisite is the existing owner's authentic effect-domain
+producer contract: exact beneficiary/principal/task/effect scope, requester
+authority, policy membership, expiry/revocation and independent reviewer
+decision/model-use association. Then qualify the existing single-target
+proof/permit → issuer/provider → resolver path. Do not manufacture credentials,
+reuse the wrong permit, replace a lease with a Boolean, or create another
+orchestrator. Ordinary012 local-repair authorization remains valid for the
+separate supervised lane. OpenClaw/Hermes provider adapters exist, but this
+observation does not admit them; the older HermesJobExecutor remains blocked
+outside simulation.
+
+Evidence: backlog `current_observation.local_worker_format_benchmark_20261004`;
+local `O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004/` contains
+`closure-receipt.json`, `retained-validation/result-review.json` and
+`next-admission-assessment.json`. Exact execution commands/XML/source and
+recovery records are retained there. No unattended deployment or FoundUp build.
+
 ## Local worker format benchmark — 2026-10-04
 
 PR2054 is merged/main-verified at `79a976eff2b2db1fb7fe16cceaaf76642d94666c`:

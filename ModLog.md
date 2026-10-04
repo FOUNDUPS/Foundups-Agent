@@ -1,3 +1,16 @@
+## 2026-10-04 — Verify retained local repair and close P8
+
+- PR2055 merged/main-verified; reviewed tree matches. Hosted217 WRE/67 scanner/
+  452 separate guarded cases passed; three owned lanes retired with recovery.
+- Existing benchmark receipt readback precedes later merged-source testing:
+  retained29pass → controlled rollback26pass/3fail → restored29pass. Same29
+  cases, no errors/skips, exact source restoration and independent review.
+- This is one supervised worker repair with retained source benefit, not
+  native admission, autonomous promotion or generalized learned improvement.
+- Reconciled existing roadmap/backlog and recorded the remaining effect-specific
+  producer/permit/issuer/provider/resolver prerequisite. No new module/skill.
+  WSP00/5/15/22/48/50/84/97. See current RSI dispatch checkpoint and P8 receipts.
+
 ## 2026-10-04 — Measure local repair failure and repair shared proposal framing
 
 - Existing benchmark records one local repair attempt/zero accepted; rejected code
