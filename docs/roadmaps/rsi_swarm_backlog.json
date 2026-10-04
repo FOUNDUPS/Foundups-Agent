@@ -1881,9 +1881,9 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.native_chat_delimiter_20261004",
-    "base_commit": "e3169540b7a30906244d698f81ac2e7a79f9a7cd",
-    "selected_action": "Remove native caller Markdown stop while preserving qualified formatter EOS",
+    "observation_path": "current_observation.codeact_exit_truth_20261004",
+    "base_commit": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
+    "selected_action": "Propagate nonzero CodeAct subprocess status without false success or failed capture",
     "status": "coordinator_repair_locally_validated_publication_pending",
     "wsp15": {
       "complexity": 2,
@@ -1894,10 +1894,10 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "coordinator-supervised local diagnostic; not WRE production admission",
+    "execution_plane": "ordinary supervised source repair; native and public CodeAct admission remain blocked",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.offline_skill_scanner_20261004",
-    "next_action": "Exact-source independent review, publication/main closure, then unchanged-acceptance real WRE observation with fresh budget."
+    "previous_observation": "current_observation.native_chat_delimiter_20261004",
+    "next_action": "Review and exact-head publication/main closure; then rescore existing worker benchmark and repair handoff owners before another dispatch."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28154,7 +28154,7 @@
     },
     "native_chat_delimiter_20261004": {
       "base": "e3169540b7a30906244d698f81ac2e7a79f9a7cd",
-      "state": "coordinator_repair_locally_validated_publication_pending",
+      "state": "merged_main_verified_owned_lanes_retired",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -28206,7 +28206,98 @@
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-native-chat-delimiter-20261004",
       "test_criteria_sha256": "4115bbe8acf92a0eb30735031ba715191460ac8a7f066fbfbaccea7c24f51fcb",
       "frozen_test_sha256": "55556524f16868cd24466cecabbeeb2a9c61b9dfbaac10cfb110ff06229389a2",
-      "next_gate": "Exact-source independent review, publication/main closure, then unchanged-acceptance real WRE observation with fresh budget."
+      "next_gate": "Observation closed; initial proposal usable but verified application/promotion remain open. Re-observe worker quality and execution truth.",
+      "publication": {
+        "pr": 2053,
+        "head": "96e9fb3f7f893ef30aa4a5e2ecf7465a7869bbfb",
+        "merge": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
+        "main_ci": 37187262012,
+        "main_codeql": 37187261559,
+        "main_conclusion": "success",
+        "pr_checks_passed": 10,
+        "owned_lanes_retired": true
+      },
+      "later_observation": {
+        "classification": "valid_observation_useful_proposal_unverified_variation",
+        "source": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
+        "public_calls": 1,
+        "generations": 2,
+        "initial_semantic_acceptance": true,
+        "execution_success": false,
+        "structural_fidelity": 0,
+        "outcomes": 1,
+        "variations": 1,
+        "learning_events": 1,
+        "breadcrumbs": 1,
+        "promoted": false,
+        "after_fidelity": null,
+        "reflection": "Prompt echo ending incomplete; untested and unpromoted, usefulness not demonstrated",
+        "prompt_tokens": 1582,
+        "completion_tokens": 840,
+        "total_tokens": 2422,
+        "parent_seconds": 250.219,
+        "wre_seconds": 237.531,
+        "paid_inference_calls": 0,
+        "finish_reasons": null,
+        "retained_learned_benefit": null,
+        "review_sha256": "ec3af54531d1e64e8b0e6a0c1fe5809b99bb24933b2b363272ec8277c8767bc5",
+        "frozen_acceptance_sha256": "b88588b91932548786b65fb6f4743f0c1f0db0df066b58ea6126c6f316a554ec"
+      }
+    },
+    "codeact_exit_truth_20261004": {
+      "base": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
+      "state": "coordinator_repair_locally_validated_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "reused_owner": "modules/infrastructure/wre_core/src/codeact_executor.py::_execute_shell",
+      "execution_plane": "ordinary supervised source repair; native and public CodeAct admission remain blocked",
+      "baseline": {
+        "failed": 11,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 21,
+        "passed": 10
+      },
+      "focused": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 21,
+        "passed": 21
+      },
+      "connected": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 207,
+        "passed": 207
+      },
+      "selections_overlap": true,
+      "new_cases": 15,
+      "worker": {
+        "calls": 1,
+        "accepted": false,
+        "reason": "No nonzero error return; captures failure streams",
+        "proposal_executed": false,
+        "retry": false,
+        "seconds": 27.61,
+        "parent_seconds": 38.187,
+        "tokens": null,
+        "paid_calls": 0
+      },
+      "coordinator_repair": true,
+      "autonomous_discovery": false,
+      "native_effect_admission": false,
+      "retained_rsi_gain": null,
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-codeact-exit-truth-20261004",
+      "criteria_sha256": "2eab52a618bf9f23b5ffeb586bec4e82a000700fe24c702f099efc298ed6b6b0",
+      "next_gate": "Review and exact-head publication/main closure; then rescore existing worker benchmark and repair handoff owners before another dispatch."
     }
   }
 }

@@ -407,10 +407,10 @@ class CodeActExecutor:
                 cwd=str(command_cwd)
             )
 
-            output = result.stdout
-            if result.returncode != 0 and result.stderr:
-                output = f"{output}\nSTDERR: {result.stderr}"
+            if result.returncode != 0:
+                return {"error": f"Command exited with status {result.returncode}"}
 
+            output = result.stdout
             outputs = {}
             if capture_var:
                 outputs[capture_var] = output.strip()

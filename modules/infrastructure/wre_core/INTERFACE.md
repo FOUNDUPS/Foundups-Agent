@@ -1,3 +1,12 @@
+## Prototype CodeAct shell result — 2026-10-04
+
+Direct `CodeActExecutor` shell actions return an error containing the numeric
+status on every nonzero subprocess exit, without raw failure stdout/stderr or
+capture. Existing pre/main/post orchestration stops at that error, retains
+earlier outputs and does not count the failed action as completed. Zero exits
+retain stripped stdout capture; stderr warnings alone do not cause failure.
+This does not admit the prototype through `WREMasterOrchestrator`.
+
 ## Explicit local-model ownership — 2026-10-01
 
 `QwenInferenceEngine.close() -> None` detaches its model and clears initialized
