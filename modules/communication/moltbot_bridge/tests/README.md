@@ -1,3 +1,30 @@
+## Current-generation quorum acceptance — 2026-10-04
+
+Independent author froze48 cases before production edits. Baseline:47 failures,
+1 pass, zero errors/skips/unexpected failures.45 failures represent the missing
+plural entry point; two reproduce the existing late input-mutation and unbounded
+runtime snapshot-call gaps. The unchanged single-review positive passed.
+
+Candidate:153 selected cases pass; broader466-case consensus/reviewer/designation/
+signer/replay/structure suite passes, no errors/skips. These selections overlap.
+Positive fixtures use two distinct test-only Ed25519 keys, model/runtime bindings
+and roles. Assertions cover exact signature inputs, one lease/artifact read,
+one runtime resolution per reviewer, every evidence reference, same-object reuse,
+key/runtime/manifest/selection/context expiry, owner/finish-clock mutations,
+whole-set rejection, cleanup failures, interrupts and invalid input before owner
+selection. Actual OS owner provenance remains the separate existing eight-case
+Linux path; these portable fixtures substitute owner/lease/runtime boundaries.
+
+New test/support leaves preserve200-line and50-line function caps; actual
+inventory31→33 only. Existing guarded CI adds the48 exact cases (452 total),
+without relaxing audit rules. Earlier local Windows guarded collection failures
+belong to PR2048; no retry or new local guarded success is claimed here.
+Registry1674 files/270 quarantined is inventory, not a pass count. Source review,
+integrity and hosted publication evidence remain separate.
+
+Frozen hashes/IDs, baseline and candidate XML/logs:
+`O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/`.
+
 ## Bounded effect-review quorum qualification — 2026-10-04
 
 A separate worker froze 63 acceptance cases before production edits. Original

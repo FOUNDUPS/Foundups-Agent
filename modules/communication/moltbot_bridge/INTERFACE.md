@@ -1,3 +1,38 @@
+## Current-generation review-set API — 2026-10-04
+
+```python
+verify_current_effect_reviewer_decisions(
+    *, owner_config_path, repo_root, decisions, context, authority_request,
+    target, expected_target, policy, runtime_evidence_resolver,
+    revoked_key_epochs=frozenset(),
+) -> bool
+```
+
+Both current single/plural entry points remain exposed by the existing consensus
+verification facade; their thin wrappers live in the existing leased owner.
+The single signature/defaults are unchanged. Plural input is an exact list/tuple
+of1–8 strict effect reviews; the shared internal entry rejects both/neither mode
+before owner selection. Conditional quorum wire/role/independence rules still apply.
+
+The caller cannot inject a clock, key resolver, signature verifier or generation
+selection. One owner-derived selection lease encloses principal artifact loading,
+scoped key projection, actual Ed25519 verification, final owner/time/input checks
+and projection cleanup. Ordinary lease-exit failures returnFalse; interrupts
+propagate after cleanup. No success is delivered before normal lease exit.
+
+Every resolved runtime object is retained with its immediate defensive field
+snapshot, including repeated object identities. At most eight resolver calls;
+the ninth rejects before calling the resolver. Final checks never refresh the
+supplied evidence: every retained record must still match and remain current.
+All reviewer-key expiries are checked against the same trusted finish time.
+Inputs are compared after final owner reread and clock sampling. Changed owner,
+clock rollback, input mutation, expired evidence or cleanup exceptions reject.
+
+This supplies current scoped key authentication and quorum relative to the
+supplied runtime evidence. It does not authenticate that producer, prove continuous
+immutability across arbitrary concurrent changes, authenticate sovereign effect
+authority, issue a permit, consume an effect lease or admit an autonomous worker.
+
 ## Bounded effect-review quorum API — 2026-10-04
 
 `verify_effect_reviewer_decisions(*, decisions, context, authority_request,

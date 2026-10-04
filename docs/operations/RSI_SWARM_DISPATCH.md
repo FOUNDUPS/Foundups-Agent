@@ -1,3 +1,21 @@
+## Current-generation quorum selection — 2026-10-04
+
+PR2048 is merged/main-verified at `3df09e895366e47d40b009f65045ba8cf043581e`.
+All ten PR checks passed; exact-main CI37178295349 and CodeQL37178295250 passed.
+PR/main guarded qualification each passed404 exact cases, with reviewed source
+bindings and no unexpected denials. Owned lane retired with recovery bundle.
+These verified receipts supersede the preceding slice's pending checkpoints.
+
+Fresh WSP15/WSP97 selection is 14/P1 (C3/I4/D4/Impact3): compose the bounded review
+set under the existing current-generation lease. The current snapshot retains
+only the last evidence record, and input comparison precedes final owner reread.
+Frozen48-case baseline reproduced both gaps plus the missing API. The existing
+owners now pass466 connected cases locally; publication/main closure is separate. Native
+admission18/P0 and full effect-proof15/P1 depend on this layer and authentic
+runtime/sovereign inputs; no source-level review grants execution authority.
+Evidence: backlog `current_generation_quorum_20261004` and
+`O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/`.
+
 ## Bounded effect-review quorum — 2026-10-04
 
 Selected 14/P1 (C3/I4/D4/Impact3) after closing PR2047 at `f1c183173`.

@@ -27829,7 +27829,7 @@
     },
     "effect_review_quorum_20261004": {
       "base": "f1c1831737879127782ec32d8a04c1ba872c4ac6",
-      "state": "locally_validated_publication_pending",
+      "state": "merged_main_verified_owned_lane_closed",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -27866,7 +27866,7 @@
         ],
         "test_oracles_changed": false,
         "source_review": "independent_no_blocker",
-        "hosted": "pending",
+        "hosted": "PR and exact main each404 passed, zero failures/errors/skips; source bindings verified",
         "integrity_cases_passed": 8,
         "node_compatibility_contract": "passed",
         "local_guarded_attempts": [
@@ -27888,7 +27888,72 @@
         "No sovereign authorization, effect permit, native admission or retained RSI benefit."
       ],
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-review-quorum-20261004",
-      "next_gate": "After publication/closure re-observe: current-generation quorum composition, then authentic effect-specific sovereign proof/provider handoff; no synthetic evidence or delegated-domain widening."
+      "next_gate": "After publication/closure re-observe: current-generation quorum composition, then authentic effect-specific sovereign proof/provider handoff; no synthetic evidence or delegated-domain widening.",
+      "publication": {
+        "pr": 2048,
+        "base": "f1c1831737879127782ec32d8a04c1ba872c4ac6",
+        "head": "4a1e9c988264c7fa0d67f87e607e39d5f532be04",
+        "merge": "3df09e895366e47d40b009f65045ba8cf043581e",
+        "merge_tree_equals_reviewed_head": true,
+        "reviewed_files": 22,
+        "pr_checks_passed": 10,
+        "pr_ci": 37178007054,
+        "pr_codeql": 37178005949,
+        "main_ci": 37178295349,
+        "main_codeql": 37178295250,
+        "all_runs": "success",
+        "pr_and_main_exact_guarded_cases_each": 404,
+        "failures_errors_skips": 0,
+        "independent_review_sha256": "ccf6d87a43a9b9325110bb49b871dc2f17edc0fc915fec5225c704872c552ccf",
+        "owned_worktree_removed": true,
+        "owned_local_and_remote_branches_removed": true,
+        "ignored_runtime_files_preserved": 4,
+        "recovery_bundle": "pr2048-recovery.bundle",
+        "native_admission": false,
+        "retained_rsi_gain": null
+      }
+    },
+    "current_generation_quorum_20261004": {
+      "base": "3df09e895366e47d40b009f65045ba8cf043581e",
+      "state": "locally_validated_publication_pending",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "selected": "Verify complete effect-review set under one current generation lease, retain and recheck every evidence record, compare inputs after final owner reread.",
+      "reuse": [
+        "existing current reviewer verification owner",
+        "existing scoped key projection",
+        "existing conditional plural verification",
+        "existing reviewer composition test fixtures"
+      ],
+      "native_admission": false,
+      "retained_rsi_gain": null,
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004",
+      "next_gate": "Independent source review/integrity/hosted checks and owned publication closure, then re-observe and rescore authentic runtime and sovereign effect proof/provider dependencies.",
+      "validation": {
+        "frozen_cases": 48,
+        "baseline_pass": 1,
+        "baseline_missing_api_failures": 45,
+        "baseline_demonstrated_gap_failures": 2,
+        "unexpected_failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "candidate_selected_pass": 153,
+        "candidate_connected_pass": 466,
+        "counts_overlap": true,
+        "oracles_changed": false,
+        "hosted": "pending",
+        "source_review": "pending_exact_diff",
+        "registry_files": 1674,
+        "quarantined_files": 270,
+        "integrity_cases_passed": 8,
+        "node_compatibility_contract": "passed"
+      }
     }
   }
 }
