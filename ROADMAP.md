@@ -12,7 +12,17 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-02 current layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+**2026-10-04 current layer:** The local worker-assisted PatternMemory repair
+excludes successful low-fidelity outcomes from WRE failure reflection. Original
+source fails the strengthened regression; the repaired source passes 159 local
+cases, with affected suites added to existing CI. Separate source review found
+no blocker. OpenClaw/Hermes version advisory now passes after the host permission
+change and WSL recovery; native work-order/verification/effect-lease admission
+and retained production benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#repository-maintenance-canary--2026-10-04)
+and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). Publication and CI
+require separate verification; passing local tests alone is not production RSI.
+
+**2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Operational RSI audit (2026-09-28):** the [shared decision contract and measured
 baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing

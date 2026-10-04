@@ -533,6 +533,7 @@ class PatternMemory(PatternABEvidenceMixin):
             SELECT * FROM skill_outcomes
             WHERE skill_name = ?
               AND pattern_fidelity <= ?
+              AND success = 0
             ORDER BY pattern_fidelity ASC, timestamp DESC
             LIMIT ?
         """, (skill_name, max_fidelity, limit))

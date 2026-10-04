@@ -565,7 +565,7 @@ jobs:
             modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py::test_default_refresh_runner_bounds_retained_stdout \
             scripts/tests/test_generate_reddog_backend_manifest.py
 
-      - name: Run WRE local proposal caller contracts
+      - name: Run WRE proposal and memory contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -580,7 +580,10 @@ jobs:
           python -B -m pytest --tb=short -c /dev/null --noconftest \
             -o pythonpath=. -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/proposal-caller-pytest" -v \
-            modules/infrastructure/wre_core/tests/test_wre_execution_truth.py
+            modules/infrastructure/wre_core/tests/test_wre_execution_truth.py \
+            modules/infrastructure/wre_core/tests/test_pattern_memory.py \
+            modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py \
+            modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py
 
       - name: Run WRE RSI measurement contract tests
         env:

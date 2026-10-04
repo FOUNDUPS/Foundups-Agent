@@ -1,3 +1,26 @@
+## Failure recall regression — 2026-10-04
+
+Extended the existing `test_recall_failure_patterns` with independent success
+and fidelity fixtures, including the inclusive boundary, expanded cutoff,
+missing skill and zero limit. Original source: 40 pass / 1 fail (2.55s).
+Corrected source: 159 pass (8.10s), no skips, with normal pytest fixtures in the
+fresh isolated worktree. Command:
+
+```powershell
+python -B -m pytest modules/infrastructure/wre_core/tests/test_pattern_memory.py modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py modules/infrastructure/wre_core/tests/test_wre_execution_truth.py modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py -q --tb=short -p no:cacheprovider
+```
+
+FOUNDUPS_DB_PATH and WRE_PATTERN_MEMORY_DB were set to disposable evidence paths.
+Existing CI now runs these four files using its isolated configuration. Earlier
+scratch validation separately passed 41 memory and 10 continuity cases; those
+are not added to the 159 as distinct cases. An unchanged extracted reflection
+builder confirmed consumer behavior and later scratch reopening, not production
+retention. Independent source review did not itself execute these tests.
+A second run using the exact CI plugin/config isolation passed 159 cases in
+6.16s (`publication-tests.xml` in the local evidence directory). The original
+8.10s run above used normal repository configuration. Eight manifest generator
+contracts separately passed in 64.90s; these are additional distinct cases.
+
 ## Terminal fixture observation — 2026-10-02
 
 **fixture_inconclusive.** One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established.

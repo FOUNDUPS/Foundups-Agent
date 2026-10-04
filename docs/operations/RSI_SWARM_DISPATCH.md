@@ -1,3 +1,26 @@
+## Repository maintenance canary — 2026-10-04
+
+The existing PatternMemory failure query now excludes successful outcomes,
+preventing low structural fidelity from becoming a false failure example in
+WRE reflection. A local Qwen2.5-Coder 7B supplied the explicitly tasked SQL
+repair (395 tokens, 33.797s); this is supervised implementation, not autonomous
+defect discovery. Original plus strengthened existing regression: 40 pass /
+1 fail. Corrected source: 159 local tests pass across memory, continuity,
+execution truth and master orchestration; these suites are now in existing CI.
+Separate source review found no blocking defect. Hosted/main closure is separate.
+
+Full-access host recheck removed the earlier permission block. Existing WSL
+version advisory now passes: OpenClaw 2026.7.1-2 (0790d9f), Hermes v0.20.4
+(2026.8.18). A transient WSL service crash recovered. Version readiness is not
+sandbox, model/provider, work-order, verifier or effect-lease admission.
+
+WSP15: repair 14/P1 (2/4/4/4), selected as the executable existing-owner slice;
+native autonomous admission remains 18/P0 (4/5/5/4), blocked on genuine authority
+and the issuer-to-effect-consumer path. The closed prefix diagnostic stays closed.
+See backlog `current_observation.pattern_memory_failure_recall_20261004` for
+source, worker, regression, runtime and remaining-gate evidence. No automated
+promotion, external account action, reward or production RSI gain is claimed.
+
 ## Terminal fixture observation — 2026-10-02
 
 Source `5e7faccfeeda635b342d37849b18769f74db13e2`. **fixture_inconclusive; diagnostic usefulness insufficient.**
