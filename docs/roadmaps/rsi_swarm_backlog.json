@@ -1881,23 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.pattern_memory_failure_recall_20261004",
-    "base_commit": "dad6fc6b060e5436fdfb0bd74a566934534c74fa",
-    "selected_action": "Close false failure recall in existing PatternMemory",
+    "observation_path": "current_observation.queue_default_repair_20261004",
+    "base_commit": "a9d2b07a3b4f4214df43432974054528a54b6ea7",
+    "selected_action": "Close implicit social dispatch in existing post-commit runner",
     "status": "source_repaired_local_validation_complete_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
       "deferability": 4,
-      "impact": 4,
-      "total": 14,
+      "impact": 3,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.terminal_fixture_observation_20261002",
-    "publication_state": "pending_exact_head_review_ci_main_closure",
-    "next_action": "Finish reviewed repair publication and owned-lane closure, then re-observe the existing native-admission prerequisites."
+    "previous_observation": "current_observation.pattern_memory_failure_recall_20261004",
+    "next_action": "Finish exact-head reviewed publication/main/cleanup; then select the smallest eligible native proof handoff layer from fresh owner evidence."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -27621,7 +27620,7 @@
     },
     "pattern_memory_failure_recall_20261004": {
       "base": "dad6fc6b060e5436fdfb0bd74a566934534c74fa",
-      "state": "source_repaired_local_validation_complete_publication_pending",
+      "state": "merged_main_verified_owned_lane_closed",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -27709,7 +27708,15 @@
         "receipt_id": "sha256:876eba270f8e40237475d5006f19ee6cce97d2c989a795e573e683de3f5886af"
       },
       "permissions": "Prior session denial resolved by 012 full-access change; Git fetch/worktree creation verified",
-      "publication": "Exact head PR/CI/main and owned-lane closure required separately",
+      "publication": {
+        "pr": 2046,
+        "head": "f4e91d329139bef82382487c2f4cce01a06dcaaa",
+        "merge": "a9d2b07a3b4f4214df43432974054528a54b6ea7",
+        "pr_checks_passed": 10,
+        "main_ci_run": 37173751620,
+        "main_codeql_run": 37173751263,
+        "owned_lane_removed": true
+      },
       "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-local-agent-20261004-82f4e22da9564b24b23cbc4a19b9cf55",
       "patch_sha256": "d85d72000f6fa204c14fac70e75ed6d9d22d1b33e373620c76552852ee949542",
       "previous_selection": {
@@ -27749,6 +27756,63 @@
           "Independent verifier, admitted sandbox/model/provider and governed retention/rollback"
         ],
         "rule": "Re-observe after repair publication; no new orchestrator or reopening closed prefix diagnostic"
+      }
+    },
+    "queue_default_repair_20261004": {
+      "base": "a9d2b07a3b4f4214df43432974054528a54b6ea7",
+      "state": "source_repaired_local_validation_complete_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "selection_basis": "Native admission18/P0 is blocked by incompatible single-effect proof/provider composition and authentic runtime inputs. Existing queue intent currently attempts social dispatch; explicit mode selection repairs a demonstrated defect without activating imports or accounts. Raises provisional11/P2 after inspecting effect behavior.",
+      "retrieval": {
+        "mode": "source-pinned lexical and direct source",
+        "semantic_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "quality": "Fallback ranking noisy, no tests returned; must-include module docs and existing tests read directly; historical checkpoints deduplicated; no memory/README present."
+      },
+      "worker": {
+        "model": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+        "route": "direct_existing_local_adapter",
+        "attempts": 2,
+        "accepted": 0,
+        "rejected": 2,
+        "tokens": 940,
+        "elapsed_seconds": 77.031,
+        "paid_inference_calls": 0,
+        "coordinator_interventions": 1,
+        "implementation_author": "coordinator",
+        "native_ticket_admission": false,
+        "cost_energy": null
+      },
+      "validation": {
+        "baseline_fixed_cases": 12,
+        "baseline_pass": 4,
+        "baseline_fail": 8,
+        "candidate_fixed_cases_pass": 12,
+        "original_unit_cases_pass": 3,
+        "total_candidate_cases": 15,
+        "independent_review": "pending_exact_patch",
+        "real_dispatch_executed": false
+      },
+      "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-queue-default-20261004",
+      "next_gate": {
+        "selected": "HIGH/worktree_create single-effect proof handoff",
+        "state": "contract_and_provenance_review_required_before_implementation",
+        "reuse": [
+          "existing effect binding",
+          "current reviewer verification",
+          "existing signer and replay owners"
+        ],
+        "native_admission_parent_score": 18,
+        "native_admission": false,
+        "rule": "Resolve implementation semantics from existing authenticated owners; no arbitrary callback, widened delegated permit or fabricated live evidence."
       }
     }
   }

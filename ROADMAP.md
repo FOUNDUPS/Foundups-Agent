@@ -12,15 +12,16 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** The local worker-assisted PatternMemory repair
-excludes successful low-fidelity outcomes from WRE failure reflection. Original
-source fails the strengthened regression; the repaired source passes 159 local
-cases, with affected suites added to existing CI. Separate source review found
-no blocker. OpenClaw/Hermes version advisory now passes after the host permission
-change and WSL recovery; native work-order/verification/effect-lease admission
-and retained production benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#repository-maintenance-canary--2026-10-04)
-and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). Publication and CI
-require separate verification; passing local tests alone is not production RSI.
+**2026-10-04 current layer:** PatternMemory repair PR2046 is merged/main-verified
+at `a9d2b07a3`, with all 10 PR checks and main CI/CodeQL passing; owned lane retired.
+Re-observation selects 13/P1: make the existing post-commit runner queue-only by
+default and require explicit dispatch. Original source fails 8/12 fixed controls;
+repair passes 12 plus 3 unchanged unit cases locally. Both local Qwen proposals
+were rejected; coordinator implemented the repair. Native admission 18/P0 remains
+blocked by effect-proof/provider composition and authentic runtime inputs.
+See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#queue-default-repair--2026-10-04)
+and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). Hosted publication
+is a separate gate; neither worker attempts nor passing tests establish RSI.
 
 **2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
