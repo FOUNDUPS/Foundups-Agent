@@ -1,5 +1,24 @@
 # Git Push DAE - Autonomous Development Publishing
 
+## Safe queue default — 2026-10-04
+
+The tracked post-commit runner now queues only unless `--dispatch` is explicit.
+`--enqueue-only` remains supported; the two flags are mutually exclusive.
+`--dispatch-direct` remains unsupported. `run_runner()` also defaults to queue-only;
+programmatic dispatch requires `enqueue_only=False`.
+
+This intentionally makes the observed shared hook's default, `enqueue`,
+`background`, `sync` and fallback invocations queue-only: those modes supply no
+runner mode flag. The shared hook and import paths are unchanged. Queue success
+means an event was appended, not delivered or admitted for replay. Real dispatch
+still requires its own authorized, qualified caller/runtime; this repair does
+not qualify the production router or enable external posting.
+
+Twelve bounded entrypoint/API cases and the original three unit cases pass
+locally (15 total). See the current [test contract](tests/README.md).
+The Sept28 section below records the previous source behavior; PR1945 is merged
+in this slice's main baseline. Its qualification did not repair the default.
+
 ## Post-commit runner qualification — 2026-09-28
 
 The tracked `scripts/post_commit_social_runner.py` first writes a `git_push`

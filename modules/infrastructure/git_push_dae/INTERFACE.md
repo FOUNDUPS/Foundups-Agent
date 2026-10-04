@@ -1,5 +1,23 @@
 # GitPushDAE Interface Documentation
 
+## Queue/default contract — 2026-10-04
+
+This supersedes the Sept28 default-dispatch contract below.
+
+- CLI with no mode flag, or `--enqueue-only`: append one event and exit0 before
+  importing the router; no dispatch result is written.
+- Explicit `--dispatch`: retain the existing queue-then-dispatch behavior,
+  result/error correlation and exit0/1 semantics. Exit0 is not delivery evidence.
+- Both flags in either order, or unsupported `--dispatch-direct`: argparse
+  exits2 before Git context collection, event creation or router effects.
+- `run_runner(..., enqueue_only=True)` is the default; callers requesting the
+  existing dispatch behavior must explicitly pass `enqueue_only=False`.
+- Spool schema, payload/dedupe fields, default paths and dispatch implementation
+  are unchanged. No spool consumer, replay admission or deduplication is added.
+
+Observed shared hook modes without a mode flag now queue only, including `sync`.
+No shared hook, import-path or account configuration is changed.
+
 ## Post-commit runner contract — 2026-09-28
 
 Existing owner: `scripts/post_commit_social_runner.py`.

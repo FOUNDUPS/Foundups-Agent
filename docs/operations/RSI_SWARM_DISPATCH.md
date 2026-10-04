@@ -1,3 +1,37 @@
+## Queue-default repair — 2026-10-04
+
+Previous PatternMemory repair PR2046 is merged at `a9d2b07a3`; all 10 PR checks,
+main CI 37173751620 and CodeQL 37173751263 passed. Its owned lane is retired.
+That verified closure supersedes its earlier pending publication checkpoint.
+
+Re-observation found publication's post-commit runner attempted social routing
+in a hook mode labeled enqueue. Existing Sept28 tests/docs already identified
+this boundary (PR1945 is merged); fixing imports alone would expose delivery.
+Selected **13/P1 (C2/I4/D4/Impact3)**: reuse the existing runner, default CLI/API
+to enqueue-only, require explicit mutually exclusive `--dispatch`, retain rejected
+`--dispatch-direct`. No shared-hook, router, import-path or account changes.
+
+Fixed acceptance precedes production edit: original 4/12 pass; candidate 12/12,
+plus all 3 unchanged original unit functions (15 total locally). Two bounded
+local Qwen proposals failed constraints and were rejected; coordinator wrote
+the repair. 940 local-model tokens/77.031s, zero paid worker calls; coordinator
+and reviewer cost unknown. This is observed worker failure with a safe repair,
+not native OpenClaw/Hermes admission or autonomous success.
+
+Holo source mismatch persists; source-pinned fallback has UNKNOWN semantic
+freshness/index gap. Canonical backlog records retrieval quality and selected
+scope. Source review/hosted checks/main convergence require separate receipts.
+
+The 18/P0 native parent still needs compatible effect-authority composition and
+authentic runtime inputs. Existing issuer cannot simply attach to the resolver:
+the production provider expects a delegated two-request permit, while a HIGH
+worktree effect needs its own authenticated single-target proof. Reuse current
+effect binding/reviewer owners, resolve the missing handoff contract next, then
+re-observe. Installed version readiness is not effect admission.
+
+Evidence: `current_observation.queue_default_repair_20261004` in the canonical
+backlog; `O:/Foundups-Agent/outputs/rsi-queue-default-20261004/`.
+
 ## Repository maintenance canary — 2026-10-04
 
 The existing PatternMemory failure query now excludes successful outcomes,
