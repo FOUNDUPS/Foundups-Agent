@@ -1,3 +1,35 @@
+## Supplied effect-sovereign evidence API — 2026-10-04
+
+`EffectSovereignAuthorizationEvidence` in the existing consensus policy owner is
+an immutable eight-field record: `authorization_digest`, `parent_authorization`
+(an exact `SovereignAuthorizationEvidence`), `parent_authority_request_digest`,
+`target_signing_request_digest`, `effect_request_digest`, `consensus_policy_digest`,
+`issued_at` and `expires_at`. Construction is not authentication.
+
+`effect_sovereign_authorization_matches(evidence, *, context, parent, target,
+expected_target, policy, now) -> bool` in the existing evidence owner reuses the
+current context, policy, target and parent validators. All seven new/nested digest
+values are exact canonical strings. Nine nested identity fields are nonempty
+ASCII strings of at most256 characters. Time values are exact integers; bools,
+coercions, record subclasses and mappings are rejected before correlation.
+
+The parent digest excludes its two approval backreferences; the target digest
+covers the complete signing request. Parent and target identities need not be
+equal. Parent/effect authorization references remain distinct fields, with no
+required inequality. Lifetime must satisfy:
+`0 <= evidence.issued_at <= context.issued_at <= now < context.expires_at <=
+evidence.expires_at <= min(parent_authorization.expires_at,
+parent.identity_expires_at, parent.work_authority_expires_at, target_payload['expires_at'])`.
+Here `target_payload` is the output of `validate_authoritative_use_lease_request`.
+The existing target validator still allows its five-second future skew.
+
+Ordinary exceptions returnFalse; interrupts propagate. No clock, resolver,
+signer, provider, nonce or store is called. True means supplied records agree;
+it proves neither authentic sovereign approval nor permission to execute.
+Existing parent authorization, two-request delegation and live resolution are
+unchanged. Tests use synthetic assertions; the prepared-request integration
+case additionally uses a disposable SQLite fixture, without issuing a lease.
+
 ## Current-generation review-set API — 2026-10-04
 
 ```python

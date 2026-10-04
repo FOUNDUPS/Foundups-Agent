@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.effect_request_preparation_20261004",
-    "base_commit": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
-    "selected_action": "Existing external authoritative-use issuer canonical preparation and caller reuse; no new runtime owner.",
-    "status": "locally_verified_publication_pending",
+    "observation_path": "current_observation.effect_sovereign_binding_20261004",
+    "base_commit": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
+    "selected_action": "Pure exact-effect sovereign-evidence matching in existing policy/evidence owners",
+    "status": "locally_verified_pending_publication",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 3,
-      "total": 13,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
+    "execution_plane": "ordinary supervised source maintenance; no native WRE effect admission",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.mcp_runtime_qualification_20261004",
-    "next_action": "Finish independent review, generated bindings, exact-head CI/publication and owned closure; re-observe WSP15/WSP97. No native activation."
+    "previous_observation": "current_observation.effect_request_preparation_20261004",
+    "next_action": "Independent source review and exact-source CI/publication; then fresh WSP15/97 selection toward authentic evidence and effect permit composition."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -16976,7 +16976,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -17014,7 +17014,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -17025,7 +17025,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper\u2192adapter\u2192Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -17051,7 +17051,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper\u2192adapter\u2192engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",
@@ -28802,7 +28802,7 @@
     },
     "effect_request_preparation_20261004": {
       "base": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
-      "state": "locally_verified_publication_pending",
+      "state": "merged_main_verified_owned_lane_retired",
       "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
       "scope": "Existing external authoritative-use issuer canonical preparation and caller reuse; no new runtime owner.",
       "wsp15": {
@@ -28896,9 +28896,10 @@
         "source-and-local-review.json": "a2608dc4809759fbb87d610e866192bd4726755797b9d8b9ad34c69dc6ba866b",
         "ci-selection-binding.json": "9c8da8f770cfc3375c53791df26ba8797a5d0f60f6410b993b7a51976c11ade9",
         "worker-preparation/benchmark-receipt.json": "6f069b22fa98487e1f417944776b7f0d62336e676eabf41d8de24fa5d73a5a1a",
-        "worker-preparation/benchmark-provenance.json": "0b812c11c641c040a6a0a9463d9c45bbb115866dd7b193f07109e4f3526c0a79"
+        "worker-preparation/benchmark-provenance.json": "0b812c11c641c040a6a0a9463d9c45bbb115866dd7b193f07109e4f3526c0a79",
+        "closure-receipt.json": "134fc12f87027a433d06a68324dba9e9b8b2fc44df8631ab255513c11d85a9bd"
       },
-      "next_action": "Finish full publication review, exact-head CI/publication and owned closure; re-observe WSP15/WSP97. No native activation.",
+      "next_action": "Closed; re-observation selects14/P1 exact-effect supplied-evidence matching. No native activation.",
       "remaining_gate": "Effect-specific trusted producer/proof/permit and independent provider/resolver composition; preparation returns data only.",
       "limitations": [
         "Synthetic local fixtures and inert provider/rehydration; not production credentials or admission.",
@@ -28927,7 +28928,156 @@
         "existing_guarded_owner": true,
         "distinct_cases": 495,
         "audit_ast_matches_connected_run": true,
-        "remote_result": null
+        "remote_result": {
+          "pr": 495,
+          "main": 495,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "publication": {
+        "pr": 2058,
+        "head": "34b38e29a992cb5be9d8b895cf911225350425f7",
+        "merge": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
+        "tree": "711edaf2f43b6604fb6acf7ce5a34964fbb0065f",
+        "reviewed_merge_tree_equal": true,
+        "pr_checks_passed": 11,
+        "main_ci": {
+          "conclusion": "success",
+          "headSha": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
+          "name": "CI",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/37202890227",
+          "workflowName": "CI"
+        },
+        "main_codeql": {
+          "conclusion": "success",
+          "headSha": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
+          "name": "Push on main",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/37202889937",
+          "workflowName": "CodeQL"
+        },
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "shared_status_unchanged_during_cleanup": true,
+        "recovery_bundle_sha256": "7886be3c11843e02b3063da4a84694b3b09d546267105cf7483ee5c9e9971afc"
+      }
+    },
+    "effect_sovereign_binding_20261004": {
+      "base": "00e0c044f2fbc191be549f8c10ebfebe438c0f89",
+      "state": "locally_verified_pending_publication",
+      "scope": "Pure exact-effect sovereign-evidence matching in existing policy/evidence owners",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "execution_plane": "ordinary supervised source maintenance; no native WRE effect admission",
+      "retrieval": {
+        "noise": "Named owners and exact-source fallback;25open-PR sample,not global PR audit",
+        "ordering": "WSP00 gate;verifiedmain;WSP15/97;governedquery;existing module contracts;independent acceptance",
+        "missing": {
+          "memory/README.md": false,
+          "requirements.txt": false
+        },
+        "staleness": "Holo owner rejects authority root/head mismatch;freshnessUNKNOWN,gaptrue,zeroattempts/mutations/reindex. No semantic authority claim. Main source immutable00e0c044f verified directly.",
+        "duplication": "No existing exact-effect sovereign matcher; existing parent matcher/quorum serve separate obligations;extend owners",
+        "navigation": "Existing NAVIGATION lacks narrow symbols; source and INTERFACE verified"
+      },
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-effect-sovereign-binding-20261004",
+      "source_paths": [
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_policy.py",
+        "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_evidence.py"
+      ],
+      "criteria_changed_after_freeze": false,
+      "measurements": {
+        "baseline": {
+          "tests": 83,
+          "failures": 83,
+          "errors": 0,
+          "skips": 0
+        },
+        "candidate": {
+          "tests": 83,
+          "passed": 83,
+          "errors": 0,
+          "skips": 0
+        },
+        "connected": {
+          "tests": 242,
+          "passed": 242,
+          "errors": 0,
+          "skips": 0
+        },
+        "selection_overlap": "connected includes selected83",
+        "source_hashes_stable": true,
+        "exact_case_ids": true,
+        "worker_calls": 1,
+        "sdk_input_tokens": 642,
+        "sdk_output_tokens": 81,
+        "sdk_total_tokens": 723,
+        "parent_seconds": 53.281,
+        "paid_inference_calls": 0,
+        "cost_usd": null
+      },
+      "native_effect_admission": false,
+      "retained_gain": null,
+      "next_action": "Independent source review and exact-source CI/publication; then fresh WSP15/97 selection toward authentic evidence and effect permit composition.",
+      "worker_attribution": {
+        "model": "local Qwen2.5-Coder-7B Q4_K_M",
+        "scope": "lifetime helper only; coordinator specified formula",
+        "raw_format": "accept",
+        "static_scope": "accept",
+        "helper_ast_unchanged": true,
+        "outer_integration": "coordinator",
+        "native_success": false
+      },
+      "test_commands": [
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-effect-sovereign-binding-20261004/run_tests.py baseline",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-effect-sovereign-binding-20261004/run_tests.py candidate",
+        "C:/Python312/python.exe -I -S -B O:/Foundups-Agent/outputs/rsi-effect-sovereign-binding-20261004/run_tests.py connected"
+      ],
+      "evidence_bindings": {
+        "test-freeze.json": "81a5101a2636b8cf2e7f934639e82374ac62310a4bd3f8e48477620d8a99c5bb",
+        "test-selection.json": "c8f81b125d76ea595e118a4b4351348dd8fe29f491e92a5d3e2ce5a798b11635",
+        "baseline-review.json": "52cefd64c676c7181bd7a2ad2c2df458b39657a015b8be409b4bef900d4d8dc6",
+        "integration-review.json": "64c5757131a215e3a0fc827d240e9ce86976aac843c3b1ea3abcec0471765587",
+        "candidate/evidence/receipt.json": "cbaf635bc37254018cef9d37cb1562f4e35c49f5f6159ffd826eda571f14b1b3",
+        "connected/evidence/receipt.json": "acc75a2cad044f4ddc4f5531c28e1e47ad6ed5c19b59fc1ef4c9915a0c22bc51",
+        "worker-preparation/output-scope-review.json": "66647b930c21f098b99f1af6eeda74ccc8995a2e144ef2e4063fe01225ac656a"
+      },
+      "independent_review": {
+        "status": "approved",
+        "test_authorship_disclosed": true,
+        "reviewer_executed_tests": false,
+        "path": "source-and-local-review.json",
+        "sha256": "33da5fd50dd33a84c62f837fd7e20418f833984e9a10a996d81f91216f560f67"
+      },
+      "worker_benchmark": {
+        "samples": 1,
+        "accepted": 1,
+        "task_scope": "supplied lifetime helper only",
+        "receipt_sha256": "097d1a53ddc830072d4a7ec723b832617715c56f80286fc4669889c8d02eb54e",
+        "provenance_sha256": "5cf44a30644e12bf0d4b4185ac8f29983a600342beca1548a16349fc1de1cbe9",
+        "rehydration_verified": true,
+        "retained_gain": null
+      },
+      "generated_bindings": {
+        "manifest_digest": "f56f6771d6d5d5352d03c1259793ff527ba583b3788dc757f2309f8e7f8bfa81",
+        "runtime_files": 1404,
+        "changed_runtime_entries": [
+          "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_evidence.py",
+          "modules/communication/moltbot_bridge/src/reddog_elevated_authority_consensus_policy.py"
+        ],
+        "registry_files": 1678,
+        "registry_quarantined": 270,
+        "ci_exact_cases": 578,
+        "ci_guard_changed": false
       }
     }
   }

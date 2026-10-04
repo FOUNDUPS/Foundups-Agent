@@ -1,8 +1,32 @@
+## Supplied effect-sovereign evidence — 2026-10-04
+
+Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy
+and evidence owners. The new frozen record and matcher bind supplied approval
+references to the recomputed parent, full signing target, effect and policy,
+with exact types, bounded identity text and complete lifetime coverage.
+A true match authenticates nothing and grants no permission. Trusted production
+provenance, effect permits and native admission remain separate work.
+
+Independent frozen baseline:83 missing-API failures; candidate83/83 pass.
+Connected242/242 pass, including the83; zero errors/skips and unchanged criteria.
+Existing function/class ASTs are unchanged; both runtime files remain within
+200 lines and functions within50. One local Qwen call supplied only the lifetime
+helper, whose integrated AST is unchanged. Its prospective format and static
+scope pass; the coordinator supplied the formula and wrote the outer matcher.
+SDK telemetry:642 input/81 output tokens;53.281s parent elapsed;0 paid calls.
+Total cost and retained gain are unknown. No automatic learning or runtime grant.
+
+Exact-source review and publication are separate gates. Canonical evidence:
+`current_observation.effect_sovereign_binding_20261004` in the RSI backlog;
+PC artifacts: `outputs/rsi-effect-sovereign-binding-20261004`. WSP00/5/6/11/15/
+22/48/50/62/84/97/99. Next: authenticate supplied effect evidence through the
+existing owner, then qualify the effect-specific permit/provider composition.
+
 ## Effect request preparation — 2026-10-04
 
 13/P1 source prerequisite: existing issuer preparation now feeds the canonical
 effect-binding surface before authorization. Local43/43 and connected78/78
-pass; publication/main verification remain pending. Local Qwen content required
+pass. PR2058 merged at00e0c044f with11 successful PR checks and both exact-main workflows successful;495 effect-boundary and49 MCP cases passed. Owned lane retired with recovery preserved. Local Qwen content required
 coordinator formatting recovery and caller integration; raw format remains a
 failure. Native authority is not activated. See canonical RSI backlog
 `effect_request_preparation_20261004` and module ModLog for evidence and limits.

@@ -12,13 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** Canonical effect-request preparation is locally
-verified:43 frozen cases pass and78 connected cases pass. A local Qwen method
-required coordinator formatting recovery and caller integration; its raw format
-failed. Publication/main verification remains pending. PR2057's paired MCP work
-is merged/main-verified (49/49), its lane retired and PR1525/1526 superseded.
-Native autonomous RSI still requires authentic effect authority and composition.
-See the [current layer](docs/operations/RSI_SWARM_DISPATCH.md#canonical-effect-request-preparation--2026-10-04).
+**2026-10-04 current layer:** PR2058 canonical request preparation is merged
+and exact-main verified:495/495 effect-boundary cases and49/49 MCP cases; its
+owned lane is retired with recovery preserved. Fresh WSP15/WSP97 selects14/P1
+exact-effect supplied-evidence matching in the existing policy/evidence owners.
+Independent frozen83-case baseline fails on the absent API; candidate83 and
+connected242 cases now pass locally with unchanged criteria. A local Qwen helper
+passed format/scope review; coordinator integration and publication are separate. This compares data;
+authentic approval, a single-target permit and native activation remain open.
+See the [current selection](docs/roadmaps/rsi_swarm_backlog.json).
 
 **2026-10-04 retained-source checkpoint:** PR2055 is merged/main-verified and its three
 owned lanes are retired. One local worker repair now has verified retained

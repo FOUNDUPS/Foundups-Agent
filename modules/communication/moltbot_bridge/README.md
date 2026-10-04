@@ -1,3 +1,10 @@
+## Supplied effect approval matching — 2026-10-04
+
+Use the existing evidence owner's `effect_sovereign_authorization_matches` to
+compare a supplied record against the actual parent, full target, context and
+policy. See [the API](INTERFACE.md#supplied-effect-sovereign-evidence-api--2026-10-04).
+This pure data check does not authenticate the record or authorize execution.
+
 ## Current-generation review sets — 2026-10-04
 
 `verify_current_effect_reviewer_decisions` now composes the bounded quorum under
