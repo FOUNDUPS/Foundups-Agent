@@ -1,3 +1,34 @@
+## Authenticated effect consent — 2026-10-04
+
+Selected15/P1 (C3/I4/D4/Impact4). Opt-in owner v6 now registers a distinct
+HIGH/worktree_create consent privilege. The existing principal resolver exposes
+a detached Ed25519 consent verifier under one current lease, using the existing
+principal artifact, target binding, codecs and P12 evidence matcher. Owner v1-v5,
+principal artifact v1/v2 and existing reviewer/grant privileges remain.
+
+Original frozen95-case baseline failed only on missing APIs; initial95/326
+passed. Independent source review then found two sampled-state gaps. Two added
+cases reproduced false acceptance before repair. The repair snapshots original
+inputs before the first clock callback and rechecks all three relevant principal
+records after final owner/time sampling. Final97/97 and connected328/328 pass,
+with zero errors/skips and original95 criteria preserved. These are sampled
+checks, not continuous immutability or change-and-restore protection.
+
+One local Qwen call supplied the interval helper from a coordinator-supplied
+formula; its integrated AST is unchanged. Raw format and scope were accepted.
+SDK:688 input/126 output tokens;63.344s parent,52.656s child;0 paid calls; total
+cost unknown. The coordinator wrote the authentication and repairs. Source
+qualification uses disposable signatures and substituted owner/lease provenance.
+No native admission, deployed authority, parent sovereignty, execution permit,
+model learning or new retained RSI benefit is claimed.
+
+Publication remains a separate gate. Exact evidence/commands and review hashes:
+`current_observation.authenticated_effect_consent_20261004` in the canonical RSI
+backlog; PC artifacts `outputs/rsi-authenticated-effect-consent-20261004`.
+Next prerequisite: effect-specific permit/provider composition under the same
+held lease, followed by use-time resolver and compatible host admission.
+WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
 ## Supplied effect-sovereign evidence — 2026-10-04
 
 Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy

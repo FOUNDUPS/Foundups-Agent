@@ -173,9 +173,10 @@ def _owner_source_policy_schemas() -> frozenset[str]:
     from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (  # noqa: E501
         SCHEMA_VERSION_V4,
         SCHEMA_VERSION_V5,
+        SCHEMA_VERSION_V6,
     )
 
-    return frozenset({SCHEMA_VERSION_V4, SCHEMA_VERSION_V5})
+    return frozenset({SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6})
 
 
 __all__ = [

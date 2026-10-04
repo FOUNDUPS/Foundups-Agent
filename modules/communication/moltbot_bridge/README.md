@@ -1,3 +1,11 @@
+## Detached effect consent — 2026-10-04
+
+Use `resolve_current_effect_sovereign_authorization` from the existing principal
+resolver to authenticate a detached exact-effect assertion through current owner
+v6. See [the interface](INTERFACE.md#authenticated-effect-consent--2026-10-04).
+The returned evidence is data; it cannot authorize a signer, create a worktree,
+or replace a later effect permit. Linux owner checks remain required.
+
 ## Supplied effect approval matching — 2026-10-04
 
 Use the existing evidence owner's `effect_sovereign_authorization_matches` to
