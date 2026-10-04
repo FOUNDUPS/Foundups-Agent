@@ -1622,7 +1622,10 @@ exact signature. Six rejection controls trap secret extraction on invalid
 reference/hash metadata, original mock mode, denial and expiry. These fixtures
 do not establish live vault access, authentic principal enrollment or deployed
 service wiring. The CI grant-aware signing step additionally runs key-provider,
-runtime-wiring, system-service entrypoint and resolver-supply regressions.
+runtime-wiring, system-service entrypoint, resolver-supply and conversation
+regressions. The shared test helper uses explicit per-test native roots, derives
+default socket/anchor paths from effective roots and preserves explicit negative
+overrides. Production path checks are unchanged.
 
 The revocation-contract cases use only signed test fixtures. They prove exact
 authority/generation/store binding and attacker-rehash rejection. The durable

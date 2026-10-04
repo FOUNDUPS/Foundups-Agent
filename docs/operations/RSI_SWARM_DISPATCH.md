@@ -8,9 +8,12 @@ after both resolutions. The factory now validates returned reference metadata
 before normalization and checks original resolver mode before wrapping.
 
 Baseline1pass/1fail; unchanged candidate2pass; six added rejection controls pass.
-Connected110 cases:107pass/3 platform skips, including the focused8, not118
-independent cases. Separate review verified exact frozen ASTs and evidence.
-CI now selects all seven connected suites. Publication/hosted checks remain
+Initial connected110 cases:107pass/3 platform skips. Hosted CI37235749458
+then exposed11 legacy path-fixture failures/99passes. Per-test native roots and
+derived socket/anchor defaults preserve all92 assertions and explicit negative
+overrides. Final111 cases:108pass/3 platform skips, including the focused8;
+repeated runs are not additional independent cases. Separate review verified exact frozen ASTs and evidence.
+CI now selects eight suites, including the fixture importer. Publication/hosted checks remain
 open; legacy provider/audit formats remain unchanged.
 
 Synthetic keys/resolver, principal mapping, peer and clock qualify source

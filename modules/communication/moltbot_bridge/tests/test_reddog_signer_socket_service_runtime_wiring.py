@@ -195,12 +195,11 @@ def _policy(**overrides: object) -> PeerCredentialPolicy:
     return PeerCredentialPolicy(**values)
 
 
-def _config(public_key: str, **overrides: object) -> SignerSocketServiceRuntimeWiringConfig:
+def _config(tmp_path: Path, public_key: str, **overrides: object) -> SignerSocketServiceRuntimeWiringConfig:
     values = {
-        "repo_root": "O:/Foundups-Agent",
-        "runtime_root": "O:/tmp",
-        "signer_runtime_root": "O:/tmp-signer-state",
-        "socket_path": "O:/tmp/reddog-signer.sock",
+        "repo_root": tmp_path / "repo",
+        "runtime_root": tmp_path / "runtime",
+        "signer_runtime_root": tmp_path / "signer-runtime",
         "key_provider_profile": _profile(public_key),
         "peer_policy": _policy(),
         "provider_mode": PROVIDER_MODE_TEST_ONLY_DRYRUN,
@@ -210,7 +209,6 @@ def _config(public_key: str, **overrides: object) -> SignerSocketServiceRuntimeW
         "timeout_s": 2.5,
         "max_request_bytes": 4096,
         "max_response_bytes": 8192,
-        "control_loop_anchor_path": "O:/tmp-signer-state/anchor.json",
         "control_loop_authority_policy": {
             "issuer_principal_id": "github:012",
             "signer_public_key": public_key,
@@ -221,6 +219,8 @@ def _config(public_key: str, **overrides: object) -> SignerSocketServiceRuntimeW
         },
     }
     values.update(overrides)
+    values.setdefault("socket_path", Path(values["runtime_root"]) / "reddog-signer.sock")
+    values.setdefault("control_loop_anchor_path", Path(values["signer_runtime_root"]) / "anchor.json")
     return SignerSocketServiceRuntimeWiringConfig(**values)
 
 
@@ -248,13 +248,13 @@ def _peer() -> SignerPeerAttestation:
     )
 
 
-def test_runtime_wiring_composes_provider_attestor_and_bounded_service() -> None:
+def test_runtime_wiring_composes_provider_attestor_and_bounded_service(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     service = CapturingBoundedService()
 
     result = run_reddog_signer_socket_service_runtime_wiring(
-        _config(public_key),
+        _config(tmp_path, public_key),
         _resolver(private_key),
         serve_bounded=service,
     )
@@ -290,6 +290,7 @@ def test_runtime_receipt_does_not_overclaim_injected_dependency_effects(
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             repo_root=repo,
             runtime_root=runtime,
@@ -314,7 +315,7 @@ def test_runtime_receipt_does_not_overclaim_injected_dependency_effects(
     assert result.no_holoindex_reindex_performed is False
 
 
-def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_override() -> None:
+def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_override(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     resolver = _resolver(private_key)
@@ -322,6 +323,7 @@ def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_ov
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
             allow_test_only_key_material=False,
@@ -341,7 +343,7 @@ def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_ov
     ]
 
 
-def test_runtime_wiring_routes_multiple_wsp71_permissioned_profiles() -> None:
+def test_runtime_wiring_routes_multiple_wsp71_permissioned_profiles(tmp_path: Path) -> None:
     principal_key = _private_key()
     reddog_key = _private_key()
     principal_public = _public_text(principal_key)
@@ -372,6 +374,7 @@ def test_runtime_wiring_routes_multiple_wsp71_permissioned_profiles() -> None:
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             principal_public,
             key_provider_profile=None,
             key_provider_profiles=(principal_profile, reddog_profile),
@@ -407,7 +410,7 @@ def test_runtime_wiring_routes_multiple_wsp71_permissioned_profiles() -> None:
     ]
 
 
-def test_runtime_wiring_rejects_duplicate_multi_profile_public_key() -> None:
+def test_runtime_wiring_rejects_duplicate_multi_profile_public_key(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     service = CapturingBoundedService()
@@ -415,6 +418,7 @@ def test_runtime_wiring_rejects_duplicate_multi_profile_public_key() -> None:
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             key_provider_profile=None,
             key_provider_profiles=(profile, profile),
@@ -428,7 +432,7 @@ def test_runtime_wiring_rejects_duplicate_multi_profile_public_key() -> None:
     assert service.calls == []
 
 
-def test_runtime_wiring_rejects_duplicate_profile_id_across_keys() -> None:
+def test_runtime_wiring_rejects_duplicate_profile_id_across_keys(tmp_path: Path) -> None:
     first_key = _private_key()
     second_key = _private_key()
     first = _profile(
@@ -443,6 +447,7 @@ def test_runtime_wiring_rejects_duplicate_profile_id_across_keys() -> None:
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             _public_text(first_key),
             key_provider_profile=None,
             key_provider_profiles=(first, second),
@@ -456,7 +461,7 @@ def test_runtime_wiring_rejects_duplicate_profile_id_across_keys() -> None:
     assert service.calls == []
 
 
-def test_mapping_config_normalizes_profile_and_peer_policy() -> None:
+def test_mapping_config_normalizes_profile_and_peer_policy(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     profile = _profile(public_key).__dict__
@@ -469,7 +474,7 @@ def test_mapping_config_normalizes_profile_and_peer_policy() -> None:
     service = CapturingBoundedService()
 
     result = run_reddog_signer_socket_service_runtime_wiring(
-        _config(public_key, key_provider_profile=profile, peer_policy=policy),
+        _config(tmp_path, public_key, key_provider_profile=profile, peer_policy=policy),
         _resolver(private_key),
         serve_bounded=service,
     )
@@ -480,13 +485,13 @@ def test_mapping_config_normalizes_profile_and_peer_policy() -> None:
     assert attestor.policy.allowed_gids == (1002,)
 
 
-def test_default_provider_mode_rejects_before_service_call() -> None:
+def test_default_provider_mode_rejects_before_service_call(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     service = CapturingBoundedService()
 
     result = run_reddog_signer_socket_service_runtime_wiring(
-        _config(public_key, allow_test_only_key_material=False),
+        _config(tmp_path, public_key, allow_test_only_key_material=False),
         _resolver(private_key),
         serve_bounded=service,
     )
@@ -519,6 +524,7 @@ def test_runtime_wiring_rejects_linked_control_anchor_path(
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             repo_root=repo,
             runtime_root=runtime,
@@ -547,6 +553,7 @@ def test_runtime_wiring_rejects_socket_outside_declared_runtime_root(
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             repo_root=repo,
             runtime_root=runtime,
@@ -563,13 +570,14 @@ def test_runtime_wiring_rejects_socket_outside_declared_runtime_root(
     assert service.calls == []
 
 
-def test_wsp71_runtime_wiring_requires_control_anchor_and_policy() -> None:
+def test_wsp71_runtime_wiring_requires_control_anchor_and_policy(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     service = CapturingBoundedService()
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
             allow_test_only_key_material=False,
@@ -585,7 +593,7 @@ def test_wsp71_runtime_wiring_requires_control_anchor_and_policy() -> None:
     assert service.calls == []
 
 
-def test_runtime_wiring_rejects_malformed_typed_control_policy() -> None:
+def test_runtime_wiring_rejects_malformed_typed_control_policy(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     service = CapturingBoundedService()
@@ -600,6 +608,7 @@ def test_runtime_wiring_rejects_malformed_typed_control_policy() -> None:
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
             allow_test_only_key_material=False,
@@ -634,6 +643,7 @@ def test_runtime_wiring_rejects_overlapping_runtime_roots(
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         _config(
+            tmp_path,
             public_key,
             repo_root=repo,
             runtime_root=runtime,
@@ -650,7 +660,7 @@ def test_runtime_wiring_rejects_overlapping_runtime_roots(
     assert service.calls == []
 
 
-def test_invalid_config_profile_or_peer_policy_rejects() -> None:
+def test_invalid_config_profile_or_peer_policy_rejects(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     resolver = _resolver(private_key)
@@ -662,12 +672,12 @@ def test_invalid_config_profile_or_peer_policy_rejects() -> None:
         serve_bounded=service,
     )
     bad_profile = run_reddog_signer_socket_service_runtime_wiring(
-        _config(public_key, key_provider_profile={"signer_profile_id": "only-one-field"}),
+        _config(tmp_path, public_key, key_provider_profile={"signer_profile_id": "only-one-field"}),
         resolver,
         serve_bounded=service,
     )
     bad_policy = run_reddog_signer_socket_service_runtime_wiring(
-        _config(public_key, peer_policy={"uid_to_principal": {}}),
+        _config(tmp_path, public_key, peer_policy={"uid_to_principal": {}}),
         resolver,
         serve_bounded=service,
     )
@@ -678,10 +688,10 @@ def test_invalid_config_profile_or_peer_policy_rejects() -> None:
     assert service.calls == []
 
 
-def test_service_reject_exception_or_wrong_type_rejects() -> None:
+def test_service_reject_exception_or_wrong_type_rejects(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
-    config = _config(public_key)
+    config = _config(tmp_path, public_key)
     resolver = _resolver(private_key)
 
     rejected = run_reddog_signer_socket_service_runtime_wiring(
@@ -712,11 +722,11 @@ def test_service_reject_exception_or_wrong_type_rejects() -> None:
     assert FAIL_SIGNER_RUNTIME_SERVICE_INVALID in wrong.rejection_reasons
 
 
-def test_result_serialization_contains_no_secret_material_or_backend() -> None:
+def test_result_serialization_contains_no_secret_material_or_backend(tmp_path: Path) -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     result = run_reddog_signer_socket_service_runtime_wiring(
-        _config(public_key),
+        _config(tmp_path, public_key),
         _resolver(private_key),
         serve_bounded=CapturingBoundedService(),
     )

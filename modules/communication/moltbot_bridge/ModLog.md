@@ -9,9 +9,12 @@ the canonical full digest. Original resolver-mode checks run before wrapping;
 global audit hashing and legacy provider behavior are unchanged.
 
 Six additive rejection cases cover reference/hash substitution, swapped metadata,
-mock mode, denial and expiry before secret extraction. Focused8/8 and connected
-107 pass/3 Windows platform skips; no failures/errors. Independent source/test
-review verified frozen ASTs and evidence bindings. CI now selects all seven
+mock mode, denial and expiry before secret extraction. Focused8/8 and initial connected
+107 pass/3 Windows platform skips. Hosted CI37235749458 then failed11 existing
+Windows-path fixture cases, with99passes. Repairing the helper and its sole
+importer preserves all92 assertions, explicit overrides and production guards.
+Final connected108pass/3skip has no failures/errors. Independent source/test
+review verified frozen ASTs and evidence bindings. CI now selects eight
 connected suites; hosted verification remains a publication gate.
 
 This is coordinator-authored source repair with synthetic keys, principal/peer

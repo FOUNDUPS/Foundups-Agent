@@ -16,7 +16,9 @@ Status: canonical **system planning and completion-gate authority** in this repo
 Selected **15/P1** (C2/I4/D5/Impact4): repair a demonstrated short audit-hash versus
 full grant-digest mismatch in the existing signer factory. Frozen baseline:
 1 pass/1 fail; unchanged candidate:2/2 pass. Six added rejection controls pass;
-connected selection:107 pass/3 Windows platform skips. Independent review found
+final connected selection:108 pass/3 Windows platform skips. Initial hosted
+99pass/11fail exposed legacy Windows-only test paths; the fixture repair preserves
+all92 assertions and production guards. Independent review found
 no blocker; publication and hosted checks remain open. Production startup is
 still uncomposed. Native admission 18/P0 and genuine input handoff 15/P1 remain
 blocked/unresolved. See the [composition checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#wsp71-factory-composition--2026-10-05)

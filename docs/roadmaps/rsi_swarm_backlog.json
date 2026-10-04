@@ -30287,7 +30287,7 @@
         "denominator": "Includes the eight factory cases; do not add focused and connected totals.",
         "skip_reason": "Two unavailable Windows symlink privileges and one Linux-only case."
       },
-      "ci": "Existing workflow selects the same seven suites, requires cryptography and disables ambient plugin/conftest/dotenv loading; hosted verification pending.",
+      "ci": "Existing workflow selects eight suites including the importing conversation test; original seven-suite hosted run failed on legacy Windows-only fixture paths. Replacement hosted verification pending.",
       "integrity": {
         "backend_manifest": "current, 1408 runtime files; standalone factory remains outside production import closure",
         "test_registry": "current, 1687 total and 270 quarantined; no regeneration needed"
@@ -30326,7 +30326,38 @@
         "owned_lane": "retired after verified recovery bundle and ignored-artifact preservation",
         "speed_improvement_or_model_learning_claim": false
       },
-      "next_gate": "Publish this repair through exact-head review/CI, verify main, then re-observe the existing production provider/backend composition; authentic principal input and lifecycle remain separate prerequisites."
+      "next_gate": "Publish this repair through exact-head review/CI, verify main, then re-observe the existing production provider/backend composition; authentic principal input and lifecycle remain separate prerequisites.",
+      "initial_ci_failure": {
+        "pr": 2065,
+        "head": "044bfa587547c7bc638e5223c12e5a9ffd67ffb2",
+        "ci": 37235749458,
+        "conclusion": "failure",
+        "step": "Run RedDog grant-aware signing composition regression",
+        "passed": 99,
+        "failed": 11,
+        "skipped": 0,
+        "seconds": 8.38,
+        "cause": "Existing test helper hardcodes Windows O:/ paths, rejected as colon-containing components by Linux path validation. Linked-anchor case additionally leaves the socket outside its overridden runtime root.",
+        "repair": "Platform-native per-test roots; derive defaults from effective runtime roots while preserving explicit overrides and all assertions",
+        "productionSourceChangedForPortability": false,
+        "logSha256": "f0c19b8510a21ff42d02ebd094efcbeb4734b7693785d0872f531d01e8e77813"
+      },
+      "portable_fixture_repair": {
+        "scope": "Existing runtime-wiring test helper and its one conversation-wiring importer; no production changes.",
+        "behavior": "Use explicit per-test native roots; derive socket/anchor defaults after root overrides; preserve explicit path and None overrides.",
+        "assertion_asts_preserved": 92,
+        "focused_passed": 19,
+        "focused_skipped": 1,
+        "review_sha256": "e54a97beaf6ea266de5c3d3d6702abef7174b6e7c26ae7edcd2ea52af5a27f5b",
+        "connected_tests": 111,
+        "connected_passed": 108,
+        "connected_skipped": 3,
+        "connected_failed": 0,
+        "command": "O:/RedDog-Builder-Artifacts/cpython-3.12.10-amd64/runtime/python.exe -S -B -X utf8 -m pytest -q --tb=short -c NUL --noconftest --import-mode=importlib -p no:cacheprovider --basetemp O:/rsi-signer-portable-connected-20261005 --junitxml O:/Foundups-Agent/outputs/rsi-holo-grounding-20261005/signer-factory-composition/portable-connected-tests.xml modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_wiring.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_dryrun.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py",
+        "receipt_sha256": "0ef08063b7feb098da725430519dea9534e584d17d166b86968fd35fae42417e",
+        "test_registry": "Rechecked current after test-only repair;1687 total/270 quarantined",
+        "denominator": "Original107/3skip and hosted99/11fail observations remain historical. Final108/3skip includes factory8 and all20 portable fixture cases; do not sum repeat runs."
+      }
     }
   }
 }

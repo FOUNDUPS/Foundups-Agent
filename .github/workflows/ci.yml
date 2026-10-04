@@ -1216,7 +1216,8 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_wiring.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_dryrun.py \
-            modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py
 
       - name: Run RedDog fast test tier
         working-directory: extensions/reddog
