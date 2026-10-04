@@ -101,11 +101,12 @@ def _is_safe_proposal(response: Any) -> bool:
 
 def _build_prompt(skill_content: str, input_context: Mapping[str, Any]) -> str:
     return (
-        "Execute this skill step-by-step:\n\n"
+        "Prepare the proposal requested by this skill:\n\n"
         f"{skill_content}\n\n"
         "Input Context:\n"
         f"{json.dumps({k: v for k, v in input_context.items() if k != 'parent_continuity_context'}, indent=2)}\n\n"
-        "Draft a structured proposal. Do not claim that repository, shell, Git, "
+        "Follow the skill's required output format for the proposal. "
+        "Do not claim that repository, shell, Git, "
         "network, or external effects occurred."
     )
 

@@ -1,3 +1,21 @@
+## Prototype CodeAct file containment — 2026-10-04
+
+The existing read-file action checks resolved Path components before reading.
+Sibling directories sharing the repository's name prefix are outside. Nested,
+normalized within-root and missing-file behavior remains. A denied read returns
+an error and existing orchestration stops later actions while retaining earlier
+successful outputs. This is not atomic symlink-race protection, an OS sandbox,
+or public WRE CodeAct admission; that prototype boundary remains blocked.
+
+## Local proposal framing — 2026-10-04
+
+The existing local proposal wrapper asks for a proposal using the skill's required
+output format. It no longer adds an execution directive or an unconditional
+structured-response instruction. Exact skill text, ordinary JSON context and
+reserved continuity omission remain unchanged. This affects raw/native caller
+prompt framing only; profile, limits, cleanup and quarantine are unchanged.
+Model format adherence and semantic correctness still require verification.
+
 ## Prototype CodeAct shell result — 2026-10-04
 
 Direct `CodeActExecutor` shell actions return an error containing the numeric

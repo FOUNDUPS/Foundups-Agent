@@ -242,3 +242,67 @@ def test_nonzero_shell_exit_stops_stage_and_retains_prefix(failure_index, tmp_pa
     assert [call.args[0][-1] for call in run.call_args_list] == names[:failure_index + 1]
     assert conditional.call_count == (0 if failure_index < 2 else 1)
     assert later_effects == []
+
+
+@pytest.mark.parametrize("kind", ["nested", "normalized", "missing"])
+def test_read_file_preserves_contained_path_behavior(kind, tmp_path):
+    repo = tmp_path / "repo"
+    nested = repo / "nested"
+    nested.mkdir(parents=True)
+    (nested / "valid.txt").write_text("owned content\n", encoding="utf-8")
+    paths = {"nested": "nested/valid.txt", "normalized": "nested/../nested/valid.txt",
+             "missing": "nested/missing.txt"}
+    skill = _exit_truth_skill({"main_action": {
+        "type": "read_file", "path": paths[kind], "capture": "contents"}})
+    result = CodeActExecutor(repo_root=repo).execute(skill, {"seed": "preserved"})
+    assert result.success is True and result.error is None
+    assert result.actions_executed == 1
+    expected = "" if kind == "missing" else "owned content\n"
+    assert result.outputs == {"seed": "preserved", "contents": expected}
+
+
+@pytest.mark.parametrize("neighbor", ["repo-sibling", "unrelated"], ids=["sibling", "unrelated"])
+@pytest.mark.parametrize("absolute", [True, False], ids=["absolute", "relative"])
+def test_read_file_denies_outside_components_before_read(neighbor, absolute, tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    outside = tmp_path / neighbor
+    outside.mkdir()
+    target = outside / "owned-outside.txt"
+    target.write_text("outside fixture marker", encoding="utf-8")
+    path = str(target) if absolute else "../" + neighbor + "/owned-outside.txt"
+    skill = _exit_truth_skill({"main_action": {
+        "type": "read_file", "path": path, "capture": "denied_contents"}})
+    executor = CodeActExecutor(repo_root=repo)
+    with patch.object(Path, "read_text", autospec=True, side_effect=Path.read_text) as read:
+        result = executor.execute(skill, {"seed": "preserved"})
+    assert result.success is False
+    assert isinstance(result.error, str) and result.error
+    assert result.actions_executed == 0
+    assert result.outputs == {"seed": "preserved"}
+    read.assert_not_called()
+
+
+def test_denied_read_stops_later_action_and_retains_earlier_capture(tmp_path):
+    repo = tmp_path / "repo"
+    outside = tmp_path / "repo-sibling"
+    repo.mkdir()
+    outside.mkdir()
+    (repo / "before.txt").write_text("earlier content", encoding="utf-8")
+    (repo / "later.txt").write_text("later content", encoding="utf-8")
+    (outside / "denied.txt").write_text("outside fixture marker", encoding="utf-8")
+    skill = _exit_truth_skill({
+        "pre_actions": [{"type": "read_file", "path": "before.txt", "capture": "before"}],
+        "main_action": {"type": "read_file", "path": "../repo-sibling/denied.txt",
+                        "capture": "denied_contents"},
+        "post_actions": [{"type": "read_file", "path": "later.txt", "capture": "later"}],
+    })
+    executor = CodeActExecutor(repo_root=repo)
+    with patch.object(Path, "read_text", autospec=True, side_effect=Path.read_text) as read:
+        result = executor.execute(skill, {"seed": "preserved"})
+    assert result.success is False
+    assert isinstance(result.error, str) and result.error
+    assert result.actions_executed == 1
+    assert result.outputs == {"seed": "preserved", "before": "earlier content"}
+    assert read.call_count == 1
+    assert read.call_args.args[0] == repo / "before.txt"

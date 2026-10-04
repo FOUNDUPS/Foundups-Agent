@@ -486,7 +486,7 @@ class CodeActExecutor:
             full_path = self.repo_root / file_path
 
             # Security: ensure path is within repo
-            if not str(full_path.resolve()).startswith(str(self.repo_root.resolve())):
+            if not full_path.resolve().is_relative_to(self.repo_root.resolve()):
                 return {"error": f"Path escape attempt blocked: {file_path}"}
 
             if not full_path.exists():

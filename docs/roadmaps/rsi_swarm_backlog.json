@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.codeact_exit_truth_20261004",
-    "base_commit": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
-    "selected_action": "Propagate nonzero CodeAct subprocess status without false success or failed capture",
-    "status": "coordinator_repair_locally_validated_publication_pending",
+    "observation_path": "current_observation.local_worker_format_benchmark_20261004",
+    "base_commit": "79a976eff2b2db1fb7fe16cceaaf76642d94666c",
+    "selected_action": "Remove shared proposal-format contradiction and measure unchanged local task",
+    "status": "prompt_contract_repaired_local_comparison_observed_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1894,10 +1894,10 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised source repair; native and public CodeAct admission remain blocked",
+    "execution_plane": "coordinator-supervised local diagnostic and source repair; not native effect admission",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.native_chat_delimiter_20261004",
-    "next_action": "Review and exact-head publication/main closure; then rescore existing worker benchmark and repair handoff owners before another dispatch."
+    "previous_observation": "current_observation.codeact_exit_truth_20261004",
+    "next_action": "Close this exact source through review/CI/main, then rescore the existing repair-validation and model-qualification paths. No third same-task call or automatic proposal execution."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28246,7 +28246,7 @@
     },
     "codeact_exit_truth_20261004": {
       "base": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
-      "state": "coordinator_repair_locally_validated_publication_pending",
+      "state": "merged_main_verified_owned_lane_retired",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -28297,7 +28297,138 @@
       "retained_rsi_gain": null,
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-codeact-exit-truth-20261004",
       "criteria_sha256": "2eab52a618bf9f23b5ffeb586bec4e82a000700fe24c702f099efc298ed6b6b0",
-      "next_gate": "Review and exact-head publication/main closure; then rescore existing worker benchmark and repair handoff owners before another dispatch."
+      "next_gate": "Review and exact-head publication/main closure; then rescore existing worker benchmark and repair handoff owners before another dispatch.",
+      "publication": {
+        "pr": 2054,
+        "base": "c338192f1f21ab9a54352aa2ff0d8fc0988c5253",
+        "head": "cca36c8bf0ac64df06faf9896a6d4c0b606cf824",
+        "merge": "79a976eff2b2db1fb7fe16cceaaf76642d94666c",
+        "merge_tree_equals_reviewed_head": true,
+        "reviewed_files": 13,
+        "pr_checks_passed": 10,
+        "pr_ci": 37189400504,
+        "pr_codeql": 37189399502,
+        "main_ci": 37189820620,
+        "main_codeql": 37189820559,
+        "main_status": "success",
+        "hosted_wre_cases": 207,
+        "hosted_scanner_cases": 67,
+        "hosted_guarded_cases": 452,
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "ignored_runtime_files_preserved": 4,
+        "recovery_bundle": "pr2054-recovery.bundle",
+        "independent_review_sha256": "67838b9a949b1874c1ae0276c07d73c2bdad0015277caa16922c4334aaae2310",
+        "native_effect_admission": false,
+        "autonomous_worker_repair": false,
+        "retained_rsi_gain": null,
+        "shared_status_unchanged_during_cleanup": true
+      }
+    },
+    "local_worker_format_benchmark_20261004": {
+      "base": "79a976eff2b2db1fb7fe16cceaaf76642d94666c",
+      "state": "prompt_contract_repaired_local_comparison_observed_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "reused_owner": "modules/infrastructure/wre_core/src/local_skill_inference.py::_build_prompt",
+      "reused_benchmark": "modules/ai_intelligence/ai_gateway/src/model_combination_benchmark_harness.py",
+      "execution_plane": "coordinator-supervised local diagnostic and source repair; not native effect admission",
+      "baseline_path_tests": {
+        "cases": 29,
+        "passed": 26,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "first_worker": {
+        "calls": 1,
+        "accepted": false,
+        "format_passed": false,
+        "semantic_source_review_passed": false,
+        "candidate_applied": false,
+        "candidate_tests_run": false,
+        "seconds": 97.547,
+        "parent_seconds": 108.219,
+        "tokens": null,
+        "paid_calls": 0
+      },
+      "benchmark_receipt": "model_combination_benchmark_run:9618bd74dd2d57f6bfc884d1a85543378fd34931d24db04d1946b1f4de214cab",
+      "benchmark_consumption": "saved actual-run and independent-review evidence; no additional model invocation",
+      "prompt_baseline": {
+        "selected": 79,
+        "passed": 67,
+        "failed": 12,
+        "deselected": 25,
+        "errors": 0,
+        "skipped": 0
+      },
+      "prompt_candidate": {
+        "selected": 79,
+        "passed": 79,
+        "failed": 0,
+        "deselected": 25,
+        "errors": 0,
+        "skipped": 0
+      },
+      "connected": {
+        "passed": 209,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "integrated_connected": {
+        "tests": 217,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "returncode": 0,
+        "parent_seconds": 6.36,
+        "passed": 217
+      },
+      "worker_patch_validation": {
+        "passed": 29,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "unchanged_frozen_tests": true,
+        "exact_expression_retained_in_owned_patch": true,
+        "independent_receipt_sha256": "c058e45d2d20c91a9b317e57f836996bed40f1dd65be69bdb21a06f1499938ad"
+      },
+      "paired_benchmark_receipt": "model_combination_benchmark_run:3f8507ddd8b9be269d61be91f61ef1faaf16b62311e37b8f7ee1873bfc70a104",
+      "manifest_tests": {
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "test_expectation_migration": "five full-prompt equality expectations;77 other top-level AST nodes unchanged;two new format cases",
+      "selections_overlap": true,
+      "paired_comparison": {
+        "classification": "valid_paired_observation_expression_source_admissible_for_frozen_testing",
+        "worker_seconds": 17.766,
+        "parent_seconds": 28.875,
+        "tokens": null,
+        "paid_calls": 0,
+        "task_and_criteria_unchanged": true,
+        "new_heldout_task": false,
+        "third_call_allowed": false,
+        "independent_review_sha256": "1e00a4abfd949bf63602322e36506fc751d059672443b449eb672f3d689e56bd"
+      },
+      "coordinator_prompt_repair": true,
+      "autonomous_discovery": false,
+      "native_effect_admission": false,
+      "retained_rsi_gain": null,
+      "retained_learned_benefit": null,
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004",
+      "rejected_proposal_review_sha256": "d2138eecee48e0bda06ab3b825f7277d33733ccfd329fd3d311e91eb1a061f9b",
+      "prompt_source_review_sha256": "a76754fb01018d9dc1348f585944212f17f03fa1afe27cec3f1a4429348a0605",
+      "next_gate": "Close this exact source through review/CI/main, then rescore the existing repair-validation and model-qualification paths. No third same-task call or automatic proposal execution."
     }
   }
 }

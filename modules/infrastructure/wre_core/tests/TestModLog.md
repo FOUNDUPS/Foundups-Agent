@@ -1,3 +1,18 @@
+## Local proposal framing regression — 2026-10-04
+
+Independent frozen prompt baseline:12expected failures/67passes,25deselected,
+0errors/skips. Candidate:79passes; connected six-suite selection:209passes;
+manifest:8passes. Selections overlap. Two new inert raw-expression/native-JSON
+cases preserve payloads, limits, cleanup and proposal truth. Five exact full-prompt
+expectations migrated because they encoded the defective wrapper;77 other
+top-level AST nodes are unchanged. Finite lexical checks verify assembly only,
+not model adherence, semantic correctness or execution authority.
+The path suite remains byte-identical: baseline26pass/3fail becomes29pass after
+the exact worker predicate is substituted. All21 prior cases remain unchanged;
+the final integrated six-suite selection passes217 with no errors/skips.
+Commands, XML and independent evidence:
+`O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004/prompt-contract/`.
+
 ## CodeAct nonzero-exit regression — 2026-10-04
 
 Existing hardening suite now has 21 cases: six unchanged controls, eight

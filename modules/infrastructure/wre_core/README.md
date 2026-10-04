@@ -1,3 +1,10 @@
+## Local proposal output contract
+
+Skill-specific output instructions now take precedence in the existing local
+proposal wrapper. Generated text remains quarantined and can still be wrong.
+See [the interface](INTERFACE.md#local-proposal-framing--2026-10-04) and the
+[measured checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#local-worker-format-benchmark--2026-10-04).
+
 ## Local proposal lifetime
 
 Each WRE local proposal call now explicitly closes the engine it constructs.

@@ -1,3 +1,12 @@
+## Local worker format layer — 2026-10-04
+
+The real path-repair benchmark exposed a wrong-format, semantically wrong proposal.
+The shared prompt contradiction is repaired. The unchanged-task comparison yielded
+an exact worker path predicate passing29 frozen cases;217 integrated cases pass.
+Publication and retained-use verification remain open. Follow the
+[current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#local-worker-format-benchmark--2026-10-04).
+Earlier entries below are historical.
+
 ## Current execution-truth layer — 2026-10-04
 
 Merged PR2053's real WRE observation passed initial-proposal usefulness but its
