@@ -22,6 +22,12 @@ qualification uses disposable signatures and substituted owner/lease provenance.
 No native admission, deployed authority, parent sovereignty, execution permit,
 model learning or new retained RSI benefit is claimed.
 
+Initial PR2060 CI37209280885 passed675 effect cases but failed the existing
+extension fast tier: the runtime manifest grew1404→1406 while its consumer
+ceiling remained1404. The extension ModLog records the reproduced defect and
+narrow count-boundary repair; all15 fast-tier members now pass locally. Fresh
+replacement-head hosted checks remain required.
+
 Publication remains a separate gate. Exact evidence/commands and review hashes:
 `current_observation.authenticated_effect_consent_20261004` in the canonical RSI
 backlog; PC artifacts `outputs/rsi-authenticated-effect-consent-20261004`.
