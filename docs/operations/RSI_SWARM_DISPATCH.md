@@ -1,3 +1,43 @@
+## CodeAct exit truth and proposal checkpoint — 2026-10-04
+
+PR2053 is merged/main-verified at `c338192f1f21ab9a54352aa2ff0d8fc0988c5253`.
+All ten PR checks and main CI37187262012/CodeQL37187261559 passed; PR/main
+each passed 176 WRE, 67 scanner/admission and 452 separate guarded cases.
+Publication/canary worktrees and owned branch are retired; recovery is preserved.
+
+One later real WRE call on that merge passed the unchanged initial-proposal
+usefulness criterion. Same task/model/profile/budget: parent 250.219 seconds,
+WRE 237.531 seconds; 1,582 prompt + 840 completion = 2,422 tokens across two
+generations, zero paid inference. Baseline: 97.782 seconds and 1,651 tokens,
+with failed initial usefulness. This is one controlled observation, not broad
+quality or causal proof. Finish reasons remain unobserved.
+
+WRE persisted one failed execution outcome, one unverified variation, one
+learning event and one matching AgentDB breadcrumb. The variation echoed the
+reflection prompt and ended incomplete; it is untested/unpromoted with unknown
+after-fidelity. Independent review accepts initial usefulness and truthful
+persistence only. No native effect admission or retained learned benefit.
+
+Selected 14/P1 (C2/I4/D4/Impact4): repair existing CodeAct nonzero-exit truth
+before trusting that component in a later execution path. Its shell action now
+returns a numeric-status error before capturing failed output; existing outer
+execution stops, preserves earlier outputs and omits failed/later actions.
+Zero exits, warning-only stderr and all policy gates remain. Public WRE CodeAct
+is still blocked. No new executor, skill, runtime authority or activation.
+
+Independent frozen baseline: 11 expected failures/10 passes. Candidate: 21
+focused/207 connected passes; selections overlap. Existing CI gains CodeAct and
+Git-CWD guard suites. The one local Qwen replacement was rejected by source
+inspection: no error return and failure-stream capture. It was not applied or
+executed. Coordinator repair; no retry; 27.610 seconds (parent 38.187), tokens
+unavailable. Source/PR/main closure remains separate.
+
+After closure, rescore existing local-worker capability/benchmark and repair
+execution owners. Repeated rejected patches are a quality gap, not evidence
+that more dispatch alone will improve the system. WSP00/5/11/15/22/48/50/84/97.
+Evidence: backlog `codeact_exit_truth_20261004`, local
+`O:/Foundups-Agent/outputs/rsi-codeact-exit-truth-20261004/`.
+
 ## Native chat delimiter repair — 2026-10-04
 
 PR2052 is merged/main-verified at `e3169540b7a30906244d698f81ac2e7a79f9a7cd`.

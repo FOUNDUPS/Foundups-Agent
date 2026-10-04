@@ -12,20 +12,19 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** PR2052 is merged/main-verified at
-`e3169540b7a30906244d698f81ac2e7a79f9a7cd`; its owned lane is retired.
-The first real production Skillz WRE canary passed scanner/manifest admission
-and persisted one failed outcome plus its AgentDB breadcrumb. Two local
-generations returned; the retained initial proposal had no actionable steps
-and failed frozen semantic acceptance. Reflection text was not captured.
-No retained RSI benefit or native effect admission is claimed.
+**2026-10-04 current layer:** PR2053 is merged/main-verified at
+`c338192f1f21ab9a54352aa2ff0d8fc0988c5253`; its owned lanes are retired.
+A later real production Skillz WRE observation passed initial-proposal
+usefulness under unchanged criteria. It persisted an incomplete, unverified
+reflection variation; no promotion or retained learned benefit was established.
 
-Selected **14/P1:** repair the existing native chat `###` stop delimiter.
-Independent baseline: 4 expected failures/59 passes; repaired: 63 focused and
-176 connected passes. The local worker proposal was rejected; this one-line
-repair required coordinator intervention. Next: exact-source review/publication,
-then one changed-source WRE observation with unchanged acceptance. Native
-18/P0 remains blocked. See [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#native-chat-delimiter-repair--2026-10-04)
+Selected **14/P1:** fix false success after a nonzero CodeAct command exit.
+Independent baseline 11 failures/10 passes becomes 21 focused/207 connected
+passes. The local worker patch was rejected; coordinator intervention remains
+explicit. Existing public CodeAct stays blocked. Next: exact-source closure,
+then fresh prioritization of local-worker quality and the missing verified
+repair handoff. Native autonomous 18/P0 remains blocked. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#codeact-exit-truth-and-proposal-checkpoint--2026-10-04)
 and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).

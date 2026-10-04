@@ -18517,7 +18517,9 @@
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-wre-core-unit-part-01",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

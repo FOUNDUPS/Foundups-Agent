@@ -730,6 +730,8 @@ jobs:
           python -B -m pytest --tb=short -c /dev/null --noconftest \
             -o pythonpath=. -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/proposal-caller-pytest" -v \
+            modules/infrastructure/wre_core/tests/test_codeact_executor_hardening.py \
+            modules/infrastructure/wre_core/tests/test_wre_worker_git_cwd_guard.py \
             modules/infrastructure/wre_core/tests/test_wre_execution_truth.py \
             modules/infrastructure/wre_core/tests/test_pattern_memory.py \
             modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py \

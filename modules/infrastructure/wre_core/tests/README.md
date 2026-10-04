@@ -1,3 +1,14 @@
+## CodeAct nonzero-exit regression — 2026-10-04
+
+Existing hardening suite now has 21 cases: six unchanged controls, eight
+nonzero status/stderr/capture combinations, four zero-exit controls and three
+pre/main/post stop cases. Baseline 11 fail/10 pass; candidate 21 pass. Connected
+CodeAct, Git-CWD, execution-truth, PatternMemory, continuity and master suites:
+207 pass (overlapping selection), no skips. All shell calls are mocked; this
+does not qualify a sandbox or enable public CodeAct. Raw-error stream exclusion
+is additionally source-reviewed, not claimed as an explicit substring test.
+Exact commands/XML: `O:/Foundups-Agent/outputs/rsi-codeact-exit-truth-20261004/`.
+
 ## Native chat delimiter regression — 2026-10-04
 
 Three new cases in existing `test_wre_execution_truth.py` preserve a Markdown

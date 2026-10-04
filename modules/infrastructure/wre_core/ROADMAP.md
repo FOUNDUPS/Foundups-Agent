@@ -1,12 +1,12 @@
-## Current native proposal layer — 2026-10-04
+## Current execution-truth layer — 2026-10-04
 
-The real production Skillz scanner/admission/proposal/persistence path ran once
-on merged PR2052; semantic usefulness failed, and no variation was retained.
-The existing native chat owner now omits the `###` text stop while retaining
-formatter EOS and all limits. 63 focused/176 connected cases pass; publication
-and a later unchanged-criteria canary remain open. See the
-[canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-chat-delimiter-repair--2026-10-04).
-Earlier entries below are historical, not current native admission claims.
+Merged PR2053's real WRE observation passed initial-proposal usefulness but its
+stored reflection was incomplete/unverified. No learned variation was promoted.
+The next 14/P1 owner repair prevents nonzero CodeAct command exits from reporting
+success: 21 focused/207 connected cases pass. Public CodeAct remains blocked;
+source publication and autonomous repair admission are separate. Follow the
+[canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#codeact-exit-truth-and-proposal-checkpoint--2026-10-04).
+Earlier entries below are historical.
 
 ## Local continuity proposal canary — 2026-10-04
 

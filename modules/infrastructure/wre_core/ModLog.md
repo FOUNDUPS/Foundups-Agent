@@ -1,3 +1,14 @@
+## 2026-10-04 — Propagate CodeAct nonzero status
+
+- Existing shell owner returns a bounded numeric-status error before failure
+  capture; outer sequencing already stops and retains prior successful outputs.
+- Frozen baseline 11 fail/10 pass becomes 21 pass; connected 207 pass. Existing
+  CI adds CodeAct/Git-CWD suites. Raw-stream exclusion also checked in source.
+- One local Qwen proposal rejected; coordinator repair, not autonomous worker
+  success. Public CodeAct and native effect admission remain blocked.
+- Reconciled PR2053/main and useful initial WRE proposal; its echoed reflection
+  remains unverified/unpromoted. WSP00/5/11/15/22/48/50/84/97.
+
 ## 2026-10-04 — Observe real Skillz path and repair native text stop
 
 - Merged PR2052 real WRE canary passed scanner/manifest admission, generated

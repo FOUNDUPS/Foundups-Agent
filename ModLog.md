@@ -1,3 +1,11 @@
+## 2026-10-04 — WRE CodeAct exit truth
+
+Nonzero shell status now stops the existing CodeAct prototype; 21 focused and
+207 connected cases pass, with CI coverage added. Worker patch rejected and
+coordinator intervention recorded. PR2053 and its useful initial proposal /
+unverified reflection observation reconciled in the existing roadmap/backlog.
+No production activation. WSP00/15/22/48/97.
+
 ## 2026-10-04 — Real WRE observation and native delimiter repair
 
 PR2052 closed on exact main with passing CI/CodeQL; its real WRE canary passed
