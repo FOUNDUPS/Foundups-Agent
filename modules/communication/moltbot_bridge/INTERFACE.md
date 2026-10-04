@@ -1302,6 +1302,13 @@ resolver must pass provider-mode checks before adaptation. This metadata check
 does not authenticate the resolver; global audit hashes and legacy provider
 results retain their existing format. Synthetic socket-v2 composition is tested;
 the production system-service entrypoint remains uncomposed and fail-closed.
+`Wsp71EphemeralSignerBackendFactory` also accepts optional
+`signer_peer_instance_binding: SignerPeerInstanceBinding | None`, appended after
+its existing fields. Each fresh backend receives this same binding. The default
+remains `None`, so unbound handshakes still reject. The existing handshake validator
+checks request/instance equality; the factory neither authenticates supplied
+bindings nor grants a current-generation lease. Synthetic direct/factory handshake
+tests verify matching signatures and session/generation/profile rejection.
 Native-memory zeroization and complete signer lifecycle supervision remain
 SPECIFIED_NOT_IMPLEMENTED.
 No private key, resolved secret, grant signature, or audit key is serialized.

@@ -22,6 +22,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
     signer_key_reference_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    SignerPeerInstanceBinding,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
     SignerSecretGrantAuthorityPolicy,
 )
@@ -74,6 +77,7 @@ class Wsp71EphemeralSignerBackendFactory:
     secret_grant_authority_policy: SignerSecretGrantAuthorityPolicy | None = None
     secret_grant_rate_authority: DurableSignerSecretGrantRateAuthority | None = None
     elevated_consensus_signer_authority: Any | None = None
+    signer_peer_instance_binding: SignerPeerInstanceBinding | None = None
 
     @property
     def signer_agent_id(self) -> str:
@@ -110,6 +114,7 @@ class Wsp71EphemeralSignerBackendFactory:
             elevated_consensus_signer_authority=(
                 self.elevated_consensus_signer_authority
             ),
+            signer_peer_instance_binding=self.signer_peer_instance_binding,
         )
         return replace(result, backend=backend)
 

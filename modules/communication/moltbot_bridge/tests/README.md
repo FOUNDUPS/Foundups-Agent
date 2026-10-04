@@ -1,3 +1,20 @@
+## Factory peer-instance propagation — 2026-10-05
+
+The existing factory test owner has14 frozen cases: original8 plus6 new handshake
+cases. Baseline10pass/4 missing-keyword failures; candidate14pass, no errors/skips.
+The direct valid control and unbound rejection establish fixture validity.
+Successive factory-built backends produce verified signatures; altered input and
+session/generation/profile substitutions reject. No existing test AST changed.
+
+Nine-suite connected selection:127pass/4skip of131, with normal package imports.
+Windows lacks AF_UNIX for one real-socket test; two symlink-privilege cases and
+one Linux-only case also skip. Original focused-harness attempt119pass/8fail/4skip
+is preserved; its URI/subprocess restrictions did not identify source defects.
+CI selects all nine suites. Scope is synthetic source qualification, not peer
+credential provenance, genuine vault access, service activation or native RSI.
+Exact commands and receipt hashes are in backlog `signer_factory_peer_binding_20261005`.
+The previous grant-digest slice PR2065 is merged/main-verified with hosted111/111.
+
 ## Authenticated effect consent — 2026-10-04
 
 Local source qualification:97/97 and connected328/328 pass. The original95-case

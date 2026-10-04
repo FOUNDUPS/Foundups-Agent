@@ -1211,6 +1211,7 @@ jobs:
           python -B -m pytest -q --tb=short -c /dev/null --noconftest \
             --import-mode=importlib -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py \
             modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_wiring.py \

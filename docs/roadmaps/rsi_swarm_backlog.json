@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.signer_factory_composition_20261005",
-    "base_commit": "1cee9a957290a8053eef263e587e3b4ac43d40a3",
-    "selected_action": "Repair and qualify the existing WSP71 factory grant-digest connection",
+    "observation_path": "current_observation.signer_factory_peer_binding_20261005",
+    "base_commit": "fc6f6e021033af21556be3cca64f8e9c9e43fca3",
+    "selected_action": "Qualify peer-instance propagation through existing WSP71 factory",
     "status": "local_source_qualified_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
-      "deferability": 5,
-      "impact": 4,
-      "total": 15,
+      "deferability": 4,
+      "impact": 3,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "execution_plane": "authorized repository source maintenance, not native work admission",
-    "previous_observation": "current_observation.holo_grounding_20261005",
-    "next_action": "Publish this repair through exact-head review/CI, verify main, then re-observe the existing production provider/backend composition; authentic principal input and lifecycle remain separate prerequisites.",
+    "previous_observation": "current_observation.signer_factory_composition_20261005",
+    "next_action": "Publish with exact-head review/CI and verify main; re-observe/score one-target one-request composition under the existing owner lease, preserving consume-before-resolve and protected-use signing. Authentic principal/model input is separate.",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
@@ -30357,7 +30357,134 @@
         "receipt_sha256": "0ef08063b7feb098da725430519dea9534e584d17d166b86968fd35fae42417e",
         "test_registry": "Rechecked current after test-only repair;1687 total/270 quarantined",
         "denominator": "Original107/3skip and hosted99/11fail observations remain historical. Final108/3skip includes factory8 and all20 portable fixture cases; do not sum repeat runs."
+      },
+      "closure": {
+        "state": "MERGED_VERIFIED_MAIN",
+        "pr": 2065,
+        "reviewed_head": "bd98edabbd67ff7055fe861e2ba5594dbf2c5a3b",
+        "merge": "fc6f6e021033af21556be3cca64f8e9c9e43fca3",
+        "hosted_ci": 37236688783,
+        "hosted_passed": 111,
+        "main_ci": 37237231628,
+        "main_codeql": 37237231590,
+        "all_conclusions": "success",
+        "retained_main_factory_passed": 8,
+        "maintenance_seconds": 435.453,
+        "maintenance_status": "COMPLETED",
+        "historical_three_tasks_nine_events_unchanged": true,
+        "tasks_after": 4,
+        "events_after": 12,
+        "new_task_retries": 0,
+        "all_started_runtimes_stopped": true,
+        "query": "CURRENT/no-gap, exact fc6f, no workspace overlay",
+        "maintenance_review_sha256": "6622b5e0df28430cc385a90630f458b4aa3a5c43297996c975cb1dc251405058",
+        "owned_lane": "Normally retired; verified bundle and eight ignored files preserved; local recovery branch retained",
+        "limits": "Earlier pending fields describe the pre-publication checkpoint. No native RSI, model learning, live-resume or completed-event-resolution claim."
       }
+    },
+    "signer_factory_peer_binding_20261005": {
+      "base": "fc6f6e021033af21556be3cca64f8e9c9e43fca3",
+      "observed_on": "2026-10-05 JST",
+      "state": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_PENDING",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "selection_basis": "Concrete prerequisite to owner-held lazy composition: factory drops peer-instance binding required by backend handshake verification.",
+      "execution_plane": "Authorized Codex repository source maintenance; no native WRE/RedDog admission",
+      "repair": "Append optional typed peer-instance binding after all old fields and forward through existing backend replace. Five added production lines; no new module, routing or startup.",
+      "retrieval": {
+        "receipt": "holo-query.json",
+        "sha256": "5ca575e3c74fd5eeac3940d9427f88253e4ebdafdcbf66e7918584131e46f999",
+        "freshness": "CURRENT",
+        "index_gap_detected": false,
+        "both_heads": "fc6f6e021033af21556be3cca64f8e9c9e43fca3",
+        "workspace_overlay_present": false,
+        "evaluation_receipt_sha256": "d6d3ff24718b69a74cfc25086b8a8cefe5a004ce89f6faf145eaaaf3aea34c20",
+        "quality": "Four required source/test paths first; three lower-priority matches excluded. Required docs present; optional memory README and module requirements.txt absent. Direct canonical reads reused existing owners."
+      },
+      "baseline": {
+        "tests": 14,
+        "failures": 4,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 10,
+        "receipt": "test-baseline-receipt.json",
+        "sha256": "12f7346c90c1b80eadea9484e39ce99d7fc089e11f909204627d7c0bda46f573",
+        "seconds": 3.984,
+        "failure": "Four missing-keyword failures; valid direct handshake, unbound rejection and original eight cases pass."
+      },
+      "candidate": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 14,
+        "receipt": "test-candidate-receipt.json",
+        "sha256": "9ca952f6682c92d26abd1e0e1bf6949d524edeb739fc6f38d4dd3d1a342aca19",
+        "seconds": 2.843,
+        "test_bytes_unchanged": true,
+        "original_test_ast_nodes_unchanged": 20,
+        "oracles": "Real and altered-input signature checks, fresh backends, deferred exact-reference resolutions, session/generation/profile rejection."
+      },
+      "initial_connected_harness": {
+        "tests": 131,
+        "failures": 8,
+        "errors": 0,
+        "skipped": 4,
+        "passed": 119,
+        "receipt": "portable-fixture-test-receipt.json",
+        "sha256": "1cb5a98e2c8971efd0ca57535ce68c70326de013ecee2375a937a10b1333f43c",
+        "seconds": 18.922,
+        "cause": "Focused harness mishandled SQLite file URIs and denied existing --help subprocess. Harness limitations, not source defects; all failures preserved."
+      },
+      "connected": {
+        "tests": 131,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 4,
+        "passed": 127,
+        "receipt": "test-full-connected-receipt.json",
+        "sha256": "a948da97e7bebebedf9e191c1ae32691fc635d58ae905677e55d373e4f056d46",
+        "seconds": 22.844,
+        "exact_argv_in_receipt": true,
+        "execution": "Previously qualified conventional pytest, normal imports, minimal credential-free environment and disposable database/temp roots. No namespace/audit-hook shim; not an OS sandbox.",
+        "skip_reasons": [
+          "AF_UNIX unavailable in Windows Python",
+          "Two Windows symlink-privilege limits",
+          "One Linux-only case"
+        ],
+        "denominator": "Includes focused14. Repeated runs are not additive; source and frozen criteria unchanged between wider attempts."
+      },
+      "independent_review": {
+        "agent": "event_store_source_review",
+        "state": "Source/oracle approved; final publication review pending",
+        "sha256": "149aecfadca3e2ea93e6898ed355ef276b312df2a826db8bf978025abd347cf6",
+        "test_author": "measurement_seam_review",
+        "test_author_receipt_sha256": "074d95c9295cbc72008472b09b868a015b1ad6eff61107aed0b59c130b60baa8"
+      },
+      "ci": "Existing connected regression selects nine suites including the whole mutual handshake file. Hosted execution pending.",
+      "integrity": {
+        "backend_manifest": "--check current1408; standalone factory excluded from production import closure",
+        "test_registry": "--check current1687 total/270 quarantined; no regeneration needed"
+      },
+      "evidence_root": "outputs/rsi-holo-grounding-20261005/signer-peer-binding",
+      "worker_attribution": "Coordinator source author; separate test author and reviewer. Codex collaboration is not a signed native worker assignment.",
+      "local_generative_provider_calls": 0,
+      "paid_provider_api_calls": 0,
+      "coordinator_subagent_cost": null,
+      "native_rsi_complete": false,
+      "retained_autonomous_benefit": null,
+      "limits": [
+        "Synthetic keys/peer fixtures do not authenticate instance provenance",
+        "No native grant, service activation, live vault access or route change",
+        "No owner-held privileged-use, lifecycle or native-memory zeroization qualification"
+      ],
+      "next_gate": "Publish with exact-head review/CI and verify main; re-observe/score one-target one-request composition under the existing owner lease, preserving consume-before-resolve and protected-use signing. Authentic principal/model input is separate."
     }
   }
 }

@@ -197,3 +197,108 @@ def test_factory_rejects_untrusted_resolution_metadata(tmp_path, monkeypatch, ca
     assert result.ok is False
     assert result.rejection_code == expected
     assert result.backend is None and result.secret_values_returned is False
+
+
+def _factory_handshake_case(tmp_path):
+    import time
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_mutual_peer_handshake as handshake
+
+    signing_secret, public_key, audit_secret = _key_material()
+    private = Ed25519PrivateKey.from_private_bytes(
+        base64.b64decode(signing_secret[len(SIGNING_KEY_PREFIX):]))
+    signing_ref, audit_ref = "op://Foundups/handshake/private", "op://Foundups/handshake/audit"
+    resolver = _Resolver({signing_ref: signing_secret, audit_ref: audit_secret})
+    profile = SignerKeyProviderProfile(
+        signer_profile_id="reddog-work-authority", signer_agent_id="signer:reddog",
+        signing_key_ref=signing_ref, audit_mac_key_ref=audit_ref,
+        expected_public_key=public_key,
+        expected_key_fingerprint=public_key_fingerprint(public_key),
+        expected_key_epoch="epoch-1", permission_snapshot_digest="sha256:" + "3" * 64,
+        ttl_seconds=60,
+    )
+    original = handshake._binding()
+    binding = replace(original, socket_path=str(tmp_path / "unused.sock"),
+                      signer_profiles=(replace(original.signer_profiles[0],
+                                               signer_public_key=public_key),))
+    now = int(time.time())
+    request = handshake._request(private, now_epoch=now, socket_path=binding.socket_path)
+    direct = replace(handshake._backend(private), signer_peer_instance_binding=binding,
+                     proposal_clock=lambda: int(time.time()))
+    return SimpleNamespace(profile=profile, resolver=resolver, binding=binding,
+                           request=request, direct=direct, peer=handshake._peer(),
+                           handshake=handshake, now=now)
+
+
+def test_direct_bound_handshake_control_is_valid(tmp_path):
+    case = _factory_handshake_case(tmp_path)
+    response = case.direct.sign(case.request, case.peer)
+    assert response.accepted is True
+    assert case.handshake.verify_signer_peer_handshake_response(
+        case.request, response, now_epoch=case.now).accepted is True
+    assert Ed25519SignatureVerifier().verify(
+        case.profile.expected_public_key, case.request.signing_input, response.signature)
+    assert case.resolver.calls == []
+
+
+def test_unbound_factory_preserves_handshake_rejection(tmp_path):
+    case = _factory_handshake_case(tmp_path)
+    factory = Wsp71EphemeralSignerBackendFactory(case.profile, case.resolver)
+    assert case.resolver.calls == []
+    result = factory()
+    assert result.ok is True and result.backend is not None
+    assert result.backend.signer_peer_instance_binding is None
+    response = result.backend.sign(case.request, case.peer)
+    assert response.accepted is False and not response.signature
+    assert response.rejection_code == case.handshake.REJECT_ED25519_SIGNER_REQUEST_INVALID
+    assert case.resolver.calls == [(ref, case.profile.signer_agent_id) for ref in
+                                   (case.profile.signing_key_ref, case.profile.audit_mac_key_ref)]
+
+
+def test_bound_factory_handshake_verifies_for_each_fresh_backend(tmp_path):
+    case = _factory_handshake_case(tmp_path)
+    factory = Wsp71EphemeralSignerBackendFactory(
+        case.profile, case.resolver, signer_peer_instance_binding=case.binding)
+    assert case.resolver.calls == []
+    previous = None
+    for attempt in (1, 2):
+        result = factory()
+        assert result.ok is True and result.backend is not None
+        assert result.backend is not previous
+        assert result.backend.signer_peer_instance_binding == case.binding
+        response = result.backend.sign(case.request, case.peer)
+        assert response.accepted is True
+        assert case.handshake.verify_signer_peer_handshake_response(
+            case.request, response, now_epoch=case.now).accepted is True
+        verifier = Ed25519SignatureVerifier()
+        assert verifier.verify(case.profile.expected_public_key,
+                               case.request.signing_input, response.signature)
+        assert not verifier.verify(case.profile.expected_public_key,
+                                   case.request.signing_input + " ", response.signature)
+        assert case.resolver.calls == [(ref, case.profile.signer_agent_id) for ref in
+                                       (case.profile.signing_key_ref,
+                                        case.profile.audit_mac_key_ref)] * attempt
+        previous = result.backend
+
+
+@pytest.mark.parametrize("mismatch", ["session", "generation", "profile"])
+def test_factory_handshake_rejects_different_instance(tmp_path, mismatch):
+    case = _factory_handshake_case(tmp_path)
+    assert case.direct.sign(case.request, case.peer).accepted is True
+    changes = {
+        "session": {"session_id": "different-session"},
+        "generation": {"artifact_generation_digest": "sha256:" + "9" * 64},
+        "profile": {"signer_profiles": (replace(case.binding.signer_profiles[0],
+                                               signer_profile_id="different-profile"),)},
+    }
+    factory = Wsp71EphemeralSignerBackendFactory(
+        case.profile, case.resolver,
+        signer_peer_instance_binding=replace(case.binding, **changes[mismatch]))
+    assert case.resolver.calls == []
+    result = factory()
+    assert result.ok is True and result.backend is not None
+    response = result.backend.sign(case.request, case.peer)
+    assert response.accepted is False and not response.signature
+    assert response.rejection_code == case.handshake.REJECT_ED25519_SIGNER_REQUEST_INVALID
+    assert case.resolver.calls == [(ref, case.profile.signer_agent_id) for ref in
+                                   (case.profile.signing_key_ref, case.profile.audit_mac_key_ref)]
