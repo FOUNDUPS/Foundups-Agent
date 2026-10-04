@@ -49,6 +49,21 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
     replay_store: DurableSignerSecretGrantNonceStore
     current_generation_authority: SignerCurrentGenerationRuntimeAuthority
 
+    def prepare_request(self, *, payload: Mapping[str, Any], authority_tier: str) -> SigningRequest | None:
+        try:
+            if (
+                type(self.replay_store) is not DurableSignerSecretGrantNonceStore
+                or type(self.current_generation_authority) is not SignerCurrentGenerationRuntimeAuthority
+            ):
+                return None
+            request = build_authoritative_use_lease_request(
+                _bind_replay_store(payload, self.replay_store),
+                authority_tier=authority_tier,
+            )
+            return request
+        except Exception:
+            return None
+
     def issue(
         self,
         *,
@@ -63,10 +78,11 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
             ):
                 return None
             now_epoch = int(time.time())
-            request = build_authoritative_use_lease_request(
-                _bind_replay_store(payload, self.replay_store),
-                authority_tier=authority_tier,
+            request = self.prepare_request(
+                payload=payload, authority_tier=authority_tier,
             )
+            if request is None:
+                return None
             with self.grant_provider.lease(request) as grant:
                 if not isinstance(grant, Mapping):
                     return None

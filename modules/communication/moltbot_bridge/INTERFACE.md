@@ -538,6 +538,22 @@ backlog `current_observation.effect_consensus_qualification_20261001`.
 
 Next WSP15 13/P1: Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair. No runtime activation is granted.
 
+## Canonical unsigned effect request preparation
+
+`ExternalSignerAuthoritativeUseLeaseIssuer.prepare_request(*, payload, authority_tier)`
+returns the existing `SigningRequest` or `None`. It applies the same exact owner
+types, four replay-store bindings and canonical builder used by `issue`; mismatched
+supplied bindings reject. It does not mutate the input, read the clock, acquire
+grants, call a signer, resolve generation authority or consume a nonce.
+
+Use the returned request as the target data for the existing effect-binding
+consumer. HIGH and ULTRA retain builder compatibility; pure effect correlation
+still supports HIGH/worktree only. Preparation is neither freshness validation
+nor an effect proof/permit. Later admission must verify the exact target again;
+data equality is not authentication or an immutable lease. `issue` still captures
+time before preparation and retains its existing provider/cleanup/error behavior.
+The real elevated provider handoff and resident resolver remain uncomposed.
+
 ## Effect-lease admission map — 2026-10-01
 
 Source-only trace at `71e26ea598dae90865b16bf8dfd9eb9a34117088`; installed

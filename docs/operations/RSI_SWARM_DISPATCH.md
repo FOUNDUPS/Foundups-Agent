@@ -1,3 +1,28 @@
+## Canonical effect request preparation — 2026-10-04
+
+The existing issuer now exposes `prepare_request(payload=..., authority_tier=...)`
+and `issue` reuses it after its original owner check and clock sample. This
+returns replay-bound canonical data before effect authorization; it does not
+grant freshness, signing permission or a runtime lease. Exact-type rejection,
+input preservation, Exception/interrupt handling and provider cleanup remain.
+
+Independent frozen43-case baseline:11 pass/32 missing-API failures; candidate43
+pass. Connected78 cases pass, including those43, with zero errors/skips. Two
+earlier wrapper/setup failures remain recorded. The same assertions and test
+bytes were used before and after; no new runtime module or trust domain.
+
+One local Qwen proposal supplied the method body but failed the raw format
+requirement. Coordinator fence removal/indentation preserved its AST; coordinator
+also integrated the caller. This is supervised reuse, not autonomous acceptance.
+One SDK event:948 input/124 output tokens;70.031s parent elapsed;0 paid inference
+calls; total cost unknown. No retry, promotion, grant or model-learning claim.
+
+Source/CI publication remains pending at this checkpoint. Evidence and exact
+commands: `current_observation.effect_request_preparation_20261004` in the
+canonical RSI backlog and `outputs/rsi-effect-request-preparation-20261004` on
+the execution PC. Native18/P0 remains blocked on authentic effect authority and
+producer/permit/provider/resolver composition. WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
 ## MCP runtime qualification and rejected worker proposal — 2026-10-04
 
 PR2056 is closed: merge3c10155f1ab25ffa1a16081bca70842c56e9253f,
@@ -37,7 +62,7 @@ the rejected outcome; this is measured failure, not an autonomous success claim.
 
 A Windows CI job requires all49 cases without skips using its own128MiB VHD;
 source review rejected an earlier SUBST fixture without weakening test anchors.
-Hosted execution/publication are pending. Local fixtures use the existing
+PR2057 is merged and exact-main CI/CodeQL succeeded; both hosted runs passed49/49. Local fixtures use the existing
 bounded child/Job owner and a copied paired environment; no shared runtime was
 upgraded. PID checks are sampled, the singleton lock is a fixture seam, and
 process reaping does not establish graceful ASGI shutdown or an atomic lease.
@@ -47,13 +72,13 @@ Hosted attempt1 at9f74a627 then failed its two live observer calls at10s while
 uses numeric netstat/PID snapshots with a15s startup window; no production or
 prior48 test-function change. One additional parser-negative case had a test
 input typo, preserved as46pass/1fail, then corrected. Final local coverage is
-47 nonlistener +2 live =49 distinct criteria. Hosted replacement is pending.
+47 nonlistener +2 live =49 distinct criteria. Hosted replacement and exact-main each passed49 cases with zero skips/failures/errors.
 
 Full commands, hashes, XML and failed attempts live in
 `outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC. Current
 status and WSP15 queue: `current_observation.mcp_runtime_qualification_20261004`
-in the canonical backlog. Close exact-source publication and owned cleanup,
-then re-observe. Native authority and learned variation retention remain open.
+in the canonical backlog. Owned lane/branches are retired with recovery preserved
+and shared state unchanged. PR1525/1526 are closed as superseded. Re-observe. Native authority and learned variation retention remain open.
 
 ## Retained local repair and remaining admission gate — 2026-10-04
 

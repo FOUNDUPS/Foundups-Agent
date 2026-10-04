@@ -364,6 +364,9 @@ unavailable.
 
 ## External signer exact-effect authority
 
+The issuer exposes clock-free `prepare_request` for exact canonical target
+data before authorization. See INTERFACE; this API issues no permission or lease.
+
 The bridge now contains the smallest reusable authoritative-use lease primitive.
 It extends the existing E0 secret-grant and isolated signer socket instead of
 adding a signer or trust store. A strict signed request can be rehydrated into

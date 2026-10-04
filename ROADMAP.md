@@ -12,14 +12,13 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** Paired MCP runtime qualification now passes49
-local criteria, including two real owned HTTP lifecycles. A local Qwen cleanup
-proposal was rejected; the coordinator repaired the demonstrated defects.
-The record preserves that failed worker attempt and its767/59 token counts.
-PR2056 is merged/main-verified with its owned lane retired. This new runtime
-slice awaits publication and hosted CI; shared environments remain unchanged.
-Native autonomous RSI is still blocked on the effect-authority contract.
-See the [current qualification](docs/operations/RSI_SWARM_DISPATCH.md#mcp-runtime-qualification-and-rejected-worker-proposal--2026-10-04).
+**2026-10-04 current layer:** Canonical effect-request preparation is locally
+verified:43 frozen cases pass and78 connected cases pass. A local Qwen method
+required coordinator formatting recovery and caller integration; its raw format
+failed. Publication/main verification remains pending. PR2057's paired MCP work
+is merged/main-verified (49/49), its lane retired and PR1525/1526 superseded.
+Native autonomous RSI still requires authentic effect authority and composition.
+See the [current layer](docs/operations/RSI_SWARM_DISPATCH.md#canonical-effect-request-preparation--2026-10-04).
 
 **2026-10-04 retained-source checkpoint:** PR2055 is merged/main-verified and its three
 owned lanes are retired. One local worker repair now has verified retained

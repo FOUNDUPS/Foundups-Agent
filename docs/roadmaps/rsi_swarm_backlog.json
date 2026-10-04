@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.mcp_runtime_qualification_20261004",
-    "base_commit": "3c10155f1ab25ffa1a16081bca70842c56e9253f",
-    "selected_action": "Extend existing MCP launcher and three suites; requirements/launcher paired pins; selected-venv startup and post-spawn ownership cleanup; Windows CI coverage",
-    "status": "local_qualification_complete_publication_pending",
+    "observation_path": "current_observation.effect_request_preparation_20261004",
+    "base_commit": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
+    "selected_action": "Existing external authoritative-use issuer canonical preparation and caller reuse; no new runtime owner.",
+    "status": "locally_verified_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
       "deferability": 4,
-      "impact": 4,
-      "total": 14,
+      "impact": 3,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.retained_source_closure_20261004",
-    "next_action": "Finish independent source review and exact-head CI/publication, verify main, retire only owned lane, then re-observe WSP15/WSP97. No automatic model retry or runtime activation."
+    "previous_observation": "current_observation.mcp_runtime_qualification_20261004",
+    "next_action": "Finish independent review, generated bindings, exact-head CI/publication and owned closure; re-observe WSP15/WSP97. No native activation."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28599,7 +28599,7 @@
     },
     "mcp_runtime_qualification_20261004": {
       "base": "3c10155f1ab25ffa1a16081bca70842c56e9253f",
-      "state": "local_qualification_complete_publication_pending",
+      "state": "merged_main_verified_owned_lane_closed",
       "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
       "wsp15": {
         "complexity": 2,
@@ -28677,14 +28677,14 @@
         "ordering": "Current tests and launch/server/readiness owners first, then direct lock owner and existing lifecycle helpers; historical paired result used only as provenance.",
         "noise": "Holo returned unrelated protocol hits; exact source fallback used.",
         "staleness": "Holo authority/root heads differ and freshnessUNKNOWN/gaptrue; not accepted as current authority. Source is pinned3c10155.",
-        "missing": "memory/README.md absent; semantic freshnessUNKNOWN/gaptrue. Current exact fixture/source reviewed and locally qualified; hosted runtime remains unverified.",
+        "missing": "memory/README.md absent; semantic freshness UNKNOWN/gaptrue. Exact source, local and hosted runtime now separately qualified.",
         "reuse": "Three existing suites, existing launch path and lifecycle patterns; no new runtime module, benchmark or orchestration system."
       },
       "limitations": [
         "Selected venv normal site hooks are restored; no full runtime security closure or shared environment activation.",
         "Live fixture bypasses real singleton lock with owned mock and samples PID/port ownership; no atomic lease, graceful ASGI shutdown or general concurrency proof.",
         "One failed worker proposal; coordinator fixes receive no worker success credit.",
-        "Hosted CI and publication pending; production RSI remains incomplete."
+        "PR2057 and exact-main CI/CodeQL verified; production RSI remains incomplete."
       ],
       "evidence_bindings": {
         "lifecycle-test-freeze.json": "7bf8fa2181bc9cbabc515fe162720950703ef6cfb9c235b702005ce1c3d5c37d",
@@ -28710,7 +28710,7 @@
         "live-v4/receipt.json": "62caa3a57b8674756025ed2e084950a37abf006882f0e68a9598ef881962005f",
         "live-v4/tests.xml": "7851733202fff8a03956bf5f2709dea84093a7df9857fad5b244590ea0772af3"
       },
-      "next_action": "Finish independent source review and exact-head CI/publication, verify main, retire only owned lane, then re-observe WSP15/WSP97. No automatic model retry or runtime activation.",
+      "next_action": "Closed. Fresh WSP15/WSP97 selected canonical issuer request preparation as an executable source prerequisite; native authority remains unresolved.",
       "ranked_queue": [
         {
           "task": "native autonomous RSI admission",
@@ -28728,7 +28728,7 @@
           "task": "demonstrated MCP cleanup failure and paired runtime qualification",
           "score": 14,
           "priority": "P1",
-          "state": "selected_local_complete_publication_pending"
+          "state": "closed_verified_on_main"
         },
         {
           "task": "new local worker capability comparison",
@@ -28756,7 +28756,178 @@
         "local_final_passed": 49,
         "production_changed": false,
         "prior48_test_function_asts_unchanged": true,
-        "hosted_replacement_status": "pending"
+        "hosted_replacement_status": "pr_and_main_49_passed_zero_failed_errors_skips"
+      },
+      "publication": {
+        "pr": 2057,
+        "head": "90a744bf68022143ec808bc5421543e6ae2d6f80",
+        "merge": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
+        "tree": "7b8674ed083a2da9640d734f2b845e8243289f29",
+        "reviewed_merge_tree_equal": true,
+        "pr_checks_passed": 11,
+        "main_ci": {
+          "conclusion": "success",
+          "headSha": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
+          "name": "CI",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/37199343684",
+          "workflowName": "CI"
+        },
+        "main_codeql": {
+          "conclusion": "success",
+          "headSha": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
+          "name": "Push on main",
+          "status": "completed",
+          "url": "https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/37199343795",
+          "workflowName": "CodeQL"
+        },
+        "pr_and_main_counts": {
+          "windows_mcp": 49,
+          "other_suites": [
+            217,
+            67,
+            452
+          ]
+        },
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "recovery_bundle_sha256": "df1b3236e6e89fde72ec01db980f6d4a5b2ccb073e376dae66a70c521aa7045c",
+        "shared_status_unchanged_during_cleanup": true,
+        "closure_receipt_sha256": "5d5aa567a06010488a57e6228f1188472a484b12fab85ab68facc13235ff8d37",
+        "superseded_dependency_prs_closed": [
+          1525,
+          1526
+        ]
+      }
+    },
+    "effect_request_preparation_20261004": {
+      "base": "6a4305d6bad3e2ace5aa14e19193452daf3a402f",
+      "state": "locally_verified_publication_pending",
+      "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
+      "scope": "Existing external authoritative-use issuer canonical preparation and caller reuse; no new runtime owner.",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "measurements": {
+        "baseline-v3": {
+          "selected": 43,
+          "passed": 11,
+          "failed": 32,
+          "errors": 0,
+          "skipped": 0,
+          "fixture_sqlite_open_attempts": 344
+        },
+        "candidate": {
+          "selected": 43,
+          "passed": 43,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0,
+          "fixture_sqlite_open_attempts": 344
+        },
+        "connected": {
+          "selected": 78,
+          "passed": 78,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0,
+          "fixture_sqlite_open_attempts": 358
+        }
+      },
+      "signal_class": "execution_feedback",
+      "case_semantics": "43 frozen acceptance cases; connected78 includes these43, not121 independent cases.32 baseline failures are absent-API observations, not32 discovered production bugs.",
+      "setup_failures": {
+        "first": "0collected/2errors: Windows environment omitted",
+        "second": "43fixture failures: disposable SQLite setup forbidden"
+      },
+      "criteria_changed_after_freeze": false,
+      "worker": {
+        "calls": 1,
+        "provider": "local llama_cpp0.3.20",
+        "model": "qwen2.5-coder-7b-instruct-q4_k_m",
+        "prompt_tokens": 948,
+        "completion_tokens": 124,
+        "total_tokens": 1072,
+        "token_provenance": "one observed SDK completion event; not independent hardware counters",
+        "parent_seconds": 70.031,
+        "paid_inference_calls": 0,
+        "compute_cost_usd": null,
+        "raw_format_accepted": false,
+        "automatic_retry": false,
+        "automatically_applied": false,
+        "semantic_method_contribution": true,
+        "manual_format_recovery": true,
+        "coordinator_contribution": "scope, instructions, harness repair, exact fence removal/class indentation, issue integration, review/publication",
+        "worker_method_ast_unchanged": true
+      },
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-effect-request-preparation-20261004",
+      "source_after_sha256": "961ea6a8addace2698d4c04449c4782c9a15f4dccb8908a3b61860d02f7ba060",
+      "native_effect_admission": false,
+      "retained_gain": null,
+      "model_learning_gain": null,
+      "retrieval": {
+        "noise": "Named source owners and current contracts used; historical roadmap lines are not fresh runtime evidence.",
+        "ordering": "WSP00 gate, fresh main, WSP15/97, governed Holo query, exact source/module contracts, independent acceptance.",
+        "missing": "Module requirements.txt and memory/README.md are absent. Holo semantic coverage unavailable; no requirement to invent replacements in this slice.",
+        "staleness": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; ok=false, freshness=UNKNOWN, index_gap_detected=true. No query-side indexing/mutation. Exact pinned Git/source fallback only; no semantic authority claim.",
+        "navigation": "NAVIGATION.py lacks these narrow issuer/effect symbols; exact owner paths verified from source and INTERFACE.",
+        "duplication": "One source method extraction; reuse existing tests/fixtures and bounded process owner. Existing Holo maintenance owns freshness repair."
+      },
+      "evidence_bindings": {
+        "test-freeze.json": "c1a6103d87978aab89e0dee3bdf614c03751557c28e96cb07cdc2394fb70e58b",
+        "test-selection.json": "63782d7e7815be863ade21eff95dfcee300623291dd27be84046a7c40e716324",
+        "baseline-observation.json": "47d3514ef3da28a980b7f3389d0ec5b31f134802e1c35645d620820bca35eb67",
+        "coordinator-integration.json": "3eaf1fab33a20d7a4a69c3f4d1c827765e69b505433d03083041efeb59cb74f1",
+        "baseline-v3/evidence/receipt.json": "bfecde9bb4f8bbb7fac5038aaeeff753c8cc1c70466c897fc46538b6efb0bbe9",
+        "baseline-v3/evidence/results.xml": "9f469a98cb5191abca84a4e476accbf0a4b92b5d4d2ce63b40c59a4eb9b87f3f",
+        "candidate/evidence/receipt.json": "b7f3d57c88885e57851dcd475f18d8822df436f1add961001c6d422335880b6e",
+        "candidate/evidence/results.xml": "c058762db3e479ff0b40c675ce5d3f630f716c363153217317054f0725eb592e",
+        "connected/evidence/receipt.json": "b9a4116491a2bf771a4faeb36a0eaedb102ab72db183c9c6c793e7d375f2efcd",
+        "connected/evidence/results.xml": "0a934f248bd8e98351495635a048769e2388abc3b6007faaf84d532d41a2b4cc",
+        "worker-preparation/native_worker-result.json": "528ecc899fa0917482faaf0634e546cec35954fe1ec47c24e44f4fe2b9d8412f",
+        "worker-preparation/native_worker-parent.json": "57bea1579beb2fb76758c5c509db5e9b1e84dbf3efbdc65050ecff82f6e2cac1",
+        "worker-preparation/result-review.json": "4ee9196ab00a72ef8e120c3f9fe16645d4e74811fc14499d643f99bf01a4ee5d",
+        "test-driver-sqlite-review.json": "2c9471a63904c36db1005cfda0f7ab9270c1de650409272c78d661b791e4668a",
+        "source-and-local-review.json": "a2608dc4809759fbb87d610e866192bd4726755797b9d8b9ad34c69dc6ba866b",
+        "ci-selection-binding.json": "9c8da8f770cfc3375c53791df26ba8797a5d0f60f6410b993b7a51976c11ade9",
+        "worker-preparation/benchmark-receipt.json": "6f069b22fa98487e1f417944776b7f0d62336e676eabf41d8de24fa5d73a5a1a",
+        "worker-preparation/benchmark-provenance.json": "0b812c11c641c040a6a0a9463d9c45bbb115866dd7b193f07109e4f3526c0a79"
+      },
+      "next_action": "Finish full publication review, exact-head CI/publication and owned closure; re-observe WSP15/WSP97. No native activation.",
+      "remaining_gate": "Effect-specific trusted producer/proof/permit and independent provider/resolver composition; preparation returns data only.",
+      "limitations": [
+        "Synthetic local fixtures and inert provider/rehydration; not production credentials or admission.",
+        "Private SQLite fixture setup is real; recorded opens are audit attempts, not connection success counters.",
+        "Python guards and Windows resource bounds are not an OS filesystem/network sandbox.",
+        "Raw output fails format; coordinator recovery does not retroactively make that benchmark pass.",
+        "No independently retained new benefit or whole-system completion claim.",
+        "The existing generic proposal adapter strips outer whitespace. Required first-line class indentation is therefore an incompatible packet requirement; this is coordinator/adapter contract debt, not evidence of model inability. Markdown fences independently violated the frozen format contract."
+      ],
+      "independent_review": {
+        "state": "approved",
+        "source_and_saved_test_evidence_reviewed": true,
+        "reviewer_executed_tests": false,
+        "reviewer_also_authored_frozen_tests": true
+      },
+      "benchmark": {
+        "owner": "modules/ai_intelligence/ai_gateway/src/model_combination_benchmark_harness.py",
+        "samples": 1,
+        "accepted": 0,
+        "decision": "reject",
+        "rehydration_equal": true,
+        "new_model_calls_for_recording": 0,
+        "manual_recovery_does_not_change_decision": true
+      },
+      "ci_selection": {
+        "existing_guarded_owner": true,
+        "distinct_cases": 495,
+        "audit_ast_matches_connected_run": true,
+        "remote_result": null
       }
     }
   }

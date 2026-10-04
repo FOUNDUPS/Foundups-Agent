@@ -224,7 +224,20 @@ jobs:
                   deny(event)
               if event=='import' and str(args[0]).split('.')[0] in ('openai','anthropic','requests','httpx','llama_cpp','torch','transformers','dotenv','psycopg','psycopg2'):
                   deny(event,'provider/model import')
-              if event=='sqlite3.connect': deny(event,'database access not selected')
+              if event=='sqlite3.connect':
+                  try:
+                      value=args[0]
+                      if type(value) not in (str,type(TMP)) or str(value).startswith(('file:',':memory:','\\\\')):
+                          raise ValueError('unsupported_database_form')
+                      target=observer._database_path(value,TMP/'pytest')
+                      parts=target.relative_to(TMP/'pytest').parts
+                      if Path(value)!=target or not Path(value).is_absolute(): raise ValueError('noncanonical_path')
+                      if len(parts)!=3 or parts[1:]!=('high-water','authority.sqlite3'):
+                          raise ValueError('unselected_fixture_database')
+                      if len(sqlite_opens)>=1024: raise ValueError('fixture_connection_budget')
+                  except (TypeError,ValueError,OSError):
+                      deny('sqlite3.connect','unqualified_fixture_database')
+                  sqlite_opens.append(str(target))
               if event=='open' and isinstance(args[0],(str,bytes)):
                   p=observer._OPEN_TARGET.get() or norm(args[0]); mode=args[1]; flags=args[2]
                   write=(isinstance(mode,str) and any(c in mode for c in 'wax+')) or bool(flags & (os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_TRUNC|os.O_APPEND))
@@ -727,6 +740,52 @@ jobs:
               'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_quorum_composition.py::test_current_quorum_shape_and_mode_rejected_before_owner[neither]',
               'modules/communication/moltbot_bridge/tests/test_reddog_reviewer_quorum_composition.py::test_current_runtime_snapshot_ninth_call_rejected_before_resolver',
           ]
+          # Frozen canonical request preparation and issuer compatibility cases.
+          nodes += [
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_canonical_without_effects[missing-HIGH]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_canonical_without_effects[missing-ULTRA]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_canonical_without_effects[equal-HIGH]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_canonical_without_effects[equal-ULTRA]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_canonical_without_effects[mapping-HIGH]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_canonical_without_effects[mapping-ULTRA]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_each_replay_mismatch[replay_store_binding_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_each_replay_mismatch[replay_store_id]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_each_replay_mismatch[replay_store_durability_receipt_id]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_each_replay_mismatch[replay_store_instance_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[none]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[missing]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[extra]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[boolean_generation]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[effect_digest]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[LOW]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[unknown]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[null_tier]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[boolean_tier]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_rejects_malformed_request[list_tier]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_and_issue_reject_wrong_owner_types[store_object]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_and_issue_reject_wrong_owner_types[store_subclass]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_and_issue_reject_wrong_owner_types[authority_object]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_and_issue_reject_wrong_owner_types[authority_subclass]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_exception_boundary_and_no_clock[ordinary]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepare_exception_boundary_and_no_clock[interrupt]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepared_request_connects_to_effect_binding[valid]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepared_request_connects_to_effect_binding[stale_replay]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepared_request_connects_to_effect_binding[stale_effect]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepared_request_connects_to_effect_binding[ULTRA]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py::test_prepared_request_connects_to_effect_binding[live_enqueue]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_reuses_preparation_with_original_clock_and_identity',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[clock]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[construction]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[lease]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[enter]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[grant]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[sign]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[rehydrate]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_fail_closed_order_and_cleanup[exit]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_invalid_payload_still_samples_clock_before_construction',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_interrupt_and_context_suppression[False]',
+              'modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py::test_issue_preserves_interrupt_and_context_suppression[True]',
+          ]
           args=nodes+['-c',str(config),'--rootdir='+str(R),'--noconftest','--import-mode=importlib',
               '-p','no:cacheprovider','-v','--tb=short','--basetemp='+str(TMP/'pytest'),
               '--junitxml='+str(D/'results.xml')]
@@ -740,7 +799,7 @@ jobs:
           exact=len(cases)==len(nodes) and {x.get('name') for x in cases}=={n.split('::',1)[1] for n in nodes}
           unexpected=[x for x in blocked if x['event']!='os.symlink']
           receipt={'returncode':status,'counts':counts,'exact_cases':exact,'hashes_stable':before==after,
-              'blocked_events':blocked,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
+              'blocked_events':blocked,'fixture_sqlite_opens':sqlite_opens,'observed_source_read_bindings':{p:after[p] for p in sorted(repo_reads)},
               'limits':['Python audit constraints, not OS isolation.','Domain, binding/context, real test-only signatures and structural controls; no authenticated resolver provenance, issued effect lease or RSI benefit.']}
           (D/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({k:receipt[k] for k in ('counts','exact_cases','hashes_stable')}))
