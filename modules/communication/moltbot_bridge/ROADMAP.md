@@ -1,3 +1,10 @@
+## Offline scanner prerequisite — 2026-10-04
+
+14/P1 existing-owner repair passes12 focused and64 connected cases locally (3 skips).
+Four fixed child settings prevent known dotenv/cost-map/bytecode import side effects.
+Scanner admission and verdict checks remain; this is not OS network isolation.
+Next: exact-source publication, then the bounded WRE Skillz canary in the canonical RSI backlog.
+
 ## Current-generation effect-review quorum — 2026-10-04
 
 Selected14/P1 (C3/I4/D4/Impact3), extending the existing leased owner and facade.

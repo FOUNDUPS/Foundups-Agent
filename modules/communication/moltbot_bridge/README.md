@@ -1071,7 +1071,12 @@ workspace. Hard process termination can leave isolated temporary files; this
 change adds no crash scavenger or persistent per-scan archive.
 Missing/malformed evidence, manifest failure, timeout, unavailable required
 scanner or workspace/publication error fails closed. Raw scanner streams are
-omitted and its environment excludes credentials. `SkillScanResult` is supply-chain
+omitted and its environment excludes credentials. The child always sets
+`PYTHON_DOTENV_DISABLED=1`, `LITELLM_MODE=PRODUCTION`,
+`LITELLM_LOCAL_MODEL_COST_MAP=True` and `PYTHONDONTWRITEBYTECODE=1`;
+these suppress known import-time dotenv/cost-map/bytecode side effects in the
+installed scanner dependencies, without promising OS-level isolation.
+`SkillScanResult` is supply-chain
 evidence only; it grants no execution, effect, evaluation or promotion authority.
 
 Each call returns its own Boolean verdict; keyword-only literal `details=True` returns its local `(allowed, message)` pair. The process caller validates Boolean/text fields and uses that explanation for logs/actions/responses; malformed results raise before downstream preflight/execution. REQUIRED/ENFORCED/MAX_SEVERITY drift rejects; diagnostic fields remain latest state and `force`, TTL and ALWAYS remain compatible.

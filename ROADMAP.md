@@ -12,16 +12,18 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** PR2046, PR2047, PR2048 and PR2050 are merged/main-verified
-and their owned lanes retired. PR2050 at
-`c563304a5` passed all ten PR checks, exact-main CI/CodeQL and452 guarded cases.
-The13/P1 slice repairs continuity metadata breaking existing local proposal
-and reflection prompts. Native-chat local Qwen supplied the two expressions;
-raw mode failed. Frozen baseline8 failures/27 passes becomes35/35;173 connected
-cases pass. Publication and later retained use remain pending. Native18/P0 remains blocked on authentic authority/runtime-use and
-execution integration. See [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#local-continuity-proposal-canary--2026-10-04)
-and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). This local canary
-must not be described as native Hermes/OpenClaw admission or production RSI.
+**2026-10-04 current layer:** PR2051 is merged/main-verified at `6ba78fd26731e49eaca02baf06cb12dd7130b565`.
+All ten PR checks and main CI37182598395/CodeQL37182598226 passed; PR/main
+each passed173 WRE and452 separate guarded cases. Owned lanes retired.
+A fresh retained raw call returned only “Do not execute anything.” Availability
+improved, but independent frozen semantic usefulness failed. No retry or
+retained RSI benefit is claimed. Next: one bounded public WRE production
+Skillz proposal canary, after this offline prerequisite clears. Preserve the
+0.90 structural threshold and all scanner gates; native18/P0 remains blocked.
+
+Selected14/P1: repair the existing scanner child offline environment before the
+13/P1 WRE Skillz canary. See [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#offline-scanner-environment--2026-10-04)
+and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 
 **2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 

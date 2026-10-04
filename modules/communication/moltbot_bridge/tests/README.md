@@ -1,3 +1,10 @@
+## Offline scanner environment — 2026-10-04
+
+Four frozen environment cases plus eight prior controls: corrected baseline4 fail/8 pass; candidate12 pass.
+Connected scanner/manifest/admission run:64 pass,3 skip,83 deselected. CI runs the same selection.
+The old missing-scanner mock now covers the full locator; initial accidental scanner launch is preserved with unknown external effects.
+See [module change record](../ModLog.md#offline-scanner-environment--2026-10-04) and canonical backlog for exact receipts.
+
 ## Current-generation quorum acceptance — 2026-10-04
 
 Independent author froze48 cases before production edits. Baseline:47 failures,

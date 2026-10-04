@@ -27968,7 +27968,7 @@
     },
     "local_continuity_proposal_20261004": {
       "base": "c563304a5451245df41cadc661a3c64d447fe2f7",
-      "state": "source_repaired_local_validation_complete_publication_pending",
+      "state": "merged_main_verified_retained_available_but_semantically_insufficient",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -27992,7 +27992,7 @@
       "native_admission": false,
       "retained_rsi_gain": null,
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-local-continuity-proposal-20261004",
-      "next_gate": "Frozen criteria withheld; local proposal alone never proves effect or production admission.",
+      "next_gate": "Offline scanner repair then frozen production Skillz proposal canary. No raw retry.",
       "validation": {
         "frozen_passed": 35,
         "connected_passed": 173,
@@ -28009,7 +28009,105 @@
         "coordinator_cost": null,
         "metadata_probe_loads": 1,
         "production_effect_evidence": false
+      },
+      "closure": {
+        "pr": 2051,
+        "base": "c563304a5451245df41cadc661a3c64d447fe2f7",
+        "head": "999c1639ce98af580f7b620028df0eef1bf7b9ee",
+        "merge": "6ba78fd26731e49eaca02baf06cb12dd7130b565",
+        "merge_tree_equals_reviewed_head": true,
+        "reviewed_files": 17,
+        "pr_checks_passed": 10,
+        "pr_ci": 37182193473,
+        "pr_codeql": 37182192162,
+        "main_ci": 37182598395,
+        "main_codeql": 37182598226,
+        "all_runs": "success",
+        "pr_and_main_guarded_cases_each": 452,
+        "pr_and_main_wre_cases_each": 173,
+        "independent_review_sha256": "07258f24772c70c16cb34860154b59656d893f7b16581a6df67aa4158e5a493c",
+        "owned_publication_worktree_removed": true,
+        "owned_publication_local_and_remote_branches_removed": true,
+        "ignored_runtime_files_preserved": 4,
+        "recovery_bundle": "pr2051-recovery.bundle",
+        "retained_observation_worktree": "O:/Foundups-Agent-worktrees/rsi-retained-observation-20261004",
+        "native_admission": false,
+        "retained_rsi_gain": null,
+        "retained_result": {
+          "classification": "available_but_semantically_insufficient",
+          "availability_improvement": true,
+          "semantic_usefulness": false,
+          "full_rsi_success": false,
+          "independent_review_sha256": "e411979c30b6df2b13b8c08a4b5aef6496f8090e11243bb69583920a48a3fe3b"
+        },
+        "retained_observation_worktree_removed": true,
+        "retained_observation_runtime_files_preserved": 4
       }
+    },
+    "offline_skill_scanner_20261004": {
+      "base": "6ba78fd26731e49eaca02baf06cb12dd7130b565",
+      "state": "local_repair_validated_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "execution_plane": "Coordinator-supervised local Qwen proposal; not native WRE/effect ticket admission",
+      "reused_owner": "modules/communication/moltbot_bridge/src/skill_safety_guard.py::_scanner_environment",
+      "initial_baseline": {
+        "failed": 5,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 12,
+        "passed": 7
+      },
+      "corrected_baseline": {
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 12,
+        "passed": 8
+      },
+      "focused": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 12,
+        "passed": 12
+      },
+      "connected": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 3,
+        "cases": 67,
+        "passed": 64
+      },
+      "selections_overlap": true,
+      "worker": {
+        "calls": 1,
+        "mode": "native_chat",
+        "elapsed_seconds": 25.25,
+        "model": "qwen2.5-coder-7b-instruct-q4_k_m",
+        "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "runtime": "llama_cpp 0.3.20",
+        "max_generated_tokens": 512,
+        "tokens": null,
+        "paid_inference_calls": 0,
+        "coordinator_cost": null,
+        "automatic_retry": false,
+        "autonomous_discovery": false,
+        "proposal": "Four exact fixed entries accepted after independent criteria freeze"
+      },
+      "unexpected_initial_scanner_invocations": 1,
+      "initial_scanner_network_effects": null,
+      "test_fixture_reconciliation": "Mock complete locator instead of PATH only; preserve missing-scanner assertions and initial failed run.",
+      "native_admission": false,
+      "retained_rsi_gain": null,
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-offline-skill-scanner-20261004",
+      "next_gate": "Exact-head review/PR/main closure, then one frozen bounded production Skillz proposal canary with original 0.90 structural threshold."
     }
   }
 }
