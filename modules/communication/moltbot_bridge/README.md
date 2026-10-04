@@ -1,3 +1,12 @@
+## Effect-review quorum — 2026-10-04
+
+The existing consensus verifier now exposes `verify_effect_reviewer_decisions`
+for a complete bounded set. See [the contract](INTERFACE.md#bounded-effect-review-quorum-api--2026-10-04).
+It checks all reviews, quorum, roles and independence relative to supplied trusted
+resolvers; it does not issue authority or authenticate those resolvers. The
+single-review API and delegated two-request domain remain unchanged. Earlier
+one-review checkpoints below retain their historical scope.
+
 ## Connected current reviewer verification — 2026-10-01
 
 The [current reviewer API](INTERFACE.md#connected-current-reviewer-verification-api--2026-10-01)

@@ -27760,7 +27760,7 @@
     },
     "queue_default_repair_20261004": {
       "base": "a9d2b07a3b4f4214df43432974054528a54b6ea7",
-      "state": "source_repaired_local_validation_complete_publication_pending",
+      "state": "merged_main_verified_owned_lane_closed",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -27798,7 +27798,7 @@
         "candidate_fixed_cases_pass": 12,
         "original_unit_cases_pass": 3,
         "total_candidate_cases": 15,
-        "independent_review": "pending_exact_patch",
+        "independent_review": "passed; exact closure-receipt.json and independent-review.json in local_evidence",
         "real_dispatch_executed": false
       },
       "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-queue-default-20261004",
@@ -27813,7 +27813,82 @@
         "native_admission_parent_score": 18,
         "native_admission": false,
         "rule": "Resolve implementation semantics from existing authenticated owners; no arbitrary callback, widened delegated permit or fabricated live evidence."
+      },
+      "publication": {
+        "pr": 2047,
+        "head": "79cec3cfa5c3487b72bd28d35db002693aee045a",
+        "merge": "f1c1831737879127782ec32d8a04c1ba872c4ac6",
+        "pr_checks_passed": 10,
+        "main_ci": 37176313703,
+        "main_codeql": 37176313588,
+        "main_status": "success",
+        "merge_tree_equals_reviewed_head": true,
+        "post_merge_default_queue_cases_passed": 2,
+        "owned_lane": "retired_with_verified_bundle"
       }
+    },
+    "effect_review_quorum_20261004": {
+      "base": "f1c1831737879127782ec32d8a04c1ba872c4ac6",
+      "state": "locally_validated_publication_pending",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 14,
+        "priority": "P1"
+      },
+      "selection_basis": "Native admission18/P0 blocked. Reuse existing review/context/policy owners to qualify complete bounded review sets before current-owner and sovereign-effect integration. No new runtime module or authority.",
+      "retrieval": {
+        "mode": "governed lexical plus must-include direct source",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "quality": "Semantic authority/head mismatch remains; lexical relevance repaired with source/tests. Missing module memory/README.md and requirements.txt recorded without unrelated creation. Historical pending checkpoints reconciled."
+      },
+      "validation": {
+        "baseline_cases": 63,
+        "baseline_expected_missing_api_failures": 63,
+        "candidate_cases_passed": 63,
+        "connected_cases_passed": 315,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "counts_overlap": true,
+        "prior_attempts": [
+          {
+            "passed": 208,
+            "structural_failures": 2
+          },
+          {
+            "passed": 301,
+            "split_import_failures": 3
+          }
+        ],
+        "test_oracles_changed": false,
+        "source_review": "independent_no_blocker",
+        "hosted": "pending",
+        "integrity_cases_passed": 8,
+        "node_compatibility_contract": "passed",
+        "local_guarded_attempts": [
+          {
+            "interpreter": "isolated default Python",
+            "collection_errors": 3,
+            "reason": "missing jsonschema"
+          },
+          {
+            "interpreter": "qualified Windows venv",
+            "collection_errors": 3,
+            "reason": "Windows asyncio import failed: base_events undefined"
+          }
+        ]
+      },
+      "limits": [
+        "Supplied resolver evidence is conditional, not authenticated runtime provenance.",
+        "8192-byte canonical envelope is accepted-wire size, not hard peak memory.",
+        "No sovereign authorization, effect permit, native admission or retained RSI benefit."
+      ],
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-review-quorum-20261004",
+      "next_gate": "After publication/closure re-observe: current-generation quorum composition, then authentic effect-specific sovereign proof/provider handoff; no synthetic evidence or delegated-domain widening."
     }
   }
 }
