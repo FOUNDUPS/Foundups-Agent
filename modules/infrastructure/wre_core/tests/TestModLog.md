@@ -12,9 +12,15 @@ changed during execution; no exact-source qualification is claimed. Independent
 review's shape/digest/metaclass controls reproduced37fail/2pass before repair,
 then39pass. Original75 still pass; stable connected306pass/two Windows link skips
 (308total, overlapping selections). Legacy fixture migration preserves55 assertion
-ASTs and passes23 master cases. Actual scanner/runtime observation has not run. Tests use scanner
-substitution, two owned Git producer cases and two private SQLite reopen cases;
-no model, operational database, effect authority or learning proof is inferred.
+ASTs and passes23 master cases. These unit tests use scanner substitution,
+two owned Git producer cases and two private SQLite reopen cases. Separate
+actual PC observations preserve scanner rejection, materialization rejection
+with one rejected event, then completed155-shard-per-side projection with one
+projected event. All have zero outcome/variation rows and no watched agent
+generation. Scanner classification is local ML and is not covered by that
+agent-call counter. Four fixed compatibility controls pass in isolated2.2.0;
+short TEMP follows a measured WinError206 probe. Source PR2061 hosted331 WRE
+and675 separate effect-boundary cases pass. No fitness/native authority proof.
 Evidence: `outputs/rsi-test-scope-telemetry-20261004`; original criteria retained.
 
 ## Retained source regression and rollback — 2026-10-04

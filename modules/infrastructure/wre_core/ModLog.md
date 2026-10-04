@@ -9,7 +9,12 @@
   the unsuccessful source-drifted first run is preserved historically.
 - Migrated generic effect fixtures to an inert name, preserving55 assertions;
   all23 master cases pass. Manifest8 and RedDog fast15 pass separately.
-  Actual scanner/runtime observation remains pending.
+  Actual scanner/producer/private persistence now complete:155 shards per
+  side, one projected event, zero outcomes/variations and false effect success.
+  Two earlier failures are preserved. Isolated Cisco2.2.0 passes four fixed
+  compatibility controls; short owned TEMP resolves the demonstrated Windows
+  path-length barrier without global changes. PR2061 source checks passed;
+  documentation/publication closure remains open.
 - One local Qwen helper proposal was rejected and not applied; the coordinator
   implemented the candidate. No worker repair credit or learning gain.
 - Reconciled PR2060 exact-main/owned-lane closure. Selected 15/P1; native 18/P0

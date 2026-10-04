@@ -16,8 +16,11 @@ Status: canonical **system planning and completion-gate authority** in this repo
 its owned lane retired. Selected 15/P1 now qualifies the existing named WRE
 registry-scope TELEMETRY connection. The unchanged75 cases and39 additive
 controls pass; stable connected validation has306 passes/two Windows link skips.
-Actual scanner/runtime observation and exact publication remain open. The
-unsuccessful initial connected run is preserved as historical evidence.
+The real admitted planner now projects155 shards per revision and persists
+one truthful observation. Two earlier runtime failures led to an isolated
+scanner qualification and shorter owned TEMP; all outcomes remain preserved.
+Exact publication/main closure remains open in PR2061. The unsuccessful initial
+connected run is also retained as historical evidence.
 One local helper proposal was rejected, not applied. Native unattended 18/P0,
 effect permits/provider wiring and compatible authority deployment remain open.
 See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint)

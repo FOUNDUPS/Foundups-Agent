@@ -1,7 +1,7 @@
 ## Named registry-scope telemetry — P14 contract
 
-Candidate source contract; final qualification and actual scanner/runtime
-observation are pending. Existing `auto_test_registry_audit` v2.3 supports the
+Source-qualified contract with independently reviewed actual scanner,
+projection and private-persistence observation; publication closure is pending. Existing `auto_test_registry_audit` v2.3 supports the
 named `operation="project_scope"` with a `request` containing `base_sha`,
 `head_sha`, `expected_changed_paths` and `projection_input`. Only existing
 reserved `parent_continuity_context` is additionally accepted. Caller roots,
@@ -31,7 +31,10 @@ The [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-s
 qualification evidence. Shapes/digest types and identity-only builtin traversal
 are covered by39 additive controls; original75 criteria remain unchanged.
 Stable connected validation passes306 with two Windows link skips. The initial
-source-drifted run remains historical; runtime observation is a separate gate.
+source-drifted run remains historical. The separate PC observation produces
+a155-shard-per-side projection and persists one projected event, with false effect success.
+Two earlier rejected attempts remain recorded; isolated scanner2.2.0 and short
+owned TEMP qualify this environment, not native authority or automatic updates.
 
 ## Prototype CodeAct file containment — 2026-10-04
 

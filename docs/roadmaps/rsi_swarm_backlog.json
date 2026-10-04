@@ -1884,7 +1884,7 @@
     "observation_path": "current_observation.test_scope_telemetry_20261004",
     "base_commit": "b99d05309385e272cd5d0691fa23e5abb654864a",
     "selected_action": "Named admitted scope projection with truthful telemetry observation",
-    "status": "source_qualified_runtime_observation_pending",
+    "status": "runtime_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,10 +1894,10 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised source work; proposed scanner-admitted deterministic observation is separately pending",
+    "execution_plane": "ordinary supervised source work and scanner-admitted deterministic planning observation; no native effect authority",
     "requires_fresh_reobservation_after_closure": true,
     "previous_observation": "current_observation.authenticated_effect_consent_20261004",
-    "next_action": "Observe the named deterministic route once with actual admission and private persistence; preserve controlled rejection if runner limits fail. Then close this layer and re-score."
+    "next_action": "Close PR2061 with final exact-source checks/main verification and owned-lane recovery; then re-observe the14/P1 measured-zero fidelity candidate before any dispatch."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -29270,7 +29270,7 @@
     },
     "test_scope_telemetry_20261004": {
       "base": "b99d05309385e272cd5d0691fa23e5abb654864a",
-      "state": "source_qualified_runtime_observation_pending",
+      "state": "runtime_qualified_publication_pending",
       "scope": "Existing named auto_test_registry_audit TELEMETRY projection and event-only persistence; no SkillOutcome or runtime authority",
       "wsp15": {
         "complexity": 3,
@@ -29280,7 +29280,7 @@
         "total": 15,
         "priority": "P1"
       },
-      "execution_plane": "ordinary supervised source work; proposed scanner-admitted deterministic observation is separately pending",
+      "execution_plane": "ordinary supervised source work and scanner-admitted deterministic planning observation; no native effect authority",
       "prior_observation": "authenticated_effect_consent_20261004",
       "retrieval": {
         "holo": "AUTHORITY_ROOT_HEAD_MISMATCH",
@@ -29344,7 +29344,7 @@
           "retry_allowed": false
         },
         "coordinator": "Candidate implementation separate from rejected local helper.",
-        "proof_limits": "Scanner verdicts substituted; two owned Git producer fixtures and two private SQLite reopen checks. No real scanner/runtime qualification, effect authority, training or learning gain.",
+        "proof_limits": "Unit scanner substitutions remain limited to unit tests. Separate actual scanner/producer/private SQLite observations qualify planning only; no test execution, fitness, native effect authority, full OS isolation or general model-call monitoring.",
         "final_candidate": {
           "returncode": 0,
           "parent_seconds": 12.844,
@@ -29432,17 +29432,107 @@
           "file links unavailable on Windows host",
           "directory links unavailable on Windows host"
         ],
-        "selection_overlap": "75 original and39 additive are distinct; connected includes39, legacy and manifest selections overlap. Do not add counts as unique coverage."
+        "selection_overlap": "75 original and39 additive are distinct; connected includes39, legacy and manifest selections overlap. Do not add counts as unique coverage.",
+        "runtime_observations": [
+          {
+            "name": "installed_scanner_rejection",
+            "path": "wre-canary",
+            "parent_seconds": 18.25,
+            "child_call_seconds": 17.922,
+            "returncode": 0,
+            "telemetry_completed": false,
+            "status": "wre_skill_scan",
+            "observation_persisted": false,
+            "learning_events": 0,
+            "skill_outcomes": 0,
+            "skill_variations": 0,
+            "watched_agent_model_calls": 0,
+            "source_stable": true,
+            "result_sha256": "760fa41c9049fe4f8a3cfc3b1f6a4971c696ca23b61e934c2786d03ef90e0998",
+            "review_sha256": "a3858c32a71d5919e7aa1029790207ebaf75f4b82e918293b7dcdfd75695af10"
+          },
+          {
+            "name": "materialization_rejection",
+            "path": "scanner-upgrade/wre-canary",
+            "parent_seconds": 23.984,
+            "child_call_seconds": 23.593,
+            "returncode": 0,
+            "telemetry_completed": false,
+            "status": "rejected",
+            "observation_persisted": true,
+            "learning_events": 1,
+            "skill_outcomes": 0,
+            "skill_variations": 0,
+            "watched_agent_model_calls": 0,
+            "source_stable": true,
+            "result_sha256": "406f7c0d65083edd356e1b9e5a4804a2806fc3dd8317f2062ed33e89cc48fe9d",
+            "review_sha256": "f6c8be20c58d37235c3f7db81a400af11d225d9f62972db2a1f2adbc0d6a4798"
+          },
+          {
+            "name": "short_temp_projection",
+            "path": "scanner-upgrade/short-temp/wre-canary",
+            "parent_seconds": 162.86,
+            "child_call_seconds": 162.531,
+            "returncode": 0,
+            "telemetry_completed": true,
+            "status": "projected",
+            "observation_persisted": true,
+            "learning_events": 1,
+            "skill_outcomes": 0,
+            "skill_variations": 0,
+            "watched_agent_model_calls": 0,
+            "source_stable": true,
+            "result_sha256": "6c2aa17f8a55cf2a1f463d4bdae5083867e20f0654887b31707626dad554949d",
+            "review_sha256": "cbe77b8f44cbf558b21fb34ab0c5bc88981f23dc6b0ee9fcbf8242819995938f"
+          }
+        ],
+        "completed_projection": {
+          "base_shards": 155,
+          "candidate_shards": 155,
+          "base_paths": 1411,
+          "candidate_paths": 1415,
+          "batches_per_side": 5,
+          "impact": "SYSTEMIC",
+          "effect_success": false,
+          "test_execution": false
+        },
+        "scanner_qualification": {
+          "version": "2.2.0",
+          "isolated": true,
+          "shared_version": "2.0.9",
+          "shared_modified": false,
+          "frozen_controls_passed": 4,
+          "medium_threshold_unchanged": true,
+          "agent_vs_classifier": "Scanner bundled local classifier runs; zero watched agent/generative calls is a separate limited observation."
+        },
+        "windows_temp": {
+          "long_paths_enabled": 0,
+          "long_probe_chars": 279,
+          "long_probe_winerror": 206,
+          "short_probe_chars": 182,
+          "short_probe_readback": true,
+          "global_settings_modified": false,
+          "prior_materialization_exception": "not captured; do not claim exact identity"
+        },
+        "source_pr_ci": {
+          "pr": 2061,
+          "head": "b674106ff2e3cd3e553af9a030fbd48db89b57e9",
+          "ci_run": 37215263736,
+          "codeql_run": 37215261941,
+          "all_checks_passed": 11,
+          "wre_cases": 331,
+          "effect_cases": 675,
+          "scope": "source checkpoint only; final documentation head and main require fresh checks"
+        }
       },
       "open_gates": [
-        "Actual scanner/runtime observation",
-        "Final independent publication review and exact PR/main closure"
+        "Final documentation/source review and exact PR/main publication closure"
       ],
       "native_effect_admission": false,
       "unattended_rsi_complete": false,
-      "actual_scanner_runtime_observation": "not_run",
+      "actual_scanner_runtime_observation": "reviewed_projection_and_private_persistence_completed_after_two_preserved_rejections",
       "retained_gain": null,
-      "next_action": "Observe the named deterministic route once with actual admission and private persistence; preserve controlled rejection if runner limits fail. Then close this layer and re-score.",
+      "next_action": "Close PR2061 with final exact-source checks/main verification and owned-lane recovery; then re-observe the14/P1 measured-zero fidelity candidate before any dispatch.",
       "alternatives": [
         {
           "task": "Native unattended RSI admission",
@@ -29470,6 +29560,20 @@
           "priority": "P1",
           "state": "separate_owner_dependency",
           "reason": "Current governed route reports mismatch; preserve authority/shared roots and use exact-source fallback. No query-side maintenance."
+        },
+        {
+          "task": "Preserve measured zero fidelity and verify existing SkillSelector consequence",
+          "score": 14,
+          "priority": "P1",
+          "dimensions": [
+            2,
+            4,
+            4,
+            4
+          ],
+          "state": "unblocked_candidate_after_current_closure",
+          "evidence": "modules/infrastructure/wre_core/src/pattern_memory.py:get_skill_fidelity_stats; src/skill_selector.py:select_skill",
+          "reason": "Existing AVG(...) or default replaces genuine0.0; source-derived ranking inversion requires frozen disposable SQLite baseline and one supervised local-worker proposal. Structural fidelity is not correctness/fitness."
         }
       ],
       "artifact_bindings": {
@@ -29494,10 +29598,21 @@
         "connected-2-results.json": "95c91a84eff12ff30b9a78b003cec53184110979f8a885f94bd297643912e614",
         "shape-baseline-results.json": "1959dd3f054c106156ca50aa8b99b5cf4e9948ccadb9ded8b5519e3b5f6359d1",
         "shape-candidate-results.json": "0f26e8f185473d040839a062ae2bc04348b3cd8d6fe2f84f7efd4f682c8b2a9c",
-        "manifest-contract-results.json": "e66a0b0b64b8a3ca5af7c9633a9509b1d6953494e52a3626dc43a2a3c603bf9e"
+        "manifest-contract-results.json": "e66a0b0b64b8a3ca5af7c9633a9509b1d6953494e52a3626dc43a2a3c603bf9e",
+        "publication-source-review.json": "6b7f1577b1d197a93fd86e94a250e334f534b9eef86b51ecea934b3a7028a20e",
+        "source-checkpoint.json": "2862a1c87e2a2d585d72ba44d3bdcbb9f09b591f42780828d2012f3b8c2d8cea",
+        "scanner-upgrade/upstream-assessment.json": "85be933ba2e8da2c8b61f07aac2a32a8d09fb1a3398aede75baee1669913d64c",
+        "scanner-upgrade/test-freeze.json": "e4760b2d1b503d6bd956ba650fc463ec68d71ec96b4d0cd2098794d47dcc6e4c",
+        "scanner-upgrade/result.json": "981ea7df7aa8c4914c436de8a33e404af2f2e724cccdd41630244b3bfbe43570",
+        "scanner-upgrade/controls-result-review.json": "46c0df82ed8fa22235fcee432a45524faac7b2f48383f7b8b12353de1a307137",
+        "scanner-upgrade/install-receipt.json": "20501e3e77d6d8a905d53b6095c20148e19fe72ada62739541847c356cae5934",
+        "scanner-upgrade/path-length-probe.json": "4f3df512598136ebb9dff40d6e41db4376b4c0fbe63ef0e41544fc4721a3b9a6"
       },
       "publication": {
-        "status": "pending",
+        "status": "draft_pr_source_checks_passed_final_docs_pending",
+        "pr": 2061,
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2061",
+        "source_head": "b674106ff2e3cd3e553af9a030fbd48db89b57e9",
         "main_verified": false
       },
       "integrity": {
