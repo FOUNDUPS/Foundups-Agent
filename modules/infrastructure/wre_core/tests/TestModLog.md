@@ -1,3 +1,22 @@
+## P14 initial telemetry controls — 2026-10-05
+
+Independent frozen 75-case baseline failed only on
+`registry_scope_normalizer_api_missing`; no collection errors/skips. Candidate
+75/75 passed with unchanged test/source bindings in that run. Saved XML hashes
+and all 75 unique parameterized names/order match the frozen selection. Empty
+JUnit classnames under `-c NUL` explain the original false classname comparison;
+the exact command and unique name/order evidence are retained.
+
+The initial connected run returned 257 pass/10 fail/2 skip, with source bindings
+changed during execution; no exact-source qualification is claimed. Independent
+review's shape/digest/metaclass controls reproduced37fail/2pass before repair,
+then39pass. Original75 still pass; stable connected306pass/two Windows link skips
+(308total, overlapping selections). Legacy fixture migration preserves55 assertion
+ASTs and passes23 master cases. Actual scanner/runtime observation has not run. Tests use scanner
+substitution, two owned Git producer cases and two private SQLite reopen cases;
+no model, operational database, effect authority or learning proof is inferred.
+Evidence: `outputs/rsi-test-scope-telemetry-20261004`; original criteria retained.
+
 ## Retained source regression and rollback — 2026-10-04
 
 At merge `a2b130247c010419e1cb918e48c0595258831075`, three new Python processes

@@ -1,3 +1,16 @@
+## Named registry-scope telemetry — P14 checkpoint
+
+The candidate `auto_test_registry_audit` v2.3 executor connects the existing
+bounded scope planner to WRE as TELEMETRY. Projection completion is separate
+from effect success; completion is recorded only as a `telemetry_projection`
+event. Existing admission/scanner counters remain.
+It does not run the selected tests, generate a model proposal or train outcomes.
+Source review is accepted after repairing independently reproduced shape and
+type-comparison gaps. Original75 and additive39 controls pass; stable connected
+306pass/two Windows link skips. Actual scanner/runtime observation and
+publication remain pending. See the [candidate interface](INTERFACE.md#named-registry-scope-telemetry--p14-contract)
+and [canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
+
 ## Local proposal output contract
 
 Skill-specific output instructions now take precedence in the existing local

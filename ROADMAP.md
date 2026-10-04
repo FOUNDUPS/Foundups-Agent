@@ -12,13 +12,16 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** PR2059 is merged/main-verified and its owned lane
-is retired. The next15/P1 authenticated-consent slice is locally qualified:
-97 fixed cases and328 connected checks pass after two independently discovered
-snapshot defects were reproduced and repaired. One local Qwen helper was used.
-Hosted publication remains pending. Native18/P0, exact-effect permits/provider
-wiring and compatible Linux/WSL authority deployment remain separate gates.
-See the [current selection](docs/roadmaps/rsi_swarm_backlog.json).
+**Current layer — P14:** PR2060 is merged/main-verified at `b99d05309`, with
+its owned lane retired. Selected 15/P1 now qualifies the existing named WRE
+registry-scope TELEMETRY connection. The unchanged75 cases and39 additive
+controls pass; stable connected validation has306 passes/two Windows link skips.
+Actual scanner/runtime observation and exact publication remain open. The
+unsuccessful initial connected run is preserved as historical evidence.
+One local helper proposal was rejected, not applied. Native unattended 18/P0,
+effect permits/provider wiring and compatible authority deployment remain open.
+See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint)
+and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
 
 **2026-10-04 retained-source checkpoint:** PR2055 is merged/main-verified and its three
 owned lanes are retired. One local worker repair now has verified retained

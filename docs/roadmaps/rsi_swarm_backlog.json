@@ -1881,10 +1881,10 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.authenticated_effect_consent_20261004",
-    "base_commit": "25b740edfe5877f6cfcc6ae7fbe0dbcb472ce423",
-    "selected_action": "Authenticated exact-effect consent under existing current-owner lease",
-    "status": "local_qualification_complete_independent_publication_pending",
+    "observation_path": "current_observation.test_scope_telemetry_20261004",
+    "base_commit": "b99d05309385e272cd5d0691fa23e5abb654864a",
+    "selected_action": "Named admitted scope projection with truthful telemetry observation",
+    "status": "source_qualified_runtime_observation_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,10 +1894,10 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised source qualification with disposable signatures; native WRE admission remains separate",
+    "execution_plane": "ordinary supervised source work; proposed scanner-admitted deterministic observation is separately pending",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.effect_sovereign_binding_20261004",
-    "next_action": "Complete exact-source independent review, generated bindings and hosted PR/main gates; then re-observe WSP15/WSP97 for effect-specific permit/provider composition."
+    "previous_observation": "current_observation.authenticated_effect_consent_20261004",
+    "next_action": "Observe the named deterministic route once with actual admission and private persistence; preserve controlled rejection if runner limits fail. Then close this layer and re-score."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -29102,7 +29102,7 @@
     },
     "authenticated_effect_consent_20261004": {
       "base": "25b740edfe5877f6cfcc6ae7fbe0dbcb472ce423",
-      "state": "local_qualification_complete_independent_publication_pending",
+      "state": "closed_merged_main_verified_owned_lane_retired",
       "scope": "Authenticate detached exact-effect consent under existing current-owner lease; no runtime activation",
       "wsp15": {
         "complexity": 3,
@@ -29179,7 +29179,7 @@
       "native_effect_admission": false,
       "retained_gain": null,
       "host_limit": "Existing owner loader explicitly requires Linux/root-owned paths; historical WSL tool versions do not prove a current signer deployment or Windows authority bridge.",
-      "next_action": "Complete exact-source independent review, generated bindings and hosted PR/main gates; then re-observe WSP15/WSP97 for effect-specific permit/provider composition.",
+      "next_action": "Closed source qualification. Current selected layer is named registry-scope telemetry; effect-specific permit/provider composition remains a separate deferred prerequisite.",
       "contract": {
         "status": "implemented_local_qualification",
         "sha256": "e2453c2a63f5b99b9ffd55e09dfebd327ac1449c39e04efb057450a3929e4e10",
@@ -29219,7 +29219,10 @@
         "worker-preparation/native_worker-parent.json": "03a9b13b323ba359ddc373144b9e54f3d2ed288e8f34de97457e8034fff4b2ab",
         "worker-preparation/proposal-review.json": "7ab5549c71e596cddcb854a71256981a5b9a9d0afbf257bae188db028cb6b4a2",
         "worker-preparation/benchmark-receipt.json": "77647fcb025d0d564e6f8d0abb330522c32719aac51e4a2a737fb603fc1d8a37",
-        "worker-preparation/benchmark-provenance.json": "cee694141e59b0cf7884207d51437a1bfdaa85579c8030d91d42ec2f6ee6d1a6"
+        "worker-preparation/benchmark-provenance.json": "cee694141e59b0cf7884207d51437a1bfdaa85579c8030d91d42ec2f6ee6d1a6",
+        "closure-receipt.json": "865725dbbd8775ddfa369afc299837fbf724ba510f2253490e090f6941d9a026",
+        "publication-review-2.json": "4c5c3df9fdcb805d208c544347ac2cbbe0bb01354a93855d8675ce4cf94d419c",
+        "commit-binding-2.json": "819f172a8c4a55a3f5fa4e6fd77c00b5f791d40ec765100177bb02434f84a69f"
       },
       "independent_review": {
         "approved_bounded_source": true,
@@ -29238,9 +29241,271 @@
         "pattern_memory_written": false
       },
       "publication": {
+        "status": "closed",
+        "pr": 2060,
+        "head": "16afb9b57435e6999b5edf337d484836fbb35b6a",
+        "merge": "b99d05309385e272cd5d0691fa23e5abb654864a",
+        "tree": "1430bbe86151a5e499d02a4622161e64fccbccf9",
+        "reviewed_merge_tree_equal": true,
+        "pr_checks_passed": 11,
+        "main_verified": true,
+        "main_ci_run": 37210594932,
+        "main_codeql_run": 37210594700,
+        "separate_hosted_counts": {
+          "windows_mcp": 49,
+          "other_suites": [
+            217,
+            67,
+            675
+          ],
+          "fast_tier_members": 15
+        },
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "ignored_files_preserved": 4,
+        "recovery_bundle_sha256": "b575d75378b50c583a157374128a789a02ce7ccfd9cc926f4ff388d828b5dadf",
+        "shared_status_unchanged_during_cleanup": true,
+        "closure_receipt_sha256": "865725dbbd8775ddfa369afc299837fbf724ba510f2253490e090f6941d9a026"
+      }
+    },
+    "test_scope_telemetry_20261004": {
+      "base": "b99d05309385e272cd5d0691fa23e5abb654864a",
+      "state": "source_qualified_runtime_observation_pending",
+      "scope": "Existing named auto_test_registry_audit TELEMETRY projection and event-only persistence; no SkillOutcome or runtime authority",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "execution_plane": "ordinary supervised source work; proposed scanner-admitted deterministic observation is separately pending",
+      "prior_observation": "authenticated_effect_consent_20261004",
+      "retrieval": {
+        "holo": "AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "noise": "No usable semantic results; exact-source targeted fallback.",
+        "ordering": "Canonical skill, source, interface, adjacent tests before implementation.",
+        "missing": [
+          "modules/infrastructure/wre_core/memory/README.md"
+        ],
+        "staleness_risk": "Shared query checkout differs from authority; all implementation reads use this exact merged tree.",
+        "duplication": "Existing scope projection, executor, result helper, event table and master reused; no new skill, orchestrator, store or test runner."
+      },
+      "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-test-scope-telemetry-20261004",
+      "measurements": {
+        "initial_baseline": {
+          "cases": 75,
+          "failures": 75,
+          "errors": 0,
+          "skips": 0,
+          "reason": "registry_scope_normalizer_api_missing"
+        },
+        "initial_candidate": {
+          "cases": 75,
+          "passed": 75,
+          "errors": 0,
+          "skips": 0,
+          "test_sources_unchanged": true,
+          "unique_frozen_names_and_order_match": true
+        },
+        "junit_identity_limit": "-c NUL emits empty classname; preserved exact argv plus all unique parameterized names/order match. Initial classname comparison false is retained, not treated as case mismatch.",
+        "initial_connected": {
+          "cases": 269,
+          "passed": 257,
+          "failures": 10,
+          "errors": 0,
+          "skips": 2,
+          "test_sources_unchanged": false,
+          "qualified": false,
+          "meaning": "Unsuccessful source-drifted observation; stable connected validation remains pending."
+        },
+        "worker": {
+          "attempts": 1,
+          "sdk_events": 1,
+          "prompt_tokens": 555,
+          "completion_tokens": 145,
+          "total_tokens": 700,
+          "finish_reason": "stop",
+          "child_seconds": 49.313,
+          "parent_seconds": 59.641,
+          "returncode": 0,
+          "normal_job_close_returned": true,
+          "output_oversized": false,
+          "output_read_failed": false,
+          "paid_calls": 0,
+          "monetary_cost": null,
+          "token_semantics": "One saved SDK mapping; overlapping returns not added. No independent hardware/cost measurement.",
+          "disposition": "REJECTED_SEMANTIC_CONTRACT",
+          "applied_worker_code": false,
+          "worker_repair_credit": false,
+          "retry_allowed": false
+        },
+        "coordinator": "Candidate implementation separate from rejected local helper.",
+        "proof_limits": "Scanner verdicts substituted; two owned Git producer fixtures and two private SQLite reopen checks. No real scanner/runtime qualification, effect authority, training or learning gain.",
+        "final_candidate": {
+          "returncode": 0,
+          "parent_seconds": 12.844,
+          "log_sha256": "d2e9e2c8bd9035622cd136b7e5d35498a9d1a2b1b0918c0969469e687ebace7b",
+          "timed_out": false,
+          "test_sources_unchanged": true,
+          "tests": 75,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 75,
+          "xml_sha256": "f17b90080ec9e0d08a7a65b415eabecb2d3a0e1e05a8af5a1af1caee2c171ec3",
+          "exact_case_order_matches": false,
+          "unique_frozen_names_and_order_match": true
+        },
+        "shape_baseline": {
+          "returncode": 1,
+          "parent_seconds": 1.672,
+          "log_sha256": "28c6c80e06d14fa55c70f4cc5b92d2450b0184e62f2d5fa340f37efe1070af55",
+          "timed_out": false,
+          "test_sources_unchanged": true,
+          "tests": 39,
+          "failures": 37,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 2,
+          "xml_sha256": "70449b754f94e24293fdde8c7a9a0821a8d16026de69d32f60954af614cc7a1b"
+        },
+        "shape_candidate": {
+          "returncode": 0,
+          "parent_seconds": 1.391,
+          "log_sha256": "692cdb33156117c41497861fa1b180a83cc6341663e7cd943eb6a1dfb750c27d",
+          "timed_out": false,
+          "test_sources_unchanged": true,
+          "tests": 39,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 39,
+          "xml_sha256": "1fcc236e9563b5c98514694f27079d0fcec8238b28575eaa9fe629c13b75eee9"
+        },
+        "stable_connected": {
+          "returncode": 0,
+          "parent_seconds": 79.812,
+          "log_sha256": "c42a5b171622362dffb287c465a76b70fdf1d42706a61d7482200c8886807ee6",
+          "timed_out": false,
+          "test_sources_unchanged": true,
+          "tests": 308,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 2,
+          "passed": 306,
+          "xml_sha256": "b73b2acb66aad90086f90182ef169f4fdc005153bb9a41dc78d51398e76fd84a"
+        },
+        "manifest_contract": {
+          "returncode": 0,
+          "parent_seconds": 63.391,
+          "log_sha256": "9efac64969cbbf3d892a4c2aac7bbfa072ba8d8dd62b8125a434cf7582ff1b69",
+          "timed_out": false,
+          "test_sources_unchanged": true,
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 8,
+          "xml_sha256": "e6a15d9033f287870a59b7cf9b8b869823760d94accac053d057ab64de67722d"
+        },
+        "legacy_fixture_migration": {
+          "before_sha256_lf": "43bbd97dd05fab1b30b0330254102a6af85538a13bbda4e71ea8a95b8c8a7345",
+          "after_sha256": "cee4596691e800ef2bad881bfae47374d0a3b1836800fa580985509b6ff7bd60",
+          "assertion_asts_unchanged": true,
+          "assertions": 55,
+          "renamed_literals": 11,
+          "fixtures": 2,
+          "production_registry_modified_for_fixture": false,
+          "rationale": "Generic effect tests had reused the now planning-only named skill. Their mocked effects and assertions remain; all other names retain original loader."
+        },
+        "reddog_fast": {
+          "members": 15,
+          "status": "PASS",
+          "duration_ms": 13002,
+          "log_sha256": "f66fa8607287c11a38d1c2196b284d90f83b4aaa8bc5e85b05df6499b9ee8d7d"
+        },
+        "connected_skips": [
+          "file links unavailable on Windows host",
+          "directory links unavailable on Windows host"
+        ],
+        "selection_overlap": "75 original and39 additive are distinct; connected includes39, legacy and manifest selections overlap. Do not add counts as unique coverage."
+      },
+      "open_gates": [
+        "Actual scanner/runtime observation",
+        "Final independent publication review and exact PR/main closure"
+      ],
+      "native_effect_admission": false,
+      "unattended_rsi_complete": false,
+      "actual_scanner_runtime_observation": "not_run",
+      "retained_gain": null,
+      "next_action": "Observe the named deterministic route once with actual admission and private persistence; preserve controlled rejection if runner limits fail. Then close this layer and re-score.",
+      "alternatives": [
+        {
+          "task": "Native unattended RSI admission",
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "reason": "Authentic operating authority, compatible runtime and issuer/provider/resolver composition remain absent."
+        },
+        {
+          "task": "Effect-specific permit source qualification",
+          "score": 13,
+          "priority": "P1",
+          "state": "deferred",
+          "dimensions": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "reason": "Re-scored for the minimum supervised-loop objective; controlled consumer alone adds no executable repair/verification. Previous15/P1 was within the stronger unattended authority path, retained historically."
+        },
+        {
+          "task": "Holo owner mismatch",
+          "score": 14,
+          "priority": "P1",
+          "state": "separate_owner_dependency",
+          "reason": "Current governed route reports mismatch; preserve authority/shared roots and use exact-source fallback. No query-side maintenance."
+        }
+      ],
+      "artifact_bindings": {
+        "work-order.json": "61b9398f15a0245ec85ff84bd4f4b516943c0dae5d6d436df22e52e8b3f1551b",
+        "design-contract.json": "20b80e29cefbe934fe45d7a4fe436b961c1ca003f97df162e8a1d52102a5a2a3",
+        "design-clarifications.json": "81accc14bb218c03608b5589437272b3825015cff2549abe18232e18185e7848",
+        "contract-independent-review.json": "604d5c7126bd6c350df5e09d74ec35b606795226ddacc479511d8c01594556b7",
+        "test-freeze.json": "1e5735dfb4dc0317af289866bc7219a986c0f993b7e090c3b1037d2201599ca2",
+        "test-selection.json": "aa6baec1b6a3c32cc0b8e190ef5e5ac9c2cfe1eab6a6ead4b8867347ed007e44",
+        "baseline-review.json": "feabd8feff59ab2fc78432348d9b51d0fac5baae6f1a2c497611ff5269640fe7",
+        "baseline-results.json": "b185a604d452b0689530edbe65b79136e348eced30a2d58f08c000d8bbfa7cb9",
+        "baseline-tests.xml": "813fda85dca1dc3126cde863d6db7e2d75dc69193c475f2afd7fd7c8883e3687",
+        "candidate-results.json": "6743c7079bb24d314111fafc6be5b0439b221e140840c1117ec60d003cce5c72",
+        "candidate-tests.xml": "d464da4d1ec3dcdf988daf221f54a891ad82d353b38a1db8ccd344ca5fbdfaa9",
+        "connected-results.json": "63f071bbd9832f307cb8576b3cdd1233fc02113998d499b56f661eca71e1613d",
+        "worker-preparation/proposal-review.json": "6615814a1c41744e74909a03c874580a7b578a659d2b6d4404b8a5a0f603d71b",
+        "source-review.json": "177c9443eaeb2f6633eb8f88881119468b4bb50030afa0f31ee6949dc4406d86",
+        "source-review-2.json": "9e5b8c0702b67f2512bb4b62dbbcf89b9edd6fb4a7da19ed9932a2d4c7b014a0",
+        "shape-regression-freeze.json": "f458a5ded16d9b9fd5459bcbcba4b0e531e85c02d5d96475ca48a9c60fcded52",
+        "legacy-fixture-migration.json": "3ce56beda70206df959ef86c5052eabb74a106c75aa91b839a963745b0dbdf55",
+        "candidate-2-results.json": "e38199bfd54d8ba5b5ef4e0472eec7cdd622110a809832fc5e91b450fcd12ed9",
+        "connected-2-results.json": "95c91a84eff12ff30b9a78b003cec53184110979f8a885f94bd297643912e614",
+        "shape-baseline-results.json": "1959dd3f054c106156ca50aa8b99b5cf4e9948ccadb9ded8b5519e3b5f6359d1",
+        "shape-candidate-results.json": "0f26e8f185473d040839a062ae2bc04348b3cd8d6fe2f84f7efd4f682c8b2a9c",
+        "manifest-contract-results.json": "e66a0b0b64b8a3ca5af7c9633a9509b1d6953494e52a3626dc43a2a3c603bf9e"
+      },
+      "publication": {
         "status": "pending",
-        "ci_selection_cases": 675,
         "main_verified": false
+      },
+      "integrity": {
+        "test_registry_files": 1685,
+        "quarantined_files": 270,
+        "runtime_members": 1408,
+        "manifest_digest": "1cae5e88497899ef4021912002b85ad495cdb172196cc72a9dc9f46c58d59428",
+        "count_boundary": "admit1408/reject1409"
       }
     }
   }

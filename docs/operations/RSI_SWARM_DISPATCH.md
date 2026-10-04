@@ -1,3 +1,54 @@
+## Named registry-scope telemetry — P14 checkpoint
+
+Selected 15/P1 (C3/I4/D4/Impact4): the existing `auto_test_registry_audit` v2.3
+candidate delegates one bounded `project_scope` request to the existing planner.
+The named WRE path keeps admission gates, reports telemetry completion separately
+from false effect/execution success, and records one existing `telemetry_projection`
+event without SkillOutcome, fidelity, fallback, evolution or ReAct retry. This is
+planning evidence, not test execution, authority, learned fitness or native RSI.
+
+Initial independent baseline: 75 missing-API failures; candidate: 75/75 pass,
+zero errors/skips, frozen criteria unchanged. Saved command/XML and unique case
+names/order agree. Initial connected observation: 257 pass/10 fail/2 skip;
+bound source changed during that run, so it provides no exact-source pass.
+Independent source review found malformed side-field/digest acceptance and
+caller-metaclass comparison. Frozen39 additive cases reproduce37fail/2pass;
+the repaired owner passes39/39 and the unchanged original75/75. Stable connected
+validation passes306 cases with two unavailable-Windows-link skips (308 total,
+overlapping selections). Generic effect fixtures now use an inert fixture name;
+all55 assertions remain unchanged, with23/23 master cases passing. No production
+fixture registration was added. Source review accepted these repairs.
+
+The existing test registry has1685 files/270 quarantined. Backend source closure
+adds the adjacent executor and Skillz manifest, exactly1408 members; both digest
+pins and admit1408/reject1409 count boundaries agree. Generator contracts8/8
+and the existing15-member RedDog fast tier pass. These are separate selections.
+Existing large master functions did not grow; new functions remain within50lines.
+Actual scanner/runtime observation and publication have not completed.
+
+One local Qwen helper proposal was semantically rejected and not applied, with
+no retry or worker repair credit. One saved SDK event reports 555 input/145
+output tokens; parent 59.641s, child 49.313s, zero paid calls, cost unknown.
+The coordinator implemented the candidate separately. Unit scanner verdicts are
+substituted; owned Git and private SQLite connections do not imply operating
+admission. Native unattended RSI remains blocked at 18/P0; effect-specific
+permit work is deferred, and Holo authority mismatch remains a separate owner
+issue. No speculative successor is selected by this checkpoint.
+
+P13 PR2060 is closed: exact reviewed tree merged as
+`b99d05309385e272cd5d0691fa23e5abb654864a`; all 11 PR checks and exact-main CI
+37210594932/CodeQL 37210594700 passed. Hosted evidence includes 675 effect-boundary
+cases, 49 Windows MCP cases and all 15 fast-tier members (separate selections).
+Owned root/branch retired; four ignored artifacts and recovery bundle preserved;
+shared state unchanged during cleanup. Its consent source qualification does
+not deploy authority or complete native admission.
+
+Canonical records: `current_observation.test_scope_telemetry_20261004` and
+`authenticated_effect_consent_20261004` in the [backlog](../roadmaps/rsi_swarm_backlog.json).
+PC evidence: `outputs/rsi-test-scope-telemetry-20261004` and P13
+`outputs/rsi-authenticated-effect-consent-20261004/closure-receipt.json`.
+WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
 ## Authenticated effect consent — 2026-10-04
 
 Selected15/P1 (C3/I4/D4/Impact4). Opt-in owner v6 now registers a distinct
@@ -22,7 +73,7 @@ qualification uses disposable signatures and substituted owner/lease provenance.
 No native admission, deployed authority, parent sovereignty, execution permit,
 model learning or new retained RSI benefit is claimed.
 
-Publication remains a separate gate; do not dispatch from this planning record. Exact evidence/commands and review hashes:
+PR2060 publication and owned-lane closure are verified by the current P14 checkpoint above; this planning record grants no dispatch authority. Exact evidence/commands and review hashes:
 `current_observation.authenticated_effect_consent_20261004` in the canonical RSI
 backlog; PC artifacts `outputs/rsi-authenticated-effect-consent-20261004`.
 Next prerequisite: effect-specific permit/provider composition under the same
