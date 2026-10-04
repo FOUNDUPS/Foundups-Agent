@@ -1,3 +1,27 @@
+## WSP71 factory grant-digest composition — 2026-10-05
+
+Selected15/P1 (C2/I4/D5/Impact4). A frozen real-factory/socket-v2 test exposed
+short audit-reference hashes being compared with full E0 grant digests after
+durable grant consumption. Baseline:1 pass/1 fail; unchanged acceptance after
+repair:2/2 pass. The existing factory now checks exact reference identity and
+expected short/full hash before normalizing successful resolution metadata to
+the canonical full digest. Original resolver-mode checks run before wrapping;
+global audit hashing and legacy provider behavior are unchanged.
+
+Six additive rejection cases cover reference/hash substitution, swapped metadata,
+mock mode, denial and expiry before secret extraction. Focused8/8 and connected
+107 pass/3 Windows platform skips; no failures/errors. Independent source/test
+review verified frozen ASTs and evidence bindings. CI now selects all seven
+connected suites; hosted verification remains a publication gate.
+
+This is coordinator-authored source repair with synthetic keys, principal/peer
+bindings, clock and vault resolver. It does not authenticate a production
+resolver or wire/start the system service. Native zeroization, lifecycle,
+principal enrollment and retained autonomous benefit remain open. The backend
+manifest correctly excludes this still-uncomposed factory. WSP00/5/6/11/15/22/
+48/50/62/71/84/97/99. Evidence and exact commands:
+`current_observation.signer_factory_composition_20261005` in the RSI backlog.
+
 ## Existing Holo grounding completed — 2026-10-05
 
 PR2063 merged/main-verified at `2eaa6de7` with 11 PR checks and 181 hosted recovery

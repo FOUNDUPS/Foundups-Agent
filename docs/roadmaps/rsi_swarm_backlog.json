@@ -1881,22 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.holo_grounding_20261005",
-    "base_commit": "2eaa6de745046c3e17f1ecf8f078b20228b5808b",
-    "selected_action": "Complete canonical P16 closure and re-observe existing worker admission prerequisites",
-    "status": "in_progress",
+    "observation_path": "current_observation.signer_factory_composition_20261005",
+    "base_commit": "1cee9a957290a8053eef263e587e3b4ac43d40a3",
+    "selected_action": "Repair and qualify the existing WSP71 factory grant-digest connection",
+    "status": "local_source_qualified_publication_pending",
     "wsp15": {
-      "complexity": 1,
-      "importance": 3,
-      "deferability": 3,
-      "impact": 3,
-      "total": 10,
-      "priority": "P2"
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 5,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary authorized repository documentation and read-only existing-owner re-observation; no new runtime allocation",
-    "previous_observation": "current_observation.zero_fidelity_20261005",
-    "next_action": "Reconcile observed grounding and independently audit actual first-trust/input handoff owners. Preserve failure history and stop at missing authentic inputs; do not invent a grant or new module.",
+    "execution_plane": "authorized repository source maintenance, not native work admission",
+    "previous_observation": "current_observation.holo_grounding_20261005",
+    "next_action": "Publish this repair through exact-head review/CI, verify main, then re-observe the existing production provider/backend composition; authentic principal input and lifecycle remain separate prerequisites.",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
@@ -30233,6 +30233,100 @@
         "global_artifact_absence_claim": false,
         "enrollment_note": "Existing UI consumes a pre-issued principal-signed credential; no first-trust key-binding handoff demonstrated by this observation."
       }
+    },
+    "signer_factory_composition_20261005": {
+      "base": "1cee9a957290a8053eef263e587e3b4ac43d40a3",
+      "observed_on": "2026-10-05 JST",
+      "state": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_PENDING",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "selection_basis": "Small reusable repair of a reproduced missing connection in the existing factory; broader native admission is still blocked.",
+      "execution_plane": "authorized repository source maintenance, not native work admission",
+      "defect": "Real vault audit hashes use sha256 plus 16 hex characters; E0 grant binding requires the full 64. Both keys resolve, then the valid socket-v2 grant fails binding.",
+      "repair": "Validate successful exact reference and expected short/full digest in the existing factory, then use canonical signer_key_reference_digest. Check original resolver mode before wrapping; retain global audit/provider contracts.",
+      "retrieval": {
+        "receipt": "signer-factory-composition/holo-query.json",
+        "freshness": "CURRENT",
+        "index_gap_detected": false,
+        "quality": "This CURRENT/no-gap query missed the seam: unrelated WRE tests and CY2 briefing. Earlier retained-main-owner-query.json supplied factory/provider hits; direct reads supplied mandatory docs. Freshness is not retrieval relevance.",
+        "additional_receipt": "retained-main-owner-query.json"
+      },
+      "baseline": {
+        "passed": 1,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0,
+        "receipt": "focused-v4-test-receipt.json",
+        "earlier_attempts": "Import error and invalid fixture attempts remain preserved; not evidence of the production defect."
+      },
+      "frozen_candidate": {
+        "passed": 2,
+        "failed": 0,
+        "original_test_asts_unchanged": true
+      },
+      "additive_adversarial": {
+        "cases": 6,
+        "focused_total": 8,
+        "passed": 8,
+        "receipt_sha256": "7e8ef68cd0ab93c5dc329812e884058f36425c2544bdb488790617cab22681e6"
+      },
+      "connected": {
+        "tests": 110,
+        "passed": 107,
+        "skipped": 3,
+        "failed": 0,
+        "errors": 0,
+        "command": "O:/RedDog-Builder-Artifacts/cpython-3.12.10-amd64/runtime/python.exe -S -B -X utf8 -m pytest -q --tb=short -c NUL --noconftest --import-mode=importlib -p no:cacheprovider --basetemp O:/rsi-signer-join-connected-20261005 --junitxml O:/Foundups-Agent/outputs/rsi-holo-grounding-20261005/signer-factory-composition/connected-tests.xml modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_wiring.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_dryrun.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py",
+        "receipt_sha256": "e400974c3066d0ac5fcf0286e899baa8db03fc5780beb18a61014e9187ab2d37",
+        "denominator": "Includes the eight factory cases; do not add focused and connected totals.",
+        "skip_reason": "Two unavailable Windows symlink privileges and one Linux-only case."
+      },
+      "ci": "Existing workflow selects the same seven suites, requires cryptography and disables ambient plugin/conftest/dotenv loading; hosted verification pending.",
+      "integrity": {
+        "backend_manifest": "current, 1408 runtime files; standalone factory remains outside production import closure",
+        "test_registry": "current, 1687 total and 270 quarantined; no regeneration needed"
+      },
+      "independent_review": {
+        "agent": "event_store_source_review",
+        "scope": "source, frozen ASTs, eight-case receipts and CI selection",
+        "outcome": "no concrete blockers",
+        "runtime_executed_by_reviewer": false
+      },
+      "evidence_root": "outputs/rsi-holo-grounding-20261005/signer-factory-composition",
+      "worker_attribution": "Coordinator authored the source repair; separate worker authored tests and separate reviewer checked it. No local generative model call in this slice.",
+      "model_generation_calls": 0,
+      "paid_calls": 0,
+      "total_cost": null,
+      "native_rsi_complete": false,
+      "retained_autonomous_benefit": null,
+      "limits": [
+        "synthetic keys, resolver, principal map, peer and clock",
+        "factory not composed by production entrypoint or included in its runtime manifest",
+        "no native authority, paid calls, model generation or service activation"
+      ],
+      "previous_maintenance_closure": {
+        "pr": 2064,
+        "merge": "1cee9a957290a8053eef263e587e3b4ac43d40a3",
+        "main_ci": 37232142107,
+        "main_codeql": 37232141992,
+        "status": "MERGED_VERIFIED_MAIN",
+        "retained_maintenance_status": "COMPLETED",
+        "parent_seconds": 431.297,
+        "tasks": 3,
+        "events": 9,
+        "old_two_tasks_six_events_unchanged": true,
+        "query": "CURRENT/no-gap",
+        "closure_sha256": "b97e9202efc962e40b508524ac04633c85d0c818ca23c8fcb8df43867407d683",
+        "owned_lane": "retired after verified recovery bundle and ignored-artifact preservation",
+        "speed_improvement_or_model_learning_claim": false
+      },
+      "next_gate": "Publish this repair through exact-head review/CI, verify main, then re-observe the existing production provider/backend composition; authentic principal input and lifecycle remain separate prerequisites."
     }
   }
 }

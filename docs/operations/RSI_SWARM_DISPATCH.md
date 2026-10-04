@@ -1,8 +1,39 @@
+## WSP71 factory composition — 2026-10-05
+
+Selected15/P1 (C2/I4/D5/Impact4) at `1cee9a957290a8053eef263e587e3b4ac43d40a3`.
+Reuse the existing ephemeral factory and canonical E0 reference-digest helper.
+The real vault audit helper emits a shortened hash; a valid grant binds full
+digests. A frozen test through the actual factory/backend/socket-v2 path failed
+after both resolutions. The factory now validates returned reference metadata
+before normalization and checks original resolver mode before wrapping.
+
+Baseline1pass/1fail; unchanged candidate2pass; six added rejection controls pass.
+Connected110 cases:107pass/3 platform skips, including the focused8, not118
+independent cases. Separate review verified exact frozen ASTs and evidence.
+CI now selects all seven connected suites. Publication/hosted checks remain
+open; legacy provider/audit formats remain unchanged.
+
+Synthetic keys/resolver, principal mapping, peer and clock qualify source
+composition only. No service startup, live vault resolution, model generation,
+native grant, or retained autonomous benefit occurred. The coordinator authored
+the repair; separate agents authored tests and reviewed the result. Production
+provider/backend composition, lifecycle and authentic principal input remain
+prerequisites. Re-observe them after closing this narrow repair.
+
+Exact commands, hashes and preserved attempts:
+`current_observation.signer_factory_composition_20261005` in the canonical
+backlog; PC evidence `outputs/rsi-holo-grounding-20261005/signer-factory-composition`.
+
 ## Existing Holo grounding — P16 checkpoint
 
 P16 grounding is complete at captured main `2eaa6de745046c3e17f1ecf8f078b20228b5808b`.
-Current selection is **10/P2** (C1/I3/D3/Impact3): canonical closure and existing-owner
-re-observation, with no new runtime allocation. The earlier 16/P0 resume repair
+The subsequent **10/P2** closure merged as PR2064 at `1cee9a95`, with exact-main
+CI37232142107 and CodeQL37232141992 successful. A later maintenance invocation
+completed in431.297s; the same private database has3 tasks/9 events, preserving
+the old2 tasks/6 events. Clean-checkout query returned CURRENT/no-gap at generation
+`651cb82a…`. Owned runtimes stopped, and the worktree/branches were retired after
+verified recovery-bundle and ignored-artifact preservation. No speed or learning
+gain is inferred from the two different-head runs. The earlier16/P0 resume repair
 followed a 14/P1 owner qualification. Native admission 18/P0 and genuine input
 handoff 15/P1 remain blocked/unresolved; P15 closure remains preserved.
 

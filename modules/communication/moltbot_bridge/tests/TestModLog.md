@@ -1,3 +1,18 @@
+## Real WSP71 factory through socket-v2 — 2026-10-05
+
+Frozen integration baseline:1 pass/1 fail. After the factory digest repair,
+the unchanged two cases pass; six added rejection cases bring focused coverage
+to8/8. Connected seven-suite selection:107 pass/3 skips (two Windows symlink
+privilege skips; one Linux-only case),0 failures/errors. CI selects that same
+seven-suite set and requires cryptography before pytest.
+
+The acceptance test observes durable grant consumption before both resolutions,
+reopens the store to reject replay, verifies the exact Ed25519 signature and
+rejects altered input. Negative cases trap secret extraction. Synthetic keys,
+principal mapping, clock and resolver qualify composition only. Frozen ASTs and
+eight-case receipts independently reviewed; hosted execution remains pending.
+Exact commands/source pins: RSI backlog `signer_factory_composition_20261005`.
+
 ## Authenticated effect consent — 2026-10-04
 
 Local source qualification:97/97 and connected328/328 pass. The original95-case
