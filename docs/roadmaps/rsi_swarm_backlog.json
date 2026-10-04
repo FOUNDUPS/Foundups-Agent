@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.local_worker_format_benchmark_20261004",
-    "base_commit": "79a976eff2b2db1fb7fe16cceaaf76642d94666c",
-    "selected_action": "Remove shared proposal-format contradiction and measure unchanged local task",
-    "status": "prompt_contract_repaired_local_comparison_observed_publication_pending",
+    "observation_path": "current_observation.retained_source_closure_20261004",
+    "base_commit": "a2b130247c010419e1cb918e48c0595258831075",
+    "selected_action": "Reconcile retained source evidence in existing canonical documents",
+    "status": "canonical_reconciliation_publication_pending",
     "wsp15": {
-      "complexity": 2,
-      "importance": 4,
-      "deferability": 4,
-      "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "complexity": 1,
+      "importance": 3,
+      "deferability": 3,
+      "impact": 3,
+      "total": 10,
+      "priority": "P2"
     },
     "dispatchable": false,
-    "execution_plane": "coordinator-supervised local diagnostic and source repair; not native effect admission",
+    "execution_plane": "ordinary coordinator documentation closure",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.codeact_exit_truth_20261004",
-    "next_action": "Close this exact source through review/CI/main, then rescore the existing repair-validation and model-qualification paths. No third same-task call or automatic proposal execution."
+    "previous_observation": "current_observation.local_worker_format_benchmark_20261004",
+    "next_action": "Native18/P0 remains blocked; resolve designated effect-domain producer and independent actual-use contract through existing owner. Supervised lane requires a fresh task; no automatic same-task retry or promotion."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28327,7 +28327,7 @@
     },
     "local_worker_format_benchmark_20261004": {
       "base": "79a976eff2b2db1fb7fe16cceaaf76642d94666c",
-      "state": "prompt_contract_repaired_local_comparison_observed_publication_pending",
+      "state": "merged_main_verified_retained_source_benefit_owned_lanes_retired",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -28428,7 +28428,150 @@
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004",
       "rejected_proposal_review_sha256": "d2138eecee48e0bda06ab3b825f7277d33733ccfd329fd3d311e91eb1a061f9b",
       "prompt_source_review_sha256": "a76754fb01018d9dc1348f585944212f17f03fa1afe27cec3f1a4429348a0605",
-      "next_gate": "Close this exact source through review/CI/main, then rescore the existing repair-validation and model-qualification paths. No third same-task call or automatic proposal execution."
+      "next_gate": "Source retention closed. Native parent remains blocked on authentic effect provenance plus source composition; another supervised repair requires fresh observed task/packet.",
+      "publication": {
+        "pr": 2055,
+        "head": "63fe5d6f599d958c7ba50b4157e47c87486cb4b1",
+        "merge": "a2b130247c010419e1cb918e48c0595258831075",
+        "main_ci": 37192480744,
+        "main_codeql": 37192480395,
+        "main_conclusion": "success",
+        "pr_checks_passed": 10,
+        "owned_roots_retired": [
+          "rsi-codeact-path-benchmark-20261004",
+          "rsi-codeact-path-validation-20261004",
+          "rsi-codeact-path-retained-20261004"
+        ],
+        "owned_branches_absent": true
+      },
+      "retained_source_validation": {
+        "merge": "a2b130247c010419e1cb918e48c0595258831075",
+        "accepted_by_independent_review": true,
+        "unique_case_count": 29,
+        "retained": {
+          "passed": 29,
+          "failed": 0
+        },
+        "rollback": {
+          "passed": 26,
+          "failed": 3
+        },
+        "recovery": {
+          "passed": 29,
+          "failed": 0
+        },
+        "errors": 0,
+        "skips": 0,
+        "test_content_unchanged_normalized": true,
+        "case_order_unchanged": true,
+        "source_restored": true,
+        "final_clean": true,
+        "additional_passing_cases": 3,
+        "independent_tasks": 1,
+        "new_model_calls": 0,
+        "signal_class": "execution_feedback",
+        "learned_variation_retention": null,
+        "native_effect_admission": false,
+        "review_sha256": "8c92d846f2b0679e2e4048e734d9cc1d121325d99fd2275d346ae7d609acc060",
+        "receipt_sha256": "79b60b3f9d732af608a4fa84c52c16a587240074b575a5a1f3193f04c85a5e19",
+        "consumed_evidence_plan_sha256": "e5d78b171028a9c90a9a956713773b5e0ab5f32bf31e57405626c8a8c8e51a83",
+        "closure_sha256": "2f68021442a13ebc16992471abce68ffcfad1c07e67cd35bd2e7c9a71909c97a"
+      }
+    },
+    "retained_source_closure_20261004": {
+      "base": "a2b130247c010419e1cb918e48c0595258831075",
+      "state": "canonical_reconciliation_publication_pending",
+      "wsp15": {
+        "complexity": 1,
+        "importance": 3,
+        "deferability": 3,
+        "impact": 3,
+        "total": 10,
+        "priority": "P2"
+      },
+      "execution_plane": "documentation closure of supervised source improvement; no native effect admission",
+      "previous_observation": "local_worker_format_benchmark_20261004",
+      "retention_evidence": {
+        "merge": "a2b130247c010419e1cb918e48c0595258831075",
+        "accepted_by_independent_review": true,
+        "unique_case_count": 29,
+        "retained": {
+          "passed": 29,
+          "failed": 0
+        },
+        "rollback": {
+          "passed": 26,
+          "failed": 3
+        },
+        "recovery": {
+          "passed": 29,
+          "failed": 0
+        },
+        "errors": 0,
+        "skips": 0,
+        "test_content_unchanged_normalized": true,
+        "case_order_unchanged": true,
+        "source_restored": true,
+        "final_clean": true,
+        "additional_passing_cases": 3,
+        "independent_tasks": 1,
+        "new_model_calls": 0,
+        "signal_class": "execution_feedback",
+        "learned_variation_retention": null,
+        "native_effect_admission": false,
+        "review_sha256": "8c92d846f2b0679e2e4048e734d9cc1d121325d99fd2275d346ae7d609acc060",
+        "receipt_sha256": "79b60b3f9d732af608a4fa84c52c16a587240074b575a5a1f3193f04c85a5e19",
+        "consumed_evidence_plan_sha256": "e5d78b171028a9c90a9a956713773b5e0ab5f32bf31e57405626c8a8c8e51a83",
+        "closure_sha256": "2f68021442a13ebc16992471abce68ffcfad1c07e67cd35bd2e7c9a71909c97a"
+      },
+      "ranked_queue": [
+        {
+          "task": "Native autonomous RSI admission",
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 4,
+          "total": 18,
+          "priority": "P0",
+          "state": "blocked",
+          "rationale": "Canonical parent remains highest priority; neither ordinary012 authorization nor source retention supplies the authenticated effect-specific producer, independent runtime-use provenance or missing issuer/provider/resolver composition."
+        },
+        {
+          "task": "Existing effect-specific authorization-to-issuer/provider integration prerequisite",
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1",
+          "state": "blocked_on_owner_contract",
+          "rationale": "Narrow existing-owner path, already planned in bridge INTERFACE; not a new architecture. Authentic sovereign B/P/T/E and requester/beneficiary semantics plus reviewer actual-use evidence must be supplied before a single-target proof/permit handoff can be safely implemented. Do not merely pass the delegated permit or turn None into a fabricated lease."
+        },
+        {
+          "task": "Coordinator-supervised local proposal, independent regression and reviewed source retention",
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1",
+          "state": "existing_usable_lane; new task and budget required for next invocation",
+          "rationale": "The real local Qwen adapter and existing fixed-test/retention process can support ordinary authorized repair work without RedDog effect admission. P8 retained/rollback/main gates are complete and independently verified; this assessment identifies no new defect and allocates no third call or new task."
+        },
+        {
+          "task": "Reconcile retained source evidence in existing canonical documents",
+          "complexity": 1,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3,
+          "total": 10,
+          "priority": "P2",
+          "state": "selected"
+        }
+      ],
+      "native_assessment_sha256": "982bf560992bf42aa484d9656de581fd2f781987b6dae82b2152d4a773b05b18",
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-retained-source-closure-20261004",
+      "next_action": "Native18/P0 remains blocked; resolve designated effect-domain producer and independent actual-use contract through existing owner. Supervised lane requires a fresh task; no automatic same-task retry or promotion."
     }
   }
 }

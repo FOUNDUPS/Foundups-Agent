@@ -1,3 +1,14 @@
+## Retained source regression and rollback — 2026-10-04
+
+At merge `a2b130247c010419e1cb918e48c0595258831075`, three new Python processes
+run the unchanged29-case CodeAct file:29pass; baseline source26pass/3fail;
+restored source29pass. Exact original failure names recur; errors/skips0;
+exit0/1/0. Source bytes restored and detached worktree clean before retirement.
+These phases overlap; no new tests/model calls or held-out task. Independent
+review accepted saved source/test/criteria, actual XML and evidence-consumer
+lineage. Commands/results: P8 `retained-validation/`. Hosted PR/main logs also
+verify217 connected WRE,67 scanner and452 separate guarded cases.
+
 ## Local proposal framing regression — 2026-10-04
 
 Independent frozen prompt baseline:12expected failures/67passes,25deselected,

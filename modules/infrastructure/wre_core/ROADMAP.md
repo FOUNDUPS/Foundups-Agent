@@ -1,10 +1,11 @@
-## Local worker format layer — 2026-10-04
+## Retained local source layer — 2026-10-04
 
-The real path-repair benchmark exposed a wrong-format, semantically wrong proposal.
-The shared prompt contradiction is repaired. The unchanged-task comparison yielded
-an exact worker path predicate passing29 frozen cases;217 integrated cases pass.
-Publication and retained-use verification remain open. Follow the
-[current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#local-worker-format-benchmark--2026-10-04).
+PR2055 is merged/main-verified with its owned lanes retired. Existing saved
+benchmark receipts inform the later fresh-process validation:29pass retained,
+26pass/3fail under controlled rollback,29pass after exact restoration. One
+task-specific supervised repair benefit is retained; this does not activate
+native effects, autonomous promotion or learned variation retention. See the
+[current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retained-local-repair-and-remaining-admission-gate--2026-10-04).
 Earlier entries below are historical.
 
 ## Current execution-truth layer — 2026-10-04
