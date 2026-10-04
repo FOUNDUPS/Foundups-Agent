@@ -1146,6 +1146,11 @@ main workflows passed. Launch plan #1747 is merged; startup campaigns remain dis
   substitution, and Linux-root socket transport fail closed.
 - COMPLETE: an uncomposed WSP 71 op CLI resolver factory requires a fixed,
   root-owned executable with secure ancestry and no group/other write access.
+- COMPLETE (source qualification only): the existing WSP71 ephemeral factory
+  now binds verified resolution metadata to full E0 reference digests. A frozen
+  real-factory/socket-v2 regression fails before repair and passes afterward;
+  six rejection controls preserve mode, reference and expiry boundaries.
+  This does not complete production startup, resolver authentication or RSI.
 - NEXT: independently administered grant-service composition and lifecycle,
   including production E0 provider/backend composition, WSP 71
   resolve-per-sign composition, native-memory

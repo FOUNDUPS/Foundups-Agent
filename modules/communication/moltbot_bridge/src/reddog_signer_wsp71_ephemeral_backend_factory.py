@@ -16,7 +16,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     SignerKeyProviderDryRunResult,
     SignerKeyProviderProfile,
     SignerKeyResolver,
+    _provider_mode_authorized,
     build_signer_backend_from_provider,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+    signer_key_reference_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
     SignerSecretGrantAuthorityPolicy,
@@ -24,6 +28,39 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authori
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_rate_authority import (
     DurableSignerSecretGrantRateAuthority,
 )
+from modules.infrastructure.secrets_mcp.src.vault_resolver import (
+    ResolveErrorCode,
+    ResolveResult,
+    hash_reference,
+)
+
+
+@dataclass(frozen=True)
+class _GrantReferenceResolver:
+    """Bind resolution metadata to full E0 digests without changing audit logs."""
+
+    resolver: SignerKeyResolver
+
+    def resolve(self, reference: str, requester_id: str | None = None) -> ResolveResult:
+        result = self.resolver.resolve(reference, requester_id=requester_id)
+        if not isinstance(result, ResolveResult) or result.success is False:
+            return result
+        audit_digest = hash_reference(reference)
+        full_digest = signer_key_reference_digest(reference)
+        if (
+            result.success is not True
+            or type(result.reference) is not str
+            or result.reference != reference
+            or type(result.reference_hash) is not str
+            or result.reference_hash not in (audit_digest, full_digest)
+        ):
+            return ResolveResult(
+                success=False,
+                reference=reference,
+                reference_hash=audit_digest,
+                error_code=ResolveErrorCode.INVALID_REFERENCE,
+            )
+        return replace(result, reference_hash=full_digest)
 
 
 @dataclass(frozen=True)
@@ -47,9 +84,17 @@ class Wsp71EphemeralSignerBackendFactory:
         return self.profile.permission_snapshot_digest
 
     def __call__(self) -> SignerKeyProviderDryRunResult:
+        resolver = self.resolver
+        # Check the original resolver before an adapter could hide mock identity.
+        if _provider_mode_authorized(
+            PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            resolver=resolver,
+        ):
+            resolver = _GrantReferenceResolver(resolver)
         result = build_signer_backend_from_provider(
             self.profile,
-            self.resolver,
+            resolver,
             provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
             allow_test_only_key_material=False,
             permission_snapshot_fresh=True,

@@ -12,18 +12,26 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — P16 grounding completed; closure in progress (2026-10-05 JST):**
-PR2063 merged as `2eaa6de745046c3e17f1ecf8f078b20228b5808b`; all 11 PR checks
-and exact-main CI/CodeQL passed, including 181 recovery cases. Normal admission
-for that new HEAD completed maintenance in 500.797s and stopped both owned
-runtimes. A separate query from the clean checkout returned CURRENT/no-gap for
-generation `b90d637c…`; the stale shared-checkout query remains a recorded failure.
-Four earlier attempts, the rejected Qwen proposal and initial CI failure remain
-preserved. This did not exercise live pointer resume or complete native RSI.
-Selected **10/P2** (C1/I3/D3/Impact3): canonical closure and existing-owner
-re-observation. Native admission 18/P0 and genuine input handoff 15/P1 remain
-blocked/unresolved. See the [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint)
+**Current layer — WSP71 factory composition (2026-10-05 JST):**
+Selected **15/P1** (C2/I4/D5/Impact4): repair a demonstrated short audit-hash versus
+full grant-digest mismatch in the existing signer factory. Frozen baseline:
+1 pass/1 fail; unchanged candidate:2/2 pass. Six added rejection controls pass;
+final connected selection:108 pass/3 Windows platform skips. Initial hosted
+99pass/11fail exposed legacy Windows-only test paths; the fixture repair preserves
+all92 assertions and production guards. Independent review found
+no blocker; publication and hosted checks remain open. Production startup is
+still uncomposed. Native admission 18/P0 and genuine input handoff 15/P1 remain
+blocked/unresolved. See the [composition checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#wsp71-factory-composition--2026-10-05)
 and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
+
+**Closed layer — P16:** PR2063 repair and PR2064 closure are merged/main-verified.
+At `1cee9a957290a8053eef263e587e3b4ac43d40a3`, another actual maintenance
+invocation completed in431.297s. The same database now has3 tasks/9 events;
+the old2 tasks/6 events are unchanged. Clean-checkout query:CURRENT/no-gap.
+Both owned runtimes stopped and the owned worktree was retired with verified
+recovery artifacts. This is retained operational use, not model learning,
+live pointer-resume proof or a speed comparison. Failures remain preserved in
+the [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
 
 **Closed layer — P15:** P14 PR2061 is merged/main-verified at `0b3f6cbc3`,
 with its owned lane retired and recovery preserved. Selected 14/P1 now repairs

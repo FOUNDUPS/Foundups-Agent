@@ -1295,6 +1295,13 @@ An uncomposed local witness and policy v3 bind the root-state anchor; the oracle
 requires three-way agreement; two mutable root mirrors can be rolled back while the
 static installation domain remains unchanged. Root-service transport, protected-use client,
 and composed oracle exist. Owner config v3 plus the uncomposed independent-grant client supply bind a disjoint Unix socket, exact non-root peer UID/GID, and signed policy identity; the WSP71 resolver factory and client remain uncomposed, so system-service signing fails closed.
+The standalone WSP71 ephemeral factory validates each successful resolver result's
+exact reference and expected short audit hash or full E0 digest, then returns
+full grant-binding hashes using `signer_key_reference_digest`. The original
+resolver must pass provider-mode checks before adaptation. This metadata check
+does not authenticate the resolver; global audit hashes and legacy provider
+results retain their existing format. Synthetic socket-v2 composition is tested;
+the production system-service entrypoint remains uncomposed and fail-closed.
 Native-memory zeroization and complete signer lifecycle supervision remain
 SPECIFIED_NOT_IMPLEMENTED.
 No private key, resolved secret, grant signature, or audit key is serialized.
