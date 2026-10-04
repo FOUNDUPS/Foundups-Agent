@@ -1,3 +1,19 @@
+## Native chat delimiter regression — 2026-10-04
+
+Three new cases in existing `test_wre_execution_truth.py` preserve a Markdown
+subheading, an inline `###` literal and an EOS-only control. The native fake
+honors supplied stops; all cases require EOS suffix removal, output caps,
+single cleanup and proposal quarantine. Two old fit assertions now expect EOS
+only. All other original test ASTs and raw route controls remain unchanged.
+
+Independent frozen baseline: 59 pass/4 expected failures. Candidate: 63 pass;
+connected execution-truth, PatternMemory, continuity and master suites: 176
+pass, zero skips. Selections overlap; existing CI already covers the full file.
+These deterministic tests do not prove real-model usefulness. Frozen semantic
+acceptance is unchanged for a later separately reviewed real WRE invocation.
+Exact commands, XML and source bindings:
+`O:/Foundups-Agent/outputs/rsi-native-chat-delimiter-20261004/`.
+
 ## Continuity proposal regression — 2026-10-04
 
 The OpenClaw continuity object remains available to its lineage owner but is

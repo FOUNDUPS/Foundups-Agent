@@ -1,3 +1,38 @@
+## Native chat delimiter repair — 2026-10-04
+
+PR2052 is merged/main-verified at `e3169540b7a30906244d698f81ac2e7a79f9a7cd`.
+All ten PR checks and main CI37184962576/CodeQL37184962543 passed. PR/main
+each passed 67 scanner/admission, 173 WRE and 452 separate guarded cases.
+The owned publication lane is retired; recovery evidence is preserved.
+
+One subsequent real `auto_test_registry_audit` WRE invocation passed production
+Skillz manifest/scanner admission and generated twice through local Qwen.
+Independent frozen semantic acceptance failed: the proposal gave an objective
+and an empty workflow heading, with no actionable steps. WRE persisted one
+failed outcome and its matching AgentDB breadcrumb, zero variations/learning
+events. Structural fidelity was zero; the original 0.90 threshold was preserved.
+Measured parent/WRE times: 97.782/81.219 seconds; native usage: 1,587 prompt +
+64 completion = 1,651 tokens. No paid inference; coordinator cost is unknown.
+This proves a bounded proposal/persistence path, not native effect admission,
+semantic evaluation by Gemma, autonomous promotion or retained RSI benefit.
+
+Selected 14/P1 (C2/I4/D4/Impact4): remove the existing native caller's `###`
+text stop; the qualified formatter still supplies EOS text/token stopping.
+Three new deterministic cases and migrated fit assertions reproduce four
+baseline failures among 63 cases. Candidate: 63 focused and 176 connected
+passes, no failures/skips; selections overlap. Raw stops, limits, qualification
+and proposal quarantine remain. The actual earlier generation's finish reason
+was not captured, so this defect is not a proven cause of that observation.
+
+The one bounded Qwen repair proposal was malformed JSON and rejected without
+retry. The coordinator supplied the one-line change; independent source review
+and publication remain separate. After exact-main closure, re-observe once
+under the unchanged semantic acceptance, with a fresh source-bound budget.
+Native autonomous admission remains 18/P0 and blocked on genuine authority.
+No new module, skill, evaluator or scheduler. WSP00/5/11/15/22/48/50/84/95/97/99.
+Evidence: backlog `native_chat_delimiter_20261004` and
+`O:/Foundups-Agent/outputs/rsi-native-chat-delimiter-20261004/`.
+
 ## Offline scanner environment — 2026-10-04
 
 The existing scanner child environment now fixes dotenv disabled, LiteLLM

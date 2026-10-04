@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.local_continuity_proposal_20261004",
-    "base_commit": "c563304a5451245df41cadc661a3c64d447fe2f7",
-    "selected_action": "Repair reserved continuity metadata projection in existing local proposal/reflection prompts; test supervised local worker",
-    "status": "source_repaired_local_validation_complete_publication_pending",
+    "observation_path": "current_observation.native_chat_delimiter_20261004",
+    "base_commit": "e3169540b7a30906244d698f81ac2e7a79f9a7cd",
+    "selected_action": "Remove native caller Markdown stop while preserving qualified formatter EOS",
+    "status": "coordinator_repair_locally_validated_publication_pending",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 13,
+      "impact": 4,
+      "total": 14,
       "priority": "P1"
     },
     "dispatchable": false,
     "execution_plane": "coordinator-supervised local diagnostic; not WRE production admission",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.current_generation_quorum_20261004",
-    "next_action": "Bounded local proposal, independent fixed criteria, source review/publication, then separately reviewed later retained use."
+    "previous_observation": "current_observation.offline_skill_scanner_20261004",
+    "next_action": "Exact-source independent review, publication/main closure, then unchanged-acceptance real WRE observation with fresh budget."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28046,7 +28046,7 @@
     },
     "offline_skill_scanner_20261004": {
       "base": "6ba78fd26731e49eaca02baf06cb12dd7130b565",
-      "state": "local_repair_validated_publication_pending",
+      "state": "merged_main_verified_owned_lane_retired",
       "wsp15": {
         "complexity": 2,
         "importance": 4,
@@ -28107,7 +28107,106 @@
       "native_admission": false,
       "retained_rsi_gain": null,
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-offline-skill-scanner-20261004",
-      "next_gate": "Exact-head review/PR/main closure, then one frozen bounded production Skillz proposal canary with original 0.90 structural threshold."
+      "next_gate": "Real production Skillz canary consumed; failed semantic usefulness. Re-observe native text stop repair.",
+      "publication": {
+        "pr": 2052,
+        "head": "6b9c333b6a9d593765970f954ae40fa6d7d3ccab",
+        "merge": "e3169540b7a30906244d698f81ac2e7a79f9a7cd",
+        "pr_checks_passed": 10,
+        "main_ci": 37184962576,
+        "main_codeql": 37184962543,
+        "main_conclusion": "success",
+        "hosted_scanner_cases": 67,
+        "hosted_wre_cases": 173,
+        "hosted_separate_guarded_cases": 452,
+        "owned_lane_retired": true
+      },
+      "wre_canary": {
+        "state": "valid_observation_proposal_usefulness_failed",
+        "head": "e3169540b7a30906244d698f81ac2e7a79f9a7cd",
+        "skill": "auto_test_registry_audit",
+        "public_calls": 1,
+        "generations": 2,
+        "scanner_passed": true,
+        "manifest_passed": true,
+        "skill_outcomes": 1,
+        "failed_outcomes": 1,
+        "continuity_breadcrumbs": 1,
+        "variations": 0,
+        "learning_events": 0,
+        "structural_fidelity": 0,
+        "structural_threshold": 0.9,
+        "semantic_acceptance": false,
+        "prompt_tokens": 1587,
+        "completion_tokens": 64,
+        "total_tokens": 1651,
+        "parent_seconds": 97.782,
+        "wre_seconds": 81.219,
+        "paid_inference_calls": 0,
+        "native_effect_admission": false,
+        "autonomous_promotion": false,
+        "retained_benefit": null,
+        "review_sha256": "b2f12fc38e0871360e677e5573a00699fcc30723c91bdea6e57c5c425ce38154",
+        "frozen_acceptance_sha256": "b88588b91932548786b65fb6f4743f0c1f0db0df066b58ea6126c6f316a554ec",
+        "owned_canary_root_retired": true,
+        "preserved_runtime_files": 5
+      }
+    },
+    "native_chat_delimiter_20261004": {
+      "base": "e3169540b7a30906244d698f81ac2e7a79f9a7cd",
+      "state": "coordinator_repair_locally_validated_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "reused_owner": "holo_index/qwen_advisor/llm_engine.py::_native_chat_completion",
+      "baseline": {
+        "passed": 59,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 63
+      },
+      "focused": {
+        "passed": 63,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 63
+      },
+      "connected": {
+        "passed": 176,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": 176
+      },
+      "new_cases": 3,
+      "existing_fit_assertions_updated": 2,
+      "selections_overlap": true,
+      "worker": {
+        "calls": 1,
+        "accepted": false,
+        "reason": "malformed JSON",
+        "elapsed_seconds": 15.203,
+        "parent_seconds": 25.766,
+        "tokens": null,
+        "paid_inference_calls": 0,
+        "retry": false
+      },
+      "coordinator_repair": true,
+      "autonomous_discovery": false,
+      "original_generation_cause_proven": false,
+      "native_effect_admission": false,
+      "retained_rsi_gain": null,
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-native-chat-delimiter-20261004",
+      "test_criteria_sha256": "4115bbe8acf92a0eb30735031ba715191460ac8a7f066fbfbaccea7c24f51fcb",
+      "frozen_test_sha256": "55556524f16868cd24466cecabbeeb2a9c61b9dfbaac10cfb110ff06229389a2",
+      "next_gate": "Exact-source independent review, publication/main closure, then unchanged-acceptance real WRE observation with fresh budget."
     }
   }
 }
