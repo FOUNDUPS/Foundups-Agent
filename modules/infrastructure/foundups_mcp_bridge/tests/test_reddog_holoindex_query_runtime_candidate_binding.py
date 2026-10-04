@@ -7,7 +7,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import tempfile
 
 import pytest
 from holo_index.repository_state import RepositoryState
@@ -54,19 +53,20 @@ from modules.infrastructure.foundups_mcp_bridge.tests.test_reddog_holoindex_quer
     TARGET,
     _fixture,
 )
+from modules.infrastructure.foundups_mcp_bridge.tests.reddog_holoindex_test_fs_support import (
+    create_directory_alias_or_skip,
+)
 
 
 DIGESTS = tuple(f"sha256:{index:064x}" for index in range(100, 130))
 
 
 @pytest.fixture
-def approved_tmp_path() -> Path:
-    root = Path("O:/.reddog_test_tmp")
+def approved_tmp_path(tmp_path: Path) -> Path:
+    root = tmp_path.resolve()
     if os.name != "nt" or not root.anchor.upper().startswith("O:"):
         pytest.skip("approved O:-local Windows test volume unavailable")
-    root.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="query-candidate-", dir=root) as value:
-        yield Path(value)
+    yield root
 
 
 def _dependency_binding(root: Path) -> tuple[DependencyRuntimeBinding, dict[str, object]]:
@@ -460,10 +460,7 @@ def test_source_authority_rejects_linked_root_when_capability_exists(
 ) -> None:
     source, head, state = _source_fixture(approved_tmp_path)
     alias = approved_tmp_path / "source-link"
-    try:
-        os.symlink(source, alias, target_is_directory=True)
-    except OSError as exc:
-        pytest.skip(f"directory symlink capability unavailable: {exc.winerror}")
+    create_directory_alias_or_skip(alias, source)
     with pytest.raises(CandidateSourceAuthorityError, match="SOURCE_ROOT_INVALID"):
         _verify_candidate_source_authority_for_test(
             source_root=alias, expected_repo_head_sha=head,
@@ -485,7 +482,7 @@ def test_candidate_requirements_are_exact_and_disjoint_from_launcher() -> None:
         if row and not row.startswith("#")
     ]
     assert launcher == [
-        "fastmcp==2.13.0.2", "mcp==1.20.0", "pydantic==2.12.3", "uvicorn==0.38.0",
+        "fastmcp==3.2.0", "mcp==1.28.1", "pydantic==2.12.3", "uvicorn==0.38.0",
     ]
     assert candidate == ["packaging==26.0"]
     launcher_names = {row.partition("==")[0].casefold() for row in launcher}

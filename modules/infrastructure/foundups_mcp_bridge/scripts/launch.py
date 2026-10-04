@@ -85,8 +85,8 @@ FORBIDDEN_CANARY_TOOLS: Set[str] = {
 }
 
 MCP_RUNTIME_VERSIONS = {
-    "fastmcp": "2.13.0.2",
-    "mcp": "1.20.0",
+    "fastmcp": "3.2.0",
+    "mcp": "1.28.1",
     "pydantic": "2.12.3",
     "uvicorn": "0.38.0",
 }
@@ -182,7 +182,7 @@ def _mcp_python_capable(candidate: Path) -> bool:
     )
     try:
         result = subprocess.run(
-            [str(candidate), "-I", "-c", code], capture_output=True,
+            [str(candidate), "-I", "-B", "-c", code], capture_output=True,
             text=True, timeout=5.0, check=False, env=_closed_child_base_env(),
         )
     except (OSError, subprocess.TimeoutExpired):
@@ -219,6 +219,7 @@ def _mcp_child_env(repo_root: Path, candidate: Path, token: str = "") -> tuple[P
     python_paths = [str(repo_root)]
     if packages is not None:
         python_paths.append(str(packages))
+        env["FOUNDUPS_MCP_SITE_PACKAGES"] = str(packages)
     env["PYTHONPATH"] = os.pathsep.join(python_paths)
     env["PYTHONNOUSERSITE"] = "1"
     env["PYTHONDONTWRITEBYTECODE"] = "1"
@@ -227,6 +228,29 @@ def _mcp_child_env(repo_root: Path, candidate: Path, token: str = "") -> tuple[P
     else:
         env.pop("FOUNDUPS_MCP_AUTH_TOKEN", None)
     return executable, env
+
+
+def _mcp_module_command(
+    executable: Path, env: dict[str, str], module: str, args: list[str],
+) -> list[str]:
+    """Preserve selected venv startup while owning the direct Windows PID."""
+    if module not in {
+        "modules.infrastructure.foundups_mcp_bridge.src.mcp_server",
+        "modules.infrastructure.foundups_mcp_bridge.scripts.readiness_once",
+    }:
+        raise ValueError("unapproved_mcp_child_module")
+    packages = env.get("FOUNDUPS_MCP_SITE_PACKAGES")
+    if not packages:
+        return [str(executable), "-B", "-m", module, *args]
+    # PYTHONPATH alone omits the selected venv's .pth dependency paths and
+    # startup hooks (including PyWin32). Reuse that venv's normal site setup.
+    bootstrap = (
+        "import runpy,site,sys;"
+        "site.addsitedir(sys.argv.pop(1));"
+        "module=sys.argv.pop(1);"
+        "runpy.run_module(module,run_name='__main__',alter_sys=True)"
+    )
+    return [str(executable), "-B", "-c", bootstrap, packages, module, *args]
 
 
 def _terminate_runtime(handle: Optional[MCPRuntimeHandle], timeout_sec: float = 5.0) -> Tuple[bool, str]:
@@ -358,11 +382,11 @@ def _verify_readiness_subprocess(
         return {"verified": False, "error": "mcp_capable_python_missing"}
     executable, env = _mcp_child_env(repo_root, interpreter, token)
     env["PYTHONWARNINGS"] = "ignore"
-    command = [
-        str(executable), "-m",
+    command = _mcp_module_command(
+        executable, env,
         "modules.infrastructure.foundups_mcp_bridge.scripts.readiness_once",
-        "--host", host, "--port", str(port), "--timeout", str(timeout),
-    ]
+        ["--host", host, "--port", str(port), "--timeout", str(timeout)],
+    )
     try:
         result = subprocess.run(
             command, cwd=str(repo_root), env=env, capture_output=True,
@@ -558,12 +582,12 @@ def _http_subprocess_spec(
     env["FOUNDUPS_MCP_HOST"] = options.host
     env["FOUNDUPS_MCP_PORT"] = str(options.port)
     env["FOUNDUPS_MCP_REQUIRE_AUTH"] = "1" if options.auth_enforced else "0"
-    command = [
-        str(executable), "-m",
+    command = _mcp_module_command(
+        executable, env,
         "modules.infrastructure.foundups_mcp_bridge.src.mcp_server",
-        "--transport", "http", "--host", options.host,
-        "--port", str(options.port),
-    ]
+        ["--transport", "http", "--host", options.host,
+         "--port", str(options.port)],
+    )
     return command, env, None
 
 
@@ -660,8 +684,11 @@ def run_mcp_bridge_http(
     try:
         return _launch_http_subprocess(options, lock, blocking)
     except Exception as exc:
+        with _state_lock:
+            handle = _active_runtime
+        if handle is not None and handle.lock is lock:
+            return _readiness_failure(handle, {"error": type(exc).__name__})
         _release_lock(lock)
-        _clear_active_runtime()
         return {"status": "error", "error": type(exc).__name__}
 
 

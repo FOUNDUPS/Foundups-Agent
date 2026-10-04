@@ -1183,6 +1183,14 @@ from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
 
 #### FastMCP lifecycle API
 
+The exact dependency contract is FastMCP3.2.0/MCP1.28.1/Pydantic2.12.3/
+Uvicorn0.38.0. On Windows, `_mcp_child_env` supplies the selected site-packages
+path from the resolved venv; an ambient `FOUNDUPS_MCP_SITE_PACKAGES` value is
+not inherited. The private command builder accepts only the existing server
+and readiness entrypoints and performs that venv's normal `.pth` startup before
+module execution. This is compatibility behavior for the selected environment,
+not authentication of installed packages or a runtime execution grant.
+
 - `build_mcp_server(repo_root=None)` registers only the remote read allowlist
   and removes internal `repo_root` parameters from published tool schemas.
 - `build_asgi_app(repo_root=None, auth_token=None, require_auth=True)` raises
