@@ -1,14 +1,14 @@
-## Existing Holo recovery repair in progress — 2026-10-05
+## Existing Holo grounding completed — 2026-10-05
 
-P16 now selects 16/P0 under WSP00/15/97. Four actual controller attempts retain
-startup failure, snapshot-probe failure, built-in retry-wait, and semantic-backend
-failure after canonical invalidation. The in-progress receipt and task history
-remain intact. Exact Pydantic/Git/cache controls qualified one cached MiniLM
-constructor and one finite 384-element CPU encode (8.047s parent); they do not
-prove a completed refresh. Existing-owner incident resume repair passes181 local
-connected tests; one Qwen proposal was rejected and not applied. Publication,
-merged-source runtime verification and native RSI closure remain open.
-P15 closure and retained consumer proof remain preserved. See the
+P16 PR2063 is merged/main-verified at `2eaa6de7`: 11 PR checks and both main
+workflows passed, including 181 recovery cases. Normal new-head admission
+completed maintenance in 500.797s with reverse owned-runtime shutdown and a
+separate clean-checkout CURRENT/no-gap query. The old failed task and its three
+events are unchanged; the new task completed with retry count 0. Four earlier
+attempts, the rejected Qwen proposal and initial stale-registry CI failure remain
+recorded. No live pointer-resume, shared-checkout repair or native RSI completion
+is claimed. Next 10/P2 is canonical closure/re-observation; native 18/P0 and genuine
+input handoff 15/P1 remain blocked/unresolved. WSP00/15/22/97. See the
 [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
 
 ## Preserve measured-zero fidelity — 2026-10-05

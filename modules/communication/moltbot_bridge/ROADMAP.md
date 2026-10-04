@@ -1391,9 +1391,10 @@ claim is made while historical monolith debt remains.
   and signer peer-handshake anchors are implemented and adversarially verified.
 ## Admitted HoloIndex recovery — 2026-10-05
 
-16/P0 existing-owner resume repair is locally qualified:181 connected cases pass.
-The explicit original incident pointer must match current authority and durable
-task/request records; existing retry and completion gates remain. One local
-worker proposal was rejected; coordinator authored the change. Next: exact-source
-publication and current-main operational grounding. Old-head task history is
-retained. See the canonical RSI backlog `holo_grounding_20261005`.
+PR2063 is merged/main-verified at `2eaa6de7`; 181 hosted recovery cases passed.
+Normal new-head admission completed maintenance and a separate clean-checkout
+query returned CURRENT/no-gap (`b90d637c…`). The original failed task/history is
+unchanged; live pointer resume was not exercised. The stale shared checkout and
+rejected worker proposal remain recorded. Selected 10/P2 (C1/I3/D3/Impact3) is
+canonical closure/re-observation. Native admission 18/P0 and genuine input handoff
+15/P1 remain blocked/unresolved. See backlog `holo_grounding_20261005`.

@@ -1882,21 +1882,37 @@
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
     "observation_path": "current_observation.holo_grounding_20261005",
-    "base_commit": "6efbc3ac19beb4191608e1bce18f6b56b4f2605b",
-    "selected_action": "Validate explicit existing incident pointer and reuse bounded coordinator retry through existing controller",
+    "base_commit": "2eaa6de745046c3e17f1ecf8f078b20228b5808b",
+    "selected_action": "Complete canonical P16 closure and re-observe existing worker admission prerequisites",
     "status": "in_progress",
     "wsp15": {
-      "complexity": 3,
-      "importance": 4,
-      "deferability": 5,
-      "impact": 4,
-      "total": 16,
-      "priority": "P0"
+      "complexity": 1,
+      "importance": 3,
+      "deferability": 3,
+      "impact": 3,
+      "total": 10,
+      "priority": "P2"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary supervised existing-owner source repair; no new live maintenance allocation",
+    "execution_plane": "ordinary authorized repository documentation and read-only existing-owner re-observation; no new runtime allocation",
     "previous_observation": "current_observation.zero_fidelity_20261005",
-    "next_action": "Complete independent source review and repository integrity checks, then authorized publication and exact merged-source runtime qualification. Preserve old task history; never use its incident pointer for a new HEAD."
+    "next_action": "Reconcile observed grounding and independently audit actual first-trust/input handoff owners. Preserve failure history and stop at missing authentic inputs; do not invent a grant or new module.",
+    "higher_priority_gates": [
+      {
+        "task": "Native autonomous RSI admission",
+        "total": 18,
+        "priority": "P0",
+        "state": "blocked",
+        "reason": "Actual existing model-binding query returned MODEL_RUNTIME_BINDING_UNCONFIGURED; current grounding is not worker/verifier operating authority."
+      },
+      {
+        "task": "Genuine input handoff",
+        "total": 15,
+        "priority": "P1",
+        "state": "blocked_or_unknown",
+        "reason": "Ten named input paths are absent in observed process/user/machine scopes. Existing intake is draft-only; UI consumes a pre-issued signed credential. Genuine first-trust handoff remains unresolved, not a global absence claim."
+      }
+    ]
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -29843,7 +29859,7 @@
     },
     "holo_grounding_20261005": {
       "base_commit": "6efbc3ac19beb4191608e1bce18f6b56b4f2605b",
-      "status": "in_progress",
+      "status": "operational_grounding_complete_closure_in_progress",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -29926,9 +29942,19 @@
         "global_artifact_absence_claim": false,
         "architect_binding_is_worker_verifier_grant": false
       },
-      "maintenance_outcome": "failed_after_canonical_invalidation",
-      "verified_new_generation": null,
-      "fresh_owner_query": null,
+      "maintenance_outcome": "completed_normal_new_head_admission",
+      "verified_new_generation": "sha256:b90d637c0dbea13a6b927b7e604c4e1fec44d699666e3f070a723339dbecafaf",
+      "fresh_owner_query": {
+        "head": "2eaa6de745046c3e17f1ecf8f078b20228b5808b",
+        "ok": true,
+        "freshness": "CURRENT",
+        "index_gap_detected": false,
+        "semantic_evidence_count": 35,
+        "shared_host_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "shared_host_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "shared_checkout_fixed": false,
+        "guidance_change_required": false
+      },
       "implementation_change_claim": true,
       "test_pass_claim": true,
       "native_rsi_complete": false,
@@ -29956,7 +29982,18 @@
         "semantic-model-qualification/child-result.json": "974ab714bb332945ee6c8b815890b6c7b9395bb437020081828393b3d470ef53",
         "semantic-model-qualification/parent-result.json": "d3eea8501c1500800e24dc6c041d69471485dedc67e0d34c33db1015e663f80d",
         "semantic-model-qualification/result-review.json": "571e6abe55aafdca30c342e678920b91dd088584704024e215c40822034e614f",
-        "freshness-gate-after-semantic-failure.json": "b42763fb3a5d93383bb2c854f0dfc9cc0f7984ac34fc6c9a597eb58eb94632f3"
+        "freshness-gate-after-semantic-failure.json": "b42763fb3a5d93383bb2c854f0dfc9cc0f7984ac34fc6c9a597eb58eb94632f3",
+        "publication-closure.json": "aa23fb57d16a6a2df5fd1b9aa1bd6b33aadfba026fdb2a8e7016cd5f4ef2bd7e",
+        "resume-repair-review/publication-readiness-review.json": "88ed3260ab336ed36310e50f2ab758edae67fbe1726cdd270efe078c6ae3c8ac",
+        "maintenance-current-main/controller-result.json": "439fc8174ea171f0d292dc34ef3e33ae90a0b51c2ed4a759a7cde7c11f466b0e",
+        "maintenance-current-main/parent-result.json": "3e5bf11af6e5c46390b71e476a193edb6e64417ed53203f570f934fa153c4ea9",
+        "maintenance-current-main/result-review.json": "86e715587c99db8957effbf60fe84b5f31d2742428920a73bdbdb70eefb4fdaa",
+        "maintenance-current-main/startup-qualified-current-main/result-review.json": "c010bfb1ff369f19fe539295714facee5322f3e7fd125bb00209b947e89f7748",
+        "postmerge-clean-worktree-query.json": "10c03ca388bb03a02bef7e853e54537823feb53475e6a5d69168f5cdaf2813d3",
+        "postmerge-owner-query.json": "a57155f1915cac7f46cedaa09ce056183b6de65f26bf895ea9d9d4eb5170bf0c",
+        "postmerge-query-observation-review.json": "0a8f452358ec66a03559e0136097d901f8b09cebb9c9532afc8b0a8b04180ab8",
+        "current-model-binding-query.json": "30a7b5b273aa4c8256b681047aa641296a55c7811430f227aa16199bbeca6faf",
+        "current-native-input-presence.json": "9be5285359349f3d2b2ab4662a249c2ca3fb890ba97b5f3b482adc59280edd60"
       },
       "initial_wsp15": {
         "complexity": 2,
@@ -29984,8 +30021,8 @@
         "context_retry_not_before": "2026-10-04T18:44:58.431915+00:00",
         "source": "SELECT-only immutable saved snapshot after fourth attempt"
       },
-      "current_freshness": "STALE_INDEX",
-      "freshness_receipt_state": "cli_maintenance_in_progress",
+      "current_freshness": "CURRENT",
+      "freshness_receipt_state": "verified_generation_at_exact_2eaa",
       "environment_controls": {
         "pydantic": "PYDANTIC_DISABLE_PLUGINS=__all__",
         "git": {
@@ -30023,11 +30060,12 @@
         "retrieval_quality_proved": false
       },
       "repair_state": {
-        "status": "reviewed_source_publication_pending",
+        "status": "merged_main_verified",
         "worker_accepted_claim": false,
         "test_pass_claim": true,
         "additional_live_retry_allocated": false,
-        "generic_stale_index_admission": false
+        "generic_stale_index_admission": false,
+        "live_pointer_resume_exercised": false
       },
       "source_qualification": {
         "existing_baseline": {
@@ -30096,7 +30134,7 @@
           "fast_milliseconds": 6711,
           "runtime_files": 1408,
           "manifest_sha256": "f1c85cad8dfba356169780fa84028745ee52ea6daec776dfe800f4035a69a1a4",
-          "remote_ci_verified": false
+          "remote_ci_verified": true
         }
       },
       "local_worker": {
@@ -30129,7 +30167,71 @@
         "original_pr_head": "4eed2e61166b4f11f430315fcafa0312ce9a2d3b",
         "original_log_sha256": "d58ce1aa94a8bd8c2ae8fc4f9ee49cddddd7ff326eccfb8a94f3dcfb16f4d74c",
         "production_code_changed": false,
-        "hosted_replacement_checks_pending": true
+        "hosted_replacement_checks_pending": false
+      },
+      "publication_closure": {
+        "status": "MERGED_VERIFIED_MAIN",
+        "pr": 2063,
+        "reviewed_head": "9ea22a74149540e9bf7feed14707dd1dfc1d7afa",
+        "merge_head": "2eaa6de745046c3e17f1ecf8f078b20228b5808b",
+        "tree": "e7b4d1bc5aeefcfa65121c151436e52afc2096fc",
+        "pr_checks": 11,
+        "pr_ci": 37228979192,
+        "pr_codeql": 37228977195,
+        "main_ci": 37229568265,
+        "main_codeql": 37229568105,
+        "hosted_recovery_cases": 181,
+        "independent_review": "resume-repair-review/publication-readiness-review.json",
+        "native_rsi_complete": false,
+        "owned_worktree_state": "clean detached verified merge, retained for runtime qualification",
+        "original_failed_task_preserved": true
+      },
+      "operational_completion": {
+        "observed_on": "2026-10-05 JST",
+        "head": "2eaa6de745046c3e17f1ecf8f078b20228b5808b",
+        "normal_new_head_admission": true,
+        "resume_pointer_supplied": false,
+        "status": "COMPLETED",
+        "parent_seconds": 500.797,
+        "child_seconds": 500.125,
+        "returncode": 0,
+        "new_task_retry_count": 0,
+        "owned_runtimes_stopped": [
+          "openclaw_supervisor",
+          "openclaw"
+        ],
+        "old_full_task_and_three_events_unchanged": true,
+        "paid_calls": 0,
+        "model_generation_calls": 0,
+        "semantic_encoder_used": true,
+        "freshness_receipt_digest": "sha256:c7277eb0b183e8e648d3738238f4d0ae0ac6de164afd12a18e84d827cc25b748",
+        "unverified_optional_collections": [
+          "navigation_work_ledger",
+          "navigation_vocabulary"
+        ],
+        "live_resume_api_benefit_claim": false,
+        "next_closure_wsp15": {
+          "complexity": 1,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3,
+          "total": 10,
+          "priority": "P2"
+        }
+      },
+      "current_input_observation": {
+        "model_binding_query_status": "MODEL_RUNTIME_BINDING_UNCONFIGURED",
+        "configured": false,
+        "accepted": false,
+        "path_names_observed": 10,
+        "all_absent_in": [
+          "process",
+          "user",
+          "machine"
+        ],
+        "includes_signer_owner_config": true,
+        "global_artifact_absence_claim": false,
+        "enrollment_note": "Existing UI consumes a pre-issued principal-signed credential; no first-trust key-binding handoff demonstrated by this observation."
       }
     }
   }
