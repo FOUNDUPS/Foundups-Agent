@@ -4,10 +4,10 @@
 
 At source `6efbc3ac1`, four actual controller attempts ended in startup failure,
 snapshot-probe failure, retry-wait, then semantic-backend failure. The last attempt
-invalidated the canonical index before failure; preserve its
-`cli_maintenance_in_progress` receipt, original task and retry history. Do not
-restore the old receipt, create a fresh task database, bypass retry delays or
-admit generic `STALE_INDEX` as a new incident.
+invalidated the canonical index before failure. Its saved
+`cli_maintenance_in_progress` receipt, original failed task and retry history remain
+preserved after normal new-head maintenance. Do not manually restore old receipts,
+create a fresh task database, bypass retry delays or admit generic `STALE_INDEX`.
 
 The bounded external launch qualified these exact process settings:
 
@@ -27,12 +27,15 @@ nonzero float32 values, observed CPU, stable pins and no recorded denials. The
 source-matched IPv6 loopback probe closed. These are finite diagnostics, not a
 filesystem sandbox, index proof or service admission.
 
-Selected 16/P0 existing-owner resume repair is `in_progress`. An incident pointer
-must be validated against the durable current-head/root task and request before
-existing coordinator retry can be reached; surrounding lifecycle gates remain.
-No new live retry is allocated, and this checkpoint makes no source-test or worker
-acceptance claim. See the [P16 checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint)
-for attempt history; CURRENT/no-gap completion and native RSI remain open.
+PR2063 merged/main-verified at `2eaa6de7`, with 181 hosted recovery cases. An
+incident pointer still requires durable current-head/root task/request validation.
+The actual 500.797s completion used normal admission for the new HEAD, not live
+pointer resume. Both owned runtimes stopped, the new task completed at retry 0,
+and the old task/three events stayed unchanged. A separate clean-checkout query
+proved CURRENT/no-gap for generation `b90d637c…`; the stale shared-checkout query
+remains a mismatch. Existing CLAUDE guidance already selects the correct source.
+This is captured exact-head grounding, not all optional collections, retrieval
+fitness or native RSI closure. See the [P16 checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
 
 ## Post-merge controller
 

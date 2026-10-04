@@ -1,9 +1,10 @@
 ## Existing Holo grounding — P16 checkpoint
 
-Current selection is **16/P0** (C3/I4/D5/Impact4), `in_progress`, under
-`work-order-resume-repair.json` at source `6efbc3ac19beb4191608e1bce18f6b56b4f2605b`.
-The original 14/P1 owner qualification exposed a concrete recovery gap. P15
-PR2062 closure and its retained synthetic consumer proof remain closed.
+P16 grounding is complete at captured main `2eaa6de745046c3e17f1ecf8f078b20228b5808b`.
+Current selection is **10/P2** (C1/I3/D3/Impact3): canonical closure and existing-owner
+re-observation, with no new runtime allocation. The earlier 16/P0 resume repair
+followed a 14/P1 owner qualification. Native admission 18/P0 and genuine input
+handoff 15/P1 remain blocked/unresolved; P15 closure remains preserved.
 
 Four actual controller attempts are preserved:
 
@@ -16,8 +17,8 @@ Four actual controller attempts are preserved:
    not-before `2026-10-04T18:44:58.431915Z`. This was scheduling, not maintenance completion.
 4. 51.188s: the eligible task failed with
    `HOLOINDEX_MAINTENANCE_SEMANTIC_BACKEND_REQUIRED` after canonical invalidation.
-   The receipt now names the selected HEAD and `cli_maintenance_in_progress`;
-   it has not been restored or removed. Attempts 2–4 reported both owned runtimes
+   That saved receipt named the old HEAD and `cli_maintenance_in_progress`;
+   the failure remains preserved, without manual restoration. Attempts 2–4 reported both owned runtimes
    stopped in reverse order, and every parent reported normal Job closure.
 
 Three exact environment controls were qualified without global configuration
@@ -35,29 +36,40 @@ A subsequent 8.047s parent / 7.250s child observation loaded the pinned cached
 MiniLM snapshot once and encoded one fixed input once: 384 finite nonzero
 `float32` values on CPU, no recorded denials or exceptions, stable pins and normal
 Job close. This qualifies that local encoder operation, not retrieval quality,
-current index completion or a generative worker. Full failure history remains.
+index completion or a generative worker. Full failure history remains.
 
-The latest saved task is `failed`, retry count 1, in the same private database.
-The current freshness gate is `STALE_INDEX`; that alone must remain insufficient
-for new admission. The selected source repair will validate an explicit pointer
-to the existing root-owned incident/task/request and reuse existing bounded
-coordinator retry and controller transactions. No new store, skill or authority
-is selected. The coordinator repair passes181 connected local cases, including
-the unchanged29 frozen cases (baseline28 missing-API failures/one control pass)
-and six candidate-only lifecycle controls. The first152-case connected run
-failed the private return-tuple test and675-line ceiling; the test now checks
-the added blank incident field and unchanged cleanup helpers moved into the
-existing liveness owner. No ceiling or frozen criterion was weakened.
+The old task remains `failed`, retry count 1; its full row and all three events
+are unchanged. Generic `STALE_INDEX` alone still cannot admit work. The existing
+incident/controller repair validates durable binding and preserves retry/lifecycle
+gates. Its 181 local cases include unchanged 29 frozen cases (baseline 28 missing-API
+failures/one control pass) and six candidate-only lifecycle controls. The first
+152-case run retained two failures; the private tuple test was migrated and
+unchanged cleanup helpers moved to preserve the 675-line ceiling.
 
 One actual local Qwen proposal passed formatting but failed semantics: it compared
 the full incident digest with the stripped suffix, and omitted type/error guards.
 It was rejected without application or retry. SDK telemetry:903 input/304 output,
 1207 total tokens;112.016s parent/98.907s child;0 paid calls. This is a failed
-worker attempt; the coordinator authored the repair. Publication and merged-source
-verification remain next, with no new live retry allocated by source tests. A
-new main HEAD requires its own existing admission; the original6efbc ticket and
-its failures must remain historical rather than be relabelled as resumed. Current
-CURRENT/no-gap grounding and native unattended RSI closure remain open.
+worker attempt; the coordinator authored the repair. Initial PR2063 CI37228621136
+failed the stale test registry; regeneration added only two test files (1687 total,
+270 quarantined), and that failure remains recorded. PR2063 merged as `2eaa6de7`,
+tree `e7b4d1bc…`, with all 11 PR checks and main CI37229568265/CodeQL37229568105
+successful; hosted recovery coverage passed 181 cases.
+
+One actual normal new-head admission then completed in 500.797s, exit 0, with
+OpenClaw and supervisor stopped in reverse order. The new task completed at retry
+count 0 in the same private database. This did not exercise the pointer-resume
+branch; no causal runtime benefit is attributed to that API. Paid calls and model
+generation calls were zero; semantic indexing used the qualified local encoder.
+A separate clean-checkout query returned `ok=true`, `CURRENT`, no gap at exact
+`2eaa6de7`, generation `b90d637c…`. The shared-checkout `0c81418f…` query failed
+with root/HEAD mismatch and remains preserved; no shared checkout was moved.
+Current CLAUDE source-selection guidance was already correct; the coordinator
+used an old pasted command, so no guidance repair was needed. Optional work-ledger
+and vocabulary collections remain unverified, and native RSI is incomplete.
+The existing model-binding query returned `MODEL_RUNTIME_BINDING_UNCONFIGURED`.
+Ten named input paths were absent in observed process/user/machine scopes; this
+is not global artifact absence. Genuine first-trust handoff remains unresolved.
 
 Evidence: `outputs/rsi-holo-grounding-20261005`; exact hashes and the prior
 current-process model-binding limitation are retained in backlog

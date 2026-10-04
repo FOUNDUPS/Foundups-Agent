@@ -12,13 +12,17 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — P16 (in progress):** selected 16/P0 (C3/I4/D5/Impact4)
-repairs recovery of an already admitted Holo maintenance task. Four controller
-attempts are preserved; the latest failed after index invalidation. Exact
-process-environment controls and one cached MiniLM load/encode are qualified,
-and the coordinator's resume repair passes181 connected local tests. One local
-Qwen proposal was rejected. Current grounding and native RSI closure remain
-unproved; publication and merged-source runtime verification are next. See the [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint)
+**Current layer — P16 grounding completed; closure in progress (2026-10-05 JST):**
+PR2063 merged as `2eaa6de745046c3e17f1ecf8f078b20228b5808b`; all 11 PR checks
+and exact-main CI/CodeQL passed, including 181 recovery cases. Normal admission
+for that new HEAD completed maintenance in 500.797s and stopped both owned
+runtimes. A separate query from the clean checkout returned CURRENT/no-gap for
+generation `b90d637c…`; the stale shared-checkout query remains a recorded failure.
+Four earlier attempts, the rejected Qwen proposal and initial CI failure remain
+preserved. This did not exercise live pointer resume or complete native RSI.
+Selected **10/P2** (C1/I3/D3/Impact3): canonical closure and existing-owner
+re-observation. Native admission 18/P0 and genuine input handoff 15/P1 remain
+blocked/unresolved. See the [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint)
 and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
 
 **Closed layer — P15:** P14 PR2061 is merged/main-verified at `0b3f6cbc3`,
