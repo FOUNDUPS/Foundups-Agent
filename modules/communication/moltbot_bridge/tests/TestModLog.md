@@ -1,3 +1,24 @@
+## Factory peer-instance propagation — 2026-10-05
+
+Frozen14 cases:10pass/4 missing-keyword failures before the five-line factory
+extension, then14pass/0fail/0error/0skip with identical test bytes. All20 original
+test nodes remain unchanged. Independent review checked real direct and factory
+signatures, altered-input rejection, fresh-backend resolution, default-unbound
+rejection and session/generation/profile mismatches.
+
+Initial broad use of the focused audit harness:119pass/8fail/4skip. Its SQLite
+file-URI handling and prohibition of the existing `--help` subprocess caused the
+failures. Preserved evidence remains `test-connected*`; no test criteria or
+production source changed in response. Reusing conventional connected pytest
+gives127pass/4 Windows platform skips of131, with normal package imports and
+private database paths. CI now selects the same nine suites. These include the
+focused14; counts are not additive. Publication/hosted checks remain open.
+
+Actual commands/source/receipt bindings: backlog `signer_factory_peer_binding_20261005`;
+PC evidence `outputs/rsi-holo-grounding-20261005/signer-peer-binding`.
+Prior PR2065 closure: hosted111/111 and exact-main CI/CodeQL success, merged8/8
+factory check, governed maintenance/current query independently reviewed.
+
 ## Real WSP71 factory through socket-v2 — 2026-10-05
 
 Frozen integration baseline:1 pass/1 fail. After the factory digest repair,

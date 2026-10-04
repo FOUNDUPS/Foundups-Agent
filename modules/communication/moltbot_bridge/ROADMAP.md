@@ -1151,6 +1151,11 @@ main workflows passed. Launch plan #1747 is merged; startup campaigns remain dis
   real-factory/socket-v2 regression fails before repair and passes afterward;
   six rejection controls preserve mode, reference and expiry boundaries.
   This does not complete production startup, resolver authentication or RSI.
+- COMPLETE (source qualification only): the existing ephemeral factory forwards
+  an optional peer-instance binding to each fresh backend. Frozen14 cases pass;
+  connected127 pass/4 Windows platform skips. Default-unbound rejection and
+  instance substitution rejection are preserved. Publication remains separate;
+  this does not qualify binding provenance or current-generation privileged use.
 - NEXT: independently administered grant-service composition and lifecycle,
   including production E0 provider/backend composition, WSP 71
   resolve-per-sign composition, native-memory

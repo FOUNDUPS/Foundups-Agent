@@ -1,3 +1,38 @@
+## Factory peer-instance propagation — 2026-10-05
+
+At merged main `fc6f6e021033af21556be3cca64f8e9c9e43fca3`, WSP15 selects
+C2/I4/D4/Impact3=13/P1. The existing factory could resolve valid keys but had
+no input for the peer-instance binding required by its backend's handshake
+validator. Append one optional typed field and forward it through the existing
+backend replacement. Preserve positional compatibility, default `None`, original
+provider checks and per-call resolution. No new module, skill or orchestrator.
+
+A separate worker froze six new cases alongside the original eight. Actual
+baseline:10pass/4 missing-keyword failures; unchanged candidate:14pass. The valid
+direct handshake control and default-unbound rejection passed before repair.
+The candidate verifies real signatures for successive fresh backends and rejects
+session, generation and profile substitutions. Independent source review preserved
+all20 original test nodes and all frozen test bytes.
+
+The first wider run exposed the focused harness's file-URI and subprocess limits:
+119pass/8fail/4skip, preserved as `test-connected*`. The previously qualified
+conventional pytest path, with private database roots and a credential-free
+environment, passes127/131 with4 Windows platform skips. It uses normal package
+imports; no source/test changes were made to resolve the harness limitation.
+CI selects all nine suites. Publication and hosted checks remain separate gates.
+
+This is coordinator-authored source wiring, independently tested/reviewed in the
+Codex repository lane. Synthetic keys and peer fixtures do not authenticate a
+production instance. Current-generation lease, target/store binding, protected
+use, routing/startup and native principal/model admission remain separate work.
+No generative local-provider call, live vault operation or native grant occurred.
+Re-observe and rescore the existing one-target/one-request composition after
+publication; do not expand to multi-profile routing or service activation here.
+
+Exact commands, hashes and original failures:
+`current_observation.signer_factory_peer_binding_20261005` in the canonical backlog;
+PC evidence `outputs/rsi-holo-grounding-20261005/signer-peer-binding`.
+
 ## WSP71 factory composition — 2026-10-05
 
 Selected15/P1 (C2/I4/D5/Impact4) at `1cee9a957290a8053eef263e587e3b4ac43d40a3`.
@@ -13,15 +48,30 @@ then exposed11 legacy path-fixture failures/99passes. Per-test native roots and
 derived socket/anchor defaults preserve all92 assertions and explicit negative
 overrides. Final111 cases:108pass/3 platform skips, including the focused8;
 repeated runs are not additional independent cases. Separate review verified exact frozen ASTs and evidence.
-CI now selects eight suites, including the fixture importer. Publication/hosted checks remain
-open; legacy provider/audit formats remain unchanged.
+CI selects eight suites, including the fixture importer. PR2065 merged at
+`fc6f6e021033af21556be3cca64f8e9c9e43fca3`: replacement hosted CI37236688783
+passed111/111; main CI37237231628 and CodeQL37237231590 succeeded. A separate
+merged-source factory invocation passed8/8. Legacy provider/audit formats remain unchanged.
 
 Synthetic keys/resolver, principal mapping, peer and clock qualify source
 composition only. No service startup, live vault resolution, model generation,
 native grant, or retained autonomous benefit occurred. The coordinator authored
 the repair; separate agents authored tests and reviewed the result. Production
 provider/backend composition, lifecycle and authentic principal input remain
-prerequisites. Re-observe them after closing this narrow repair.
+prerequisites. The clean owned worktree was normally retired after a verified
+recovery bundle and preservation of its eight ignored artifacts; its local
+recovery branch remains. This is a completed source layer, not native RSI.
+
+The existing governed postmerge controller completed once at exact merged main
+in435.453s, with both owned runtimes stopped. Independent review verified all
+three historical tasks/nine events unchanged in an immutable snapshot; exactly
+one completed task and three valid-digest events were added. Event resolution
+statuses remain as stored, including pending incident-bound/completion records.
+The clean next-worktree owner query returnedCURRENT/no-gap without an overlay.
+Evidence: `outputs/rsi-holo-grounding-20261005/maintenance-merged-factory/result-review.json`
+(SHA256 `6622b5e0df28430cc385a90630f458b4aa3a5c43297996c975cb1dc251405058`).
+This is regular new-head maintenance, not live-resume qualification, model learning
+or evidence that native runtime credentials are configured.
 
 Exact commands, hashes and preserved attempts:
 `current_observation.signer_factory_composition_20261005` in the canonical

@@ -12,15 +12,30 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — WSP71 factory composition (2026-10-05 JST):**
+**Current layer — factory peer-instance propagation (2026-10-05 JST):**
+Selected **13/P1** (C2/I4/D4/Impact3): preserve the existing signer-owned peer
+binding through the ephemeral factory before attempting owner-held service
+composition. Frozen baseline:10 pass/4 missing-keyword failures; unchanged
+candidate:14/14 pass. Nine connected suites:127 pass/4 Windows platform skips,
+including the focused cases. Independent source/oracle review passed; exact-head
+publication remains open. The five-line factory extension preserves old positional
+inputs and default-unbound rejection. No routing or service activation changed.
+See the [peer-binding checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#factory-peer-instance-propagation--2026-10-05)
+and canonical backlog `signer_factory_peer_binding_20261005`.
+
+**Closed layer — WSP71 factory composition (2026-10-05 JST):**
 Selected **15/P1** (C2/I4/D5/Impact4): repair a demonstrated short audit-hash versus
 full grant-digest mismatch in the existing signer factory. Frozen baseline:
 1 pass/1 fail; unchanged candidate:2/2 pass. Six added rejection controls pass;
 final connected selection:108 pass/3 Windows platform skips. Initial hosted
 99pass/11fail exposed legacy Windows-only test paths; the fixture repair preserves
-all92 assertions and production guards. Independent review found
-no blocker; publication and hosted checks remain open. Production startup is
-still uncomposed. Native admission 18/P0 and genuine input handoff 15/P1 remain
+all92 assertions and production guards. PR2065 is merged at
+`fc6f6e021033af21556be3cca64f8e9c9e43fca3`; hosted111/111 and both exact-main
+CI/CodeQL checks passed. A fresh merged-source invocation passed8/8 factory cases.
+Governed maintenance completed in435.453s; historical3 tasks/9 events are unchanged,
+with one completed task/3 events added. Query:CURRENT/no-gap at exact merged main.
+The owned worktree was normally retired after verified recovery preservation.
+Production startup is still uncomposed. Native admission18/P0 and genuine input handoff15/P1 remain
 blocked/unresolved. See the [composition checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#wsp71-factory-composition--2026-10-05)
 and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
 

@@ -1,3 +1,29 @@
+## Factory peer-instance propagation — 2026-10-05
+
+Selected13/P1 (C2/I4/D4/Impact3) after PR2065 merged/main verification and one
+independently reviewed governed maintenance run. Extend only the existing factory:
+append optional typed peer-instance binding and forward it to every fresh backend.
+Old positional fields/defaults, provider checks and deferred resolution remain.
+No routing, service startup, new module or skill changed.
+
+Separate test worker froze six new cases; all20 existing test AST nodes remain.
+Baseline10pass/4 missing-keyword failures becomes14/14 with identical criteria.
+Actual signatures, fresh backends and session/generation/profile rejection are
+checked. Independent source/oracle review passed. A focused harness could not
+run all connected tests (119pass/8fail/4skip); its SQLite-URI and help-subprocess
+restrictions remain recorded. Conventional connected pytest passes127/131,
+with4 Windows platform skips and unchanged source/tests. CI selects nine suites.
+
+PR2065 closure: merged `fc6f6e021033af21556be3cca64f8e9c9e43fca3`, hosted111/111,
+main CI/CodeQL success, merged factory8/8. Maintenance435.453s preserves old3 tasks/
+9 events and adds one completed task/3 events; queryCURRENT/no-gap. Prior owned
+worktree retired normally with verified recovery. The current slice still needs
+exact-head publication; production composition and authentic native admission
+remain open. No local generative provider call, live secret or native RSI claim.
+Evidence/commands: backlog `signer_factory_peer_binding_20261005` and
+`outputs/rsi-holo-grounding-20261005/signer-peer-binding`. WSP00/5/6/11/15/22/48/
+50/62/71/84/97/99.
+
 ## WSP71 factory grant-digest composition — 2026-10-05
 
 Selected15/P1 (C2/I4/D5/Impact4). A frozen real-factory/socket-v2 test exposed
