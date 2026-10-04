@@ -1,3 +1,16 @@
+## 2026-10-04 — Measure local repair failure and repair shared proposal framing
+
+- Existing benchmark records one local repair attempt/zero accepted; rejected code
+  was not executed. Observed wrapper contradicted task-specific output formatting.
+- Repaired existing local proposal framing;79 focused/209 connected/8 manifest
+  checks pass. Preserved payloads, quarantine, runtime/profile, limits and cleanup.
+- The exact reviewed worker path predicate passes29 frozen cases (baseline3fail)
+  and is retained unchanged in the owned patch;217 integrated cases pass.
+- One independently reviewed paired comparison uses unchanged task/criteria. No
+  third call, automatic application, native activation or retained-gain claim.
+- Reconciled PR2054 exact-main/owned-lane closure in canonical roadmap/backlog.
+  WSP00/5/11/15/22/48/50/84/97; see the current dispatch checkpoint for evidence.
+
 ## 2026-10-04 — Propagate CodeAct nonzero status
 
 - Existing shell owner returns a bounded numeric-status error before failure

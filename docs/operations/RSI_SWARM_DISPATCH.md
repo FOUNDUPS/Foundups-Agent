@@ -1,3 +1,47 @@
+## Local worker format benchmark — 2026-10-04
+
+PR2054 is merged/main-verified at `79a976eff2b2db1fb7fe16cceaaf76642d94666c`:
+ten PR checks and exact-main CI37189820620/CodeQL37189820559 passed. Hosted
+logs confirm207 WRE,67 scanner and452 separate guarded cases. Its owned lane
+and branches are retired; verified bundle/four runtime artifacts are retained.
+
+One new local path-repair task produced a rejected proposal: wrong output format
+and unresolved containment. Baseline29 cases:26pass/3fail. The rejected code
+was not applied or tested. Existing AI Gateway benchmark consumed saved evidence
+as1sample/0accepted; no extra call, signed authority or champion claim.
+
+WSP15 selected14/P1 (2/4/4/4): remove contradictory execution/structured-output
+wording in the existing local proposal wrapper. Exact skill/context payloads,
+quarantine, native profile, limits and cleanup remain. Frozen prompt baseline:
+12fail/67pass; candidate79pass; prompt-connected209pass; final integrated217pass;
+manifest8pass. These are
+overlapping selections. Five wording-dependent expectations migrated; all other
+77 top-level AST nodes preserved. Test registry current1674/270; runtime manifest
+has1404members with digest `d0cb9aa1e9970a9a6271c895e3f58cca6f2f463721f5a06b12de0bef1c0a61c2`.
+
+One separately reviewed changed-source comparison used the same task, model,
+profile, limits and acceptance criteria: `valid_paired_observation_expression_source_admissible_for_frozen_testing`. Worker
+17.766s, parent28.875s. Both arms have
+unknown token counts and0paid inference calls; total coordinator cost unknown.
+This is a paired intervention, not a new held-out task or general competence
+claim. No third same-task call. Raw results and independent verdict are preserved.
+
+The exact worker expression was then applied only after source review in a
+detached checkout. All29 original frozen path tests passed (baseline26pass/3fail).
+It is copied unchanged into the owned patch with its test extension; the final
+six-suite217 cases pass. The existing benchmark consumes saved evidence as one
+paired task, baseline0/1accepted and changed-source1/1accepted. This is execution
+feedback for that task, not formal verification or an externally standardized
+RSI score. Symlink races/TOCTOU and OS sandboxing are not established.
+
+The prompt repair is coordinator-authored. Public CodeAct/native effect admission,
+promotion and retained learned gain remain open. Generated text alone is never
+effect evidence. Next: exact-source publication/closure, then re-observe and score
+the existing repair-validation/model-qualification owners; do not add a new
+orchestrator or benchmark framework. Local evidence:
+`O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004/`.
+See backlog `current_observation.local_worker_format_benchmark_20261004`.
+
 ## CodeAct exit truth and proposal checkpoint — 2026-10-04
 
 PR2053 is merged/main-verified at `c338192f1f21ab9a54352aa2ff0d8fc0988c5253`.

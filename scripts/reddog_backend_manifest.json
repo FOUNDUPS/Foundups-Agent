@@ -2655,7 +2655,7 @@
     "modules/infrastructure/wre_core/src/improvement_job_contract.py": "e0f2b282b958f1ecbffe4d8da68741be07dbe620a2bcb01e55f0b1ad481b3dbf",
     "modules/infrastructure/wre_core/src/improvement_job_identity.py": "b3380989a0ee22a68dd58eafa87ad89d978e37dee0e5dfdff3b16dccb8f78f9e",
     "modules/infrastructure/wre_core/src/libido_monitor.py": "e4b54db49c788da9ef9e8f6c8863428e6ba8903d06dc4203c20b86f8b2cc0d28",
-    "modules/infrastructure/wre_core/src/local_skill_inference.py": "f6d4856b7e1a327b5e28b08cbe2cad5bcea1a1508fe0dee64ce4bb5d3e379243",
+    "modules/infrastructure/wre_core/src/local_skill_inference.py": "a66d85331f003b7a07757cb787af7d685f62f68ca9e80eca234b29ef8f3d87a3",
     "modules/infrastructure/wre_core/src/pattern_ab_evidence.py": "bf03c370ac7e7563c0184937de90ab7c1c1dc3bff525d3083415805e4db7d850",
     "modules/infrastructure/wre_core/src/pattern_memory.py": "7c6b0bfb651ecb138b669320c0c58971de53c2f7737ec4a3295e84adae872dbd",
     "modules/infrastructure/wre_core/src/reddog_direction.py": "b4d1aa123c4aef6fc95717d04c61efc3ec34cb0fd1d0f2ea403f3ee61c298ba8",
